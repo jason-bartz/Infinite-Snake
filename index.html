@@ -415,6 +415,12 @@
             P: false
         };
         
+        // Game arrays
+        let snakes = [];
+        let elements = [];
+        let particles = [];
+        let playerSnake = null;
+        
         // Snake colors palette
         const SNAKE_COLORS = [
             { primary: '#FF6B6B', secondary: '#FF5252', face: '😊' },
@@ -1391,8 +1397,13 @@
             
             try {
                 for (const file of files) {
-                    const response = await fetch(file);
-                    const data = await response.json();
+                    try {
+                        const response = await fetch(file);
+                        if (!response.ok) {
+                            console.warn(`Failed to load ${file}:`, response.statusText);
+                            continue;
+                        }
+                        const data = await response.json();
                     
                     // Process combinations from each file
                     if (data.combinations) {
@@ -1426,6 +1437,9 @@
                             }
                         }
                     }
+                    } catch (fileError) {
+                        console.warn(`Error processing ${file}:`, fileError);
+                    }
                 }
                 
                 // Update element database
@@ -1434,7 +1448,11 @@
                 return true;
             } catch (error) {
                 console.error('Error loading combinations:', error);
-                // Keep using fallback combinations
+                // Use fallback combinations
+                Object.values(FALLBACK_COMBINATIONS).forEach(combo => {
+                    ALL_ELEMENTS[combo.name.toLowerCase()] = combo;
+                });
+                elementDatabase = { ...BASIC_ELEMENTS, ...ALL_ELEMENTS };
                 return false;
             }
         }
@@ -1473,8 +1491,20 @@
         
         // Initialize game
         async function initGame() {
-            await loadCombinationData();
+            console.log('Initializing game...');
+            try {
+                await loadCombinationData();
+            } catch (error) {
+                console.error('Failed to load combinations, using fallback:', error);
+            }
             
+            // Update total discoveries display
+            const totalPossible = Object.keys(ALL_ELEMENTS).length || Object.keys(FALLBACK_COMBINATIONS).length;
+            if (totalPossible > 0) {
+                document.getElementById('discoveries').textContent = `Discoveries: 0 / ${totalPossible}`;
+            }
+            
+            console.log('Starting game loop...');
             // Start game loop
             requestAnimationFrame(gameLoop);
         }
