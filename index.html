@@ -748,7 +748,7 @@
             
             // Try to load chunks that might contain this element
             // This is a simple strategy - in production you'd have an index
-            for (let i = 0; i < 9; i++) { // 9 chunks total
+            for (let i = 0; i < 2; i++) { // 2 chunks total
                 if (!loadedChunks.has(i)) {
                     loadChunk(i);
                     break;
@@ -1233,7 +1233,7 @@
                         }
                         if (combo.result.tier >= 4) {
                             // Load remaining chunks progressively
-                            for (let i = 2; i < 9; i++) {
+                            for (let i = 2; i < 2; i++) {
                                 if (!loadedChunks.has(i)) {
                                     setTimeout(() => loadChunk(i), i * 1000);
                                     break;
