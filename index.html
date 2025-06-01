@@ -345,7 +345,7 @@
     <div id="splashScreen">
         <h1>Infinite Snake</h1>
         <p>You are an Infinite Snake - a mystical serpent capable of endless growth and elemental mastery. Consume the scattered elements of creation, combine them within your ever-expanding form, and unlock the infinite possibilities that lie within the realm.</p>
-        <button id="startButton">Begin Your Journey</button>
+        <button id="startButton" onclick="handleStartClick()">Begin Your Journey</button>
     </div>
     
     <div id="score">Score: 0</div>
@@ -377,24 +377,32 @@
     
     <div id="gameModeSelect">
         <h3>Select Victory Condition</h3>
-        <button onclick="startGame(100)">Discovery Race: 100</button>
-        <button onclick="startGame(200)">Discovery Race: 200</button>
-        <button onclick="startGame(500)">Discovery Race: 500</button>
-        <button onclick="startGame(1000)">Discovery Race: 1000</button>
-        <button onclick="startGame(0)">Infinite Mode</button>
+        <button onclick="window.startGame(100)">Discovery Race: 100</button>
+        <button onclick="window.startGame(200)">Discovery Race: 200</button>
+        <button onclick="window.startGame(500)">Discovery Race: 500</button>
+        <button onclick="window.startGame(1000)">Discovery Race: 1000</button>
+        <button onclick="window.startGame(0)">Infinite Mode</button>
     </div>
     
     <canvas id="gameCanvas"></canvas>
     
     <script>
-        // Make canvas and ctx global for debugging
-        window.canvas = document.getElementById('gameCanvas');
-        window.ctx = canvas.getContext('2d');
-        const canvas = window.canvas;
-        const ctx = window.ctx;
+        // Canvas initialization
+        const canvas = document.getElementById('gameCanvas');
+        if (!canvas) {
+            console.error('Canvas element not found!');
+        }
+        const ctx = canvas ? canvas.getContext('2d') : null;
         
-        canvas.width = window.innerWidth - 40;
-        canvas.height = window.innerHeight - 40;
+        // Make canvas and ctx global
+        window.canvas = canvas;
+        window.ctx = ctx;
+        
+        // Set initial canvas size
+        if (canvas) {
+            canvas.width = window.innerWidth - 40;
+            canvas.height = window.innerHeight - 40;
+        }
         
         // Game constants
         const WORLD_SIZE = 2000;
@@ -468,6 +476,9 @@
         let elements = [];
         let particles = [];
         let playerSnake = null;
+        
+        // Debug flag
+        const DEBUG = true;
         
         // Music system
         const musicTracks = [
@@ -694,11 +705,18 @@
                 this.score += 1 * deltaTime / 1000; // Reduced from 10 to 1 for balance
                 
                 if (this.isPlayer) {
-                    document.getElementById('score').textContent = `Score: ${Math.floor(this.score)}`;
-                    const totalPossible = Object.keys(ALL_ELEMENTS).length || Object.keys(elementDatabase).length || '?';
-                    document.getElementById('discoveries').textContent = 
-                        gameMode === 0 ? `Discoveries: ${this.discoveries} / ${totalPossible}` : 
-                        `Discoveries: ${this.discoveries} / ${targetDiscoveries}`;
+                    const scoreElement = document.getElementById('score');
+                    if (scoreElement) {
+                        scoreElement.textContent = `Score: ${Math.floor(this.score)}`;
+                    }
+                    
+                    const discoveriesElement = document.getElementById('discoveries');
+                    if (discoveriesElement) {
+                        const totalPossible = Object.keys(ALL_ELEMENTS).length || Object.keys(elementDatabase).length || '?';
+                        discoveriesElement.textContent = 
+                            gameMode === 0 ? `Discoveries: ${this.discoveries} / ${totalPossible}` : 
+                            `Discoveries: ${this.discoveries} / ${targetDiscoveries}`;
+                    }
                     
                     // Check for skin unlocks
                     checkSkinUnlocks(this.score);
@@ -1648,16 +1666,10 @@
             }
         });
         
-        // Start game
-        document.getElementById('startButton').addEventListener('click', () => {
-            document.getElementById('splashScreen').style.opacity = '0';
-            setTimeout(() => {
-                document.getElementById('splashScreen').style.display = 'none';
-                document.getElementById('gameModeSelect').style.display = 'block';
-            }, 1000);
-        });
+        // Start game - moved to setupGame function
         
-        function startGame(mode) {
+        // Make startGame globally accessible
+        window.startGame = function(mode) {
             console.log('Starting game with mode:', mode);
             gameMode = mode;
             targetDiscoveries = mode;
@@ -1723,10 +1735,26 @@
             
             console.log('Game started successfully with', snakes.length, 'snakes');
             console.log('Player snake:', playerSnake);
+        };
+        
+        // Global start button handler
+        window.handleStartClick = function() {
+            console.log('Start button clicked (onclick)');
+            const splashScreen = document.getElementById('splashScreen');
+            if (splashScreen) {
+                splashScreen.style.opacity = '0';
+                setTimeout(() => {
+                    splashScreen.style.display = 'none';
+                    const gameModeSelect = document.getElementById('gameModeSelect');
+                    if (gameModeSelect) {
+                        gameModeSelect.style.display = 'block';
+                    }
+                }, 1000);
+            }
+        };
             
             updateDiscoveryLog();
             updateElementQueue();
-        }
         
         // Handle resize
         window.addEventListener('resize', () => {
@@ -1894,28 +1922,36 @@
         
         // Initialize game
         async function initGame() {
-            console.log('Initializing game...');
-            
-            // Load skin progress
-            loadSkinProgress();
-            
             try {
-                await loadCombinationData();
+                console.log('Initializing game...');
+                
+                // Load skin progress
+                loadSkinProgress();
+                
+                try {
+                    await loadCombinationData();
+                } catch (error) {
+                    console.error('Failed to load combinations, using fallback:', error);
+                }
+                
+                // Update total discoveries display
+                const totalPossible = Object.keys(ALL_ELEMENTS).length || Object.keys(FALLBACK_COMBINATIONS).length;
+                const totalCombos = Object.keys(COMBINATIONS).length;
+                if (totalPossible > 0) {
+                    const discoveriesElement = document.getElementById('discoveries');
+                    if (discoveriesElement) {
+                        discoveriesElement.textContent = `Discoveries: 0 / ${totalPossible}`;
+                    }
+                    console.log(`Game ready with ${totalPossible} unique elements and ${totalCombos} combinations`);
+                }
+                
+                console.log('Starting game loop...');
+                // Start game loop
+                requestAnimationFrame(gameLoop);
             } catch (error) {
-                console.error('Failed to load combinations, using fallback:', error);
+                console.error('Critical error during game initialization:', error);
+                alert('Error initializing game. Please refresh the page.');
             }
-            
-            // Update total discoveries display
-            const totalPossible = Object.keys(ALL_ELEMENTS).length || Object.keys(FALLBACK_COMBINATIONS).length;
-            const totalCombos = Object.keys(COMBINATIONS).length;
-            if (totalPossible > 0) {
-                document.getElementById('discoveries').textContent = `Discoveries: 0 / ${totalPossible}`;
-                console.log(`Game ready with ${totalPossible} unique elements and ${totalCombos} combinations`);
-            }
-            
-            console.log('Starting game loop...');
-            // Start game loop
-            requestAnimationFrame(gameLoop);
         }
         
         function createElementBarCombination(elem1Name, elem2Name, result) {
@@ -2107,8 +2143,14 @@
         }
         
         function closeSkinMenu() {
-            document.getElementById('skinMenu').style.display = 'none';
+            const menu = document.getElementById('skinMenu');
+            if (menu) {
+                menu.style.display = 'none';
+            }
         }
+        
+        // Make closeSkinMenu globally accessible
+        window.closeSkinMenu = closeSkinMenu;
         
         function selectSkin(skinId) {
             selectedSkinId = skinId;
@@ -2216,12 +2258,50 @@
             document.getElementById('volumeLabel').textContent = volume + '%';
         }
         
-        // Volume slider listener
-        document.getElementById('volumeSlider').addEventListener('input', (e) => {
-            setMusicVolume(e.target.value);
-        });
+        // Initialize everything when DOM is ready
+        function setupGame() {
+            // Volume slider listener
+            const volumeSlider = document.getElementById('volumeSlider');
+            if (volumeSlider) {
+                volumeSlider.addEventListener('input', (e) => {
+                    setMusicVolume(e.target.value);
+                });
+            } else {
+                console.warn('Volume slider not found');
+            }
+            
+            // Start button listener
+            const startButton = document.getElementById('startButton');
+            if (startButton) {
+                startButton.addEventListener('click', () => {
+                    console.log('Start button clicked');
+                    const splashScreen = document.getElementById('splashScreen');
+                    if (splashScreen) {
+                        splashScreen.style.opacity = '0';
+                        setTimeout(() => {
+                            splashScreen.style.display = 'none';
+                            const gameModeSelect = document.getElementById('gameModeSelect');
+                            if (gameModeSelect) {
+                                gameModeSelect.style.display = 'block';
+                            }
+                        }, 1000);
+                    }
+                });
+            } else {
+                console.error('Start button not found!');
+            }
+            
+            // Initialize game
+            initGame();
+        }
         
-        initGame();
+        // Wait for DOM to be fully loaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', setupGame);
+        } else {
+            // DOM is already loaded
+            setupGame();
+        }
     </script>
 </body>
 </html>
