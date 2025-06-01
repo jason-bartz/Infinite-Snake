@@ -365,7 +365,13 @@
     </div>
     
     <div id="controls">
-        Arrow Keys: Move • P: Pause
+        Arrow Keys: Move • P: Pause • M: Mute Music
+    </div>
+    
+    <div id="musicControls" style="position: absolute; bottom: 20px; left: 20px; background: rgba(0,0,0,0.8); padding: 10px; border-radius: 10px; border: 1px solid #444;">
+        <span style="color: white; font-size: 14px; margin-right: 10px;">🎵 Music:</span>
+        <input type="range" id="volumeSlider" min="0" max="100" value="30" style="width: 100px; vertical-align: middle;">
+        <span id="volumeLabel" style="color: white; font-size: 12px; margin-left: 5px;">30%</span>
     </div>
     
     <div id="gameModeSelect">
@@ -446,7 +452,9 @@
             ArrowLeft: false,
             ArrowRight: false,
             p: false,
-            P: false
+            P: false,
+            m: false,
+            M: false
         };
         
         // Game arrays
@@ -454,6 +462,19 @@
         let elements = [];
         let particles = [];
         let playerSnake = null;
+        
+        // Music system
+        const musicTracks = [
+            'music/track1.mp3',
+            'music/track2.mp3',
+            'music/track3.mp3',
+            'music/track4.mp3',
+            'music/track5.mp3'
+        ];
+        let currentTrackIndex = -1;
+        let audioPlayer = null;
+        let musicEnabled = true;
+        let musicVolume = 0.3; // 30% default volume
         
         // Snake colors palette
         const SNAKE_COLORS = [
@@ -1494,6 +1515,12 @@
                     paused = !paused;
                 }
             }
+            
+            // Music controls
+            if (e.key === 'm' || e.key === 'M') {
+                toggleMusic();
+                e.preventDefault();
+            }
         });
         
         window.addEventListener('keyup', (e) => {
@@ -1518,6 +1545,9 @@
             gameStarted = true;
             
             document.getElementById('gameModeSelect').style.display = 'none';
+            
+            // Start music
+            initMusic();
             
             // Initialize player
             playerSnake = new Snake(WORLD_SIZE / 2, WORLD_SIZE / 2, true);
@@ -1818,6 +1848,87 @@
                 message.remove();
             }, 2000);
         }
+        
+        // Music functions
+        function initMusic() {
+            if (!audioPlayer) {
+                audioPlayer = new Audio();
+                audioPlayer.volume = musicVolume;
+                
+                // Play next track when current one ends
+                audioPlayer.addEventListener('ended', () => {
+                    playNextTrack();
+                });
+                
+                // Handle loading errors
+                audioPlayer.addEventListener('error', (e) => {
+                    console.warn('Error loading music track:', e);
+                    // Try next track after a delay
+                    setTimeout(playNextTrack, 1000);
+                });
+            }
+            
+            playNextTrack();
+        }
+        
+        function playNextTrack() {
+            if (!musicEnabled || musicTracks.length === 0) return;
+            
+            // Select random track, but not the same one that just played
+            let newIndex;
+            do {
+                newIndex = Math.floor(Math.random() * musicTracks.length);
+            } while (newIndex === currentTrackIndex && musicTracks.length > 1);
+            
+            currentTrackIndex = newIndex;
+            audioPlayer.src = musicTracks[currentTrackIndex];
+            
+            // Attempt to play
+            audioPlayer.play().catch(e => {
+                console.log('Music autoplay blocked, will start on user interaction');
+                // Set up one-time click listener to start music
+                document.addEventListener('click', startMusicOnInteraction, { once: true });
+            });
+        }
+        
+        function startMusicOnInteraction() {
+            if (audioPlayer && musicEnabled) {
+                audioPlayer.play().catch(e => console.log('Could not start music:', e));
+            }
+        }
+        
+        function toggleMusic() {
+            musicEnabled = !musicEnabled;
+            
+            if (musicEnabled) {
+                if (audioPlayer && audioPlayer.paused) {
+                    audioPlayer.play();
+                }
+            } else {
+                if (audioPlayer) {
+                    audioPlayer.pause();
+                }
+            }
+            
+            // Update UI
+            const controls = document.getElementById('musicControls');
+            if (controls) {
+                controls.style.opacity = musicEnabled ? '1' : '0.5';
+            }
+        }
+        
+        function setMusicVolume(volume) {
+            musicVolume = volume / 100;
+            if (audioPlayer) {
+                audioPlayer.volume = musicVolume;
+            }
+            document.getElementById('volumeLabel').textContent = volume + '%';
+        }
+        
+        // Volume slider listener
+        document.getElementById('volumeSlider').addEventListener('input', (e) => {
+            setMusicVolume(e.target.value);
+        });
         
         initGame();
     </script>

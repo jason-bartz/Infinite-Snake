@@ -27,3 +27,41 @@ This game is designed to be deployed on Vercel. Simply connect your GitHub repos
 ## Live Demo
 
 Visit [infinitesnake.io](https://infinitesnake.io) to play!
+
+## Music
+
+The game supports background music that cycles randomly through multiple tracks. To add your own music:
+
+1. Place MP3 files in the `music/` directory
+2. Name them `track1.mp3`, `track2.mp3`, etc.
+3. Or update the `musicTracks` array in `index.html`
+
+### Music Controls
+
+- **M**: Toggle music on/off
+- **Volume Slider**: Adjust music volume (bottom-left corner)
+- Default volume is set to 30%
+
+### Adding Custom Music
+
+To use your own music files with different names:
+
+1. Open `index.html`
+2. Find the `musicTracks` array
+3. Update the filenames to match your MP3 files:
+
+```javascript
+const musicTracks = [
+    'music/your-song-1.mp3',
+    'music/your-song-2.mp3',
+    'music/your-song-3.mp3'
+];
+```
+
+## Credits
+
+Game developed with elemental combination mechanics inspired by various crafting games.
+
+### Music Credits
+
+*Add your music credits here when you add tracks*
