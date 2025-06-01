@@ -69,6 +69,7 @@
             gap: 8px;
             align-items: center;
             font-size: 14px;
+            z-index: 10;
         }
         .queueElement {
             font-size: 20px;
@@ -76,9 +77,21 @@
             background: rgba(255,255,255,0.1);
             border-radius: 5px;
             position: relative;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .queueElement:hover {
+            transform: scale(1.1);
+            background: rgba(255,255,255,0.2);
         }
         .queueElement.compatible {
             animation: glow 1s infinite;
+            box-shadow: 0 0 10px rgba(255,215,0,0.5);
         }
         @keyframes glow {
             0%, 100% { box-shadow: 0 0 10px rgba(255,215,0,0.5); }
@@ -481,6 +494,9 @@
                 this.speed = SPEED;
                 this.alive = true;
                 this.name = isPlayer ? 'You' : `Snake${Math.floor(Math.random() * 1000)}`;
+                this.elementCapacity = 5; // Starting capacity
+                this.maxCapacity = 5;
+                this.combinationsMade = 0;
                 
                 // Assign color
                 if (isPlayer) {
@@ -502,8 +518,9 @@
                     });
                 }
                 
-                // Initialize with random basic elements
-                for (let i = 0; i < 5; i++) {
+                // Initialize with random basic elements (up to capacity)
+                const startingElements = Math.min(3, this.elementCapacity);
+                for (let i = 0; i < startingElements; i++) {
                     const basicKeys = Object.keys(BASIC_ELEMENTS);
                     const randomElement = basicKeys[Math.floor(Math.random() * basicKeys.length)];
                     this.elements.push(randomElement);
@@ -567,11 +584,31 @@
                 this.x += Math.cos(this.angle) * currentSpeed;
                 this.y += Math.sin(this.angle) * currentSpeed;
                 
-                // World wrap
-                if (this.x < 0) this.x = WORLD_SIZE;
-                if (this.x > WORLD_SIZE) this.x = 0;
-                if (this.y < 0) this.y = WORLD_SIZE;
-                if (this.y > WORLD_SIZE) this.y = 0;
+                // World wrap with smooth transition
+                if (this.x < 0) {
+                    this.x += WORLD_SIZE;
+                    if (this.isPlayer) {
+                        camera.x += WORLD_SIZE;
+                    }
+                }
+                if (this.x > WORLD_SIZE) {
+                    this.x -= WORLD_SIZE;
+                    if (this.isPlayer) {
+                        camera.x -= WORLD_SIZE;
+                    }
+                }
+                if (this.y < 0) {
+                    this.y += WORLD_SIZE;
+                    if (this.isPlayer) {
+                        camera.y += WORLD_SIZE;
+                    }
+                }
+                if (this.y > WORLD_SIZE) {
+                    this.y -= WORLD_SIZE;
+                    if (this.isPlayer) {
+                        camera.y -= WORLD_SIZE;
+                    }
+                }
                 
                 // Update segments
                 this.segments.unshift({ x: this.x, y: this.y });
@@ -599,50 +636,56 @@
                 
                 const combinationsFound = [];
                 
-                // Check adjacent elements
-                for (let i = 0; i < this.elements.length - 1; i++) {
-                    const elem1 = this.elements[i];
-                    const elem2 = this.elements[i + 1];
-                    
-                    // Try both orders
-                    const combo1 = `${elem1}+${elem2}`;
-                    const combo2 = `${elem2}+${elem1}`;
-                    
-                    let result = COMBINATIONS[combo1] || COMBINATIONS[combo2];
-                    
-                    if (result) {
-                        combinationsFound.push({
-                            index: i,
-                            result: result,
-                            elem1: elem1,
-                            elem2: elem2
-                        });
+                // Check all possible pairs of elements (regardless of position)
+                for (let i = 0; i < this.elements.length; i++) {
+                    for (let j = i + 1; j < this.elements.length; j++) {
+                        const elem1 = this.elements[i];
+                        const elem2 = this.elements[j];
+                        
+                        // Try both orders
+                        const combo1 = `${elem1}+${elem2}`;
+                        const combo2 = `${elem2}+${elem1}`;
+                        
+                        let result = COMBINATIONS[combo1] || COMBINATIONS[combo2];
+                        
+                        if (result) {
+                            combinationsFound.push({
+                                indices: [i, j],
+                                result: result,
+                                elem1: elem1,
+                                elem2: elem2
+                            });
+                            // Only process one combination per check
+                            break;
+                        }
                     }
+                    if (combinationsFound.length > 0) break;
                 }
                 
-                // Process combinations (in reverse to maintain indices)
-                for (let i = combinationsFound.length - 1; i >= 0; i--) {
-                    const combo = combinationsFound[i];
-                    
-                    // Visual flash and animation at combination location
-                    if (combo.index < this.segments.length) {
-                        const segX = this.segments[combo.index].x;
-                        const segY = this.segments[combo.index].y;
-                        
-                        createCombinationFlash(segX, segY);
-                        
-                        // Create combining animation
-                        createCombiningAnimation(
-                            segX, segY,
-                            combo.elem1, combo.elem2, combo.result
-                        );
+                // Process combinations
+                for (const combo of combinationsFound) {
+                    // Visual animation in element bar for player
+                    if (this.isPlayer) {
+                        createElementBarCombination(combo.elem1, combo.elem2, combo.result);
                     }
                     
-                    // Remove used elements
-                    this.elements.splice(combo.index, 2);
+                    // Remove used elements (higher index first to maintain positions)
+                    const [idx1, idx2] = combo.indices.sort((a, b) => b - a);
+                    this.elements.splice(idx2, 1);
+                    this.elements.splice(idx1, 1);
                     
-                    // Add new element at the head
-                    this.elements.unshift(combo.result.name.toLowerCase());
+                    // Add new element
+                    this.elements.push(combo.result.name.toLowerCase());
+                    
+                    // Increase capacity for successful combination
+                    this.combinationsMade++;
+                    if (this.combinationsMade % 3 === 0) { // Every 3 combinations
+                        this.elementCapacity++;
+                        this.maxCapacity = Math.max(this.maxCapacity, this.elementCapacity);
+                        if (this.isPlayer) {
+                            showCapacityIncrease();
+                        }
+                    }
                     
                     // Discovery tracking
                     const elementKey = combo.result.name.toLowerCase();
@@ -733,6 +776,15 @@
             }
             
             consume(element) {
+                // Check if we have capacity
+                if (this.elements.length >= this.elementCapacity) {
+                    // Drop oldest element
+                    const droppedElement = this.elements.shift();
+                    if (this.isPlayer) {
+                        showElementDropped(droppedElement);
+                    }
+                }
+                
                 // Add element to body
                 this.elements.push(element.type);
                 
@@ -784,11 +836,17 @@
                             Math.random() * WORLD_SIZE,
                             true
                         );
+                        // Penalty: lose one capacity slot
+                        playerSnake.elementCapacity = Math.max(3, this.maxCapacity - 1);
+                        playerSnake.maxCapacity = playerSnake.elementCapacity;
+                        
                         snakes.push(playerSnake);
                         
                         // Reset camera to new player position immediately
                         camera.x = playerSnake.x;
                         camera.y = playerSnake.y;
+                        
+                        showDeathPenalty();
                     }, 3000);
                 }
             }
@@ -1181,31 +1239,47 @@
             if (!playerSnake) return;
             
             const queue = document.getElementById('elementQueue');
-            queue.innerHTML = '<span style="color: #888; margin-right: 10px; font-size: 12px;">Your Elements:</span>';
+            queue.innerHTML = `<span style="color: #888; margin-right: 10px; font-size: 12px;">Elements (${playerSnake.elements.length}/${playerSnake.elementCapacity}):</span>`;
             
-            // Show first 10 elements
-            for (let i = 0; i < Math.min(10, playerSnake.elements.length); i++) {
-                const elementType = playerSnake.elements[i];
-                const element = elementDatabase[elementType];
+            // Show all elements with empty slots
+            for (let i = 0; i < playerSnake.elementCapacity; i++) {
+                const div = document.createElement('div');
+                div.className = 'queueElement';
                 
-                if (element) {
-                    const div = document.createElement('div');
-                    div.className = 'queueElement';
-                    div.textContent = element.emoji;
+                if (i < playerSnake.elements.length) {
+                    const elementType = playerSnake.elements[i];
+                    const element = elementDatabase[elementType] || ALL_ELEMENTS[elementType];
                     
-                    // Check if compatible with next element
-                    if (i < playerSnake.elements.length - 1) {
-                        const nextType = playerSnake.elements[i + 1];
-                        const combo1 = `${elementType}+${nextType}`;
-                        const combo2 = `${nextType}+${elementType}`;
+                    if (element) {
+                        div.textContent = element.emoji;
+                        div.title = element.name;
                         
-                        if (COMBINATIONS[combo1] || COMBINATIONS[combo2]) {
+                        // Check if any combination is possible
+                        let hasCombo = false;
+                        for (let j = 0; j < playerSnake.elements.length; j++) {
+                            if (i !== j) {
+                                const otherType = playerSnake.elements[j];
+                                const combo1 = `${elementType}+${otherType}`;
+                                const combo2 = `${otherType}+${elementType}`;
+                                if (COMBINATIONS[combo1] || COMBINATIONS[combo2]) {
+                                    hasCombo = true;
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        if (hasCombo) {
                             div.classList.add('compatible');
                         }
                     }
-                    
-                    queue.appendChild(div);
+                } else {
+                    // Empty slot
+                    div.style.opacity = '0.3';
+                    div.style.border = '1px dashed #666';
+                    div.textContent = '○';
                 }
+                
+                queue.appendChild(div);
             }
         }
         
@@ -1653,6 +1727,96 @@
             console.log('Starting game loop...');
             // Start game loop
             requestAnimationFrame(gameLoop);
+        }
+        
+        function createElementBarCombination(elem1Name, elem2Name, result) {
+            const elem1 = elementDatabase[elem1Name] || ALL_ELEMENTS[elem1Name];
+            const elem2 = elementDatabase[elem2Name] || ALL_ELEMENTS[elem2Name];
+            
+            if (!elem1 || !elem2 || !result) return;
+            
+            const queue = document.getElementById('elementQueue');
+            const rect = queue.getBoundingClientRect();
+            
+            const animation = document.createElement('div');
+            animation.className = 'combining-animation';
+            animation.style.left = rect.left + rect.width / 2 + 'px';
+            animation.style.top = rect.top + 'px';
+            animation.style.fontSize = '18px';
+            
+            animation.innerHTML = `
+                <div style="display: flex; align-items: center; justify-content: center; gap: 5px; background: rgba(0,0,0,0.9); padding: 5px 10px; border-radius: 10px; border: 2px solid #FFD700;">
+                    <span style="font-size: 20px;">${elem1.emoji}</span>
+                    <span style="color: #FFD700;">+</span>
+                    <span style="font-size: 20px;">${elem2.emoji}</span>
+                    <span style="color: #FFD700;">=</span>
+                    <span style="font-size: 25px;">${result.emoji}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(animation);
+            
+            setTimeout(() => {
+                animation.remove();
+            }, 2000);
+        }
+        
+        function showCapacityIncrease() {
+            const message = document.createElement('div');
+            message.className = 'score-popup';
+            message.style.position = 'fixed';
+            message.style.left = '50%';
+            message.style.top = '200px';
+            message.style.transform = 'translateX(-50%)';
+            message.style.fontSize = '20px';
+            message.style.color = '#00FF00';
+            message.textContent = '+1 Element Slot!';
+            document.body.appendChild(message);
+            
+            setTimeout(() => {
+                message.remove();
+            }, 1500);
+        }
+        
+        function showElementDropped(elementName) {
+            const element = elementDatabase[elementName] || ALL_ELEMENTS[elementName];
+            if (!element) return;
+            
+            const message = document.createElement('div');
+            message.className = 'score-popup';
+            message.style.position = 'fixed';
+            message.style.left = '50%';
+            message.style.top = '180px';
+            message.style.transform = 'translateX(-50%)';
+            message.style.fontSize = '16px';
+            message.style.color = '#FF6666';
+            message.textContent = `Dropped: ${element.emoji} ${element.name}`;
+            document.body.appendChild(message);
+            
+            setTimeout(() => {
+                message.remove();
+            }, 1500);
+        }
+        
+        function showDeathPenalty() {
+            const message = document.createElement('div');
+            message.className = 'score-popup';
+            message.style.position = 'fixed';
+            message.style.left = '50%';
+            message.style.top = '50%';
+            message.style.transform = 'translate(-50%, -50%)';
+            message.style.fontSize = '24px';
+            message.style.color = '#FF0000';
+            message.style.background = 'rgba(0,0,0,0.8)';
+            message.style.padding = '20px';
+            message.style.borderRadius = '10px';
+            message.style.border = '2px solid #FF0000';
+            message.textContent = '-1 Element Capacity';
+            document.body.appendChild(message);
+            
+            setTimeout(() => {
+                message.remove();
+            }, 2000);
         }
         
         initGame();
