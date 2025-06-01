@@ -51,6 +51,11 @@ logs
 # OS generated files
 Thumbs.db
 
+# Claude AI
+.claude/
+CLAUDE.md
+*claude*
+
 # Music files (add your own)
 music/*.mp3
 music/*.wav
