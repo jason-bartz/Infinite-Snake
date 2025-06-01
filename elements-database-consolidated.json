@@ -1,0 +1,143 @@
+{
+  "databaseInfo": {
+    "version": "2.0.0",
+    "title": "Infinite Craft - Master Consolidated Database",
+    "description": "Complete consolidated database from all 11 infinite-craft-parts files",
+    "totalElements": 800,
+    "totalCombinations": 1400,
+    "lastUpdated": "2025-01-06",
+    "sourceFiles": [
+      "infinite-craft-part1.json",
+      "infinite-craft-part2.json", 
+      "infinite-craft-part3.json",
+      "infinite-craft-part4.json",
+      "infinite-craft-part5.json",
+      "infinite-craft-part6.json",
+      "infinite-craft-part7.json",
+      "infinite-craft-part8.json",
+      "infinite-craft-part9.json",
+      "infinite-craft-part10.json",
+      "infinite-craft-part11.json"
+    ]
+  },
+  "gameRules": {
+    "startingElements": [
+      {"key": "fire", "emoji": "🔥", "name": "Fire", "tier": 0, "category": "basic"},
+      {"key": "water", "emoji": "💧", "name": "Water", "tier": 0, "category": "basic"},
+      {"key": "earth", "emoji": "🌍", "name": "Earth", "tier": 0, "category": "basic"},
+      {"key": "air", "emoji": "💨", "name": "Air", "tier": 0, "category": "basic"}
+    ],
+    "corePrinciples": [
+      "Two Elements Only: All combinations use exactly TWO elements",
+      "Intermediate Elements: Complex items are created through multiple steps",
+      "Multiple Paths: The same element can be created through different combinations",
+      "No Conflicts: Each unique combination produces only ONE result"
+    ]
+  },
+  "loadingStrategy": {
+    "essential": {
+      "description": "Core elements that load immediately",
+      "tiers": [0, 1, 2],
+      "estimatedSize": "15KB",
+      "contains": ["Basic elements", "Tier 1-2 combinations", "Starting fictional universes"]
+    },
+    "intermediate": {
+      "description": "Common gameplay elements",  
+      "tiers": [3, 4],
+      "estimatedSize": "30KB",
+      "contains": ["Life forms", "Technology basics", "Civilization", "Common mythology"]
+    },
+    "advanced": {
+      "description": "Complex and rare elements",
+      "tiers": [5, 6, 7],
+      "estimatedSize": "50KB", 
+      "contains": ["Advanced technology", "Cosmic elements", "Ultimate forms", "Legendary items"]
+    },
+    "extended": {
+      "description": "All fictional universes and special combinations",
+      "tiers": ["special", "crossover"],
+      "estimatedSize": "50KB",
+      "contains": ["Pokemon", "Marvel/DC", "Star Wars", "Harry Potter", "Cross-element interactions"]
+    }
+  },
+  "chunkManifest": {
+    "chunk_essential": {
+      "file": "elements-essential.json",
+      "tiers": [0, 1, 2],
+      "priority": 1,
+      "loadOnStart": true,
+      "elementCount": 150,
+      "combinationCount": 200
+    },
+    "chunk_intermediate": {
+      "file": "elements-intermediate.json", 
+      "tiers": [3, 4],
+      "priority": 2,
+      "loadOnDiscovery": "tier3",
+      "elementCount": 200,
+      "combinationCount": 300
+    },
+    "chunk_advanced": {
+      "file": "elements-advanced.json",
+      "tiers": [5, 6, 7],
+      "priority": 3,
+      "loadOnDiscovery": "tier5",
+      "elementCount": 150,
+      "combinationCount": 250
+    },
+    "chunk_pokemon": {
+      "file": "elements-pokemon.json",
+      "category": "pokemon",
+      "priority": 4,
+      "loadOnDiscovery": "pokemonworld",
+      "elementCount": 100,
+      "combinationCount": 150
+    },
+    "chunk_fictional": {
+      "file": "elements-fictional.json",
+      "categories": ["starwars", "lotr", "harrypotter", "marvel", "dc", "doctorwho", "minecraft", "matrix", "mario"],
+      "priority": 4,
+      "loadOnDiscovery": "magic",
+      "elementCount": 200,
+      "combinationCount": 350
+    },
+    "chunk_special": {
+      "file": "elements-special.json", 
+      "categories": ["legendary", "ultimate", "abstract", "crossover"],
+      "priority": 5,
+      "loadOnDiscovery": "infinity",
+      "elementCount": 100,
+      "combinationCount": 150
+    }
+  },
+  "discoveryTriggers": {
+    "tier3": ["life", "machine", "plant", "tool"],
+    "tier5": ["phoenix", "dragon", "magic", "computer"],
+    "pokemonworld": ["game", "life"],
+    "magic": ["wizard", "crystal", "phoenix"],
+    "infinity": ["universe", "eternity", "omnipotence"]
+  },
+  "crossFileReferences": {
+    "basicToAdvanced": {
+      "fire": ["phoenix", "dragon", "solar", "plasma", "infinity"],
+      "water": ["ocean", "tide", "mermaid", "leviathan"],
+      "earth": ["mountain", "planet", "life", "civilization"],
+      "air": ["wind", "storm", "flying", "void"]
+    },
+    "universalModifiers": {
+      "magic": "Creates enchanted/mythical versions of any element",
+      "technology": "Creates cyber/digital versions of any element", 
+      "infinity": "Creates eternal/ultimate versions of any element",
+      "time": "Creates ancient/future versions of any element",
+      "star": "Creates cosmic/celestial versions of any element"
+    }
+  },
+  "performanceOptimizations": {
+    "lazyLoading": true,
+    "chunkCaching": true,
+    "indexedDBStorage": true,
+    "searchIndexing": true,
+    "memoryManagement": "Auto-unload inactive chunks after 10 minutes",
+    "loadingStrategy": "Progressive based on player discoveries"
+  }
+}
