@@ -17,10 +17,12 @@
             font-family: 'Arial', sans-serif;
             overflow: hidden;
             color: white;
+            cursor: default; /* Keep cursor visible */
         }
         canvas {
             border: 2px solid #333;
             box-shadow: 0 0 20px rgba(138, 43, 226, 0.5);
+            cursor: crosshair; /* Show crosshair cursor on canvas */
         }
         #score {
             position: absolute;
@@ -366,7 +368,7 @@
     </div>
     
     <div id="controls">
-        Arrow Keys: Move • P: Pause • M: Mute Music • S: Skins (while paused)
+        <span id="controlsText">Arrow Keys: Move</span> • P: Pause • M: Mute Music • S: Skins (while paused)
     </div>
     
     <div id="musicControls" style="position: absolute; bottom: 20px; left: 20px; background: rgba(0,0,0,0.8); padding: 10px; border-radius: 10px; border: 1px solid #444;">
@@ -382,6 +384,13 @@
         <button onclick="window.startGame(500)">Discovery Race: 500</button>
         <button onclick="window.startGame(1000)">Discovery Race: 1000</button>
         <button onclick="window.startGame(0)">Infinite Mode</button>
+    </div>
+    
+    <div id="controlSelect" style="display: none; position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.9); padding: 20px; border-radius: 10px; z-index: 50;">
+        <h3 style="color: #FFD700; margin-bottom: 15px;">Select Control Method</h3>
+        <button onclick="window.selectControls('arrows')" style="margin: 5px; padding: 10px 20px; background: linear-gradient(135deg, #4B79A1, #283E51); border: 1px solid #666; color: white; border-radius: 5px; cursor: pointer;">Arrow Keys</button>
+        <button onclick="window.selectControls('wasd')" style="margin: 5px; padding: 10px 20px; background: linear-gradient(135deg, #4B79A1, #283E51); border: 1px solid #666; color: white; border-radius: 5px; cursor: pointer;">WASD Keys</button>
+        <button onclick="window.selectControls('mouse')" style="margin: 5px; padding: 10px 20px; background: linear-gradient(135deg, #4B79A1, #283E51); border: 1px solid #666; color: white; border-radius: 5px; cursor: pointer;">Mouse/Touchpad</button>
     </div>
     
     <canvas id="gameCanvas"></canvas>
@@ -488,13 +497,18 @@
             ArrowDown: false,
             ArrowLeft: false,
             ArrowRight: false,
-            p: false,
-            P: false,
-            m: false,
-            M: false,
-            s: false,
-            S: false
+            w: false, W: false,
+            a: false, A: false,
+            s: false, S: false,
+            d: false, D: false,
+            p: false, P: false,
+            m: false, M: false
         };
+        
+        // Control settings
+        let controlMethod = 'arrows'; // 'arrows', 'wasd', or 'mouse'
+        let mouseX = 0;
+        let mouseY = 0;
         
         // Game arrays
         let snakes = [];
@@ -658,11 +672,31 @@
                 
                 // Player controls
                 if (this.isPlayer) {
-                    if (keys.ArrowLeft) {
-                        this.angle -= TURN_SPEED;
-                    }
-                    if (keys.ArrowRight) {
-                        this.angle += TURN_SPEED;
+                    if (controlMethod === 'arrows') {
+                        if (keys.ArrowLeft) {
+                            this.angle -= TURN_SPEED;
+                        }
+                        if (keys.ArrowRight) {
+                            this.angle += TURN_SPEED;
+                        }
+                    } else if (controlMethod === 'wasd') {
+                        if (keys.a || keys.A) {
+                            this.angle -= TURN_SPEED;
+                        }
+                        if (keys.d || keys.D) {
+                            this.angle += TURN_SPEED;
+                        }
+                    } else if (controlMethod === 'mouse') {
+                        // Calculate angle to mouse position
+                        const screenX = this.x - camera.x + window.canvas.width / 2;
+                        const screenY = this.y - camera.y + window.canvas.height / 2;
+                        const targetAngle = Math.atan2(mouseY - screenY, mouseX - screenX);
+                        
+                        // Smooth angle transition
+                        let angleDiff = targetAngle - this.angle;
+                        while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
+                        while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
+                        this.angle += angleDiff * 0.1;
                     }
                 } else {
                     // Simple AI - target nearest element
@@ -1526,14 +1560,9 @@
         
         function updateCamera() {
             if (playerSnake && playerSnake.alive) {
-                // Smooth camera follow
-                const targetX = playerSnake.x;
-                const targetY = playerSnake.y;
-                
-                // Use lerp for smooth movement
-                const lerpFactor = 0.1;
-                camera.x += (targetX - camera.x) * lerpFactor;
-                camera.y += (targetY - camera.y) * lerpFactor;
+                // Direct camera follow - no lerping
+                camera.x = playerSnake.x;
+                camera.y = playerSnake.y;
             }
         }
         
@@ -1696,8 +1725,8 @@
                 e.preventDefault();
             }
             
-            // Skin menu
-            if ((e.key === 's' || e.key === 'S') && paused) {
+            // Skin menu (only if not using WASD controls)
+            if ((e.key === 's' || e.key === 'S') && paused && controlMethod !== 'wasd') {
                 openSkinMenuFromPause();
                 e.preventDefault();
             }
@@ -1779,7 +1808,10 @@
             
             console.log('Game started successfully with', snakes.length, 'snakes');
             console.log('Player snake:', playerSnake);
-        };
+            
+            updateDiscoveryLog();
+            updateElementQueue();
+        }
         
         // Global start button handler
         window.handleStartClick = function() {
@@ -2195,6 +2227,31 @@
         
         // Make closeSkinMenu globally accessible
         window.closeSkinMenu = closeSkinMenu;
+        
+        // Pause functions
+        function togglePause() {
+            paused = !paused;
+            const pauseScreen = document.getElementById('pauseScreen');
+            if (pauseScreen) {
+                pauseScreen.style.display = paused ? 'block' : 'none';
+            }
+            if (!paused) {
+                closeSkinMenu();
+            }
+        }
+        
+        function openSkinMenuFromPause() {
+            const pauseScreen = document.getElementById('pauseScreen');
+            if (pauseScreen) {
+                pauseScreen.style.display = 'none';
+            }
+            openSkinMenu();
+        }
+        
+        // Make pause functions global
+        window.togglePause = togglePause;
+        window.openSkinMenuFromPause = openSkinMenuFromPause;
+        window.toggleMusic = toggleMusic;
         
         function selectSkin(skinId) {
             selectedSkinId = skinId;
