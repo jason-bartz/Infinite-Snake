@@ -304,6 +304,27 @@
                 opacity: 0;
             }
         }
+        .combining-animation {
+            position: fixed;
+            pointer-events: none;
+            z-index: 150;
+            font-size: 24px;
+            text-align: center;
+            animation: combineFloat 2s ease-out;
+        }
+        @keyframes combineFloat {
+            0% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.5);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -100px) scale(1);
+            }
+        }
     </style>
 </head>
 <body>
@@ -566,7 +587,7 @@
                 
                 if (this.isPlayer) {
                     document.getElementById('score').textContent = `Score: ${Math.floor(this.score)}`;
-                    const totalPossible = Object.keys(ALL_ELEMENTS).length || '?';
+                    const totalPossible = Object.keys(ALL_ELEMENTS).length || Object.keys(elementDatabase).length || '?';
                     document.getElementById('discoveries').textContent = 
                         gameMode === 0 ? `Discoveries: ${this.discoveries} / ${totalPossible}` : 
                         `Discoveries: ${this.discoveries} / ${targetDiscoveries}`;
@@ -603,11 +624,17 @@
                 for (let i = combinationsFound.length - 1; i >= 0; i--) {
                     const combo = combinationsFound[i];
                     
-                    // Visual flash at combination location
+                    // Visual flash and animation at combination location
                     if (combo.index < this.segments.length) {
-                        createCombinationFlash(
-                            this.segments[combo.index].x,
-                            this.segments[combo.index].y
+                        const segX = this.segments[combo.index].x;
+                        const segY = this.segments[combo.index].y;
+                        
+                        createCombinationFlash(segX, segY);
+                        
+                        // Create combining animation
+                        createCombiningAnimation(
+                            segX, segY,
+                            combo.elem1, combo.elem2, combo.result
                         );
                     }
                     
@@ -728,13 +755,26 @@
             die() {
                 this.alive = false;
                 
-                // Drop all elements
-                for (let i = 0; i < this.elements.length && i < this.segments.length; i++) {
+                // Drop only some elements (30-50% of total)
+                const dropCount = Math.floor(this.elements.length * (0.3 + Math.random() * 0.2));
+                const dropIndices = [];
+                
+                // Randomly select which elements to drop
+                for (let i = 0; i < dropCount && i < this.segments.length; i++) {
+                    let index;
+                    do {
+                        index = Math.floor(Math.random() * Math.min(this.elements.length, this.segments.length));
+                    } while (dropIndices.includes(index));
+                    dropIndices.push(index);
+                }
+                
+                // Drop selected elements
+                dropIndices.forEach(i => {
                     const segment = this.segments[i];
                     spawnElement(this.elements[i], 
                         segment.x + (Math.random() - 0.5) * 30,
                         segment.y + (Math.random() - 0.5) * 30);
-                }
+                });
                 
                 if (this.isPlayer) {
                     // Respawn
@@ -745,6 +785,10 @@
                             true
                         );
                         snakes.push(playerSnake);
+                        
+                        // Reset camera to new player position immediately
+                        camera.x = playerSnake.x;
+                        camera.y = playerSnake.y;
                     }, 3000);
                 }
             }
@@ -929,6 +973,14 @@
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText(this.data.emoji, screenX, screenY);
+                
+                // Draw name label
+                ctx.font = `${Math.max(10, this.size * 0.6)}px Arial`;
+                ctx.fillStyle = 'white';
+                ctx.strokeStyle = 'black';
+                ctx.lineWidth = 2;
+                ctx.strokeText(this.data.name, screenX, screenY + this.size + 10);
+                ctx.fillText(this.data.name, screenX, screenY + this.size + 10);
             }
         }
         
@@ -1069,11 +1121,50 @@
             flash.style.left = screenX + 'px';
             flash.style.top = screenY + 'px';
             flash.style.transform = 'translate(-50%, -50%)';
+            flash.style.width = '60px';
+            flash.style.height = '60px';
+            flash.style.borderRadius = '50%';
+            flash.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+            flash.style.animation = 'flashExpand 0.5s ease-out';
             document.body.appendChild(flash);
             
             setTimeout(() => {
                 flash.remove();
             }, 500);
+        }
+        
+        function createCombiningAnimation(x, y, elem1Name, elem2Name, result) {
+            const elem1 = elementDatabase[elem1Name] || ALL_ELEMENTS[elem1Name];
+            const elem2 = elementDatabase[elem2Name] || ALL_ELEMENTS[elem2Name];
+            
+            if (!elem1 || !elem2 || !result) return;
+            
+            const animation = document.createElement('div');
+            animation.className = 'combining-animation';
+            const rect = canvas.getBoundingClientRect();
+            const screenX = x - camera.x + canvas.width / 2 + rect.left;
+            const screenY = y - camera.y + canvas.height / 2 + rect.top;
+            
+            animation.style.left = screenX + 'px';
+            animation.style.top = screenY + 'px';
+            
+            // Show the combination formula
+            animation.innerHTML = `
+                <div style="display: flex; align-items: center; justify-content: center; gap: 10px; background: rgba(0,0,0,0.8); padding: 10px; border-radius: 10px; border: 2px solid #FFD700;">
+                    <span style="font-size: 30px;">${elem1.emoji}</span>
+                    <span style="color: #FFD700; font-size: 20px;">+</span>
+                    <span style="font-size: 30px;">${elem2.emoji}</span>
+                    <span style="color: #FFD700; font-size: 20px;">=</span>
+                    <span style="font-size: 40px;">${result.emoji}</span>
+                </div>
+                <div style="color: #FFD700; margin-top: 5px; font-size: 16px; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">${result.name}</div>
+            `;
+            
+            document.body.appendChild(animation);
+            
+            setTimeout(() => {
+                animation.remove();
+            }, 2000);
         }
         
         function showDiscovery(element) {
@@ -1216,8 +1307,13 @@
         
         function updateCamera() {
             if (playerSnake && playerSnake.alive) {
-                camera.x = playerSnake.x;
-                camera.y = playerSnake.y;
+                // Smooth camera follow to prevent teleporting
+                const targetX = playerSnake.x;
+                const targetY = playerSnake.y;
+                
+                // Lerp camera position for smooth movement
+                camera.x += (targetX - camera.x) * 0.1;
+                camera.y += (targetY - camera.y) * 0.1;
             }
         }
         
@@ -1409,30 +1505,66 @@
                     if (data.combinations) {
                         // Handle different sections of combinations
                         for (const section of Object.values(data.combinations)) {
-                            for (const [combo, result] of Object.entries(section)) {
-                                const [elem1, elem2] = combo.split(' + ');
-                                if (!elem1 || !elem2) continue;
-                                
-                                const key1 = `${elem1.toLowerCase()}+${elem2.toLowerCase()}`;
-                                const key2 = `${elem2.toLowerCase()}+${elem1.toLowerCase()}`;
-                                
-                                // Parse result format "emoji|name"
-                                let emoji, name;
-                                if (typeof result === 'string') {
-                                    [emoji, name] = result.split('|');
-                                } else if (result.emoji && result.name) {
-                                    emoji = result.emoji;
-                                    name = result.name;
+                            if (Array.isArray(section)) {
+                                // Handle array format
+                                for (const combo of section) {
+                                    if (combo.element1 && combo.element2 && combo.result) {
+                                        // Parse element format "emoji name"
+                                        const parseElement = (str) => {
+                                            const match = str.match(/^([^\s]+)\s+(.+)$/);
+                                            if (match) {
+                                                return { emoji: match[1], name: match[2] };
+                                            }
+                                            return null;
+                                        };
+                                        
+                                        const elem1 = parseElement(combo.element1);
+                                        const elem2 = parseElement(combo.element2);
+                                        const result = parseElement(combo.result);
+                                        
+                                        if (elem1 && elem2 && result) {
+                                            const key1 = `${elem1.name.toLowerCase()}+${elem2.name.toLowerCase()}`;
+                                            const key2 = `${elem2.name.toLowerCase()}+${elem1.name.toLowerCase()}`;
+                                            
+                                            const tier = determineTier(result.name);
+                                            const elementData = { emoji: result.emoji, name: result.name, tier };
+                                            
+                                            COMBINATIONS[key1] = elementData;
+                                            COMBINATIONS[key2] = elementData;
+                                            ALL_ELEMENTS[result.name.toLowerCase()] = elementData;
+                                            ALL_ELEMENTS[elem1.name.toLowerCase()] = { emoji: elem1.emoji, name: elem1.name, tier: determineTier(elem1.name) };
+                                            ALL_ELEMENTS[elem2.name.toLowerCase()] = { emoji: elem2.emoji, name: elem2.name, tier: determineTier(elem2.name) };
+                                            totalCombinations++;
+                                        }
+                                    }
                                 }
-                                
-                                if (emoji && name) {
-                                    const tier = determineTier(name);
-                                    const elementData = { emoji, name, tier };
+                            } else if (typeof section === 'object') {
+                                // Handle object format
+                                for (const [combo, result] of Object.entries(section)) {
+                                    const [elem1, elem2] = combo.split(' + ');
+                                    if (!elem1 || !elem2) continue;
                                     
-                                    COMBINATIONS[key1] = elementData;
-                                    COMBINATIONS[key2] = elementData;
-                                    ALL_ELEMENTS[name.toLowerCase()] = elementData;
-                                    totalCombinations++;
+                                    const key1 = `${elem1.toLowerCase()}+${elem2.toLowerCase()}`;
+                                    const key2 = `${elem2.toLowerCase()}+${elem1.toLowerCase()}`;
+                                    
+                                    // Parse result format "emoji|name"
+                                    let emoji, name;
+                                    if (typeof result === 'string') {
+                                        [emoji, name] = result.split('|');
+                                    } else if (result.emoji && result.name) {
+                                        emoji = result.emoji;
+                                        name = result.name;
+                                    }
+                                    
+                                    if (emoji && name) {
+                                        const tier = determineTier(name);
+                                        const elementData = { emoji, name, tier };
+                                        
+                                        COMBINATIONS[key1] = elementData;
+                                        COMBINATIONS[key2] = elementData;
+                                        ALL_ELEMENTS[name.toLowerCase()] = elementData;
+                                        totalCombinations++;
+                                    }
                                 }
                             }
                         }
@@ -1442,9 +1574,21 @@
                     }
                 }
                 
+                // Also add reverse combinations to ensure all are available
+                const currentCombos = { ...COMBINATIONS };
+                for (const [key, value] of Object.entries(currentCombos)) {
+                    const [elem1, elem2] = key.split('+');
+                    if (elem1 && elem2) {
+                        const reverseKey = `${elem2}+${elem1}`;
+                        if (!COMBINATIONS[reverseKey]) {
+                            COMBINATIONS[reverseKey] = value;
+                        }
+                    }
+                }
+                
                 // Update element database
                 elementDatabase = { ...BASIC_ELEMENTS, ...ALL_ELEMENTS };
-                console.log(`Loaded ${totalCombinations} combinations!`);
+                console.log(`Loaded ${Object.keys(COMBINATIONS).length} total combinations (${totalCombinations} unique results)!`);
                 return true;
             } catch (error) {
                 console.error('Error loading combinations:', error);
@@ -1500,8 +1644,10 @@
             
             // Update total discoveries display
             const totalPossible = Object.keys(ALL_ELEMENTS).length || Object.keys(FALLBACK_COMBINATIONS).length;
+            const totalCombos = Object.keys(COMBINATIONS).length;
             if (totalPossible > 0) {
                 document.getElementById('discoveries').textContent = `Discoveries: 0 / ${totalPossible}`;
+                console.log(`Game ready with ${totalPossible} unique elements and ${totalCombos} combinations`);
             }
             
             console.log('Starting game loop...');
