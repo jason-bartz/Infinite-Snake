@@ -766,12 +766,12 @@
                 // Draw segments
                 for (let i = 0; i < this.segments.length; i++) {
                     const segment = this.segments[i];
-                    const screenX = segment.x - camera.x + canvas.width / 2;
-                    const screenY = segment.y - camera.y + canvas.height / 2;
+                    const screenX = segment.x - camera.x + window.canvas.width / 2;
+                    const screenY = segment.y - camera.y + window.canvas.height / 2;
                     
                     // Skip if off screen
-                    if (screenX < -50 || screenX > canvas.width + 50 ||
-                        screenY < -50 || screenY > canvas.height + 50) continue;
+                    if (screenX < -50 || screenX > window.canvas.width + 50 ||
+                        screenY < -50 || screenY > window.canvas.height + 50) continue;
                     
                     ctx.save();
                     
@@ -832,8 +832,8 @@
                 // Draw cute face on head
                 if (this.segments.length > 0) {
                     const head = this.segments[0];
-                    const screenX = head.x - camera.x + canvas.width / 2;
-                    const screenY = head.y - camera.y + canvas.height / 2;
+                    const screenX = head.x - camera.x + window.canvas.width / 2;
+                    const screenY = head.y - camera.y + window.canvas.height / 2;
                     
                     // Draw face
                     ctx.save();
@@ -902,12 +902,12 @@
             }
             
             draw() {
-                const screenX = this.x - camera.x + canvas.width / 2;
-                const screenY = this.y - camera.y + canvas.height / 2;
+                const screenX = this.x - camera.x + window.canvas.width / 2;
+                const screenY = this.y - camera.y + window.canvas.height / 2;
                 
                 // Skip if off screen
-                if (screenX < -50 || screenX > canvas.width + 50 ||
-                    screenY < -50 || screenY > canvas.height + 50) return;
+                if (screenX < -50 || screenX > window.canvas.width + 50 ||
+                    screenY < -50 || screenY > window.canvas.height + 50) return;
                 
                 const scale = 1 + Math.sin(this.pulse) * 0.1;
                 
