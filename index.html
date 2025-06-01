@@ -584,6 +584,8 @@
                     });
                 }
                 
+                console.log(`Snake initialized: isPlayer=${isPlayer}, segments=${this.segments.length}, position=(${x},${y})`);
+                
                 // Initialize with random basic elements (up to capacity)
                 const startingElements = Math.min(3, this.elementCapacity);
                 for (let i = 0; i < startingElements; i++) {
@@ -921,7 +923,26 @@
             }
             
             draw() {
-                if (!this.alive) return;
+                if (!this.alive) {
+                    return;
+                }
+                
+                if (!this.segments || this.segments.length === 0) {
+                    console.error('Snake has no segments!');
+                    return;
+                }
+                
+                // Test: Draw a big red circle at snake position
+                if (this.isPlayer) {
+                    const testX = this.x - camera.x + canvas.width / 2;
+                    const testY = this.y - camera.y + canvas.height / 2;
+                    ctx.save();
+                    ctx.fillStyle = 'red';
+                    ctx.beginPath();
+                    ctx.arc(testX, testY, 30, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
                 
                 // Draw segments
                 for (let i = 0; i < this.segments.length; i++) {
@@ -1477,13 +1498,9 @@
         
         function updateCamera() {
             if (playerSnake && playerSnake.alive) {
-                // Smooth camera follow to prevent teleporting
-                const targetX = playerSnake.x;
-                const targetY = playerSnake.y;
-                
-                // Lerp camera position for smooth movement
-                camera.x += (targetX - camera.x) * 0.1;
-                camera.y += (targetY - camera.y) * 0.1;
+                // For debugging, snap camera to player immediately
+                camera.x = playerSnake.x;
+                camera.y = playerSnake.y;
             }
         }
         
@@ -1493,6 +1510,11 @@
         function gameLoop(currentTime) {
             if (!gameStarted) {
                 requestAnimationFrame(gameLoop);
+                return;
+            }
+            
+            if (!ctx) {
+                console.error('Canvas context is null!');
                 return;
             }
             
@@ -1569,7 +1591,16 @@
             elements.forEach(element => element.draw());
             
             // Draw snakes
-            snakes.forEach(snake => snake.draw());
+            if (snakes.length === 0) {
+                console.warn('No snakes to draw!');
+            }
+            snakes.forEach((snake, index) => {
+                try {
+                    snake.draw();
+                } catch (error) {
+                    console.error(`Error drawing snake ${index}:`, error);
+                }
+            });
             
             // Draw particles
             drawParticles();
@@ -1631,8 +1662,17 @@
             
             document.getElementById('gameModeSelect').style.display = 'none';
             
+            // Clear any existing snakes
+            snakes = [];
+            elements = [];
+            particles = [];
+            
             // Start music
             initMusic();
+            
+            // Initialize camera at center
+            camera.x = WORLD_SIZE / 2;
+            camera.y = WORLD_SIZE / 2;
             
             // Initialize player
             console.log('Creating player snake...');
@@ -1653,10 +1693,33 @@
             }
             console.log('Total snakes created:', snakes.length);
             
+            // Test draw immediately
+            setTimeout(() => {
+                console.log('=== RENDER TEST ===');
+                console.log('Canvas:', canvas.width, 'x', canvas.height);
+                console.log('Context valid:', !!ctx);
+                console.log('Snakes array:', snakes.length);
+                console.log('Player alive:', playerSnake?.alive);
+                console.log('Player segments:', playerSnake?.segments?.length);
+                console.log('Camera:', camera);
+                
+                // Try to draw a test circle
+                ctx.save();
+                ctx.fillStyle = 'red';
+                ctx.beginPath();
+                ctx.arc(canvas.width/2, canvas.height/2, 50, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+                console.log('Test circle drawn');
+            }, 100);
+            
             // Initial elements - more for less sparse board
             for (let i = 0; i < 60; i++) {
                 spawnElement();
             }
+            
+            console.log('Game started successfully with', snakes.length, 'snakes');
+            console.log('Player snake:', playerSnake);
             
             updateDiscoveryLog();
             updateElementQueue();
