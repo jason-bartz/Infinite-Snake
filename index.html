@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Infinite Snake - Elemental Mastery</title>
+    <link rel="icon" type="image/png" href="skins/favicon.png">
     <style>
         body {
             margin: 0;
@@ -365,7 +366,7 @@
     </div>
     
     <div id="controls">
-        Arrow Keys: Move • P: Pause • M: Mute Music
+        Arrow Keys: Move • P: Pause • M: Mute Music • S: Skins (while paused)
     </div>
     
     <div id="musicControls" style="position: absolute; bottom: 20px; left: 20px; background: rgba(0,0,0,0.8); padding: 10px; border-radius: 10px; border: 1px solid #444;">
@@ -454,7 +455,9 @@
             p: false,
             P: false,
             m: false,
-            M: false
+            M: false,
+            s: false,
+            S: false
         };
         
         // Game arrays
@@ -476,21 +479,50 @@
         let musicEnabled = true;
         let musicVolume = 0.3; // 30% default volume
         
-        // Snake colors palette
-        const SNAKE_COLORS = [
-            { primary: '#FF6B6B', secondary: '#FF5252', face: '😊' },
-            { primary: '#4ECDC4', secondary: '#45B7AA', face: '😄' },
-            { primary: '#FFE66D', secondary: '#FFD93D', face: '😁' },
-            { primary: '#A8E6CF', secondary: '#81C784', face: '😎' },
-            { primary: '#C7CEEA', secondary: '#B39DDB', face: '🤗' },
-            { primary: '#FF8CC8', secondary: '#FF6BB3', face: '😋' },
-            { primary: '#FFB347', secondary: '#FFA000', face: '😊' },
-            { primary: '#B4E7CE', secondary: '#81C784', face: '😌' },
-            { primary: '#FFDAC1', secondary: '#FFAB91', face: '🥰' },
-            { primary: '#E0BBE4', secondary: '#CE93D8', face: '😇' }
+        // Snake skins system
+        const SNAKE_SKINS = [
+            // Default emoji skins (always available)
+            { id: 'emoji1', type: 'emoji', emoji: '😊', primary: '#FF6B6B', secondary: '#FF5252', name: 'Happy', unlockScore: 0 },
+            { id: 'emoji2', type: 'emoji', emoji: '😄', primary: '#4ECDC4', secondary: '#45B7AA', name: 'Joyful', unlockScore: 0 },
+            { id: 'emoji3', type: 'emoji', emoji: '😁', primary: '#FFE66D', secondary: '#FFD93D', name: 'Grinning', unlockScore: 0 },
+            { id: 'emoji4', type: 'emoji', emoji: '😎', primary: '#A8E6CF', secondary: '#81C784', name: 'Cool', unlockScore: 0 },
+            { id: 'emoji5', type: 'emoji', emoji: '🤗', primary: '#C7CEEA', secondary: '#B39DDB', name: 'Hugging', unlockScore: 0 },
+            
+            // Image skins (unlockable)
+            { id: 'black', type: 'image', image: 'skins/black.png', primary: '#333333', secondary: '#1a1a1a', name: 'Shadow', unlockScore: 100 },
+            { id: 'blue', type: 'image', image: 'skins/blue.png', primary: '#4A90E2', secondary: '#357ABD', name: 'Azure', unlockScore: 200 },
+            { id: 'green', type: 'image', image: 'skins/green.png', primary: '#4CAF50', secondary: '#388E3C', name: 'Emerald', unlockScore: 300 },
+            { id: 'orange', type: 'image', image: 'skins/orange.png', primary: '#FF9800', secondary: '#F57C00', name: 'Citrus', unlockScore: 400 },
+            { id: 'pink', type: 'image', image: 'skins/pink.png', primary: '#E91E63', secondary: '#C2185B', name: 'Blossom', unlockScore: 500 },
+            { id: 'yellow', type: 'image', image: 'skins/yellow.png', primary: '#FFEB3B', secondary: '#FBC02D', name: 'Sunshine', unlockScore: 600 },
+            { id: 'dog', type: 'image', image: 'skins/dog.png', primary: '#8D6E63', secondary: '#6D4C41', name: 'Puppy', unlockScore: 800 },
+            { id: 'hotdog', type: 'image', image: 'skins/hotdog.png', primary: '#D2691E', secondary: '#A0522D', name: 'Hot Dog', unlockScore: 1000 },
+            { id: 'gamer', type: 'image', image: 'skins/gamer.png', primary: '#9C27B0', secondary: '#7B1FA2', name: 'Gamer', unlockScore: 1500 },
+            { id: 'robot', type: 'image', image: 'skins/robot.png', primary: '#607D8B', secondary: '#455A64', name: 'Mecha', unlockScore: 2000 },
+            { id: 'ramen', type: 'image', image: 'skins/ramen.png', primary: '#FFA726', secondary: '#FB8C00', name: 'Ramen', unlockScore: 2500 },
+            { id: 'toilet', type: 'image', image: 'skins/toilet.png', primary: '#ECEFF1', secondary: '#CFD8DC', name: 'Porcelain', unlockScore: 3000 },
+            { id: 'tornado', type: 'image', image: 'skins/tornado.png', primary: '#78909C', secondary: '#546E7A', name: 'Whirlwind', unlockScore: 4000 },
+            { id: 'neon', type: 'image', image: 'skins/neon.png', primary: '#FF00FF', secondary: '#00FFFF', name: 'Neon', unlockScore: 5000 },
+            { id: 'space', type: 'image', image: 'skins/space.png', primary: '#311B92', secondary: '#1A237E', name: 'Cosmic', unlockScore: 7500 },
+            { id: 'green-dragon', type: 'image', image: 'skins/green-dragon.png', primary: '#2E7D32', secondary: '#1B5E20', name: 'Jade Dragon', unlockScore: 10000 },
+            { id: 'red-dragon', type: 'image', image: 'skins/red-dragon.png', primary: '#D32F2F', secondary: '#B71C1C', name: 'Crimson Dragon', unlockScore: 15000 },
+            { id: 'unicorn-1', type: 'image', image: 'skins/unicorn-1.png', primary: '#F8BBD0', secondary: '#F48FB1', name: 'Unicorn', unlockScore: 20000 },
+            { id: 'unicorn-2', type: 'image', image: 'skins/unicorn-2.png', primary: '#E1BEE7', secondary: '#CE93D8', name: 'Rainbow Unicorn', unlockScore: 25000 }
         ];
         
-        let snakeColorIndex = 1; // Start at 1 since player gets 0
+        // Track unlocked skins
+        let unlockedSkins = new Set(['emoji1', 'emoji2', 'emoji3', 'emoji4', 'emoji5']);
+        let selectedSkinId = 'emoji1';
+        
+        // Preload skin images
+        const skinImages = {};
+        SNAKE_SKINS.filter(skin => skin.type === 'image').forEach(skin => {
+            const img = new Image();
+            img.src = skin.image;
+            skinImages[skin.id] = img;
+        });
+        
+        let aiSkinIndex = 0; // For cycling through AI skins
         
         // Discovery tracking
         const discoveredElements = new Set(['fire', 'water', 'earth', 'air']);
@@ -519,12 +551,13 @@
                 this.maxCapacity = 5;
                 this.combinationsMade = 0;
                 
-                // Assign color
+                // Assign skin
                 if (isPlayer) {
-                    this.color = SNAKE_COLORS[0]; // Player always gets the first color
+                    this.skin = SNAKE_SKINS.find(s => s.id === selectedSkinId) || SNAKE_SKINS[0];
                 } else {
-                    this.color = SNAKE_COLORS[snakeColorIndex % SNAKE_COLORS.length];
-                    snakeColorIndex++;
+                    // AI gets random skin from all available
+                    const availableSkins = SNAKE_SKINS.filter(s => s.unlockScore <= 5000); // AI can use mid-tier skins
+                    this.skin = availableSkins[Math.floor(Math.random() * availableSkins.length)];
                 }
                 
                 // Power-ups
@@ -649,6 +682,9 @@
                     document.getElementById('discoveries').textContent = 
                         gameMode === 0 ? `Discoveries: ${this.discoveries} / ${totalPossible}` : 
                         `Discoveries: ${this.discoveries} / ${targetDiscoveries}`;
+                    
+                    // Check for skin unlocks
+                    checkSkinUnlocks(this.score);
                 }
             }
             
@@ -887,8 +923,8 @@
                     
                     ctx.save();
                     
-                    // Use snake's assigned color
-                    ctx.fillStyle = i % 2 === 0 ? this.color.primary : this.color.secondary;
+                    // Use snake's skin colors
+                    ctx.fillStyle = i % 2 === 0 ? this.skin.primary : this.skin.secondary;
                     
                     // Power-up effects
                     if (this.activePower === 'lava_body') {
@@ -941,22 +977,30 @@
                     }
                 }
                 
-                // Draw cute face on head
+                // Draw head
                 if (this.segments.length > 0) {
                     const head = this.segments[0];
                     const screenX = head.x - camera.x + canvas.width / 2;
                     const screenY = head.y - camera.y + canvas.height / 2;
                     
-                    // Draw face
                     ctx.save();
                     ctx.translate(screenX, screenY);
                     ctx.rotate(this.angle);
                     
-                    // Face emoji
-                    ctx.font = `${SEGMENT_SIZE * 1.6}px Arial`;
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillText(this.color.face, 0, 0);
+                    if (this.skin.type === 'emoji') {
+                        // Draw emoji face
+                        ctx.font = `${SEGMENT_SIZE * 1.6}px Arial`;
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(this.skin.emoji, 0, 0);
+                    } else if (this.skin.type === 'image' && skinImages[this.skin.id]) {
+                        // Draw image head
+                        const img = skinImages[this.skin.id];
+                        if (img.complete) {
+                            const size = SEGMENT_SIZE * 2.2;
+                            ctx.drawImage(img, -size/2, -size/2, size, size);
+                        }
+                    }
                     
                     ctx.restore();
                     
@@ -1513,12 +1557,21 @@
                 
                 if (e.key === 'p' || e.key === 'P') {
                     paused = !paused;
+                    if (!paused) {
+                        closeSkinMenu();
+                    }
                 }
             }
             
             // Music controls
             if (e.key === 'm' || e.key === 'M') {
                 toggleMusic();
+                e.preventDefault();
+            }
+            
+            // Skin menu
+            if ((e.key === 's' || e.key === 'S') && paused) {
+                toggleSkinMenu();
                 e.preventDefault();
             }
         });

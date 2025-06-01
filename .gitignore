@@ -58,3 +58,9 @@ music/*.ogg
 # Keep the music directory and README
 !music/.gitkeep
 !music/README.md
+
+# Snake skin images (add your own)
+skins/*.png
+# Keep the skins directory and README
+!skins/.gitkeep
+!skins/README.md
