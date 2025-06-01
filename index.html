@@ -519,6 +519,9 @@
         SNAKE_SKINS.filter(skin => skin.type === 'image').forEach(skin => {
             const img = new Image();
             img.src = skin.image;
+            img.onerror = () => {
+                console.warn(`Failed to load skin image: ${skin.image}`);
+            };
             skinImages[skin.id] = img;
         });
         
@@ -554,10 +557,19 @@
                 // Assign skin
                 if (isPlayer) {
                     this.skin = SNAKE_SKINS.find(s => s.id === selectedSkinId) || SNAKE_SKINS[0];
+                    if (!this.skin) {
+                        console.error('No skin found for player! Using default.');
+                        this.skin = { id: 'default', type: 'emoji', emoji: '😊', primary: '#FF6B6B', secondary: '#FF5252', name: 'Default' };
+                    }
                 } else {
                     // AI gets random skin from all available
                     const availableSkins = SNAKE_SKINS.filter(s => s.unlockScore <= 5000); // AI can use mid-tier skins
-                    this.skin = availableSkins[Math.floor(Math.random() * availableSkins.length)];
+                    if (availableSkins.length > 0) {
+                        this.skin = availableSkins[Math.floor(Math.random() * availableSkins.length)];
+                    } else {
+                        console.warn('No available skins for AI, using default');
+                        this.skin = SNAKE_SKINS[0] || { id: 'default', type: 'emoji', emoji: '🤖', primary: '#607D8B', secondary: '#455A64', name: 'AI Default' };
+                    }
                 }
                 
                 // Power-ups
@@ -924,7 +936,12 @@
                     ctx.save();
                     
                     // Use snake's skin colors
-                    ctx.fillStyle = i % 2 === 0 ? this.skin.primary : this.skin.secondary;
+                    if (this.skin) {
+                        ctx.fillStyle = i % 2 === 0 ? this.skin.primary : this.skin.secondary;
+                    } else {
+                        // Fallback colors if skin is missing
+                        ctx.fillStyle = i % 2 === 0 ? '#FF6B6B' : '#FF5252';
+                    }
                     
                     // Power-up effects
                     if (this.activePower === 'lava_body') {
@@ -987,19 +1004,33 @@
                     ctx.translate(screenX, screenY);
                     ctx.rotate(this.angle);
                     
-                    if (this.skin.type === 'emoji') {
-                        // Draw emoji face
+                    if (this.skin) {
+                        if (this.skin.type === 'emoji') {
+                            // Draw emoji face
+                            ctx.font = `${SEGMENT_SIZE * 1.6}px Arial`;
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
+                            ctx.fillText(this.skin.emoji, 0, 0);
+                        } else if (this.skin.type === 'image' && skinImages[this.skin.id]) {
+                            // Draw image head
+                            const img = skinImages[this.skin.id];
+                            if (img.complete) {
+                                const size = SEGMENT_SIZE * 2.2;
+                                ctx.drawImage(img, -size/2, -size/2, size, size);
+                            } else {
+                                // Fallback to emoji while image loads
+                                ctx.font = `${SEGMENT_SIZE * 1.6}px Arial`;
+                                ctx.textAlign = 'center';
+                                ctx.textBaseline = 'middle';
+                                ctx.fillText('🐍', 0, 0); // Snake emoji
+                            }
+                        }
+                    } else {
+                        // Fallback if no skin
                         ctx.font = `${SEGMENT_SIZE * 1.6}px Arial`;
                         ctx.textAlign = 'center';
                         ctx.textBaseline = 'middle';
-                        ctx.fillText(this.skin.emoji, 0, 0);
-                    } else if (this.skin.type === 'image' && skinImages[this.skin.id]) {
-                        // Draw image head
-                        const img = skinImages[this.skin.id];
-                        if (img.complete) {
-                            const size = SEGMENT_SIZE * 2.2;
-                            ctx.drawImage(img, -size/2, -size/2, size, size);
-                        }
+                        ctx.fillText('😊', 0, 0);
                     }
                     
                     ctx.restore();
@@ -1593,6 +1624,7 @@
         });
         
         function startGame(mode) {
+            console.log('Starting game with mode:', mode);
             gameMode = mode;
             targetDiscoveries = mode;
             gameStarted = true;
@@ -1603,11 +1635,14 @@
             initMusic();
             
             // Initialize player
+            console.log('Creating player snake...');
             playerSnake = new Snake(WORLD_SIZE / 2, WORLD_SIZE / 2, true);
             playerSnake.angle = -Math.PI / 2; // Face upward
             snakes.push(playerSnake);
+            console.log('Player snake created:', playerSnake);
             
             // Initialize AI snakes
+            console.log('Creating AI snakes...');
             for (let i = 0; i < 8; i++) {
                 const aiSnake = new Snake(
                     Math.random() * WORLD_SIZE,
@@ -1616,6 +1651,7 @@
                 );
                 snakes.push(aiSnake);
             }
+            console.log('Total snakes created:', snakes.length);
             
             // Initial elements - more for less sparse board
             for (let i = 0; i < 60; i++) {
