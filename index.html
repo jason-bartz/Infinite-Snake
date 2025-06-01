@@ -502,7 +502,8 @@
 </head>
 <body>
     <div id="splashScreen">
-        <img src="assets/word-logo.png" alt="Infinite Snake" style="width: 400px; max-width: 80%; margin-bottom: 30px;">
+        <img src="assets/word-logo.png" alt="Infinite Snake" style="width: 400px; max-width: 80%; margin-bottom: 30px;" onerror="this.style.display='none'; document.getElementById('splashTitle').style.display='block';">
+        <h1 id="splashTitle" style="display: none; font-size: 60px; margin-bottom: 30px; background: linear-gradient(45deg, #FFD700, #FF6B6B); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Infinite Snake</h1>
         <p>You are an Infinite Snake - a mystical serpent capable of endless growth and elemental mastery. Consume the scattered elements of creation, combine them within your ever-expanding form, and unlock the infinite possibilities that lie within the realm.</p>
         <button id="startButton">Begin Your Journey</button>
     </div>
@@ -2791,6 +2792,19 @@
         
         // Start game loop
         requestAnimationFrame(gameLoop);
+        
+        // Debug: Log initial state
+        console.log('Game initialized. Canvas:', canvas.width, 'x', canvas.height);
+        console.log('Elements loaded:', elementsLoaded);
+        console.log('Splash screen present:', !!document.getElementById('splashScreen'));
+        console.log('Start button present:', !!document.getElementById('startButton'));
+        
+        // Ensure splash screen is visible
+        const splash = document.getElementById('splashScreen');
+        if (splash) {
+            splash.style.display = 'flex';
+            splash.style.opacity = '1';
+        }
     </script>
 </body>
 </html>
