@@ -1793,6 +1793,10 @@
         // Initialize game
         async function initGame() {
             console.log('Initializing game...');
+            
+            // Load skin progress
+            loadSkinProgress();
+            
             try {
                 await loadCombinationData();
             } catch (error) {
@@ -1900,6 +1904,138 @@
             setTimeout(() => {
                 message.remove();
             }, 2000);
+        }
+        
+        // Skin system functions
+        function checkSkinUnlocks(currentScore) {
+            let hasNewUnlock = false;
+            
+            SNAKE_SKINS.forEach(skin => {
+                if (!unlockedSkins.has(skin.id) && currentScore >= skin.unlockScore) {
+                    unlockedSkins.add(skin.id);
+                    hasNewUnlock = true;
+                    showSkinUnlocked(skin);
+                }
+            });
+            
+            if (hasNewUnlock) {
+                saveSkinProgress();
+            }
+        }
+        
+        function showSkinUnlocked(skin) {
+            const notification = document.createElement('div');
+            notification.className = 'achievement';
+            notification.innerHTML = `
+                <h3>NEW SKIN UNLOCKED!</h3>
+                <div class="element-display">
+                    ${skin.type === 'emoji' ? skin.emoji : `<img src="${skin.image}" style="width: 60px; height: 60px;">`}
+                </div>
+                <div class="element-name">${skin.name}</div>
+                <div class="tier-info">Press P then S to equip</div>
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 4000);
+        }
+        
+        function toggleSkinMenu() {
+            const menu = document.getElementById('skinMenu');
+            if (menu.style.display === 'block') {
+                closeSkinMenu();
+            } else {
+                openSkinMenu();
+            }
+        }
+        
+        function openSkinMenu() {
+            const menu = document.getElementById('skinMenu');
+            const grid = document.getElementById('skinGrid');
+            
+            // Clear and rebuild grid
+            grid.innerHTML = '';
+            
+            SNAKE_SKINS.forEach(skin => {
+                const isUnlocked = unlockedSkins.has(skin.id);
+                const div = document.createElement('div');
+                div.className = 'skinItem';
+                if (skin.id === selectedSkinId) div.classList.add('selected');
+                if (!isUnlocked) div.classList.add('locked');
+                
+                const preview = document.createElement('div');
+                preview.className = 'skinPreview';
+                if (skin.type === 'emoji') {
+                    preview.textContent = skin.emoji;
+                } else {
+                    const img = document.createElement('img');
+                    img.src = skin.image;
+                    preview.appendChild(img);
+                }
+                
+                const name = document.createElement('div');
+                name.className = 'skinName';
+                name.textContent = skin.name;
+                
+                div.appendChild(preview);
+                div.appendChild(name);
+                
+                if (!isUnlocked) {
+                    const req = document.createElement('div');
+                    req.className = 'skinRequirement';
+                    req.textContent = `Score: ${skin.unlockScore}`;
+                    div.appendChild(req);
+                } else if (skin.unlockScore > 0 && !localStorage.getItem(`skin_${skin.id}_seen`)) {
+                    const newTag = document.createElement('div');
+                    newTag.className = 'skinNew';
+                    newTag.textContent = 'NEW!';
+                    div.style.position = 'relative';
+                    div.appendChild(newTag);
+                }
+                
+                if (isUnlocked) {
+                    div.onclick = () => selectSkin(skin.id);
+                }
+                
+                grid.appendChild(div);
+            });
+            
+            menu.style.display = 'block';
+        }
+        
+        function closeSkinMenu() {
+            document.getElementById('skinMenu').style.display = 'none';
+        }
+        
+        function selectSkin(skinId) {
+            selectedSkinId = skinId;
+            localStorage.setItem('selectedSkin', skinId);
+            localStorage.setItem(`skin_${skinId}_seen`, 'true');
+            
+            // Update player skin immediately
+            if (playerSnake) {
+                playerSnake.skin = SNAKE_SKINS.find(s => s.id === skinId);
+            }
+            
+            // Update UI
+            openSkinMenu(); // Refresh to show selection
+        }
+        
+        function saveSkinProgress() {
+            localStorage.setItem('unlockedSkins', JSON.stringify([...unlockedSkins]));
+        }
+        
+        function loadSkinProgress() {
+            const saved = localStorage.getItem('unlockedSkins');
+            if (saved) {
+                unlockedSkins = new Set(JSON.parse(saved));
+            }
+            
+            const savedSelection = localStorage.getItem('selectedSkin');
+            if (savedSelection && unlockedSkins.has(savedSelection)) {
+                selectedSkinId = savedSelection;
+            }
         }
         
         // Music functions
