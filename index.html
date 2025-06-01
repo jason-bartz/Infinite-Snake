@@ -386,6 +386,31 @@
     
     <canvas id="gameCanvas"></canvas>
     
+    <div id="skinMenu">
+        <h2>Select Your Skin</h2>
+        <div id="skinGrid" class="skinGrid"></div>
+        <div style="text-align: center; margin-top: 20px;">
+            <button onclick="window.closeSkinMenu()" style="padding: 10px 30px; font-size: 18px; background: #FFD700; border: none; border-radius: 10px; cursor: pointer;">Close</button>
+        </div>
+    </div>
+    
+    <div id="pauseScreen" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 400;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+            <h1 style="color: #FFD700; font-size: 64px; margin-bottom: 30px; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">PAUSED</h1>
+            <div style="background: rgba(0,0,0,0.9); padding: 30px; border-radius: 20px; border: 3px solid #FFD700;">
+                <button onclick="window.togglePause()" style="display: block; margin: 10px auto; padding: 15px 40px; font-size: 20px; background: #FFD700; border: none; border-radius: 10px; cursor: pointer; width: 200px;">Resume Game</button>
+                <button onclick="window.openSkinMenuFromPause()" style="display: block; margin: 10px auto; padding: 15px 40px; font-size: 20px; background: #4ECDC4; border: none; border-radius: 10px; cursor: pointer; width: 200px;">Change Skin</button>
+                <button onclick="window.toggleMusic()" style="display: block; margin: 10px auto; padding: 15px 40px; font-size: 20px; background: #FF6B6B; border: none; border-radius: 10px; cursor: pointer; width: 200px;">Toggle Music</button>
+                <div style="margin-top: 30px; color: #AAA; font-size: 16px;">
+                    <p>Arrow Keys: Move</p>
+                    <p>P: Pause/Resume</p>
+                    <p>M: Toggle Music</p>
+                    <p>S: Skins (while paused)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <script>
         // Canvas initialization
         const canvas = document.getElementById('gameCanvas');
@@ -478,7 +503,7 @@
         let playerSnake = null;
         
         // Debug flag
-        const DEBUG = true;
+        const DEBUG = false;
         
         // Music system
         const musicTracks = [
@@ -598,7 +623,9 @@
                     });
                 }
                 
-                console.log(`Snake initialized: isPlayer=${isPlayer}, segments=${this.segments.length}, position=(${x},${y})`);
+                if (DEBUG) {
+                    console.log(`Snake initialized: isPlayer=${isPlayer}, segments=${this.segments.length}, position=(${x},${y})`);
+                }
                 
                 // Initialize with random basic elements (up to capacity)
                 const startingElements = Math.min(3, this.elementCapacity);
@@ -666,31 +693,11 @@
                 this.x += Math.cos(this.angle) * currentSpeed;
                 this.y += Math.sin(this.angle) * currentSpeed;
                 
-                // World wrap with smooth transition
-                if (this.x < 0) {
-                    this.x += WORLD_SIZE;
-                    if (this.isPlayer) {
-                        camera.x += WORLD_SIZE;
-                    }
-                }
-                if (this.x > WORLD_SIZE) {
-                    this.x -= WORLD_SIZE;
-                    if (this.isPlayer) {
-                        camera.x -= WORLD_SIZE;
-                    }
-                }
-                if (this.y < 0) {
-                    this.y += WORLD_SIZE;
-                    if (this.isPlayer) {
-                        camera.y += WORLD_SIZE;
-                    }
-                }
-                if (this.y > WORLD_SIZE) {
-                    this.y -= WORLD_SIZE;
-                    if (this.isPlayer) {
-                        camera.y -= WORLD_SIZE;
-                    }
-                }
+                // World wrap
+                if (this.x < 0) this.x += WORLD_SIZE;
+                if (this.x > WORLD_SIZE) this.x -= WORLD_SIZE;
+                if (this.y < 0) this.y += WORLD_SIZE;
+                if (this.y > WORLD_SIZE) this.y -= WORLD_SIZE;
                 
                 // Update segments
                 this.segments.unshift({ x: this.x, y: this.y });
@@ -1519,9 +1526,14 @@
         
         function updateCamera() {
             if (playerSnake && playerSnake.alive) {
-                // For debugging, snap camera to player immediately
-                camera.x = playerSnake.x;
-                camera.y = playerSnake.y;
+                // Smooth camera follow
+                const targetX = playerSnake.x;
+                const targetY = playerSnake.y;
+                
+                // Use lerp for smooth movement
+                const lerpFactor = 0.1;
+                camera.x += (targetX - camera.x) * lerpFactor;
+                camera.y += (targetY - camera.y) * lerpFactor;
             }
         }
         
@@ -1541,6 +1553,41 @@
             
             const deltaTime = Math.min(currentTime - lastTime, 100);
             lastTime = currentTime;
+            
+            // Handle pause state
+            if (paused) {
+                // Still draw everything but don't update
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                drawBackground();
+                
+                // Draw elements without updating
+                elements.forEach(element => {
+                    try {
+                        element.draw();
+                    } catch (e) {
+                        console.error('Error drawing element:', e);
+                    }
+                });
+                
+                // Draw snakes without updating
+                snakes.forEach((snake, index) => {
+                    try {
+                        snake.draw();
+                    } catch (error) {
+                        console.error(`Error drawing snake ${index}:`, error);
+                    }
+                });
+                
+                // Draw particles
+                drawParticles();
+                
+                // Draw pause overlay
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                requestAnimationFrame(gameLoop);
+                return;
+            }
             
             if (!paused) {
                 // Element spawning - faster rate
@@ -1639,10 +1686,7 @@
                 e.preventDefault();
                 
                 if (e.key === 'p' || e.key === 'P') {
-                    paused = !paused;
-                    if (!paused) {
-                        closeSkinMenu();
-                    }
+                    togglePause();
                 }
             }
             
@@ -1654,7 +1698,7 @@
             
             // Skin menu
             if ((e.key === 's' || e.key === 'S') && paused) {
-                toggleSkinMenu();
+                openSkinMenuFromPause();
                 e.preventDefault();
             }
         });
