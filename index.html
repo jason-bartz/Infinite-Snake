@@ -698,6 +698,16 @@
             });
         }
         
+        // Manifest-based chunk loading
+        let chunkManifest = {};
+        const chunkFileMapping = {
+            'intermediate': 'elements-intermediate.json',
+            'advanced': 'elements-advanced.json',
+            'pokemon': 'elements-pokemon.json',
+            'fictional': 'elements-fictional.json',
+            'special': 'elements-special.json'
+        };
+        
         // Lazy loading system for database chunks
         async function loadChunk(chunkId) {
             if (loadedChunks.has(chunkId) || isLoadingChunk) return;
@@ -709,31 +719,33 @@
                 
                 if (cachedChunk) {
                     // Use cached chunk
-                    Object.assign(ALL_ELEMENTS, cachedChunk.elements);
-                    Object.assign(COMBINATIONS, cachedChunk.combinations);
-                    Object.assign(elementDatabase, cachedChunk.elements);
+                    mergeChunkData(cachedChunk);
                     
                     loadedChunks.add(chunkId);
-                    console.log(`Loaded chunk ${chunkId} from cache: ${Object.keys(cachedChunk.elements).length} elements`);
+                    console.log(`Loaded chunk ${chunkId} from cache: ${Object.keys(cachedChunk.elements || {}).length} elements`);
                 } else {
+                    // Determine file to load based on chunkId
+                    const fileName = chunkFileMapping[chunkId];
+                    if (!fileName) {
+                        console.warn(`Unknown chunk ID: ${chunkId}`);
+                        return;
+                    }
+                    
                     // Fetch from network
-                    const response = await fetch(`elements-chunk-${chunkId}.json`);
+                    const response = await fetch(fileName);
                     const chunk = await response.json();
                     
                     // Merge chunk data
-                    Object.assign(ALL_ELEMENTS, chunk.elements);
-                    Object.assign(COMBINATIONS, chunk.combinations);
-                    Object.assign(elementDatabase, chunk.elements);
+                    mergeChunkData(chunk);
                     
                     // Cache the chunk
                     saveToCache('chunks', {
                         id: chunkId,
-                        elements: chunk.elements,
-                        combinations: chunk.combinations
+                        ...chunk
                     }).catch(err => console.warn(`Failed to cache chunk ${chunkId}`, err));
                     
                     loadedChunks.add(chunkId);
-                    console.log(`Loaded chunk ${chunkId}: ${Object.keys(chunk.elements).length} elements, ${Object.keys(chunk.combinations).length} combinations`);
+                    console.log(`Loaded chunk ${chunkId}: ${Object.keys(chunk.elements || {}).length} elements`);
                 }
             } catch (err) {
                 console.error(`Failed to load chunk ${chunkId}:`, err);
@@ -742,16 +754,51 @@
             }
         }
         
+        // Helper function to merge chunk data into global objects
+        function mergeChunkData(chunk) {
+            // Merge all tier elements into ALL_ELEMENTS
+            const allElements = {};
+            if (chunk.basicElements) Object.assign(allElements, chunk.basicElements);
+            if (chunk.tier1Elements) Object.assign(allElements, chunk.tier1Elements);
+            if (chunk.tier2Elements) Object.assign(allElements, chunk.tier2Elements);
+            if (chunk.tier3Elements) Object.assign(allElements, chunk.tier3Elements);
+            if (chunk.tier4Elements) Object.assign(allElements, chunk.tier4Elements);
+            if (chunk.tier5Elements) Object.assign(allElements, chunk.tier5Elements);
+            if (chunk.tier6Elements) Object.assign(allElements, chunk.tier6Elements);
+            if (chunk.tier7Elements) Object.assign(allElements, chunk.tier7Elements);
+            if (chunk.elements) Object.assign(allElements, chunk.elements);
+            
+            Object.assign(ALL_ELEMENTS, allElements);
+            Object.assign(elementDatabase, allElements);
+            
+            // Merge combinations
+            if (chunk.combinations) {
+                Object.assign(COMBINATIONS, chunk.combinations);
+            }
+        }
+        
         // Check if element requires loading additional chunks
         function checkElementAvailability(elementKey) {
             if (ALL_ELEMENTS[elementKey]) return true;
             
-            // Try to load chunks that might contain this element
-            // This is a simple strategy - in production you'd have an index
-            for (let i = 0; i < 2; i++) { // 2 chunks total
-                if (!loadedChunks.has(i)) {
-                    loadChunk(i);
-                    break;
+            // Check discovery triggers from manifest
+            if (chunkManifest.discoveryTriggers) {
+                for (const [trigger, triggerElements] of Object.entries(chunkManifest.discoveryTriggers)) {
+                    if (triggerElements.includes(elementKey)) {
+                        // Load appropriate chunk based on trigger
+                        if (trigger === 'tier3' && !loadedChunks.has('intermediate')) {
+                            loadChunk('intermediate');
+                        } else if (trigger === 'tier5' && !loadedChunks.has('advanced')) {
+                            loadChunk('advanced');
+                        } else if (trigger === 'pokemonworld' && !loadedChunks.has('pokemon')) {
+                            loadChunk('pokemon');
+                        } else if (trigger === 'magic' && !loadedChunks.has('fictional')) {
+                            loadChunk('fictional');
+                        } else if (trigger === 'infinity' && !loadedChunks.has('special')) {
+                            loadChunk('special');
+                        }
+                        break;
+                    }
                 }
             }
             return false;
@@ -768,9 +815,9 @@
                 
                 if (cachedData) {
                     // Use cached data
-                    BASIC_ELEMENTS = cachedData.basicElements;
-                    COMBINATIONS = cachedData.combinations;
-                    ALL_ELEMENTS = cachedData.elements;
+                    BASIC_ELEMENTS = cachedData.basicElements || {};
+                    COMBINATIONS = cachedData.combinations || {};
+                    ALL_ELEMENTS = cachedData.elements || {};
                     elementsLoaded = true;
                     
                     console.log(`Loaded essential database from cache: ${Object.keys(ALL_ELEMENTS).length} elements`);
@@ -782,8 +829,15 @@
                         loadingIndicator.style.display = 'none';
                     }
                     
-                    // Pre-load first chunk
-                    setTimeout(() => loadChunk(0), 1000);
+                    // Load manifest for chunk info
+                    fetch('elements-database-consolidated.json')
+                        .then(response => response.json())
+                        .then(manifest => {
+                            chunkManifest = manifest;
+                            // Pre-load intermediate chunk
+                            setTimeout(() => loadChunk('intermediate'), 1000);
+                        })
+                        .catch(err => console.warn('Failed to load manifest', err));
                 } else {
                     // Fetch from network
                     fetchEssentialDatabase();
@@ -796,8 +850,16 @@
         
         // Fetch essential database from network
         function fetchEssentialDatabase() {
-            // Load essential database
-            fetch('elements-database-essential.json')
+            // First load the manifest to understand chunk structure
+            fetch('elements-database-consolidated.json')
+                .then(response => response.json())
+                .then(manifest => {
+                    chunkManifest = manifest;
+                    console.log('Loaded chunk manifest');
+                    
+                    // Now load essential database
+                    return fetch('elements-essential.json');
+                })
                 .then(response => {
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
@@ -805,9 +867,16 @@
                     return response.json();
                 })
                 .then(data => {
-                    BASIC_ELEMENTS = data.basicElements;
-                    COMBINATIONS = data.combinations;
-                    ALL_ELEMENTS = data.elements;
+                    // Merge tiered elements into single objects
+                    BASIC_ELEMENTS = data.basicElements || {};
+                    ALL_ELEMENTS = {};
+                    
+                    // Merge all tier elements into ALL_ELEMENTS
+                    if (data.basicElements) Object.assign(ALL_ELEMENTS, data.basicElements);
+                    if (data.tier1Elements) Object.assign(ALL_ELEMENTS, data.tier1Elements);
+                    if (data.tier2Elements) Object.assign(ALL_ELEMENTS, data.tier2Elements);
+                    
+                    COMBINATIONS = data.combinations || {};
                     elementsLoaded = true;
                     
                     console.log(`Loaded essential database: ${Object.keys(ALL_ELEMENTS).length} elements, ${Object.keys(COMBINATIONS).length} combinations`);
@@ -818,9 +887,9 @@
                     // Cache the data
                     saveToCache('databases', {
                         name: 'essential',
-                        basicElements: data.basicElements,
-                        combinations: data.combinations,
-                        elements: data.elements
+                        basicElements: BASIC_ELEMENTS,
+                        combinations: COMBINATIONS,
+                        elements: ALL_ELEMENTS
                     }).catch(err => console.warn('Failed to cache database', err));
                     
                     // Hide loading indicator if visible
@@ -829,8 +898,8 @@
                         loadingIndicator.style.display = 'none';
                     }
                     
-                    // Pre-load first chunk in background
-                    setTimeout(() => loadChunk(0), 1000);
+                    // Pre-load intermediate chunk in background after a delay
+                    setTimeout(() => loadChunk('intermediate'), 2000);
                 })
                 .catch(err => {
                     console.error('Failed to load element database, using defaults', err);

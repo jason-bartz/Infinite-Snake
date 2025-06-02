@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Element Loading</title>
+</head>
+<body>
+    <h1>Element Loading Test</h1>
+    <div id="status">Loading...</div>
+    <div id="results"></div>
+    
+    <script>
+        async function testLoading() {
+            const status = document.getElementById('status');
+            const results = document.getElementById('results');
+            
+            try {
+                // Test loading essential file
+                status.textContent = 'Loading elements-essential.json...';
+                const essentialResponse = await fetch('elements-essential.json');
+                const essentialData = await essentialResponse.json();
+                
+                results.innerHTML += '<h2>Essential Data:</h2>';
+                results.innerHTML += `<p>Basic Elements: ${Object.keys(essentialData.basicElements || {}).length}</p>`;
+                results.innerHTML += `<p>Tier 1 Elements: ${Object.keys(essentialData.tier1Elements || {}).length}</p>`;
+                results.innerHTML += `<p>Tier 2 Elements: ${Object.keys(essentialData.tier2Elements || {}).length}</p>`;
+                results.innerHTML += `<p>Combinations: ${Object.keys(essentialData.combinations || {}).length}</p>`;
+                
+                // Test merging
+                const allElements = {};
+                if (essentialData.basicElements) Object.assign(allElements, essentialData.basicElements);
+                if (essentialData.tier1Elements) Object.assign(allElements, essentialData.tier1Elements);
+                if (essentialData.tier2Elements) Object.assign(allElements, essentialData.tier2Elements);
+                
+                results.innerHTML += `<p><strong>Total merged elements: ${Object.keys(allElements).length}</strong></p>`;
+                
+                // Test loading manifest
+                status.textContent = 'Loading manifest...';
+                const manifestResponse = await fetch('elements-database-consolidated.json');
+                const manifestData = await manifestResponse.json();
+                
+                results.innerHTML += '<h2>Manifest Data:</h2>';
+                results.innerHTML += `<p>Chunks: ${Object.keys(manifestData.chunkManifest || {}).length}</p>`;
+                
+                // Show chunk info
+                if (manifestData.chunkManifest) {
+                    results.innerHTML += '<h3>Available Chunks:</h3><ul>';
+                    for (const [key, chunk] of Object.entries(manifestData.chunkManifest)) {
+                        results.innerHTML += `<li>${key}: ${chunk.file} (${chunk.elementCount} elements)</li>`;
+                    }
+                    results.innerHTML += '</ul>';
+                }
+                
+                status.textContent = 'Test completed successfully!';
+                status.style.color = 'green';
+                
+            } catch (error) {
+                status.textContent = 'Error: ' + error.message;
+                status.style.color = 'red';
+                console.error(error);
+            }
+        }
+        
+        testLoading();
+    </script>
+</body>
+</html>
