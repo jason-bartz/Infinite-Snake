@@ -87,7 +87,7 @@
             z-index: 50;
             text-align: center;
             border: 2px solid #444;
-            max-width: 600px;
+            max-width: 800px;
             width: 90%;
         }
         
@@ -125,6 +125,72 @@
         #gameModeSelect button:hover {
             background: linear-gradient(135deg, #5B89B1, #384E61);
             transform: scale(1.05);
+        }
+        
+        /* Victory Mode Layout */
+        #victoryButtons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .victory-column {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .victory-column h5 {
+            color: #FFD700;
+            margin: 0 0 10px 0;
+            text-align: center;
+            font-size: 18px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .victory-infinite {
+            grid-column: span 2;
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        
+        /* Discovery Mode Buttons */
+        .btn-discovery {
+            background: linear-gradient(135deg, #2E7D32, #1B5E20) !important;
+            border: 1px solid #4CAF50 !important;
+        }
+        
+        .btn-discovery:hover {
+            background: linear-gradient(135deg, #388E3C, #2E7D32) !important;
+            box-shadow: 0 0 15px rgba(76, 175, 80, 0.5);
+        }
+        
+        /* Points Mode Buttons */
+        .btn-points {
+            background: linear-gradient(135deg, #D32F2F, #B71C1C) !important;
+            border: 1px solid #F44336 !important;
+        }
+        
+        .btn-points:hover {
+            background: linear-gradient(135deg, #E53935, #D32F2F) !important;
+            box-shadow: 0 0 15px rgba(244, 67, 54, 0.5);
+        }
+        
+        /* Infinite Mode Button */
+        .btn-infinite {
+            background: linear-gradient(135deg, #7B1FA2, #4A148C) !important;
+            border: 1px solid #9C27B0 !important;
+            min-width: 250px !important;
+            font-size: 18px !important;
+            padding: 15px 30px !important;
+        }
+        
+        .btn-infinite:hover {
+            background: linear-gradient(135deg, #8E24AA, #6A1B9A) !important;
+            box-shadow: 0 0 20px rgba(156, 39, 176, 0.6);
         }
         
         #loadingIndicator {
@@ -549,13 +615,21 @@
         <div class="modeSection">
             <h4>Victory Condition</h4>
             <div id="victoryButtons">
-                <button onclick="selectVictoryMode('discovery', 100)">Discovery Race: 100</button>
-                <button onclick="selectVictoryMode('discovery', 500)">Discovery Race: 500</button>
-                <button onclick="selectVictoryMode('discovery', 1000)">Discovery Race: 1000</button>
-                <button onclick="selectVictoryMode('points', 50000)">Points Race: 50K</button>
-                <button onclick="selectVictoryMode('points', 250000)">Points Race: 250K</button>
-                <button onclick="selectVictoryMode('points', 1000000)">Points Race: 1M</button>
-                <button onclick="selectVictoryMode('infinite', 0)">Infinite Mode</button>
+                <div class="victory-column">
+                    <h5>🧪 Discovery Race</h5>
+                    <button class="btn-discovery" onclick="selectVictoryMode('discovery', 100)">Discover 100 Elements</button>
+                    <button class="btn-discovery" onclick="selectVictoryMode('discovery', 500)">Discover 500 Elements</button>
+                    <button class="btn-discovery" onclick="selectVictoryMode('discovery', 1000)">Discover 1000 Elements</button>
+                </div>
+                <div class="victory-column">
+                    <h5>⭐ Points Race</h5>
+                    <button class="btn-points" onclick="selectVictoryMode('points', 50000)">Score 50,000 Points</button>
+                    <button class="btn-points" onclick="selectVictoryMode('points', 250000)">Score 250,000 Points</button>
+                    <button class="btn-points" onclick="selectVictoryMode('points', 1000000)">Score 1,000,000 Points</button>
+                </div>
+                <div class="victory-infinite">
+                    <button class="btn-infinite" onclick="selectVictoryMode('infinite', 0)">∞ Infinite Mode</button>
+                </div>
             </div>
         </div>
         
@@ -666,6 +740,16 @@
         let particles = [];
         let lastDiscoveredElement = null;
         let highScore = parseInt(localStorage.getItem('highScore') || '0');
+        
+        // Space effects
+        let staticStars = [];
+        let shootingStars = [];
+        let lastShootingStarTime = 0;
+        
+        // Nebula border effect variables
+        let borderParticles = [];
+        let animationTime = 0;
+        const MAX_BORDER_PARTICLES = 150;
         
         // Element database
         let elementDatabase = {};
@@ -961,6 +1045,63 @@
                 currentTrack.volume = musicVolume;
             }
         };
+        
+        // Border particle class
+        class BorderParticle {
+            constructor(x, y, edge) {
+                this.x = x;
+                this.y = y;
+                this.edge = edge; // 'left', 'right', 'top', 'bottom'
+                this.baseX = x;
+                this.baseY = y;
+                this.size = Math.random() * 3 + 1;
+                this.speed = Math.random() * 0.5 + 0.1;
+                this.offset = Math.random() * Math.PI * 2;
+                this.opacity = Math.random() * 0.5 + 0.3;
+                this.color = this.getRandomColor();
+            }
+            
+            getRandomColor() {
+                const colors = [
+                    'rgba(147, 51, 234, ', // purple
+                    'rgba(236, 72, 153, ', // pink
+                    'rgba(59, 130, 246, ', // blue
+                    'rgba(168, 85, 247, ', // purple-pink
+                    'rgba(99, 102, 241, '  // indigo
+                ];
+                return colors[Math.floor(Math.random() * colors.length)];
+            }
+            
+            update(deltaTime) {
+                const time = animationTime + this.offset;
+                
+                // Float in circular motion
+                const radius = 15;
+                const floatX = Math.cos(time * this.speed) * radius;
+                const floatY = Math.sin(time * this.speed * 0.7) * radius;
+                
+                this.x = this.baseX + floatX;
+                this.y = this.baseY + floatY;
+                
+                // Pulse opacity
+                this.opacity = 0.3 + Math.sin(time * 2) * 0.2;
+            }
+            
+            draw(ctx) {
+                ctx.save();
+                ctx.globalAlpha = this.opacity;
+                ctx.fillStyle = this.color + this.opacity + ')';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Add glow effect
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = this.color + '0.8)';
+                ctx.fill();
+                ctx.restore();
+            }
+        }
         
         // Snake class
         class Snake {
@@ -1481,6 +1622,99 @@
             }
         }
         
+        // Shooting Star class
+        class ShootingStar {
+            constructor() {
+                // Random starting position on screen edge
+                const edge = Math.floor(Math.random() * 4);
+                switch(edge) {
+                    case 0: // Top
+                        this.x = Math.random() * WORLD_SIZE;
+                        this.y = 0;
+                        break;
+                    case 1: // Right
+                        this.x = WORLD_SIZE;
+                        this.y = Math.random() * WORLD_SIZE;
+                        break;
+                    case 2: // Bottom
+                        this.x = Math.random() * WORLD_SIZE;
+                        this.y = WORLD_SIZE;
+                        break;
+                    case 3: // Left
+                        this.x = 0;
+                        this.y = Math.random() * WORLD_SIZE;
+                        break;
+                }
+                
+                // Random angle and speed
+                const angle = Math.random() * Math.PI * 2;
+                const speed = 15 + Math.random() * 10; // Fast movement
+                this.vx = Math.cos(angle) * speed;
+                this.vy = Math.sin(angle) * speed;
+                
+                this.trail = [];
+                this.maxTrailLength = 20;
+                this.life = 1.0;
+                this.fadeSpeed = 0.01; // Slower fade for 1-2 second visibility
+            }
+            
+            update() {
+                // Add current position to trail
+                this.trail.push({ x: this.x, y: this.y, alpha: this.life });
+                
+                // Limit trail length
+                if (this.trail.length > this.maxTrailLength) {
+                    this.trail.shift();
+                }
+                
+                // Update position
+                this.x += this.vx;
+                this.y += this.vy;
+                
+                // Fade out
+                this.life -= this.fadeSpeed;
+                
+                // Update trail alpha
+                this.trail.forEach((point, index) => {
+                    point.alpha = (index / this.trail.length) * this.life;
+                });
+                
+                // Check if out of bounds or faded
+                return this.life > 0 && this.x > -100 && this.x < WORLD_SIZE + 100 && 
+                       this.y > -100 && this.y < WORLD_SIZE + 100;
+            }
+            
+            draw() {
+                // Draw trail
+                ctx.save();
+                this.trail.forEach((point, index) => {
+                    const screenX = point.x - camera.x + canvas.width / 2;
+                    const screenY = point.y - camera.y + canvas.height / 2;
+                    
+                    ctx.globalAlpha = point.alpha * 0.5;
+                    ctx.fillStyle = '#ffffff';
+                    const size = (index / this.trail.length) * 3;
+                    ctx.beginPath();
+                    ctx.arc(screenX, screenY, size, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+                
+                // Draw main star
+                const screenX = this.x - camera.x + canvas.width / 2;
+                const screenY = this.y - camera.y + canvas.height / 2;
+                
+                ctx.globalAlpha = this.life;
+                ctx.fillStyle = '#ffffff';
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = 'rgba(255, 255, 255, 0.8)';
+                ctx.beginPath();
+                ctx.arc(screenX, screenY, 3, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.restore();
+            }
+        }
+        
         // Helper functions
         function spawnElement(type = null, x = null, y = null) {
             if (!type) {
@@ -1774,6 +2008,27 @@
             ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
+            // Draw static stars (before grid so they appear behind)
+            ctx.save();
+            staticStars.forEach(star => {
+                const screenX = star.x - camera.x + canvas.width / 2;
+                const screenY = star.y - camera.y + canvas.height / 2;
+                
+                // Skip if off-screen
+                if (screenX < -10 || screenX > canvas.width + 10 ||
+                    screenY < -10 || screenY > canvas.height + 10) return;
+                
+                ctx.globalAlpha = star.opacity;
+                ctx.fillStyle = star.color;
+                ctx.beginPath();
+                ctx.arc(screenX, screenY, star.size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            ctx.restore();
+            
+            // Draw shooting stars
+            shootingStars.forEach(star => star.draw());
+            
             // Grid
             ctx.strokeStyle = 'rgba(138, 43, 226, 0.1)';
             ctx.lineWidth = 1;
@@ -1795,37 +2050,166 @@
                 ctx.stroke();
             }
             
-            // Draw world borders
-            const borderThickness = 10;
+            // Draw world borders with nebula effect
+            const borderThickness = 50; // Increased for gradient effect
             const leftBorder = -camera.x + canvas.width / 2;
             const rightBorder = WORLD_SIZE - camera.x + canvas.width / 2;
             const topBorder = -camera.y + canvas.height / 2;
             const bottomBorder = WORLD_SIZE - camera.y + canvas.height / 2;
             
-            ctx.fillStyle = '#ff0000';
+            // Pulsating glow intensity
+            const glowIntensity = 0.7 + Math.sin(animationTime * 2) * 0.3;
             
-            // Left border
+            // Create nebula gradient function
+            function createNebulaGradient(x0, y0, x1, y1) {
+                const gradient = ctx.createLinearGradient(x0, y0, x1, y1);
+                gradient.addColorStop(0, `rgba(147, 51, 234, ${glowIntensity})`); // purple
+                gradient.addColorStop(0.3, `rgba(236, 72, 153, ${glowIntensity * 0.8})`); // pink
+                gradient.addColorStop(0.6, `rgba(59, 130, 246, ${glowIntensity * 0.6})`); // blue
+                gradient.addColorStop(1, 'rgba(0, 0, 0, 0)'); // fade to transparent
+                return gradient;
+            }
+            
+            // Left border nebula
             if (leftBorder > -borderThickness) {
-                ctx.fillRect(0, 0, Math.max(borderThickness, leftBorder), canvas.height);
+                const borderWidth = Math.max(borderThickness, leftBorder);
+                ctx.fillStyle = createNebulaGradient(0, 0, borderWidth, 0);
+                ctx.fillRect(0, 0, borderWidth, canvas.height);
+                
+                // Add danger glow
+                ctx.save();
+                ctx.shadowBlur = 20 * glowIntensity;
+                ctx.shadowColor = 'rgba(255, 0, 0, 0.5)';
+                ctx.strokeStyle = `rgba(255, 0, 0, ${glowIntensity * 0.3})`;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(Math.max(10, leftBorder), 0);
+                ctx.lineTo(Math.max(10, leftBorder), canvas.height);
+                ctx.stroke();
+                ctx.restore();
             }
             
-            // Right border
+            // Right border nebula
             if (rightBorder < canvas.width + borderThickness) {
+                ctx.fillStyle = createNebulaGradient(canvas.width, 0, rightBorder, 0);
                 ctx.fillRect(rightBorder, 0, canvas.width - rightBorder, canvas.height);
+                
+                // Add danger glow
+                ctx.save();
+                ctx.shadowBlur = 20 * glowIntensity;
+                ctx.shadowColor = 'rgba(255, 0, 0, 0.5)';
+                ctx.strokeStyle = `rgba(255, 0, 0, ${glowIntensity * 0.3})`;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(rightBorder, 0);
+                ctx.lineTo(rightBorder, canvas.height);
+                ctx.stroke();
+                ctx.restore();
             }
             
-            // Top border
+            // Top border nebula
             if (topBorder > -borderThickness) {
-                ctx.fillRect(0, 0, canvas.width, Math.max(borderThickness, topBorder));
+                const borderHeight = Math.max(borderThickness, topBorder);
+                ctx.fillStyle = createNebulaGradient(0, 0, 0, borderHeight);
+                ctx.fillRect(0, 0, canvas.width, borderHeight);
+                
+                // Add danger glow
+                ctx.save();
+                ctx.shadowBlur = 20 * glowIntensity;
+                ctx.shadowColor = 'rgba(255, 0, 0, 0.5)';
+                ctx.strokeStyle = `rgba(255, 0, 0, ${glowIntensity * 0.3})`;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(0, Math.max(10, topBorder));
+                ctx.lineTo(canvas.width, Math.max(10, topBorder));
+                ctx.stroke();
+                ctx.restore();
             }
             
-            // Bottom border
+            // Bottom border nebula
             if (bottomBorder < canvas.height + borderThickness) {
+                ctx.fillStyle = createNebulaGradient(0, canvas.height, 0, bottomBorder);
                 ctx.fillRect(0, bottomBorder, canvas.width, canvas.height - bottomBorder);
+                
+                // Add danger glow
+                ctx.save();
+                ctx.shadowBlur = 20 * glowIntensity;
+                ctx.shadowColor = 'rgba(255, 0, 0, 0.5)';
+                ctx.strokeStyle = `rgba(255, 0, 0, ${glowIntensity * 0.3})`;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(0, bottomBorder);
+                ctx.lineTo(canvas.width, bottomBorder);
+                ctx.stroke();
+                ctx.restore();
             }
+            
+            // Draw border particles
+            borderParticles.forEach(particle => {
+                // Only draw particles that are visible on screen
+                if (particle.edge === 'left' && leftBorder > -borderThickness - 20) {
+                    particle.draw(ctx);
+                } else if (particle.edge === 'right' && rightBorder < canvas.width + borderThickness + 20) {
+                    particle.draw(ctx);
+                } else if (particle.edge === 'top' && topBorder > -borderThickness - 20) {
+                    particle.draw(ctx);
+                } else if (particle.edge === 'bottom' && bottomBorder < canvas.height + borderThickness + 20) {
+                    particle.draw(ctx);
+                }
+            });
         }
         
         // Game functions
+        function initializeStaticStars() {
+            staticStars = [];
+            const starCount = 200; // Sparse distribution
+            
+            for (let i = 0; i < starCount; i++) {
+                staticStars.push({
+                    x: Math.random() * WORLD_SIZE,
+                    y: Math.random() * WORLD_SIZE,
+                    size: Math.random() * 2 + 1, // 1-3px
+                    opacity: Math.random() * 0.2 + 0.1, // 0.1-0.3 opacity
+                    color: Math.random() > 0.5 ? '#ffffff' : '#e0e8ff' // white or pale blue
+                });
+            }
+        }
+        
+        function initializeBorderParticles() {
+            borderParticles = [];
+            
+            // Create particles along each border
+            const particleSpacing = 30;
+            
+            // Left border particles
+            for (let y = 0; y < canvas.height; y += particleSpacing) {
+                if (borderParticles.length < MAX_BORDER_PARTICLES) {
+                    borderParticles.push(new BorderParticle(Math.random() * 30, y, 'left'));
+                }
+            }
+            
+            // Right border particles
+            for (let y = 0; y < canvas.height; y += particleSpacing) {
+                if (borderParticles.length < MAX_BORDER_PARTICLES) {
+                    borderParticles.push(new BorderParticle(canvas.width - Math.random() * 30, y, 'right'));
+                }
+            }
+            
+            // Top border particles
+            for (let x = 0; x < canvas.width; x += particleSpacing) {
+                if (borderParticles.length < MAX_BORDER_PARTICLES) {
+                    borderParticles.push(new BorderParticle(x, Math.random() * 30, 'top'));
+                }
+            }
+            
+            // Bottom border particles
+            for (let x = 0; x < canvas.width; x += particleSpacing) {
+                if (borderParticles.length < MAX_BORDER_PARTICLES) {
+                    borderParticles.push(new BorderParticle(x, canvas.height - Math.random() * 30, 'bottom'));
+                }
+            }
+        }
+        
         function startGame() {
             gameStarted = true;
             
@@ -1850,6 +2234,12 @@
             
             // Update discovery log
             updateDiscoveryLog();
+            
+            // Initialize border particles
+            initializeBorderParticles();
+            
+            // Initialize static stars
+            initializeStaticStars();
             
             gameLoop();
         }
@@ -1992,6 +2382,9 @@
             const deltaTime = currentTime - lastTime;
             lastTime = currentTime;
             
+            // Update animation time for border effects
+            animationTime = currentTime * 0.001; // Convert to seconds
+            
             // Update camera to follow player
             if (playerSnake && playerSnake.alive) {
                 camera.x = playerSnake.x;
@@ -2002,6 +2395,18 @@
             snakes.forEach(snake => snake.update());
             elements.forEach(element => element.update());
             particles = particles.filter(particle => particle.update());
+            
+            // Update border particles
+            borderParticles.forEach(particle => particle.update(deltaTime));
+            
+            // Update shooting stars
+            shootingStars = shootingStars.filter(star => star.update());
+            
+            // Spawn shooting star occasionally (10-15 seconds)
+            if (currentTime - lastShootingStarTime > (10000 + Math.random() * 5000) && shootingStars.length === 0) {
+                shootingStars.push(new ShootingStar());
+                lastShootingStarTime = currentTime;
+            }
             
             // Check collisions
             checkCollisions();
