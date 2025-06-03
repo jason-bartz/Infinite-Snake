@@ -22,13 +22,29 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle at center, #1a0033, #000);
+            background: #000;
+            overflow: hidden;
+            z-index: 1000;
+            transition: opacity 1s;
+        }
+        
+        #splashStarsCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        #splashContent {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            height: 100%;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 1000;
-            transition: opacity 1s;
         }
         
         #splashScreen img {
@@ -77,18 +93,37 @@
         /* Game Mode Selection */
         #gameModeSelect {
             position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            overflow: hidden;
+            display: none;
+            z-index: 50;
+        }
+        
+        #gameModeStarsCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        #gameModeContent {
+            position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             background: rgba(0,0,0,0.95);
             padding: 40px;
             border-radius: 20px;
-            display: none;
-            z-index: 50;
             text-align: center;
             border: 2px solid #444;
             max-width: 800px;
             width: 90%;
+            z-index: 1;
         }
         
         #gameModeSelect h3 {
@@ -606,15 +641,22 @@
 <body>
     <!-- Splash Screen -->
     <div id="splashScreen">
-        <img src="assets/word-logo.webp" alt="Infinite Snake" style="width: 400px; max-width: 80%; margin-bottom: 30px;" onerror="this.style.display='none'; document.getElementById('splashTitle').style.display='block';">
-        <h1 id="splashTitle">Infinite Snake</h1>
-        <p>You are an Infinite Snake - a mystical serpent capable of endless growth and elemental mastery. Consume the scattered elements of creation, combine them within your ever-expanding form, and unlock the infinite possibilities that lie within the realm.</p>
-        <button id="startButton">Begin Your Journey</button>
+        <canvas id="splashStarsCanvas"></canvas>
+        <div id="splashContent">
+            <img src="assets/word-logo.webp" alt="Infinite Snake" style="width: 400px; max-width: 80%; margin-bottom: 30px;" onerror="this.style.display='none'; document.getElementById('splashTitle').style.display='block';">
+            <h1 id="splashTitle">Infinite Snake</h1>
+            <p>Reality has shattered. The elements of creation lie scattered across the void.<br><br>
+            You are the Infinite Snake - a primordial being born from chaos. Consume these fragments. Combine them within your endless coils. Forge new existence.<br><br>
+            From Fire and Water to stars and civilizations, rebuild the cosmos itself. The universe awaits.</p>
+            <button id="startButton">Begin Your Journey</button>
+        </div>
     </div>
     
     <!-- Game Mode Selection -->
     <div id="gameModeSelect">
-        <h3>Game Setup</h3>
+        <canvas id="gameModeStarsCanvas"></canvas>
+        <div id="gameModeContent">
+            <h3>Game Setup</h3>
         
         <div class="modeSection">
             <h4>Victory Condition</h4>
@@ -658,6 +700,7 @@
                 </ul>
                 <p style="text-align: center; margin-top: 10px; color: #888; font-size: 12px;">Press P to pause • New discoveries grant invincibility!</p>
             </div>
+        </div>
         </div>
     </div>
     
@@ -2521,6 +2564,172 @@
             loadSkinData();
             preloadSkins();
         });
+        
+        // Stars animation for splash and game mode screens
+        (function() {
+            const splashCanvas = document.getElementById('splashStarsCanvas');
+            const splashCtx = splashCanvas.getContext('2d');
+            const gameModeCanvas = document.getElementById('gameModeStarsCanvas');
+            const gameModeCtx = gameModeCanvas.getContext('2d');
+            
+            // Resize canvases
+            function resizeCanvases() {
+                splashCanvas.width = window.innerWidth;
+                splashCanvas.height = window.innerHeight;
+                gameModeCanvas.width = window.innerWidth;
+                gameModeCanvas.height = window.innerHeight;
+            }
+            resizeCanvases();
+            window.addEventListener('resize', resizeCanvases);
+            
+            // Stars array (shared between both screens)
+            const stars = [];
+            const shootingStars = [];
+            let lastShootingStarTime = 0;
+            
+            // Initialize stars
+            for (let i = 0; i < 150; i++) {
+                stars.push({
+                    x: Math.random() * window.innerWidth,
+                    y: Math.random() * window.innerHeight,
+                    size: Math.random() * 2 + 0.5,
+                    opacity: Math.random() * 0.5 + 0.3,
+                    twinkleSpeed: Math.random() * 0.02 + 0.01
+                });
+            }
+            
+            // Shooting star class for splash
+            class SplashShootingStar {
+                constructor() {
+                    // Start from screen edge
+                    const edge = Math.floor(Math.random() * 4);
+                    const width = window.innerWidth;
+                    const height = window.innerHeight;
+                    
+                    switch(edge) {
+                        case 0: // Top
+                            this.x = Math.random() * width;
+                            this.y = -10;
+                            break;
+                        case 1: // Right
+                            this.x = width + 10;
+                            this.y = Math.random() * height;
+                            break;
+                        case 2: // Bottom
+                            this.x = Math.random() * width;
+                            this.y = height + 10;
+                            break;
+                        case 3: // Left
+                            this.x = -10;
+                            this.y = Math.random() * height;
+                            break;
+                    }
+                    
+                    // Aim towards screen center area
+                    const targetX = width * (0.3 + Math.random() * 0.4);
+                    const targetY = height * (0.3 + Math.random() * 0.4);
+                    const angle = Math.atan2(targetY - this.y, targetX - this.x);
+                    const speed = 3 + Math.random() * 2;
+                    
+                    this.vx = Math.cos(angle) * speed;
+                    this.vy = Math.sin(angle) * speed;
+                    this.trail = [];
+                    this.maxTrailLength = 30;
+                    this.life = 1.0;
+                }
+                
+                update() {
+                    this.trail.push({ x: this.x, y: this.y });
+                    if (this.trail.length > this.maxTrailLength) {
+                        this.trail.shift();
+                    }
+                    
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    this.life -= 0.01;
+                    
+                    return this.life > 0 && this.x > -50 && this.x < window.innerWidth + 50 && 
+                           this.y > -50 && this.y < window.innerHeight + 50;
+                }
+                
+                draw(ctx) {
+                    // Draw trail
+                    ctx.save();
+                    this.trail.forEach((point, index) => {
+                        const alpha = (index / this.trail.length) * this.life * 0.3;
+                        ctx.globalAlpha = alpha;
+                        ctx.fillStyle = '#ffffff';
+                        const size = (index / this.trail.length) * 2;
+                        ctx.beginPath();
+                        ctx.arc(point.x, point.y, size, 0, Math.PI * 2);
+                        ctx.fill();
+                    });
+                    
+                    // Draw star
+                    ctx.globalAlpha = this.life;
+                    ctx.fillStyle = '#ffffff';
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = 'rgba(255, 255, 255, 0.8)';
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
+            }
+            
+            // Animation loop
+            function animateStars(timestamp) {
+                // Check which screen is active
+                const splashActive = document.getElementById('splashScreen').style.display !== 'none' && 
+                                   document.getElementById('splashScreen').style.opacity !== '0';
+                const gameModeActive = document.getElementById('gameModeSelect').style.display !== 'none';
+                
+                if (!splashActive && !gameModeActive) {
+                    requestAnimationFrame(animateStars);
+                    return;
+                }
+                
+                // Determine which canvas to draw on
+                const activeCanvas = splashActive ? splashCanvas : gameModeCanvas;
+                const activeCtx = splashActive ? splashCtx : gameModeCtx;
+                
+                // Clear canvas
+                activeCtx.clearRect(0, 0, activeCanvas.width, activeCanvas.height);
+                
+                // Draw static stars with twinkling
+                stars.forEach(star => {
+                    star.opacity += Math.sin(timestamp * star.twinkleSpeed) * 0.05;
+                    star.opacity = Math.max(0.1, Math.min(0.8, star.opacity));
+                    
+                    activeCtx.globalAlpha = star.opacity;
+                    activeCtx.fillStyle = '#ffffff';
+                    activeCtx.beginPath();
+                    activeCtx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                    activeCtx.fill();
+                });
+                
+                // Update and draw shooting stars
+                shootingStars.forEach((star, index) => {
+                    if (!star.update()) {
+                        shootingStars.splice(index, 1);
+                    } else {
+                        star.draw(activeCtx);
+                    }
+                });
+                
+                // Spawn new shooting star occasionally
+                if (timestamp - lastShootingStarTime > 3000 + Math.random() * 4000) {
+                    shootingStars.push(new SplashShootingStar());
+                    lastShootingStarTime = timestamp;
+                }
+                
+                activeCtx.globalAlpha = 1;
+                requestAnimationFrame(animateStars);
+            }
+            
+            // Start animation
+            requestAnimationFrame(animateStars);
+        })();
         
         // Try to play music on first user interaction
         document.addEventListener('click', function playMusicOnInteraction() {
