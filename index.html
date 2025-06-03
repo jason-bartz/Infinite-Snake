@@ -536,7 +536,7 @@
 <body>
     <!-- Splash Screen -->
     <div id="splashScreen">
-        <img src="assets/word-logo.png" alt="Infinite Snake" style="width: 400px; max-width: 80%; margin-bottom: 30px;" onerror="this.style.display='none'; document.getElementById('splashTitle').style.display='block';">
+        <img src="assets/word-logo.webp" alt="Infinite Snake" style="width: 400px; max-width: 80%; margin-bottom: 30px;" onerror="this.style.display='none'; document.getElementById('splashTitle').style.display='block';">
         <h1 id="splashTitle">Infinite Snake</h1>
         <p>You are an Infinite Snake - a mystical serpent capable of endless growth and elemental mastery. Consume the scattered elements of creation, combine them within your ever-expanding form, and unlock the infinite possibilities that lie within the realm.</p>
         <button id="startButton">Begin Your Journey</button>
@@ -680,7 +680,7 @@
             'snake-default-green': { name: 'Default Green', unlocked: true },
             '35mm': { name: 'Hipstamatic', unlocked: false },
             'Frank': { name: 'Franklin', unlocked: false },
-            'af-one': { name: 'Don't Scuff on Me', unlocked: false },
+            'af-one': { name: "Don't Scuff on Me", unlocked: false },
             'barbi': { name: 'Pink Plastic', unlocked: false },
             'boat-mcboatface': { name: 'Boaty McBoatface', unlocked: false },
             'camera-guy': { name: 'Camera Face', unlocked: false },
@@ -1924,7 +1924,7 @@
                 if (!skinData.unlocked) {
                     const icon = document.createElement('div');
                     icon.className = 'skin-unlock-icon';
-                    icon.textContent = availableUnlocks > 0 ? '\uD83D\uDD13' : '\uD83D\uDD12';
+                    icon.textContent = availableUnlocks > 0 ? '🔓' : '🔒';
                     div.appendChild(icon);
                 }
                 
