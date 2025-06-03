@@ -1,0 +1,327 @@
+{
+  "version": "1.0",
+  "pack": "core",
+  "elements": {
+    "1": {
+      "id": 1,
+      "key": "fire",
+      "emoji": "🔥",
+      "name": "Fire",
+      "tier": 0,
+      "discovered": true,
+      "base": true,
+      "category": "classical"
+    },
+    "2": {
+      "id": 2,
+      "key": "water",
+      "emoji": "💧",
+      "name": "Water",
+      "tier": 0,
+      "discovered": true,
+      "base": true,
+      "category": "classical"
+    },
+    "3": {
+      "id": 3,
+      "key": "earth",
+      "emoji": "🌍",
+      "name": "Earth",
+      "tier": 0,
+      "discovered": true,
+      "base": true,
+      "category": "classical"
+    },
+    "4": {
+      "id": 4,
+      "key": "air",
+      "emoji": "💨",
+      "name": "Air",
+      "tier": 0,
+      "discovered": true,
+      "base": true,
+      "category": "classical"
+    },
+    "5": {
+      "id": 5,
+      "key": "steam",
+      "emoji": "💨",
+      "name": "Steam",
+      "tier": 1,
+      "discovered": false,
+      "base": false,
+      "category": "state"
+    },
+    "6": {
+      "id": 6,
+      "key": "mud",
+      "emoji": "🟫",
+      "name": "Mud",
+      "tier": 1,
+      "discovered": false,
+      "base": false,
+      "category": "material"
+    },
+    "7": {
+      "id": 7,
+      "key": "lava",
+      "emoji": "🌋",
+      "name": "Lava",
+      "tier": 1,
+      "discovered": false,
+      "base": false,
+      "category": "material"
+    },
+    "8": {
+      "id": 8,
+      "key": "dust",
+      "emoji": "🌫️",
+      "name": "Dust",
+      "tier": 1,
+      "discovered": false,
+      "base": false,
+      "category": "material"
+    },
+    "9": {
+      "id": 9,
+      "key": "rain",
+      "emoji": "🌧️",
+      "name": "Rain",
+      "tier": 1,
+      "discovered": false,
+      "base": false,
+      "category": "weather"
+    },
+    "10": {
+      "id": 10,
+      "key": "smoke",
+      "emoji": "💨",
+      "name": "Smoke",
+      "tier": 1,
+      "discovered": false,
+      "base": false,
+      "category": "state"
+    },
+    "11": {
+      "id": 11,
+      "key": "plant",
+      "emoji": "🌱",
+      "name": "Plant",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "life"
+    },
+    "12": {
+      "id": 12,
+      "key": "stone",
+      "emoji": "🪨",
+      "name": "Stone",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "material"
+    },
+    "13": {
+      "id": 13,
+      "key": "cloud",
+      "emoji": "☁️",
+      "name": "Cloud",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "weather"
+    },
+    "14": {
+      "id": 14,
+      "key": "energy",
+      "emoji": "⚡",
+      "name": "Energy",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "force"
+    },
+    "15": {
+      "id": 15,
+      "key": "tree",
+      "emoji": "🌳",
+      "name": "Tree",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "life"
+    },
+    "16": {
+      "id": 16,
+      "key": "ocean",
+      "emoji": "🌊",
+      "name": "Ocean",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "nature"
+    },
+    "17": {
+      "id": 17,
+      "key": "volcano",
+      "emoji": "🌋",
+      "name": "Volcano",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "nature"
+    },
+    "18": {
+      "id": 18,
+      "key": "storm",
+      "emoji": "⛈️",
+      "name": "Storm",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "weather"
+    },
+    "19": {
+      "id": 19,
+      "key": "sand",
+      "emoji": "🏖️",
+      "name": "Sand",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "material"
+    },
+    "20": {
+      "id": 20,
+      "key": "lightning",
+      "emoji": "⚡",
+      "name": "Lightning",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "force"
+    },
+    "21": {
+      "id": 21,
+      "key": "forest",
+      "emoji": "🌲",
+      "name": "Forest",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "nature"
+    },
+    "22": {
+      "id": 22,
+      "key": "glass",
+      "emoji": "🪟",
+      "name": "Glass",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "material"
+    },
+    "23": {
+      "id": 23,
+      "key": "crystal",
+      "emoji": "💎",
+      "name": "Crystal",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "material"
+    },
+    "24": {
+      "id": 24,
+      "key": "ice",
+      "emoji": "🧊",
+      "name": "Ice",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "state"
+    },
+    "25": {
+      "id": 25,
+      "key": "wind",
+      "emoji": "🌪️",
+      "name": "Wind",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "force"
+    },
+    "26": {
+      "id": 26,
+      "key": "life",
+      "emoji": "🌟",
+      "name": "Life",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "abstract"
+    },
+    "27": {
+      "id": 27,
+      "key": "dragon",
+      "emoji": "🐉",
+      "name": "Dragon",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "mythical"
+    },
+    "28": {
+      "id": 28,
+      "key": "magic",
+      "emoji": "✨",
+      "name": "Magic",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "abstract"
+    },
+    "29": {
+      "id": 29,
+      "key": "hurricane",
+      "emoji": "🌀",
+      "name": "Hurricane",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "weather"
+    }
+  },
+  "keyToId": {
+    "fire": 1,
+    "water": 2,
+    "earth": 3,
+    "air": 4,
+    "steam": 5,
+    "mud": 6,
+    "lava": 7,
+    "dust": 8,
+    "rain": 9,
+    "smoke": 10,
+    "plant": 11,
+    "stone": 12,
+    "cloud": 13,
+    "energy": 14,
+    "tree": 15,
+    "ocean": 16,
+    "volcano": 17,
+    "storm": 18,
+    "sand": 19,
+    "lightning": 20,
+    "forest": 21,
+    "glass": 22,
+    "crystal": 23,
+    "ice": 24,
+    "wind": 25,
+    "life": 26,
+    "dragon": 27,
+    "magic": 28,
+    "hurricane": 29
+  }
+}

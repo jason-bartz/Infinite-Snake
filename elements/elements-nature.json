@@ -1,0 +1,228 @@
+{
+  "version": "1.0",
+  "pack": "nature",
+  "elements": {
+    "30": {
+      "id": 30,
+      "key": "seed",
+      "emoji": "🌰",
+      "name": "Seed",
+      "tier": 1,
+      "discovered": false,
+      "base": false,
+      "category": "life"
+    },
+    "31": {
+      "id": 31,
+      "key": "flower",
+      "emoji": "🌸",
+      "name": "Flower",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "life"
+    },
+    "32": {
+      "id": 32,
+      "key": "grass",
+      "emoji": "🌿",
+      "name": "Grass",
+      "tier": 1,
+      "discovered": false,
+      "base": false,
+      "category": "life"
+    },
+    "33": {
+      "id": 33,
+      "key": "moss",
+      "emoji": "🌿",
+      "name": "Moss",
+      "tier": 1,
+      "discovered": false,
+      "base": false,
+      "category": "life"
+    },
+    "34": {
+      "id": 34,
+      "key": "mushroom",
+      "emoji": "🍄",
+      "name": "Mushroom",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "life"
+    },
+    "35": {
+      "id": 35,
+      "key": "fruit",
+      "emoji": "🍎",
+      "name": "Fruit",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "life"
+    },
+    "36": {
+      "id": 36,
+      "key": "bee",
+      "emoji": "🐝",
+      "name": "Bee",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "life"
+    },
+    "37": {
+      "id": 37,
+      "key": "honey",
+      "emoji": "🍯",
+      "name": "Honey",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "material"
+    },
+    "38": {
+      "id": 38,
+      "key": "butterfly",
+      "emoji": "🦋",
+      "name": "Butterfly",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "life"
+    },
+    "39": {
+      "id": 39,
+      "key": "pollen",
+      "emoji": "💛",
+      "name": "Pollen",
+      "tier": 1,
+      "discovered": false,
+      "base": false,
+      "category": "material"
+    },
+    "40": {
+      "id": 40,
+      "key": "leaf",
+      "emoji": "🍃",
+      "name": "Leaf",
+      "tier": 1,
+      "discovered": false,
+      "base": false,
+      "category": "life"
+    },
+    "41": {
+      "id": 41,
+      "key": "vine",
+      "emoji": "🌿",
+      "name": "Vine",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "life"
+    },
+    "42": {
+      "id": 42,
+      "key": "garden",
+      "emoji": "🌻",
+      "name": "Garden",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "nature"
+    },
+    "43": {
+      "id": 43,
+      "key": "meadow",
+      "emoji": "🌾",
+      "name": "Meadow",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "nature"
+    },
+    "44": {
+      "id": 44,
+      "key": "spore",
+      "emoji": "⚪",
+      "name": "Spore",
+      "tier": 1,
+      "discovered": false,
+      "base": false,
+      "category": "life"
+    },
+    "45": {
+      "id": 45,
+      "key": "nectar",
+      "emoji": "💧",
+      "name": "Nectar",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "material"
+    },
+    "46": {
+      "id": 46,
+      "key": "root",
+      "emoji": "🫚",
+      "name": "Root",
+      "tier": 1,
+      "discovered": false,
+      "base": false,
+      "category": "life"
+    },
+    "47": {
+      "id": 47,
+      "key": "bark",
+      "emoji": "🪵",
+      "name": "Bark",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "material"
+    },
+    "48": {
+      "id": 48,
+      "key": "sap",
+      "emoji": "🟤",
+      "name": "Sap",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "material"
+    },
+    "49": {
+      "id": 49,
+      "key": "ecosystem",
+      "emoji": "🌍",
+      "name": "Ecosystem",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "nature"
+    }
+  },
+  "keyToId": {
+    "seed": 30,
+    "flower": 31,
+    "grass": 32,
+    "moss": 33,
+    "mushroom": 34,
+    "fruit": 35,
+    "bee": 36,
+    "honey": 37,
+    "butterfly": 38,
+    "pollen": 39,
+    "leaf": 40,
+    "vine": 41,
+    "garden": 42,
+    "meadow": 43,
+    "spore": 44,
+    "nectar": 45,
+    "root": 46,
+    "bark": 47,
+    "sap": 48,
+    "ecosystem": 49
+  }
+}

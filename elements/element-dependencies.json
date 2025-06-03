@@ -1,0 +1,228 @@
+{
+  "version": "1.0",
+  "description": "Element dependency graph for understanding element relationships",
+  "dependencies": {
+    "1": {
+      "id": 1,
+      "key": "fire",
+      "createdBy": [],
+      "creates": [5, 7, 10, 14, 22, 2, 27],
+      "requiredFor": [5, 7, 10, 14, 22, 12, 27]
+    },
+    "2": {
+      "id": 2,
+      "key": "water",
+      "createdBy": [[1, 24]],
+      "creates": [5, 6, 9, 11, 12, 16, 24, 15, 14],
+      "requiredFor": [5, 6, 9, 11, 12, 13, 15, 16, 24, 14]
+    },
+    "3": {
+      "id": 3,
+      "key": "earth",
+      "createdBy": [],
+      "creates": [6, 7, 8, 17, 15, 11, 23],
+      "requiredFor": [6, 7, 8, 17, 15, 11, 23]
+    },
+    "4": {
+      "id": 4,
+      "key": "air",
+      "createdBy": [],
+      "creates": [8, 9, 10, 13, 19, 25, 28],
+      "requiredFor": [8, 9, 10, 13, 19, 25, 28]
+    },
+    "5": {
+      "id": 5,
+      "key": "steam",
+      "createdBy": [[1, 2]],
+      "creates": [13],
+      "requiredFor": [13]
+    },
+    "6": {
+      "id": 6,
+      "key": "mud",
+      "createdBy": [[2, 3], [2, 8], [2, 19]],
+      "creates": [11, 12],
+      "requiredFor": [11, 12]
+    },
+    "7": {
+      "id": 7,
+      "key": "lava",
+      "createdBy": [[1, 3]],
+      "creates": [12, 17],
+      "requiredFor": [12, 17]
+    },
+    "8": {
+      "id": 8,
+      "key": "dust",
+      "createdBy": [[3, 4]],
+      "creates": [6],
+      "requiredFor": [6]
+    },
+    "9": {
+      "id": 9,
+      "key": "rain",
+      "createdBy": [[2, 4], [2, 25]],
+      "creates": [13, 18],
+      "requiredFor": [13, 18]
+    },
+    "10": {
+      "id": 10,
+      "key": "smoke",
+      "createdBy": [[1, 4], [1, 15], [4, 17], [1, 21]],
+      "creates": [13],
+      "requiredFor": [13]
+    },
+    "11": {
+      "id": 11,
+      "key": "plant",
+      "createdBy": [[2, 6], [3, 26]],
+      "creates": [15, 26],
+      "requiredFor": [15, 26]
+    },
+    "12": {
+      "id": 12,
+      "key": "stone",
+      "createdBy": [[2, 7], [1, 6]],
+      "creates": [19, 17],
+      "requiredFor": [19, 17]
+    },
+    "13": {
+      "id": 13,
+      "key": "cloud",
+      "createdBy": [[4, 9], [2, 10], [4, 5]],
+      "creates": [18],
+      "requiredFor": [18]
+    },
+    "14": {
+      "id": 14,
+      "key": "energy",
+      "createdBy": [[1, 1], [2, 20]],
+      "creates": [18, 20, 23, 26, 28],
+      "requiredFor": [18, 20, 23, 26, 28]
+    },
+    "15": {
+      "id": 15,
+      "key": "tree",
+      "createdBy": [[11, 11], [3, 11], [2, 11]],
+      "creates": [21, 10],
+      "requiredFor": [21, 10]
+    },
+    "16": {
+      "id": 16,
+      "key": "ocean",
+      "createdBy": [[2, 2], [2, 29]],
+      "creates": [29],
+      "requiredFor": [29]
+    },
+    "17": {
+      "id": 17,
+      "key": "volcano",
+      "createdBy": [[3, 7], [7, 12]],
+      "creates": [10],
+      "requiredFor": [10]
+    },
+    "18": {
+      "id": 18,
+      "key": "storm",
+      "createdBy": [[13, 14], [9, 13]],
+      "creates": [20, 29],
+      "requiredFor": [20, 29]
+    },
+    "19": {
+      "id": 19,
+      "key": "sand",
+      "createdBy": [[4, 12]],
+      "creates": [22, 6],
+      "requiredFor": [22, 6]
+    },
+    "20": {
+      "id": 20,
+      "key": "lightning",
+      "createdBy": [[14, 18]],
+      "creates": [14, 23],
+      "requiredFor": [14, 23]
+    },
+    "21": {
+      "id": 21,
+      "key": "forest",
+      "createdBy": [[15, 15]],
+      "creates": [10],
+      "requiredFor": [10]
+    },
+    "22": {
+      "id": 22,
+      "key": "glass",
+      "createdBy": [[1, 19]],
+      "creates": [23],
+      "requiredFor": [23]
+    },
+    "23": {
+      "id": 23,
+      "key": "crystal",
+      "createdBy": [[14, 22], [20, 22], [3, 28]],
+      "creates": [24],
+      "requiredFor": [24]
+    },
+    "24": {
+      "id": 24,
+      "key": "ice",
+      "createdBy": [[2, 25], [2, 23]],
+      "creates": [2],
+      "requiredFor": [2]
+    },
+    "25": {
+      "id": 25,
+      "key": "wind",
+      "createdBy": [[4, 4]],
+      "creates": [24, 29, 9],
+      "requiredFor": [24, 29, 9]
+    },
+    "26": {
+      "id": 26,
+      "key": "life",
+      "createdBy": [[11, 14]],
+      "creates": [27, 28, 11],
+      "requiredFor": [27, 28, 11]
+    },
+    "27": {
+      "id": 27,
+      "key": "dragon",
+      "createdBy": [[1, 26]],
+      "creates": [28],
+      "requiredFor": [28]
+    },
+    "28": {
+      "id": 28,
+      "key": "magic",
+      "createdBy": [[14, 26], [4, 27]],
+      "creates": [23],
+      "requiredFor": [23]
+    },
+    "29": {
+      "id": 29,
+      "key": "hurricane",
+      "createdBy": [[18, 25], [16, 18]],
+      "creates": [16],
+      "requiredFor": [16]
+    }
+  },
+  "tiers": {
+    "0": [1, 2, 3, 4],
+    "1": [5, 6, 7, 8, 9, 10],
+    "2": [11, 12, 13, 14, 15, 16, 17, 18, 19],
+    "3": [20, 21, 22, 23, 24, 25],
+    "4": [26, 29],
+    "5": [27, 28]
+  },
+  "categories": {
+    "classical": [1, 2, 3, 4],
+    "state": [5, 10, 24],
+    "material": [6, 7, 8, 12, 19, 22, 23],
+    "weather": [9, 13, 18, 29],
+    "life": [11, 15],
+    "nature": [16, 17, 21],
+    "force": [14, 20, 25],
+    "abstract": [26, 28],
+    "mythical": [27]
+  }
+}

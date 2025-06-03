@@ -598,6 +598,10 @@
             font-size: 16px;
         }
     </style>
+    <!-- New Element System Scripts -->
+    <script src="elements/element-loader.js"></script>
+    <script src="elements/compatibility-layer.js"></script>
+    <script src="elements/integrate.js"></script>
 </head>
 <body>
     <!-- Splash Screen -->
@@ -767,7 +771,7 @@
             'af-one': { name: "Don't Scuff on Me", unlocked: false },
             'barbi': { name: 'Pink Plastic', unlocked: false },
             'boat-mcboatface': { name: 'Boaty McBoatface', unlocked: false },
-            'camera-guy': { name: 'Camera Face', unlocked: false },
+            'camera-guy': { name: 'Say Cheese', unlocked: false },
             'coffee': { name: 'Caffeine Fiend', unlocked: false },
             'controller': { name: 'Game On', unlocked: false },
             'diet-cola': { name: 'Cola Crusader', unlocked: false },
@@ -786,13 +790,13 @@
             'nyan': { name: 'Poptart Cat', unlocked: false },
             'pizza': { name: 'Slice of Life', unlocked: false },
             'potato': { name: 'Spud Buddy', unlocked: false },
-            'racer': { name: 'Speed Racer', unlocked: false },
+            'racer': { name: 'Speed Demon', unlocked: false },
             'ramen': { name: 'Noodle Master', unlocked: false },
             'red-dragon': { name: 'Crimson Drake', unlocked: false },
             'robot': { name: 'Mecha Boi', unlocked: false },
             'santa': { name: 'Ho Ho Snake', unlocked: false },
             'saturn': { name: 'Ring Leader', unlocked: false },
-            'skibidi': { name: 'Skibidi Snake', unlocked: false },
+            'skibidi': { name: 'Mr. Swirley', unlocked: false },
             'snake-2': { name: 'Classic Redux', unlocked: false },
             'space-cadet': { name: 'Cosmic Crawler', unlocked: false },
             'tornado': { name: 'Whirlwind', unlocked: false },
@@ -951,19 +955,21 @@
         async function loadElements() {
             try {
                 document.getElementById('loadingIndicator').style.display = 'block';
-                const response = await fetch('elements.json');
-                const data = await response.json();
                 
-                // Process elements
-                for (const [key, element] of Object.entries(data.elements)) {
-                    elementDatabase[key] = {
-                        ...element,
-                        key: key
-                    };
+                // Wait for the new element system to load
+                if (!window.elementLoader || !window.elementCompatibility) {
+                    // Wait for elementsLoaded event
+                    await new Promise((resolve) => {
+                        window.addEventListener('elementsLoaded', resolve, { once: true });
+                    });
                 }
                 
-                // Process combinations
-                combinations = data.combinations;
+                // Use the compatibility layer to get legacy format
+                const legacyData = window.elementCompatibility.legacyCache;
+                
+                // Update local references
+                elementDatabase = legacyData.elements;
+                combinations = legacyData.combinations;
                 
                 console.log(`Loaded ${Object.keys(elementDatabase).length} elements and ${Object.keys(combinations).length} combinations`);
                 document.getElementById('loadingIndicator').style.display = 'none';
@@ -1127,8 +1133,9 @@
                 if (isPlayer) {
                     this.skin = currentPlayerSkin;
                 } else {
-                    // Random AI skin
-                    this.skin = aiSkins[Math.floor(Math.random() * aiSkins.length)];
+                    // Random AI skin from all available skins
+                    const allSkins = Object.keys(skinMetadata);
+                    this.skin = allSkins[Math.floor(Math.random() * allSkins.length)];
                 }
                 
                 // Initialize segments
@@ -1281,11 +1288,17 @@
                         const elem1 = this.elements[i];
                         const elem2 = this.elements[j];
                         
-                        // Check both orders
-                        const combo1 = `${elem1}+${elem2}`;
-                        const combo2 = `${elem2}+${elem1}`;
-                        
-                        let result = combinations[combo1] || combinations[combo2];
+                        // Use the new element system for combination checking if available
+                        let result = null;
+                        if (window.elementLoader && window.elementCompatibility) {
+                            const resultElement = window.elementLoader.getCombinationByKeys(elem1, elem2);
+                            result = resultElement ? resultElement.key : null;
+                        } else {
+                            // Fallback to old system
+                            const combo1 = `${elem1}+${elem2}`;
+                            const combo2 = `${elem2}+${elem1}`;
+                            result = combinations[combo1] || combinations[combo2];
+                        }
                         
                         if (result && elementDatabase[result]) {
                             // Keep the result in the collection instead of removing elements
@@ -1305,6 +1318,16 @@
                                 // Additional effects for player
                                 if (this.isPlayer && this === playerSnake) {
                                     discoveredElements.add(result); // Update global discoveries
+                                    
+                                    // Update new system if available
+                                    if (window.elementLoader && window.elementCompatibility) {
+                                        const element = window.elementLoader.getElementByKey(result);
+                                        if (element) {
+                                            window.elementLoader.discoverElement(element.id);
+                                            window.elementCompatibility.saveDiscoveredElements();
+                                        }
+                                    }
+                                    
                                     showCombinationMessage(elem1, elem2, result, true); // Show new discovery
                                     // Grant invincibility on new discovery
                                     this.invincibilityTimer = 3000; // 3 seconds
@@ -1509,8 +1532,8 @@
                     if (skinImage && skinImage.complete) {
                         ctx.save();
                         ctx.translate(screenX, screenY);
-                        ctx.rotate(this.angle);
-                        const size = SEGMENT_SIZE * 2.5;
+                        ctx.rotate(this.angle + Math.PI); // Rotate 180 degrees so top faces body
+                        const size = SEGMENT_SIZE * 3.175; // Increased by 15% more (25% total)
                         ctx.drawImage(skinImage, -size/2, -size/2, size, size);
                         ctx.restore();
                     } else {
@@ -1718,16 +1741,56 @@
         // Helper functions
         function spawnElement(type = null, x = null, y = null) {
             if (!type) {
-                // Random element based on tier probabilities
-                const rand = Math.random();
-                if (rand < 0.7) {
-                    // Basic element
-                    const basics = ['fire', 'water', 'earth', 'air'];
-                    type = basics[Math.floor(Math.random() * basics.length)];
+                // Use tier-based spawning if new system is available
+                if (window.elementLoader) {
+                    const rand = Math.random();
+                    let selectedElement;
+                    
+                    if (rand < 0.7) {
+                        // 70% chance for tier 0 (basic) elements
+                        const tier0Elements = window.elementLoader.getElementsByTier(0);
+                        selectedElement = tier0Elements[Math.floor(Math.random() * tier0Elements.length)];
+                    } else if (rand < 0.9) {
+                        // 20% chance for tier 1 elements
+                        const tier1Elements = window.elementLoader.getElementsByTier(1);
+                        if (tier1Elements.length > 0) {
+                            selectedElement = tier1Elements[Math.floor(Math.random() * tier1Elements.length)];
+                        } else {
+                            // Fallback to tier 0
+                            const tier0Elements = window.elementLoader.getElementsByTier(0);
+                            selectedElement = tier0Elements[Math.floor(Math.random() * tier0Elements.length)];
+                        }
+                    } else {
+                        // 10% chance for tier 2+ elements (if discovered)
+                        const allElements = window.elementLoader.getAllElements();
+                        const higherTierElements = allElements.filter(e => e.tier >= 2 && discoveredElements.has(e.key));
+                        if (higherTierElements.length > 0) {
+                            selectedElement = higherTierElements[Math.floor(Math.random() * higherTierElements.length)];
+                        } else {
+                            // Fallback to tier 1 or 0
+                            const tier1Elements = window.elementLoader.getElementsByTier(1);
+                            if (tier1Elements.length > 0) {
+                                selectedElement = tier1Elements[Math.floor(Math.random() * tier1Elements.length)];
+                            } else {
+                                const tier0Elements = window.elementLoader.getElementsByTier(0);
+                                selectedElement = tier0Elements[Math.floor(Math.random() * tier0Elements.length)];
+                            }
+                        }
+                    }
+                    
+                    type = selectedElement.key;
                 } else {
-                    // Any discovered element
-                    const available = Object.keys(elementDatabase);
-                    type = available[Math.floor(Math.random() * available.length)];
+                    // Fallback to old system
+                    const rand = Math.random();
+                    if (rand < 0.7) {
+                        // Basic element
+                        const basics = ['fire', 'water', 'earth', 'air'];
+                        type = basics[Math.floor(Math.random() * basics.length)];
+                    } else {
+                        // Any discovered element
+                        const available = Object.keys(elementDatabase);
+                        type = available[Math.floor(Math.random() * available.length)];
+                    }
                 }
             }
             
@@ -2440,6 +2503,20 @@
         // Initialize
         Promise.all([loadElements(), loadSnakeNames()]).then(() => {
             console.log('Game ready!');
+            
+            // Sync discovered elements from new system if available
+            if (window.elementLoader && window.elementCompatibility) {
+                // Load previously discovered elements
+                const savedDiscovered = window.elementCompatibility.loadDiscoveredElements();
+                if (savedDiscovered && savedDiscovered.size > 0) {
+                    // Merge with existing discovered elements
+                    for (const elementKey of savedDiscovered) {
+                        discoveredElements.add(elementKey);
+                    }
+                    console.log(`Loaded ${savedDiscovered.size} discovered elements from new system`);
+                }
+            }
+            
             // Load skin data
             loadSkinData();
             preloadSkins();

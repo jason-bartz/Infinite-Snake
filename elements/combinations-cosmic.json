@@ -1,0 +1,452 @@
+{
+  "version": "1.0",
+  "pack": "cosmic",
+  "combinations": [
+    {
+      "elements": [8, 8],
+      "result": 126,
+      "description": "dust + dust = cosmic dust"
+    },
+    {
+      "elements": [4, 125],
+      "result": 128,
+      "description": "air + void = space"
+    },
+    {
+      "elements": [1, 126],
+      "result": 109,
+      "description": "fire + cosmic dust = star"
+    },
+    {
+      "elements": [14, 126],
+      "result": 109,
+      "description": "energy + cosmic dust = star"
+    },
+    {
+      "elements": [3, 128],
+      "result": 110,
+      "description": "earth + space = planet"
+    },
+    {
+      "elements": [8, 128],
+      "result": 126,
+      "description": "dust + space = cosmic dust"
+    },
+    {
+      "elements": [12, 110],
+      "result": 111,
+      "description": "stone + planet = moon"
+    },
+    {
+      "elements": [24, 128],
+      "result": 112,
+      "description": "ice + space = comet"
+    },
+    {
+      "elements": [12, 128],
+      "result": 113,
+      "description": "stone + space = asteroid"
+    },
+    {
+      "elements": [113, 4],
+      "result": 114,
+      "description": "asteroid + air = meteor"
+    },
+    {
+      "elements": [113, 1],
+      "result": 114,
+      "description": "asteroid + fire = meteor"
+    },
+    {
+      "elements": [126, 109],
+      "result": 115,
+      "description": "cosmic dust + star = nebula"
+    },
+    {
+      "elements": [109, 109],
+      "result": 116,
+      "description": "star + star = constellation"
+    },
+    {
+      "elements": [109, 110],
+      "result": 117,
+      "description": "star + planet = solar system"
+    },
+    {
+      "elements": [109, 115],
+      "result": 118,
+      "description": "star + nebula = galaxy"
+    },
+    {
+      "elements": [116, 115],
+      "result": 118,
+      "description": "constellation + nebula = galaxy"
+    },
+    {
+      "elements": [109, 14],
+      "result": 119,
+      "description": "star + energy = supernova"
+    },
+    {
+      "elements": [119, 119],
+      "result": 120,
+      "description": "supernova + supernova = black hole"
+    },
+    {
+      "elements": [129, 109],
+      "result": 120,
+      "description": "gravity + star = black hole"
+    },
+    {
+      "elements": [128, 128],
+      "result": 125,
+      "description": "space + space = void"
+    },
+    {
+      "elements": [120, 120],
+      "result": 121,
+      "description": "black hole + black hole = wormhole"
+    },
+    {
+      "elements": [109, 20],
+      "result": 122,
+      "description": "star + lightning = pulsar"
+    },
+    {
+      "elements": [120, 14],
+      "result": 123,
+      "description": "black hole + energy = quasar"
+    },
+    {
+      "elements": [118, 118],
+      "result": 124,
+      "description": "galaxy + galaxy = universe"
+    },
+    {
+      "elements": [110, 3],
+      "result": 129,
+      "description": "planet + earth = gravity"
+    },
+    {
+      "elements": [109, 3],
+      "result": 129,
+      "description": "star + earth = gravity"
+    },
+    {
+      "elements": [110, 111],
+      "result": 130,
+      "description": "planet + moon = orbit"
+    },
+    {
+      "elements": [117, 25],
+      "result": 130,
+      "description": "solar system + wind = orbit"
+    },
+    {
+      "elements": [128, 25],
+      "result": 132,
+      "description": "space + wind = solar wind"
+    },
+    {
+      "elements": [109, 25],
+      "result": 132,
+      "description": "star + wind = solar wind"
+    },
+    {
+      "elements": [132, 3],
+      "result": 131,
+      "description": "solar wind + earth = aurora"
+    },
+    {
+      "elements": [132, 4],
+      "result": 131,
+      "description": "solar wind + air = aurora"
+    },
+    {
+      "elements": [125, 125],
+      "result": 133,
+      "description": "void + void = dark matter"
+    },
+    {
+      "elements": [128, 14],
+      "result": 134,
+      "description": "space + energy = dark energy"
+    },
+    {
+      "elements": [125, 14],
+      "result": 134,
+      "description": "void + energy = dark energy"
+    },
+    {
+      "elements": [3, 130],
+      "result": 127,
+      "description": "earth + orbit = satellite"
+    },
+    {
+      "elements": [111, 130],
+      "result": 127,
+      "description": "moon + orbit = satellite"
+    },
+    {
+      "elements": [109, 23],
+      "result": 115,
+      "description": "star + crystal = nebula"
+    },
+    {
+      "elements": [110, 26],
+      "result": 3,
+      "description": "planet + life = earth"
+    },
+    {
+      "elements": [131, 28],
+      "result": 115,
+      "description": "aurora + magic = nebula"
+    },
+    {
+      "elements": [128, 23],
+      "result": 109,
+      "description": "space + crystal = star"
+    },
+    {
+      "elements": [119, 126],
+      "result": 115,
+      "description": "supernova + cosmic dust = nebula"
+    },
+    {
+      "elements": [110, 2],
+      "result": 16,
+      "description": "planet + water = ocean"
+    },
+    {
+      "elements": [112, 110],
+      "result": 2,
+      "description": "comet + planet = water"
+    },
+    {
+      "elements": [114, 3],
+      "result": 1,
+      "description": "meteor + earth = fire"
+    },
+    {
+      "elements": [109, 109, 109],
+      "result": 118,
+      "description": "star + star + star = galaxy"
+    },
+    {
+      "elements": [133, 134],
+      "result": 124,
+      "description": "dark matter + dark energy = universe"
+    },
+    {
+      "elements": [121, 128],
+      "result": 124,
+      "description": "wormhole + space = universe"
+    },
+    {
+      "elements": [123, 118],
+      "result": 124,
+      "description": "quasar + galaxy = universe"
+    },
+    {
+      "elements": [117, 117],
+      "result": 118,
+      "description": "solar system + solar system = galaxy"
+    },
+    {
+      "elements": [28, 128],
+      "result": 115,
+      "description": "magic + space = nebula"
+    },
+    {
+      "elements": [109, 1],
+      "result": 14,
+      "description": "star + fire = energy"
+    },
+    {
+      "elements": [120, 26],
+      "result": 121,
+      "description": "black hole + life = wormhole"
+    },
+    {
+      "elements": [128, 26],
+      "result": 110,
+      "description": "space + life = planet"
+    },
+    {
+      "elements": [109, 2],
+      "result": 5,
+      "description": "star + water = steam"
+    },
+    {
+      "elements": [132, 23],
+      "result": 131,
+      "description": "solar wind + crystal = aurora"
+    },
+    {
+      "elements": [118, 133],
+      "result": 124,
+      "description": "galaxy + dark matter = universe"
+    },
+    {
+      "elements": [125, 26],
+      "result": 133,
+      "description": "void + life = dark matter"
+    },
+    {
+      "elements": [128, 4],
+      "result": 125,
+      "description": "space + air = void"
+    },
+    {
+      "elements": [119, 3],
+      "result": 7,
+      "description": "supernova + earth = lava"
+    },
+    {
+      "elements": [120, 2],
+      "result": 125,
+      "description": "black hole + water = void"
+    },
+    {
+      "elements": [111, 2],
+      "result": 24,
+      "description": "moon + water = ice"
+    },
+    {
+      "elements": [109, 24],
+      "result": 112,
+      "description": "star + ice = comet"
+    },
+    {
+      "elements": [126, 2],
+      "result": 6,
+      "description": "cosmic dust + water = mud"
+    },
+    {
+      "elements": [129, 2],
+      "result": 16,
+      "description": "gravity + water = ocean"
+    },
+    {
+      "elements": [109, 4],
+      "result": 132,
+      "description": "star + air = solar wind"
+    },
+    {
+      "elements": [119, 28],
+      "result": 121,
+      "description": "supernova + magic = wormhole"
+    },
+    {
+      "elements": [112, 3],
+      "result": 2,
+      "description": "comet + earth = water"
+    },
+    {
+      "elements": [128, 1],
+      "result": 109,
+      "description": "space + fire = star"
+    },
+    {
+      "elements": [110, 130],
+      "result": 117,
+      "description": "planet + orbit = solar system"
+    },
+    {
+      "elements": [111, 129],
+      "result": 130,
+      "description": "moon + gravity = orbit"
+    },
+    {
+      "elements": [122, 14],
+      "result": 123,
+      "description": "pulsar + energy = quasar"
+    },
+    {
+      "elements": [115, 129],
+      "result": 109,
+      "description": "nebula + gravity = star"
+    },
+    {
+      "elements": [134, 129],
+      "result": 120,
+      "description": "dark energy + gravity = black hole"
+    }
+  ],
+  "combinationIndex": {
+    "8,8": 126,
+    "4,125": 128,
+    "1,126": 109,
+    "14,126": 109,
+    "3,128": 110,
+    "8,128": 126,
+    "12,110": 111,
+    "24,128": 112,
+    "12,128": 113,
+    "113,4": 114,
+    "113,1": 114,
+    "126,109": 115,
+    "109,109": 116,
+    "109,110": 117,
+    "109,115": 118,
+    "116,115": 118,
+    "109,14": 119,
+    "119,119": 120,
+    "129,109": 120,
+    "128,128": 125,
+    "120,120": 121,
+    "109,20": 122,
+    "120,14": 123,
+    "118,118": 124,
+    "110,3": 129,
+    "109,3": 129,
+    "110,111": 130,
+    "117,25": 130,
+    "128,25": 132,
+    "109,25": 132,
+    "132,3": 131,
+    "132,4": 131,
+    "125,125": 133,
+    "128,14": 134,
+    "125,14": 134,
+    "3,130": 127,
+    "111,130": 127,
+    "109,23": 115,
+    "110,26": 3,
+    "131,28": 115,
+    "128,23": 109,
+    "119,126": 115,
+    "110,2": 16,
+    "112,110": 2,
+    "114,3": 1,
+    "109,109,109": 118,
+    "133,134": 124,
+    "121,128": 124,
+    "123,118": 124,
+    "117,117": 118,
+    "28,128": 115,
+    "109,1": 14,
+    "120,26": 121,
+    "128,26": 110,
+    "109,2": 5,
+    "132,23": 131,
+    "118,133": 124,
+    "125,26": 133,
+    "128,4": 125,
+    "119,3": 7,
+    "120,2": 125,
+    "111,2": 24,
+    "109,24": 112,
+    "126,2": 6,
+    "129,2": 16,
+    "109,4": 132,
+    "119,28": 121,
+    "112,3": 2,
+    "128,1": 109,
+    "110,130": 117,
+    "111,129": 130,
+    "122,14": 123,
+    "115,129": 109,
+    "134,129": 120
+  }
+}

@@ -1,0 +1,294 @@
+{
+  "version": "1.0",
+  "pack": "cosmic",
+  "elements": {
+    "109": {
+      "id": 109,
+      "key": "star",
+      "emoji": "⭐",
+      "name": "Star",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "cosmic"
+    },
+    "110": {
+      "id": 110,
+      "key": "planet",
+      "emoji": "🪐",
+      "name": "Planet",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "cosmic"
+    },
+    "111": {
+      "id": 111,
+      "key": "moon",
+      "emoji": "🌙",
+      "name": "Moon",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "cosmic"
+    },
+    "112": {
+      "id": 112,
+      "key": "comet",
+      "emoji": "☄️",
+      "name": "Comet",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "cosmic"
+    },
+    "113": {
+      "id": 113,
+      "key": "asteroid",
+      "emoji": "🪨",
+      "name": "Asteroid",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "cosmic"
+    },
+    "114": {
+      "id": 114,
+      "key": "meteor",
+      "emoji": "☄️",
+      "name": "Meteor",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "cosmic"
+    },
+    "115": {
+      "id": 115,
+      "key": "nebula",
+      "emoji": "🌌",
+      "name": "Nebula",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "cosmic"
+    },
+    "116": {
+      "id": 116,
+      "key": "constellation",
+      "emoji": "✨",
+      "name": "Constellation",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "cosmic"
+    },
+    "117": {
+      "id": 117,
+      "key": "solar_system",
+      "emoji": "🌞",
+      "name": "Solar System",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "cosmic"
+    },
+    "118": {
+      "id": 118,
+      "key": "galaxy",
+      "emoji": "🌌",
+      "name": "Galaxy",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "cosmic"
+    },
+    "119": {
+      "id": 119,
+      "key": "supernova",
+      "emoji": "💥",
+      "name": "Supernova",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "cosmic"
+    },
+    "120": {
+      "id": 120,
+      "key": "black_hole",
+      "emoji": "⚫",
+      "name": "Black Hole",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "cosmic"
+    },
+    "121": {
+      "id": 121,
+      "key": "wormhole",
+      "emoji": "🌀",
+      "name": "Wormhole",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "cosmic"
+    },
+    "122": {
+      "id": 122,
+      "key": "pulsar",
+      "emoji": "💫",
+      "name": "Pulsar",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "cosmic"
+    },
+    "123": {
+      "id": 123,
+      "key": "quasar",
+      "emoji": "✴️",
+      "name": "Quasar",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "cosmic"
+    },
+    "124": {
+      "id": 124,
+      "key": "universe",
+      "emoji": "🌌",
+      "name": "Universe",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "cosmic"
+    },
+    "125": {
+      "id": 125,
+      "key": "void",
+      "emoji": "⚫",
+      "name": "Void",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "cosmic"
+    },
+    "126": {
+      "id": 126,
+      "key": "cosmic_dust",
+      "emoji": "✨",
+      "name": "Cosmic Dust",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "cosmic"
+    },
+    "127": {
+      "id": 127,
+      "key": "satellite",
+      "emoji": "🛰️",
+      "name": "Satellite",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "cosmic"
+    },
+    "128": {
+      "id": 128,
+      "key": "space",
+      "emoji": "🌌",
+      "name": "Space",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "cosmic"
+    },
+    "129": {
+      "id": 129,
+      "key": "gravity",
+      "emoji": "⬇️",
+      "name": "Gravity",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "cosmic"
+    },
+    "130": {
+      "id": 130,
+      "key": "orbit",
+      "emoji": "🪐",
+      "name": "Orbit",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "cosmic"
+    },
+    "131": {
+      "id": 131,
+      "key": "aurora",
+      "emoji": "🌌",
+      "name": "Aurora",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "cosmic"
+    },
+    "132": {
+      "id": 132,
+      "key": "solar_wind",
+      "emoji": "☀️",
+      "name": "Solar Wind",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "cosmic"
+    },
+    "133": {
+      "id": 133,
+      "key": "dark_matter",
+      "emoji": "⚫",
+      "name": "Dark Matter",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "cosmic"
+    },
+    "134": {
+      "id": 134,
+      "key": "dark_energy",
+      "emoji": "💜",
+      "name": "Dark Energy",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "cosmic"
+    }
+  },
+  "keyToId": {
+    "star": 109,
+    "planet": 110,
+    "moon": 111,
+    "comet": 112,
+    "asteroid": 113,
+    "meteor": 114,
+    "nebula": 115,
+    "constellation": 116,
+    "solar_system": 117,
+    "galaxy": 118,
+    "supernova": 119,
+    "black_hole": 120,
+    "wormhole": 121,
+    "pulsar": 122,
+    "quasar": 123,
+    "universe": 124,
+    "void": 125,
+    "cosmic_dust": 126,
+    "satellite": 127,
+    "space": 128,
+    "gravity": 129,
+    "orbit": 130,
+    "aurora": 131,
+    "solar_wind": 132,
+    "dark_matter": 133,
+    "dark_energy": 134
+  }
+}

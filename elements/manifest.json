@@ -1,0 +1,122 @@
+{
+  "version": "2.0",
+  "description": "Element system manifest for Infinite Snake",
+  "created": "2025-03-06",
+  "packs": [
+    {
+      "id": "core",
+      "name": "Core Elements",
+      "version": "1.0",
+      "description": "Base elements and fundamental combinations",
+      "elements": "elements-core.json",
+      "combinations": "combinations-core.json",
+      "dependencies": [],
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "id": "nature",
+      "name": "Nature Elements",
+      "version": "1.0",
+      "description": "Nature-themed elements including plants, insects, and ecosystems",
+      "elements": "elements-nature.json",
+      "combinations": "combinations-nature.json",
+      "dependencies": ["core"],
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "id": "technology",
+      "name": "Technology Elements",
+      "version": "1.0",
+      "description": "Technology and science-themed elements from metal to AI",
+      "elements": "elements-technology.json",
+      "combinations": "combinations-technology.json",
+      "dependencies": ["core"],
+      "enabled": true,
+      "priority": 3
+    },
+    {
+      "id": "magic",
+      "name": "Magic Elements",
+      "version": "1.0",
+      "description": "Magical and mystical elements from mana to omnipotence",
+      "elements": "elements-magic.json",
+      "combinations": "combinations-magic.json",
+      "dependencies": ["core"],
+      "enabled": true,
+      "priority": 4
+    },
+    {
+      "id": "cosmic",
+      "name": "Cosmic Elements",
+      "version": "1.0",
+      "description": "Space and cosmic-themed elements from dust to universe",
+      "elements": "elements-cosmic.json",
+      "combinations": "combinations-cosmic.json",
+      "dependencies": ["core"],
+      "enabled": true,
+      "priority": 5
+    },
+    {
+      "id": "abstract",
+      "name": "Abstract Elements",
+      "version": "1.0",
+      "description": "Abstract concepts, emotions, and philosophical ideas from time to acceptance",
+      "elements": "elements-abstract.json",
+      "combinations": "combinations-abstract.json",
+      "dependencies": ["core"],
+      "enabled": true,
+      "priority": 6
+    },
+    {
+      "id": "material",
+      "name": "Material Elements",
+      "version": "1.0",
+      "description": "Materials, substances, and compounds from copper to livermorium",
+      "elements": "elements-material.json",
+      "combinations": "combinations-material.json",
+      "dependencies": ["core"],
+      "enabled": true,
+      "priority": 7
+    },
+    {
+      "id": "cross-pack",
+      "name": "Cross-Pack Combinations",
+      "version": "1.0",
+      "description": "Hybrid combinations between different element packs",
+      "elements": null,
+      "combinations": "combinations-cross-pack.json",
+      "dependencies": ["core", "nature", "technology", "magic", "cosmic", "abstract", "material"],
+      "enabled": true,
+      "priority": 8
+    }
+  ],
+  "settings": {
+    "useNumericIds": true,
+    "cacheEnabled": true,
+    "lazyLoading": false,
+    "validateCombinations": true
+  },
+  "metadata": {
+    "totalElements": 500,
+    "totalCombinations": 894,
+    "baseElements": 29,
+    "natureElements": 20,
+    "technologyElements": 28,
+    "magicElements": 31,
+    "cosmicElements": 26,
+    "abstractElements": 81,
+    "materialElements": 210,
+    "crossPackElements": 75,
+    "coreCombinations": 47,
+    "natureCombinations": 40,
+    "technologyCombinations": 56,
+    "magicCombinations": 62,
+    "cosmicCombinations": 74,
+    "abstractCombinations": 140,
+    "materialCombinations": 400,
+    "crossPackCombinations": 75,
+    "lastModified": "2025-03-06"
+  }
+}
