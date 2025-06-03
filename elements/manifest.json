@@ -156,6 +156,28 @@
       "dependencies": ["pokemon-expanded", "core", "nature", "technology", "magic", "cosmic", "abstract", "material", "fictional", "fictional-expanded"],
       "enabled": true,
       "priority": 14
+    },
+    {
+      "id": "expanded",
+      "name": "Expanded Elements & Combinations",
+      "version": "1.0",
+      "description": "Additional elements and combinations to reduce dead ends and create more paths",
+      "elements": "elements-expanded.json",
+      "combinations": "combinations-expanded.json",
+      "dependencies": ["core", "nature", "material"],
+      "enabled": true,
+      "priority": 15
+    },
+    {
+      "id": "expanded-cross",
+      "name": "Expanded Cross-Pack",
+      "version": "1.0",
+      "description": "Cross-pack combinations and elements for expanded pack",
+      "elements": "elements-expanded-cross.json",
+      "combinations": "combinations-expanded-cross.json",
+      "dependencies": ["expanded", "core", "nature", "technology", "magic", "cosmic", "abstract", "material"],
+      "enabled": true,
+      "priority": 16
     }
   ],
   "settings": {
@@ -165,8 +187,8 @@
     "validateCombinations": true
   },
   "metadata": {
-    "totalElements": 796,
-    "totalCombinations": 1639,
+    "totalElements": 879,
+    "totalCombinations": 1789,
     "baseElements": 29,
     "natureElements": 20,
     "technologyElements": 28,
@@ -177,6 +199,8 @@
     "fictionalElements": 35,
     "fictionalExpandedElements": 110,
     "pokemonExpandedElements": 151,
+    "expandedElements": 56,
+    "expandedCrossElements": 27,
     "crossPackElements": 75,
     "coreCombinations": 47,
     "natureCombinations": 40,
@@ -188,6 +212,8 @@
     "fictionalCombinations": 50,
     "fictionalExpandedCombinations": 115,
     "pokemonExpandedCombinations": 175,
+    "expandedCombinations": 120,
+    "expandedCrossCombinations": 30,
     "crossPackCombinations": 75,
     "fictionalCrossCombinations": 115,
     "fictionalExpandedCrossCombinations": 115,

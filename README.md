@@ -1,67 +1,79 @@
-# Infinite Snake
+# Infinite Snake 🐍✨
 
-An infinite snake game with elemental combination mechanics. Collect elements and combine them within your snake's body to discover new elements and unlock special powers.
+A new twist on the classic snake game where you rebuild reality itself by consuming and combining the fundamental elements of existence.
 
-## Features
+## Story
 
-- **Elemental System**: Start with Fire, Water, Earth, and Air
-- **Thousands of Combinations**: Discover over 30,000 unique element combinations
-- **Power-ups**: Unlock special abilities like speed boosts, armor, and magnetic attraction
-- **Multiplayer AI**: Compete against AI snakes in a vast world
-- **Discovery Tracking**: Track your progress as you uncover new elements
-- **Multiple Game Modes**: Choose from different victory conditions or play infinitely
+Reality has shattered. The elements of creation lie scattered across the void. You are the Infinite Snake - a primordial being born from chaos. Consume these fragments, combine them within your endless coils, and forge new existence. From Fire and Water to stars and civilizations, rebuild the cosmos itself.
 
 ## How to Play
 
-- **Arrow Keys**: Control your snake's movement
-- **P**: Pause the game
-- Collect elements scattered across the world
-- Elements in your snake's body will automatically combine when compatible
-- Discover new elements to earn points and unlock powers
-- Grow your snake and survive as long as possible
+1. **Collect Elements** - Guide your snake around the map to consume elemental orbs
+2. **Combine Elements** - Elements in your body automatically combine to create new discoveries (Fire + Water = Steam, etc.)
+3. **Grow & Survive** - Each combination makes you longer. The bigger you are, the more elements you can carry!
+4. **Battle** - In head-to-head collisions, the longer snake wins. Running into any snake's body = instant death
+5. **Discover Everything** - Find all possible element combinations to master the realm
+6. **Watch the Borders** - The borders mean instant death - stay away!
 
-## Deployment
+## Features
 
-This game is designed to be deployed on Vercel. Simply connect your GitHub repository to Vercel and it will automatically deploy.
+- **2000+ Element Combinations** - Discover everything from Steam to Gravity to entire civilizations to your favorite fictional characters. Adding more periodically
+- **Multiple Game Modes**
+  - Discovery Race (100/500/1000 elements)
+  - Points Race (50k/250k/1M points)
+  - Infinite Mode (For the cozy gamers)
+- **Progressive Element System** - Start with Fire, Water, Earth, and Air. Combine your way up through 7+ tiers of complexity
+- **Unlockable Snake Skins** - 35+ unique skins to unlock as you play, from hotdog snakes to Lovecraftian horrors
+- **AI Opponents** - Compete against procedurally-generated AI opponent snakes with their own discovery progress
+- **Dynamic Soundtrack** - Chill EDM soundtrack that rotates as you play
+- **Three Control Schemes** - Arrow keys, WASD, or mouse - whatever feels right!
 
-## Live Demo
+## Controls
 
-Visit [infinitesnake.io](https://infinitesnake.io) to play!
+- **Arrow Keys / WASD** - Turn left/right
+- **Mouse** - Snake follows cursor
+- **P** - Pause
+- **New discoveries grant 3 seconds of invincibility**
 
-## Music
+## Play in Your Browser Now!
 
-The game supports background music that cycles randomly through multiple tracks. To add your own music:
+🎮 **[www.infinitesnake.io](https://www.infinitesnake.io)**
 
-1. Place MP3 files in the `music/` directory
-2. Name them `track1.mp3`, `track2.mp3`, etc.
-3. Or update the `musicTracks` array in `index.html`
+## Getting Started (Local)
 
-### Music Controls
+1. Clone this repo
+2. Open `index.html` in a browser
+3. That's it. No build process, no dependencies
 
-- **M**: Toggle music on/off
-- **Volume Slider**: Adjust music volume (bottom-left corner)
-- Default volume is set to 30%
+## Game Tips
 
-### Adding Custom Music
+- Your element capacity grows as you eat more elements (starts at 4, maxes at 30)
+- When you're full, your snake automatically digests for bonus points
+- Death costs you half your score and capacity - but you keep your discoveries!
+- Higher tier elements are rarer but give way more points
+- Some elements only spawn after you've discovered their prerequisites
+- Check the discovery sidebar to track your collection progress
 
-To use your own music files with different names:
+## Technical Stuff
 
-1. Open `index.html`
-2. Find the `musicTracks` array
-3. Update the filenames to match your MP3 files:
+Built with vanilla JavaScript, HTML5 Canvas, and a smidge of CSS. The element database uses a lazy-loading chunk system to keep initial load times fast while supporting thousands of combinations. Game state is saved locally for unlocked skins.
 
-```javascript
-const musicTracks = [
-    'music/your-song-1.mp3',
-    'music/your-song-2.mp3',
-    'music/your-song-3.mp3'
-];
-```
+## Browser Support
 
-## Credits
+Works best in Chrome/Edge/Firefox. Safari works but might have some audio quirks. Mobile... technically works but wasn't really designed for it.
 
-Game developed with elemental combination mechanics inspired by various crafting games.
+## Why I Made This
 
-### Music Credits
+My son loves snake games and crafting games - he can spend hours on Infinite Craft, Snake.io, Slither.io, Minecraft, etc. I wanted to figure out a way to combine his favorite mechanics from both styles into something new. The goal was to create a fun, pick-up-and-play game that could be enjoyed for 5 minutes or 30 minutes - simple enough to jump into but with enough strategy and control to keep you coming back.
 
-*Add your music credits here when you add tracks*
+Inspired by: Infinite Craft, Snake.io, Slither.io, Little Alchemy, Doodle God, and the whole genre of crafting games.
+
+---
+
+**Note:** If you find any weird element combinations or game-breaking bugs or general issues, shoot me an email: me@jason-bartz.com
+
+## Support
+
+If you enjoy the game and want to "buy me a coffee":
+
+☕ **[Buy Me a Coffee](https://buymeacoffee.com/jsnbrtz)**
