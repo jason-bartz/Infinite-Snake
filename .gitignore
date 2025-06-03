@@ -56,10 +56,6 @@ Thumbs.db
 CLAUDE.md
 *claude*
 
-# Music files (add your own)
-music/*.mp3
-music/*.wav
-music/*.ogg
 # Keep the music directory and README
 !music/.gitkeep
 !music/README.md
