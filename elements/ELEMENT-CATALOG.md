@@ -1,7 +1,7 @@
 # Infinite Snake Element Catalog
 
 ## Overview
-The Infinite Snake element system now contains **645 unique elements** across 10 thematic packs, with **1,289 combinations** that create logical progressions and interesting discoveries.
+The Infinite Snake element system now contains **879 unique elements** across 15 thematic packs, with **1,789 combinations** that create logical progressions and interesting discoveries.
 
 ## Element Packs
 
@@ -55,15 +55,44 @@ The Infinite Snake element system now contains **645 unique elements** across 10
 
 ### 9. Fictional Expanded Pack (IDs 536-645)
 - **Elements**: 110 expanded fictional elements
-- **Combinations**: 230
+- **Combinations**: 115
 - **Theme**: Deep roster of characters, locations, and items
 - **Examples**: All starter Pokémon, LOTR fellowship, Star Wars cast, DBZ fighters, Marvel/DC heroes
 
-### 10. Cross-Pack Combinations
+### 10. Pokémon Expanded Pack (IDs 646-796)
+- **Elements**: 151 Pokémon elements
+- **Combinations**: 175
+- **Theme**: Extended Pokémon collection with all regions and mega evolutions
+- **Examples**: All 151 original Pokémon and their evolutions
+
+### 11. Expanded Pack (IDs 797-852)
+- **Elements**: 56 new general elements
+- **Combinations**: 120
+- **Theme**: Additional elements to reduce dead ends and create more paths
+- **Examples**: geyser, hot spring, rainbow, bread, wildfire, flood
+
+### 12. Expanded Cross Pack (IDs 853-879)
+- **Elements**: 27 cross-pack elements
+- **Combinations**: 30
+- **Theme**: New elements from expanded combinations
+- **Examples**: geothermal power, mana spring, healing spring, prismatic mana
+
+### 13. Cross-Pack Combinations
 - **Elements**: 75 hybrid elements (IDs 135-209)
-- **Combinations**: 265
-- **Theme**: Unique hybrids between all packs including fictional
-- **Examples**: biotech, enchanted machine, space wizard, force blade, dimensional ball
+- **Combinations**: 75
+- **Theme**: Unique hybrids between all packs
+- **Examples**: biotech, enchanted machine, space wizard, cosmic mana
+
+### 14. Fictional Cross Combinations
+- **Elements**: Uses existing elements
+- **Combinations**: 115
+- **Theme**: Combinations between fictional and other packs
+- **Examples**: lightsaber + mana, TARDIS + quantum, pokéball + magic
+
+### 15. Additional Cross-Pack Systems
+- **Fictional Expanded Cross**: 115 combinations
+- **Pokémon Expanded Cross**: 175 combinations
+- **Theme**: Deep integration between all element systems
 
 ## Progression Examples
 
@@ -83,16 +112,16 @@ dust → cosmic dust → star → constellation → galaxy → universe
 life → consciousness → thought → wisdom → enlightenment → transcendence
 
 ## Discovery Statistics
-- **Total Unique Elements**: 645
-- **Total Combinations**: 1,289
-- **Average Elements per Pack**: 64
+- **Total Unique Elements**: 879
+- **Total Combinations**: 1,789
+- **Average Elements per Pack**: 58
 - **Tier Distribution**:
   - Tier 0 (Base): 4
-  - Tier 1: ~120
-  - Tier 2: ~180
-  - Tier 3: ~150
-  - Tier 4: ~40
-  - Tier 5: ~6
+  - Tier 1: ~150
+  - Tier 2: ~350
+  - Tier 3: ~280
+  - Tier 4: ~85
+  - Tier 5: ~10
 
 ## Playing Tips
 1. Start with the four base elements (fire, water, earth, air)
