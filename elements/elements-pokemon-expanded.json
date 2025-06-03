@@ -1,0 +1,1516 @@
+{
+  "version": "1.0",
+  "pack": "pokemon-expanded",
+  "elements": {
+    "646": {
+      "id": 646,
+      "key": "mega-charizard-x",
+      "emoji": "🎮",
+      "name": "Mega Charizard X",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "647": {
+      "id": 647,
+      "key": "mega-charizard-y",
+      "emoji": "🎮",
+      "name": "Mega Charizard Y",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "648": {
+      "id": 648,
+      "key": "mega-blastoise",
+      "emoji": "🎮",
+      "name": "Mega Blastoise",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "649": {
+      "id": 649,
+      "key": "mega-venusaur",
+      "emoji": "🎮",
+      "name": "Mega Venusaur",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "650": {
+      "id": 650,
+      "key": "mega-mewtwo-x",
+      "emoji": "🎮",
+      "name": "Mega Mewtwo X",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "651": {
+      "id": 651,
+      "key": "mega-mewtwo-y",
+      "emoji": "🎮",
+      "name": "Mega Mewtwo Y",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "652": {
+      "id": 652,
+      "key": "mega-lucario",
+      "emoji": "🎮",
+      "name": "Mega Lucario",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "653": {
+      "id": 653,
+      "key": "mega-garchomp",
+      "emoji": "🎮",
+      "name": "Mega Garchomp",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "654": {
+      "id": 654,
+      "key": "mega-rayquaza",
+      "emoji": "🎮",
+      "name": "Mega Rayquaza",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "655": {
+      "id": 655,
+      "key": "mega-gengar",
+      "emoji": "🎮",
+      "name": "Mega Gengar",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "656": {
+      "id": 656,
+      "key": "cyndaquil",
+      "emoji": "🎮",
+      "name": "Cyndaquil",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "657": {
+      "id": 657,
+      "key": "quilava",
+      "emoji": "🎮",
+      "name": "Quilava",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "658": {
+      "id": 658,
+      "key": "typhlosion",
+      "emoji": "🎮",
+      "name": "Typhlosion",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "659": {
+      "id": 659,
+      "key": "totodile",
+      "emoji": "🎮",
+      "name": "Totodile",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "660": {
+      "id": 660,
+      "key": "croconaw",
+      "emoji": "🎮",
+      "name": "Croconaw",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "661": {
+      "id": 661,
+      "key": "feraligatr",
+      "emoji": "🎮",
+      "name": "Feraligatr",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "662": {
+      "id": 662,
+      "key": "chikorita",
+      "emoji": "🎮",
+      "name": "Chikorita",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "663": {
+      "id": 663,
+      "key": "bayleef",
+      "emoji": "🎮",
+      "name": "Bayleef",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "664": {
+      "id": 664,
+      "key": "meganium",
+      "emoji": "🎮",
+      "name": "Meganium",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "665": {
+      "id": 665,
+      "key": "umbreon",
+      "emoji": "🎮",
+      "name": "Umbreon",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "666": {
+      "id": 666,
+      "key": "espeon",
+      "emoji": "🎮",
+      "name": "Espeon",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "667": {
+      "id": 667,
+      "key": "tyranitar",
+      "emoji": "🎮",
+      "name": "Tyranitar",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "668": {
+      "id": 668,
+      "key": "ampharos",
+      "emoji": "🎮",
+      "name": "Ampharos",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "669": {
+      "id": 669,
+      "key": "scizor",
+      "emoji": "🎮",
+      "name": "Scizor",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "670": {
+      "id": 670,
+      "key": "torchic",
+      "emoji": "🎮",
+      "name": "Torchic",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "671": {
+      "id": 671,
+      "key": "combusken",
+      "emoji": "🎮",
+      "name": "Combusken",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "672": {
+      "id": 672,
+      "key": "blaziken",
+      "emoji": "🎮",
+      "name": "Blaziken",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "673": {
+      "id": 673,
+      "key": "mudkip",
+      "emoji": "🎮",
+      "name": "Mudkip",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "674": {
+      "id": 674,
+      "key": "marshtomp",
+      "emoji": "🎮",
+      "name": "Marshtomp",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "675": {
+      "id": 675,
+      "key": "swampert",
+      "emoji": "🎮",
+      "name": "Swampert",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "676": {
+      "id": 676,
+      "key": "treecko",
+      "emoji": "🎮",
+      "name": "Treecko",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "677": {
+      "id": 677,
+      "key": "grovyle",
+      "emoji": "🎮",
+      "name": "Grovyle",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "678": {
+      "id": 678,
+      "key": "sceptile",
+      "emoji": "🎮",
+      "name": "Sceptile",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "679": {
+      "id": 679,
+      "key": "gardevoir",
+      "emoji": "🎮",
+      "name": "Gardevoir",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "680": {
+      "id": 680,
+      "key": "salamence",
+      "emoji": "🎮",
+      "name": "Salamence",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "681": {
+      "id": 681,
+      "key": "metagross",
+      "emoji": "🎮",
+      "name": "Metagross",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "682": {
+      "id": 682,
+      "key": "kyogre",
+      "emoji": "🎮",
+      "name": "Kyogre",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "683": {
+      "id": 683,
+      "key": "groudon",
+      "emoji": "🎮",
+      "name": "Groudon",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "684": {
+      "id": 684,
+      "key": "rayquaza",
+      "emoji": "🎮",
+      "name": "Rayquaza",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "685": {
+      "id": 685,
+      "key": "piplup",
+      "emoji": "🎮",
+      "name": "Piplup",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "686": {
+      "id": 686,
+      "key": "prinplup",
+      "emoji": "🎮",
+      "name": "Prinplup",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "687": {
+      "id": 687,
+      "key": "empoleon",
+      "emoji": "🎮",
+      "name": "Empoleon",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "688": {
+      "id": 688,
+      "key": "chimchar",
+      "emoji": "🎮",
+      "name": "Chimchar",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "689": {
+      "id": 689,
+      "key": "monferno",
+      "emoji": "🎮",
+      "name": "Monferno",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "690": {
+      "id": 690,
+      "key": "infernape",
+      "emoji": "🎮",
+      "name": "Infernape",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "691": {
+      "id": 691,
+      "key": "turtwig",
+      "emoji": "🎮",
+      "name": "Turtwig",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "692": {
+      "id": 692,
+      "key": "grotle",
+      "emoji": "🎮",
+      "name": "Grotle",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "693": {
+      "id": 693,
+      "key": "torterra",
+      "emoji": "🎮",
+      "name": "Torterra",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "694": {
+      "id": 694,
+      "key": "garchomp",
+      "emoji": "🎮",
+      "name": "Garchomp",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "695": {
+      "id": 695,
+      "key": "lucario",
+      "emoji": "🎮",
+      "name": "Lucario",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "696": {
+      "id": 696,
+      "key": "rotom",
+      "emoji": "🎮",
+      "name": "Rotom",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "697": {
+      "id": 697,
+      "key": "dialga",
+      "emoji": "🎮",
+      "name": "Dialga",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "698": {
+      "id": 698,
+      "key": "palkia",
+      "emoji": "🎮",
+      "name": "Palkia",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "699": {
+      "id": 699,
+      "key": "giratina",
+      "emoji": "🎮",
+      "name": "Giratina",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "700": {
+      "id": 700,
+      "key": "snivy",
+      "emoji": "🎮",
+      "name": "Snivy",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "701": {
+      "id": 701,
+      "key": "servine",
+      "emoji": "🎮",
+      "name": "Servine",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "702": {
+      "id": 702,
+      "key": "serperior",
+      "emoji": "🎮",
+      "name": "Serperior",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "703": {
+      "id": 703,
+      "key": "tepig",
+      "emoji": "🎮",
+      "name": "Tepig",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "704": {
+      "id": 704,
+      "key": "pignite",
+      "emoji": "🎮",
+      "name": "Pignite",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "705": {
+      "id": 705,
+      "key": "emboar",
+      "emoji": "🎮",
+      "name": "Emboar",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "706": {
+      "id": 706,
+      "key": "oshawott",
+      "emoji": "🎮",
+      "name": "Oshawott",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "707": {
+      "id": 707,
+      "key": "dewott",
+      "emoji": "🎮",
+      "name": "Dewott",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "708": {
+      "id": 708,
+      "key": "samurott",
+      "emoji": "🎮",
+      "name": "Samurott",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "709": {
+      "id": 709,
+      "key": "zoroark",
+      "emoji": "🎮",
+      "name": "Zoroark",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "710": {
+      "id": 710,
+      "key": "hydreigon",
+      "emoji": "🎮",
+      "name": "Hydreigon",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "711": {
+      "id": 711,
+      "key": "reshiram",
+      "emoji": "🎮",
+      "name": "Reshiram",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "712": {
+      "id": 712,
+      "key": "zekrom",
+      "emoji": "🎮",
+      "name": "Zekrom",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "713": {
+      "id": 713,
+      "key": "kyurem",
+      "emoji": "🎮",
+      "name": "Kyurem",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "714": {
+      "id": 714,
+      "key": "froakie",
+      "emoji": "🎮",
+      "name": "Froakie",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "715": {
+      "id": 715,
+      "key": "frogadier",
+      "emoji": "🎮",
+      "name": "Frogadier",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "716": {
+      "id": 716,
+      "key": "greninja",
+      "emoji": "🎮",
+      "name": "Greninja",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "717": {
+      "id": 717,
+      "key": "chespin",
+      "emoji": "🎮",
+      "name": "Chespin",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "718": {
+      "id": 718,
+      "key": "quilladin",
+      "emoji": "🎮",
+      "name": "Quilladin",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "719": {
+      "id": 719,
+      "key": "chesnaught",
+      "emoji": "🎮",
+      "name": "Chesnaught",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "720": {
+      "id": 720,
+      "key": "fennekin",
+      "emoji": "🎮",
+      "name": "Fennekin",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "721": {
+      "id": 721,
+      "key": "braixen",
+      "emoji": "🎮",
+      "name": "Braixen",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "722": {
+      "id": 722,
+      "key": "delphox",
+      "emoji": "🎮",
+      "name": "Delphox",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "723": {
+      "id": 723,
+      "key": "sylveon",
+      "emoji": "🎮",
+      "name": "Sylveon",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "724": {
+      "id": 724,
+      "key": "xerneas",
+      "emoji": "🎮",
+      "name": "Xerneas",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "725": {
+      "id": 725,
+      "key": "yveltal",
+      "emoji": "🎮",
+      "name": "Yveltal",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "726": {
+      "id": 726,
+      "key": "zygarde",
+      "emoji": "🎮",
+      "name": "Zygarde",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "727": {
+      "id": 727,
+      "key": "rowlet",
+      "emoji": "🎮",
+      "name": "Rowlet",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "728": {
+      "id": 728,
+      "key": "dartrix",
+      "emoji": "🎮",
+      "name": "Dartrix",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "729": {
+      "id": 729,
+      "key": "decidueye",
+      "emoji": "🎮",
+      "name": "Decidueye",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "730": {
+      "id": 730,
+      "key": "litten",
+      "emoji": "🎮",
+      "name": "Litten",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "731": {
+      "id": 731,
+      "key": "torracat",
+      "emoji": "🎮",
+      "name": "Torracat",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "732": {
+      "id": 732,
+      "key": "incineroar",
+      "emoji": "🎮",
+      "name": "Incineroar",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "733": {
+      "id": 733,
+      "key": "popplio",
+      "emoji": "🎮",
+      "name": "Popplio",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "734": {
+      "id": 734,
+      "key": "brionne",
+      "emoji": "🎮",
+      "name": "Brionne",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "735": {
+      "id": 735,
+      "key": "primarina",
+      "emoji": "🎮",
+      "name": "Primarina",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "736": {
+      "id": 736,
+      "key": "mimikyu",
+      "emoji": "🎮",
+      "name": "Mimikyu",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "737": {
+      "id": 737,
+      "key": "lycanroc",
+      "emoji": "🎮",
+      "name": "Lycanroc",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "738": {
+      "id": 738,
+      "key": "solgaleo",
+      "emoji": "🎮",
+      "name": "Solgaleo",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "739": {
+      "id": 739,
+      "key": "lunala",
+      "emoji": "🎮",
+      "name": "Lunala",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "740": {
+      "id": 740,
+      "key": "grookey",
+      "emoji": "🎮",
+      "name": "Grookey",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "741": {
+      "id": 741,
+      "key": "thwackey",
+      "emoji": "🎮",
+      "name": "Thwackey",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "742": {
+      "id": 742,
+      "key": "rillaboom",
+      "emoji": "🎮",
+      "name": "Rillaboom",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "743": {
+      "id": 743,
+      "key": "scorbunny",
+      "emoji": "🎮",
+      "name": "Scorbunny",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "744": {
+      "id": 744,
+      "key": "raboot",
+      "emoji": "🎮",
+      "name": "Raboot",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "745": {
+      "id": 745,
+      "key": "cinderace",
+      "emoji": "🎮",
+      "name": "Cinderace",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "746": {
+      "id": 746,
+      "key": "sobble",
+      "emoji": "🎮",
+      "name": "Sobble",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "747": {
+      "id": 747,
+      "key": "drizzile",
+      "emoji": "🎮",
+      "name": "Drizzile",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "748": {
+      "id": 748,
+      "key": "inteleon",
+      "emoji": "🎮",
+      "name": "Inteleon",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "749": {
+      "id": 749,
+      "key": "corviknight",
+      "emoji": "🎮",
+      "name": "Corviknight",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "750": {
+      "id": 750,
+      "key": "dragapult",
+      "emoji": "🎮",
+      "name": "Dragapult",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "751": {
+      "id": 751,
+      "key": "zacian",
+      "emoji": "🎮",
+      "name": "Zacian",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "752": {
+      "id": 752,
+      "key": "zamazenta",
+      "emoji": "🎮",
+      "name": "Zamazenta",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "753": {
+      "id": 753,
+      "key": "gengar",
+      "emoji": "🎮",
+      "name": "Gengar",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "754": {
+      "id": 754,
+      "key": "alakazam",
+      "emoji": "🎮",
+      "name": "Alakazam",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "755": {
+      "id": 755,
+      "key": "machamp",
+      "emoji": "🎮",
+      "name": "Machamp",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "756": {
+      "id": 756,
+      "key": "gyarados",
+      "emoji": "🎮",
+      "name": "Gyarados",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "757": {
+      "id": 757,
+      "key": "lapras",
+      "emoji": "🎮",
+      "name": "Lapras",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "758": {
+      "id": 758,
+      "key": "glaceon",
+      "emoji": "🎮",
+      "name": "Glaceon",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "759": {
+      "id": 759,
+      "key": "leafeon",
+      "emoji": "🎮",
+      "name": "Leafeon",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "760": {
+      "id": 760,
+      "key": "charizardite-x",
+      "emoji": "🎮",
+      "name": "Charizardite X",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "761": {
+      "id": 761,
+      "key": "charizardite-y",
+      "emoji": "🎮",
+      "name": "Charizardite Y",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "762": {
+      "id": 762,
+      "key": "blastoisinite",
+      "emoji": "🎮",
+      "name": "Blastoisinite",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "763": {
+      "id": 763,
+      "key": "venusaurite",
+      "emoji": "🎮",
+      "name": "Venusaurite",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "764": {
+      "id": 764,
+      "key": "mewtwonite-x",
+      "emoji": "🎮",
+      "name": "Mewtwonite X",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "765": {
+      "id": 765,
+      "key": "mewtwonite-y",
+      "emoji": "🎮",
+      "name": "Mewtwonite Y",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "766": {
+      "id": 766,
+      "key": "lucarionite",
+      "emoji": "🎮",
+      "name": "Lucarionite",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "767": {
+      "id": 767,
+      "key": "garchompite",
+      "emoji": "🎮",
+      "name": "Garchompite",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "768": {
+      "id": 768,
+      "key": "gengarite",
+      "emoji": "🎮",
+      "name": "Gengarite",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "769": {
+      "id": 769,
+      "key": "ultra-ball",
+      "emoji": "🎮",
+      "name": "Ultra Ball",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "770": {
+      "id": 770,
+      "key": "great-ball",
+      "emoji": "🎮",
+      "name": "Great Ball",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "771": {
+      "id": 771,
+      "key": "premier-ball",
+      "emoji": "🎮",
+      "name": "Premier Ball",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "772": {
+      "id": 772,
+      "key": "luxury-ball",
+      "emoji": "🎮",
+      "name": "Luxury Ball",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "773": {
+      "id": 773,
+      "key": "quick-ball",
+      "emoji": "🎮",
+      "name": "Quick Ball",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "774": {
+      "id": 774,
+      "key": "timer-ball",
+      "emoji": "🎮",
+      "name": "Timer Ball",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "775": {
+      "id": 775,
+      "key": "dusk-ball",
+      "emoji": "🎮",
+      "name": "Dusk Ball",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "776": {
+      "id": 776,
+      "key": "heal-ball",
+      "emoji": "🎮",
+      "name": "Heal Ball",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "777": {
+      "id": 777,
+      "key": "darkrai",
+      "emoji": "🎮",
+      "name": "Darkrai",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "778": {
+      "id": 778,
+      "key": "arceus",
+      "emoji": "🎮",
+      "name": "Arceus",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "779": {
+      "id": 779,
+      "key": "celebi",
+      "emoji": "🎮",
+      "name": "Celebi",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "780": {
+      "id": 780,
+      "key": "jirachi",
+      "emoji": "🎮",
+      "name": "Jirachi",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "781": {
+      "id": 781,
+      "key": "deoxys",
+      "emoji": "🎮",
+      "name": "Deoxys",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "782": {
+      "id": 782,
+      "key": "shaymin",
+      "emoji": "🎮",
+      "name": "Shaymin",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "783": {
+      "id": 783,
+      "key": "victini",
+      "emoji": "🎮",
+      "name": "Victini",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "784": {
+      "id": 784,
+      "key": "genesect",
+      "emoji": "🎮",
+      "name": "Genesect",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "785": {
+      "id": 785,
+      "key": "diancie",
+      "emoji": "🎮",
+      "name": "Diancie",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "786": {
+      "id": 786,
+      "key": "hoopa",
+      "emoji": "🎮",
+      "name": "Hoopa",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "787": {
+      "id": 787,
+      "key": "volcanion",
+      "emoji": "🎮",
+      "name": "Volcanion",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "788": {
+      "id": 788,
+      "key": "magearna",
+      "emoji": "🎮",
+      "name": "Magearna",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "789": {
+      "id": 789,
+      "key": "marshadow",
+      "emoji": "🎮",
+      "name": "Marshadow",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "790": {
+      "id": 790,
+      "key": "zeraora",
+      "emoji": "🎮",
+      "name": "Zeraora",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "791": {
+      "id": 791,
+      "key": "melmetal",
+      "emoji": "🎮",
+      "name": "Melmetal",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "792": {
+      "id": 792,
+      "key": "eternatus",
+      "emoji": "🎮",
+      "name": "Eternatus",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "793": {
+      "id": 793,
+      "key": "zarude",
+      "emoji": "🎮",
+      "name": "Zarude",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "794": {
+      "id": 794,
+      "key": "regieleki",
+      "emoji": "🎮",
+      "name": "Regieleki",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "795": {
+      "id": 795,
+      "key": "regidrago",
+      "emoji": "🎮",
+      "name": "Regidrago",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "796": {
+      "id": 796,
+      "key": "calyrex",
+      "emoji": "🎮",
+      "name": "Calyrex",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    }
+  }
+}

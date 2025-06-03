@@ -1,0 +1,1106 @@
+{
+  "version": "1.0",
+  "pack": "fictional-expanded",
+  "elements": {
+    "536": {
+      "id": 536,
+      "key": "bulbasaur",
+      "emoji": "✨",
+      "name": "Bulbasaur",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "537": {
+      "id": 537,
+      "key": "ivysaur",
+      "emoji": "✨",
+      "name": "Ivysaur",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "538": {
+      "id": 538,
+      "key": "venusaur",
+      "emoji": "✨",
+      "name": "Venusaur",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "539": {
+      "id": 539,
+      "key": "charmander",
+      "emoji": "✨",
+      "name": "Charmander",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "540": {
+      "id": 540,
+      "key": "charmeleon",
+      "emoji": "✨",
+      "name": "Charmeleon",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "541": {
+      "id": 541,
+      "key": "charizard",
+      "emoji": "✨",
+      "name": "Charizard",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "542": {
+      "id": 542,
+      "key": "squirtle",
+      "emoji": "✨",
+      "name": "Squirtle",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "543": {
+      "id": 543,
+      "key": "wartortle",
+      "emoji": "✨",
+      "name": "Wartortle",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "544": {
+      "id": 544,
+      "key": "blastoise",
+      "emoji": "✨",
+      "name": "Blastoise",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "545": {
+      "id": 545,
+      "key": "meowth",
+      "emoji": "✨",
+      "name": "Meowth",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "546": {
+      "id": 546,
+      "key": "psyduck",
+      "emoji": "✨",
+      "name": "Psyduck",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "547": {
+      "id": 547,
+      "key": "snorlax",
+      "emoji": "✨",
+      "name": "Snorlax",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "548": {
+      "id": 548,
+      "key": "dragonite",
+      "emoji": "✨",
+      "name": "Dragonite",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "549": {
+      "id": 549,
+      "key": "mewtwo",
+      "emoji": "✨",
+      "name": "Mewtwo",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "550": {
+      "id": 550,
+      "key": "mew",
+      "emoji": "✨",
+      "name": "Mew",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "551": {
+      "id": 551,
+      "key": "eevee",
+      "emoji": "✨",
+      "name": "Eevee",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "552": {
+      "id": 552,
+      "key": "vaporeon",
+      "emoji": "✨",
+      "name": "Vaporeon",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "553": {
+      "id": 553,
+      "key": "jolteon",
+      "emoji": "✨",
+      "name": "Jolteon",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "554": {
+      "id": 554,
+      "key": "flareon",
+      "emoji": "✨",
+      "name": "Flareon",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "555": {
+      "id": 555,
+      "key": "articuno",
+      "emoji": "✨",
+      "name": "Articuno",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "556": {
+      "id": 556,
+      "key": "zapdos",
+      "emoji": "✨",
+      "name": "Zapdos",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "557": {
+      "id": 557,
+      "key": "moltres",
+      "emoji": "✨",
+      "name": "Moltres",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "558": {
+      "id": 558,
+      "key": "lugia",
+      "emoji": "✨",
+      "name": "Lugia",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "559": {
+      "id": 559,
+      "key": "ho-oh",
+      "emoji": "✨",
+      "name": "Ho-Oh",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "560": {
+      "id": 560,
+      "key": "master-ball",
+      "emoji": "✨",
+      "name": "Master Ball",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "561": {
+      "id": 561,
+      "key": "rare-candy",
+      "emoji": "✨",
+      "name": "Rare Candy",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "562": {
+      "id": 562,
+      "key": "potion",
+      "emoji": "✨",
+      "name": "Potion",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "563": {
+      "id": 563,
+      "key": "frodo",
+      "emoji": "✨",
+      "name": "Frodo",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "564": {
+      "id": 564,
+      "key": "sam",
+      "emoji": "✨",
+      "name": "Sam",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "565": {
+      "id": 565,
+      "key": "aragorn",
+      "emoji": "✨",
+      "name": "Aragorn",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "566": {
+      "id": 566,
+      "key": "gandalf",
+      "emoji": "✨",
+      "name": "Gandalf",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "567": {
+      "id": 567,
+      "key": "legolas",
+      "emoji": "✨",
+      "name": "Legolas",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "568": {
+      "id": 568,
+      "key": "gimli",
+      "emoji": "✨",
+      "name": "Gimli",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "569": {
+      "id": 569,
+      "key": "boromir",
+      "emoji": "✨",
+      "name": "Boromir",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "570": {
+      "id": 570,
+      "key": "gollum",
+      "emoji": "✨",
+      "name": "Gollum",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "571": {
+      "id": 571,
+      "key": "sauron",
+      "emoji": "✨",
+      "name": "Sauron",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "572": {
+      "id": 572,
+      "key": "saruman",
+      "emoji": "✨",
+      "name": "Saruman",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "573": {
+      "id": 573,
+      "key": "galadriel",
+      "emoji": "✨",
+      "name": "Galadriel",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "574": {
+      "id": 574,
+      "key": "elrond",
+      "emoji": "✨",
+      "name": "Elrond",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "575": {
+      "id": 575,
+      "key": "rivendell",
+      "emoji": "✨",
+      "name": "Rivendell",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "576": {
+      "id": 576,
+      "key": "minas-tirith",
+      "emoji": "✨",
+      "name": "Minas Tirith",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "577": {
+      "id": 577,
+      "key": "helm-s-deep",
+      "emoji": "✨",
+      "name": "Helm's Deep",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "578": {
+      "id": 578,
+      "key": "isengard",
+      "emoji": "✨",
+      "name": "Isengard",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "579": {
+      "id": 579,
+      "key": "mount-doom",
+      "emoji": "✨",
+      "name": "Mount Doom",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "580": {
+      "id": 580,
+      "key": "lothlorien",
+      "emoji": "✨",
+      "name": "Lothlorien",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "581": {
+      "id": 581,
+      "key": "rohan",
+      "emoji": "✨",
+      "name": "Rohan",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "582": {
+      "id": 582,
+      "key": "fangorn-forest",
+      "emoji": "✨",
+      "name": "Fangorn Forest",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "583": {
+      "id": 583,
+      "key": "sting",
+      "emoji": "✨",
+      "name": "Sting",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "584": {
+      "id": 584,
+      "key": "anduril",
+      "emoji": "✨",
+      "name": "Anduril",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "585": {
+      "id": 585,
+      "key": "glamdring",
+      "emoji": "✨",
+      "name": "Glamdring",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "586": {
+      "id": 586,
+      "key": "palantir",
+      "emoji": "✨",
+      "name": "Palantir",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "587": {
+      "id": 587,
+      "key": "mithril",
+      "emoji": "✨",
+      "name": "Mithril",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "588": {
+      "id": 588,
+      "key": "luke-skywalker",
+      "emoji": "✨",
+      "name": "Luke Skywalker",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "589": {
+      "id": 589,
+      "key": "princess-leia",
+      "emoji": "✨",
+      "name": "Princess Leia",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "590": {
+      "id": 590,
+      "key": "han-solo",
+      "emoji": "✨",
+      "name": "Han Solo",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "591": {
+      "id": 591,
+      "key": "darth-vader",
+      "emoji": "✨",
+      "name": "Darth Vader",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "592": {
+      "id": 592,
+      "key": "yoda",
+      "emoji": "✨",
+      "name": "Yoda",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "593": {
+      "id": 593,
+      "key": "obi-wan-kenobi",
+      "emoji": "✨",
+      "name": "Obi-Wan Kenobi",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "594": {
+      "id": 594,
+      "key": "anakin-skywalker",
+      "emoji": "✨",
+      "name": "Anakin Skywalker",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "595": {
+      "id": 595,
+      "key": "padme-amidala",
+      "emoji": "✨",
+      "name": "Padme Amidala",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "596": {
+      "id": 596,
+      "key": "emperor-palpatine",
+      "emoji": "✨",
+      "name": "Emperor Palpatine",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "597": {
+      "id": 597,
+      "key": "chewbacca",
+      "emoji": "✨",
+      "name": "Chewbacca",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "598": {
+      "id": 598,
+      "key": "r2-d2",
+      "emoji": "✨",
+      "name": "R2-D2",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "599": {
+      "id": 599,
+      "key": "c-3po",
+      "emoji": "✨",
+      "name": "C-3PO",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "600": {
+      "id": 600,
+      "key": "tatooine",
+      "emoji": "✨",
+      "name": "Tatooine",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "601": {
+      "id": 601,
+      "key": "coruscant",
+      "emoji": "✨",
+      "name": "Coruscant",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "602": {
+      "id": 602,
+      "key": "dagobah",
+      "emoji": "✨",
+      "name": "Dagobah",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "603": {
+      "id": 603,
+      "key": "hoth",
+      "emoji": "✨",
+      "name": "Hoth",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "604": {
+      "id": 604,
+      "key": "endor",
+      "emoji": "✨",
+      "name": "Endor",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "605": {
+      "id": 605,
+      "key": "naboo",
+      "emoji": "✨",
+      "name": "Naboo",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "606": {
+      "id": 606,
+      "key": "mustafar",
+      "emoji": "✨",
+      "name": "Mustafar",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "607": {
+      "id": 607,
+      "key": "death-star-ii",
+      "emoji": "✨",
+      "name": "Death Star II",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "608": {
+      "id": 608,
+      "key": "x-wing",
+      "emoji": "✨",
+      "name": "X-Wing",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "609": {
+      "id": 609,
+      "key": "tie-fighter",
+      "emoji": "✨",
+      "name": "TIE Fighter",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "610": {
+      "id": 610,
+      "key": "star-destroyer",
+      "emoji": "✨",
+      "name": "Star Destroyer",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "611": {
+      "id": 611,
+      "key": "holocron",
+      "emoji": "✨",
+      "name": "Holocron",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "612": {
+      "id": 612,
+      "key": "goku",
+      "emoji": "✨",
+      "name": "Goku",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "613": {
+      "id": 613,
+      "key": "vegeta",
+      "emoji": "✨",
+      "name": "Vegeta",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "614": {
+      "id": 614,
+      "key": "gohan",
+      "emoji": "✨",
+      "name": "Gohan",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "615": {
+      "id": 615,
+      "key": "piccolo",
+      "emoji": "✨",
+      "name": "Piccolo",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "616": {
+      "id": 616,
+      "key": "krillin",
+      "emoji": "✨",
+      "name": "Krillin",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "617": {
+      "id": 617,
+      "key": "trunks",
+      "emoji": "✨",
+      "name": "Trunks",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "618": {
+      "id": 618,
+      "key": "cell",
+      "emoji": "✨",
+      "name": "Cell",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "619": {
+      "id": 619,
+      "key": "frieza",
+      "emoji": "✨",
+      "name": "Frieza",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "620": {
+      "id": 620,
+      "key": "majin-buu",
+      "emoji": "✨",
+      "name": "Majin Buu",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "621": {
+      "id": 621,
+      "key": "beerus",
+      "emoji": "✨",
+      "name": "Beerus",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "622": {
+      "id": 622,
+      "key": "senzu-bean",
+      "emoji": "✨",
+      "name": "Senzu Bean",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "623": {
+      "id": 623,
+      "key": "dragon-radar",
+      "emoji": "✨",
+      "name": "Dragon Radar",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "624": {
+      "id": 624,
+      "key": "capsule-corp",
+      "emoji": "✨",
+      "name": "Capsule Corp",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "625": {
+      "id": 625,
+      "key": "ssj2",
+      "emoji": "✨",
+      "name": "SSJ2",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "626": {
+      "id": 626,
+      "key": "ssj3",
+      "emoji": "✨",
+      "name": "SSJ3",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "627": {
+      "id": 627,
+      "key": "ssj-god",
+      "emoji": "✨",
+      "name": "SSJ God",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "628": {
+      "id": 628,
+      "key": "ultra-ego",
+      "emoji": "✨",
+      "name": "Ultra Ego",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "629": {
+      "id": 629,
+      "key": "iron-man",
+      "emoji": "✨",
+      "name": "Iron Man",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "630": {
+      "id": 630,
+      "key": "captain-america",
+      "emoji": "✨",
+      "name": "Captain America",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "631": {
+      "id": 631,
+      "key": "thor",
+      "emoji": "✨",
+      "name": "Thor",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "632": {
+      "id": 632,
+      "key": "hulk",
+      "emoji": "✨",
+      "name": "Hulk",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "633": {
+      "id": 633,
+      "key": "spider-man",
+      "emoji": "✨",
+      "name": "Spider-Man",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "634": {
+      "id": 634,
+      "key": "thanos",
+      "emoji": "✨",
+      "name": "Thanos",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "635": {
+      "id": 635,
+      "key": "power-stone",
+      "emoji": "✨",
+      "name": "Power Stone",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "636": {
+      "id": 636,
+      "key": "space-stone",
+      "emoji": "✨",
+      "name": "Space Stone",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "637": {
+      "id": 637,
+      "key": "reality-stone",
+      "emoji": "✨",
+      "name": "Reality Stone",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "638": {
+      "id": 638,
+      "key": "soul-stone",
+      "emoji": "✨",
+      "name": "Soul Stone",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "639": {
+      "id": 639,
+      "key": "time-stone",
+      "emoji": "✨",
+      "name": "Time Stone",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "640": {
+      "id": 640,
+      "key": "mind-stone",
+      "emoji": "✨",
+      "name": "Mind Stone",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "641": {
+      "id": 641,
+      "key": "superman",
+      "emoji": "✨",
+      "name": "Superman",
+      "tier": 5,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "642": {
+      "id": 642,
+      "key": "batman",
+      "emoji": "✨",
+      "name": "Batman",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "643": {
+      "id": 643,
+      "key": "wonder-woman",
+      "emoji": "✨",
+      "name": "Wonder Woman",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "644": {
+      "id": 644,
+      "key": "flash",
+      "emoji": "✨",
+      "name": "Flash",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    },
+    "645": {
+      "id": 645,
+      "key": "kryptonite",
+      "emoji": "✨",
+      "name": "Kryptonite",
+      "tier": 4,
+      "discovered": false,
+      "base": false,
+      "category": "fictional"
+    }
+  }
+}

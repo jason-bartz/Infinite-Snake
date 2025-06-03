@@ -1,0 +1,418 @@
+{
+  "combinations": [
+    {
+      "comment": "Pokemon Evolutions - Starter Pokemon",
+      "inputs": [539, 523],
+      "output": 540,
+      "description": "Charmander + Evolution Stone = Charmeleon"
+    },
+    {
+      "inputs": [540, 523],
+      "output": 541,
+      "description": "Charmeleon + Evolution Stone = Charizard"
+    },
+    {
+      "inputs": [536, 523],
+      "output": 537,
+      "description": "Bulbasaur + Evolution Stone = Ivysaur"
+    },
+    {
+      "inputs": [537, 523],
+      "output": 538,
+      "description": "Ivysaur + Evolution Stone = Venusaur"
+    },
+    {
+      "inputs": [542, 523],
+      "output": 543,
+      "description": "Squirtle + Evolution Stone = Wartortle"
+    },
+    {
+      "inputs": [543, 523],
+      "output": 544,
+      "description": "Wartortle + Evolution Stone = Blastoise"
+    },
+    {
+      "inputs": [539, 561],
+      "output": 540,
+      "description": "Charmander + Rare Candy = Charmeleon"
+    },
+    {
+      "inputs": [540, 561],
+      "output": 541,
+      "description": "Charmeleon + Rare Candy = Charizard"
+    },
+    
+    {
+      "comment": "Eevee Evolutions",
+      "inputs": [551, 523],
+      "output": 552,
+      "description": "Eevee + Evolution Stone = Vaporeon"
+    },
+    {
+      "inputs": [551, 553],
+      "output": 553,
+      "description": "Eevee + Jolteon = Jolteon (breeding)"
+    },
+    {
+      "inputs": [551, 554],
+      "output": 554,
+      "description": "Eevee + Flareon = Flareon (breeding)"
+    },
+    
+    {
+      "comment": "Pokemon Legendary Combinations",
+      "inputs": [555, 556],
+      "output": 557,
+      "description": "Articuno + Zapdos = Moltres (complete the trio)"
+    },
+    {
+      "inputs": [558, 559],
+      "output": 560,
+      "description": "Lugia + Ho-Oh = Master Ball (legendary power)"
+    },
+    {
+      "inputs": [549, 550],
+      "output": 560,
+      "description": "Mewtwo + Mew = Master Ball (ultimate capture device)"
+    },
+    
+    {
+      "comment": "Lord of the Rings - Character Relationships",
+      "inputs": [563, 507],
+      "output": 570,
+      "description": "Frodo + One Ring = Gollum (Ring Bearer's fate)"
+    },
+    {
+      "inputs": [563, 564],
+      "output": 514,
+      "description": "Frodo + Sam = The Shire (their home)"
+    },
+    {
+      "inputs": [565, 584],
+      "output": 512,
+      "description": "Aragorn + Anduril = Gondor (rightful king)"
+    },
+    {
+      "inputs": [566, 572],
+      "output": 571,
+      "description": "Gandalf + Saruman = Sauron (the greater evil)"
+    },
+    {
+      "inputs": [567, 568],
+      "output": 509,
+      "description": "Legolas + Gimli = Elf (friendship transcends race)"
+    },
+    
+    {
+      "comment": "Lord of the Rings - Locations",
+      "inputs": [574, 573],
+      "output": 575,
+      "description": "Elrond + Galadriel = Rivendell (elven realms)"
+    },
+    {
+      "inputs": [576, 577],
+      "output": 581,
+      "description": "Minas Tirith + Helm's Deep = Rohan (allied kingdoms)"
+    },
+    {
+      "inputs": [572, 578],
+      "output": 513,
+      "description": "Saruman + Isengard = Mordor (corruption spreads)"
+    },
+    {
+      "inputs": [507, 579],
+      "output": 571,
+      "description": "One Ring + Mount Doom = Sauron (ring's destruction)"
+    },
+    
+    {
+      "comment": "Lord of the Rings - Weapons",
+      "inputs": [563, 583],
+      "output": 507,
+      "description": "Frodo + Sting = One Ring (burden bearer)"
+    },
+    {
+      "inputs": [566, 585],
+      "output": 572,
+      "description": "Gandalf + Glamdring = Saruman (wizard rivalry)"
+    },
+    {
+      "inputs": [565, 584],
+      "output": 512,
+      "description": "Aragorn + Anduril = Gondor"
+    },
+    
+    {
+      "comment": "Star Wars - Character Transformations",
+      "inputs": [594, 596],
+      "output": 591,
+      "description": "Anakin Skywalker + Emperor Palpatine = Darth Vader"
+    },
+    {
+      "inputs": [588, 501],
+      "output": 505,
+      "description": "Luke Skywalker + Lightsaber = Jedi"
+    },
+    {
+      "inputs": [593, 588],
+      "output": 505,
+      "description": "Obi-Wan Kenobi + Luke Skywalker = Jedi (training)"
+    },
+    {
+      "inputs": [591, 588],
+      "output": 502,
+      "description": "Darth Vader + Luke Skywalker = The Force (redemption)"
+    },
+    
+    {
+      "comment": "Star Wars - Relationships",
+      "inputs": [589, 590],
+      "output": 504,
+      "description": "Princess Leia + Han Solo = Millennium Falcon"
+    },
+    {
+      "inputs": [590, 597],
+      "output": 504,
+      "description": "Han Solo + Chewbacca = Millennium Falcon"
+    },
+    {
+      "inputs": [594, 595],
+      "output": 588,
+      "description": "Anakin Skywalker + Padme Amidala = Luke Skywalker"
+    },
+    {
+      "inputs": [598, 599],
+      "output": 504,
+      "description": "R2-D2 + C-3PO = Millennium Falcon (droids)"
+    },
+    
+    {
+      "comment": "Star Wars - Locations",
+      "inputs": [600, 602],
+      "output": 592,
+      "description": "Tatooine + Dagobah = Yoda (exile)"
+    },
+    {
+      "inputs": [606, 594],
+      "output": 591,
+      "description": "Mustafar + Anakin Skywalker = Darth Vader"
+    },
+    {
+      "inputs": [601, 596],
+      "output": 503,
+      "description": "Coruscant + Emperor Palpatine = Death Star"
+    },
+    {
+      "inputs": [503, 607],
+      "output": 610,
+      "description": "Death Star + Death Star II = Star Destroyer"
+    },
+    
+    {
+      "comment": "Star Wars - Vehicles and Technology",
+      "inputs": [608, 609],
+      "output": 503,
+      "description": "X-Wing + TIE Fighter = Death Star (space battle)"
+    },
+    {
+      "inputs": [611, 502],
+      "output": 505,
+      "description": "Holocron + The Force = Jedi"
+    },
+    {
+      "inputs": [611, 506],
+      "output": 596,
+      "description": "Holocron + Sith = Emperor Palpatine"
+    },
+    
+    {
+      "comment": "Dragon Ball Z - Transformations",
+      "inputs": [612, 526],
+      "output": 625,
+      "description": "Goku + Super Saiyan = SSJ2"
+    },
+    {
+      "inputs": [625, 526],
+      "output": 626,
+      "description": "SSJ2 + Super Saiyan = SSJ3"
+    },
+    {
+      "inputs": [626, 621],
+      "output": 627,
+      "description": "SSJ3 + Beerus = SSJ God"
+    },
+    {
+      "inputs": [613, 621],
+      "output": 628,
+      "description": "Vegeta + Beerus = Ultra Ego"
+    },
+    
+    {
+      "comment": "Dragon Ball Z - Character Relationships",
+      "inputs": [612, 613],
+      "output": 614,
+      "description": "Goku + Vegeta = Gohan (next generation)"
+    },
+    {
+      "inputs": [612, 615],
+      "output": 525,
+      "description": "Goku + Piccolo = Kamehameha (training)"
+    },
+    {
+      "inputs": [613, 617],
+      "output": 624,
+      "description": "Vegeta + Trunks = Capsule Corp"
+    },
+    {
+      "inputs": [612, 525],
+      "output": 619,
+      "description": "Goku + Kamehameha = Frieza (nemesis)"
+    },
+    
+    {
+      "comment": "Dragon Ball Z - Items",
+      "inputs": [524, 623],
+      "output": 621,
+      "description": "Dragon Ball + Dragon Radar = Beerus (divine)"
+    },
+    {
+      "inputs": [622, 616],
+      "output": 612,
+      "description": "Senzu Bean + Krillin = Goku (recovery)"
+    },
+    {
+      "inputs": [524, 524],
+      "output": 521,
+      "description": "Dragon Ball + Dragon Ball = Pikachu (wish for Pokemon)"
+    },
+    
+    {
+      "comment": "Marvel - Character Combinations",
+      "inputs": [629, 52],
+      "output": 635,
+      "description": "Iron Man + Electricity = Power Stone (arc reactor)"
+    },
+    {
+      "inputs": [630, 632],
+      "output": 631,
+      "description": "Captain America + Hulk = Thor (Avengers)"
+    },
+    {
+      "inputs": [633, 629],
+      "output": 640,
+      "description": "Spider-Man + Iron Man = Mind Stone (mentorship)"
+    },
+    {
+      "inputs": [634, 635],
+      "output": 636,
+      "description": "Thanos + Power Stone = Space Stone"
+    },
+    
+    {
+      "comment": "Marvel - Infinity Stones",
+      "inputs": [635, 636],
+      "output": 637,
+      "description": "Power Stone + Space Stone = Reality Stone"
+    },
+    {
+      "inputs": [637, 638],
+      "output": 639,
+      "description": "Reality Stone + Soul Stone = Time Stone"
+    },
+    {
+      "inputs": [639, 640],
+      "output": 634,
+      "description": "Time Stone + Mind Stone = Thanos (complete gauntlet)"
+    },
+    
+    {
+      "comment": "DC Comics",
+      "inputs": [641, 645],
+      "output": 642,
+      "description": "Superman + Kryptonite = Batman (weakness exploited)"
+    },
+    {
+      "inputs": [642, 643],
+      "output": 644,
+      "description": "Batman + Wonder Woman = Flash (Justice League)"
+    },
+    {
+      "inputs": [641, 644],
+      "output": 643,
+      "description": "Superman + Flash = Wonder Woman (trinity)"
+    },
+    
+    {
+      "comment": "Cross-Universe Combinations",
+      "inputs": [612, 641],
+      "output": 627,
+      "description": "Goku + Superman = SSJ God (ultimate power)"
+    },
+    {
+      "inputs": [588, 565],
+      "output": 505,
+      "description": "Luke Skywalker + Aragorn = Jedi (heroes journey)"
+    },
+    {
+      "inputs": [591, 634],
+      "output": 596,
+      "description": "Darth Vader + Thanos = Emperor Palpatine"
+    },
+    {
+      "inputs": [566, 592],
+      "output": 515,
+      "description": "Gandalf + Yoda = Elder Wand (wisdom)"
+    },
+    
+    {
+      "comment": "Pokemon Items and Battles",
+      "inputs": [560, 549],
+      "output": 550,
+      "description": "Master Ball + Mewtwo = Mew (capture legendary)"
+    },
+    {
+      "inputs": [562, 546],
+      "output": 547,
+      "description": "Potion + Psyduck = Snorlax (healing)"
+    },
+    {
+      "inputs": [541, 548],
+      "output": 557,
+      "description": "Charizard + Dragonite = Moltres (fire dragon)"
+    },
+    
+    {
+      "comment": "Character Evolution Paths",
+      "inputs": [563, 571],
+      "output": 570,
+      "description": "Frodo + Sauron = Gollum (corruption)"
+    },
+    {
+      "inputs": [588, 591],
+      "output": 594,
+      "description": "Luke Skywalker + Darth Vader = Anakin Skywalker (redemption)"
+    },
+    {
+      "inputs": [612, 618],
+      "output": 614,
+      "description": "Goku + Cell = Gohan (sacrifice)"
+    },
+    
+    {
+      "comment": "Location Combinations",
+      "inputs": [575, 580],
+      "output": 509,
+      "description": "Rivendell + Lothlorien = Elf (elven realms)"
+    },
+    {
+      "inputs": [600, 605],
+      "output": 594,
+      "description": "Tatooine + Naboo = Anakin Skywalker"
+    },
+    {
+      "inputs": [603, 604],
+      "output": 558,
+      "description": "Hoth + Endor = Lugia (ice and forest)"
+    }
+  ]
+}

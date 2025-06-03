@@ -13,7 +13,8 @@ const mimeTypes = {
   '.jpg': 'image/jpeg',
   '.gif': 'image/gif',
   '.svg': 'image/svg+xml',
-  '.mp3': 'audio/mpeg'
+  '.mp3': 'audio/mpeg',
+  '.webp': 'image/webp'
 };
 
 const server = http.createServer((req, res) => {

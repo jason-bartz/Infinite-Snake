@@ -63,12 +63,15 @@ class ElementLoader {
         
         // Load elements
         if (pack.elements) {
+            console.log(`Loading elements from: elements/${pack.elements}`);
             const elementsData = await this.loadJSON(`elements/${pack.elements}`);
+            console.log(`Loaded elements data for ${pack.name}:`, elementsData ? 'success' : 'null');
             this.loadElements(elementsData);
         }
         
         // Load combinations
         if (pack.combinations) {
+            console.log(`Loading combinations from: elements/${pack.combinations}`);
             const combinationsData = await this.loadJSON(`elements/${pack.combinations}`);
             this.loadCombinations(combinationsData);
         }
@@ -78,6 +81,11 @@ class ElementLoader {
      * Load elements from data
      */
     loadElements(data) {
+        if (!data || !data.elements) {
+            console.error('Invalid element data:', data);
+            return;
+        }
+        
         for (const [id, element] of Object.entries(data.elements)) {
             const numId = parseInt(id);
             this.elements.set(numId, element);

@@ -81,15 +81,81 @@
       "priority": 7
     },
     {
+      "id": "fictional",
+      "name": "Fictional & Pop Culture",
+      "version": "1.0",
+      "description": "Iconic elements from movies, TV shows, books, and games",
+      "elements": "elements-fictional.json",
+      "combinations": "combinations-fictional.json",
+      "dependencies": ["core"],
+      "enabled": true,
+      "priority": 8
+    },
+    {
       "id": "cross-pack",
       "name": "Cross-Pack Combinations",
       "version": "1.0",
       "description": "Hybrid combinations between different element packs",
       "elements": null,
       "combinations": "combinations-cross-pack.json",
-      "dependencies": ["core", "nature", "technology", "magic", "cosmic", "abstract", "material"],
+      "dependencies": ["core", "nature", "technology", "magic", "cosmic", "abstract", "material", "fictional"],
       "enabled": true,
-      "priority": 8
+      "priority": 9
+    },
+    {
+      "id": "fictional-cross",
+      "name": "Fictional Cross-Pack Combinations",
+      "version": "1.0",
+      "description": "Combinations between fictional elements and other packs",
+      "elements": null,
+      "combinations": "combinations-fictional-cross.json",
+      "dependencies": ["fictional", "core", "nature", "technology", "magic", "cosmic", "abstract", "material"],
+      "enabled": true,
+      "priority": 10
+    },
+    {
+      "id": "fictional-expanded",
+      "name": "Fictional Expanded Elements",
+      "version": "1.0",
+      "description": "Expanded fictional elements with more characters, locations, and items",
+      "elements": "elements-fictional-expanded.json",
+      "combinations": "combinations-fictional-expanded.json",
+      "dependencies": ["fictional"],
+      "enabled": true,
+      "priority": 11
+    },
+    {
+      "id": "fictional-expanded-cross",
+      "name": "Fictional Expanded Cross-Pack",
+      "version": "1.0",
+      "description": "Cross-pack combinations for expanded fictional elements",
+      "elements": null,
+      "combinations": "combinations-fictional-expanded-cross.json",
+      "dependencies": ["fictional-expanded", "core", "nature", "technology", "magic", "cosmic", "abstract", "material", "fictional"],
+      "enabled": true,
+      "priority": 12
+    },
+    {
+      "id": "pokemon-expanded",
+      "name": "Pokemon Expanded Elements",
+      "version": "1.0",
+      "description": "Extended Pokemon collection with all regions and mega evolutions",
+      "elements": "elements-pokemon-expanded.json",
+      "combinations": "combinations-pokemon-expanded.json",
+      "dependencies": ["fictional", "fictional-expanded"],
+      "enabled": true,
+      "priority": 13
+    },
+    {
+      "id": "pokemon-expanded-cross",
+      "name": "Pokemon Expanded Cross-Pack",
+      "version": "1.0", 
+      "description": "Cross-pack combinations for expanded Pokemon elements",
+      "elements": null,
+      "combinations": "combinations-pokemon-expanded-cross.json",
+      "dependencies": ["pokemon-expanded", "core", "nature", "technology", "magic", "cosmic", "abstract", "material", "fictional", "fictional-expanded"],
+      "enabled": true,
+      "priority": 14
     }
   ],
   "settings": {
@@ -99,8 +165,8 @@
     "validateCombinations": true
   },
   "metadata": {
-    "totalElements": 500,
-    "totalCombinations": 894,
+    "totalElements": 796,
+    "totalCombinations": 1639,
     "baseElements": 29,
     "natureElements": 20,
     "technologyElements": 28,
@@ -108,6 +174,9 @@
     "cosmicElements": 26,
     "abstractElements": 81,
     "materialElements": 210,
+    "fictionalElements": 35,
+    "fictionalExpandedElements": 110,
+    "pokemonExpandedElements": 151,
     "crossPackElements": 75,
     "coreCombinations": 47,
     "natureCombinations": 40,
@@ -116,7 +185,13 @@
     "cosmicCombinations": 74,
     "abstractCombinations": 140,
     "materialCombinations": 400,
+    "fictionalCombinations": 50,
+    "fictionalExpandedCombinations": 115,
+    "pokemonExpandedCombinations": 175,
     "crossPackCombinations": 75,
+    "fictionalCrossCombinations": 115,
+    "fictionalExpandedCrossCombinations": 115,
+    "pokemonExpandedCrossCombinations": 175,
     "lastModified": "2025-03-06"
   }
 }

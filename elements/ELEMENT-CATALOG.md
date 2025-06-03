@@ -1,7 +1,7 @@
 # Infinite Snake Element Catalog
 
 ## Overview
-The Infinite Snake element system now contains **500 unique elements** across 7 thematic packs, with **894 combinations** that create logical progressions and interesting discoveries.
+The Infinite Snake element system now contains **645 unique elements** across 10 thematic packs, with **1,289 combinations** that create logical progressions and interesting discoveries.
 
 ## Element Packs
 
@@ -47,11 +47,23 @@ The Infinite Snake element system now contains **500 unique elements** across 7 
 - **Theme**: Real-world materials and substances
 - **Examples**: metals, chemicals, fabrics, medicines, all periodic table elements
 
-### 8. Cross-Pack Combinations
+### 8. Fictional Pack (IDs 501-535)
+- **Elements**: 35 iconic fictional elements
+- **Combinations**: 50
+- **Theme**: Items and characters from popular franchises
+- **Examples**: lightsaber, TARDIS, One Ring, Dragon Ball, Pokéball
+
+### 9. Fictional Expanded Pack (IDs 536-645)
+- **Elements**: 110 expanded fictional elements
+- **Combinations**: 230
+- **Theme**: Deep roster of characters, locations, and items
+- **Examples**: All starter Pokémon, LOTR fellowship, Star Wars cast, DBZ fighters, Marvel/DC heroes
+
+### 10. Cross-Pack Combinations
 - **Elements**: 75 hybrid elements (IDs 135-209)
-- **Combinations**: 70
-- **Theme**: Unique hybrids between different packs
-- **Examples**: biotech, enchanted machine, space wizard, astral mana
+- **Combinations**: 265
+- **Theme**: Unique hybrids between all packs including fictional
+- **Examples**: biotech, enchanted machine, space wizard, force blade, dimensional ball
 
 ## Progression Examples
 
@@ -71,9 +83,9 @@ dust → cosmic dust → star → constellation → galaxy → universe
 life → consciousness → thought → wisdom → enlightenment → transcendence
 
 ## Discovery Statistics
-- **Total Unique Elements**: 500
-- **Total Combinations**: 894
-- **Average Elements per Pack**: 71
+- **Total Unique Elements**: 645
+- **Total Combinations**: 1,289
+- **Average Elements per Pack**: 64
 - **Tier Distribution**:
   - Tier 0 (Base): 4
   - Tier 1: ~120
