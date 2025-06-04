@@ -1111,34 +1111,57 @@
         }
         
         // Sound effects
-        let eatSound = null;
-        let explosionSound = null;
+        const eatSounds = [];
+        const explosionSounds = [];
+        let soundIndex = 0;
         
         function initSoundEffects() {
-            // Preload eating sound
-            eatSound = new Audio('sounds/8-bit-blip.mp3');
-            eatSound.volume = 0.5; // 50% volume
-            
-            // Preload explosion sound
-            explosionSound = new Audio('sounds/fire-impact.mp3');
-            explosionSound.volume = 0.75; // 75% volume
-        }
-        
-        function playEatSound() {
-            if (eatSound && !musicMuted) {
-                // Clone the audio to allow overlapping sounds
-                const sound = eatSound.cloneNode();
-                sound.volume = eatSound.volume;
-                sound.play().catch(e => console.log('Eat sound blocked:', e));
+            // Create multiple audio instances for overlapping sounds
+            for (let i = 0; i < 5; i++) {
+                const eatSound = new Audio('sounds/8-bit-blip.mp3');
+                eatSound.volume = 0.5; // 50% volume
+                eatSounds.push(eatSound);
+                
+                const explosionSound = new Audio('sounds/fire-impact.mp3');
+                explosionSound.volume = 0.75; // 75% volume
+                explosionSounds.push(explosionSound);
             }
         }
         
-        function playExplosionSound() {
-            if (explosionSound && !musicMuted) {
-                // Clone the audio to allow overlapping sounds
-                const sound = explosionSound.cloneNode();
-                sound.volume = explosionSound.volume;
-                sound.play().catch(e => console.log('Explosion sound blocked:', e));
+        function playEatSound() {
+            if (!musicMuted && eatSounds.length > 0) {
+                // Use round-robin to cycle through sound instances
+                const sound = eatSounds[soundIndex % eatSounds.length];
+                soundIndex++;
+                
+                // Reset the sound to start
+                sound.currentTime = 0;
+                sound.volume = 0.5;
+                
+                // Try to play
+                const playPromise = sound.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(e => console.log('Eat sound error:', e.message));
+                }
+            }
+        }
+        
+        function playExplosionSound(isPlayerInvolved = true) {
+            if (!musicMuted && explosionSounds.length > 0) {
+                // Use round-robin to cycle through sound instances
+                const sound = explosionSounds[soundIndex % explosionSounds.length];
+                soundIndex++;
+                
+                // Reset the sound to start
+                sound.currentTime = 0;
+                // Set volume based on whether player is involved
+                sound.volume = isPlayerInvolved ? 0.75 : 0.25; // 75% for player, 25% for AI only
+                
+                // Try to play
+                const playPromise = sound.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(e => console.log('Explosion sound error:', e.message));
+                }
             }
         }
         
@@ -1202,6 +1225,9 @@
             // Create event handlers that we can reference later for removal
             currentTrack.endedHandler = function() {
                 console.log(`Track "${trackName}" ended, stopRequested: ${this.stopRequested}, currentTime: ${this.currentTime}, duration: ${this.duration}`);
+                // Reset the playing flag first
+                isPlayingNext = false;
+                
                 // Only play next if the track wasn't stopped intentionally and actually ended
                 if (!this.stopRequested && this.currentTime > 0 && this.duration > 0 && this.currentTime >= this.duration - 0.5) {
                     console.log('Track ended naturally, playing next track...');
@@ -1221,6 +1247,8 @@
             
             currentTrack.errorHandler = (e) => {
                 console.error('Error loading track:', trackName, e);
+                // Reset the playing flag
+                isPlayingNext = false;
                 // Try next track after a short delay
                 setTimeout(() => {
                     playRandomTrack();
@@ -1708,8 +1736,9 @@
             }
             
             explode(killer) {
-                // Play explosion sound
-                playExplosionSound();
+                // Play explosion sound - louder if player is involved
+                const isPlayerInvolved = this.isPlayer || (killer && killer.isPlayer);
+                playExplosionSound(isPlayerInvolved);
                 
                 // Award points to killer
                 if (killer && killer.alive) {
