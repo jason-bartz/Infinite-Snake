@@ -736,7 +736,7 @@
         <div id="score">Score: 0</div>
         <div id="discoveries">Discoveries: 0</div>
         <div id="alchemyVisionTimer" style="display: none; color: #FFD700; font-size: 18px; margin-top: 10px; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);">
-            🔮 Alchemy Vision: <span id="alchemyTime">30</span>s
+            🔮 Alchemy Vision: <span id="alchemyTime">60</span>s
         </div>
         <div id="elementQueue"></div>
         <div id="leaderboard">
@@ -810,12 +810,19 @@
         let highScore = parseInt(localStorage.getItem('highScore') || '0');
         
         // Alchemy Vision power-up
-        let alchemyVisionPowerUp = null;
+        let alchemyVisionPowerUps = [];
         let alchemyVisionActive = false;
         let alchemyVisionTimer = 0;
         let lastAlchemyVisionSpawn = 0;
-        const ALCHEMY_VISION_DURATION = 30000; // 30 seconds
+        const ALCHEMY_VISION_DURATION = 60000; // 60 seconds
         const ALCHEMY_VISION_SPAWN_INTERVAL = 120000; // 2 minutes
+        const ALCHEMY_VISION_SPAWN_COUNT = 3; // Number of power-ups to spawn at once
+        
+        // Void Orb mechanic
+        let voidOrbs = [];
+        let lastVoidOrbSpawn = 0;
+        const VOID_ORB_SPAWN_INTERVAL = 30000; // 30 seconds
+        const VOID_ORB_SPAWN_COUNT = 5; // Number of void orbs to maintain on map
         
         // Space effects
         let staticStars = [];
@@ -1483,28 +1490,65 @@
                         while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
                         this.angle += angleDiff * 0.15; // Aggressive turn
                     } else {
-                        // Normal AI - find nearest element but avoid borders
-                        let nearestElement = null;
-                        let minDist = 500;
+                        // Normal AI - decide what to seek based on capacity
+                        let target = null;
+                        let targetAngle = null;
                         
-                        for (const element of elements) {
-                            const dist = Math.hypot(element.x - this.x, element.y - this.y);
+                        // If at capacity, prioritize Void Orbs
+                        if (this.elements.length >= this.elementCapacity) {
+                            let nearestVoidOrb = null;
+                            let minVoidDist = 800; // Larger search radius for void orbs
                             
-                            // Skip elements that are too close to borders
-                            if (nearBorder) {
-                                const elemNearBorder = element.x < borderDanger || element.x > WORLD_SIZE - borderDanger ||
-                                                     element.y < borderDanger || element.y > WORLD_SIZE - borderDanger;
-                                if (elemNearBorder) continue;
+                            for (const orb of voidOrbs) {
+                                const dist = Math.hypot(orb.x - this.x, orb.y - this.y);
+                                
+                                // Skip orbs that are too close to borders
+                                if (nearBorder) {
+                                    const orbNearBorder = orb.x < borderDanger || orb.x > WORLD_SIZE - borderDanger ||
+                                                         orb.y < borderDanger || orb.y > WORLD_SIZE - borderDanger;
+                                    if (orbNearBorder) continue;
+                                }
+                                
+                                if (dist < minVoidDist) {
+                                    minVoidDist = dist;
+                                    nearestVoidOrb = orb;
+                                }
                             }
                             
-                            if (dist < minDist) {
-                                minDist = dist;
-                                nearestElement = element;
+                            if (nearestVoidOrb) {
+                                target = nearestVoidOrb;
+                                targetAngle = Math.atan2(nearestVoidOrb.y - this.y, nearestVoidOrb.x - this.x);
                             }
                         }
                         
-                        if (nearestElement) {
-                            const targetAngle = Math.atan2(nearestElement.y - this.y, nearestElement.x - this.x);
+                        // If no void orb target (or not at capacity), find nearest element
+                        if (!target) {
+                            let nearestElement = null;
+                            let minDist = 500;
+                            
+                            for (const element of elements) {
+                                const dist = Math.hypot(element.x - this.x, element.y - this.y);
+                                
+                                // Skip elements that are too close to borders
+                                if (nearBorder) {
+                                    const elemNearBorder = element.x < borderDanger || element.x > WORLD_SIZE - borderDanger ||
+                                                         element.y < borderDanger || element.y > WORLD_SIZE - borderDanger;
+                                    if (elemNearBorder) continue;
+                                }
+                                
+                                if (dist < minDist) {
+                                    minDist = dist;
+                                    nearestElement = element;
+                                }
+                            }
+                            
+                            if (nearestElement) {
+                                target = nearestElement;
+                                targetAngle = Math.atan2(nearestElement.y - this.y, nearestElement.x - this.x);
+                            }
+                        }
+                        
+                        if (target && targetAngle !== null) {
                             let angleDiff = targetAngle - this.angle;
                             while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
                             while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
@@ -1620,15 +1664,38 @@
             }
             
             consume(element) {
-                // Check if we have space
-                if (this.elements.length >= this.elementCapacity) {
-                    // Digest all elements when full
-                    this.digest();
-                }
-                
                 // Play eating sound for player only
                 if (this.isPlayer) {
                     playEatSound();
+                }
+                
+                // Check if we have space
+                if (this.elements.length >= this.elementCapacity) {
+                    // At capacity - just add points, don't store element
+                    this.score += 100;
+                    
+                    // Still grow snake and track elements eaten
+                    this.length += 2;
+                    this.elementsEaten++;
+                    
+                    // Check for capacity growth
+                    const capacityLevel = Math.floor((this.elementCapacity - 4) / 2);
+                    const elementsNeededForNext = 10 + (capacityLevel * 5);
+                    const elementsForThisLevel = capacityLevel === 0 ? this.elementsEaten : 
+                        this.elementsEaten - (10 + ((capacityLevel - 1) * capacityLevel * 5 / 2));
+                    
+                    if (elementsForThisLevel >= elementsNeededForNext && this.elementCapacity < 30) {
+                        this.elementCapacity += 2;
+                        if (this.isPlayer && this === playerSnake) {
+                            showMessage(`Element capacity increased to ${this.elementCapacity}! Next upgrade: ${10 + ((capacityLevel + 1) * 5)} elements`, false);
+                        }
+                    }
+                    
+                    // Remove element from world
+                    const index = elements.indexOf(element);
+                    if (index > -1) elements.splice(index, 1);
+                    
+                    return; // Don't add to queue
                 }
                 
                 // Add element to snake (at the front for queue-based system)
@@ -1983,6 +2050,67 @@
                     ctx.fillStyle = i % 2 === 0 ? 'rgba(255, 215, 0, 0.8)' : 'rgba(147, 0, 211, 0.8)';
                     ctx.beginPath();
                     ctx.arc(px, py, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                
+                ctx.restore();
+            }
+        }
+        
+        // VoidOrb class
+        class VoidOrb {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.size = 20;
+                this.pulse = Math.random() * Math.PI * 2;
+                this.rotation = 0;
+            }
+            
+            update() {
+                this.pulse += 0.05;
+                this.rotation += 0.03;
+            }
+            
+            draw() {
+                const screenX = this.x - camera.x + canvas.width / 2;
+                const screenY = this.y - camera.y + canvas.height / 2;
+                
+                // Skip if off-screen
+                if (screenX < -50 || screenX > canvas.width + 50 ||
+                    screenY < -50 || screenY > canvas.height + 50) return;
+                
+                const scale = 1 + Math.sin(this.pulse) * 0.1;
+                
+                ctx.save();
+                ctx.translate(screenX, screenY);
+                ctx.rotate(this.rotation);
+                
+                // Blue glow effect
+                const glowSize = this.size * 2 * scale;
+                const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, glowSize);
+                gradient.addColorStop(0, 'rgba(0, 150, 255, 0.6)'); // Bright blue
+                gradient.addColorStop(0.5, 'rgba(0, 50, 200, 0.4)'); // Dark blue
+                gradient.addColorStop(1, 'transparent');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(-glowSize, -glowSize, glowSize * 2, glowSize * 2);
+                
+                // Void orb emoji
+                ctx.font = `${this.size * 2 * scale}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('🌀', 0, 0);
+                
+                // Swirling particles
+                for (let i = 0; i < 4; i++) {
+                    const angle = (this.rotation * 3) + (i * Math.PI / 2);
+                    const dist = this.size * scale * 0.8;
+                    const px = Math.cos(angle) * dist;
+                    const py = Math.sin(angle) * dist;
+                    
+                    ctx.fillStyle = 'rgba(100, 200, 255, 0.8)';
+                    ctx.beginPath();
+                    ctx.arc(px, py, 2, 0, Math.PI * 2);
                     ctx.fill();
                 }
                 
@@ -2421,21 +2549,63 @@
                 }
                 
                 // Check AlchemyVision power-up collision (player only)
-                if (snake.isPlayer && alchemyVisionPowerUp) {
-                    const dist = Math.hypot(alchemyVisionPowerUp.x - snake.x, alchemyVisionPowerUp.y - snake.y);
-                    if (dist < SEGMENT_SIZE + alchemyVisionPowerUp.size) {
-                        // Activate Alchemy Vision
-                        alchemyVisionActive = true;
-                        alchemyVisionTimer = ALCHEMY_VISION_DURATION;
-                        alchemyVisionPowerUp = null;
-                        
-                        // Play collection sound if available
-                        if (window.eatSound) {
-                            window.eatSound.play().catch(() => {});
+                if (snake.isPlayer) {
+                    for (let i = alchemyVisionPowerUps.length - 1; i >= 0; i--) {
+                        const powerUp = alchemyVisionPowerUps[i];
+                        const dist = Math.hypot(powerUp.x - snake.x, powerUp.y - snake.y);
+                        if (dist < SEGMENT_SIZE + powerUp.size) {
+                            // Activate Alchemy Vision
+                            alchemyVisionActive = true;
+                            alchemyVisionTimer = ALCHEMY_VISION_DURATION;
+                            
+                            // Remove collected power-up
+                            alchemyVisionPowerUps.splice(i, 1);
+                            
+                            // Play collection sound if available
+                            if (window.eatSound) {
+                                window.eatSound.play().catch(() => {});
+                            }
+                            
+                            // Show notification
+                            showMessage('🔮 Alchemy Vision Activated! 60s', 'success');
+                            break; // Only collect one at a time
+                        }
+                    }
+                }
+                
+                // Check Void Orb collision (all snakes can collect)
+                for (let i = voidOrbs.length - 1; i >= 0; i--) {
+                    const orb = voidOrbs[i];
+                    const dist = Math.hypot(orb.x - snake.x, orb.y - snake.y);
+                    if (dist < SEGMENT_SIZE + orb.size) {
+                        // Consume the void orb
+                        if (snake.elements.length > 0) {
+                            const elementCount = snake.elements.length;
+                            const points = elementCount * 100;
+                            snake.score += points;
+                            snake.elements = []; // Clear all elements
+                            
+                            // Visual feedback
+                            if (snake.isPlayer) {
+                                showMessage(`🌀 Void consumed! +${points} points`, 'info');
+                                if (window.eatSound) {
+                                    window.eatSound.play().catch(() => {});
+                                }
+                            }
+                            
+                            // Create particle effect
+                            for (let j = 0; j < 15; j++) {
+                                const angle = (j / 15) * Math.PI * 2;
+                                const speed = 2 + Math.random() * 3;
+                                const vx = Math.cos(angle) * speed;
+                                const vy = Math.sin(angle) * speed;
+                                particles.push(new Particle(orb.x, orb.y, vx, vy, 'rgba(100, 200, 255, 0.8)'));
+                            }
                         }
                         
-                        // Show notification
-                        showMessage('🔮 Alchemy Vision Activated! 30s', 'success');
+                        // Remove void orb
+                        voidOrbs.splice(i, 1);
+                        break;
                     }
                 }
                 
@@ -2900,18 +3070,39 @@
                 spawnElement();
             }
             
-            // Spawn AlchemyVision power-up
-            if (!alchemyVisionPowerUp && Date.now() - lastAlchemyVisionSpawn >= ALCHEMY_VISION_SPAWN_INTERVAL) {
-                const x = 100 + Math.random() * (WORLD_SIZE - 200);
-                const y = 100 + Math.random() * (WORLD_SIZE - 200);
-                alchemyVisionPowerUp = new AlchemyVision(x, y);
+            // Spawn AlchemyVision power-ups
+            if (alchemyVisionPowerUps.length === 0 && Date.now() - lastAlchemyVisionSpawn >= ALCHEMY_VISION_SPAWN_INTERVAL) {
+                // Spawn multiple power-ups spread across the map
+                for (let i = 0; i < ALCHEMY_VISION_SPAWN_COUNT; i++) {
+                    // Divide the map into sections to spread out spawns
+                    const sectionWidth = WORLD_SIZE / Math.ceil(Math.sqrt(ALCHEMY_VISION_SPAWN_COUNT));
+                    const sectionHeight = WORLD_SIZE / Math.ceil(Math.sqrt(ALCHEMY_VISION_SPAWN_COUNT));
+                    
+                    // Random position within each section
+                    const sectionX = (i % Math.ceil(Math.sqrt(ALCHEMY_VISION_SPAWN_COUNT))) * sectionWidth;
+                    const sectionY = Math.floor(i / Math.ceil(Math.sqrt(ALCHEMY_VISION_SPAWN_COUNT))) * sectionHeight;
+                    
+                    const x = sectionX + 100 + Math.random() * (sectionWidth - 200);
+                    const y = sectionY + 100 + Math.random() * (sectionHeight - 200);
+                    
+                    alchemyVisionPowerUps.push(new AlchemyVision(x, y));
+                }
                 lastAlchemyVisionSpawn = Date.now();
             }
             
-            // Update AlchemyVision power-up
-            if (alchemyVisionPowerUp) {
-                alchemyVisionPowerUp.update();
+            // Update AlchemyVision power-ups
+            alchemyVisionPowerUps.forEach(powerUp => powerUp.update());
+            
+            // Spawn Void Orbs to maintain count
+            if (voidOrbs.length < VOID_ORB_SPAWN_COUNT && Date.now() - lastVoidOrbSpawn >= VOID_ORB_SPAWN_INTERVAL / VOID_ORB_SPAWN_COUNT) {
+                const x = 100 + Math.random() * (WORLD_SIZE - 200);
+                const y = 100 + Math.random() * (WORLD_SIZE - 200);
+                voidOrbs.push(new VoidOrb(x, y));
+                lastVoidOrbSpawn = Date.now();
             }
+            
+            // Update Void Orbs
+            voidOrbs.forEach(orb => orb.update());
             
             // Update AlchemyVision timer
             if (alchemyVisionActive) {
@@ -2919,6 +3110,8 @@
                 if (alchemyVisionTimer <= 0) {
                     alchemyVisionActive = false;
                     alchemyVisionTimer = 0;
+                    // Clear any remaining power-ups when one expires
+                    alchemyVisionPowerUps = [];
                 }
             }
             
@@ -2937,10 +3130,11 @@
             drawBackground();
             elements.forEach(element => element.draw());
             
-            // Draw AlchemyVision power-up
-            if (alchemyVisionPowerUp) {
-                alchemyVisionPowerUp.draw();
-            }
+            // Draw AlchemyVision power-ups
+            alchemyVisionPowerUps.forEach(powerUp => powerUp.draw());
+            
+            // Draw Void Orbs
+            voidOrbs.forEach(orb => orb.draw());
             
             snakes.forEach(snake => snake.draw());
             particles.forEach(particle => particle.draw());

@@ -44,12 +44,30 @@ All music tracks used in this project are produced by ZapSplat and licensed unde
 
 ---
 
+## Sound Effects
+
+### Fire/Magic Effects
+#### Fire Impact
+- **Description**: Cinematic fire impact, burst, flame ignite, magic fire hit, version 2
+- **Producer**: PMSFX
+- **License**: ZapSplat Standard License
+- **Source**: [ZapSplat.com](https://www.zapsplat.com/music/cinematic-fire-impact-burst-flame-ignite-magic-fire-hit-version-2/)
+
+### UI/Game Sounds
+#### Beep Sound
+- **Description**: Game sound, 8-bit blip, very short beep
+- **Producer**: ZapSplat
+- **License**: ZapSplat Standard License
+- **Source**: [ZapSplat.com](https://www.zapsplat.com/?s=beep)
+
+---
+
 ## License Information
 
-All music tracks are used under the ZapSplat Standard License, which permits use in personal and commercial projects with attribution.
+All music tracks and sound effects are used under the ZapSplat Standard License, which permits use in personal and commercial projects with attribution.
 
 For more information about ZapSplat's licensing terms, visit: [https://www.zapsplat.com/license-type/standard-license/](https://www.zapsplat.com/license-type/standard-license/)
 
 ## Attribution
 
-Music from https://www.zapsplat.com
+Music and Sound Effects from https://www.zapsplat.com
