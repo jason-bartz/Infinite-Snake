@@ -735,6 +735,9 @@
         <div id="recentDiscovery"></div>
         <div id="score">Score: 0</div>
         <div id="discoveries">Discoveries: 0</div>
+        <div id="alchemyVisionTimer" style="display: none; color: #FFD700; font-size: 18px; margin-top: 10px; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);">
+            🔮 Alchemy Vision: <span id="alchemyTime">30</span>s
+        </div>
         <div id="elementQueue"></div>
         <div id="leaderboard">
             <h4>Leaderboard</h4>
@@ -805,6 +808,14 @@
         let particles = [];
         let lastDiscoveredElement = null;
         let highScore = parseInt(localStorage.getItem('highScore') || '0');
+        
+        // Alchemy Vision power-up
+        let alchemyVisionPowerUp = null;
+        let alchemyVisionActive = false;
+        let alchemyVisionTimer = 0;
+        let lastAlchemyVisionSpawn = 0;
+        const ALCHEMY_VISION_DURATION = 30000; // 30 seconds
+        const ALCHEMY_VISION_SPAWN_INTERVAL = 120000; // 2 minutes
         
         // Space effects
         let staticStars = [];
@@ -1848,8 +1859,51 @@
                 
                 const scale = 1 + Math.sin(this.pulse) * 0.1;
                 
-                // Glow effect
-                if (this.data.tier > 0) {
+                // Check if this element is compatible with player's tail during AlchemyVision
+                let alchemyGlow = null;
+                if (alchemyVisionActive && playerSnake && playerSnake.alive && playerSnake.elements.length > 0) {
+                    const tailElement = playerSnake.elements[playerSnake.elements.length - 1];
+                    const distance = Math.hypot(this.x - playerSnake.x, this.y - playerSnake.y);
+                    
+                    // Only show glows within 300 pixel radius
+                    if (distance <= 300) {
+                        // Check if this element can combine with tail
+                        const combo1 = `${this.type}+${tailElement}`;
+                        const combo2 = `${tailElement}+${this.type}`;
+                        
+                        if (combinations[combo1] || combinations[combo2]) {
+                            const result = combinations[combo1] || combinations[combo2];
+                            // Check if this is a new discovery
+                            if (!discoveredElements.has(result)) {
+                                alchemyGlow = 'discovery'; // Golden glow
+                            } else {
+                                alchemyGlow = 'known'; // Green glow
+                            }
+                        }
+                    }
+                }
+                
+                // Draw appropriate glow effect
+                if (alchemyGlow === 'discovery') {
+                    // Golden glow for new discoveries
+                    const glowSize = ELEMENT_SIZE * 3 * scale;
+                    const gradient = ctx.createRadialGradient(screenX, screenY, 0, screenX, screenY, glowSize);
+                    gradient.addColorStop(0, 'rgba(255, 215, 0, 0.8)');
+                    gradient.addColorStop(0.5, 'rgba(255, 165, 0, 0.4)');
+                    gradient.addColorStop(1, 'transparent');
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(screenX - glowSize, screenY - glowSize, glowSize * 2, glowSize * 2);
+                } else if (alchemyGlow === 'known') {
+                    // Green glow for known combinations
+                    const glowSize = ELEMENT_SIZE * 2.5 * scale;
+                    const gradient = ctx.createRadialGradient(screenX, screenY, 0, screenX, screenY, glowSize);
+                    gradient.addColorStop(0, 'rgba(0, 255, 0, 0.6)');
+                    gradient.addColorStop(0.5, 'rgba(0, 200, 0, 0.3)');
+                    gradient.addColorStop(1, 'transparent');
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(screenX - glowSize, screenY - glowSize, glowSize * 2, glowSize * 2);
+                } else if (this.data.tier > 0) {
+                    // Normal tier-based glow
                     const glowSize = ELEMENT_SIZE * 2 * scale;
                     const gradient = ctx.createRadialGradient(screenX, screenY, 0, screenX, screenY, glowSize);
                     const hue = (this.data.tier * 60) % 360;
@@ -1872,6 +1926,67 @@
                 ctx.lineWidth = 2;
                 ctx.strokeText(this.data.name, screenX, screenY + ELEMENT_SIZE + 5);
                 ctx.fillText(this.data.name, screenX, screenY + ELEMENT_SIZE + 5);
+            }
+        }
+        
+        // AlchemyVision power-up class
+        class AlchemyVision {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.size = 20;
+                this.pulse = 0;
+                this.rotation = 0;
+            }
+            
+            update() {
+                this.pulse += 0.05;
+                this.rotation += 0.02;
+            }
+            
+            draw() {
+                const screenX = this.x - camera.x + canvas.width / 2;
+                const screenY = this.y - camera.y + canvas.height / 2;
+                
+                // Skip if off-screen
+                if (screenX < -50 || screenX > canvas.width + 50 ||
+                    screenY < -50 || screenY > canvas.height + 50) return;
+                
+                const scale = 1 + Math.sin(this.pulse) * 0.1;
+                
+                ctx.save();
+                ctx.translate(screenX, screenY);
+                ctx.rotate(this.rotation);
+                
+                // Purple/gold glow effect
+                const glowSize = this.size * 2 * scale;
+                const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, glowSize);
+                gradient.addColorStop(0, 'rgba(255, 215, 0, 0.6)'); // Gold
+                gradient.addColorStop(0.5, 'rgba(147, 0, 211, 0.4)'); // Purple
+                gradient.addColorStop(1, 'transparent');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(-glowSize, -glowSize, glowSize * 2, glowSize * 2);
+                
+                // Crystal ball emoji
+                ctx.font = `${this.size * 2 * scale}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('🔮', 0, 0);
+                
+                // Swirling particles
+                for (let i = 0; i < 3; i++) {
+                    const angle = (this.rotation * 2) + (i * Math.PI * 2 / 3);
+                    const dist = this.size * scale;
+                    const px = Math.cos(angle) * dist;
+                    const py = Math.sin(angle) * dist;
+                    
+                    ctx.fillStyle = i % 2 === 0 ? 'rgba(255, 215, 0, 0.8)' : 'rgba(147, 0, 211, 0.8)';
+                    ctx.beginPath();
+                    ctx.arc(px, py, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                
+                ctx.restore();
             }
         }
         
@@ -2231,6 +2346,16 @@
                 document.getElementById('score').innerHTML = `Score: ${Math.floor(playerSnake.score)} <span style="color: #FFD700; font-size: 16px;">(NEW HIGH SCORE!)</span>`;
             }
             
+            // Update AlchemyVision timer
+            const timerElement = document.getElementById('alchemyVisionTimer');
+            if (alchemyVisionActive && alchemyVisionTimer > 0) {
+                timerElement.style.display = 'block';
+                const seconds = Math.ceil(alchemyVisionTimer / 1000);
+                document.getElementById('alchemyTime').textContent = seconds;
+            } else {
+                timerElement.style.display = 'none';
+            }
+            
             // Update discoveries count based on game mode
             const discoveryCount = discoveredElements.size - 4; // Subtract base elements
             const discoveryDisplay = document.getElementById('discovery-count');
@@ -2292,6 +2417,25 @@
                     const dist = Math.hypot(element.x - snake.x, element.y - snake.y);
                     if (dist < SEGMENT_SIZE + ELEMENT_SIZE) {
                         snake.consume(element);
+                    }
+                }
+                
+                // Check AlchemyVision power-up collision (player only)
+                if (snake.isPlayer && alchemyVisionPowerUp) {
+                    const dist = Math.hypot(alchemyVisionPowerUp.x - snake.x, alchemyVisionPowerUp.y - snake.y);
+                    if (dist < SEGMENT_SIZE + alchemyVisionPowerUp.size) {
+                        // Activate Alchemy Vision
+                        alchemyVisionActive = true;
+                        alchemyVisionTimer = ALCHEMY_VISION_DURATION;
+                        alchemyVisionPowerUp = null;
+                        
+                        // Play collection sound if available
+                        if (window.eatSound) {
+                            window.eatSound.play().catch(() => {});
+                        }
+                        
+                        // Show notification
+                        showMessage('🔮 Alchemy Vision Activated! 30s', 'success');
                     }
                 }
                 
@@ -2756,6 +2900,28 @@
                 spawnElement();
             }
             
+            // Spawn AlchemyVision power-up
+            if (!alchemyVisionPowerUp && Date.now() - lastAlchemyVisionSpawn >= ALCHEMY_VISION_SPAWN_INTERVAL) {
+                const x = 100 + Math.random() * (WORLD_SIZE - 200);
+                const y = 100 + Math.random() * (WORLD_SIZE - 200);
+                alchemyVisionPowerUp = new AlchemyVision(x, y);
+                lastAlchemyVisionSpawn = Date.now();
+            }
+            
+            // Update AlchemyVision power-up
+            if (alchemyVisionPowerUp) {
+                alchemyVisionPowerUp.update();
+            }
+            
+            // Update AlchemyVision timer
+            if (alchemyVisionActive) {
+                alchemyVisionTimer -= 16; // Assuming ~60fps
+                if (alchemyVisionTimer <= 0) {
+                    alchemyVisionActive = false;
+                    alchemyVisionTimer = 0;
+                }
+            }
+            
             // Spawn new AI snakes if needed
             const aiSnakes = snakes.filter(s => !s.isPlayer && s.alive).length;
             if (aiSnakes < 5) {
@@ -2770,6 +2936,12 @@
             // Draw everything
             drawBackground();
             elements.forEach(element => element.draw());
+            
+            // Draw AlchemyVision power-up
+            if (alchemyVisionPowerUp) {
+                alchemyVisionPowerUp.draw();
+            }
+            
             snakes.forEach(snake => snake.draw());
             particles.forEach(particle => particle.draw());
         }
