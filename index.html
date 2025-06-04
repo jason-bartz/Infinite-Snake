@@ -1127,7 +1127,16 @@
             return true;
         }
         
+        let isPlayingNext = false; // Prevent multiple simultaneous calls
+        
         function playRandomTrack() {
+            // Prevent multiple simultaneous calls
+            if (isPlayingNext) {
+                console.log('Already playing next track, ignoring call');
+                return;
+            }
+            isPlayingNext = true;
+            
             // Refill available tracks if empty
             if (availableTracks.length === 0) {
                 console.log('Refilling available tracks...');
@@ -1135,9 +1144,14 @@
             }
             
             // Stop current track if playing
-            if (currentTrack) {
+            if (currentTrack && currentTrack.stopRequested !== true) {
+                // Mark that we're stopping this track intentionally
+                currentTrack.stopRequested = true;
+                // Remove all event listeners to prevent them from firing
+                currentTrack.removeEventListener('ended', currentTrack.endedHandler);
+                currentTrack.removeEventListener('error', currentTrack.errorHandler);
                 currentTrack.pause();
-                currentTrack.src = ''; // Clear the source
+                // Don't clear src as it can trigger ended event
                 currentTrack = null; // Clear reference
             }
             
@@ -1153,40 +1167,52 @@
             currentTrack = new Audio(`music/${trackName}`);
             currentTrack.volume = musicMuted ? 0 : musicVolume;
             
-            // Play next track when this one ends
-            currentTrack.addEventListener('ended', () => {
-                console.log(`Track "${trackName}" ended, available tracks: ${availableTracks.length}`);
-                setTimeout(() => {
-                    try {
-                        console.log('Attempting to play next track...');
-                        playRandomTrack();
-                    } catch (error) {
-                        console.error('Error playing next track:', error);
-                        // Try again in a few seconds
-                        setTimeout(playRandomTrack, 3000);
-                    }
-                }, 1000); // Wait 1 second before next track
-            });
+            // Create event handlers that we can reference later for removal
+            currentTrack.endedHandler = function() {
+                console.log(`Track "${trackName}" ended, stopRequested: ${this.stopRequested}, currentTime: ${this.currentTime}, duration: ${this.duration}`);
+                // Only play next if the track wasn't stopped intentionally and actually ended
+                if (!this.stopRequested && this.currentTime > 0 && this.duration > 0 && this.currentTime >= this.duration - 0.5) {
+                    console.log('Track ended naturally, playing next track...');
+                    setTimeout(() => {
+                        try {
+                            playRandomTrack();
+                        } catch (error) {
+                            console.error('Error playing next track:', error);
+                            // Try again in a few seconds
+                            setTimeout(playRandomTrack, 3000);
+                        }
+                    }, 1000); // Wait 1 second before next track
+                } else {
+                    console.log('Track was stopped or ended prematurely, not playing next track');
+                }
+            };
             
-            // Handle loading errors
-            currentTrack.addEventListener('error', (e) => {
+            currentTrack.errorHandler = (e) => {
                 console.error('Error loading track:', trackName, e);
                 // Try next track after a short delay
                 setTimeout(() => {
                     playRandomTrack();
                 }, 1000);
-            });
+            };
+            
+            // Add event listeners
+            currentTrack.addEventListener('ended', currentTrack.endedHandler);
+            currentTrack.addEventListener('error', currentTrack.errorHandler);
             
             // Try to play
             const playPromise = currentTrack.play();
             if (playPromise !== undefined) {
                 playPromise.then(() => {
                     console.log('Music started playing successfully');
+                    isPlayingNext = false; // Reset flag on success
                 }).catch(e => {
                     console.log('Music autoplay blocked:', e.message);
                     // Store track to retry on user interaction
                     window.pendingMusicTrack = currentTrack;
+                    isPlayingNext = false; // Reset flag on error
                 });
+            } else {
+                isPlayingNext = false; // Reset flag if no promise
             }
         }
         
