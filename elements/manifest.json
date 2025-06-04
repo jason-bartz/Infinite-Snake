@@ -178,6 +178,28 @@
       "dependencies": ["expanded", "core", "nature", "technology", "magic", "cosmic", "abstract", "material"],
       "enabled": true,
       "priority": 16
+    },
+    {
+      "id": "missing-core",
+      "name": "Missing Core Elements",
+      "version": "1.0",
+      "description": "Core elements that were referenced but missing (animal, light)",
+      "elements": "elements-missing-core.json",
+      "combinations": null,
+      "dependencies": [],
+      "enabled": true,
+      "priority": 17
+    },
+    {
+      "id": "orphan-fixes",
+      "name": "Orphan Fixes",
+      "version": "1.0",
+      "description": "Combinations to create previously orphaned elements",
+      "elements": null,
+      "combinations": "combinations-orphan-fixes.json",
+      "dependencies": ["core", "nature", "technology", "missing-core"],
+      "enabled": true,
+      "priority": 18
     }
   ],
   "settings": {
@@ -187,8 +209,10 @@
     "validateCombinations": true
   },
   "metadata": {
-    "totalElements": 879,
-    "totalCombinations": 1789,
+    "totalElements": 881,
+    "totalCombinations": 1853,
+    "missingCoreElements": 2,
+    "orphanFixCombinations": 74,
     "baseElements": 29,
     "natureElements": 20,
     "technologyElements": 28,

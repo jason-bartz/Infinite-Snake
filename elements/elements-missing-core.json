@@ -1,0 +1,27 @@
+{
+  "version": "1.0",
+  "pack": "missing-core",
+  "description": "Core elements that were referenced in combinations but missing from the game",
+  "elements": {
+    "880": {
+      "id": 880,
+      "key": "animal",
+      "emoji": "🐾",
+      "name": "Animal",
+      "tier": 3,
+      "discovered": false,
+      "base": false,
+      "category": "life"
+    },
+    "881": {
+      "id": 881,
+      "key": "light",
+      "emoji": "💡",
+      "name": "Light",
+      "tier": 2,
+      "discovered": false,
+      "base": false,
+      "category": "energy"
+    }
+  }
+}
