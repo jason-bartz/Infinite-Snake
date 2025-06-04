@@ -434,6 +434,7 @@
             padding: 15px 30px;
             border-radius: 10px;
             border: 3px solid #FFD700;
+            text-align: center;
             z-index: 25;
             box-shadow: 0 0 20px rgba(255, 215, 0, 0.8), inset 0 0 20px rgba(255, 255, 255, 0.2);
             animation: none;
@@ -441,6 +442,15 @@
         
         #recentDiscovery.show {
             animation: flashyEntrance 0.5s ease-out;
+        }
+        
+        #recentDiscovery small {
+            display: block;
+            margin-top: 5px;
+            font-size: 14px;
+            font-weight: normal;
+            font-style: italic;
+            opacity: 0.9;
         }
         
         @keyframes flashyEntrance {
@@ -2486,7 +2496,7 @@
         
         function showMessage(text, isDiscovery) {
             const popup = document.getElementById('recentDiscovery');
-            popup.textContent = text;
+            popup.innerHTML = text;
             popup.className = isDiscovery ? 'show' : 'show combo';
             popup.style.opacity = '1';
             
@@ -2698,7 +2708,7 @@
                             }
                             
                             // Show notification
-                            showMessage('🔮 Alchemy Vision Activated! 60s', 'success');
+                            showMessage('🔮 Alchemy Vision Activated! 60s<br><small style="opacity: 0.8">Your eyes are opened to see all combinations</small>', 'success');
                             break; // Only collect one at a time
                         }
                     }
@@ -2718,7 +2728,7 @@
                             
                             // Visual feedback
                             if (snake.isPlayer) {
-                                showMessage(`🌀 Void consumed! +${points} points`, 'info');
+                                showMessage(`🌀 Void consumed! +${points} points<br><small style="opacity: 0.8">Your elements have been purged to the void</small>`, 'info');
                                 if (window.eatSound) {
                                     window.eatSound.play().catch(() => {});
                                 }
@@ -2778,7 +2788,7 @@
                                     elements.push(newElement);
                                 }
                                 
-                                showMessage(`💎 Catalyst activated! Spawned ${spawnCount} compatible elements`, 'success');
+                                showMessage(`💎 Catalyst activated! Spawned ${spawnCount} compatible elements<br><small style="opacity: 0.8">New elements have resonated into existence</small>`, 'success');
                             } else if (spawnCount > 0 && !snake.isPlayer) {
                                 // AI snakes get points instead
                                 snake.score += 200;
