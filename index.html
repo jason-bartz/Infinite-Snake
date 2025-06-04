@@ -244,26 +244,17 @@
         
         /* Canvas */
         #gameCanvas {
-            display: block;
-            border: 2px solid #333;
-            box-shadow: 0 0 20px rgba(138, 43, 226, 0.5);
-            margin-left: 200px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
         }
         
         /* Discovery Sidebar */
         #discoveryLog {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 200px;
-            height: 100%;
-            background: rgba(0,0,0,0.9);
-            padding: 20px;
-            overflow-y: auto;
-            border-right: 2px solid #444;
-            z-index: 20;
-            box-sizing: border-box;
-            display: none;
+            display: none; /* Hidden - replaced by discovery feed */
         }
         
         #discoveryLog h3 {
@@ -326,12 +317,13 @@
             }
         }
         
-        /* UI Elements */
+        /* Main UI overlay */
         #ui {
-            position: absolute;
+            position: fixed;
             top: 0;
-            left: 200px;
-            right: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             pointer-events: none;
             z-index: 10;
         }
@@ -344,20 +336,165 @@
             display: none; /* Hidden - discoveries shown in sidebar */
         }
         
-        #elementQueue {
+        /* Bottom UI Bar (MMO-style) */
+        .bottom-ui {
             position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.8);
-            padding: 10px;
-            border-radius: 10px;
-            display: grid;
-            grid-template-columns: repeat(15, 50px);
-            grid-template-rows: repeat(2, 50px);
+            bottom: 0;
+            left: 0;
+            right: 0;
+            pointer-events: auto;
+            background: linear-gradient(to bottom, 
+                rgba(0, 0, 0, 0) 0%,
+                rgba(0, 0, 0, 0.7) 10%,
+                rgba(10, 10, 26, 0.95) 30%,
+                rgba(10, 10, 26, 0.98) 100%
+            );
+            padding-top: 20px;
+            border-top: 2px solid rgba(138, 43, 226, 0.3);
+            box-shadow: 0 -10px 30px rgba(138, 43, 226, 0.2);
+        }
+        
+        /* Element Collection Bar (Skill Bar Style) */
+        .element-collection-bar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0 20px;
+            margin-bottom: 10px;
             gap: 4px;
-            width: fit-content;
-            z-index: 20;
+        }
+        
+        .element-slot {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, 
+                rgba(20, 20, 40, 0.9) 0%,
+                rgba(30, 30, 50, 0.8) 100%
+            );
+            border: 2px solid rgba(138, 43, 226, 0.4);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transition: all 0.2s;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .element-slot.empty {
+            background: linear-gradient(135deg, 
+                rgba(10, 10, 20, 0.6) 0%,
+                rgba(20, 20, 30, 0.5) 100%
+            );
+            border-color: rgba(100, 100, 120, 0.3);
+            border-style: dashed;
+        }
+        
+        .element-slot.filled {
+            background: linear-gradient(135deg, 
+                rgba(40, 40, 60, 0.9) 0%,
+                rgba(50, 50, 70, 0.8) 100%
+            );
+            border-color: rgba(138, 43, 226, 0.6);
+        }
+        
+        .element-slot.tail-element {
+            border-color: #FFD700;
+            background: linear-gradient(135deg, 
+                rgba(255, 215, 0, 0.2) 0%,
+                rgba(255, 215, 0, 0.1) 100%
+            );
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5),
+                       inset 0 0 10px rgba(255, 215, 0, 0.2);
+            animation: tailPulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes tailPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .element-slot:hover:not(.empty) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(138, 43, 226, 0.4),
+                       inset 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .element-slot .emoji {
+            font-size: 28px;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+        }
+        
+        .element-slot .element-name {
+            font-size: 9px;
+            color: #AAA;
+            text-align: center;
+            margin-top: 2px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+        }
+        
+        /* Boost Bar (Mana Bar Style) */
+        .boost-bar-container {
+            width: 60%;
+            max-width: 800px;
+            margin: 0 auto 15px;
+            padding: 0 20px;
+        }
+        
+        .boost-bar-frame {
+            height: 24px;
+            background: linear-gradient(to bottom, 
+                rgba(0, 0, 0, 0.8) 0%,
+                rgba(10, 10, 20, 0.9) 100%
+            );
+            border: 2px solid rgba(100, 100, 120, 0.5);
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.8);
+        }
+        
+        .boost-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, 
+                #00a8ff 0%,
+                #00d4ff 50%,
+                #00a8ff 100%
+            );
+            background-size: 200% 100%;
+            position: relative;
+            animation: boostShimmer 3s linear infinite;
+        }
+        
+        @keyframes boostShimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        .boost-bar-fill.low {
+            background: linear-gradient(90deg, #ff4444, #ff6666);
+            animation: none;
+        }
+        
+        .boost-bar-fill.boosting {
+            background: linear-gradient(90deg, #44ff44, #66ff66);
+            animation: boostShimmer 1s linear infinite;
+        }
+        
+        .boost-bar-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 12px;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+            color: white;
+        }
+        
+        #elementQueue {
+            display: none; /* Hidden - replaced by bottom element bar */
         }
         
         .element-square {
@@ -418,42 +555,38 @@
             transition: transform 0.2s;
         }
         
+        /* Message Popups (Over Element Bar) */
         #recentDiscovery {
             position: absolute;
-            top: 150px; /* Below element collection box */
+            bottom: 200px;
             left: 50%;
             transform: translateX(-50%);
-            background: linear-gradient(135deg, rgba(255, 215, 0, 0.95), rgba(255, 140, 0, 0.95));
+            background: linear-gradient(135deg, 
+                rgba(255, 215, 0, 0.95) 0%,
+                rgba(255, 140, 0, 0.95) 100%
+            );
             color: white;
-            font-size: 20px;
+            font-size: 18px;
             font-weight: bold;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-            opacity: 0;
-            transition: all 0.5s;
-            pointer-events: none;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
             padding: 15px 30px;
             border-radius: 10px;
             border: 3px solid #FFD700;
             text-align: center;
-            z-index: 25;
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.8), inset 0 0 20px rgba(255, 255, 255, 0.2);
+            pointer-events: none;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.8), 
+                       inset 0 0 20px rgba(255, 255, 255, 0.2);
+            opacity: 0;
+            transition: all 0.5s;
             animation: none;
+            z-index: 25;
         }
         
         #recentDiscovery.show {
-            animation: flashyEntrance 0.5s ease-out;
+            animation: popupBounce 0.5s ease-out;
         }
         
-        #recentDiscovery small {
-            display: block;
-            margin-top: 5px;
-            font-size: 14px;
-            font-weight: normal;
-            font-style: italic;
-            opacity: 0.9;
-        }
-        
-        @keyframes flashyEntrance {
+        @keyframes popupBounce {
             0% {
                 transform: translateX(-50%) scale(0.5) rotate(-10deg);
                 opacity: 0;
@@ -468,48 +601,288 @@
         }
         
         #recentDiscovery.combo {
-            background: linear-gradient(135deg, rgba(78, 205, 196, 0.95), rgba(69, 183, 170, 0.95));
+            background: linear-gradient(135deg, 
+                rgba(78, 205, 196, 0.95) 0%,
+                rgba(69, 183, 170, 0.95) 100%
+            );
             border-color: #4ecdc4;
-            box-shadow: 0 0 20px rgba(78, 205, 196, 0.8), inset 0 0 20px rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 30px rgba(78, 205, 196, 0.8), 
+                       inset 0 0 20px rgba(255, 255, 255, 0.2);
         }
         
-        /* Leaderboard */
-        #leaderboard {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(0,0,0,0.8);
-            padding: 15px;
-            border-radius: 10px;
-            border: 2px solid #444;
-            min-width: 200px;
-        }
-        
-        #leaderboard h4 {
-            margin: 0 0 10px 0;
-            color: #FFD700;
-            font-size: 16px;
-            text-align: center;
-        }
-        
-        #leaderboard-list {
+        #recentDiscovery small {
+            display: block;
+            margin-top: 5px;
             font-size: 14px;
-            line-height: 1.6;
+            font-weight: normal;
+            font-style: italic;
+            opacity: 0.9;
         }
         
-        #leaderboard-list .leader {
+        /* Player Info Box (Bottom Left) */
+        .player-info-box {
+            position: absolute;
+            bottom: 120px;
+            left: 20px;
+            width: 280px;
+            background: linear-gradient(135deg, 
+                rgba(20, 20, 40, 0.95) 0%,
+                rgba(30, 30, 50, 0.9) 100%
+            );
+            border: 2px solid rgba(138, 43, 226, 0.5);
+            border-radius: 10px;
+            padding: 12px;
+            pointer-events: auto;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        .player-info-header {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+        
+        .player-portrait {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, 
+                rgba(40, 40, 60, 0.9) 0%,
+                rgba(50, 50, 70, 0.8) 100%
+            );
+            border: 2px solid #FFD700;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .player-portrait img {
+            width: 56px;
+            height: 56px;
+            image-rendering: pixelated;
+        }
+        
+        .player-stats {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 4px;
+        }
+        
+        .stat-line {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+        }
+        
+        .stat-label {
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .stat-value {
+            color: #FFD700;
+            font-weight: bold;
+            text-shadow: 0 0 4px rgba(255, 215, 0, 0.3);
+        }
+        
+        /* Leaderboard (Bottom Right) */
+        .leaderboard-box {
+            position: absolute;
+            bottom: 120px;
+            right: 20px;
+            width: 280px;
+            background: linear-gradient(135deg, 
+                rgba(20, 20, 40, 0.95) 0%,
+                rgba(30, 30, 50, 0.9) 100%
+            );
+            border: 2px solid rgba(138, 43, 226, 0.5);
+            border-radius: 10px;
+            padding: 12px;
+            pointer-events: auto;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        .leaderboard-header {
+            font-size: 16px;
+            color: #FFD700;
+            text-align: center;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 0 0 4px rgba(255, 215, 0, 0.3);
+        }
+        
+        .leaderboard-entry {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 8px;
+            margin: 4px 0;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+        
+        .leaderboard-entry:hover {
+            background: rgba(138, 43, 226, 0.2);
+            transform: translateX(4px);
+        }
+        
+        .leaderboard-entry.leader {
+            background: linear-gradient(90deg, 
+                rgba(255, 215, 0, 0.2) 0%,
+                rgba(255, 215, 0, 0.1) 100%
+            );
+            border-left: 3px solid #FFD700;
+        }
+        
+        .leaderboard-entry.player {
+            background: linear-gradient(90deg, 
+                rgba(78, 205, 196, 0.2) 0%,
+                rgba(78, 205, 196, 0.1) 100%
+            );
+            border-left: 3px solid #4ecdc4;
+        }
+        
+        .leaderboard-name {
+            flex: 1;
+            font-weight: bold;
+        }
+        
+        .leaderboard-stats {
+            text-align: right;
+            font-size: 11px;
+            color: #AAA;
+        }
+        
+        /* Discovery Feed (Left Side Chat-style) */
+        .discovery-feed {
+            position: absolute;
+            top: 50%;
+            left: 20px;
+            transform: translateY(-50%);
+            width: 300px;
+            max-height: 60vh;
+            pointer-events: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            overflow: hidden;
+        }
+        
+        .discovery-feed-inner {
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(138, 43, 226, 0.3) transparent;
+        }
+        
+        .discovery-feed-inner::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .discovery-feed-inner::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .discovery-feed-inner::-webkit-scrollbar-thumb {
+            background: rgba(138, 43, 226, 0.3);
+            border-radius: 2px;
+        }
+        
+        .discovery-message {
+            background: linear-gradient(90deg, 
+                rgba(20, 20, 40, 0.8) 0%,
+                rgba(20, 20, 40, 0.4) 80%,
+                transparent 100%
+            );
+            border-left: 3px solid #FFD700;
+            padding: 8px 12px;
+            margin: 4px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 14px;
+            animation: slideInLeft 0.3s ease-out;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .discovery-message .emoji {
+            font-size: 20px;
+        }
+        
+        .discovery-message .discovery-text {
+            flex: 1;
+        }
+        
+        .discovery-message .discovery-name {
             color: #FFD700;
             font-weight: bold;
         }
         
-        #leaderboard-list .player {
-            color: #4ecdc4;
-            font-weight: bold;
-            font-size: 16px;
-            background: rgba(78, 205, 196, 0.1);
-            padding: 2px 6px;
-            border-radius: 4px;
-            border: 1px solid rgba(78, 205, 196, 0.3);
+        .discovery-message .discovery-combo {
+            font-size: 12px;
+            color: #AAA;
+            margin-top: 2px;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 1200px) {
+            .player-info-box,
+            .leaderboard-box {
+                width: 240px;
+                font-size: 12px;
+            }
+            
+            .element-slot {
+                width: 48px;
+                height: 48px;
+            }
+            
+            .element-slot .emoji {
+                font-size: 24px;
+            }
+            
+            .discovery-feed {
+                width: 250px;
+            }
+        }
+        
+        @media (max-width: 800px) {
+            .player-info-box,
+            .leaderboard-box {
+                bottom: 100px;
+                width: 200px;
+            }
+            
+            .discovery-feed {
+                display: none; /* Hide on mobile */
+            }
+            
+            .element-slot {
+                width: 42px;
+                height: 42px;
+            }
+            
+            .boost-bar-container {
+                width: 80%;
+            }
         }
         
         /* Pause Menu */
@@ -692,40 +1065,15 @@
                     <h5>🧪 Discovery Race</h5>
                     <button class="btn-discovery" onclick="selectVictoryMode('discovery', 100)">Discover 100 Elements</button>
                     <button class="btn-discovery" onclick="selectVictoryMode('discovery', 500)">Discover 500 Elements</button>
-                    <button class="btn-discovery" onclick="selectVictoryMode('discovery', 1000)">Discover 1000 Elements</button>
                 </div>
                 <div class="victory-column">
                     <h5>⭐ Points Race</h5>
                     <button class="btn-points" onclick="selectVictoryMode('points', 50000)">Score 50,000 Points</button>
                     <button class="btn-points" onclick="selectVictoryMode('points', 250000)">Score 250,000 Points</button>
-                    <button class="btn-points" onclick="selectVictoryMode('points', 1000000)">Score 1,000,000 Points</button>
                 </div>
                 <div class="victory-infinite">
                     <button class="btn-infinite" onclick="selectVictoryMode('infinite', 0)">∞ Infinite Mode</button>
                 </div>
-            </div>
-        </div>
-        
-        <div class="modeSection" id="controlSection" style="display: none;">
-            <h4>Control Method</h4>
-            <div id="loadingIndicator">
-                Loading element database... <span id="loadingProgress"></span>
-            </div>
-            <button class="controlOption" onclick="selectControls('arrows')">↑ ↓ ← → Arrow Keys</button>
-            <button class="controlOption" onclick="selectControls('wasd')">W A S D Keys</button>
-            <button class="controlOption" onclick="selectControls('mouse')">🖱️ Mouse / Touchpad</button>
-            
-            <div class="howToPlay">
-                <h5>How to Play</h5>
-                <ul>
-                    <li><strong>Collect Elements:</strong> Guide your snake to consume elemental orbs scattered across the map</li>
-                    <li><strong>Combine Elements:</strong> Elements in your snake automatically combine to create new discoveries</li>
-                    <li><strong>Grow & Survive:</strong> Each combination makes you longer. Bigger snakes can hold more elements!</li>
-                    <li><strong>Battle Strategy:</strong> In head-to-head collisions, the longer snake wins. Avoid all snake bodies!</li>
-                    <li><strong>Discover Everything:</strong> Find all possible element combinations to master the realm</li>
-                    <li><strong>Beware the Borders:</strong> Red borders mean instant death - stay away!</li>
-                </ul>
-                <p style="text-align: center; margin-top: 10px; color: #888; font-size: 12px;">Press P to pause • New discoveries grant invincibility!</p>
             </div>
         </div>
         </div>
@@ -745,21 +1093,69 @@
         <div id="recentDiscovery"></div>
         <div id="score">Score: 0</div>
         <div id="discoveries">Discoveries: 0</div>
-        <div id="alchemyVisionTimer" style="display: none; color: #FFD700; font-size: 18px; margin-top: 10px; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);">
-            🔮 Alchemy Vision: <span id="alchemyTime">60</span>s
+        <div id="elementQueue"></div>
+        
+        <!-- Discovery Feed (Left Side) -->
+        <div class="discovery-feed">
+            <div class="discovery-feed-inner" id="discoveryFeed"></div>
         </div>
-        <div id="staminaContainer" style="margin: 10px 0; text-align: center;">
-            <div style="color: white; font-size: 14px; margin-bottom: 5px;">BOOST</div>
-            <div id="staminaBar" style="width: 200px; height: 20px; background: rgba(0,0,0,0.5); border: 2px solid #333; border-radius: 10px; margin: 0 auto; position: relative; overflow: hidden;">
-                <div id="staminaFill" style="width: 100%; height: 100%; background: linear-gradient(90deg, #00a8ff, #00d4ff); transition: width 0.1s; position: absolute;"></div>
-                <div id="staminaWarning" style="width: 20%; height: 100%; background: rgba(255,100,100,0.3); position: absolute; left: 0; border-right: 2px solid rgba(255,100,100,0.5);"></div>
+        
+        <!-- Bottom UI Container -->
+        <div class="bottom-ui">
+            <!-- Element Collection Bar -->
+            <div class="element-collection-bar" id="elementBar"></div>
+            
+            <!-- Boost Bar -->
+            <div class="boost-bar-container">
+                <div class="boost-bar-frame">
+                    <div class="boost-bar-fill" id="boostBarFill" style="width: 100%"></div>
+                    <div class="boost-bar-text">BOOST</div>
+                </div>
             </div>
         </div>
-        <div id="elementQueue"></div>
-        <div id="leaderboard">
-            <h4>Leaderboard</h4>
-            <div id="discovery-count" style="color: #FFD700; font-size: 14px; margin-bottom: 10px; text-align: center;"></div>
-            <div id="leaderboard-list"></div>
+        
+        <!-- Alchemy Vision Timer (Above Player Info) -->
+        <div id="alchemyVisionTimer" style="display: none; position: absolute; bottom: 220px; left: 20px; width: 280px; background: linear-gradient(135deg, rgba(255, 215, 0, 0.2) 0%, rgba(255, 140, 0, 0.2) 100%); border: 2px solid #FFD700; border-radius: 8px; padding: 10px; text-align: center; color: #FFD700; font-size: 18px; font-weight: bold; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);">
+            🔮 Alchemy Vision: <span id="alchemyTime">60</span>s
+        </div>
+        
+        <!-- Player Info Box -->
+        <div class="player-info-box">
+            <div class="player-info-header">
+                <div class="player-portrait">
+                    <img id="playerPortrait" src="skins/snake-default-green.webp" alt="Player">
+                </div>
+                <div class="player-stats">
+                    <div class="stat-line">
+                        <span class="stat-label">Score</span>
+                        <span class="stat-value" id="playerScore">0</span>
+                    </div>
+                    <div class="stat-line">
+                        <span class="stat-label">Discoveries</span>
+                        <span class="stat-value" id="playerDiscoveries">0</span>
+                    </div>
+                    <div class="stat-line">
+                        <span class="stat-label">Best Rank</span>
+                        <span class="stat-value" id="playerBestRank">-</span>
+                    </div>
+                    <div class="stat-line">
+                        <span class="stat-label">Time</span>
+                        <span class="stat-value" id="playerTime">0:00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Leaderboard Box -->
+        <div class="leaderboard-box">
+            <div class="leaderboard-header">Leaderboard</div>
+            <div id="leaderboardList"></div>
+        </div>
+        
+        <!-- UI Info (Top Right) -->
+        <div style="position: absolute; top: 20px; right: 20px; text-align: right; font-size: 14px; color: rgba(255, 255, 255, 0.4); pointer-events: none;">
+            <div style="margin-bottom: 5px;">Press P for Pause Menu</div>
+            <div id="fpsCounter">FPS: --</div>
         </div>
     </div>
     
@@ -797,9 +1193,9 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         
-        // Make canvas fit with sidebar
+        // Make canvas fit full window
         function resizeCanvas() {
-            canvas.width = window.innerWidth - 200; // Account for sidebar
+            canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
         }
         resizeCanvas();
@@ -825,13 +1221,15 @@
         let particles = [];
         let lastDiscoveredElement = null;
         let highScore = parseInt(localStorage.getItem('highScore') || '0');
+        let gameStartTime = Date.now();
+        let bestRank = 0;
         
         // Alchemy Vision power-up
         let alchemyVisionPowerUps = [];
         let alchemyVisionActive = false;
         let alchemyVisionTimer = 0;
         let lastAlchemyVisionSpawn = 0;
-        const ALCHEMY_VISION_DURATION = 60000; // 60 seconds
+        const ALCHEMY_VISION_DURATION = 30000; // 30 seconds
         const ALCHEMY_VISION_SPAWN_INTERVAL = 120000; // 2 minutes
         const ALCHEMY_VISION_SPAWN_COUNT = 3; // Number of power-ups to spawn at once
         
@@ -1053,12 +1451,59 @@
         function selectVictoryMode(mode, target) {
             gameMode = mode;
             gameTarget = target;
-            document.getElementById('controlSection').style.display = 'block';
             
-            // Highlight selected button
-            const buttons = document.querySelectorAll('#victoryButtons button');
-            buttons.forEach(btn => btn.style.opacity = '0.6');
-            event.target.style.opacity = '1';
+            // Set default control scheme to mouse
+            controlScheme = 'mouse';
+            
+            // Start the game immediately
+            startGameTransition();
+        }
+        
+        function startGameTransition() {
+            // Create fade transition
+            const gameModeSelect = document.getElementById('gameModeSelect');
+            const discoveryLog = document.getElementById('discoveryLog');
+            const gameCanvas = document.getElementById('gameCanvas');
+            const gameModeStarsCanvas = document.getElementById('gameModeStarsCanvas');
+            
+            // Add transition styles
+            gameModeSelect.style.transition = 'opacity 0.8s ease-out';
+            gameCanvas.style.transition = 'opacity 0.8s ease-in';
+            gameCanvas.style.opacity = '0';
+            
+            // Create a temporary background during transition
+            const transitionBg = document.createElement('div');
+            transitionBg.style.position = 'fixed';
+            transitionBg.style.top = '0';
+            transitionBg.style.left = '0';
+            transitionBg.style.width = '100%';
+            transitionBg.style.height = '100%';
+            transitionBg.style.background = '#000';
+            transitionBg.style.zIndex = '40';
+            transitionBg.appendChild(gameModeStarsCanvas.cloneNode(true));
+            transitionBg.style.transition = 'opacity 1s ease-out';
+            document.body.appendChild(transitionBg);
+            
+            // Fade out menu content but keep stars visible
+            const menuContent = gameModeSelect.querySelector('#gameModeContent');
+            menuContent.style.transition = 'opacity 0.5s ease-out';
+            menuContent.style.opacity = '0';
+            
+            setTimeout(() => {
+                gameModeSelect.style.opacity = '0';
+                discoveryLog.style.display = 'block';
+                gameCanvas.style.opacity = '1';
+                
+                setTimeout(() => {
+                    gameModeSelect.style.display = 'none';
+                    transitionBg.style.opacity = '0';
+                    
+                    setTimeout(() => {
+                        transitionBg.remove();
+                        startGame();
+                    }, 1000);
+                }, 100);
+            }, 500);
         }
         
         function selectControls(scheme) {
@@ -1144,8 +1589,6 @@
         // Load element database
         async function loadElements() {
             try {
-                document.getElementById('loadingIndicator').style.display = 'block';
-                
                 // Wait for the new element system to load
                 if (!window.elementLoader || !window.elementCompatibility) {
                     // Wait for elementsLoaded event
@@ -1162,7 +1605,6 @@
                 combinations = legacyData.combinations;
                 
                 console.log(`Loaded ${Object.keys(elementDatabase).length} elements and ${Object.keys(combinations).length} combinations`);
-                document.getElementById('loadingIndicator').style.display = 'none';
             } catch (error) {
                 console.error('Failed to load elements:', error);
                 // Fallback to basic elements
@@ -1172,7 +1614,6 @@
                     earth: { emoji: '🌍', name: 'Earth', tier: 0, base: true },
                     air: { emoji: '💨', name: 'Air', tier: 0, base: true }
                 };
-                document.getElementById('loadingIndicator').style.display = 'none';
             }
         }
         
@@ -1493,12 +1934,12 @@
                         if (keys['ArrowLeft']) this.angle -= TURN_SPEED * turnMultiplier;
                         if (keys['ArrowRight']) this.angle += TURN_SPEED * turnMultiplier;
                         // Handle boost
-                        this.isBoosting = keys['ArrowUp'] && this.stamina > 20;
+                        this.isBoosting = keys['ArrowUp'] && this.stamina > 0;
                     } else if (controlScheme === 'wasd') {
                         if (keys['a'] || keys['A']) this.angle -= TURN_SPEED * turnMultiplier;
                         if (keys['d'] || keys['D']) this.angle += TURN_SPEED * turnMultiplier;
                         // Handle boost
-                        this.isBoosting = (keys['w'] || keys['W']) && this.stamina > 20;
+                        this.isBoosting = (keys['w'] || keys['W']) && this.stamina > 0;
                     } else if (controlScheme === 'mouse') {
                         // Smooth angle interpolation
                         let angleDiff = mouseAngle - this.angle;
@@ -1506,7 +1947,7 @@
                         while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
                         this.angle += angleDiff * 0.1 * turnMultiplier;
                         // Handle boost (mouse click)
-                        this.isBoosting = mouseDown && this.stamina > 20;
+                        this.isBoosting = mouseDown && this.stamina > 0;
                     }
                 } else {
                     // AI with border avoidance
@@ -1697,7 +2138,7 @@
                             shouldBoost = true;
                         }
                         
-                            this.isBoosting = shouldBoost && this.stamina > 20;
+                            this.isBoosting = shouldBoost && this.stamina > 0;
                         } else {
                             // Don't boost near borders or during emergency turns
                             this.isBoosting = false;
@@ -1954,8 +2395,8 @@
                     spawnElement(this.elements[i], segment.x, segment.y);
                 }
                 
-                // Create death particles
-                createDeathParticles(this.x, this.y);
+                // Create death particles scaled to snake size
+                createDeathParticles(this.x, this.y, this.length);
                 
                 // Respawn if player
                 if (this.isPlayer) {
@@ -2124,6 +2565,11 @@
                 this.x = x;
                 this.y = y;
                 this.data = elementDatabase[type];
+                // Fallback if element not found
+                if (!this.data) {
+                    console.warn(`Element type "${type}" not found in database`);
+                    this.data = { emoji: '❓', name: 'Unknown', tier: 0 };
+                }
                 this.pulse = 0;
                 this.isCatalystSpawned = isCatalystSpawned;
                 this.catalystSparkleTime = 0;
@@ -2189,7 +2635,7 @@
                     gradient.addColorStop(1, 'transparent');
                     ctx.fillStyle = gradient;
                     ctx.fillRect(screenX - glowSize, screenY - glowSize, glowSize * 2, glowSize * 2);
-                } else if (this.data.tier > 0) {
+                } else if (this.data && this.data.tier > 0) {
                     // Normal tier-based glow
                     const glowSize = ELEMENT_SIZE * 2 * scale;
                     const gradient = ctx.createRadialGradient(screenX, screenY, 0, screenX, screenY, glowSize);
@@ -2204,15 +2650,16 @@
                 ctx.font = `${ELEMENT_SIZE * 2 * scale}px Arial`;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText(this.data.emoji, screenX, screenY);
+                ctx.fillText(this.data ? this.data.emoji : '❓', screenX, screenY);
                 
                 // Draw element name below emoji
                 ctx.font = '10px Arial';
                 ctx.fillStyle = 'white';
                 ctx.strokeStyle = 'black';
                 ctx.lineWidth = 2;
-                ctx.strokeText(this.data.name, screenX, screenY + ELEMENT_SIZE + 5);
-                ctx.fillText(this.data.name, screenX, screenY + ELEMENT_SIZE + 5);
+                const name = this.data ? this.data.name : 'Unknown';
+                ctx.strokeText(name, screenX, screenY + ELEMENT_SIZE + 5);
+                ctx.fillText(name, screenX, screenY + ELEMENT_SIZE + 5);
                 
                 // Draw catalyst sparkles if this element was spawned by catalyst
                 if (this.isCatalystSpawned) {
@@ -2629,16 +3076,36 @@
             }
         }
         
-        function createDeathParticles(x, y) {
-            for (let i = 0; i < 30; i++) {
+        function createDeathParticles(x, y, snakeLength = 5) {
+            // Scale particle count and speed based on snake size
+            const baseParticles = 20;
+            const particleCount = Math.min(baseParticles + Math.floor(snakeLength / 2), 100); // Cap at 100 particles
+            const speedMultiplier = 1 + (snakeLength / 50); // Bigger snakes = faster explosion
+            
+            for (let i = 0; i < particleCount; i++) {
                 const angle = Math.random() * Math.PI * 2;
-                const speed = Math.random() * 5;
+                const speed = (Math.random() * 5 + 2) * speedMultiplier;
                 particles.push(new Particle(
                     x, y,
                     Math.cos(angle) * speed,
                     Math.sin(angle) * speed,
                     '#ff0000'
                 ));
+            }
+            
+            // Add some larger, slower particles for bigger snakes
+            if (snakeLength > 20) {
+                const largeParticleCount = Math.min(Math.floor(snakeLength / 10), 20);
+                for (let i = 0; i < largeParticleCount; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = (Math.random() * 3 + 1) * speedMultiplier;
+                    particles.push(new Particle(
+                        x, y,
+                        Math.cos(angle) * speed,
+                        Math.sin(angle) * speed,
+                        '#ff6600'
+                    ));
+                }
             }
         }
         
@@ -2653,6 +3120,8 @@
                 // Update discovery log for new discoveries
                 lastDiscoveredElement = result;
                 updateDiscoveryLog();
+                // Add to discovery feed
+                addDiscoveryToFeed(resultData, `${elem1Data.emoji} ${elem1Data.name} + ${elem2Data.emoji} ${elem2Data.name}`);
             } else {
                 message = `Combo! ${message}`;
             }
@@ -2678,8 +3147,42 @@
             }, 3000);
         }
         
+        // Add discovery to the feed (MMO chat-style)
+        function addDiscoveryToFeed(element, recipe) {
+            const feed = document.getElementById('discoveryFeed');
+            const message = document.createElement('div');
+            message.className = 'discovery-message';
+            
+            let recipeText = recipe || '';
+            if (element.recipe && element.recipe.length === 2) {
+                const elem1 = elementDatabase[element.recipe[0]];
+                const elem2 = elementDatabase[element.recipe[1]];
+                if (elem1 && elem2) {
+                    recipeText = `${elem1.emoji} ${elem1.name} + ${elem2.emoji} ${elem2.name}`;
+                }
+            }
+            
+            message.innerHTML = `
+                <span class="emoji">${element.emoji}</span>
+                <div class="discovery-text">
+                    <div class="discovery-name">${element.name}</div>
+                    ${recipeText ? `<div class="discovery-combo">${recipeText}</div>` : ''}
+                </div>
+            `;
+            
+            feed.appendChild(message);
+            
+            // Auto-scroll to bottom
+            feed.scrollTop = feed.scrollHeight;
+            
+            // Limit messages to prevent memory issues
+            while (feed.children.length > 20) {
+                feed.removeChild(feed.firstChild);
+            }
+        }
+        
         function updateLeaderboard() {
-            const leaderboardList = document.getElementById('leaderboard-list');
+            const leaderboardList = document.getElementById('leaderboardList');
             
             // Sort snakes based on game mode
             let sortedSnakes = [...snakes].filter(s => s.alive);
@@ -2703,21 +3206,32 @@
                 sortedSnakes[0].isLeader = true;
             }
             
-            // Display top 5
+            // Display top 5 with MMO-style formatting
             leaderboardList.innerHTML = '';
             sortedSnakes.slice(0, 5).forEach((snake, index) => {
                 const div = document.createElement('div');
-                div.className = snake === sortedSnakes[0] ? 'leader' : '';
-                if (snake.isPlayer) div.className += ' player';
+                div.className = 'leaderboard-entry';
                 
-                let text = `${index + 1}. ${snake.name} - `;
-                if (gameMode === 'discovery') {
-                    text += `${snake.discoveries} discoveries (${Math.floor(snake.score)} pts)`;
-                } else {
-                    text += `${Math.floor(snake.score)} points`;
+                if (index === 0) {
+                    div.classList.add('leader');
+                }
+                if (snake.isPlayer) {
+                    div.classList.add('player');
                 }
                 
-                div.textContent = text;
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'leaderboard-name';
+                nameSpan.textContent = (index === 0 ? '👑 ' : '') + snake.name;
+                
+                const statsDiv = document.createElement('div');
+                statsDiv.className = 'leaderboard-stats';
+                statsDiv.innerHTML = `
+                    <div>${Math.floor(snake.score).toLocaleString()} pts</div>
+                    <div>${snake.discoveries || 0} discoveries</div>
+                `;
+                
+                div.appendChild(nameSpan);
+                div.appendChild(statsDiv);
                 leaderboardList.appendChild(div);
             });
         }
@@ -2771,14 +3285,60 @@
             }
         }
         
+        // Update boost bar separately for real-time updates
+        function updateBoostBar() {
+            if (!playerSnake) return;
+            
+            const boostFill = document.getElementById('boostBarFill');
+            if (!boostFill) return;
+            
+            // Calculate stamina percentage
+            const staminaPercent = Math.max(0, Math.min(100, (playerSnake.stamina / playerSnake.maxStamina) * 100));
+            
+            // Force immediate style update
+            boostFill.style.width = staminaPercent + '%';
+            
+            // Force browser to recalculate styles
+            boostFill.offsetWidth;
+            
+            // Change color based on stamina level
+            if (staminaPercent <= 20) {
+                boostFill.className = 'boost-bar-fill low';
+            } else if (playerSnake.isBoosting) {
+                boostFill.className = 'boost-bar-fill boosting';
+            } else {
+                boostFill.className = 'boost-bar-fill';
+            }
+        }
+        
         function updateUI() {
             if (!playerSnake) return;
             
-            document.getElementById('score').textContent = `Score: ${Math.floor(playerSnake.score)}`;
+            // Update player info box
+            document.getElementById('playerScore').textContent = Math.floor(playerSnake.score).toLocaleString();
+            
+            // Update discoveries count
+            const discoveryCount = discoveredElements.size - 4; // Subtract base elements
+            document.getElementById('playerDiscoveries').textContent = discoveryCount;
             
             // Update high score display if current score is higher
             if (playerSnake.score > highScore) {
-                document.getElementById('score').innerHTML = `Score: ${Math.floor(playerSnake.score)} <span style="color: #FFD700; font-size: 16px;">(NEW HIGH SCORE!)</span>`;
+                highScore = playerSnake.score;
+                localStorage.setItem('highScore', Math.floor(highScore));
+            }
+            
+            // Update game time
+            const gameTime = Date.now() - gameStartTime;
+            const minutes = Math.floor(gameTime / 60000);
+            const seconds = Math.floor((gameTime % 60000) / 1000);
+            document.getElementById('playerTime').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Update best rank
+            const playerRank = snakes.filter(s => s.alive).findIndex(s => s === playerSnake) + 1;
+            const bestRankElement = document.getElementById('playerBestRank');
+            if (playerRank > 0 && (bestRank === 0 || playerRank < bestRank)) {
+                bestRank = playerRank;
+                bestRankElement.textContent = `#${bestRank}`;
             }
             
             // Update AlchemyVision timer
@@ -2791,34 +3351,8 @@
                 timerElement.style.display = 'none';
             }
             
-            // Update stamina bar
-            const staminaFill = document.getElementById('staminaFill');
-            const staminaBar = document.getElementById('staminaBar');
-            if (playerSnake) {
-                const staminaPercent = (playerSnake.stamina / playerSnake.maxStamina) * 100;
-                staminaFill.style.width = staminaPercent + '%';
-                
-                // Change color based on stamina level
-                if (staminaPercent <= 20) {
-                    staminaFill.style.background = 'linear-gradient(90deg, #ff4444, #ff6666)';
-                    staminaBar.style.borderColor = '#ff4444';
-                } else if (playerSnake.isBoosting) {
-                    staminaFill.style.background = 'linear-gradient(90deg, #44ff44, #66ff66)';
-                    staminaBar.style.borderColor = '#44ff44';
-                } else {
-                    staminaFill.style.background = 'linear-gradient(90deg, #00a8ff, #00d4ff)';
-                    staminaBar.style.borderColor = '#333';
-                }
-            }
-            
-            // Update discoveries count based on game mode
-            const discoveryCount = discoveredElements.size - 4; // Subtract base elements
-            const discoveryDisplay = document.getElementById('discovery-count');
-            if (gameMode === 'discovery') {
-                discoveryDisplay.textContent = `Discoveries: ${discoveryCount} / ${gameTarget}`;
-            } else {
-                discoveryDisplay.textContent = `Discoveries: ${discoveryCount}`;
-            }
+            // Update boost bar
+            updateBoostBar();
             
             // Check victory condition
             if (gameMode === 'discovery' && discoveryCount >= gameTarget) {
@@ -2832,17 +3366,17 @@
             // Update leaderboard
             updateLeaderboard();
             
-            // Update element queue
-            const queue = document.getElementById('elementQueue');
-            queue.innerHTML = '';
+            // Update element collection bar (MMO skill bar style)
+            const elementBar = document.getElementById('elementBar');
+            elementBar.innerHTML = '';
             
-            // Create squares for the full capacity
+            // Create slots for the full capacity
             for (let i = 0; i < playerSnake.elementCapacity; i++) {
                 const div = document.createElement('div');
-                div.className = 'element-square';
+                div.className = 'element-slot';
                 
                 if (i < playerSnake.elements.length) {
-                    // Filled square with element
+                    // Filled slot with element
                     const elementType = playerSnake.elements[i];
                     const element = elementDatabase[elementType];
                     if (element) {
@@ -2851,15 +3385,15 @@
                         if (i === playerSnake.elements.length - 1 && playerSnake.elements.length > 1) {
                             div.classList.add('tail-element');
                         }
-                        div.innerHTML = `<div>${element.emoji}</div><div class="element-name">${element.name}</div>`;
+                        div.innerHTML = `<div class="emoji">${element.emoji}</div><div class="element-name">${element.name}</div>`;
                         div.title = element.name;
                     }
                 } else {
-                    // Empty square
+                    // Empty slot
                     div.classList.add('empty');
                 }
                 
-                queue.appendChild(div);
+                elementBar.appendChild(div);
             }
         }
         
@@ -2894,7 +3428,7 @@
                             }
                             
                             // Show notification
-                            showMessage('🔮 Alchemy Vision Activated! 60s<br><small style="opacity: 0.8">Your eyes are opened to see all combinations</small>', 'success');
+                            showMessage('🔮 Alchemy Vision Activated! 30s<br><small style="opacity: 0.8">Your eyes are opened to see all combinations</small>', 'success');
                             break; // Only collect one at a time
                         }
                     }
@@ -3249,6 +3783,7 @@
         
         function startGame() {
             gameStarted = true;
+            gameStartTime = Date.now();
             
             // Create player snake
             playerSnake = new Snake(WORLD_SIZE / 2, WORLD_SIZE / 2, true);
@@ -3410,6 +3945,10 @@
         }
         
         let lastTime = 0;
+        let frameCount = 0;
+        let lastFpsUpdate = 0;
+        let currentFPS = 0;
+        
         function gameLoop(currentTime) {
             if (!gameStarted) return;
             
@@ -3419,6 +3958,20 @@
             
             const deltaTime = currentTime - lastTime;
             lastTime = currentTime;
+            
+            // Calculate FPS
+            frameCount++;
+            if (currentTime - lastFpsUpdate > 1000) { // Update every second
+                currentFPS = frameCount;
+                frameCount = 0;
+                lastFpsUpdate = currentTime;
+                
+                // Update FPS display
+                const fpsElement = document.getElementById('fpsCounter');
+                if (fpsElement) {
+                    fpsElement.textContent = `FPS: ${currentFPS}`;
+                }
+            }
             
             // Update animation time for border effects
             animationTime = currentTime * 0.001; // Convert to seconds
@@ -3533,6 +4086,9 @@
             
             // Update UI
             updateUI();
+            
+            // Update boost bar every frame for real-time feedback
+            updateBoostBar();
             
             // Draw everything
             drawBackground();
