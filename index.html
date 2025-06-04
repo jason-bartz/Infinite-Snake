@@ -1117,7 +1117,11 @@
         }
         
         function playRandomTrack() {
-            if (availableTracks.length === 0) return;
+            // Refill available tracks if empty
+            if (availableTracks.length === 0) {
+                console.log('Refilling available tracks...');
+                availableTracks = [...musicTracks];
+            }
             
             // Stop current track if playing
             if (currentTrack) {
@@ -1135,7 +1139,16 @@
             
             // Play next track when this one ends
             currentTrack.addEventListener('ended', () => {
-                playRandomTrack();
+                console.log('Track ended, playing next track...');
+                setTimeout(() => {
+                    try {
+                        playRandomTrack();
+                    } catch (error) {
+                        console.error('Error playing next track:', error);
+                        // Try again in a few seconds
+                        setTimeout(playRandomTrack, 3000);
+                    }
+                }, 1000); // Wait 1 second before next track
             });
             
             // Try to play
@@ -1631,7 +1644,9 @@
                     }
                     
                     ctx.beginPath();
-                    ctx.arc(screenX, screenY, SEGMENT_SIZE - i * 0.05, 0, Math.PI * 2);
+                    // Ensure segment radius never goes below 1 pixel
+                    const segmentRadius = Math.max(1, SEGMENT_SIZE - Math.min(i * 0.05, SEGMENT_SIZE - 1));
+                    ctx.arc(screenX, screenY, segmentRadius, 0, Math.PI * 2);
                     ctx.fill();
                 }
                 
@@ -2562,10 +2577,15 @@
             // Update animation time for border effects
             animationTime = currentTime * 0.001; // Convert to seconds
             
-            // Update camera to follow player
+            // Update camera to follow player with bounds checking
             if (playerSnake && playerSnake.alive) {
-                camera.x = playerSnake.x;
-                camera.y = playerSnake.y;
+                // Ensure camera coordinates stay within reasonable bounds to prevent overflow
+                camera.x = Math.max(0, Math.min(WORLD_SIZE, playerSnake.x));
+                camera.y = Math.max(0, Math.min(WORLD_SIZE, playerSnake.y));
+                
+                // Additional check for NaN or Infinity
+                if (!isFinite(camera.x)) camera.x = WORLD_SIZE / 2;
+                if (!isFinite(camera.y)) camera.y = WORLD_SIZE / 2;
             }
             
             // Update game objects
