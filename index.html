@@ -1110,6 +1110,38 @@
             }
         }
         
+        // Sound effects
+        let eatSound = null;
+        let explosionSound = null;
+        
+        function initSoundEffects() {
+            // Preload eating sound
+            eatSound = new Audio('sounds/8-bit-blip.mp3');
+            eatSound.volume = 0.5; // 50% volume
+            
+            // Preload explosion sound
+            explosionSound = new Audio('sounds/fire-impact.mp3');
+            explosionSound.volume = 0.75; // 75% volume
+        }
+        
+        function playEatSound() {
+            if (eatSound && !musicMuted) {
+                // Clone the audio to allow overlapping sounds
+                const sound = eatSound.cloneNode();
+                sound.volume = eatSound.volume;
+                sound.play().catch(e => console.log('Eat sound blocked:', e));
+            }
+        }
+        
+        function playExplosionSound() {
+            if (explosionSound && !musicMuted) {
+                // Clone the audio to allow overlapping sounds
+                const sound = explosionSound.cloneNode();
+                sound.volume = explosionSound.volume;
+                sound.play().catch(e => console.log('Explosion sound blocked:', e));
+            }
+        }
+        
         // Music functions
         function initMusic() {
             // Check which tracks are available
@@ -1556,6 +1588,11 @@
                     this.digest();
                 }
                 
+                // Play eating sound for player only
+                if (this.isPlayer) {
+                    playEatSound();
+                }
+                
                 // Add element to snake
                 this.elements.push(element.type);
                 
@@ -1671,6 +1708,9 @@
             }
             
             explode(killer) {
+                // Play explosion sound
+                playExplosionSound();
+                
                 // Award points to killer
                 if (killer && killer.alive) {
                     killer.score += 500; // 500 points for snake explosion
@@ -1727,8 +1767,8 @@
                     if (skinImage && skinImage.complete) {
                         ctx.save();
                         ctx.translate(screenX, screenY);
-                        ctx.rotate(this.angle - Math.PI/4); // Rotate 45 degrees counter-clockwise so top faces body
-                        const size = SEGMENT_SIZE * 2.875; // Increased by 15%
+                        ctx.rotate(this.angle - Math.PI/2); // Rotate 90 degrees counter-clockwise so top faces body
+                        const size = SEGMENT_SIZE * 3.1625; // Increased by 25% (2.875 * 1.1)
                         ctx.drawImage(skinImage, -size/2, -size/2, size, size);
                         ctx.restore();
                     } else {
@@ -2487,8 +2527,9 @@
                 spawnElement();
             }
             
-            // Initialize music
+            // Initialize music and sound effects
             initMusic();
+            initSoundEffects();
             
             // Update discovery log
             updateDiscoveryLog();
