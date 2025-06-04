@@ -97,10 +97,20 @@ class ElementLoader {
      * Load combinations from data
      */
     loadCombinations(data) {
-        // Use the combinationIndex for fast lookups
+        // Use the combinationIndex for fast lookups if available
         if (data.combinationIndex) {
             for (const [key, resultId] of Object.entries(data.combinationIndex)) {
                 this.combinations.set(key, resultId);
+            }
+        } else if (data.combinations && Array.isArray(data.combinations)) {
+            // Build index from combinations array
+            for (const combo of data.combinations) {
+                if (combo.sources && combo.result) {
+                    const [id1, id2] = combo.sources;
+                    // Normalize the key (smaller id first)
+                    const key = id1 <= id2 ? `${id1},${id2}` : `${id2},${id1}`;
+                    this.combinations.set(key, combo.result);
+                }
             }
         }
     }

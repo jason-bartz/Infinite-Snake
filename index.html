@@ -1420,6 +1420,13 @@
                         if (window.elementLoader && window.elementCompatibility) {
                             const resultElement = window.elementLoader.getCombinationByKeys(elem1, elem2);
                             result = resultElement ? resultElement.key : null;
+                            
+                            // Debug logging
+                            if (this.isPlayer && (elem1 === 'water' || elem2 === 'water') && (elem1 === 'ice' || elem2 === 'ice')) {
+                                console.log(`Checking combination: ${elem1} + ${elem2}`);
+                                console.log('Result element:', resultElement);
+                                console.log('Result key:', result);
+                            }
                         } else {
                             // Fallback to old system
                             const combo1 = `${elem1}+${elem2}`;

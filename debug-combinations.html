@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Combinations</title>
+    <script src="elements/element-loader.js"></script>
+    <script src="elements/compatibility-layer.js"></script>
+    <style>
+        body { font-family: monospace; padding: 20px; }
+        .result { margin: 10px 0; padding: 10px; border: 1px solid #ccc; }
+        .success { background: #e8f5e9; }
+        .error { background: #ffebee; }
+    </style>
+</head>
+<body>
+    <h1>Element Combination Debugger</h1>
+    <div id="output"></div>
+    
+    <script>
+        const output = document.getElementById('output');
+        
+        async function debugCombinations() {
+            try {
+                // Initialize element system
+                const elementLoader = new ElementLoader();
+                await elementLoader.init();
+                
+                const elementCompatibility = new ElementCompatibilityLayer(elementLoader);
+                await elementCompatibility.init();
+                
+                // Test specific combinations that might create mud
+                const testCases = [
+                    ['water', 'earth'],
+                    ['water', 'dust'],
+                    ['water', 'sand'],
+                    ['fire', 'water'],
+                    ['fire', 'earth'],
+                    ['air', 'water']
+                ];
+                
+                output.innerHTML = '<h2>Testing Combinations:</h2>';
+                
+                for (const [elem1, elem2] of testCases) {
+                    const resultElement = elementLoader.getCombinationByKeys(elem1, elem2);
+                    const result = resultElement ? resultElement.key : null;
+                    
+                    const div = document.createElement('div');
+                    div.className = result ? 'result success' : 'result error';
+                    
+                    if (result) {
+                        const elem1Data = elementLoader.getElementByKey(elem1);
+                        const elem2Data = elementLoader.getElementByKey(elem2);
+                        div.innerHTML = `
+                            <strong>${elem1} + ${elem2} = ${result}</strong><br>
+                            ${elem1Data.emoji} ${elem1Data.name} (ID: ${elem1Data.id}) + 
+                            ${elem2Data.emoji} ${elem2Data.name} (ID: ${elem2Data.id}) = 
+                            ${resultElement.emoji} ${resultElement.name} (ID: ${resultElement.id})
+                        `;
+                    } else {
+                        div.innerHTML = `<strong>${elem1} + ${elem2} = No combination found</strong>`;
+                    }
+                    
+                    output.appendChild(div);
+                }
+                
+                // Check for any combinations that result in mud
+                output.innerHTML += '<h2>All Combinations Resulting in Mud:</h2>';
+                const mudElement = elementLoader.getElementByKey('mud');
+                if (mudElement) {
+                    let mudCombos = [];
+                    for (const [key, resultId] of elementLoader.combinations.entries()) {
+                        if (resultId === mudElement.id) {
+                            const [id1, id2] = key.split(',').map(Number);
+                            const elem1 = elementLoader.getElementById(id1);
+                            const elem2 = elementLoader.getElementById(id2);
+                            if (elem1 && elem2) {
+                                mudCombos.push({
+                                    elem1: elem1,
+                                    elem2: elem2,
+                                    key: key
+                                });
+                            }
+                        }
+                    }
+                    
+                    for (const combo of mudCombos) {
+                        const div = document.createElement('div');
+                        div.className = 'result success';
+                        div.innerHTML = `
+                            ${combo.elem1.emoji} ${combo.elem1.name} (${combo.elem1.key}) + 
+                            ${combo.elem2.emoji} ${combo.elem2.name} (${combo.elem2.key}) = 
+                            ${mudElement.emoji} ${mudElement.name}
+                        `;
+                        output.appendChild(div);
+                    }
+                }
+                
+                // Check the legacy format conversion
+                output.innerHTML += '<h2>Legacy Format Check:</h2>';
+                const legacyData = elementLoader.toLegacyFormat();
+                const legacyCombos = Object.entries(legacyData.combinations).filter(([key, value]) => value === 'mud');
+                
+                for (const [comboKey, result] of legacyCombos) {
+                    const div = document.createElement('div');
+                    div.className = 'result success';
+                    div.innerHTML = `Legacy: ${comboKey} = ${result}`;
+                    output.appendChild(div);
+                }
+                
+            } catch (error) {
+                output.innerHTML = `<div class="result error">Error: ${error.message}</div>`;
+                console.error(error);
+            }
+        }
+        
+        // Run debug when page loads
+        debugCombinations();
+    </script>
+</body>
+</html>
