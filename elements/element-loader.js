@@ -105,11 +105,13 @@ class ElementLoader {
         } else if (data.combinations && Array.isArray(data.combinations)) {
             // Build index from combinations array
             for (const combo of data.combinations) {
-                if (combo.sources && combo.result) {
-                    const [id1, id2] = combo.sources;
-                    // Normalize the key (smaller id first)
-                    const key = id1 <= id2 ? `${id1},${id2}` : `${id2},${id1}`;
-                    this.combinations.set(key, combo.result);
+                // Support both 'sources' and 'elements' field names
+                const sources = combo.sources || combo.elements;
+                if (sources && combo.result) {
+                    const [id1, id2] = sources;
+                    // Store both directions for the combination
+                    this.combinations.set(`${id1},${id2}`, combo.result);
+                    this.combinations.set(`${id2},${id1}`, combo.result);
                 }
             }
         }

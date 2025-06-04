@@ -5,7 +5,7 @@
     "646": {
       "id": 646,
       "key": "mega-charizard-x",
-      "emoji": "🎮",
+      "emoji": "🔥",
       "name": "Mega Charizard X",
       "tier": 5,
       "discovered": false,
@@ -15,7 +15,7 @@
     "647": {
       "id": 647,
       "key": "mega-charizard-y",
-      "emoji": "🎮",
+      "emoji": "☀️",
       "name": "Mega Charizard Y",
       "tier": 5,
       "discovered": false,
@@ -25,7 +25,7 @@
     "648": {
       "id": 648,
       "key": "mega-blastoise",
-      "emoji": "🎮",
+      "emoji": "💙",
       "name": "Mega Blastoise",
       "tier": 5,
       "discovered": false,
@@ -35,7 +35,7 @@
     "649": {
       "id": 649,
       "key": "mega-venusaur",
-      "emoji": "🎮",
+      "emoji": "🌸",
       "name": "Mega Venusaur",
       "tier": 5,
       "discovered": false,
@@ -45,7 +45,7 @@
     "650": {
       "id": 650,
       "key": "mega-mewtwo-x",
-      "emoji": "🎮",
+      "emoji": "💪",
       "name": "Mega Mewtwo X",
       "tier": 5,
       "discovered": false,
@@ -55,7 +55,7 @@
     "651": {
       "id": 651,
       "key": "mega-mewtwo-y",
-      "emoji": "🎮",
+      "emoji": "🧠",
       "name": "Mega Mewtwo Y",
       "tier": 5,
       "discovered": false,
@@ -65,7 +65,7 @@
     "652": {
       "id": 652,
       "key": "mega-lucario",
-      "emoji": "🎮",
+      "emoji": "🥊",
       "name": "Mega Lucario",
       "tier": 5,
       "discovered": false,
@@ -75,7 +75,7 @@
     "653": {
       "id": 653,
       "key": "mega-garchomp",
-      "emoji": "🎮",
+      "emoji": "🦈",
       "name": "Mega Garchomp",
       "tier": 5,
       "discovered": false,
@@ -85,7 +85,7 @@
     "654": {
       "id": 654,
       "key": "mega-rayquaza",
-      "emoji": "🎮",
+      "emoji": "🐲",
       "name": "Mega Rayquaza",
       "tier": 5,
       "discovered": false,
@@ -95,7 +95,7 @@
     "655": {
       "id": 655,
       "key": "mega-gengar",
-      "emoji": "🎮",
+      "emoji": "👻",
       "name": "Mega Gengar",
       "tier": 5,
       "discovered": false,
@@ -105,7 +105,7 @@
     "656": {
       "id": 656,
       "key": "cyndaquil",
-      "emoji": "🎮",
+      "emoji": "🔥",
       "name": "Cyndaquil",
       "tier": 2,
       "discovered": false,
@@ -115,7 +115,7 @@
     "657": {
       "id": 657,
       "key": "quilava",
-      "emoji": "🎮",
+      "emoji": "🔥",
       "name": "Quilava",
       "tier": 3,
       "discovered": false,
@@ -125,7 +125,7 @@
     "658": {
       "id": 658,
       "key": "typhlosion",
-      "emoji": "🎮",
+      "emoji": "🌋",
       "name": "Typhlosion",
       "tier": 4,
       "discovered": false,
@@ -135,7 +135,7 @@
     "659": {
       "id": 659,
       "key": "totodile",
-      "emoji": "🎮",
+      "emoji": "🐊",
       "name": "Totodile",
       "tier": 2,
       "discovered": false,
@@ -145,7 +145,7 @@
     "660": {
       "id": 660,
       "key": "croconaw",
-      "emoji": "🎮",
+      "emoji": "🐊",
       "name": "Croconaw",
       "tier": 3,
       "discovered": false,
@@ -155,7 +155,7 @@
     "661": {
       "id": 661,
       "key": "feraligatr",
-      "emoji": "🎮",
+      "emoji": "🐊",
       "name": "Feraligatr",
       "tier": 4,
       "discovered": false,
@@ -165,7 +165,7 @@
     "662": {
       "id": 662,
       "key": "chikorita",
-      "emoji": "🎮",
+      "emoji": "🍃",
       "name": "Chikorita",
       "tier": 2,
       "discovered": false,
@@ -175,7 +175,7 @@
     "663": {
       "id": 663,
       "key": "bayleef",
-      "emoji": "🎮",
+      "emoji": "🌿",
       "name": "Bayleef",
       "tier": 3,
       "discovered": false,
@@ -185,7 +185,7 @@
     "664": {
       "id": 664,
       "key": "meganium",
-      "emoji": "🎮",
+      "emoji": "🌺",
       "name": "Meganium",
       "tier": 4,
       "discovered": false,
@@ -195,7 +195,7 @@
     "665": {
       "id": 665,
       "key": "umbreon",
-      "emoji": "🎮",
+      "emoji": "🌙",
       "name": "Umbreon",
       "tier": 3,
       "discovered": false,
@@ -205,7 +205,7 @@
     "666": {
       "id": 666,
       "key": "espeon",
-      "emoji": "🎮",
+      "emoji": "☀️",
       "name": "Espeon",
       "tier": 3,
       "discovered": false,
@@ -215,7 +215,7 @@
     "667": {
       "id": 667,
       "key": "tyranitar",
-      "emoji": "🎮",
+      "emoji": "🦖",
       "name": "Tyranitar",
       "tier": 4,
       "discovered": false,
@@ -225,7 +225,7 @@
     "668": {
       "id": 668,
       "key": "ampharos",
-      "emoji": "🎮",
+      "emoji": "⚡",
       "name": "Ampharos",
       "tier": 3,
       "discovered": false,
@@ -235,7 +235,7 @@
     "669": {
       "id": 669,
       "key": "scizor",
-      "emoji": "🎮",
+      "emoji": "🦂",
       "name": "Scizor",
       "tier": 4,
       "discovered": false,
@@ -245,7 +245,7 @@
     "670": {
       "id": 670,
       "key": "torchic",
-      "emoji": "🎮",
+      "emoji": "🐤",
       "name": "Torchic",
       "tier": 2,
       "discovered": false,
@@ -255,7 +255,7 @@
     "671": {
       "id": 671,
       "key": "combusken",
-      "emoji": "🎮",
+      "emoji": "🔥",
       "name": "Combusken",
       "tier": 3,
       "discovered": false,
@@ -265,7 +265,7 @@
     "672": {
       "id": 672,
       "key": "blaziken",
-      "emoji": "🎮",
+      "emoji": "🥊",
       "name": "Blaziken",
       "tier": 4,
       "discovered": false,
@@ -275,7 +275,7 @@
     "673": {
       "id": 673,
       "key": "mudkip",
-      "emoji": "🎮",
+      "emoji": "💧",
       "name": "Mudkip",
       "tier": 2,
       "discovered": false,
@@ -285,7 +285,7 @@
     "674": {
       "id": 674,
       "key": "marshtomp",
-      "emoji": "🎮",
+      "emoji": "💦",
       "name": "Marshtomp",
       "tier": 3,
       "discovered": false,
@@ -295,7 +295,7 @@
     "675": {
       "id": 675,
       "key": "swampert",
-      "emoji": "🎮",
+      "emoji": "🌊",
       "name": "Swampert",
       "tier": 4,
       "discovered": false,
@@ -305,7 +305,7 @@
     "676": {
       "id": 676,
       "key": "treecko",
-      "emoji": "🎮",
+      "emoji": "🦎",
       "name": "Treecko",
       "tier": 2,
       "discovered": false,
@@ -315,7 +315,7 @@
     "677": {
       "id": 677,
       "key": "grovyle",
-      "emoji": "🎮",
+      "emoji": "🍃",
       "name": "Grovyle",
       "tier": 3,
       "discovered": false,
@@ -325,7 +325,7 @@
     "678": {
       "id": 678,
       "key": "sceptile",
-      "emoji": "🎮",
+      "emoji": "🌿",
       "name": "Sceptile",
       "tier": 4,
       "discovered": false,
@@ -335,7 +335,7 @@
     "679": {
       "id": 679,
       "key": "gardevoir",
-      "emoji": "🎮",
+      "emoji": "🧚",
       "name": "Gardevoir",
       "tier": 4,
       "discovered": false,
@@ -345,7 +345,7 @@
     "680": {
       "id": 680,
       "key": "salamence",
-      "emoji": "🎮",
+      "emoji": "🐉",
       "name": "Salamence",
       "tier": 4,
       "discovered": false,
@@ -355,7 +355,7 @@
     "681": {
       "id": 681,
       "key": "metagross",
-      "emoji": "🎮",
+      "emoji": "🤖",
       "name": "Metagross",
       "tier": 4,
       "discovered": false,
@@ -365,7 +365,7 @@
     "682": {
       "id": 682,
       "key": "kyogre",
-      "emoji": "🎮",
+      "emoji": "🐋",
       "name": "Kyogre",
       "tier": 5,
       "discovered": false,
@@ -375,7 +375,7 @@
     "683": {
       "id": 683,
       "key": "groudon",
-      "emoji": "🎮",
+      "emoji": "🌋",
       "name": "Groudon",
       "tier": 5,
       "discovered": false,
@@ -385,7 +385,7 @@
     "684": {
       "id": 684,
       "key": "rayquaza",
-      "emoji": "🎮",
+      "emoji": "🐲",
       "name": "Rayquaza",
       "tier": 5,
       "discovered": false,
@@ -395,7 +395,7 @@
     "685": {
       "id": 685,
       "key": "piplup",
-      "emoji": "🎮",
+      "emoji": "🐧",
       "name": "Piplup",
       "tier": 2,
       "discovered": false,
@@ -405,7 +405,7 @@
     "686": {
       "id": 686,
       "key": "prinplup",
-      "emoji": "🎮",
+      "emoji": "🐧",
       "name": "Prinplup",
       "tier": 3,
       "discovered": false,
@@ -415,7 +415,7 @@
     "687": {
       "id": 687,
       "key": "empoleon",
-      "emoji": "🎮",
+      "emoji": "👑",
       "name": "Empoleon",
       "tier": 4,
       "discovered": false,
@@ -425,7 +425,7 @@
     "688": {
       "id": 688,
       "key": "chimchar",
-      "emoji": "🎮",
+      "emoji": "🐵",
       "name": "Chimchar",
       "tier": 2,
       "discovered": false,
@@ -435,7 +435,7 @@
     "689": {
       "id": 689,
       "key": "monferno",
-      "emoji": "🎮",
+      "emoji": "🔥",
       "name": "Monferno",
       "tier": 3,
       "discovered": false,
@@ -445,7 +445,7 @@
     "690": {
       "id": 690,
       "key": "infernape",
-      "emoji": "🎮",
+      "emoji": "🔥",
       "name": "Infernape",
       "tier": 4,
       "discovered": false,
@@ -455,7 +455,7 @@
     "691": {
       "id": 691,
       "key": "turtwig",
-      "emoji": "🎮",
+      "emoji": "🌱",
       "name": "Turtwig",
       "tier": 2,
       "discovered": false,
@@ -465,7 +465,7 @@
     "692": {
       "id": 692,
       "key": "grotle",
-      "emoji": "🎮",
+      "emoji": "🌳",
       "name": "Grotle",
       "tier": 3,
       "discovered": false,
@@ -475,7 +475,7 @@
     "693": {
       "id": 693,
       "key": "torterra",
-      "emoji": "🎮",
+      "emoji": "🏔️",
       "name": "Torterra",
       "tier": 4,
       "discovered": false,
@@ -485,7 +485,7 @@
     "694": {
       "id": 694,
       "key": "garchomp",
-      "emoji": "🎮",
+      "emoji": "🦈",
       "name": "Garchomp",
       "tier": 4,
       "discovered": false,
@@ -495,7 +495,7 @@
     "695": {
       "id": 695,
       "key": "lucario",
-      "emoji": "🎮",
+      "emoji": "🐺",
       "name": "Lucario",
       "tier": 4,
       "discovered": false,
@@ -505,7 +505,7 @@
     "696": {
       "id": 696,
       "key": "rotom",
-      "emoji": "🎮",
+      "emoji": "⚡",
       "name": "Rotom",
       "tier": 3,
       "discovered": false,
@@ -515,7 +515,7 @@
     "697": {
       "id": 697,
       "key": "dialga",
-      "emoji": "🎮",
+      "emoji": "⏰",
       "name": "Dialga",
       "tier": 5,
       "discovered": false,
@@ -525,7 +525,7 @@
     "698": {
       "id": 698,
       "key": "palkia",
-      "emoji": "🎮",
+      "emoji": "🌌",
       "name": "Palkia",
       "tier": 5,
       "discovered": false,
@@ -535,7 +535,7 @@
     "699": {
       "id": 699,
       "key": "giratina",
-      "emoji": "🎮",
+      "emoji": "👻",
       "name": "Giratina",
       "tier": 5,
       "discovered": false,
@@ -545,7 +545,7 @@
     "700": {
       "id": 700,
       "key": "snivy",
-      "emoji": "🎮",
+      "emoji": "🐍",
       "name": "Snivy",
       "tier": 2,
       "discovered": false,
@@ -555,7 +555,7 @@
     "701": {
       "id": 701,
       "key": "servine",
-      "emoji": "🎮",
+      "emoji": "🍃",
       "name": "Servine",
       "tier": 3,
       "discovered": false,
@@ -565,7 +565,7 @@
     "702": {
       "id": 702,
       "key": "serperior",
-      "emoji": "🎮",
+      "emoji": "🐍",
       "name": "Serperior",
       "tier": 4,
       "discovered": false,
@@ -575,7 +575,7 @@
     "703": {
       "id": 703,
       "key": "tepig",
-      "emoji": "🎮",
+      "emoji": "🐷",
       "name": "Tepig",
       "tier": 2,
       "discovered": false,
@@ -585,7 +585,7 @@
     "704": {
       "id": 704,
       "key": "pignite",
-      "emoji": "🎮",
+      "emoji": "🔥",
       "name": "Pignite",
       "tier": 3,
       "discovered": false,
@@ -595,7 +595,7 @@
     "705": {
       "id": 705,
       "key": "emboar",
-      "emoji": "🎮",
+      "emoji": "🔥",
       "name": "Emboar",
       "tier": 4,
       "discovered": false,
@@ -605,7 +605,7 @@
     "706": {
       "id": 706,
       "key": "oshawott",
-      "emoji": "🎮",
+      "emoji": "🦦",
       "name": "Oshawott",
       "tier": 2,
       "discovered": false,
@@ -615,7 +615,7 @@
     "707": {
       "id": 707,
       "key": "dewott",
-      "emoji": "🎮",
+      "emoji": "💧",
       "name": "Dewott",
       "tier": 3,
       "discovered": false,
@@ -625,7 +625,7 @@
     "708": {
       "id": 708,
       "key": "samurott",
-      "emoji": "🎮",
+      "emoji": "⚔️",
       "name": "Samurott",
       "tier": 4,
       "discovered": false,
@@ -635,7 +635,7 @@
     "709": {
       "id": 709,
       "key": "zoroark",
-      "emoji": "🎮",
+      "emoji": "🦊",
       "name": "Zoroark",
       "tier": 4,
       "discovered": false,
@@ -645,7 +645,7 @@
     "710": {
       "id": 710,
       "key": "hydreigon",
-      "emoji": "🎮",
+      "emoji": "🐲",
       "name": "Hydreigon",
       "tier": 4,
       "discovered": false,
@@ -655,7 +655,7 @@
     "711": {
       "id": 711,
       "key": "reshiram",
-      "emoji": "🎮",
+      "emoji": "🔥",
       "name": "Reshiram",
       "tier": 5,
       "discovered": false,
@@ -665,7 +665,7 @@
     "712": {
       "id": 712,
       "key": "zekrom",
-      "emoji": "🎮",
+      "emoji": "⚡",
       "name": "Zekrom",
       "tier": 5,
       "discovered": false,
@@ -675,7 +675,7 @@
     "713": {
       "id": 713,
       "key": "kyurem",
-      "emoji": "🎮",
+      "emoji": "❄️",
       "name": "Kyurem",
       "tier": 5,
       "discovered": false,
@@ -685,7 +685,7 @@
     "714": {
       "id": 714,
       "key": "froakie",
-      "emoji": "🎮",
+      "emoji": "🐸",
       "name": "Froakie",
       "tier": 2,
       "discovered": false,
@@ -695,7 +695,7 @@
     "715": {
       "id": 715,
       "key": "frogadier",
-      "emoji": "🎮",
+      "emoji": "💧",
       "name": "Frogadier",
       "tier": 3,
       "discovered": false,
@@ -705,7 +705,7 @@
     "716": {
       "id": 716,
       "key": "greninja",
-      "emoji": "🎮",
+      "emoji": "🥷",
       "name": "Greninja",
       "tier": 4,
       "discovered": false,
@@ -715,7 +715,7 @@
     "717": {
       "id": 717,
       "key": "chespin",
-      "emoji": "🎮",
+      "emoji": "🌰",
       "name": "Chespin",
       "tier": 2,
       "discovered": false,
@@ -725,7 +725,7 @@
     "718": {
       "id": 718,
       "key": "quilladin",
-      "emoji": "🎮",
+      "emoji": "🛡️",
       "name": "Quilladin",
       "tier": 3,
       "discovered": false,
@@ -735,7 +735,7 @@
     "719": {
       "id": 719,
       "key": "chesnaught",
-      "emoji": "🎮",
+      "emoji": "🛡️",
       "name": "Chesnaught",
       "tier": 4,
       "discovered": false,
@@ -745,7 +745,7 @@
     "720": {
       "id": 720,
       "key": "fennekin",
-      "emoji": "🎮",
+      "emoji": "🦊",
       "name": "Fennekin",
       "tier": 2,
       "discovered": false,
@@ -755,7 +755,7 @@
     "721": {
       "id": 721,
       "key": "braixen",
-      "emoji": "🎮",
+      "emoji": "🔥",
       "name": "Braixen",
       "tier": 3,
       "discovered": false,
@@ -765,7 +765,7 @@
     "722": {
       "id": 722,
       "key": "delphox",
-      "emoji": "🎮",
+      "emoji": "🧙",
       "name": "Delphox",
       "tier": 4,
       "discovered": false,
@@ -775,7 +775,7 @@
     "723": {
       "id": 723,
       "key": "sylveon",
-      "emoji": "🎮",
+      "emoji": "🎀",
       "name": "Sylveon",
       "tier": 3,
       "discovered": false,
@@ -785,7 +785,7 @@
     "724": {
       "id": 724,
       "key": "xerneas",
-      "emoji": "🎮",
+      "emoji": "🦌",
       "name": "Xerneas",
       "tier": 5,
       "discovered": false,
@@ -795,7 +795,7 @@
     "725": {
       "id": 725,
       "key": "yveltal",
-      "emoji": "🎮",
+      "emoji": "🦅",
       "name": "Yveltal",
       "tier": 5,
       "discovered": false,
@@ -805,7 +805,7 @@
     "726": {
       "id": 726,
       "key": "zygarde",
-      "emoji": "🎮",
+      "emoji": "🐍",
       "name": "Zygarde",
       "tier": 5,
       "discovered": false,
@@ -815,7 +815,7 @@
     "727": {
       "id": 727,
       "key": "rowlet",
-      "emoji": "🎮",
+      "emoji": "🦉",
       "name": "Rowlet",
       "tier": 2,
       "discovered": false,
@@ -825,7 +825,7 @@
     "728": {
       "id": 728,
       "key": "dartrix",
-      "emoji": "🎮",
+      "emoji": "🍃",
       "name": "Dartrix",
       "tier": 3,
       "discovered": false,
@@ -835,7 +835,7 @@
     "729": {
       "id": 729,
       "key": "decidueye",
-      "emoji": "🎮",
+      "emoji": "🏹",
       "name": "Decidueye",
       "tier": 4,
       "discovered": false,
@@ -845,7 +845,7 @@
     "730": {
       "id": 730,
       "key": "litten",
-      "emoji": "🎮",
+      "emoji": "🐱",
       "name": "Litten",
       "tier": 2,
       "discovered": false,
@@ -855,7 +855,7 @@
     "731": {
       "id": 731,
       "key": "torracat",
-      "emoji": "🎮",
+      "emoji": "🔥",
       "name": "Torracat",
       "tier": 3,
       "discovered": false,
@@ -865,7 +865,7 @@
     "732": {
       "id": 732,
       "key": "incineroar",
-      "emoji": "🎮",
+      "emoji": "🐯",
       "name": "Incineroar",
       "tier": 4,
       "discovered": false,
@@ -875,7 +875,7 @@
     "733": {
       "id": 733,
       "key": "popplio",
-      "emoji": "🎮",
+      "emoji": "🦭",
       "name": "Popplio",
       "tier": 2,
       "discovered": false,
@@ -885,7 +885,7 @@
     "734": {
       "id": 734,
       "key": "brionne",
-      "emoji": "🎮",
+      "emoji": "💧",
       "name": "Brionne",
       "tier": 3,
       "discovered": false,
@@ -895,7 +895,7 @@
     "735": {
       "id": 735,
       "key": "primarina",
-      "emoji": "🎮",
+      "emoji": "🧜‍♀️",
       "name": "Primarina",
       "tier": 4,
       "discovered": false,
@@ -905,7 +905,7 @@
     "736": {
       "id": 736,
       "key": "mimikyu",
-      "emoji": "🎮",
+      "emoji": "👻",
       "name": "Mimikyu",
       "tier": 3,
       "discovered": false,
@@ -915,7 +915,7 @@
     "737": {
       "id": 737,
       "key": "lycanroc",
-      "emoji": "🎮",
+      "emoji": "🐺",
       "name": "Lycanroc",
       "tier": 3,
       "discovered": false,
@@ -925,7 +925,7 @@
     "738": {
       "id": 738,
       "key": "solgaleo",
-      "emoji": "🎮",
+      "emoji": "☀️",
       "name": "Solgaleo",
       "tier": 5,
       "discovered": false,
@@ -935,7 +935,7 @@
     "739": {
       "id": 739,
       "key": "lunala",
-      "emoji": "🎮",
+      "emoji": "🌙",
       "name": "Lunala",
       "tier": 5,
       "discovered": false,
@@ -945,7 +945,7 @@
     "740": {
       "id": 740,
       "key": "grookey",
-      "emoji": "🎮",
+      "emoji": "🐵",
       "name": "Grookey",
       "tier": 2,
       "discovered": false,
@@ -955,7 +955,7 @@
     "741": {
       "id": 741,
       "key": "thwackey",
-      "emoji": "🎮",
+      "emoji": "🥁",
       "name": "Thwackey",
       "tier": 3,
       "discovered": false,
@@ -965,7 +965,7 @@
     "742": {
       "id": 742,
       "key": "rillaboom",
-      "emoji": "🎮",
+      "emoji": "🥁",
       "name": "Rillaboom",
       "tier": 4,
       "discovered": false,
@@ -975,7 +975,7 @@
     "743": {
       "id": 743,
       "key": "scorbunny",
-      "emoji": "🎮",
+      "emoji": "🐰",
       "name": "Scorbunny",
       "tier": 2,
       "discovered": false,
@@ -985,7 +985,7 @@
     "744": {
       "id": 744,
       "key": "raboot",
-      "emoji": "🎮",
+      "emoji": "🔥",
       "name": "Raboot",
       "tier": 3,
       "discovered": false,
@@ -995,7 +995,7 @@
     "745": {
       "id": 745,
       "key": "cinderace",
-      "emoji": "🎮",
+      "emoji": "⚽",
       "name": "Cinderace",
       "tier": 4,
       "discovered": false,
@@ -1005,7 +1005,7 @@
     "746": {
       "id": 746,
       "key": "sobble",
-      "emoji": "🎮",
+      "emoji": "💧",
       "name": "Sobble",
       "tier": 2,
       "discovered": false,
@@ -1015,7 +1015,7 @@
     "747": {
       "id": 747,
       "key": "drizzile",
-      "emoji": "🎮",
+      "emoji": "💦",
       "name": "Drizzile",
       "tier": 3,
       "discovered": false,
@@ -1025,7 +1025,7 @@
     "748": {
       "id": 748,
       "key": "inteleon",
-      "emoji": "🎮",
+      "emoji": "🔫",
       "name": "Inteleon",
       "tier": 4,
       "discovered": false,
@@ -1035,7 +1035,7 @@
     "749": {
       "id": 749,
       "key": "corviknight",
-      "emoji": "🎮",
+      "emoji": "🦅",
       "name": "Corviknight",
       "tier": 4,
       "discovered": false,
@@ -1045,7 +1045,7 @@
     "750": {
       "id": 750,
       "key": "dragapult",
-      "emoji": "🎮",
+      "emoji": "👻",
       "name": "Dragapult",
       "tier": 4,
       "discovered": false,
@@ -1055,7 +1055,7 @@
     "751": {
       "id": 751,
       "key": "zacian",
-      "emoji": "🎮",
+      "emoji": "⚔️",
       "name": "Zacian",
       "tier": 5,
       "discovered": false,
@@ -1065,7 +1065,7 @@
     "752": {
       "id": 752,
       "key": "zamazenta",
-      "emoji": "🎮",
+      "emoji": "🛡️",
       "name": "Zamazenta",
       "tier": 5,
       "discovered": false,
@@ -1075,7 +1075,7 @@
     "753": {
       "id": 753,
       "key": "gengar",
-      "emoji": "🎮",
+      "emoji": "👻",
       "name": "Gengar",
       "tier": 4,
       "discovered": false,
@@ -1085,7 +1085,7 @@
     "754": {
       "id": 754,
       "key": "alakazam",
-      "emoji": "🎮",
+      "emoji": "🥄",
       "name": "Alakazam",
       "tier": 4,
       "discovered": false,
@@ -1095,7 +1095,7 @@
     "755": {
       "id": 755,
       "key": "machamp",
-      "emoji": "🎮",
+      "emoji": "💪",
       "name": "Machamp",
       "tier": 4,
       "discovered": false,
@@ -1105,7 +1105,7 @@
     "756": {
       "id": 756,
       "key": "gyarados",
-      "emoji": "🎮",
+      "emoji": "🐲",
       "name": "Gyarados",
       "tier": 4,
       "discovered": false,
@@ -1115,7 +1115,7 @@
     "757": {
       "id": 757,
       "key": "lapras",
-      "emoji": "🎮",
+      "emoji": "🦕",
       "name": "Lapras",
       "tier": 3,
       "discovered": false,
@@ -1125,7 +1125,7 @@
     "758": {
       "id": 758,
       "key": "glaceon",
-      "emoji": "🎮",
+      "emoji": "❄️",
       "name": "Glaceon",
       "tier": 3,
       "discovered": false,
@@ -1135,7 +1135,7 @@
     "759": {
       "id": 759,
       "key": "leafeon",
-      "emoji": "🎮",
+      "emoji": "🍃",
       "name": "Leafeon",
       "tier": 3,
       "discovered": false,
@@ -1145,7 +1145,7 @@
     "760": {
       "id": 760,
       "key": "charizardite-x",
-      "emoji": "🎮",
+      "emoji": "🔥",
       "name": "Charizardite X",
       "tier": 4,
       "discovered": false,
@@ -1155,7 +1155,7 @@
     "761": {
       "id": 761,
       "key": "charizardite-y",
-      "emoji": "🎮",
+      "emoji": "🔥",
       "name": "Charizardite Y",
       "tier": 4,
       "discovered": false,
@@ -1165,7 +1165,7 @@
     "762": {
       "id": 762,
       "key": "blastoisinite",
-      "emoji": "🎮",
+      "emoji": "💎",
       "name": "Blastoisinite",
       "tier": 4,
       "discovered": false,
@@ -1175,7 +1175,7 @@
     "763": {
       "id": 763,
       "key": "venusaurite",
-      "emoji": "🎮",
+      "emoji": "💎",
       "name": "Venusaurite",
       "tier": 4,
       "discovered": false,
@@ -1185,7 +1185,7 @@
     "764": {
       "id": 764,
       "key": "mewtwonite-x",
-      "emoji": "🎮",
+      "emoji": "💎",
       "name": "Mewtwonite X",
       "tier": 4,
       "discovered": false,
@@ -1195,7 +1195,7 @@
     "765": {
       "id": 765,
       "key": "mewtwonite-y",
-      "emoji": "🎮",
+      "emoji": "💎",
       "name": "Mewtwonite Y",
       "tier": 4,
       "discovered": false,
@@ -1205,7 +1205,7 @@
     "766": {
       "id": 766,
       "key": "lucarionite",
-      "emoji": "🎮",
+      "emoji": "💎",
       "name": "Lucarionite",
       "tier": 4,
       "discovered": false,
@@ -1215,7 +1215,7 @@
     "767": {
       "id": 767,
       "key": "garchompite",
-      "emoji": "🎮",
+      "emoji": "💎",
       "name": "Garchompite",
       "tier": 4,
       "discovered": false,
@@ -1225,7 +1225,7 @@
     "768": {
       "id": 768,
       "key": "gengarite",
-      "emoji": "🎮",
+      "emoji": "💎",
       "name": "Gengarite",
       "tier": 4,
       "discovered": false,
@@ -1235,7 +1235,7 @@
     "769": {
       "id": 769,
       "key": "ultra-ball",
-      "emoji": "🎮",
+      "emoji": "⚫",
       "name": "Ultra Ball",
       "tier": 3,
       "discovered": false,
@@ -1245,7 +1245,7 @@
     "770": {
       "id": 770,
       "key": "great-ball",
-      "emoji": "🎮",
+      "emoji": "🔵",
       "name": "Great Ball",
       "tier": 2,
       "discovered": false,
@@ -1255,7 +1255,7 @@
     "771": {
       "id": 771,
       "key": "premier-ball",
-      "emoji": "🎮",
+      "emoji": "⚪",
       "name": "Premier Ball",
       "tier": 3,
       "discovered": false,
@@ -1265,7 +1265,7 @@
     "772": {
       "id": 772,
       "key": "luxury-ball",
-      "emoji": "🎮",
+      "emoji": "✨",
       "name": "Luxury Ball",
       "tier": 3,
       "discovered": false,
@@ -1275,7 +1275,7 @@
     "773": {
       "id": 773,
       "key": "quick-ball",
-      "emoji": "🎮",
+      "emoji": "💨",
       "name": "Quick Ball",
       "tier": 3,
       "discovered": false,
@@ -1285,7 +1285,7 @@
     "774": {
       "id": 774,
       "key": "timer-ball",
-      "emoji": "🎮",
+      "emoji": "⏰",
       "name": "Timer Ball",
       "tier": 3,
       "discovered": false,
@@ -1295,7 +1295,7 @@
     "775": {
       "id": 775,
       "key": "dusk-ball",
-      "emoji": "🎮",
+      "emoji": "🌑",
       "name": "Dusk Ball",
       "tier": 3,
       "discovered": false,
@@ -1305,7 +1305,7 @@
     "776": {
       "id": 776,
       "key": "heal-ball",
-      "emoji": "🎮",
+      "emoji": "💗",
       "name": "Heal Ball",
       "tier": 3,
       "discovered": false,
@@ -1315,7 +1315,7 @@
     "777": {
       "id": 777,
       "key": "darkrai",
-      "emoji": "🎮",
+      "emoji": "🌑",
       "name": "Darkrai",
       "tier": 5,
       "discovered": false,
@@ -1325,7 +1325,7 @@
     "778": {
       "id": 778,
       "key": "arceus",
-      "emoji": "🎮",
+      "emoji": "✨",
       "name": "Arceus",
       "tier": 5,
       "discovered": false,
@@ -1335,7 +1335,7 @@
     "779": {
       "id": 779,
       "key": "celebi",
-      "emoji": "🎮",
+      "emoji": "🧚",
       "name": "Celebi",
       "tier": 5,
       "discovered": false,
@@ -1345,7 +1345,7 @@
     "780": {
       "id": 780,
       "key": "jirachi",
-      "emoji": "🎮",
+      "emoji": "⭐",
       "name": "Jirachi",
       "tier": 5,
       "discovered": false,
@@ -1355,7 +1355,7 @@
     "781": {
       "id": 781,
       "key": "deoxys",
-      "emoji": "🎮",
+      "emoji": "🧬",
       "name": "Deoxys",
       "tier": 5,
       "discovered": false,
@@ -1365,7 +1365,7 @@
     "782": {
       "id": 782,
       "key": "shaymin",
-      "emoji": "🎮",
+      "emoji": "🌸",
       "name": "Shaymin",
       "tier": 5,
       "discovered": false,
@@ -1375,7 +1375,7 @@
     "783": {
       "id": 783,
       "key": "victini",
-      "emoji": "🎮",
+      "emoji": "✌️",
       "name": "Victini",
       "tier": 5,
       "discovered": false,
@@ -1385,7 +1385,7 @@
     "784": {
       "id": 784,
       "key": "genesect",
-      "emoji": "🎮",
+      "emoji": "🦾",
       "name": "Genesect",
       "tier": 5,
       "discovered": false,
@@ -1395,7 +1395,7 @@
     "785": {
       "id": 785,
       "key": "diancie",
-      "emoji": "🎮",
+      "emoji": "💎",
       "name": "Diancie",
       "tier": 5,
       "discovered": false,
@@ -1405,7 +1405,7 @@
     "786": {
       "id": 786,
       "key": "hoopa",
-      "emoji": "🎮",
+      "emoji": "🔮",
       "name": "Hoopa",
       "tier": 5,
       "discovered": false,
@@ -1415,7 +1415,7 @@
     "787": {
       "id": 787,
       "key": "volcanion",
-      "emoji": "🎮",
+      "emoji": "🌋",
       "name": "Volcanion",
       "tier": 5,
       "discovered": false,
@@ -1425,7 +1425,7 @@
     "788": {
       "id": 788,
       "key": "magearna",
-      "emoji": "🎮",
+      "emoji": "⚙️",
       "name": "Magearna",
       "tier": 5,
       "discovered": false,
@@ -1435,7 +1435,7 @@
     "789": {
       "id": 789,
       "key": "marshadow",
-      "emoji": "🎮",
+      "emoji": "👤",
       "name": "Marshadow",
       "tier": 5,
       "discovered": false,
@@ -1445,7 +1445,7 @@
     "790": {
       "id": 790,
       "key": "zeraora",
-      "emoji": "🎮",
+      "emoji": "⚡",
       "name": "Zeraora",
       "tier": 5,
       "discovered": false,
@@ -1455,7 +1455,7 @@
     "791": {
       "id": 791,
       "key": "melmetal",
-      "emoji": "🎮",
+      "emoji": "🔩",
       "name": "Melmetal",
       "tier": 5,
       "discovered": false,
@@ -1465,7 +1465,7 @@
     "792": {
       "id": 792,
       "key": "eternatus",
-      "emoji": "🎮",
+      "emoji": "♾️",
       "name": "Eternatus",
       "tier": 5,
       "discovered": false,
@@ -1475,7 +1475,7 @@
     "793": {
       "id": 793,
       "key": "zarude",
-      "emoji": "🎮",
+      "emoji": "🌿",
       "name": "Zarude",
       "tier": 5,
       "discovered": false,
@@ -1485,7 +1485,7 @@
     "794": {
       "id": 794,
       "key": "regieleki",
-      "emoji": "🎮",
+      "emoji": "⚡",
       "name": "Regieleki",
       "tier": 5,
       "discovered": false,
@@ -1495,7 +1495,7 @@
     "795": {
       "id": 795,
       "key": "regidrago",
-      "emoji": "🎮",
+      "emoji": "🐲",
       "name": "Regidrago",
       "tier": 5,
       "discovered": false,
@@ -1505,7 +1505,7 @@
     "796": {
       "id": 796,
       "key": "calyrex",
-      "emoji": "🎮",
+      "emoji": "👑",
       "name": "Calyrex",
       "tier": 5,
       "discovered": false,

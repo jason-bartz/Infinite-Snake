@@ -200,6 +200,83 @@
       "dependencies": ["core", "nature", "technology", "missing-core"],
       "enabled": true,
       "priority": 18
+    },
+    {
+      "id": "critical-fixes",
+      "name": "Critical Content Fixes",
+      "version": "1.0",
+      "description": "Makes major content like Pokemon and fictional characters accessible",
+      "elements": null,
+      "combinations": "combinations-critical-fixes.json",
+      "dependencies": ["core", "abstract", "fictional", "fictional-expanded", "missing-core"],
+      "enabled": true,
+      "priority": 19
+    },
+    {
+      "id": "abstract-fixes",
+      "name": "Abstract Element Fixes",
+      "version": "1.0",
+      "description": "Combinations to make abstract elements accessible",
+      "elements": null,
+      "combinations": "combinations-abstract-fixes.json",
+      "dependencies": ["core", "abstract", "missing-core"],
+      "enabled": true,
+      "priority": 20
+    },
+    {
+      "id": "material-fixes",
+      "name": "Material Element Fixes",
+      "version": "1.0",
+      "description": "Combinations to make material and chemical elements accessible",
+      "elements": null,
+      "combinations": "combinations-material-fixes.json",
+      "dependencies": ["core", "material", "missing-core"],
+      "enabled": true,
+      "priority": 21
+    },
+    {
+      "id": "chemical-elements",
+      "name": "Chemical Element Fixes",
+      "version": "1.0",
+      "description": "Combinations for periodic table elements",
+      "elements": null,
+      "combinations": "combinations-chemical-elements.json",
+      "dependencies": ["core", "material", "missing-core"],
+      "enabled": true,
+      "priority": 22
+    },
+    {
+      "id": "pokemon-fixes",
+      "name": "Pokemon Fixes",
+      "version": "1.0",
+      "description": "Combinations to make all Pokemon accessible",
+      "elements": null,
+      "combinations": "combinations-pokemon-fixes.json",
+      "dependencies": ["core", "fictional", "pokemon-expanded", "missing-core"],
+      "enabled": true,
+      "priority": 23
+    },
+    {
+      "id": "fictional-fixes",
+      "name": "Fictional Character Fixes",
+      "version": "1.0",
+      "description": "Combinations to make all fictional characters accessible",
+      "elements": null,
+      "combinations": "combinations-fictional-fixes.json",
+      "dependencies": ["core", "fictional", "fictional-expanded", "missing-core"],
+      "enabled": true,
+      "priority": 24
+    },
+    {
+      "id": "final-fixes",
+      "name": "Final Accessibility Fixes",
+      "version": "1.0",
+      "description": "Final combinations to make all remaining elements accessible",
+      "elements": null,
+      "combinations": "combinations-final-fixes.json",
+      "dependencies": ["core", "abstract", "fictional", "pokemon-expanded", "missing-core"],
+      "enabled": true,
+      "priority": 25
     }
   ],
   "settings": {
@@ -210,9 +287,16 @@
   },
   "metadata": {
     "totalElements": 881,
-    "totalCombinations": 1853,
+    "totalCombinations": 2448,
     "missingCoreElements": 2,
     "orphanFixCombinations": 74,
+    "criticalFixCombinations": 41,
+    "abstractFixCombinations": 85,
+    "materialFixCombinations": 240,
+    "chemicalElementCombinations": 60,
+    "pokemonFixCombinations": 150,
+    "fictionalFixCombinations": 110,
+    "finalFixCombinations": 9,
     "baseElements": 29,
     "natureElements": 20,
     "technologyElements": 28,

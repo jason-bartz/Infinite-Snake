@@ -1,0 +1,460 @@
+{
+  "version": "1.0",
+  "pack": "fictional-fixes",
+  "description": "Combinations to make all fictional characters accessible",
+  "combinations": [
+    {
+      "comment": "=== LOTR LOCATIONS ===",
+      "elements": [3, 238],
+      "result": 512,
+      "description": "earth + peace = the shire"
+    },
+    {
+      "elements": [12, 233],
+      "result": 513,
+      "description": "stone + honor = gondor"
+    },
+    {
+      "elements": [274, 1],
+      "result": 513,
+      "description": "darkness + fire = mordor"
+    },
+    {
+      "comment": "=== LOTR ARTIFACTS ===",
+      "elements": [15, 509],
+      "result": 515,
+      "description": "tree + one ring = elder wand"
+    },
+    {
+      "elements": [227, 274],
+      "result": 516,
+      "description": "soul + darkness = horcrux"
+    },
+    {
+      "elements": [28, 880],
+      "result": 517,
+      "description": "magic + animal = patronus"
+    },
+    {
+      "elements": [28, 11],
+      "result": 519,
+      "description": "magic + plant = phoenix feather"
+    },
+    {
+      "comment": "=== DBZ ITEMS ===",
+      "elements": [11, 313],
+      "result": 522,
+      "description": "plant + medicine = senzu bean"
+    },
+    {
+      "elements": [50, 880],
+      "result": 523,
+      "description": "metal + animal = evolution stone"
+    },
+    {
+      "elements": [880, 72],
+      "result": 524,
+      "description": "animal + spaceship = dragon radar"
+    },
+    {
+      "elements": [14, 1],
+      "result": 525,
+      "description": "energy + fire = kamehameha"
+    },
+    {
+      "elements": [14, 880],
+      "result": 526,
+      "description": "energy + animal = super saiyan"
+    },
+    {
+      "elements": [50, 880],
+      "result": 527,
+      "description": "metal + animal = scouter"
+    },
+    {
+      "comment": "=== DOCTOR WHO ===",
+      "elements": [109, 210],
+      "result": 528,
+      "description": "star + time = tardis"
+    },
+    {
+      "elements": [50, 28],
+      "result": 529,
+      "description": "metal + magic = sonic screwdriver"
+    },
+    {
+      "elements": [880, 50],
+      "result": 530,
+      "description": "animal + metal = dalek"
+    },
+    {
+      "elements": [880, 50],
+      "result": 531,
+      "description": "animal + metal = cyberman"
+    },
+    {
+      "comment": "=== GAME OF THRONES ===",
+      "elements": [880, 1],
+      "result": 532,
+      "description": "animal + fire = dragon egg"
+    },
+    {
+      "elements": [50, 1],
+      "result": 533,
+      "description": "metal + fire = valyrian steel"
+    },
+    {
+      "elements": [24, 880],
+      "result": 534,
+      "description": "ice + animal = white walker"
+    },
+    {
+      "elements": [50, 233],
+      "result": 535,
+      "description": "metal + honor = iron throne"
+    },
+    {
+      "comment": "=== MORE LOTR CHARACTERS ===",
+      "elements": [591, 880],
+      "result": 570,
+      "description": "darth-vader + animal = gollum"
+    },
+    {
+      "elements": [591, 274],
+      "result": 571,
+      "description": "darth-vader + darkness = sauron"
+    },
+    {
+      "elements": [28, 880],
+      "result": 572,
+      "description": "magic + animal = saruman"
+    },
+    {
+      "elements": [881, 880],
+      "result": 573,
+      "description": "light + animal = galadriel"
+    },
+    {
+      "elements": [216, 880],
+      "result": 574,
+      "description": "love + animal = elrond"
+    },
+    {
+      "comment": "=== LOTR LOCATIONS ===",
+      "elements": [881, 512],
+      "result": 575,
+      "description": "light + the-shire = rivendell"
+    },
+    {
+      "elements": [512, 50],
+      "result": 576,
+      "description": "the-shire + metal = minas tirith"
+    },
+    {
+      "elements": [512, 274],
+      "result": 577,
+      "description": "the-shire + darkness = helm's deep"
+    },
+    {
+      "elements": [513, 274],
+      "result": 578,
+      "description": "mordor + darkness = isengard"
+    },
+    {
+      "elements": [513, 1],
+      "result": 579,
+      "description": "mordor + fire = mount doom"
+    },
+    {
+      "elements": [512, 11],
+      "result": 580,
+      "description": "the-shire + plant = lothlorien"
+    },
+    {
+      "elements": [512, 880],
+      "result": 581,
+      "description": "the-shire + animal = rohan"
+    },
+    {
+      "elements": [512, 15],
+      "result": 582,
+      "description": "the-shire + tree = fangorn forest"
+    },
+    {
+      "comment": "=== LOTR ITEMS ===",
+      "elements": [565, 50],
+      "result": 584,
+      "description": "aragorn + metal = anduril"
+    },
+    {
+      "elements": [566, 50],
+      "result": 585,
+      "description": "gandalf + metal = glamdring"
+    },
+    {
+      "elements": [563, 50],
+      "result": 583,
+      "description": "frodo + metal = sting"
+    },
+    {
+      "elements": [509, 28],
+      "result": 586,
+      "description": "one-ring + magic = palantir"
+    },
+    {
+      "elements": [50, 881],
+      "result": 587,
+      "description": "metal + light = mithril"
+    },
+    {
+      "comment": "=== STAR WARS CHARACTERS ===",
+      "elements": [501, 880],
+      "result": 593,
+      "description": "lightsaber + animal = obi-wan kenobi"
+    },
+    {
+      "elements": [501, 880],
+      "result": 594,
+      "description": "lightsaber + animal = anakin skywalker"
+    },
+    {
+      "elements": [880, 880],
+      "result": 595,
+      "description": "animal + animal = padme amidala"
+    },
+    {
+      "elements": [591, 880],
+      "result": 596,
+      "description": "darth-vader + animal = emperor palpatine"
+    },
+    {
+      "elements": [590, 880],
+      "result": 597,
+      "description": "han-solo + animal = chewbacca"
+    },
+    {
+      "elements": [880, 50],
+      "result": 598,
+      "description": "animal + metal = r2-d2"
+    },
+    {
+      "elements": [880, 50],
+      "result": 599,
+      "description": "animal + metal = c-3po"
+    },
+    {
+      "comment": "=== STAR WARS LOCATIONS ===",
+      "elements": [3, 274],
+      "result": 600,
+      "description": "earth + darkness = tatooine"
+    },
+    {
+      "elements": [109, 880],
+      "result": 601,
+      "description": "star + animal = coruscant"
+    },
+    {
+      "elements": [24, 880],
+      "result": 602,
+      "description": "ice + animal = dagobah"
+    },
+    {
+      "elements": [24, 880],
+      "result": 603,
+      "description": "ice + animal = hoth"
+    },
+    {
+      "elements": [15, 880],
+      "result": 604,
+      "description": "tree + animal = endor"
+    },
+    {
+      "elements": [2, 880],
+      "result": 605,
+      "description": "water + animal = naboo"
+    },
+    {
+      "elements": [1, 880],
+      "result": 606,
+      "description": "fire + animal = mustafar"
+    },
+    {
+      "comment": "=== STAR WARS SHIPS ===",
+      "elements": [503, 274],
+      "result": 607,
+      "description": "death-star + darkness = death star ii"
+    },
+    {
+      "elements": [880, 72],
+      "result": 608,
+      "description": "animal + spaceship = x-wing"
+    },
+    {
+      "elements": [880, 72],
+      "result": 609,
+      "description": "animal + spaceship = tie fighter"
+    },
+    {
+      "elements": [880, 72],
+      "result": 610,
+      "description": "animal + spaceship = star destroyer"
+    },
+    {
+      "elements": [28, 210],
+      "result": 611,
+      "description": "magic + time = holocron"
+    },
+    {
+      "comment": "=== DBZ CHARACTERS ===",
+      "elements": [612, 880],
+      "result": 615,
+      "description": "goku + animal = piccolo"
+    },
+    {
+      "elements": [612, 880],
+      "result": 616,
+      "description": "goku + animal = krillin"
+    },
+    {
+      "elements": [612, 880],
+      "result": 617,
+      "description": "goku + animal = trunks"
+    },
+    {
+      "elements": [612, 274],
+      "result": 618,
+      "description": "goku + darkness = cell"
+    },
+    {
+      "elements": [612, 880],
+      "result": 619,
+      "description": "goku + animal = frieza"
+    },
+    {
+      "elements": [612, 880],
+      "result": 620,
+      "description": "goku + animal = majin buu"
+    },
+    {
+      "elements": [612, 102],
+      "result": 621,
+      "description": "goku + death = beerus"
+    },
+    {
+      "comment": "=== DBZ LOCATIONS ===",
+      "elements": [880, 72],
+      "result": 624,
+      "description": "animal + spaceship = capsule corp"
+    },
+    {
+      "comment": "=== DBZ TRANSFORMATIONS ===",
+      "elements": [526, 526],
+      "result": 625,
+      "description": "super-saiyan + super-saiyan = ssj2"
+    },
+    {
+      "elements": [625, 526],
+      "result": 626,
+      "description": "ssj2 + super-saiyan = ssj3"
+    },
+    {
+      "elements": [626, 274],
+      "result": 627,
+      "description": "ssj3 + darkness = ssj god"
+    },
+    {
+      "elements": [613, 274],
+      "result": 628,
+      "description": "vegeta + darkness = ultra ego"
+    },
+    {
+      "comment": "=== MARVEL CHARACTERS ===",
+      "elements": [641, 880],
+      "result": 634,
+      "description": "superman + animal = thanos"
+    },
+    {
+      "comment": "=== INFINITY STONES ===",
+      "elements": [28, 211],
+      "result": 635,
+      "description": "magic + space-time = power stone"
+    },
+    {
+      "elements": [28, 211],
+      "result": 636,
+      "description": "magic + space-time = space stone"
+    },
+    {
+      "elements": [28, 229],
+      "result": 637,
+      "description": "magic + reality = reality stone"
+    },
+    {
+      "elements": [28, 227],
+      "result": 638,
+      "description": "magic + soul = soul stone"
+    },
+    {
+      "elements": [28, 210],
+      "result": 639,
+      "description": "magic + time = time stone"
+    },
+    {
+      "elements": [28, 228],
+      "result": 640,
+      "description": "magic + mind = mind stone"
+    },
+    {
+      "comment": "=== DC CHARACTERS ===",
+      "elements": [880, 50],
+      "result": 645,
+      "description": "animal + metal = kryptonite"
+    },
+    {
+      "comment": "=== MORE CHARACTERS ===",
+      "elements": [880, 274],
+      "result": 569,
+      "description": "animal + darkness = boromir"
+    },
+    {
+      "elements": [274, 28],
+      "result": 518,
+      "description": "darkness + magic = dementor"
+    },
+    {
+      "elements": [501, 880],
+      "result": 505,
+      "description": "lightsaber + animal = jedi"
+    },
+    {
+      "elements": [501, 274],
+      "result": 506,
+      "description": "lightsaber + darkness = sith"
+    },
+    {
+      "elements": [880, 15],
+      "result": 508,
+      "description": "animal + tree = hobbit"
+    },
+    {
+      "elements": [880, 50],
+      "result": 510,
+      "description": "animal + metal = dwarf"
+    },
+    {
+      "elements": [880, 274],
+      "result": 511,
+      "description": "animal + darkness = orc"
+    },
+    {
+      "elements": [11, 313],
+      "result": 622,
+      "description": "plant + medicine = senzu bean"
+    },
+    {
+      "elements": [880, 72],
+      "result": 623,
+      "description": "animal + spaceship = dragon radar"
+    }
+  ]
+}

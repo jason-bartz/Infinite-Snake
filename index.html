@@ -337,46 +337,34 @@
         }
         
         #score {
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 32px;
-            font-weight: bold;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            display: none; /* Hidden - score shown in leaderboard */
         }
         
         #discoveries {
-            position: absolute;
-            top: 60px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: #FFD700;
-            font-size: 20px;
-            font-weight: bold;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            display: none; /* Hidden - discoveries shown in sidebar */
         }
         
         #elementQueue {
             position: absolute;
-            top: 100px;
+            top: 20px;
             left: 50%;
             transform: translateX(-50%);
             background: rgba(0,0,0,0.8);
             padding: 10px;
             border-radius: 10px;
             display: grid;
-            grid-template-columns: repeat(15, 40px);
-            grid-template-rows: repeat(2, 60px);
+            grid-template-columns: repeat(15, 50px);
+            grid-template-rows: repeat(2, 50px);
             gap: 4px;
             width: fit-content;
+            z-index: 20;
         }
         
         .element-square {
-            width: 40px;
-            height: 60px;
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
+            width: 50px;
+            height: 50px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.15);
             border-radius: 5px;
             display: flex;
             flex-direction: column;
@@ -388,15 +376,15 @@
         }
         
         .element-square .element-name {
-            font-size: 8px;
-            color: #CCC;
+            font-size: 7px;
+            color: #AAA;
             text-align: center;
             margin-top: 2px;
             line-height: 1;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
-            max-width: 36px;
+            max-width: 46px;
         }
         
         .element-square.empty {
@@ -405,8 +393,24 @@
         }
         
         .element-square.filled {
-            background: rgba(255,255,255,0.15);
-            border: 1px solid rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .element-square.tail-element {
+            border: 2px solid #FFD700;
+            background: rgba(255,215,0,0.1);
+            box-shadow: 0 0 10px rgba(255,215,0,0.5);
+            animation: tailGlow 2s ease-in-out infinite;
+        }
+        
+        @keyframes tailGlow {
+            0%, 100% {
+                box-shadow: 0 0 10px rgba(255,215,0,0.5);
+            }
+            50% {
+                box-shadow: 0 0 20px rgba(255,215,0,0.8);
+            }
         }
         
         .element-square:hover {
@@ -416,7 +420,7 @@
         
         #recentDiscovery {
             position: absolute;
-            top: 20px;
+            top: 150px; /* Below element collection box */
             left: 50%;
             transform: translateX(-50%);
             background: linear-gradient(135deg, rgba(255, 215, 0, 0.95), rgba(255, 140, 0, 0.95));
@@ -490,6 +494,12 @@
         
         #leaderboard-list .player {
             color: #4ecdc4;
+            font-weight: bold;
+            font-size: 16px;
+            background: rgba(78, 205, 196, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid rgba(78, 205, 196, 0.3);
         }
         
         /* Pause Menu */
@@ -728,6 +738,7 @@
         <div id="elementQueue"></div>
         <div id="leaderboard">
             <h4>Leaderboard</h4>
+            <div id="discovery-count" style="color: #FFD700; font-size: 14px; margin-bottom: 10px; text-align: center;"></div>
             <div id="leaderboard-list"></div>
         </div>
     </div>
@@ -1528,84 +1539,72 @@
             checkCombinations() {
                 if (this.elements.length < 2) return;
                 
-                // Check all possible pairs for combinations
-                for (let i = 0; i < this.elements.length; i++) {
-                    for (let j = i + 1; j < this.elements.length; j++) {
-                        const elem1 = this.elements[i];
-                        const elem2 = this.elements[j];
+                // Queue-based system: new element (first) combines with tail (last element)
+                const newElement = this.elements[0]; // Most recently added element
+                const tailElement = this.elements[this.elements.length - 1]; // Last element (tail)
                         
-                        // Use the new element system for combination checking if available
-                        let result = null;
-                        if (window.elementLoader && window.elementCompatibility) {
-                            const resultElement = window.elementLoader.getCombinationByKeys(elem1, elem2);
-                            result = resultElement ? resultElement.key : null;
+                // Use the new element system for combination checking if available
+                let result = null;
+                if (window.elementLoader && window.elementCompatibility) {
+                    const resultElement = window.elementLoader.getCombinationByKeys(newElement, tailElement);
+                    result = resultElement ? resultElement.key : null;
+                } else {
+                    // Fallback to old system
+                    const combo1 = `${newElement}+${tailElement}`;
+                    const combo2 = `${tailElement}+${newElement}`;
+                    result = combinations[combo1] || combinations[combo2];
+                }
+                        
+                if (result && elementDatabase[result]) {
+                    // Remove the new element and tail element
+                    this.elements.shift(); // Remove new element (first)
+                    this.elements.pop(); // Remove tail element (last)
+                    
+                    // Add the result to the front
+                    this.elements.unshift(result);
                             
-                            // Debug logging
-                            if (this.isPlayer && (elem1 === 'water' || elem2 === 'water') && (elem1 === 'ice' || elem2 === 'ice')) {
-                                console.log(`Checking combination: ${elem1} + ${elem2}`);
-                                console.log('Result element:', resultElement);
-                                console.log('Result key:', result);
+                    // Discovery check
+                    if (!this.discoveredElements.has(result)) {
+                        this.discoveredElements.add(result);
+                        this.score += 1000; // 1000 points for new discovery
+                        this.discoveries++; // Increment discovery count
+                        
+                        // Additional effects for player
+                        if (this.isPlayer && this === playerSnake) {
+                            discoveredElements.add(result); // Update global discoveries
+                            
+                            // Update new system if available
+                            if (window.elementLoader && window.elementCompatibility) {
+                                const element = window.elementLoader.getElementByKey(result);
+                                if (element) {
+                                    window.elementLoader.discoverElement(element.id);
+                                    window.elementCompatibility.saveDiscoveredElements();
+                                }
                             }
-                        } else {
-                            // Fallback to old system
-                            const combo1 = `${elem1}+${elem2}`;
-                            const combo2 = `${elem2}+${elem1}`;
-                            result = combinations[combo1] || combinations[combo2];
+                            
+                            showCombinationMessage(newElement, tailElement, result, true); // Show new discovery
+                            // Grant invincibility on new discovery
+                            this.invincibilityTimer = 3000; // 3 seconds
+                            
+                            // Check for new high score
+                            if (this.score > highScore) {
+                                highScore = this.score;
+                                localStorage.setItem('highScore', highScore.toString());
+                            }
                         }
-                        
-                        if (result && elementDatabase[result]) {
-                            // Keep the result in the collection instead of removing elements
-                            // Add the result to the collection
-                            this.elements.push(result);
-                            
-                            // Remove the two original elements (remove j first since it's higher index)
-                            this.elements.splice(j, 1);
-                            this.elements.splice(i, 1);
-                            
-                            // Discovery check
-                            if (!this.discoveredElements.has(result)) {
-                                this.discoveredElements.add(result);
-                                this.score += 1000; // 1000 points for new discovery
-                                this.discoveries++; // Increment discovery count
-                                
-                                // Additional effects for player
-                                if (this.isPlayer && this === playerSnake) {
-                                    discoveredElements.add(result); // Update global discoveries
-                                    
-                                    // Update new system if available
-                                    if (window.elementLoader && window.elementCompatibility) {
-                                        const element = window.elementLoader.getElementByKey(result);
-                                        if (element) {
-                                            window.elementLoader.discoverElement(element.id);
-                                            window.elementCompatibility.saveDiscoveredElements();
-                                        }
-                                    }
-                                    
-                                    showCombinationMessage(elem1, elem2, result, true); // Show new discovery
-                                    // Grant invincibility on new discovery
-                                    this.invincibilityTimer = 3000; // 3 seconds
-                                    
-                                    // Check for new high score
-                                    if (this.score > highScore) {
-                                        highScore = this.score;
-                                        localStorage.setItem('highScore', highScore.toString());
-                                    }
-                                }
-                            } else {
-                                // Show popup for existing discovery
-                                if (this.isPlayer && this === playerSnake) {
-                                    showCombinationMessage(elem1, elem2, result, false); // Show combo
-                                }
-                            }
-                            
-                            // Create particle effect at snake head
-                            createCombinationParticles(this.segments[0].x, this.segments[0].y);
-                            
-                            // Restart checking from the beginning
-                            this.checkCombinations();
-                            return;
+                    } else {
+                        // Show popup for existing discovery
+                        if (this.isPlayer && this === playerSnake) {
+                            showCombinationMessage(newElement, tailElement, result, false); // Show combo
                         }
                     }
+                            
+                    // Create particle effect at snake head
+                    createCombinationParticles(this.segments[0].x, this.segments[0].y);
+                    
+                    // Check again in case there are more combinations
+                    this.checkCombinations();
+                    return;
                 }
             }
             
@@ -1621,8 +1620,8 @@
                     playEatSound();
                 }
                 
-                // Add element to snake
-                this.elements.push(element.type);
+                // Add element to snake (at the front for queue-based system)
+                this.elements.unshift(element.type);
                 
                 // Track elements eaten for capacity growth
                 this.elementsEaten++;
@@ -2234,10 +2233,11 @@
             
             // Update discoveries count based on game mode
             const discoveryCount = discoveredElements.size - 4; // Subtract base elements
+            const discoveryDisplay = document.getElementById('discovery-count');
             if (gameMode === 'discovery') {
-                document.getElementById('discoveries').textContent = `Discoveries: ${discoveryCount} / ${gameTarget}`;
+                discoveryDisplay.textContent = `Discoveries: ${discoveryCount} / ${gameTarget}`;
             } else {
-                document.getElementById('discoveries').textContent = `Discoveries: ${discoveryCount}`;
+                discoveryDisplay.textContent = `Discoveries: ${discoveryCount}`;
             }
             
             // Check victory condition
@@ -2267,6 +2267,10 @@
                     const element = elementDatabase[elementType];
                     if (element) {
                         div.classList.add('filled');
+                        // Highlight the tail element (last element)
+                        if (i === playerSnake.elements.length - 1 && playerSnake.elements.length > 1) {
+                            div.classList.add('tail-element');
+                        }
                         div.innerHTML = `<div>${element.emoji}</div><div class="element-name">${element.name}</div>`;
                         div.title = element.name;
                     }

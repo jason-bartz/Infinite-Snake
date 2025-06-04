@@ -1,0 +1,783 @@
+{
+  "version": "1.0",
+  "pack": "material-fixes",
+  "description": "Combinations to make material and chemical elements accessible",
+  "combinations": [
+    {
+      "comment": "=== BASE METALS ===",
+      "elements": [3, 1],
+      "result": 291,
+      "description": "earth + fire = copper"
+    },
+    {
+      "elements": [3, 50],
+      "result": 292,
+      "description": "earth + metal = iron"
+    },
+    {
+      "elements": [291, 2],
+      "result": 293,
+      "description": "copper + water = gold"
+    },
+    {
+      "elements": [291, 4],
+      "result": 294,
+      "description": "copper + air = silver"
+    },
+    {
+      "elements": [292, 292],
+      "result": 296,
+      "description": "iron + iron = steel"
+    },
+    {
+      "elements": [291, 292],
+      "result": 295,
+      "description": "copper + iron = bronze"
+    },
+    {
+      "comment": "=== BASIC MATERIALS ===",
+      "elements": [15, 15],
+      "result": 299,
+      "description": "tree + tree = paper"
+    },
+    {
+      "elements": [15, 1],
+      "result": 298,
+      "description": "tree + fire = rubber"
+    },
+    {
+      "elements": [3, 2],
+      "result": 297,
+      "description": "earth + water = plastic"
+    },
+    {
+      "elements": [880, 3],
+      "result": 301,
+      "description": "animal + earth = leather"
+    },
+    {
+      "elements": [11, 11],
+      "result": 300,
+      "description": "plant + plant = cloth"
+    },
+    {
+      "elements": [880, 300],
+      "result": 302,
+      "description": "animal + cloth = wool"
+    },
+    {
+      "elements": [41, 300],
+      "result": 303,
+      "description": "spider + cloth = silk"
+    },
+    {
+      "comment": "=== CONSTRUCTION MATERIALS ===",
+      "elements": [3, 3],
+      "result": 305,
+      "description": "earth + earth = brick"
+    },
+    {
+      "elements": [12, 2],
+      "result": 304,
+      "description": "stone + water = cement"
+    },
+    {
+      "elements": [304, 12],
+      "result": 317,
+      "description": "cement + stone = concrete"
+    },
+    {
+      "elements": [3, 11],
+      "result": 316,
+      "description": "earth + plant = clay"
+    },
+    {
+      "comment": "=== PRECIOUS MATERIALS ===",
+      "elements": [12, 1],
+      "result": 306,
+      "description": "stone + fire = diamond"
+    },
+    {
+      "comment": "=== LIQUIDS & OILS ===",
+      "elements": [11, 2],
+      "result": 307,
+      "description": "plant + water = oil"
+    },
+    {
+      "elements": [13, 2],
+      "result": 312,
+      "description": "grain + water = alcohol"
+    },
+    {
+      "elements": [880, 274],
+      "result": 315,
+      "description": "animal + darkness = ink"
+    },
+    {
+      "comment": "=== CHEMICALS & ACIDS ===",
+      "elements": [2, 1],
+      "result": 309,
+      "description": "water + fire = acid"
+    },
+    {
+      "elements": [2, 3],
+      "result": 310,
+      "description": "water + earth = salt"
+    },
+    {
+      "elements": [11, 3],
+      "result": 311,
+      "description": "plant + earth = sugar"
+    },
+    {
+      "elements": [880, 28],
+      "result": 313,
+      "description": "animal + magic = medicine"
+    },
+    {
+      "elements": [313, 299],
+      "result": 314,
+      "description": "medicine + paper = paint"
+    },
+    {
+      "comment": "=== MORE METALS ===",
+      "elements": [50, 274],
+      "result": 322,
+      "description": "metal + darkness = lead"
+    },
+    {
+      "elements": [50, 2],
+      "result": 323,
+      "description": "metal + water = zinc"
+    },
+    {
+      "elements": [50, 880],
+      "result": 324,
+      "description": "metal + animal = nickel"
+    },
+    {
+      "elements": [50, 3],
+      "result": 325,
+      "description": "metal + earth = tin"
+    },
+    {
+      "elements": [291, 323],
+      "result": 326,
+      "description": "copper + zinc = brass"
+    },
+    {
+      "elements": [322, 325],
+      "result": 327,
+      "description": "lead + tin = pewter"
+    },
+    {
+      "elements": [50, 881],
+      "result": 318,
+      "description": "metal + light = aluminum"
+    },
+    {
+      "elements": [293, 294],
+      "result": 320,
+      "description": "gold + silver = platinum"
+    },
+    {
+      "elements": [292, 881],
+      "result": 319,
+      "description": "iron + light = titanium"
+    },
+    {
+      "elements": [294, 881],
+      "result": 328,
+      "description": "silver + light = chrome"
+    },
+    {
+      "elements": [50, 210],
+      "result": 321,
+      "description": "metal + time = mercury"
+    },
+    {
+      "comment": "=== CARBON & MINERALS ===",
+      "elements": [3, 1],
+      "result": 329,
+      "description": "earth + fire = graphite"
+    },
+    {
+      "elements": [329, 329],
+      "result": 330,
+      "description": "graphite + graphite = carbon"
+    },
+    {
+      "comment": "=== FUELS ===",
+      "elements": [15, 210],
+      "result": 331,
+      "description": "tree + time = coal"
+    },
+    {
+      "elements": [307, 210],
+      "result": 332,
+      "description": "oil + time = petroleum"
+    },
+    {
+      "elements": [332, 1],
+      "result": 333,
+      "description": "petroleum + fire = gasoline"
+    },
+    {
+      "elements": [332, 2],
+      "result": 334,
+      "description": "petroleum + water = diesel"
+    },
+    {
+      "elements": [332, 4],
+      "result": 335,
+      "description": "petroleum + air = kerosene"
+    },
+    {
+      "comment": "=== WAXES & RESINS ===",
+      "elements": [880, 1],
+      "result": 336,
+      "description": "animal + fire = wax"
+    },
+    {
+      "elements": [15, 307],
+      "result": 337,
+      "description": "tree + oil = resin"
+    },
+    {
+      "elements": [307, 1],
+      "result": 338,
+      "description": "oil + fire = tar"
+    },
+    {
+      "elements": [338, 12],
+      "result": 339,
+      "description": "tar + stone = asphalt"
+    },
+    {
+      "comment": "=== COMPOSITES ===",
+      "elements": [6, 297],
+      "result": 340,
+      "description": "glass + plastic = fiberglass"
+    },
+    {
+      "elements": [297, 300],
+      "result": 341,
+      "description": "plastic + cloth = kevlar"
+    },
+    {
+      "elements": [297, 300],
+      "result": 342,
+      "description": "plastic + cloth = nylon"
+    },
+    {
+      "elements": [297, 300],
+      "result": 343,
+      "description": "plastic + cloth = polyester"
+    },
+    {
+      "elements": [297, 314],
+      "result": 344,
+      "description": "plastic + paint = vinyl"
+    },
+    {
+      "comment": "=== RUBBER & LATEX ===",
+      "elements": [298, 2],
+      "result": 345,
+      "description": "rubber + water = latex"
+    },
+    {
+      "comment": "=== FOAMS & GELS ===",
+      "elements": [309, 4],
+      "result": 346,
+      "description": "acid + air = foam"
+    },
+    {
+      "elements": [2, 311],
+      "result": 347,
+      "description": "water + sugar = gel"
+    },
+    {
+      "comment": "=== ADHESIVES ===",
+      "elements": [337, 2],
+      "result": 348,
+      "description": "resin + water = adhesive"
+    },
+    {
+      "elements": [348, 307],
+      "result": 349,
+      "description": "adhesive + oil = glue"
+    },
+    {
+      "elements": [348, 297],
+      "result": 350,
+      "description": "adhesive + plastic = tape"
+    },
+    {
+      "elements": [300, 300],
+      "result": 351,
+      "description": "cloth + cloth = velcro"
+    },
+    {
+      "comment": "=== MAGNETS & CERAMICS ===",
+      "elements": [292, 14],
+      "result": 352,
+      "description": "iron + energy = magnet"
+    },
+    {
+      "elements": [316, 1],
+      "result": 353,
+      "description": "clay + fire = ceramic"
+    },
+    {
+      "elements": [353, 2],
+      "result": 354,
+      "description": "ceramic + water = porcelain"
+    },
+    {
+      "comment": "=== BUILDING MATERIALS ===",
+      "elements": [304, 2],
+      "result": 355,
+      "description": "cement + water = plaster"
+    },
+    {
+      "elements": [355, 299],
+      "result": 356,
+      "description": "plaster + paper = drywall"
+    },
+    {
+      "elements": [340, 4],
+      "result": 357,
+      "description": "fiberglass + air = insulation"
+    },
+    {
+      "comment": "=== SPONGES & CORK ===",
+      "elements": [346, 2],
+      "result": 358,
+      "description": "foam + water = sponge"
+    },
+    {
+      "elements": [15, 336],
+      "result": 359,
+      "description": "tree + wax = cork"
+    },
+    {
+      "comment": "=== WOOD TYPES ===",
+      "elements": [15, 880],
+      "result": 360,
+      "description": "tree + animal = bamboo"
+    },
+    {
+      "elements": [15, 3],
+      "result": 361,
+      "description": "tree + earth = oak"
+    },
+    {
+      "elements": [15, 2],
+      "result": 362,
+      "description": "tree + water = pine"
+    },
+    {
+      "elements": [361, 274],
+      "result": 363,
+      "description": "oak + darkness = mahogany"
+    },
+    {
+      "elements": [361, 362],
+      "result": 364,
+      "description": "oak + pine = plywood"
+    },
+    {
+      "elements": [361, 299],
+      "result": 365,
+      "description": "oak + paper = particle board"
+    },
+    {
+      "elements": [361, 314],
+      "result": 366,
+      "description": "oak + paint = veneer"
+    },
+    {
+      "comment": "=== VARNISHES & LACQUERS ===",
+      "elements": [337, 312],
+      "result": 367,
+      "description": "resin + alcohol = lacquer"
+    },
+    {
+      "elements": [337, 307],
+      "result": 368,
+      "description": "resin + oil = varnish"
+    },
+    {
+      "elements": [336, 307],
+      "result": 369,
+      "description": "wax + oil = polish"
+    },
+    {
+      "comment": "=== DYES & PIGMENTS ===",
+      "elements": [11, 2],
+      "result": 370,
+      "description": "plant + water = dye"
+    },
+    {
+      "elements": [370, 3],
+      "result": 371,
+      "description": "dye + earth = pigment"
+    },
+    {
+      "comment": "=== CLEANING CHEMICALS ===",
+      "elements": [309, 310],
+      "result": 372,
+      "description": "acid + salt = bleach"
+    },
+    {
+      "elements": [307, 310],
+      "result": 373,
+      "description": "oil + salt = detergent"
+    },
+    {
+      "elements": [346, 307],
+      "result": 374,
+      "description": "foam + oil = soap"
+    },
+    {
+      "comment": "=== PERSONAL CARE ===",
+      "elements": [374, 307],
+      "result": 375,
+      "description": "soap + oil = shampoo"
+    },
+    {
+      "elements": [375, 311],
+      "result": 376,
+      "description": "shampoo + sugar = conditioner"
+    },
+    {
+      "elements": [307, 311],
+      "result": 377,
+      "description": "oil + sugar = lotion"
+    },
+    {
+      "elements": [311, 377],
+      "result": 378,
+      "description": "sugar + lotion = cream"
+    },
+    {
+      "comment": "=== PHARMACEUTICAL ===",
+      "elements": [313, 377],
+      "result": 379,
+      "description": "medicine + lotion = ointment"
+    },
+    {
+      "elements": [313, 346],
+      "result": 380,
+      "description": "medicine + foam = balm"
+    },
+    {
+      "elements": [313, 307],
+      "result": 381,
+      "description": "medicine + oil = salve"
+    },
+    {
+      "elements": [313, 880],
+      "result": 382,
+      "description": "medicine + animal = antibiotic"
+    },
+    {
+      "elements": [313, 880],
+      "result": 383,
+      "description": "medicine + animal = vaccine"
+    },
+    {
+      "elements": [313, 11],
+      "result": 384,
+      "description": "medicine + plant = vitamin"
+    },
+    {
+      "comment": "=== ORGANIC COMPOUNDS ===",
+      "elements": [311, 11],
+      "result": 385,
+      "description": "sugar + plant = protein"
+    },
+    {
+      "elements": [311, 311],
+      "result": 386,
+      "description": "sugar + sugar = carbohydrate"
+    },
+    {
+      "elements": [880, 311],
+      "result": 387,
+      "description": "animal + sugar = fat"
+    },
+    {
+      "elements": [11, 3],
+      "result": 388,
+      "description": "plant + earth = fiber"
+    },
+    {
+      "elements": [311, 3],
+      "result": 389,
+      "description": "sugar + earth = starch"
+    },
+    {
+      "elements": [387, 2],
+      "result": 390,
+      "description": "fat + water = gelatin"
+    },
+    {
+      "elements": [385, 880],
+      "result": 391,
+      "description": "protein + animal = collagen"
+    },
+    {
+      "elements": [385, 2],
+      "result": 392,
+      "description": "protein + water = enzyme"
+    },
+    {
+      "elements": [385, 880],
+      "result": 393,
+      "description": "protein + animal = hormone"
+    },
+    {
+      "elements": [385, 212],
+      "result": 394,
+      "description": "protein + consciousness = neurotransmitter"
+    },
+    {
+      "elements": [385, 880],
+      "result": 395,
+      "description": "protein + animal = antibody"
+    },
+    {
+      "elements": [880, 14],
+      "result": 396,
+      "description": "animal + energy = plasma"
+    },
+    {
+      "elements": [313, 2],
+      "result": 397,
+      "description": "medicine + water = serum"
+    },
+    {
+      "elements": [313, 880],
+      "result": 398,
+      "description": "medicine + animal = anesthetic"
+    },
+    {
+      "elements": [313, 372],
+      "result": 399,
+      "description": "medicine + bleach = antiseptic"
+    },
+    {
+      "elements": [372, 2],
+      "result": 400,
+      "description": "bleach + water = disinfectant"
+    },
+    {
+      "comment": "=== FOOD ADDITIVES ===",
+      "elements": [307, 311],
+      "result": 401,
+      "description": "oil + sugar = preservative"
+    },
+    {
+      "elements": [11, 4],
+      "result": 402,
+      "description": "plant + air = antioxidant"
+    },
+    {
+      "elements": [307, 2],
+      "result": 403,
+      "description": "oil + water = emulsifier"
+    },
+    {
+      "elements": [311, 386],
+      "result": 404,
+      "description": "sugar + carbohydrate = stabilizer"
+    },
+    {
+      "elements": [389, 2],
+      "result": 405,
+      "description": "starch + water = thickener"
+    },
+    {
+      "elements": [311, 880],
+      "result": 406,
+      "description": "sugar + animal = sweetener"
+    },
+    {
+      "elements": [311, 314],
+      "result": 407,
+      "description": "sugar + paint = flavoring"
+    },
+    {
+      "elements": [314, 311],
+      "result": 408,
+      "description": "paint + sugar = coloring"
+    },
+    {
+      "elements": [11, 4],
+      "result": 409,
+      "description": "plant + air = fragrance"
+    },
+    {
+      "comment": "=== PERFUMES ===",
+      "elements": [409, 307],
+      "result": 410,
+      "description": "fragrance + oil = perfume"
+    },
+    {
+      "elements": [409, 312],
+      "result": 411,
+      "description": "fragrance + alcohol = cologne"
+    },
+    {
+      "comment": "=== DEODORANTS ===",
+      "elements": [409, 318],
+      "result": 412,
+      "description": "fragrance + aluminum = deodorant"
+    },
+    {
+      "elements": [412, 310],
+      "result": 413,
+      "description": "deodorant + salt = antiperspirant"
+    },
+    {
+      "comment": "=== COSMETICS ===",
+      "elements": [377, 881],
+      "result": 414,
+      "description": "lotion + light = sunscreen"
+    },
+    {
+      "elements": [377, 2],
+      "result": 415,
+      "description": "lotion + water = moisturizer"
+    },
+    {
+      "elements": [374, 880],
+      "result": 416,
+      "description": "soap + animal = cleanser"
+    },
+    {
+      "elements": [416, 2],
+      "result": 417,
+      "description": "cleanser + water = toner"
+    },
+    {
+      "elements": [310, 358],
+      "result": 418,
+      "description": "salt + sponge = exfoliant"
+    },
+    {
+      "elements": [316, 314],
+      "result": 419,
+      "description": "clay + paint = mask"
+    },
+    {
+      "elements": [310, 346],
+      "result": 420,
+      "description": "salt + foam = scrub"
+    },
+    {
+      "elements": [314, 336],
+      "result": 421,
+      "description": "paint + wax = polish material"
+    },
+    {
+      "comment": "=== SOLVENTS ===",
+      "elements": [307, 312],
+      "result": 422,
+      "description": "oil + alcohol = remover"
+    },
+    {
+      "elements": [312, 2],
+      "result": 423,
+      "description": "alcohol + water = solvent"
+    },
+    {
+      "elements": [423, 274],
+      "result": 424,
+      "description": "solvent + darkness = acetone"
+    },
+    {
+      "elements": [312, 311],
+      "result": 425,
+      "description": "alcohol + sugar = ethanol"
+    },
+    {
+      "elements": [312, 15],
+      "result": 426,
+      "description": "alcohol + tree = methanol"
+    },
+    {
+      "elements": [426, 880],
+      "result": 427,
+      "description": "methanol + animal = formaldehyde"
+    },
+    {
+      "comment": "=== MORE CHEMICALS ===",
+      "elements": [4, 880],
+      "result": 428,
+      "description": "air + animal = ammonia"
+    },
+    {
+      "elements": [310, 2],
+      "result": 429,
+      "description": "salt + water = chlorine"
+    },
+    {
+      "elements": [429, 880],
+      "result": 430,
+      "description": "chlorine + animal = fluoride"
+    },
+    {
+      "comment": "=== BASIC ELEMENTS ===",
+      "elements": [3, 274],
+      "result": 431,
+      "description": "earth + darkness = sulfur"
+    },
+    {
+      "elements": [11, 881],
+      "result": 432,
+      "description": "plant + light = phosphorus"
+    },
+    {
+      "elements": [4, 880],
+      "result": 433,
+      "description": "air + animal = nitrogen"
+    },
+    {
+      "elements": [4, 881],
+      "result": 434,
+      "description": "air + light = oxygen"
+    },
+    {
+      "elements": [2, 881],
+      "result": 435,
+      "description": "water + light = hydrogen"
+    },
+    {
+      "elements": [4, 881],
+      "result": 436,
+      "description": "air + light = helium"
+    },
+    {
+      "elements": [436, 881],
+      "result": 437,
+      "description": "helium + light = neon"
+    },
+    {
+      "elements": [437, 4],
+      "result": 438,
+      "description": "neon + air = argon"
+    },
+    {
+      "elements": [438, 210],
+      "result": 439,
+      "description": "argon + time = xenon"
+    },
+    {
+      "elements": [439, 880],
+      "result": 440,
+      "description": "xenon + animal = radon"
+    }
+  ]
+}

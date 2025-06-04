@@ -1,0 +1,314 @@
+{
+  "version": "1.0",
+  "pack": "chemical-elements",
+  "description": "Combinations for periodic table elements",
+  "combinations": [
+    {
+      "comment": "=== RADIOACTIVE ELEMENTS ===",
+      "elements": [438, 14],
+      "result": 441,
+      "description": "argon + energy = uranium"
+    },
+    {
+      "elements": [441, 14],
+      "result": 442,
+      "description": "uranium + energy = plutonium"
+    },
+    {
+      "elements": [441, 880],
+      "result": 443,
+      "description": "uranium + animal = radium"
+    },
+    {
+      "comment": "=== ALKALI METALS ===",
+      "elements": [310, 14],
+      "result": 444,
+      "description": "salt + energy = lithium"
+    },
+    {
+      "elements": [310, 880],
+      "result": 445,
+      "description": "salt + animal = sodium"
+    },
+    {
+      "elements": [445, 11],
+      "result": 446,
+      "description": "sodium + plant = potassium"
+    },
+    {
+      "comment": "=== ALKALINE EARTH METALS ===",
+      "elements": [12, 880],
+      "result": 447,
+      "description": "stone + animal = calcium"
+    },
+    {
+      "elements": [447, 14],
+      "result": 448,
+      "description": "calcium + energy = magnesium"
+    },
+    {
+      "comment": "=== SEMICONDUCTORS ===",
+      "elements": [330, 881],
+      "result": 449,
+      "description": "carbon + light = silicon"
+    },
+    {
+      "elements": [330, 274],
+      "result": 450,
+      "description": "carbon + darkness = boron"
+    },
+    {
+      "elements": [330, 210],
+      "result": 451,
+      "description": "carbon + time = arsenic"
+    },
+    {
+      "comment": "=== HEAVY METALS ===",
+      "elements": [322, 880],
+      "result": 452,
+      "description": "lead + animal = antimony"
+    },
+    {
+      "elements": [452, 274],
+      "result": 453,
+      "description": "antimony + darkness = bismuth"
+    },
+    {
+      "elements": [292, 880],
+      "result": 454,
+      "description": "iron + animal = cobalt"
+    },
+    {
+      "elements": [292, 11],
+      "result": 455,
+      "description": "iron + plant = manganese"
+    },
+    {
+      "elements": [318, 881],
+      "result": 456,
+      "description": "aluminum + light = chromium"
+    },
+    {
+      "elements": [319, 274],
+      "result": 457,
+      "description": "titanium + darkness = vanadium"
+    },
+    {
+      "elements": [319, 210],
+      "result": 458,
+      "description": "titanium + time = tungsten"
+    },
+    {
+      "elements": [458, 880],
+      "result": 459,
+      "description": "tungsten + animal = molybdenum"
+    },
+    {
+      "elements": [322, 14],
+      "result": 460,
+      "description": "lead + energy = cadmium"
+    },
+    {
+      "elements": [448, 881],
+      "result": 461,
+      "description": "magnesium + light = beryllium"
+    },
+    {
+      "elements": [447, 880],
+      "result": 462,
+      "description": "calcium + animal = strontium"
+    },
+    {
+      "elements": [462, 880],
+      "result": 463,
+      "description": "strontium + animal = barium"
+    },
+    {
+      "elements": [463, 14],
+      "result": 464,
+      "description": "barium + energy = cesium"
+    },
+    {
+      "elements": [464, 880],
+      "result": 465,
+      "description": "cesium + animal = rubidium"
+    },
+    {
+      "elements": [318, 274],
+      "result": 466,
+      "description": "aluminum + darkness = gallium"
+    },
+    {
+      "elements": [466, 880],
+      "result": 467,
+      "description": "gallium + animal = indium"
+    },
+    {
+      "elements": [322, 880],
+      "result": 468,
+      "description": "lead + animal = thallium"
+    },
+    {
+      "elements": [449, 274],
+      "result": 469,
+      "description": "silicon + darkness = germanium"
+    },
+    {
+      "elements": [431, 880],
+      "result": 470,
+      "description": "sulfur + animal = selenium"
+    },
+    {
+      "elements": [470, 880],
+      "result": 471,
+      "description": "selenium + animal = tellurium"
+    },
+    {
+      "elements": [453, 880],
+      "result": 472,
+      "description": "bismuth + animal = polonium"
+    },
+    {
+      "elements": [472, 14],
+      "result": 473,
+      "description": "polonium + energy = astatine"
+    },
+    {
+      "elements": [464, 14],
+      "result": 474,
+      "description": "cesium + energy = francium"
+    },
+    {
+      "comment": "=== ACTINIDES ===",
+      "elements": [443, 14],
+      "result": 475,
+      "description": "radium + energy = actinium"
+    },
+    {
+      "elements": [441, 880],
+      "result": 476,
+      "description": "uranium + animal = thorium"
+    },
+    {
+      "elements": [476, 14],
+      "result": 477,
+      "description": "thorium + energy = protactinium"
+    },
+    {
+      "elements": [441, 880],
+      "result": 478,
+      "description": "uranium + animal = neptunium"
+    },
+    {
+      "elements": [442, 880],
+      "result": 479,
+      "description": "plutonium + animal = americium"
+    },
+    {
+      "elements": [479, 880],
+      "result": 480,
+      "description": "americium + animal = curium"
+    },
+    {
+      "elements": [480, 880],
+      "result": 481,
+      "description": "curium + animal = berkelium"
+    },
+    {
+      "elements": [481, 880],
+      "result": 482,
+      "description": "berkelium + animal = californium"
+    },
+    {
+      "elements": [482, 880],
+      "result": 483,
+      "description": "californium + animal = einsteinium"
+    },
+    {
+      "elements": [483, 880],
+      "result": 484,
+      "description": "einsteinium + animal = fermium"
+    },
+    {
+      "elements": [484, 880],
+      "result": 485,
+      "description": "fermium + animal = mendelevium"
+    },
+    {
+      "elements": [485, 880],
+      "result": 486,
+      "description": "mendelevium + animal = nobelium"
+    },
+    {
+      "elements": [486, 880],
+      "result": 487,
+      "description": "nobelium + animal = lawrencium"
+    },
+    {
+      "comment": "=== SUPER-HEAVY ELEMENTS ===",
+      "elements": [487, 14],
+      "result": 488,
+      "description": "lawrencium + energy = rutherfordium"
+    },
+    {
+      "elements": [488, 880],
+      "result": 489,
+      "description": "rutherfordium + animal = dubnium"
+    },
+    {
+      "elements": [489, 880],
+      "result": 490,
+      "description": "dubnium + animal = seaborgium"
+    },
+    {
+      "elements": [490, 880],
+      "result": 491,
+      "description": "seaborgium + animal = bohrium"
+    },
+    {
+      "elements": [491, 880],
+      "result": 492,
+      "description": "bohrium + animal = hassium"
+    },
+    {
+      "elements": [492, 880],
+      "result": 493,
+      "description": "hassium + animal = meitnerium"
+    },
+    {
+      "elements": [493, 880],
+      "result": 494,
+      "description": "meitnerium + animal = darmstadtium"
+    },
+    {
+      "elements": [494, 880],
+      "result": 495,
+      "description": "darmstadtium + animal = roentgenium"
+    },
+    {
+      "elements": [495, 880],
+      "result": 496,
+      "description": "roentgenium + animal = copernicium"
+    },
+    {
+      "elements": [496, 880],
+      "result": 497,
+      "description": "copernicium + animal = nihonium"
+    },
+    {
+      "elements": [497, 880],
+      "result": 498,
+      "description": "nihonium + animal = flerovium"
+    },
+    {
+      "elements": [498, 880],
+      "result": 499,
+      "description": "flerovium + animal = moscovium"
+    },
+    {
+      "elements": [499, 880],
+      "result": 500,
+      "description": "moscovium + animal = livermorium"
+    }
+  ]
+}

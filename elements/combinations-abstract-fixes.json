@@ -1,0 +1,453 @@
+{
+  "version": "1.0",
+  "pack": "abstract-fixes",
+  "description": "Combinations to make abstract elements accessible",
+  "combinations": [
+    {
+      "comment": "=== TIME & SPACE ===",
+      "elements": [14, 109],
+      "result": 210,
+      "description": "energy + star = time"
+    },
+    {
+      "elements": [109, 110],
+      "result": 211,
+      "description": "star + universe = space-time"
+    },
+    {
+      "comment": "=== CONSCIOUSNESS & MIND ===",
+      "elements": [880, 881],
+      "result": 212,
+      "description": "animal + light = consciousness"
+    },
+    {
+      "elements": [212, 210],
+      "result": 214,
+      "description": "consciousness + time = memory"
+    },
+    {
+      "elements": [212, 14],
+      "result": 213,
+      "description": "consciousness + energy = dream"
+    },
+    {
+      "elements": [212, 212],
+      "result": 215,
+      "description": "consciousness + consciousness = thought"
+    },
+    {
+      "elements": [215, 215],
+      "result": 228,
+      "description": "thought + thought = mind"
+    },
+    {
+      "comment": "=== EMOTIONS ===",
+      "elements": [880, 1],
+      "result": 216,
+      "description": "animal + fire = love"
+    },
+    {
+      "elements": [880, 274],
+      "result": 217,
+      "description": "animal + darkness = fear"
+    },
+    {
+      "elements": [880, 881],
+      "result": 218,
+      "description": "animal + light = joy"
+    },
+    {
+      "elements": [880, 2],
+      "result": 219,
+      "description": "animal + water = sorrow"
+    },
+    {
+      "elements": [216, 28],
+      "result": 235,
+      "description": "love + magic = hope"
+    },
+    {
+      "elements": [217, 274],
+      "result": 236,
+      "description": "fear + darkness = despair"
+    },
+    {
+      "elements": [216, 235],
+      "result": 237,
+      "description": "love + hope = courage"
+    },
+    {
+      "elements": [216, 216],
+      "result": 238,
+      "description": "love + love = peace"
+    },
+    {
+      "elements": [217, 217],
+      "result": 239,
+      "description": "fear + fear = war"
+    },
+    {
+      "elements": [880, 14],
+      "result": 241,
+      "description": "animal + energy = anger"
+    },
+    {
+      "comment": "=== KNOWLEDGE & WISDOM ===",
+      "elements": [215, 214],
+      "result": 221,
+      "description": "thought + memory = knowledge"
+    },
+    {
+      "elements": [221, 210],
+      "result": 220,
+      "description": "knowledge + time = wisdom"
+    },
+    {
+      "comment": "=== ORDER & CHAOS ===",
+      "elements": [14, 273],
+      "result": 222,
+      "description": "energy + balance = chaos"
+    },
+    {
+      "elements": [273, 273],
+      "result": 223,
+      "description": "balance + balance = order"
+    },
+    {
+      "elements": [223, 222],
+      "result": 224,
+      "description": "order + chaos = balance"
+    },
+    {
+      "comment": "=== INFINITY & ETERNITY ===",
+      "elements": [210, 1000],
+      "result": 225,
+      "description": "time + infinity = infinity"
+    },
+    {
+      "elements": [210, 210],
+      "result": 226,
+      "description": "time + time = eternity"
+    },
+    {
+      "comment": "=== SOUL & SPIRIT ===",
+      "elements": [212, 28],
+      "result": 227,
+      "description": "consciousness + magic = soul"
+    },
+    {
+      "comment": "=== TRUTH & LIES ===",
+      "elements": [215, 881],
+      "result": 231,
+      "description": "thought + light = truth"
+    },
+    {
+      "elements": [215, 274],
+      "result": 232,
+      "description": "thought + darkness = lie"
+    },
+    {
+      "elements": [215, 28],
+      "result": 230,
+      "description": "thought + magic = illusion"
+    },
+    {
+      "comment": "=== FATE & DESTINY ===",
+      "elements": [210, 227],
+      "result": 233,
+      "description": "time + soul = fate"
+    },
+    {
+      "elements": [233, 880],
+      "result": 234,
+      "description": "fate + animal = destiny"
+    },
+    {
+      "comment": "=== VIRTUES & VALUES ===",
+      "elements": [237, 227],
+      "result": 286,
+      "description": "courage + soul = honor"
+    },
+    {
+      "elements": [216, 217],
+      "result": 285,
+      "description": "love + fear = humility"
+    },
+    {
+      "elements": [216, 880],
+      "result": 281,
+      "description": "love + animal = compassion"
+    },
+    {
+      "elements": [281, 880],
+      "result": 282,
+      "description": "compassion + animal = empathy"
+    },
+    {
+      "elements": [219, 880],
+      "result": 283,
+      "description": "sorrow + animal = sympathy"
+    },
+    {
+      "elements": [237, 880],
+      "result": 284,
+      "description": "courage + animal = pride"
+    },
+    {
+      "elements": [217, 219],
+      "result": 287,
+      "description": "fear + sorrow = shame"
+    },
+    {
+      "elements": [216, 210],
+      "result": 288,
+      "description": "love + time = gratitude"
+    },
+    {
+      "elements": [217, 241],
+      "result": 289,
+      "description": "fear + anger = resentment"
+    },
+    {
+      "elements": [287, 215],
+      "result": 278,
+      "description": "shame + thought = guilt"
+    },
+    {
+      "comment": "=== PHILOSOPHY & MEANING ===",
+      "elements": [215, 880],
+      "result": 243,
+      "description": "thought + animal = imagination"
+    },
+    {
+      "elements": [243, 14],
+      "result": 244,
+      "description": "imagination + energy = creativity"
+    },
+    {
+      "elements": [274, 274],
+      "result": 245,
+      "description": "darkness + darkness = emptiness"
+    },
+    {
+      "elements": [14, 245],
+      "result": 246,
+      "description": "energy + emptiness = existence"
+    },
+    {
+      "elements": [245, 245],
+      "result": 247,
+      "description": "emptiness + emptiness = nothingness"
+    },
+    {
+      "elements": [246, 215],
+      "result": 248,
+      "description": "existence + thought = meaning"
+    },
+    {
+      "elements": [248, 880],
+      "result": 249,
+      "description": "meaning + animal = purpose"
+    },
+    {
+      "elements": [249, 221],
+      "result": 250,
+      "description": "purpose + knowledge = enlightenment"
+    },
+    {
+      "elements": [250, 227],
+      "result": 251,
+      "description": "enlightenment + soul = transcendence"
+    },
+    {
+      "comment": "=== DUALITY & UNITY ===",
+      "elements": [881, 274],
+      "result": 252,
+      "description": "light + darkness = duality"
+    },
+    {
+      "elements": [252, 216],
+      "result": 253,
+      "description": "duality + love = unity"
+    },
+    {
+      "comment": "=== KARMA & MEDITATION ===",
+      "elements": [215, 210],
+      "result": 254,
+      "description": "thought + time = karma"
+    },
+    {
+      "elements": [228, 238],
+      "result": 255,
+      "description": "mind + peace = meditation"
+    },
+    {
+      "comment": "=== PHILOSOPHY & ETHICS ===",
+      "elements": [221, 215],
+      "result": 256,
+      "description": "knowledge + thought = philosophy"
+    },
+    {
+      "elements": [256, 880],
+      "result": 257,
+      "description": "philosophy + animal = morality"
+    },
+    {
+      "elements": [257, 227],
+      "result": 258,
+      "description": "morality + soul = ethics"
+    },
+    {
+      "comment": "=== VIRTUE & VICE ===",
+      "elements": [286, 216],
+      "result": 259,
+      "description": "honor + love = virtue"
+    },
+    {
+      "elements": [274, 241],
+      "result": 260,
+      "description": "darkness + anger = vice"
+    },
+    {
+      "comment": "=== HARMONY & DISCORD ===",
+      "elements": [238, 223],
+      "result": 261,
+      "description": "peace + order = harmony"
+    },
+    {
+      "elements": [239, 222],
+      "result": 262,
+      "description": "war + chaos = discord"
+    },
+    {
+      "comment": "=== PERCEPTION & UNDERSTANDING ===",
+      "elements": [228, 881],
+      "result": 263,
+      "description": "mind + light = perception"
+    },
+    {
+      "elements": [228, 243],
+      "result": 264,
+      "description": "mind + imagination = intuition"
+    },
+    {
+      "elements": [228, 221],
+      "result": 265,
+      "description": "mind + knowledge = logic"
+    },
+    {
+      "elements": [215, 228],
+      "result": 266,
+      "description": "thought + mind = emotion"
+    },
+    {
+      "elements": [265, 215],
+      "result": 267,
+      "description": "logic + thought = reason"
+    },
+    {
+      "elements": [215, 227],
+      "result": 268,
+      "description": "thought + soul = faith"
+    },
+    {
+      "elements": [268, 274],
+      "result": 269,
+      "description": "faith + darkness = doubt"
+    },
+    {
+      "elements": [268, 880],
+      "result": 270,
+      "description": "faith + animal = belief"
+    },
+    {
+      "elements": [221, 263],
+      "result": 271,
+      "description": "knowledge + perception = understanding"
+    },
+    {
+      "comment": "=== CONFUSION & CLARITY ===",
+      "elements": [228, 222],
+      "result": 272,
+      "description": "mind + chaos = confusion"
+    },
+    {
+      "elements": [228, 223],
+      "result": 273,
+      "description": "mind + order = clarity"
+    },
+    {
+      "comment": "=== MYSTERY & REVELATION ===",
+      "elements": [274, 215],
+      "result": 274,
+      "description": "darkness + thought = mystery"
+    },
+    {
+      "elements": [274, 881],
+      "result": 275,
+      "description": "mystery + light = revelation"
+    },
+    {
+      "comment": "=== EXPERIENCE & INNOCENCE ===",
+      "elements": [210, 214],
+      "result": 276,
+      "description": "time + memory = experience"
+    },
+    {
+      "elements": [216, 245],
+      "result": 277,
+      "description": "love + emptiness = innocence"
+    },
+    {
+      "comment": "=== REDEMPTION & FORGIVENESS ===",
+      "elements": [278, 216],
+      "result": 279,
+      "description": "guilt + love = redemption"
+    },
+    {
+      "elements": [279, 216],
+      "result": 280,
+      "description": "redemption + love = forgiveness"
+    },
+    {
+      "comment": "=== ACCEPTANCE ===",
+      "elements": [280, 238],
+      "result": 290,
+      "description": "forgiveness + peace = acceptance"
+    },
+    {
+      "comment": "=== JUSTICE & FREEDOM ===",
+      "elements": [223, 227],
+      "result": 241,
+      "description": "order + soul = justice"
+    },
+    {
+      "elements": [227, 222],
+      "result": 240,
+      "description": "soul + chaos = freedom"
+    },
+    {
+      "comment": "=== PARADOX ===",
+      "elements": [231, 232],
+      "result": 242,
+      "description": "truth + lie = paradox"
+    },
+    {
+      "comment": "=== MAGIC CURSES ===",
+      "elements": [28, 274],
+      "result": 98,
+      "description": "magic + darkness = curse"
+    },
+    {
+      "elements": [98, 28],
+      "result": 94,
+      "description": "curse + magic = hex"
+    },
+    {
+      "comment": "=== NECROMANCY ===",
+      "elements": [28, 102],
+      "result": 103,
+      "description": "magic + death = necromancy"
+    }
+  ]
+}
