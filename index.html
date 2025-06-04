@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Infinite Snake - Elemental Mastery</title>
+    <title>Infinite Snake - Craft the Cosmos</title>
     <link rel="icon" type="image/png" href="favicon.png">
     <style>
         body {
@@ -662,9 +662,9 @@
         <div id="splashContent">
             <img src="assets/word-logo.webp" alt="Infinite Snake" style="width: 400px; max-width: 80%; margin-bottom: 30px;" onerror="this.style.display='none'; document.getElementById('splashTitle').style.display='block';">
             <h1 id="splashTitle">Infinite Snake</h1>
-            <p>Reality has shattered. The elements of creation lie scattered across the void.<br><br>
-            You are the Infinite Snake - a primordial being born from chaos. Consume these fragments. Combine them within your endless coils. Forge new existence.<br><br>
-            From Fire and Water to stars and civilizations, rebuild the cosmos itself. The universe awaits.</p>
+            <p>Reality has shattered. The elements of creation are scattered across the void.<br><br>
+            You are the Infinite Snake - an ancient being born from chaos. Consume these fragments. Combine them within your endless serpentine coils. Forge new existence.<br><br>
+            From fire and water to stars and civilizations, rebuild the Cosmos itself. The universe awaits.</p>
             <button id="startButton">Begin Your Journey</button>
         </div>
     </div>
@@ -824,6 +824,13 @@
         const VOID_ORB_SPAWN_INTERVAL = 30000; // 30 seconds
         const VOID_ORB_SPAWN_COUNT = 5; // Number of void orbs to maintain on map
         
+        // Catalyst Gem mechanic
+        let catalystGems = [];
+        let lastCatalystGemSpawn = 0;
+        const CATALYST_GEM_SPAWN_INTERVAL = 45000; // 45 seconds (more rare than void orbs)
+        const CATALYST_GEM_SPAWN_COUNT = 3; // Number of catalyst gems to maintain on map
+        let catalystSpawnedElements = []; // Track elements spawned by catalyst for visual effect
+        
         // Space effects
         let staticStars = [];
         let shootingStars = [];
@@ -844,55 +851,55 @@
         
         // Skin system
         const skinMetadata = {
-            'snake-default-green': { name: 'Default Green', unlocked: true, colors: ['#2ecc71', '#27ae60'] },
+            'snake-default-green': { name: 'Basic Boy', unlocked: true, colors: ['#2ecc71', '#27ae60'] },
             '35mm': { name: 'Hipstamatic', unlocked: false, colors: ['#2c3e50', '#1a1a1a'] },
-            'Frank': { name: 'Franklin', unlocked: false, colors: ['#9b59b6', '#8e44ad'] },
-            'af-one': { name: "Don't Scuff on Me", unlocked: false, colors: ['#e74c3c', '#ecf0f1'] },
-            'barbi': { name: 'Pink Plastic', unlocked: false, colors: ['#ff69b4', '#ff1493'] },
+            'Frank': { name: 'Franklin Jr', unlocked: false, colors: ['#9b59b6', '#8e44ad'] },
+            'af-one': { name: "Scuffy", unlocked: false, colors: ['#e74c3c', '#ecf0f1'] },
+            'barbi': { name: 'Margot', unlocked: false, colors: ['#ff69b4', '#ff1493'] },
             'boat-mcboatface': { name: 'Boaty McBoatface', unlocked: false, colors: ['#3498db', '#2980b9'] },
-            'camera-guy': { name: 'Say Cheese', unlocked: false, colors: ['#2c3e50', '#1a1a1a'] },
+            'camera-guy': { name: 'The Resistance', unlocked: false, colors: ['#2c3e50', '#1a1a1a'] },
             'coffee': { name: 'Caffeine Fiend', unlocked: false, colors: ['#8b4513', '#6b3410'] },
-            'controller': { name: 'Game On', unlocked: false, colors: ['#9b59b6', '#8e44ad'] },
+            'controller': { name: 'Little Bro', unlocked: false, colors: ['#9b59b6', '#8e44ad'] },
             'diet-cola': { name: 'Cola Crusader', unlocked: false, colors: ['#e74c3c', '#c0392b'] },
             'dog': { name: 'Good Boy', unlocked: false, colors: ['#8b4513', '#6b3410'] },
             'donut': { name: 'Sweet Tooth', unlocked: false, colors: ['#daa520', '#ff69b4'] },
             'flame': { name: 'Hot Head', unlocked: false, colors: ['#ff8c00', '#ffd700'] },
-            'football': { name: 'Touchdown', unlocked: false, colors: ['#2ecc71', '#27ae60'] },
-            'fries': { name: 'Salty Serpent', unlocked: false, colors: ['#e74c3c', '#ffd700'] },
-            'green-dragon': { name: 'Emerald Drake', unlocked: false, colors: ['#2ecc71', '#27ae60'] },
+            'football': { name: 'MVP', unlocked: false, colors: ['#2ecc71', '#27ae60'] },
+            'fries': { name: 'Sir Dips-a-lot', unlocked: false, colors: ['#e74c3c', '#ffd700'] },
+            'green-dragon': { name: 'World Muncher', unlocked: false, colors: ['#2ecc71', '#27ae60'] },
             'handheld-game': { name: 'Retro Gamer', unlocked: false, colors: ['#9b59b6', '#8e44ad'] },
             'hotdog': { name: 'Wiener Winner', unlocked: false, colors: ['#e74c3c', '#c0392b'] },
-            'infinity-glove': { name: 'Snap Master', unlocked: false, colors: ['#e74c3c', '#9b59b6', '#ffd700', '#2ecc71'] },
+            'infinity-glove': { name: 'Snappy', unlocked: false, colors: ['#e74c3c', '#9b59b6', '#ffd700', '#2ecc71'] },
             'kid-car': { name: 'Speed Demon Jr.', unlocked: false, colors: ['#e74c3c', '#c0392b'] },
             'lovecraft': { name: 'Eldritch Horror', unlocked: false, colors: ['#2ecc71', '#27ae60'] },
             'neko': { name: 'Sir Beans', unlocked: false, colors: ['#95a5a6', '#7f8c8d'] },
             'nyan': { name: 'Poptart Cat', unlocked: false, colors: ['#e74c3c', '#ff8c00', '#ffd700', '#2ecc71', '#3498db', '#9b59b6'] },
-            'pizza': { name: 'Slice of Life', unlocked: false, colors: ['#ffd700', '#f39c12'] },
-            'potato': { name: 'Spud Buddy', unlocked: false, colors: ['#8b4513', '#6b3410'] },
+            'pizza': { name: 'Tony Pepperoni', unlocked: false, colors: ['#ffd700', '#f39c12'] },
+            'potato': { name: 'Spud Bud', unlocked: false, colors: ['#8b4513', '#6b3410'] },
             'racer': { name: 'Speed Demon', unlocked: false, colors: ['#e74c3c', '#c0392b'] },
             'ramen': { name: 'Noodle Master', unlocked: false, colors: ['#ffd700', '#f39c12'] },
-            'red-dragon': { name: 'Crimson Drake', unlocked: false, colors: ['#e74c3c', '#c0392b'] },
-            'robot': { name: 'Mecha Boi', unlocked: false, colors: ['#95a5a6', '#7f8c8d'] },
-            'santa': { name: 'Ho Ho Snake', unlocked: false, colors: ['#2ecc71', '#e74c3c', '#ecf0f1'] },
+            'red-dragon': { name: 'Ralph', unlocked: false, colors: ['#e74c3c', '#c0392b'] },
+            'robot': { name: 'Metal Boi', unlocked: false, colors: ['#95a5a6', '#7f8c8d'] },
+            'santa': { name: 'Ho Ho Hose', unlocked: false, colors: ['#2ecc71', '#e74c3c', '#ecf0f1'] },
             'saturn': { name: 'Ring Leader', unlocked: false, colors: ['#ff8c00', '#ff6347'] },
             'skibidi': { name: 'Mr. Swirley', unlocked: false, colors: ['#ecf0f1', '#bdc3c7'] },
             'snake-2': { name: 'Classic Redux', unlocked: false, colors: ['#2ecc71', '#27ae60'] },
-            'space-cadet': { name: 'Cosmic Crawler', unlocked: false, colors: ['#34495e', '#2c3e50'] },
+            'space-cadet': { name: 'Cosmic Ray', unlocked: false, colors: ['#34495e', '#2c3e50'] },
             'tornado': { name: 'Whirlwind', unlocked: false, colors: ['#95a5a6', '#7f8c8d'] },
-            'tv': { name: 'Channel Surfer', unlocked: false, colors: ['#8b4513', '#6b3410'] },
-            'unicorn': { name: 'Magical Mover', unlocked: false, colors: ['#ff69b4', '#ffd700'] },
-            'brick-man': { name: 'Everything is Awesome', unlocked: false, colors: ['#ff8c00', '#ff6347'] },
-            'buffalo': { name: "Let's Go Buffalo", unlocked: false, colors: ['#3498db', '#2980b9'] },
-            'clock': { name: 'Tick Tock', unlocked: false, colors: ['#8b4513', '#6b3410'] },
-            'floral': { name: 'Bouquet', unlocked: false, colors: ['#2ecc71', '#27ae60'] },
-            'gnome': { name: 'Garden Party', unlocked: false, colors: ['#2ecc71', '#27ae60'] },
-            'mac': { name: 'Boop Beep', unlocked: false, colors: ['#f5deb3', '#e6d7c3'] },
+            'tv': { name: 'CRT Surfer', unlocked: false, colors: ['#8b4513', '#6b3410'] },
+            'unicorn': { name: 'Tres Commas', unlocked: false, colors: ['#ff69b4', '#ffd700'] },
+            'brick-man': { name: 'The Special', unlocked: false, colors: ['#ff8c00', '#ff6347'] },
+            'buffalo': { name: "Billy Blue", unlocked: false, colors: ['#3498db', '#2980b9'] },
+            'clock': { name: 'Little Tim', unlocked: false, colors: ['#8b4513', '#6b3410'] },
+            'floral': { name: 'Bo', unlocked: false, colors: ['#2ecc71', '#27ae60'] },
+            'gnome': { name: 'World Traveler', unlocked: false, colors: ['#2ecc71', '#27ae60'] },
+            'mac': { name: 'The Beige Wonder', unlocked: false, colors: ['#f5deb3', '#e6d7c3'] },
             'murica': { name: "'Murica", unlocked: false, colors: ['#e74c3c', '#ecf0f1', '#3498db'] },
-            'pod-player': { name: 'One More Thing', unlocked: false, colors: ['#87ceeb', '#5f9ea0'] },
-            'whale': { name: 'Big Fish', unlocked: false, colors: ['#3498db', '#2980b9'] }
+            'pod-player': { name: 'Poddington', unlocked: false, colors: ['#87ceeb', '#5f9ea0'] },
+            'whale': { name: 'Spout', unlocked: false, colors: ['#3498db', '#2980b9'] }
         };
         
-        const aiSkins = ['robot', 'green-dragon', 'red-dragon', 'space-cadet', 'neko', 'unicorn'];
+        const aiSkins = Object.keys(skinMetadata); // All skins available for AI
         let currentPlayerSkin = 'snake-default-green';
         let unlockedSkins = new Set(['snake-default-green']);
         let availableUnlocks = 0;
@@ -1521,7 +1528,34 @@
                             }
                         }
                         
-                        // If no void orb target (or not at capacity), find nearest element
+                        // Check for nearby Catalyst Gems (prioritize if we have elements)
+                        if (!target && this.elements.length > 0) {
+                            let nearestCatalystGem = null;
+                            let minCatalystDist = 600; // Medium search radius for catalyst gems
+                            
+                            for (const gem of catalystGems) {
+                                const dist = Math.hypot(gem.x - this.x, gem.y - this.y);
+                                
+                                // Skip gems that are too close to borders
+                                if (nearBorder) {
+                                    const gemNearBorder = gem.x < borderDanger || gem.x > WORLD_SIZE - borderDanger ||
+                                                         gem.y < borderDanger || gem.y > WORLD_SIZE - borderDanger;
+                                    if (gemNearBorder) continue;
+                                }
+                                
+                                if (dist < minCatalystDist) {
+                                    minCatalystDist = dist;
+                                    nearestCatalystGem = gem;
+                                }
+                            }
+                            
+                            if (nearestCatalystGem) {
+                                target = nearestCatalystGem;
+                                targetAngle = Math.atan2(nearestCatalystGem.y - this.y, nearestCatalystGem.x - this.x);
+                            }
+                        }
+                        
+                        // If no void orb or catalyst gem target, find nearest element
                         if (!target) {
                             let nearestElement = null;
                             let minDist = 500;
@@ -1865,8 +1899,13 @@
                 // Draw head
                 if (this.segments.length > 0) {
                     const head = this.segments[0];
-                    const screenX = head.x - camera.x + canvas.width / 2;
-                    const screenY = head.y - camera.y + canvas.height / 2;
+                    // Offset head position slightly back along the snake body
+                    const offsetDistance = 5; // pixels to move head back
+                    const offsetX = -Math.cos(this.angle) * offsetDistance;
+                    const offsetY = -Math.sin(this.angle) * offsetDistance;
+                    
+                    const screenX = (head.x + offsetX) - camera.x + canvas.width / 2;
+                    const screenY = (head.y + offsetY) - camera.y + canvas.height / 2;
                     
                     // Draw skin image
                     const skinImage = skinImages[this.skin];
@@ -1874,7 +1913,7 @@
                         ctx.save();
                         ctx.translate(screenX, screenY);
                         ctx.rotate(this.angle - Math.PI/2); // Rotate 90 degrees counter-clockwise so top faces body
-                        const size = SEGMENT_SIZE * 3.1625; // Increased by 25% (2.875 * 1.1)
+                        const size = SEGMENT_SIZE * 3.47875; // Increased by another 10% (3.1625 * 1.1)
                         ctx.drawImage(skinImage, -size/2, -size/2, size, size);
                         ctx.restore();
                     } else {
@@ -1904,16 +1943,21 @@
         
         // Element class
         class Element {
-            constructor(type, x, y) {
+            constructor(type, x, y, isCatalystSpawned = false) {
                 this.type = type;
                 this.x = x;
                 this.y = y;
                 this.data = elementDatabase[type];
                 this.pulse = 0;
+                this.isCatalystSpawned = isCatalystSpawned;
+                this.catalystSparkleTime = 0;
             }
             
             update() {
                 this.pulse += 0.05;
+                if (this.isCatalystSpawned) {
+                    this.catalystSparkleTime += 0.1;
+                }
             }
             
             draw() {
@@ -1993,6 +2037,30 @@
                 ctx.lineWidth = 2;
                 ctx.strokeText(this.data.name, screenX, screenY + ELEMENT_SIZE + 5);
                 ctx.fillText(this.data.name, screenX, screenY + ELEMENT_SIZE + 5);
+                
+                // Draw catalyst sparkles if this element was spawned by catalyst
+                if (this.isCatalystSpawned) {
+                    ctx.save();
+                    for (let i = 0; i < 4; i++) {
+                        const angle = (this.catalystSparkleTime + i * Math.PI / 2) % (Math.PI * 2);
+                        const dist = ELEMENT_SIZE + 10 + Math.sin(this.catalystSparkleTime * 2) * 5;
+                        const px = screenX + Math.cos(angle) * dist;
+                        const py = screenY + Math.sin(angle) * dist;
+                        
+                        ctx.fillStyle = 'rgba(255, 200, 100, 0.8)';
+                        ctx.beginPath();
+                        ctx.arc(px, py, 3, 0, Math.PI * 2);
+                        ctx.fill();
+                        
+                        // Add a small star
+                        ctx.fillStyle = 'rgba(255, 255, 200, 0.9)';
+                        ctx.font = '12px Arial';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText('✨', px, py);
+                    }
+                    ctx.restore();
+                }
             }
         }
         
@@ -2111,6 +2179,69 @@
                     ctx.fillStyle = 'rgba(100, 200, 255, 0.8)';
                     ctx.beginPath();
                     ctx.arc(px, py, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                
+                ctx.restore();
+            }
+        }
+        
+        // CatalystGem class
+        class CatalystGem {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.size = 20;
+                this.pulse = Math.random() * Math.PI * 2;
+                this.rotation = 0;
+                this.sparkleTime = 0;
+            }
+            
+            update() {
+                this.pulse += 0.04;
+                this.rotation += 0.02;
+                this.sparkleTime += 0.1;
+            }
+            
+            draw() {
+                const screenX = this.x - camera.x + canvas.width / 2;
+                const screenY = this.y - camera.y + canvas.height / 2;
+                
+                // Skip if off-screen
+                if (screenX < -50 || screenX > canvas.width + 50 ||
+                    screenY < -50 || screenY > canvas.height + 50) return;
+                
+                const scale = 1 + Math.sin(this.pulse) * 0.15;
+                
+                ctx.save();
+                ctx.translate(screenX, screenY);
+                ctx.rotate(this.rotation);
+                
+                // Orange glow effect
+                const glowSize = this.size * 2.5 * scale;
+                const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, glowSize);
+                gradient.addColorStop(0, 'rgba(255, 165, 0, 0.8)'); // Bright orange
+                gradient.addColorStop(0.5, 'rgba(255, 100, 0, 0.5)'); // Dark orange
+                gradient.addColorStop(1, 'transparent');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(-glowSize, -glowSize, glowSize * 2, glowSize * 2);
+                
+                // Catalyst gem emoji
+                ctx.font = `${this.size * 2 * scale}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('💎', 0, 0);
+                
+                // Sparkle particles
+                for (let i = 0; i < 6; i++) {
+                    const angle = (this.sparkleTime + i * Math.PI / 3) % (Math.PI * 2);
+                    const dist = this.size * scale * (0.8 + Math.sin(this.sparkleTime * 2 + i) * 0.3);
+                    const px = Math.cos(angle) * dist;
+                    const py = Math.sin(angle) * dist;
+                    
+                    ctx.fillStyle = 'rgba(255, 200, 100, 0.9)';
+                    ctx.beginPath();
+                    ctx.arc(px, py, 2 + Math.sin(this.sparkleTime * 3 + i) * 1, 0, Math.PI * 2);
                     ctx.fill();
                 }
                 
@@ -2605,6 +2736,71 @@
                         
                         // Remove void orb
                         voidOrbs.splice(i, 1);
+                        break;
+                    }
+                }
+                
+                // Check Catalyst Gem collision (all snakes can collect)
+                for (let i = catalystGems.length - 1; i >= 0; i--) {
+                    const gem = catalystGems[i];
+                    const dist = Math.hypot(gem.x - snake.x, gem.y - snake.y);
+                    if (dist < SEGMENT_SIZE + gem.size) {
+                        // Only activate if snake has elements
+                        if (snake.elements.length > 0) {
+                            const tailElement = snake.elements[snake.elements.length - 1];
+                            
+                            // Find all compatible elements
+                            const compatibleElements = [];
+                            for (const [combo, result] of Object.entries(combinations)) {
+                                const [elem1, elem2] = combo.split('+');
+                                if (elem1 === tailElement) {
+                                    compatibleElements.push(elem2);
+                                } else if (elem2 === tailElement) {
+                                    compatibleElements.push(elem1);
+                                }
+                            }
+                            
+                            // Spawn up to 4 compatible elements
+                            const spawnCount = Math.min(4, compatibleElements.length);
+                            if (spawnCount > 0 && snake.isPlayer) {
+                                // Spawn elements around the player
+                                for (let j = 0; j < spawnCount; j++) {
+                                    const angle = (j / spawnCount) * Math.PI * 2;
+                                    const distance = 100 + Math.random() * 100;
+                                    const spawnX = snake.x + Math.cos(angle) * distance;
+                                    const spawnY = snake.y + Math.sin(angle) * distance;
+                                    
+                                    // Pick a random compatible element (allowing duplicates)
+                                    const elementType = compatibleElements[Math.floor(Math.random() * compatibleElements.length)];
+                                    
+                                    // Create the element with catalyst sparkle effect
+                                    const newElement = new Element(elementType, spawnX, spawnY, true);
+                                    elements.push(newElement);
+                                }
+                                
+                                showMessage(`💎 Catalyst activated! Spawned ${spawnCount} compatible elements`, 'success');
+                            } else if (spawnCount > 0 && !snake.isPlayer) {
+                                // AI snakes get points instead
+                                snake.score += 200;
+                            }
+                            
+                            // Visual feedback
+                            if (window.eatSound) {
+                                window.eatSound.play().catch(() => {});
+                            }
+                            
+                            // Create particle effect
+                            for (let j = 0; j < 20; j++) {
+                                const angle = (j / 20) * Math.PI * 2;
+                                const speed = 3 + Math.random() * 4;
+                                const vx = Math.cos(angle) * speed;
+                                const vy = Math.sin(angle) * speed;
+                                particles.push(new Particle(gem.x, gem.y, vx, vy, 'rgba(255, 165, 0, 0.8)'));
+                            }
+                        }
+                        
+                        // Remove catalyst gem
+                        catalystGems.splice(i, 1);
                         break;
                     }
                 }
@@ -3104,6 +3300,22 @@
             // Update Void Orbs
             voidOrbs.forEach(orb => orb.update());
             
+            // Spawn Catalyst Gems to maintain count (more spread out)
+            if (catalystGems.length < CATALYST_GEM_SPAWN_COUNT && Date.now() - lastCatalystGemSpawn >= CATALYST_GEM_SPAWN_INTERVAL / CATALYST_GEM_SPAWN_COUNT) {
+                // Divide map into sections for better spread
+                const sectionWidth = WORLD_SIZE / CATALYST_GEM_SPAWN_COUNT;
+                const sectionIndex = catalystGems.length;
+                const sectionX = sectionIndex * sectionWidth;
+                
+                const x = sectionX + 100 + Math.random() * (sectionWidth - 200);
+                const y = 100 + Math.random() * (WORLD_SIZE - 200);
+                catalystGems.push(new CatalystGem(x, y));
+                lastCatalystGemSpawn = Date.now();
+            }
+            
+            // Update Catalyst Gems
+            catalystGems.forEach(gem => gem.update());
+            
             // Update AlchemyVision timer
             if (alchemyVisionActive) {
                 alchemyVisionTimer -= 16; // Assuming ~60fps
@@ -3135,6 +3347,9 @@
             
             // Draw Void Orbs
             voidOrbs.forEach(orb => orb.draw());
+            
+            // Draw Catalyst Gems
+            catalystGems.forEach(gem => gem.draw());
             
             snakes.forEach(snake => snake.draw());
             particles.forEach(particle => particle.draw());
