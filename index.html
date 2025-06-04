@@ -947,6 +947,16 @@
             if (e.key === 'p' || e.key === 'P') {
                 togglePause();
             }
+            
+            // Resume pending music on first interaction
+            if (window.pendingMusicTrack && !musicMuted) {
+                window.pendingMusicTrack.play().then(() => {
+                    console.log('Music resumed after user interaction');
+                }).catch(err => {
+                    console.error('Failed to resume music:', err);
+                });
+                window.pendingMusicTrack = null;
+            }
         });
         
         window.addEventListener('keyup', (e) => {
@@ -1111,9 +1121,10 @@
         }
         
         async function checkAvailableTracks() {
-            availableTracks = [];
             // For now, assume all tracks are available
             availableTracks = [...musicTracks];
+            console.log('Available tracks loaded:', availableTracks);
+            return true;
         }
         
         function playRandomTrack() {
@@ -1126,12 +1137,17 @@
             // Stop current track if playing
             if (currentTrack) {
                 currentTrack.pause();
-                currentTrack.remove();
+                currentTrack.src = ''; // Clear the source
+                currentTrack = null; // Clear reference
             }
             
             // Pick random track
             const randomIndex = Math.floor(Math.random() * availableTracks.length);
             const trackName = availableTracks[randomIndex];
+            
+            // Remove the selected track from available tracks
+            availableTracks.splice(randomIndex, 1);
+            console.log(`Playing: ${trackName}, remaining tracks: ${availableTracks.length}`);
             
             // Create audio element
             currentTrack = new Audio(`music/${trackName}`);
@@ -1139,9 +1155,10 @@
             
             // Play next track when this one ends
             currentTrack.addEventListener('ended', () => {
-                console.log('Track ended, playing next track...');
+                console.log(`Track "${trackName}" ended, available tracks: ${availableTracks.length}`);
                 setTimeout(() => {
                     try {
+                        console.log('Attempting to play next track...');
                         playRandomTrack();
                     } catch (error) {
                         console.error('Error playing next track:', error);
@@ -1151,10 +1168,26 @@
                 }, 1000); // Wait 1 second before next track
             });
             
-            // Try to play
-            currentTrack.play().catch(e => {
-                console.log('Music autoplay blocked, will play on first interaction');
+            // Handle loading errors
+            currentTrack.addEventListener('error', (e) => {
+                console.error('Error loading track:', trackName, e);
+                // Try next track after a short delay
+                setTimeout(() => {
+                    playRandomTrack();
+                }, 1000);
             });
+            
+            // Try to play
+            const playPromise = currentTrack.play();
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    console.log('Music started playing successfully');
+                }).catch(e => {
+                    console.log('Music autoplay blocked:', e.message);
+                    // Store track to retry on user interaction
+                    window.pendingMusicTrack = currentTrack;
+                });
+            }
         }
         
         window.toggleMusic = function() {
