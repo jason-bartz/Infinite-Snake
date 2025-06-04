@@ -15,6 +15,13 @@
             color: white;
         }
         
+        #gameCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            opacity: 1;
+        }
+        
         /* Splash Screen */
         #splashScreen {
             position: absolute;
@@ -844,10 +851,19 @@
             'space-cadet': { name: 'Cosmic Crawler', unlocked: false },
             'tornado': { name: 'Whirlwind', unlocked: false },
             'tv': { name: 'Channel Surfer', unlocked: false },
-            'unicorn': { name: 'Magical Mover', unlocked: false }
+            'unicorn': { name: 'Magical Mover', unlocked: false },
+            'brick-man': { name: 'Everything is Awesome', unlocked: false },
+            'buffalo': { name: "Let's Go Buffalo", unlocked: false },
+            'clock': { name: 'Tick Tock', unlocked: false },
+            'floral': { name: 'Bouquet', unlocked: false },
+            'gnome': { name: 'Garden Party', unlocked: false },
+            'mac': { name: 'Boop Beep', unlocked: false },
+            'murica': { name: "'Murica", unlocked: false },
+            'pod-player': { name: 'One More Thing', unlocked: false },
+            'whale': { name: 'Big Fish', unlocked: false }
         };
         
-        const aiSkins = ['snake-black', 'snake-blue', 'snake-neon', 'snake-orange', 'snake-pink', 'snake-space'];
+        const aiSkins = ['robot', 'green-dragon', 'red-dragon', 'space-cadet', 'neko', 'unicorn'];
         let currentPlayerSkin = 'snake-default-green';
         let unlockedSkins = new Set(['snake-default-green']);
         let availableUnlocks = 0;
@@ -971,9 +987,55 @@
         
         function selectControls(scheme) {
             controlScheme = scheme;
-            document.getElementById('gameModeSelect').style.display = 'none';
-            document.getElementById('discoveryLog').style.display = 'block';
-            startGame();
+            
+            // Create fade transition
+            const gameModeSelect = document.getElementById('gameModeSelect');
+            const discoveryLog = document.getElementById('discoveryLog');
+            const gameCanvas = document.getElementById('gameCanvas');
+            const gameModeStarsCanvas = document.getElementById('gameModeStarsCanvas');
+            
+            // Add transition styles
+            gameModeSelect.style.transition = 'opacity 0.8s ease-out';
+            gameCanvas.style.transition = 'opacity 0.8s ease-in';
+            gameCanvas.style.opacity = '0';
+            
+            // Create a temporary background during transition
+            const transitionBg = document.createElement('div');
+            transitionBg.style.position = 'fixed';
+            transitionBg.style.top = '0';
+            transitionBg.style.left = '0';
+            transitionBg.style.width = '100%';
+            transitionBg.style.height = '100%';
+            transitionBg.style.background = '#000';
+            transitionBg.style.zIndex = '40';
+            transitionBg.appendChild(gameModeStarsCanvas.cloneNode(true));
+            transitionBg.style.transition = 'opacity 1s ease-out';
+            document.body.appendChild(transitionBg);
+            
+            // Fade out menu content but keep stars visible
+            const menuContent = gameModeSelect.querySelector('#gameModeContent');
+            if (menuContent) {
+                menuContent.style.transition = 'opacity 0.4s ease-out';
+                menuContent.style.opacity = '0';
+            }
+            
+            // After content fades, start the game
+            setTimeout(() => {
+                gameModeSelect.style.display = 'none';
+                discoveryLog.style.display = 'block';
+                startGame();
+                
+                // Fade in game canvas and fade out transition background
+                setTimeout(() => {
+                    gameCanvas.style.opacity = '1';
+                    transitionBg.style.opacity = '0';
+                    
+                    // Remove transition background after fade
+                    setTimeout(() => {
+                        transitionBg.remove();
+                    }, 1000);
+                }, 100);
+            }, 400);
         }
         
         // Load snake names
