@@ -842,6 +842,156 @@
             margin-top: 2px;
         }
         
+        /* Mobile Controls */
+        .mobile-controls {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 200px;
+            pointer-events: none;
+            z-index: 50;
+        }
+        
+        body.mobile .mobile-controls {
+            display: block;
+        }
+        
+        .virtual-joystick {
+            position: absolute;
+            bottom: 40px;
+            left: 40px;
+            width: 120px;
+            height: 120px;
+            pointer-events: auto;
+        }
+        
+        .joystick-base {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .joystick-knob {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.5);
+            border: 2px solid white;
+            border-radius: 50%;
+            transition: none;
+            transform: translate(-50%, -50%);
+            left: 50%;
+            top: 50%;
+        }
+        
+        .boost-button {
+            position: absolute;
+            bottom: 40px;
+            right: 40px;
+            width: 80px;
+            height: 80px;
+            background: rgba(78, 205, 196, 0.3);
+            border: 3px solid #4ecdc4;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            pointer-events: auto;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        
+        .boost-button.active {
+            background: rgba(78, 205, 196, 0.6);
+            transform: scale(0.95);
+        }
+        
+        .pause-button-mobile {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            pointer-events: auto;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        
+        /* Mobile UI Inversions */
+        body.mobile .bottom-ui {
+            top: 0;
+            bottom: auto;
+            padding-bottom: 20px;
+            padding-top: 20px;
+            border-top: none;
+            border-bottom: 2px solid rgba(138, 43, 226, 0.3);
+            box-shadow: 0 10px 30px rgba(138, 43, 226, 0.2);
+            background: linear-gradient(to top, 
+                rgba(0, 0, 0, 0) 0%,
+                rgba(0, 0, 0, 0.7) 10%,
+                rgba(10, 10, 26, 0.95) 30%,
+                rgba(10, 10, 26, 0.98) 100%
+            );
+        }
+        
+        body.mobile .player-info-box {
+            top: 120px;
+            bottom: auto;
+            left: 20px;
+        }
+        
+        body.mobile .leaderboard-box {
+            top: 120px;
+            bottom: auto;
+            right: 20px;
+        }
+        
+        body.mobile .discovery-feed {
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        body.mobile .message-popup {
+            top: 200px;
+            bottom: auto;
+        }
+        
+        body.mobile #pauseText,
+        body.mobile #fpsCounter {
+            top: 170px;
+        }
+        
+        /* Touch-specific optimizations */
+        body.mobile {
+            touch-action: none;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        
+        body.mobile .desktop-only {
+            display: none;
+        }
+        
         /* Responsive adjustments */
         @media (max-width: 1200px) {
             .player-info-box,
@@ -871,6 +1021,11 @@
                 width: 200px;
             }
             
+            body.mobile .player-info-box,
+            body.mobile .leaderboard-box {
+                top: 100px;
+            }
+            
             .discovery-feed {
                 display: none; /* Hide on mobile */
             }
@@ -882,6 +1037,26 @@
             
             .boost-bar-container {
                 width: 80%;
+            }
+            
+            .virtual-joystick {
+                width: 100px;
+                height: 100px;
+                left: 20px;
+                bottom: 20px;
+            }
+            
+            .boost-button {
+                width: 70px;
+                height: 70px;
+                right: 20px;
+                bottom: 20px;
+                font-size: 14px;
+            }
+            
+            .joystick-knob {
+                width: 40px;
+                height: 40px;
             }
         }
         
@@ -1284,10 +1459,21 @@
         </div>
         
         <!-- UI Info (Top Right) -->
-        <div style="position: absolute; top: 20px; right: 20px; text-align: right; font-size: 14px; color: rgba(255, 255, 255, 0.4); pointer-events: none;">
-            <div style="margin-bottom: 5px;">Press P for Pause Menu</div>
+        <div id="pauseText" style="position: absolute; top: 20px; right: 20px; text-align: right; font-size: 14px; color: rgba(255, 255, 255, 0.4); pointer-events: none;">
+            <div style="margin-bottom: 5px;" class="desktop-only">Press P for Pause Menu</div>
             <div id="fpsCounter">FPS: --</div>
         </div>
+    </div>
+    
+    <!-- Mobile Controls -->
+    <div class="mobile-controls">
+        <div class="virtual-joystick" id="virtualJoystick">
+            <div class="joystick-base">
+                <div class="joystick-knob" id="joystickKnob"></div>
+            </div>
+        </div>
+        <div class="boost-button" id="boostButton">BOOST</div>
+        <div class="pause-button-mobile" id="pauseButtonMobile" onclick="togglePause()">⏸</div>
     </div>
     
     <!-- Pause Overlay -->
@@ -1579,6 +1765,15 @@
         const keys = {};
         let mouseAngle = 0;
         let mouseDown = false;
+        
+        // Mobile detection
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
+                        || ('ontouchstart' in window && navigator.maxTouchPoints > 0);
+        
+        // Mobile controls state
+        let joystickActive = false;
+        let joystickBase = { x: 0, y: 0 };
+        let joystickKnob = { x: 0, y: 0 };
         
         window.addEventListener('keydown', (e) => {
             keys[e.key] = true;
@@ -2116,7 +2311,14 @@
                         turnMultiplier = 0.85; // Reduced turn speed while boosting
                     }
                     
-                    if (controlScheme === 'arrows') {
+                    if (isMobile && joystickActive) {
+                        // Mobile controls - use joystick
+                        let angleDiff = mouseAngle - this.angle;
+                        while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
+                        while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
+                        this.angle += angleDiff * 0.12 * turnMultiplier;
+                        this.isBoosting = mouseDown && this.stamina > 0;
+                    } else if (controlScheme === 'arrows') {
                         if (keys['ArrowLeft']) this.angle -= TURN_SPEED * turnMultiplier;
                         if (keys['ArrowRight']) this.angle += TURN_SPEED * turnMultiplier;
                         // Handle boost
@@ -4429,6 +4631,109 @@
             particles.forEach(particle => particle.draw());
         }
         
+        // Initialize mobile controls
+        function initMobileControls() {
+            if (!isMobile) return;
+            
+            // Add mobile class to body
+            document.body.classList.add('mobile');
+            
+            const joystick = document.getElementById('virtualJoystick');
+            const knob = document.getElementById('joystickKnob');
+            const boostBtn = document.getElementById('boostButton');
+            
+            let joystickTouch = null;
+            
+            // Joystick controls
+            joystick.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                if (joystickTouch === null && e.changedTouches.length > 0) {
+                    joystickTouch = e.changedTouches[0].identifier;
+                    joystickActive = true;
+                    const rect = joystick.getBoundingClientRect();
+                    joystickBase.x = rect.left + rect.width / 2;
+                    joystickBase.y = rect.top + rect.height / 2;
+                }
+            });
+            
+            joystick.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                for (let i = 0; i < e.changedTouches.length; i++) {
+                    const touch = e.changedTouches[i];
+                    if (touch.identifier === joystickTouch) {
+                        const dx = touch.clientX - joystickBase.x;
+                        const dy = touch.clientY - joystickBase.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        const maxDistance = 40; // Max knob travel distance
+                        
+                        let knobX = dx;
+                        let knobY = dy;
+                        
+                        if (distance > maxDistance) {
+                            knobX = (dx / distance) * maxDistance;
+                            knobY = (dy / distance) * maxDistance;
+                        }
+                        
+                        // Update knob position
+                        knob.style.left = `${50 + (knobX / 60) * 50}%`;
+                        knob.style.top = `${50 + (knobY / 60) * 50}%`;
+                        
+                        // Update mouse angle for game controls
+                        if (distance > 10) { // Dead zone
+                            mouseAngle = Math.atan2(dy, dx);
+                        }
+                        break;
+                    }
+                }
+            });
+            
+            const resetJoystick = () => {
+                joystickActive = false;
+                joystickTouch = null;
+                knob.style.left = '50%';
+                knob.style.top = '50%';
+            };
+            
+            joystick.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                for (let i = 0; i < e.changedTouches.length; i++) {
+                    if (e.changedTouches[i].identifier === joystickTouch) {
+                        resetJoystick();
+                        break;
+                    }
+                }
+            });
+            
+            joystick.addEventListener('touchcancel', (e) => {
+                e.preventDefault();
+                resetJoystick();
+            });
+            
+            // Boost button controls
+            boostBtn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                mouseDown = true;
+                boostBtn.classList.add('active');
+            });
+            
+            boostBtn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                mouseDown = false;
+                boostBtn.classList.remove('active');
+            });
+            
+            boostBtn.addEventListener('touchcancel', (e) => {
+                e.preventDefault();
+                mouseDown = false;
+                boostBtn.classList.remove('active');
+            });
+            
+            // Prevent scrolling on game canvas
+            canvas.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+            });
+        }
+        
         // Initialize
         Promise.all([loadElements(), loadSnakeNames()]).then(() => {
             console.log('Game ready!');
@@ -4452,6 +4757,9 @@
             
             // Load all-time discoveries
             loadAllTimeDiscoveries();
+            
+            // Initialize mobile controls if needed
+            initMobileControls();
         });
         
         // Stars animation for splash and game mode screens
