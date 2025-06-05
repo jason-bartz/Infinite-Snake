@@ -1552,6 +1552,10 @@
     </div>
     
     <script>
+        // Mobile detection (needs to be before canvas setup)
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
+                        || ('ontouchstart' in window && navigator.maxTouchPoints > 0);
+        
         // Canvas setup
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
@@ -1795,9 +1799,7 @@
         let mouseAngle = 0;
         let mouseDown = false;
         
-        // Mobile detection
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
-                        || ('ontouchstart' in window && navigator.maxTouchPoints > 0);
+        // Mobile detection removed - using global definition
         
         // Mobile controls state
         let joystickActive = false;
@@ -4186,9 +4188,6 @@
         function initializeStaticStars() {
             staticStars = [];
             // Reduce stars on mobile for better performance
-            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-                || ('ontouchstart' in window)
-                || (navigator.maxTouchPoints > 0);
             const starCount = isMobile ? 50 : 200; // Much fewer stars on mobile
             
             for (let i = 0; i < starCount; i++) {
