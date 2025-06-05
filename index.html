@@ -1013,6 +1013,47 @@
             display: none;
         }
         
+        /* Mobile splash screen adjustments */
+        @media (max-width: 800px) and (orientation: landscape) {
+            #splashScreen img {
+                width: 250px !important;
+                margin-bottom: 15px !important;
+            }
+            
+            #splashScreen p {
+                font-size: 14px;
+                margin: 10px;
+                max-height: 100px;
+                overflow-y: auto;
+            }
+            
+            #splashContent {
+                padding: 20px;
+            }
+            
+            #startButton {
+                margin-top: 15px;
+                padding: 10px 30px;
+                font-size: 18px;
+            }
+            
+            #splashTitle {
+                font-size: 40px;
+                margin-bottom: 15px;
+            }
+        }
+        
+        /* Portrait mobile adjustments */
+        @media (max-width: 600px) and (orientation: portrait) {
+            #splashScreen img {
+                width: 300px !important;
+            }
+            
+            #splashScreen p {
+                font-size: 16px;
+            }
+        }
+        
         /* Responsive adjustments */
         @media (max-width: 1200px) {
             .player-info-box,
@@ -1078,6 +1119,167 @@
             .joystick-knob {
                 width: 40px;
                 height: 40px;
+            }
+        }
+        
+        /* Victory Overlay */
+        #victoryOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+        }
+        
+        #victoryPopup {
+            position: relative;
+            background: linear-gradient(135deg, 
+                rgba(20, 20, 40, 0.98) 0%,
+                rgba(40, 20, 60, 0.98) 100%
+            );
+            padding: 50px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 600px;
+            width: 90%;
+            border: 3px solid #FFD700;
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.5),
+                       inset 0 0 30px rgba(255, 215, 0, 0.1);
+            animation: victoryPulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes victoryPulse {
+            0%, 100% { 
+                transform: scale(1);
+                box-shadow: 0 0 50px rgba(255, 215, 0, 0.5),
+                           inset 0 0 30px rgba(255, 215, 0, 0.1);
+            }
+            50% { 
+                transform: scale(1.02);
+                box-shadow: 0 0 80px rgba(255, 215, 0, 0.7),
+                           inset 0 0 40px rgba(255, 215, 0, 0.2);
+            }
+        }
+        
+        .victory-glow {
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, 
+                rgba(255, 215, 0, 0.2) 0%,
+                transparent 70%
+            );
+            animation: rotate 20s linear infinite;
+            pointer-events: none;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .victory-title {
+            font-size: 48px;
+            color: #FFD700;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            animation: victoryShine 2s ease-in-out infinite;
+        }
+        
+        @keyframes victoryShine {
+            0%, 100% { text-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
+            50% { text-shadow: 0 0 40px rgba(255, 215, 0, 0.8); }
+        }
+        
+        .victory-lore {
+            font-size: 20px;
+            color: #DDD;
+            margin: 20px 0 30px;
+            line-height: 1.6;
+            font-style: italic;
+        }
+        
+        .victory-stats {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 30px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+        }
+        
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+        
+        .stat-label {
+            color: #AAA;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .stat-value {
+            color: #FFD700;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+        }
+        
+        .victory-button {
+            margin-top: 20px;
+            padding: 15px 40px;
+            font-size: 20px;
+            background: linear-gradient(45deg, #FFD700, #FF6B6B);
+            border: none;
+            border-radius: 30px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 20px rgba(255, 215, 0, 0.3);
+        }
+        
+        .victory-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 30px rgba(255, 215, 0, 0.5);
+        }
+        
+        /* Mobile adjustments for victory popup */
+        @media (max-width: 600px) {
+            #victoryPopup {
+                padding: 30px;
+            }
+            
+            .victory-title {
+                font-size: 36px;
+            }
+            
+            .victory-lore {
+                font-size: 16px;
+            }
+            
+            .stat-label {
+                font-size: 14px;
+            }
+            
+            .stat-value {
+                font-size: 20px;
             }
         }
         
@@ -1497,6 +1699,30 @@
         <div class="pause-button-mobile" id="pauseButtonMobile" onclick="togglePause()">⏸</div>
     </div>
     
+    <!-- Victory Overlay -->
+    <div id="victoryOverlay" style="display: none;">
+        <div id="victoryPopup">
+            <div class="victory-glow"></div>
+            <h1 class="victory-title">🏆 Victory! 🏆</h1>
+            <div class="victory-lore" id="victoryLore"></div>
+            <div class="victory-stats">
+                <div class="stat-item">
+                    <span class="stat-label">Final Score</span>
+                    <span class="stat-value" id="victoryScore">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Elements Discovered</span>
+                    <span class="stat-value" id="victoryDiscoveries">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Time to Complete</span>
+                    <span class="stat-value" id="victoryTime">0:00</span>
+                </div>
+            </div>
+            <button class="victory-button" onclick="location.reload()">Play Again</button>
+        </div>
+    </div>
+    
     <!-- Pause Overlay -->
     <div id="pauseOverlay">
         <div id="pauseMenu">
@@ -1560,6 +1786,43 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         
+        // Emoji cache for performance
+        const emojiCache = new Map();
+        const MAX_CACHE_SIZE = 200; // Limit cache size
+        
+        function getCachedEmoji(emoji, size) {
+            const key = `${emoji}_${size}`;
+            
+            if (emojiCache.has(key)) {
+                return emojiCache.get(key);
+            }
+            
+            // Create offscreen canvas
+            const offscreenCanvas = document.createElement('canvas');
+            const padding = 4; // Small padding for emoji rendering
+            offscreenCanvas.width = size + padding * 2;
+            offscreenCanvas.height = size + padding * 2;
+            const offscreenCtx = offscreenCanvas.getContext('2d');
+            
+            // Draw emoji to offscreen canvas
+            offscreenCtx.font = `${size}px Arial`;
+            offscreenCtx.textAlign = 'center';
+            offscreenCtx.textBaseline = 'middle';
+            offscreenCtx.fillStyle = 'black';
+            offscreenCtx.fillText(emoji, offscreenCanvas.width / 2, offscreenCanvas.height / 2);
+            
+            // Store in cache
+            emojiCache.set(key, offscreenCanvas);
+            
+            // Clean up old entries if cache is too large
+            if (emojiCache.size > MAX_CACHE_SIZE) {
+                const firstKey = emojiCache.keys().next().value;
+                emojiCache.delete(firstKey);
+            }
+            
+            return offscreenCanvas;
+        }
+        
         // Make canvas fit full window
         function resizeCanvas() {
             // Use lower resolution on mobile for better performance
@@ -1572,6 +1835,9 @@
                 canvas.style.width = window.innerWidth + 'px';
                 canvas.style.height = window.innerHeight + 'px';
             }
+            
+            // Clear emoji cache on resize as sizes might change
+            emojiCache.clear();
         }
         resizeCanvas();
         window.addEventListener('resize', resizeCanvas);
@@ -1582,6 +1848,17 @@
         const SNAKE_SPEED = 3;
         const TURN_SPEED = 0.08;
         const ELEMENT_SIZE = 20;
+        
+        // Viewport culling helper
+        function isInViewport(x, y, margin = 100) {
+            const screenX = x - camera.x + canvas.width / 2;
+            const screenY = y - camera.y + canvas.height / 2;
+            
+            return screenX >= -margin && 
+                   screenX <= canvas.width + margin && 
+                   screenY >= -margin && 
+                   screenY <= canvas.height + margin;
+        }
         
         // Game state
         let gameStarted = false;
@@ -2584,7 +2861,7 @@
                         const vx = Math.cos(particleAngle) * particleSpeed;
                         const vy = Math.sin(particleAngle) * particleSpeed;
                         const color = this.isPlayer ? 'rgba(100, 200, 255, 0.8)' : 'rgba(255, 100, 100, 0.8)';
-                        particles.push(new Particle(this.x, this.y, vx, vy, color));
+                        particlePool.spawn(this.x, this.y, vx, vy, color);
                     }
                 } else {
                     // Not boosting
@@ -2727,8 +3004,7 @@
                     }
                     
                     // Remove element from world
-                    const index = elements.indexOf(element);
-                    if (index > -1) elements.splice(index, 1);
+                    elementPool.remove(element);
                     
                     return; // Don't add to queue
                 }
@@ -2766,8 +3042,7 @@
                 }
                 
                 // Remove element from world
-                const index = elements.indexOf(element);
-                if (index > -1) elements.splice(index, 1);
+                elementPool.remove(element);
                 
                 // Update UI if player
                 if (this.isPlayer) {
@@ -2868,6 +3143,20 @@
             draw() {
                 if (!this.alive) return;
                 
+                // Early viewport check for the whole snake
+                if (this.segments.length > 0) {
+                    // Check if any segment is in viewport
+                    let anyInViewport = false;
+                    const margin = isMobile ? 150 : 200;
+                    for (const segment of this.segments) {
+                        if (isInViewport(segment.x, segment.y, margin)) {
+                            anyInViewport = true;
+                            break;
+                        }
+                    }
+                    if (!anyInViewport) return;
+                }
+                
                 // Draw boost trail effect
                 if (this.isBoosting && this.segments.length > 1) {
                     ctx.save();
@@ -2960,14 +3249,12 @@
                         ctx.restore();
                     } else {
                         // Fallback to emoji if image not loaded
-                        ctx.save(); // Save canvas state
-                        ctx.globalAlpha = 1; // Ensure full opacity
-                        ctx.fillStyle = 'black'; // Set solid color for emoji
-                        ctx.font = `${SEGMENT_SIZE * 2}px Arial`;
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'middle';
-                        ctx.fillText(this.isPlayer ? '😊' : '🐍', screenX, screenY);
-                        ctx.restore(); // Restore canvas state
+                        const snakeEmojiSize = Math.round(SEGMENT_SIZE * 2);
+                        const snakeEmojiCanvas = getCachedEmoji(this.isPlayer ? '😊' : '🐍', snakeEmojiSize);
+                        ctx.save();
+                        ctx.globalAlpha = 1;
+                        ctx.drawImage(snakeEmojiCanvas, screenX - snakeEmojiCanvas.width / 2, screenY - snakeEmojiCanvas.height / 2);
+                        ctx.restore();
                     }
                     
                     // Draw name
@@ -2980,12 +3267,12 @@
                     
                     // Draw crown if leader
                     if (this.isLeader) {
-                        ctx.save(); // Save canvas state
-                        ctx.globalAlpha = 1; // Ensure full opacity
-                        ctx.fillStyle = 'black'; // Set solid color for emoji
-                        ctx.font = '24px Arial';
-                        ctx.fillText('👑', screenX, screenY - SEGMENT_SIZE - 30);
-                        ctx.restore(); // Restore canvas state
+                        const crownSize = 24;
+                        const crownCanvas = getCachedEmoji('👑', crownSize);
+                        ctx.save();
+                        ctx.globalAlpha = 1;
+                        ctx.drawImage(crownCanvas, screenX - crownCanvas.width / 2, screenY - SEGMENT_SIZE - 30 - crownCanvas.height / 2);
+                        ctx.restore();
                     }
                 }
             }
@@ -3018,11 +3305,6 @@
             draw() {
                 const screenX = this.x - camera.x + canvas.width / 2;
                 const screenY = this.y - camera.y + canvas.height / 2;
-                
-                // Skip if off-screen - tighter culling on mobile
-                const margin = isMobile ? 30 : 50;
-                if (screenX < -margin || screenX > canvas.width + margin ||
-                    screenY < -margin || screenY > canvas.height + margin) return;
                 
                 const scale = 1 + Math.sin(this.pulse) * 0.1;
                 
@@ -3080,15 +3362,13 @@
                     ctx.fillRect(screenX - glowSize, screenY - glowSize, glowSize * 2, glowSize * 2);
                 }
                 
-                // Draw emoji
-                ctx.save(); // Save canvas state
-                ctx.globalAlpha = 1; // Ensure full opacity
-                ctx.fillStyle = 'black'; // Set solid color for emoji
-                ctx.font = `${ELEMENT_SIZE * 2 * scale}px Arial`;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(this.data ? this.data.emoji : '❓', screenX, screenY);
-                ctx.restore(); // Restore canvas state
+                // Draw emoji using cache
+                const emojiSize = Math.round(ELEMENT_SIZE * 2 * scale);
+                const emojiCanvas = getCachedEmoji(this.data ? this.data.emoji : '❓', emojiSize);
+                ctx.save();
+                ctx.globalAlpha = 1;
+                ctx.drawImage(emojiCanvas, screenX - emojiCanvas.width / 2, screenY - emojiCanvas.height / 2);
+                ctx.restore();
                 
                 // Draw element name below emoji
                 ctx.font = '10px Arial';
@@ -3114,11 +3394,11 @@
                         ctx.fill();
                         
                         // Add a small star
-                        ctx.fillStyle = 'rgba(255, 255, 200, 0.9)';
-                        ctx.font = '12px Arial';
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'middle';
-                        ctx.fillText('✨', px, py);
+                        const sparkleCanvas = getCachedEmoji('✨', 12);
+                        ctx.save();
+                        ctx.globalAlpha = 0.9;
+                        ctx.drawImage(sparkleCanvas, px - sparkleCanvas.width / 2, py - sparkleCanvas.height / 2);
+                        ctx.restore();
                     }
                     ctx.restore();
                 }
@@ -3165,14 +3445,12 @@
                 ctx.fillRect(-glowSize, -glowSize, glowSize * 2, glowSize * 2);
                 
                 // Crystal ball emoji
-                ctx.save(); // Save canvas state for emoji
-                ctx.globalAlpha = 1; // Ensure full opacity
-                ctx.fillStyle = 'black'; // Set solid color for emoji
-                ctx.font = `${this.size * 2 * scale}px Arial`;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText('🔮', 0, 0);
-                ctx.restore(); // Restore canvas state
+                const crystalSize = Math.round(this.size * 2 * scale);
+                const crystalCanvas = getCachedEmoji('🔮', crystalSize);
+                ctx.save();
+                ctx.globalAlpha = 1;
+                ctx.drawImage(crystalCanvas, -crystalCanvas.width / 2, -crystalCanvas.height / 2);
+                ctx.restore();
                 
                 // Swirling particles
                 for (let i = 0; i < 3; i++) {
@@ -3328,24 +3606,38 @@
         // Particle class
         class Particle {
             constructor(x, y, vx, vy, color) {
+                this.reset(x, y, vx, vy, color);
+            }
+            
+            reset(x, y, vx, vy, color) {
                 this.x = x;
                 this.y = y;
                 this.vx = vx;
                 this.vy = vy;
                 this.color = color;
                 this.life = 1;
+                this.active = true;
             }
             
             update() {
+                if (!this.active) return false;
+                
                 this.x += this.vx;
                 this.y += this.vy;
                 this.life -= 0.02;
                 this.vx *= 0.98;
                 this.vy *= 0.98;
-                return this.life > 0;
+                
+                if (this.life <= 0) {
+                    this.active = false;
+                    return false;
+                }
+                return true;
             }
             
             draw() {
+                if (!this.active) return;
+                
                 const screenX = this.x - camera.x + canvas.width / 2;
                 const screenY = this.y - camera.y + canvas.height / 2;
                 
@@ -3357,6 +3649,118 @@
                 ctx.globalAlpha = 1;
             }
         }
+        
+        // Object pools for performance
+        class ParticlePool {
+            constructor(size = 200) {
+                this.pool = [];
+                this.activeParticles = [];
+                
+                // Pre-allocate particles
+                for (let i = 0; i < size; i++) {
+                    this.pool.push(new Particle(0, 0, 0, 0, 'white'));
+                }
+            }
+            
+            spawn(x, y, vx, vy, color) {
+                let particle = this.pool.pop();
+                if (!particle) {
+                    // Pool is empty, create new particle
+                    particle = new Particle(x, y, vx, vy, color);
+                } else {
+                    particle.reset(x, y, vx, vy, color);
+                }
+                this.activeParticles.push(particle);
+                return particle;
+            }
+            
+            update() {
+                for (let i = this.activeParticles.length - 1; i >= 0; i--) {
+                    const particle = this.activeParticles[i];
+                    if (!particle.update()) {
+                        // Return to pool
+                        this.activeParticles.splice(i, 1);
+                        this.pool.push(particle);
+                    }
+                }
+            }
+            
+            draw() {
+                this.activeParticles.forEach(particle => {
+                    if (isInViewport(particle.x, particle.y, 50)) {
+                        particle.draw();
+                    }
+                });
+            }
+            
+            getActiveCount() {
+                return this.activeParticles.length;
+            }
+        }
+        
+        // Initialize particle pool
+        const particlePool = new ParticlePool(isMobile ? 100 : 200);
+        
+        // Element pool for performance
+        class ElementPool {
+            constructor(size = 50) {
+                this.pool = [];
+                this.activeElements = [];
+            }
+            
+            spawn(type, x, y, isCatalystSpawned = false) {
+                let element = this.pool.pop();
+                if (!element) {
+                    element = new Element(type, x, y, isCatalystSpawned);
+                } else {
+                    // Reset existing element
+                    element.type = type;
+                    element.x = x;
+                    element.y = y;
+                    element.data = elementDatabase[type];
+                    if (!element.data) {
+                        console.warn(`Element type "${type}" not found in database`);
+                        element.data = { emoji: '❓', name: 'Unknown', tier: 0 };
+                    }
+                    element.pulse = 0;
+                    element.isCatalystSpawned = isCatalystSpawned;
+                    element.catalystSparkleTime = 0;
+                }
+                this.activeElements.push(element);
+                return element;
+            }
+            
+            remove(element) {
+                const index = this.activeElements.indexOf(element);
+                if (index > -1) {
+                    this.activeElements.splice(index, 1);
+                    this.pool.push(element);
+                }
+            }
+            
+            update() {
+                this.activeElements.forEach(element => element.update());
+            }
+            
+            draw() {
+                this.activeElements.forEach(element => {
+                    if (isInViewport(element.x, element.y, ELEMENT_SIZE + 50)) {
+                        element.draw();
+                    }
+                });
+            }
+            
+            getActiveElements() {
+                return this.activeElements;
+            }
+            
+            getActiveCount() {
+                return this.activeElements.length;
+            }
+        }
+        
+        // Initialize element pool
+        const elementPool = new ElementPool();
         
         // Shooting Star class
         class ShootingStar {
@@ -3513,7 +3917,7 @@
                 y = 100 + Math.random() * (WORLD_SIZE - 200);
             }
             
-            elements.push(new Element(type, x, y));
+            elementPool.spawn(type, x, y);
         }
         
         function createCombinationParticles(x, y) {
@@ -3521,12 +3925,12 @@
             for (let i = 0; i < particleCount; i++) {
                 const angle = (Math.PI * 2 * i) / particleCount;
                 const speed = 2 + Math.random() * 3;
-                particles.push(new Particle(
+                particlePool.spawn(
                     x, y,
                     Math.cos(angle) * speed,
                     Math.sin(angle) * speed,
                     `hsl(${Math.random() * 360}, 70%, 50%)`
-                ));
+                );
             }
         }
         
@@ -3539,12 +3943,12 @@
             for (let i = 0; i < particleCount; i++) {
                 const angle = Math.random() * Math.PI * 2;
                 const speed = (Math.random() * 5 + 2) * speedMultiplier;
-                particles.push(new Particle(
+                particlePool.spawn(
                     x, y,
                     Math.cos(angle) * speed,
                     Math.sin(angle) * speed,
                     '#ff0000'
-                ));
+                );
             }
             
             // Add some larger, slower particles for bigger snakes
@@ -3553,12 +3957,12 @@
                 for (let i = 0; i < largeParticleCount; i++) {
                     const angle = Math.random() * Math.PI * 2;
                     const speed = (Math.random() * 3 + 1) * speedMultiplier;
-                    particles.push(new Particle(
+                    particlePool.spawn(
                         x, y,
                         Math.cos(angle) * speed,
                         Math.sin(angle) * speed,
                         '#ff6600'
-                    ));
+                    );
                 }
             }
         }
@@ -3599,6 +4003,55 @@
                 popup.style.opacity = '0';
                 popup.className = '';
             }, 3000);
+        }
+        
+        // Victory popup function
+        function showVictoryScreen(type, target) {
+            const overlay = document.getElementById('victoryOverlay');
+            const scoreDisplay = document.getElementById('victoryScore');
+            const discoveryDisplay = document.getElementById('victoryDiscoveries');
+            const timeDisplay = document.getElementById('victoryTime');
+            const loreDisplay = document.getElementById('victoryLore');
+            
+            // Calculate game time
+            const gameTime = Math.floor((Date.now() - gameStartTime) / 1000);
+            const minutes = Math.floor(gameTime / 60);
+            const seconds = gameTime % 60;
+            
+            // Set stats
+            scoreDisplay.textContent = playerSnake.score.toLocaleString();
+            discoveryDisplay.textContent = `${discoveryCount} / ${elementLoader.elements.size}`;
+            timeDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Set lore message based on victory type
+            const loreMessages = {
+                discovery: [
+                    `You have mastered the art of elemental fusion, discovering ${target} unique combinations. The universe bows to your alchemical prowess!`,
+                    `Through countless experiments, you've unlocked ${target} elemental secrets. Your name shall be etched in the annals of discovery!`,
+                    `The elements themselves whisper your name. ${target} discoveries mark you as a true Alchemist of the Infinite!`
+                ],
+                points: [
+                    `With ${playerSnake.score.toLocaleString()} points, you've proven your mastery over the elemental realm. The serpent of infinity coils in reverence!`,
+                    `Your score of ${playerSnake.score.toLocaleString()} echoes through the void. You are the undisputed champion of the elemental dance!`,
+                    `${playerSnake.score.toLocaleString()} points! The very fabric of reality trembles at your achievement. You are legend incarnate!`
+                ]
+            };
+            
+            const messages = loreMessages[type] || [`Victory achieved with ${playerSnake.score.toLocaleString()} points!`];
+            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+            loreDisplay.textContent = randomMessage;
+            
+            // Show overlay
+            overlay.style.display = 'flex';
+            gameRunning = false;
+            
+            // Play victory sound if available
+            if (eatSounds.length > 0 && !musicMuted) {
+                const sound = eatSounds[0];
+                sound.currentTime = 0;
+                sound.volume = 0.75;
+                sound.play().catch(e => console.log('Could not play victory sound'));
+            }
         }
         
         // Add discovery to the feed (MMO chat-style)
@@ -3810,11 +4263,9 @@
             
             // Check victory condition
             if (gameMode === 'discovery' && discoveryCount >= gameTarget) {
-                alert(`Victory! You discovered ${gameTarget} elements!`);
-                location.reload();
+                showVictoryScreen('discovery', gameTarget);
             } else if (gameMode === 'points' && playerSnake.score >= gameTarget) {
-                alert(`Victory! You reached ${gameTarget.toLocaleString()} points!`);
-                location.reload();
+                showVictoryScreen('points', gameTarget);
             }
             
             // Update leaderboard
@@ -3856,7 +4307,8 @@
                 if (!snake.alive) continue;
                 
                 // Check element collisions
-                for (const element of elements) {
+                const activeElements = elementPool.getActiveElements();
+                for (const element of activeElements) {
                     const dist = Math.hypot(element.x - snake.x, element.y - snake.y);
                     if (dist < SEGMENT_SIZE + ELEMENT_SIZE) {
                         snake.consume(element);
@@ -3914,7 +4366,7 @@
                                 const speed = 2 + Math.random() * 3;
                                 const vx = Math.cos(angle) * speed;
                                 const vy = Math.sin(angle) * speed;
-                                particles.push(new Particle(orb.x, orb.y, vx, vy, 'rgba(100, 200, 255, 0.8)'));
+                                particlePool.spawn(orb.x, orb.y, vx, vy, 'rgba(100, 200, 255, 0.8)');
                             }
                         }
                         
@@ -3958,8 +4410,7 @@
                                     const elementType = compatibleElements[Math.floor(Math.random() * compatibleElements.length)];
                                     
                                     // Create the element with catalyst sparkle effect
-                                    const newElement = new Element(elementType, spawnX, spawnY, true);
-                                    elements.push(newElement);
+                                    elementPool.spawn(elementType, spawnX, spawnY, true);
                                 }
                                 
                                 showMessage(`💎 Catalyst activated! Spawned ${spawnCount} compatible elements<br><small style="opacity: 0.8">New elements have resonated into existence</small>`, 'success');
@@ -3979,7 +4430,7 @@
                                 const speed = 3 + Math.random() * 4;
                                 const vx = Math.cos(angle) * speed;
                                 const vy = Math.sin(angle) * speed;
-                                particles.push(new Particle(gem.x, gem.y, vx, vy, 'rgba(255, 165, 0, 0.8)'));
+                                particlePool.spawn(gem.x, gem.y, vx, vy, 'rgba(255, 165, 0, 0.8)');
                             }
                         }
                         
@@ -4575,8 +5026,8 @@
             
             // Update game objects
             snakes.forEach(snake => snake.update());
-            elements.forEach(element => element.update());
-            particles = particles.filter(particle => particle.update());
+            elementPool.update();
+            particlePool.update();
             
             // Update border particles
             borderParticles.forEach(particle => particle.update(deltaTime));
@@ -4597,7 +5048,7 @@
             snakes = snakes.filter(snake => snake.alive || (snake.isPlayer && snake === playerSnake));
             
             // Spawn new elements occasionally
-            if (Math.random() < 0.04 && elements.length < 150) {
+            if (Math.random() < 0.04 && elementPool.getActiveCount() < 150) {
                 spawnElement();
             }
             
@@ -4678,19 +5129,36 @@
             
             // Draw everything
             drawBackground();
-            elements.forEach(element => element.draw());
             
-            // Draw AlchemyVision power-ups
-            alchemyVisionPowerUps.forEach(powerUp => powerUp.draw());
+            // Draw elements (element pool handles viewport culling)
+            elementPool.draw();
             
-            // Draw Void Orbs
-            voidOrbs.forEach(orb => orb.draw());
+            // Draw AlchemyVision power-ups (with viewport culling)
+            alchemyVisionPowerUps.forEach(powerUp => {
+                if (isInViewport(powerUp.x, powerUp.y, 100)) {
+                    powerUp.draw();
+                }
+            });
             
-            // Draw Catalyst Gems
-            catalystGems.forEach(gem => gem.draw());
+            // Draw Void Orbs (with viewport culling)
+            voidOrbs.forEach(orb => {
+                if (isInViewport(orb.x, orb.y, 100)) {
+                    orb.draw();
+                }
+            });
             
+            // Draw Catalyst Gems (with viewport culling)
+            catalystGems.forEach(gem => {
+                if (isInViewport(gem.x, gem.y, 100)) {
+                    gem.draw();
+                }
+            });
+            
+            // Draw snakes (they already have internal viewport culling)
             snakes.forEach(snake => snake.draw());
-            particles.forEach(particle => particle.draw());
+            
+            // Draw particles (particle pool handles viewport culling)
+            particlePool.draw();
         }
         
         // Initialize mobile controls
