@@ -586,6 +586,14 @@
             animation: popupBounce 0.5s ease-out;
         }
         
+        /* Mobile popup adjustments */
+        body.mobile #recentDiscovery {
+            bottom: 120px;
+            font-size: 14px;
+            padding: 10px 20px;
+            max-width: 80%;
+        }
+        
         @keyframes popupBounce {
             0% {
                 transform: translateX(-50%) scale(0.5) rotate(-10deg);
@@ -1015,31 +1023,33 @@
         
         /* Mobile splash screen adjustments */
         @media (max-width: 800px) and (orientation: landscape) {
-            #splashScreen img {
-                width: 250px !important;
-                margin-bottom: 15px !important;
-            }
-            
-            #splashScreen p {
-                font-size: 14px;
-                margin: 10px;
-                max-height: 100px;
+            #splashContent {
+                padding: 10px;
+                max-height: 90vh;
                 overflow-y: auto;
             }
             
-            #splashContent {
-                padding: 20px;
+            #splashScreen img {
+                width: 180px !important;
+                margin-bottom: 10px !important;
+            }
+            
+            #splashScreen p {
+                font-size: 12px;
+                margin: 5px;
+                line-height: 1.4;
             }
             
             #startButton {
-                margin-top: 15px;
-                padding: 10px 30px;
-                font-size: 18px;
+                margin-top: 10px;
+                margin-bottom: 10px;
+                padding: 8px 25px;
+                font-size: 16px;
             }
             
             #splashTitle {
-                font-size: 40px;
-                margin-bottom: 15px;
+                font-size: 30px;
+                margin-bottom: 10px;
             }
         }
         
