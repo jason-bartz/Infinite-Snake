@@ -904,10 +904,127 @@
             padding: 40px;
             border-radius: 20px;
             text-align: center;
-            max-width: 600px;
+            width: 900px;
+            height: 700px;
+            max-width: 90vw;
             max-height: 90vh;
-            overflow-y: auto;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
+        
+        /* Tab Navigation */
+        .tab-navigation {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+            border-bottom: 2px solid rgba(138, 43, 226, 0.3);
+            padding-bottom: 10px;
+        }
+        
+        .tab-button {
+            padding: 10px 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(138, 43, 226, 0.3);
+            border-radius: 10px 10px 0 0;
+            color: #AAA;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        
+        .tab-button:hover {
+            background: rgba(138, 43, 226, 0.2);
+            color: white;
+        }
+        
+        .tab-button.active {
+            background: rgba(138, 43, 226, 0.4);
+            color: #FFD700;
+            border-bottom: 2px solid #FFD700;
+            transform: translateY(2px);
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s;
+            flex: 1;
+            overflow-y: auto;
+            min-height: 0;
+        }
+        
+        .tab-content.active {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* Discovery Journal */
+        #discoveryJournal {
+            padding: 20px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 10px;
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+        
+        
+        .discovery-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+            flex: 1;
+            align-content: start;
+            overflow-y: auto;
+            overflow-x: hidden;
+            max-width: 100%;
+            min-height: 0;
+        }
+        
+        .discovery-item {
+            background: rgba(40, 40, 60, 0.6);
+            border: 1px solid rgba(138, 43, 226, 0.3);
+            border-radius: 8px;
+            padding: 5px;
+            text-align: center;
+            transition: all 0.2s;
+            cursor: pointer;
+            position: relative;
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .discovery-item:hover {
+            background: rgba(138, 43, 226, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(138, 43, 226, 0.4);
+        }
+        
+        
+        .discovery-item .element-symbol {
+            font-size: 20px;
+            margin-bottom: 3px;
+        }
+        
+        .discovery-item .element-name {
+            font-size: 10px;
+            color: #FFD700;
+            word-break: break-word;
+            line-height: 1.2;
+        }
+        
         
         /* How to Play Section */
         .howToPlay {
@@ -942,12 +1059,13 @@
         
         /* Skin Selection */
         #skinSelection {
-            margin: 20px 0;
             padding: 20px;
             background: rgba(0,0,0,0.5);
             border-radius: 10px;
-            max-height: 400px;
+            flex: 1;
             overflow-y: auto;
+            display: flex;
+            flex-direction: column;
         }
         
         #skinSelection h4 {
@@ -965,20 +1083,29 @@
         
         #skinGrid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            grid-template-columns: repeat(6, 1fr);
             gap: 10px;
             margin-top: 15px;
+            flex: 1;
+            align-content: start;
+            overflow-y: auto;
+            overflow-x: hidden;
         }
         
         .skin-item {
             position: relative;
             background: rgba(255,255,255,0.1);
             border: 2px solid rgba(255,255,255,0.2);
-            border-radius: 10px;
-            padding: 10px;
+            border-radius: 8px;
+            padding: 8px;
             cursor: pointer;
             transition: all 0.3s;
             text-align: center;
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
         
         .skin-item:hover {
@@ -1011,19 +1138,23 @@
         }
         
         .skin-image {
-            width: 60px;
-            height: 60px;
-            margin: 0 auto 5px;
+            width: 100%;
+            height: 100%;
+            max-width: 60px;
+            max-height: 60px;
+            margin: 0 auto 3px;
             display: block;
             image-rendering: pixelated;
             image-rendering: -moz-crisp-edges;
             image-rendering: crisp-edges;
+            object-fit: contain;
         }
         
         .skin-name {
-            font-size: 11px;
+            font-size: 10px;
             color: #CCC;
-            margin-top: 5px;
+            margin-top: 3px;
+            line-height: 1.2;
         }
         
         .skin-unlock-icon {
@@ -1165,26 +1296,51 @@
             <h2>Game Paused</h2>
             <p style="color: #AAA; font-size: 14px; margin: 10px 0;">High Score: <span style="color: #FFD700;" id="highScoreDisplay">0</span></p>
             
-            <div style="margin: 20px 0; padding: 15px; background: rgba(0,0,0,0.5); border-radius: 10px;">
-                <h4 style="color: #FFD700; margin-bottom: 10px;">Music Controls</h4>
-                <div style="display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 10px;">
-                    <button onclick="toggleMusic()" id="muteButton" style="padding: 8px 20px; background: linear-gradient(135deg, #4B79A1, #283E51); border: 1px solid #666; color: white; border-radius: 5px; cursor: pointer;">🔊 Mute</button>
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <span style="color: #AAA;">Volume:</span>
-                        <input type="range" id="volumeSlider" min="0" max="100" value="30" onchange="changeVolume(this.value)" style="width: 150px;">
-                        <span id="volumeDisplay" style="color: #AAA; width: 40px;">30%</span>
+            <!-- Tab Navigation -->
+            <div class="tab-navigation">
+                <button class="tab-button active" onclick="switchTab('skins')">Skins</button>
+                <button class="tab-button" onclick="switchTab('journal')">Discovery Journal</button>
+                <button class="tab-button" onclick="switchTab('music')">Music</button>
+            </div>
+            
+            <!-- Music Tab -->
+            <div id="musicTab" class="tab-content">
+                <div style="padding: 20px; background: rgba(0,0,0,0.5); border-radius: 10px;">
+                    <h4 style="color: #FFD700; margin-bottom: 10px;">Music Controls</h4>
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 10px;">
+                        <button onclick="toggleMusic()" id="muteButton" style="padding: 8px 20px; background: linear-gradient(135deg, #4B79A1, #283E51); border: 1px solid #666; color: white; border-radius: 5px; cursor: pointer;">🔊 Mute</button>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="color: #AAA;">Volume:</span>
+                            <input type="range" id="volumeSlider" min="0" max="100" value="30" onchange="changeVolume(this.value)" style="width: 150px;">
+                            <span id="volumeDisplay" style="color: #AAA; width: 40px;">30%</span>
+                        </div>
                     </div>
                 </div>
             </div>
             
-            <div id="skinSelection">
-                <h4>Snake Skins</h4>
-                <div id="availableUnlocks">Available Unlocks: 0</div>
-                <div id="skinGrid"></div>
+            <!-- Skins Tab -->
+            <div id="skinsTab" class="tab-content active">
+                <div id="skinSelection">
+                    <h4>Snake Skins</h4>
+                    <div id="availableUnlocks">Available Unlocks: 0</div>
+                    <div id="skinGrid"></div>
+                </div>
             </div>
             
-            <button onclick="resumeGame()" style="margin: 10px; padding: 10px 30px; font-size: 18px; background: #4ecdc4; color: white; border: none; border-radius: 10px; cursor: pointer;">Resume</button>
-            <button onclick="location.reload()" style="margin: 10px; padding: 10px 30px; font-size: 18px; background: #ff6b6b; color: white; border: none; border-radius: 10px; cursor: pointer;">New Game</button>
+            <!-- Discovery Journal Tab -->
+            <div id="journalTab" class="tab-content">
+                <div id="discoveryJournal">
+                    <h4 style="color: #FFD700; margin-bottom: 10px;">Discovery Journal</h4>
+                    <div class="discovery-grid" id="discoveryGrid">
+                        <!-- Discoveries will be populated here -->
+                    </div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(138, 43, 226, 0.3);">
+                <button onclick="resumeGame()" style="margin: 10px; padding: 10px 30px; font-size: 18px; background: #4ecdc4; color: white; border: none; border-radius: 10px; cursor: pointer;">Resume</button>
+                <button onclick="location.reload()" style="margin: 10px; padding: 10px 30px; font-size: 18px; background: #ff6b6b; color: white; border: none; border-radius: 10px; cursor: pointer;">New Game</button>
+            </div>
         </div>
     </div>
     
@@ -1261,15 +1417,18 @@
         let combinations = {};
         let discoveredElements = new Set(['fire', 'water', 'earth', 'air']);
         
+        // All-time discoveries (persistent across sessions)
+        let allTimeDiscoveries = new Map(); // Map of element -> recipe
+        
         // Snake names data
         let snakeNameData = null;
         
         // Skin system
         const skinMetadata = {
             'snake-default-green': { name: 'Basic Boy', unlocked: true, colors: ['#2ecc71', '#27ae60'] },
-            '35mm': { name: 'Hipstamatic', unlocked: false, colors: ['#2c3e50', '#1a1a1a'] },
+            '35mm': { name: 'Ansel', unlocked: false, colors: ['#2c3e50', '#1a1a1a'] },
             'Frank': { name: 'Franklin Jr', unlocked: false, colors: ['#9b59b6', '#8e44ad'] },
-            'af-one': { name: "Scuffy", unlocked: false, colors: ['#e74c3c', '#ecf0f1'] },
+            'af-one': { name: "Scuffy", unlocked: false, colors: ['#e74c3c', '#e23b28'] },
             'barbi': { name: 'Margot', unlocked: false, colors: ['#ff69b4', '#ff1493'] },
             'boat-mcboatface': { name: 'Boaty McBoatface', unlocked: false, colors: ['#3498db', '#2980b9'] },
             'camera-guy': { name: 'The Resistance', unlocked: false, colors: ['#2c3e50', '#1a1a1a'] },
@@ -1277,39 +1436,39 @@
             'controller': { name: 'Little Bro', unlocked: false, colors: ['#9b59b6', '#8e44ad'] },
             'diet-cola': { name: 'Cola Crusader', unlocked: false, colors: ['#e74c3c', '#c0392b'] },
             'dog': { name: 'Good Boy', unlocked: false, colors: ['#8b4513', '#6b3410'] },
-            'donut': { name: 'Sweet Tooth', unlocked: false, colors: ['#daa520', '#ff69b4'] },
+            'donut': { name: 'Sprinkles', unlocked: false, colors: ['#daa520', '#ff69b4'] },
             'flame': { name: 'Hot Head', unlocked: false, colors: ['#ff8c00', '#ffd700'] },
             'football': { name: 'MVP', unlocked: false, colors: ['#2ecc71', '#27ae60'] },
             'fries': { name: 'Sir Dips-a-lot', unlocked: false, colors: ['#e74c3c', '#ffd700'] },
             'green-dragon': { name: 'World Muncher', unlocked: false, colors: ['#2ecc71', '#27ae60'] },
-            'handheld-game': { name: 'Retro Gamer', unlocked: false, colors: ['#9b59b6', '#8e44ad'] },
-            'hotdog': { name: 'Wiener Winner', unlocked: false, colors: ['#e74c3c', '#c0392b'] },
-            'infinity-glove': { name: 'Snappy', unlocked: false, colors: ['#e74c3c', '#9b59b6', '#ffd700', '#2ecc71'] },
+            'handheld-game': { name: 'The Pocketeer', unlocked: false, colors: ['#9b59b6', '#8e44ad'] },
+            'hotdog': { name: 'Big Dawg', unlocked: false, colors: ['#e74c3c', '#c0392b'] },
+            'infinity-glove': { name: 'Snappy', unlocked: false, colors: ['#ffbd59', '#9b59b6'] },
             'kid-car': { name: 'Speed Demon Jr.', unlocked: false, colors: ['#e74c3c', '#c0392b'] },
             'lovecraft': { name: 'Eldritch Horror', unlocked: false, colors: ['#2ecc71', '#27ae60'] },
-            'neko': { name: 'Sir Beans', unlocked: false, colors: ['#95a5a6', '#7f8c8d'] },
-            'nyan': { name: 'Poptart Cat', unlocked: false, colors: ['#e74c3c', '#ff8c00', '#ffd700', '#2ecc71', '#3498db', '#9b59b6'] },
+            'neko': { name: 'Lil Beans', unlocked: false, colors: ['#95a5a6', '#7f8c8d'] },
+            'nyan': { name: 'Pastry Cat', unlocked: false, colors: ['#e74c3c', '#ff8c00', '#ffd700', '#2ecc71', '#3498db', '#9b59b6'] },
             'pizza': { name: 'Tony Pepperoni', unlocked: false, colors: ['#ffd700', '#f39c12'] },
             'potato': { name: 'Spud Bud', unlocked: false, colors: ['#8b4513', '#6b3410'] },
             'racer': { name: 'Speed Demon', unlocked: false, colors: ['#e74c3c', '#c0392b'] },
             'ramen': { name: 'Noodle Master', unlocked: false, colors: ['#ffd700', '#f39c12'] },
-            'red-dragon': { name: 'Ralph', unlocked: false, colors: ['#e74c3c', '#c0392b'] },
+            'red-dragon': { name: 'Ralph F.', unlocked: false, colors: ['#e74c3c', '#c0392b'] },
             'robot': { name: 'Metal Boi', unlocked: false, colors: ['#95a5a6', '#7f8c8d'] },
             'santa': { name: 'Ho Ho Hose', unlocked: false, colors: ['#2ecc71', '#e74c3c', '#ecf0f1'] },
             'saturn': { name: 'Ring Leader', unlocked: false, colors: ['#ff8c00', '#ff6347'] },
             'skibidi': { name: 'Mr. Swirley', unlocked: false, colors: ['#ecf0f1', '#bdc3c7'] },
-            'snake-2': { name: 'Classic Redux', unlocked: false, colors: ['#2ecc71', '#27ae60'] },
+            'snake-2': { name: 'Snek II', unlocked: false, colors: ['#2ecc71', '#27ae60'] },
             'space-cadet': { name: 'Cosmic Ray', unlocked: false, colors: ['#34495e', '#2c3e50'] },
             'tornado': { name: 'Whirlwind', unlocked: false, colors: ['#95a5a6', '#7f8c8d'] },
-            'tv': { name: 'CRT Surfer', unlocked: false, colors: ['#8b4513', '#6b3410'] },
+            'tv': { name: 'CRT Surfer', unlocked: false, colors: ['#89b6c7', '#bedeeb'] },
             'unicorn': { name: 'Tres Commas', unlocked: false, colors: ['#ff69b4', '#ffd700'] },
             'brick-man': { name: 'The Special', unlocked: false, colors: ['#ff8c00', '#ff6347'] },
             'buffalo': { name: "Billy Blue", unlocked: false, colors: ['#3498db', '#2980b9'] },
             'clock': { name: 'Little Tim', unlocked: false, colors: ['#8b4513', '#6b3410'] },
-            'floral': { name: 'Bo', unlocked: false, colors: ['#2ecc71', '#27ae60'] },
+            'floral': { name: 'Bo Kay', unlocked: false, colors: ['#2ecc71', '#27ae60'] },
             'gnome': { name: 'World Traveler', unlocked: false, colors: ['#2ecc71', '#27ae60'] },
-            'mac': { name: 'The Beige Wonder', unlocked: false, colors: ['#f5deb3', '#e6d7c3'] },
-            'murica': { name: "'Murica", unlocked: false, colors: ['#e74c3c', '#ecf0f1', '#3498db'] },
+            'mac': { name: 'Woz', unlocked: false, colors: ['#f5deb3', '#e6d7c3'] },
+            'murica': { name: "'Murica", unlocked: false, colors: ['#ecf0f1', '#f2eeed'] },
             'pod-player': { name: 'Poddington', unlocked: false, colors: ['#87ceeb', '#5f9ea0'] },
             'whale': { name: 'Spout', unlocked: false, colors: ['#3498db', '#2980b9'] }
         };
@@ -1330,6 +1489,11 @@
             const savedCurrent = localStorage.getItem('currentSkin');
             if (savedCurrent && unlockedSkins.has(savedCurrent)) {
                 currentPlayerSkin = savedCurrent;
+                // Update player portrait on load
+                const portrait = document.getElementById('playerPortrait');
+                if (portrait) {
+                    portrait.src = `skins/${currentPlayerSkin}.webp`;
+                }
             }
             
             // Update metadata
@@ -1370,6 +1534,28 @@
             const alreadyUnlocked = unlockedSkins.size - 1;
             availableUnlocks = Math.max(0, unlocks - alreadyUnlocked);
             return availableUnlocks;
+        }
+        
+        // Load all-time discoveries from localStorage
+        function loadAllTimeDiscoveries() {
+            const saved = localStorage.getItem('allTimeDiscoveries');
+            if (saved) {
+                const data = JSON.parse(saved);
+                allTimeDiscoveries = new Map(data);
+            } else {
+                // Initialize with base elements
+                allTimeDiscoveries.set('fire', 'Base Element');
+                allTimeDiscoveries.set('water', 'Base Element');
+                allTimeDiscoveries.set('earth', 'Base Element');
+                allTimeDiscoveries.set('air', 'Base Element');
+                saveAllTimeDiscoveries();
+            }
+        }
+        
+        // Save all-time discoveries to localStorage
+        function saveAllTimeDiscoveries() {
+            const data = Array.from(allTimeDiscoveries.entries());
+            localStorage.setItem('allTimeDiscoveries', JSON.stringify(data));
         }
         
         // Music system
@@ -2238,6 +2424,11 @@
                         if (this.isPlayer && this === playerSnake) {
                             discoveredElements.add(result); // Update global discoveries
                             
+                            // Save to all-time discoveries with recipe
+                            const recipe = `${elementDatabase[newElement]?.emoji || '?'} ${elementDatabase[newElement]?.name || newElement} + ${elementDatabase[tailElement]?.emoji || '?'} ${elementDatabase[tailElement]?.name || tailElement}`;
+                            allTimeDiscoveries.set(result, recipe);
+                            saveAllTimeDiscoveries();
+                            
                             // Update new system if available
                             if (window.elementLoader && window.elementCompatibility) {
                                 const element = window.elementLoader.getElementByKey(result);
@@ -2505,10 +2696,10 @@
                 // Draw head
                 if (this.segments.length > 0) {
                     const head = this.segments[0];
-                    // Offset head position slightly back along the snake body
-                    const offsetDistance = 5; // pixels to move head back
-                    const offsetX = -Math.cos(this.angle) * offsetDistance;
-                    const offsetY = -Math.sin(this.angle) * offsetDistance;
+                    // Offset head position forward along the snake direction
+                    const offsetDistance = 10; // pixels to move head forward
+                    const offsetX = Math.cos(this.angle) * offsetDistance;
+                    const offsetY = Math.sin(this.angle) * offsetDistance;
                     
                     const screenX = (head.x + offsetX) - camera.x + canvas.width / 2;
                     const screenY = (head.y + offsetY) - camera.y + canvas.height / 2;
@@ -3782,6 +3973,36 @@
         }
         
         function startGame() {
+            // Clear all game state to ensure fresh start
+            snakes = [];
+            elements = [];
+            particles = [];
+            voidOrbs = [];
+            catalystGems = [];
+            alchemyVisionPowerUps = [];
+            
+            // Reset discoveries (keep only base elements)
+            discoveredElements = new Set(['fire', 'water', 'earth', 'air']);
+            
+            // Reset game variables
+            lastDiscoveredElement = null;
+            alchemyVisionActive = false;
+            alchemyVisionTimer = 0;
+            bestRank = 0;
+            playerSnake = null;
+            
+            // Reset spawn timers
+            lastAlchemyVisionSpawn = Date.now();
+            lastVoidOrbSpawn = Date.now();
+            lastCatalystGemSpawn = Date.now();
+            
+            // Clear discovery feed
+            const discoveryFeed = document.getElementById('discoveryFeed');
+            if (discoveryFeed) {
+                discoveryFeed.innerHTML = '';
+            }
+            
+            // Start fresh game
             gameStarted = true;
             gameStartTime = Date.now();
             
@@ -3836,12 +4057,36 @@
                 
                 // Update high score display
                 document.getElementById('highScoreDisplay').textContent = Math.floor(highScore).toLocaleString();
+                
+                // Populate discovery journal
+                populateDiscoveryJournal();
             }
         }
         
         window.resumeGame = function() {
             paused = false;
             document.getElementById('pauseOverlay').style.display = 'none';
+        }
+        
+        // Tab switching for pause menu
+        window.switchTab = function(tabName) {
+            // Update button states
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update content visibility
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            if (tabName === 'music') {
+                document.getElementById('musicTab').classList.add('active');
+            } else if (tabName === 'skins') {
+                document.getElementById('skinsTab').classList.add('active');
+            } else if (tabName === 'journal') {
+                document.getElementById('journalTab').classList.add('active');
+            }
         }
         
         // Build skin selection UI
@@ -3908,6 +4153,11 @@
                 if (playerSnake) {
                     playerSnake.skin = skinId;
                 }
+                // Update player portrait
+                const portrait = document.getElementById('playerPortrait');
+                if (portrait) {
+                    portrait.src = `skins/${skinId}.webp`;
+                }
                 saveSkinData();
                 buildSkinGrid();
             } else if (availableUnlocks > 0) {
@@ -3920,6 +4170,11 @@
                 currentPlayerSkin = skinId;
                 if (playerSnake) {
                     playerSnake.skin = skinId;
+                }
+                // Update player portrait
+                const portrait = document.getElementById('playerPortrait');
+                if (portrait) {
+                    portrait.src = `skins/${skinId}.webp`;
                 }
                 
                 saveSkinData();
@@ -3942,6 +4197,73 @@
                     display.style.color = '#AAA';
                 }
             }
+        }
+        
+        // Populate discovery journal with discovered elements
+        function populateDiscoveryJournal() {
+            const grid = document.getElementById('discoveryGrid');
+            if (!grid) return;
+            
+            grid.innerHTML = '';
+            
+            // Use allTimeDiscoveries for persistent journal
+            const sortedDiscoveries = Array.from(allTimeDiscoveries.entries()).sort((a, b) => {
+                const nameA = elementDatabase[a[0]]?.name || a[0];
+                const nameB = elementDatabase[b[0]]?.name || b[0];
+                return nameA.localeCompare(nameB);
+            });
+            
+            sortedDiscoveries.forEach(([elementKey, recipe]) => {
+                const elementData = elementDatabase[elementKey];
+                if (!elementData) return;
+                
+                const div = document.createElement('div');
+                div.className = 'discovery-item';
+                div.dataset.name = elementData.name.toLowerCase();
+                div.dataset.recipe = recipe.toLowerCase();
+                
+                // Element emoji/symbol
+                const symbol = document.createElement('div');
+                symbol.className = 'element-symbol';
+                symbol.textContent = elementData.emoji;
+                
+                // Element name
+                const name = document.createElement('div');
+                name.className = 'element-name';
+                name.textContent = elementData.name;
+                
+                // Recipe tooltip
+                const recipeTooltip = document.createElement('div');
+                recipeTooltip.className = 'recipe';
+                recipeTooltip.textContent = recipe;
+                
+                div.appendChild(symbol);
+                div.appendChild(name);
+                div.appendChild(recipeTooltip);
+                
+                grid.appendChild(div);
+            });
+        }
+        
+        // filterDiscoveries function removed - search bar no longer present
+        
+        // Switch between tabs in pause menu
+        window.switchTab = function(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName + 'Tab').classList.add('active');
+            
+            // Highlight active button
+            event.target.classList.add('active');
         }
         
         let lastTime = 0;
@@ -4127,6 +4449,9 @@
             // Load skin data
             loadSkinData();
             preloadSkins();
+            
+            // Load all-time discoveries
+            loadAllTimeDiscoveries();
         });
         
         // Stars animation for splash and game mode screens
