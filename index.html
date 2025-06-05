@@ -2190,6 +2190,10 @@
             const allSkins = Object.keys(skinMetadata).concat(aiSkins);
             allSkins.forEach(skin => {
                 const img = new Image();
+                img.onerror = function() {
+                    console.warn(`Failed to load skin: ${skin}.png`);
+                    this.error = true;
+                };
                 img.src = `skins/${skin}.png`;
                 skinImages[skin] = img;
             });
@@ -2758,7 +2762,6 @@
                 this.prevAngle = this.angle;
                 this.segments = [];
                 
-                console.log('Snake created at:', x, y, 'angle:', this.angle, 'isPlayer:', isPlayer);
                 this.elements = [];
                 this.elementCapacity = 4; // Start with 4 element squares
                 this.elementsEaten = 0; // Track total elements eaten for capacity growth
@@ -2811,15 +2814,6 @@
             
             update(deltaTime = 1) {
                 if (!this.alive) return;
-                
-                // Debug log first few updates
-                if (this.isPlayer && this.updateCount === undefined) {
-                    this.updateCount = 0;
-                }
-                if (this.isPlayer && this.updateCount < 5) {
-                    console.log('Snake update called, deltaTime:', deltaTime, 'speed:', this.speed, 'x:', this.x, 'y:', this.y);
-                    this.updateCount++;
-                }
                 
                 // Store previous positions for interpolation
                 this.prevX = this.x;
@@ -3542,13 +3536,18 @@
                     
                     // Draw skin image
                     const skinImage = skinImages[this.skin];
-                    if (skinImage && skinImage.complete) {
-                        ctx.save();
-                        ctx.translate(screenX, screenY);
-                        ctx.rotate(angle - Math.PI/2); // Rotate 90 degrees counter-clockwise so top faces body
-                        const size = SEGMENT_SIZE * 3.47875; // Increased by another 10% (3.1625 * 1.1)
-                        ctx.drawImage(skinImage, -size/2, -size/2, size, size);
-                        ctx.restore();
+                    if (skinImage && skinImage.complete && !skinImage.error) {
+                        try {
+                            ctx.save();
+                            ctx.translate(screenX, screenY);
+                            ctx.rotate(angle - Math.PI/2); // Rotate 90 degrees counter-clockwise so top faces body
+                            const size = SEGMENT_SIZE * 3.47875; // Increased by another 10% (3.1625 * 1.1)
+                            ctx.drawImage(skinImage, -size/2, -size/2, size, size);
+                            ctx.restore();
+                        } catch (e) {
+                            ctx.restore();
+                            // Fall through to emoji fallback
+                        }
                     } else {
                         // Fallback to emoji if image not loaded
                         const snakeEmojiSize = Math.round(SEGMENT_SIZE * 2);
@@ -5077,14 +5076,6 @@
             
             // Update music button state
             if (paused) {
-                // Debug logging
-                console.log('=== Pause Menu Debug ===');
-                console.log('High Score:', highScore);
-                console.log('Skin Metadata:', skinMetadata);
-                console.log('Unlocked Skins:', unlockedSkins);
-                console.log('All Time Discoveries:', allTimeDiscoveries);
-                console.log('Available Unlocks:', availableUnlocks);
-                
                 // Update music controls if they exist
                 const muteButton = document.getElementById('muteButton');
                 if (muteButton) {
@@ -5139,7 +5130,6 @@
         // Build skin selection UI
         function buildSkinGrid() {
             const grid = document.getElementById('skinGrid');
-            console.log('Building skin grid, grid element:', grid);
             if (!grid) {
                 console.error('Skin grid element not found!');
                 return;
@@ -5148,8 +5138,6 @@
             
             const allSkins = Object.keys(skinMetadata).filter(skin => skin !== 'snake-default-green');
             allSkins.unshift('snake-default-green'); // Put default first
-            console.log('All skins:', allSkins);
-            console.log('Skin metadata sample:', skinMetadata['snake-default-green']);
             
             allSkins.forEach(skinId => {
                 const skinData = skinMetadata[skinId];
@@ -5203,7 +5191,6 @@
                 
                 grid.appendChild(div);
             });
-            console.log('Skin grid children count:', grid.children.length);
         }
         
         // Handle skin selection
@@ -5265,9 +5252,6 @@
         // Populate discovery journal with discovered elements
         function populateDiscoveryJournal() {
             const grid = document.getElementById('discoveryGrid');
-            console.log('Populating discovery journal, grid element:', grid);
-            console.log('allTimeDiscoveries size:', allTimeDiscoveries.size);
-            console.log('allTimeDiscoveries content:', Array.from(allTimeDiscoveries));
             if (!grid) {
                 console.error('Discovery grid element not found!');
                 return;
@@ -5345,9 +5329,11 @@
             accumulator += frameTime;
             
             // Check for NaN
-            if (!isFinite(accumulator)) {
-                console.error('Accumulator became NaN! frameTime:', frameTime, 'currentTime:', currentTime, 'lastTime:', lastTime);
+            if (!isFinite(accumulator) || !isFinite(frameTime)) {
+                console.error('Accumulator or frameTime became NaN! frameTime:', frameTime, 'currentTime:', currentTime, 'lastTime:', lastTime, 'accumulator:', accumulator);
                 accumulator = 0;
+                lastTime = currentTime;
+                return;
             }
             
             // Calculate FPS
@@ -5369,9 +5355,6 @@
             
             // Fixed timestep updates
             let updates = 0;
-            if (frameCount % 60 === 0) {
-                console.log('Game loop debug - accumulator:', accumulator, 'FIXED_TIMESTEP:', FIXED_TIMESTEP, 'will update:', accumulator >= FIXED_TIMESTEP);
-            }
             while (accumulator >= FIXED_TIMESTEP && updates < MAX_UPDATES) {
                 // Update game objects with fixed timestep (1.0 = one 60fps frame)
                 snakes.forEach(snake => snake.update(1.0));
