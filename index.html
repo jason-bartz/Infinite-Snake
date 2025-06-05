@@ -1113,6 +1113,26 @@
             -webkit-user-select: none;
         }
         
+        /* Alchemy Vision Timer */
+        .alchemy-vision-timer {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 280px;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.2) 0%, rgba(255, 140, 0, 0.2) 100%);
+            border: 2px solid #FFD700;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            color: #FFD700;
+            font-size: 18px;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+            z-index: 100;
+        }
+        
         /* Mobile UI Inversions */
         body.mobile .bottom-ui {
             top: 0;
@@ -1132,6 +1152,17 @@
         
         body.mobile .player-info-box {
             display: none; /* Hide entirely on mobile */
+        }
+        
+        /* Alchemy Vision Timer on Mobile - Bottom Center */
+        body.mobile .alchemy-vision-timer {
+            top: auto;
+            bottom: 80px; /* Above boost bar */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 240px;
+            font-size: 16px;
+            padding: 8px;
         }
         
         body.mobile .leaderboard-box {
@@ -1825,8 +1856,8 @@
             </div>
         </div>
         
-        <!-- Alchemy Vision Timer (Above Player Info) -->
-        <div id="alchemyVisionTimer" style="display: none; position: absolute; bottom: 220px; left: 20px; width: 280px; background: linear-gradient(135deg, rgba(255, 215, 0, 0.2) 0%, rgba(255, 140, 0, 0.2) 100%); border: 2px solid #FFD700; border-radius: 8px; padding: 10px; text-align: center; color: #FFD700; font-size: 18px; font-weight: bold; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);">
+        <!-- Alchemy Vision Timer -->
+        <div id="alchemyVisionTimer" class="alchemy-vision-timer" style="display: none;">
             🔮 Alchemy Vision: <span id="alchemyTime">60</span>s
         </div>
         
@@ -2127,6 +2158,88 @@
         const CATALYST_GEM_SPAWN_INTERVAL = 90000; // 90 seconds (more rare than void orbs)
         const CATALYST_GEM_SPAWN_COUNT = 3; // Number of catalyst gems to maintain on map
         let catalystSpawnedElements = []; // Track elements spawned by catalyst for visual effect
+        
+        // AI Personality Types
+        const AI_PERSONALITIES = {
+            AGGRESSIVE: {
+                name: 'Aggressive',
+                huntingPriority: 0.95,      // Almost always hunts
+                comboPriority: 0.05,        // Rarely cares about combos
+                riskTolerance: 0.95,        // Very high risk tolerance
+                boostThreshold: 0.2,        // Boosts frequently
+                chaseDistance: 500,         // Long chase range
+                fleeThreshold: 2.0,         // Only flee if enemy is 2x larger
+                collisionAvoidanceRadius: 60, // Small avoidance radius
+                aggressionMultiplier: 2.0,  // How much to prioritize hunting
+                elementIgnoreChance: 0.7    // 70% chance to ignore elements when hunting
+            },
+            COMBO_FOCUSED: {
+                name: 'Combo Master',
+                huntingPriority: 0.05,      // Almost never hunts
+                comboPriority: 0.95,        // Always seeks combos
+                riskTolerance: 0.2,         // Low risk tolerance
+                boostThreshold: 0.7,        // Rarely boosts
+                chaseDistance: 50,          // Very short chase range
+                fleeThreshold: 0.9,         // Flee from 90% size snakes
+                collisionAvoidanceRadius: 150, // Large avoidance radius
+                aggressionMultiplier: 0.2,
+                elementIgnoreChance: 0.0    // Never ignores elements
+            },
+            BALANCED: {
+                name: 'Balanced',
+                huntingPriority: 0.5,
+                comboPriority: 0.5,
+                riskTolerance: 0.5,
+                boostThreshold: 0.5,
+                chaseDistance: 250,
+                fleeThreshold: 1.3,
+                collisionAvoidanceRadius: 100,
+                aggressionMultiplier: 1.0,
+                elementIgnoreChance: 0.3
+            },
+            CAUTIOUS: {
+                name: 'Cautious',
+                huntingPriority: 0.1,       // Rarely hunts
+                comboPriority: 0.9,         // Focuses on elements
+                riskTolerance: 0.1,         // Very low risk
+                boostThreshold: 0.85,       // Almost never boosts
+                chaseDistance: 30,          // Tiny chase range
+                fleeThreshold: 0.8,         // Flee from 80% size snakes
+                collisionAvoidanceRadius: 200, // Huge avoidance radius
+                aggressionMultiplier: 0.1,
+                elementIgnoreChance: 0.0
+            },
+            OPPORTUNIST: {
+                name: 'Opportunist',
+                huntingPriority: 0.8,       // High hunting when safe
+                comboPriority: 0.2,
+                riskTolerance: 0.6,
+                boostThreshold: 0.3,
+                chaseDistance: 350,
+                fleeThreshold: 1.1,         // Careful about size matchups
+                collisionAvoidanceRadius: 80,
+                aggressionMultiplier: 1.5,
+                elementIgnoreChance: 0.5,
+                preferWeakTargets: true     // Specifically targets smaller/wounded snakes
+            }
+        };
+        
+        // AI respawn cooldown tracking
+        let aiRespawnQueue = [];
+        const AI_RESPAWN_COOLDOWN = 5000; // 5 seconds
+        const MAX_AI_SNAKES = 6; // Increased from 5 to 6
+        
+        // Track used AI skins to prevent duplicates
+        let usedAISkins = new Set();
+        
+        // Personality colors for name display
+        const PERSONALITY_COLORS = {
+            'Aggressive': '#ff4444',      // Red
+            'Combo Master': '#44ff44',    // Green
+            'Cautious': '#ffff44',        // Yellow
+            'Balanced': '#4444ff',        // Blue
+            'Opportunist': '#ff8844'      // Orange
+        };
         
         // Space effects
         let staticStars = [];
@@ -2839,9 +2952,36 @@
                 if (isPlayer) {
                     this.skin = currentPlayerSkin;
                 } else {
-                    // Random AI skin from all available skins
-                    const allSkins = Object.keys(skinMetadata);
-                    this.skin = allSkins[Math.floor(Math.random() * allSkins.length)];
+                    // Get available AI skins (exclude snake-default-green and already used skins)
+                    const allSkins = Object.keys(skinMetadata).filter(skin => 
+                        skin !== 'snake-default-green' && !usedAISkins.has(skin)
+                    );
+                    
+                    // If all skins are used, reset the used skins set (but still exclude default green)
+                    if (allSkins.length === 0) {
+                        usedAISkins.clear();
+                        const resetSkins = Object.keys(skinMetadata).filter(skin => skin !== 'snake-default-green');
+                        this.skin = resetSkins[Math.floor(Math.random() * resetSkins.length)];
+                    } else {
+                        this.skin = allSkins[Math.floor(Math.random() * allSkins.length)];
+                    }
+                    
+                    // Mark this skin as used
+                    usedAISkins.add(this.skin);
+                    
+                    // Assign random personality to AI snakes
+                    const personalities = Object.keys(AI_PERSONALITIES);
+                    const personalityKey = personalities[Math.floor(Math.random() * personalities.length)];
+                    this.personality = AI_PERSONALITIES[personalityKey];
+                    this.name = this.personality.name + ' ' + this.name;
+                    this.personalityColor = PERSONALITY_COLORS[this.personality.name];
+                    
+                    // AI-specific properties
+                    this.targetMemory = null; // Remember targets for a few frames
+                    this.targetMemoryTimer = 0;
+                    this.lastCollisionCheck = 0; // Optimize collision checking
+                    this.panicMode = false; // Emergency evasion state
+                    this.panicTimer = 0;
                 }
                 
                 // Initialize segments
@@ -2930,200 +3070,8 @@
                         this.isBoosting = mouseDown && this.stamina > 0;
                     }
                 } else {
-                    // AI with border avoidance
-                    const borderDanger = 100; // Distance from border to start avoiding
-                    const emergencyDistance = 50; // Emergency turn distance
-                    
-                    // Check distance to borders
-                    const distToLeftBorder = this.x;
-                    const distToRightBorder = WORLD_SIZE - this.x;
-                    const distToTopBorder = this.y;
-                    const distToBottomBorder = WORLD_SIZE - this.y;
-                    
-                    // Determine if we're too close to any border
-                    const nearBorder = distToLeftBorder < borderDanger || distToRightBorder < borderDanger ||
-                                     distToTopBorder < borderDanger || distToBottomBorder < borderDanger;
-                    
-                    const emergencyTurn = distToLeftBorder < emergencyDistance || distToRightBorder < emergencyDistance ||
-                                        distToTopBorder < emergencyDistance || distToBottomBorder < emergencyDistance;
-                    
-                    if (emergencyTurn) {
-                        // Emergency evasion - turn away from nearest border
-                        let avoidAngle = this.angle;
-                        
-                        if (distToLeftBorder < emergencyDistance) {
-                            avoidAngle = 0; // Turn right
-                        } else if (distToRightBorder < emergencyDistance) {
-                            avoidAngle = Math.PI; // Turn left
-                        }
-                        
-                        if (distToTopBorder < emergencyDistance) {
-                            avoidAngle = Math.PI / 2; // Turn down
-                        } else if (distToBottomBorder < emergencyDistance) {
-                            avoidAngle = -Math.PI / 2; // Turn up
-                        }
-                        
-                        let angleDiff = avoidAngle - this.angle;
-                        while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
-                        while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
-                        this.angle += angleDiff * 0.15; // Aggressive turn
-                    } else {
-                        // Normal AI - decide what to seek based on capacity
-                        let target = null;
-                        let targetAngle = null;
-                        
-                        // If at capacity, prioritize Void Orbs
-                        if (this.elements.length >= this.elementCapacity) {
-                            let nearestVoidOrb = null;
-                            let minVoidDist = 800; // Larger search radius for void orbs
-                            
-                            for (const orb of voidOrbs) {
-                                const dist = Math.hypot(orb.x - this.x, orb.y - this.y);
-                                
-                                // Skip orbs that are too close to borders
-                                if (nearBorder) {
-                                    const orbNearBorder = orb.x < borderDanger || orb.x > WORLD_SIZE - borderDanger ||
-                                                         orb.y < borderDanger || orb.y > WORLD_SIZE - borderDanger;
-                                    if (orbNearBorder) continue;
-                                }
-                                
-                                if (dist < minVoidDist) {
-                                    minVoidDist = dist;
-                                    nearestVoidOrb = orb;
-                                }
-                            }
-                            
-                            if (nearestVoidOrb) {
-                                target = nearestVoidOrb;
-                                targetAngle = Math.atan2(nearestVoidOrb.y - this.y, nearestVoidOrb.x - this.x);
-                            }
-                        }
-                        
-                        // Check for nearby Catalyst Gems (prioritize if we have elements)
-                        if (!target && this.elements.length > 0) {
-                            let nearestCatalystGem = null;
-                            let minCatalystDist = 600; // Medium search radius for catalyst gems
-                            
-                            for (const gem of catalystGems) {
-                                const dist = Math.hypot(gem.x - this.x, gem.y - this.y);
-                                
-                                // Skip gems that are too close to borders
-                                if (nearBorder) {
-                                    const gemNearBorder = gem.x < borderDanger || gem.x > WORLD_SIZE - borderDanger ||
-                                                         gem.y < borderDanger || gem.y > WORLD_SIZE - borderDanger;
-                                    if (gemNearBorder) continue;
-                                }
-                                
-                                if (dist < minCatalystDist) {
-                                    minCatalystDist = dist;
-                                    nearestCatalystGem = gem;
-                                }
-                            }
-                            
-                            if (nearestCatalystGem) {
-                                target = nearestCatalystGem;
-                                targetAngle = Math.atan2(nearestCatalystGem.y - this.y, nearestCatalystGem.x - this.x);
-                            }
-                        }
-                        
-                        // If no void orb or catalyst gem target, find nearest element
-                        if (!target) {
-                            let nearestElement = null;
-                            let minDist = 500;
-                            
-                            for (const element of elementPool.getActiveElements()) {
-                                const dist = Math.hypot(element.x - this.x, element.y - this.y);
-                                
-                                // Skip elements that are too close to borders
-                                if (nearBorder) {
-                                    const elemNearBorder = element.x < borderDanger || element.x > WORLD_SIZE - borderDanger ||
-                                                         element.y < borderDanger || element.y > WORLD_SIZE - borderDanger;
-                                    if (elemNearBorder) continue;
-                                }
-                                
-                                if (dist < minDist) {
-                                    minDist = dist;
-                                    nearestElement = element;
-                                }
-                            }
-                            
-                            if (nearestElement) {
-                                target = nearestElement;
-                                targetAngle = Math.atan2(nearestElement.y - this.y, nearestElement.x - this.x);
-                            }
-                        }
-                        
-                        if (target && targetAngle !== null) {
-                            let angleDiff = targetAngle - this.angle;
-                            while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
-                            while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
-                            
-                            // Slower turning when near borders to be more careful
-                            const turnSpeed = nearBorder ? 0.05 : 0.08;
-                            this.angle += angleDiff * turnSpeed;
-                        } else {
-                            // Wander randomly, but bias away from borders
-                            let wanderAngle = (Math.random() - 0.5) * 0.1;
-                            
-                            // Add bias away from borders
-                            if (this.x < 200) wanderAngle += 0.05; // Bias right
-                            if (this.x > WORLD_SIZE - 200) wanderAngle -= 0.05; // Bias left
-                            if (this.y < 200 && Math.cos(this.angle) < 0.5) wanderAngle = Math.abs(wanderAngle); // Bias down
-                            if (this.y > WORLD_SIZE - 200 && Math.cos(this.angle) > -0.5) wanderAngle = -Math.abs(wanderAngle); // Bias up
-                            
-                            this.angle += wanderAngle;
-                        }
-                        
-                        // AI boost decision making
-                        if (!nearBorder && !emergencyTurn) {
-                        // Strategic boost conditions for AI
-                        let shouldBoost = false;
-                        
-                        // Check threats (larger snakes nearby)
-                        let threatNearby = false;
-                        let chasingPrey = false;
-                        for (const otherSnake of snakes) {
-                            if (otherSnake === this || !otherSnake.alive) continue;
-                            const dist = Math.hypot(otherSnake.x - this.x, otherSnake.y - this.y);
-                            
-                            // Threat detection
-                            if (dist < 200 && otherSnake.length > this.length * 1.2) {
-                                threatNearby = true;
-                                break;
-                            }
-                            
-                            // Prey detection
-                            if (dist < 150 && otherSnake.length < this.length * 0.8) {
-                                chasingPrey = true;
-                            }
-                        }
-                        
-                        // Boost conditions
-                        if (threatNearby && this.stamina > 40) {
-                            // Escape from threats
-                            shouldBoost = true;
-                        } else if (chasingPrey && this.stamina > 60) {
-                            // Chase smaller snakes
-                            shouldBoost = true;
-                        } else if (target && this.stamina > 80) {
-                            // Boost to reach valuable targets
-                            const targetDist = Math.hypot(target.x - this.x, target.y - this.y);
-                            if (targetDist > 300 && targetDist < 600) {
-                                shouldBoost = true;
-                            }
-                        }
-                        
-                        // Random boost for unpredictability (5% chance)
-                        if (!shouldBoost && Math.random() < 0.05 && this.stamina > 50) {
-                            shouldBoost = true;
-                        }
-                        
-                            this.isBoosting = shouldBoost && this.stamina > 0;
-                        } else {
-                            // Don't boost near borders or during emergency turns
-                            this.isBoosting = false;
-                        }
-                    }
+                    // Enhanced AI with personality system
+                    this.updateAI(deltaTime);
                 }
                 
                 // Update stamina and speed based on boost
@@ -3609,13 +3557,44 @@
                         ctx.restore();
                     }
                     
-                    // Draw name
-                    ctx.fillStyle = 'white';
+                    // Draw name (with colored personality for AI snakes)
                     ctx.font = 'bold 14px Arial';
-                    ctx.strokeStyle = 'black';
-                    ctx.lineWidth = 3;
-                    ctx.strokeText(this.name, screenX, screenY - SEGMENT_SIZE - 10);
-                    ctx.fillText(this.name, screenX, screenY - SEGMENT_SIZE - 10);
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'bottom';
+                    const nameY = screenY - SEGMENT_SIZE - 10;
+                    
+                    if (!this.isPlayer && this.personality) {
+                        // Split name into personality and actual name parts
+                        const personalityName = this.personality.name + ' ';
+                        const actualName = this.name.substring(personalityName.length);
+                        
+                        // Measure text widths
+                        ctx.fillStyle = this.personalityColor;
+                        const personalityWidth = ctx.measureText(personalityName).width;
+                        ctx.fillStyle = 'white';
+                        const actualNameWidth = ctx.measureText(actualName).width;
+                        const totalWidth = personalityWidth + actualNameWidth;
+                        
+                        // Draw personality name with color
+                        const startX = screenX - totalWidth / 2;
+                        ctx.strokeStyle = 'black';
+                        ctx.lineWidth = 3;
+                        ctx.strokeText(personalityName, startX + personalityWidth / 2, nameY);
+                        ctx.fillStyle = this.personalityColor;
+                        ctx.fillText(personalityName, startX + personalityWidth / 2, nameY);
+                        
+                        // Draw actual name in white
+                        ctx.strokeText(actualName, startX + personalityWidth + actualNameWidth / 2, nameY);
+                        ctx.fillStyle = 'white';
+                        ctx.fillText(actualName, startX + personalityWidth + actualNameWidth / 2, nameY);
+                    } else {
+                        // Player name or fallback - draw normally
+                        ctx.strokeStyle = 'black';
+                        ctx.lineWidth = 3;
+                        ctx.fillStyle = 'white';
+                        ctx.strokeText(this.name, screenX, nameY);
+                        ctx.fillText(this.name, screenX, nameY);
+                    }
                     
                     // Draw crown if leader
                     if (this.isLeader) {
@@ -3627,6 +3606,336 @@
                         ctx.restore();
                     }
                 }
+            }
+            
+            // Enhanced AI update logic with personalities
+            updateAI(deltaTime) {
+                const personality = this.personality;
+                const currentTime = Date.now();
+                
+                // Update panic mode
+                if (this.panicMode) {
+                    this.panicTimer--;
+                    if (this.panicTimer <= 0) {
+                        this.panicMode = false;
+                    }
+                }
+                
+                // Border avoidance (personality-aware)
+                const borderDanger = personality.riskTolerance > 0.7 ? 80 : 120;
+                const emergencyDistance = personality.riskTolerance > 0.7 ? 40 : 60;
+                
+                // Check distances to borders
+                const distToLeftBorder = this.x;
+                const distToRightBorder = WORLD_SIZE - this.x;
+                const distToTopBorder = this.y;
+                const distToBottomBorder = WORLD_SIZE - this.y;
+                
+                const nearBorder = distToLeftBorder < borderDanger || distToRightBorder < borderDanger ||
+                                  distToTopBorder < borderDanger || distToBottomBorder < borderDanger;
+                
+                const emergencyTurn = distToLeftBorder < emergencyDistance || distToRightBorder < emergencyDistance ||
+                                     distToTopBorder < emergencyDistance || distToBottomBorder < emergencyDistance;
+                
+                if (emergencyTurn || this.panicMode) {
+                    // Emergency evasion with personality-based urgency
+                    let avoidAngle = this.angle;
+                    const urgency = personality.riskTolerance < 0.5 ? 0.2 : 0.15;
+                    
+                    if (distToLeftBorder < emergencyDistance) avoidAngle = 0;
+                    else if (distToRightBorder < emergencyDistance) avoidAngle = Math.PI;
+                    
+                    if (distToTopBorder < emergencyDistance) avoidAngle = Math.PI / 2;
+                    else if (distToBottomBorder < emergencyDistance) avoidAngle = -Math.PI / 2;
+                    
+                    let angleDiff = avoidAngle - this.angle;
+                    while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
+                    while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
+                    this.angle += angleDiff * urgency;
+                    
+                    return; // Skip normal AI when in emergency mode
+                }
+                
+                // Enhanced snake collision detection and avoidance
+                let dangerVector = { x: 0, y: 0 };
+                let nearestThreat = null;
+                let nearestPrey = null;
+                let threatDistance = Infinity;
+                let preyDistance = Infinity;
+                
+                // Optimize: Only check collisions every few frames for performance
+                if (currentTime - this.lastCollisionCheck > 100) { // Check every 100ms
+                    this.lastCollisionCheck = currentTime;
+                    
+                    for (const otherSnake of snakes) {
+                        if (otherSnake === this || !otherSnake.alive) continue;
+                        
+                        const dx = otherSnake.x - this.x;
+                        const dy = otherSnake.y - this.y;
+                        const distance = Math.hypot(dx, dy);
+                        
+                        // Check if this snake is a threat or prey
+                        const lengthRatio = otherSnake.length / this.length;
+                        
+                        // Threat detection
+                        if (lengthRatio > personality.fleeThreshold && distance < 300) {
+                            if (distance < threatDistance) {
+                                threatDistance = distance;
+                                nearestThreat = otherSnake;
+                            }
+                        }
+                        
+                        // Prey detection - more aggressive for hunting personalities
+                        const isValidPrey = lengthRatio < (1 / personality.fleeThreshold);
+                        const inChaseRange = distance < personality.chaseDistance;
+                        
+                        if (isValidPrey && inChaseRange) {
+                            // Opportunists prefer wounded or very small targets
+                            if (personality.preferWeakTargets) {
+                                const isWeak = otherSnake.length < this.length * 0.5 || otherSnake.stamina < 30;
+                                if (isWeak && distance < preyDistance) {
+                                    preyDistance = distance;
+                                    nearestPrey = otherSnake;
+                                }
+                            } else if (distance < preyDistance) {
+                                preyDistance = distance;
+                                nearestPrey = otherSnake;
+                            }
+                        }
+                        
+                        // Check collision with snake body segments
+                        if (distance < personality.collisionAvoidanceRadius) {
+                            for (let i = 3; i < otherSnake.segments.length; i++) {
+                                const segment = otherSnake.segments[i];
+                                const segDx = segment.x - this.x;
+                                const segDy = segment.y - this.y;
+                                const segDistance = Math.hypot(segDx, segDy);
+                                
+                                if (segDistance < personality.collisionAvoidanceRadius) {
+                                    // Add to danger vector (weighted by proximity)
+                                    const weight = 1 - (segDistance / personality.collisionAvoidanceRadius);
+                                    dangerVector.x -= (segDx / segDistance) * weight;
+                                    dangerVector.y -= (segDy / segDistance) * weight;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // Decision making based on personality and situation
+                let targetAngle = null;
+                let shouldBoost = false;
+                
+                // Priority 1: Avoid immediate collisions
+                if (Math.hypot(dangerVector.x, dangerVector.y) > 0.1) {
+                    targetAngle = Math.atan2(dangerVector.y, dangerVector.x);
+                    shouldBoost = personality.riskTolerance < 0.5;
+                    
+                    // Enter panic mode if danger is high
+                    if (Math.hypot(dangerVector.x, dangerVector.y) > 0.5) {
+                        this.panicMode = true;
+                        this.panicTimer = 60; // 1 second at 60fps
+                    }
+                }
+                // Priority 2: Flee from threats
+                else if (nearestThreat && threatDistance < 200) {
+                    const dx = nearestThreat.x - this.x;
+                    const dy = nearestThreat.y - this.y;
+                    targetAngle = Math.atan2(-dy, -dx); // Opposite direction
+                    shouldBoost = personality.riskTolerance < 0.7 && this.stamina > 40;
+                }
+                // Priority 3: Hunt prey (aggressive personalities)
+                else if (nearestPrey) {
+                    // For aggressive personalities, ALWAYS prioritize hunting over elements
+                    const shouldHunt = personality.huntingPriority > 0.8 || 
+                                     (personality.huntingPriority > 0.5 && preyDistance < 150);
+                    
+                    if (shouldHunt) {
+                        // Predict where the prey's head will be to eat them
+                        const predictedPos = this.predictHeadPosition(nearestPrey);
+                        if (predictedPos) {
+                            const dx = predictedPos.x - this.x;
+                            const dy = predictedPos.y - this.y;
+                            targetAngle = Math.atan2(dy, dx);
+                        } else {
+                            // Fallback to current head position
+                            const dx = nearestPrey.x - this.x;
+                            const dy = nearestPrey.y - this.y;
+                            targetAngle = Math.atan2(dy, dx);
+                        }
+                        
+                        shouldBoost = this.stamina > 30 && preyDistance < 200;
+                        
+                        // Override element seeking for aggressive snakes
+                        this.targetMemory = null;
+                        this.targetMemoryTimer = 0;
+                    }
+                }
+                // Priority 4: Seek game objectives
+                else {
+                    // Aggressive personalities should still look for prey opportunities
+                    if (personality.huntingPriority > 0.7 && Math.random() < personality.elementIgnoreChance) {
+                        // Scan for any snakes we might have missed
+                        for (const otherSnake of snakes) {
+                            if (otherSnake === this || !otherSnake.alive) continue;
+                            const dist = Math.hypot(otherSnake.x - this.x, otherSnake.y - this.y);
+                            if (dist < personality.chaseDistance * 0.7 && otherSnake.length < this.length) {
+                                // Found a target! Predict head position to eat them
+                                const predictedPos = this.predictHeadPosition(otherSnake);
+                                if (predictedPos) {
+                                    const dx = predictedPos.x - this.x;
+                                    const dy = predictedPos.y - this.y;
+                                    targetAngle = Math.atan2(dy, dx);
+                                    shouldBoost = this.stamina > 40 && dist < 200;
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    
+                    // If still no target, seek elements
+                    if (targetAngle === null) {
+                        let target = null;
+                        
+                        // Use cached target for a few frames to reduce computation
+                        if (this.targetMemory && this.targetMemoryTimer > 0) {
+                            target = this.targetMemory;
+                            this.targetMemoryTimer--;
+                        } else {
+                        // Find new target based on personality
+                        if (this.elements.length >= this.elementCapacity) {
+                            // At capacity - prioritize Void Orbs
+                            let nearestVoidOrb = null;
+                            let minVoidDist = 800;
+                            
+                            for (const orb of voidOrbs) {
+                                const dist = Math.hypot(orb.x - this.x, orb.y - this.y);
+                                if (dist < minVoidDist && !this.isPathBlocked(orb.x, orb.y, dist)) {
+                                    minVoidDist = dist;
+                                    nearestVoidOrb = orb;
+                                }
+                            }
+                            target = nearestVoidOrb;
+                        }
+                        
+                        // Check for Catalyst Gems (combo-focused personalities prioritize these)
+                        if (!target && this.elements.length > 0 && personality.comboPriority > Math.random()) {
+                            let nearestCatalystGem = null;
+                            let minCatalystDist = 600;
+                            
+                            for (const gem of catalystGems) {
+                                const dist = Math.hypot(gem.x - this.x, gem.y - this.y);
+                                if (dist < minCatalystDist && !this.isPathBlocked(gem.x, gem.y, dist)) {
+                                    minCatalystDist = dist;
+                                    nearestCatalystGem = gem;
+                                }
+                            }
+                            target = nearestCatalystGem;
+                        }
+                        
+                        // Find nearest element if no special targets
+                        if (!target) {
+                            let nearestElement = null;
+                            let minDist = 500;
+                            
+                            for (const element of elementPool.getActiveElements()) {
+                                const dist = Math.hypot(element.x - this.x, element.y - this.y);
+                                if (dist < minDist && !this.isPathBlocked(element.x, element.y, dist)) {
+                                    minDist = dist;
+                                    nearestElement = element;
+                                }
+                            }
+                            target = nearestElement;
+                        }
+                        
+                        // Cache the target
+                        this.targetMemory = target;
+                        this.targetMemoryTimer = 30; // Cache for 30 frames
+                    }
+                    
+                    if (target) {
+                        targetAngle = Math.atan2(target.y - this.y, target.x - this.x);
+                        
+                        // Boost decision based on personality and distance
+                        const targetDist = Math.hypot(target.x - this.x, target.y - this.y);
+                        if (targetDist > 300 && this.stamina > (personality.boostThreshold * 100)) {
+                            shouldBoost = true;
+                        }
+                    }
+                    } // Close the if (targetAngle === null) check
+                }
+                
+                // Apply turning with personality-based smoothness
+                if (targetAngle !== null) {
+                    let angleDiff = targetAngle - this.angle;
+                    while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
+                    while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
+                    
+                    // Cautious personalities turn more smoothly
+                    const turnSpeed = personality.riskTolerance > 0.7 ? 0.08 : 0.06;
+                    this.angle += angleDiff * turnSpeed;
+                } else {
+                    // Wander with personality-based randomness
+                    const wanderAmount = personality.riskTolerance * 0.05;
+                    this.angle += (Math.random() - 0.5) * wanderAmount;
+                }
+                
+                // Set boost state
+                this.isBoosting = shouldBoost && this.stamina > 20 && !nearBorder;
+            }
+            
+            // Helper method for predicting head position to eat smaller snakes
+            predictHeadPosition(targetSnake) {
+                if (!targetSnake || !targetSnake.segments || targetSnake.segments.length === 0) {
+                    return null;
+                }
+                
+                // Get the head position
+                const head = targetSnake.segments[0];
+                const targetSpeed = targetSnake.speed || SNAKE_SPEED;
+                const distance = Math.hypot(head.x - this.x, head.y - this.y);
+                
+                // Calculate time to intercept
+                const relativeSpeed = this.speed * 1.5; // Assume we'll boost
+                const interceptTime = distance / relativeSpeed;
+                
+                // Predict where the head will be
+                const predictedX = head.x + Math.cos(targetSnake.angle) * targetSpeed * interceptTime;
+                const predictedY = head.y + Math.sin(targetSnake.angle) * targetSpeed * interceptTime;
+                
+                return { x: predictedX, y: predictedY };
+            }
+            
+            // Helper method for basic pathfinding
+            isPathBlocked(targetX, targetY, distance) {
+                // Simple optimization - don't pathfind for distant targets
+                if (distance > 200) return false;
+                
+                const steps = Math.floor(distance / 20); // Check every 20 pixels
+                if (steps <= 1) return false;
+                
+                const stepX = (targetX - this.x) / steps;
+                const stepY = (targetY - this.y) / steps;
+                
+                for (let i = 1; i < steps; i++) {
+                    const checkX = this.x + stepX * i;
+                    const checkY = this.y + stepY * i;
+                    
+                    // Check if this point is too close to any snake body
+                    for (const snake of snakes) {
+                        if (snake === this || !snake.alive) continue;
+                        
+                        for (let j = 3; j < snake.segments.length; j++) {
+                            const segment = snake.segments[j];
+                            const segDist = Math.hypot(segment.x - checkX, segment.y - checkY);
+                            if (segDist < SEGMENT_SIZE * 2) {
+                                return true; // Path is blocked
+                            }
+                        }
+                    }
+                }
+                
+                return false; // Path is clear
             }
         }
         
@@ -4480,7 +4789,37 @@
                 
                 const nameSpan = document.createElement('span');
                 nameSpan.className = 'leaderboard-name';
-                nameSpan.textContent = (index === 0 ? '👑 ' : '') + snake.name;
+                
+                // Handle colored personality names for AI snakes
+                if (!snake.isPlayer && snake.personality) {
+                    // Add crown for leader
+                    if (index === 0) {
+                        const crownSpan = document.createElement('span');
+                        crownSpan.textContent = '👑 ';
+                        nameSpan.appendChild(crownSpan);
+                    }
+                    
+                    // Split name into personality and actual name
+                    const personalityName = snake.personality.name + ' ';
+                    const actualName = snake.name.substring(personalityName.length);
+                    
+                    // Create colored personality span
+                    const personalitySpan = document.createElement('span');
+                    personalitySpan.style.color = snake.personalityColor;
+                    personalitySpan.style.fontWeight = 'bold';
+                    personalitySpan.textContent = personalityName;
+                    
+                    // Create white name span
+                    const actualNameSpan = document.createElement('span');
+                    actualNameSpan.style.color = '#ffffff';
+                    actualNameSpan.textContent = actualName;
+                    
+                    nameSpan.appendChild(personalitySpan);
+                    nameSpan.appendChild(actualNameSpan);
+                } else {
+                    // Player or fallback - normal display
+                    nameSpan.textContent = (index === 0 ? '👑 ' : '') + snake.name;
+                }
                 
                 const statsDiv = document.createElement('div');
                 statsDiv.className = 'leaderboard-stats';
@@ -5055,6 +5394,8 @@
             voidOrbs = [];
             catalystGems = [];
             alchemyVisionPowerUps = [];
+            aiRespawnQueue = [];
+            usedAISkins.clear();
             
             // Reset discoveries (keep only base elements)
             discoveredElements = new Set(['fire', 'water', 'earth', 'air']);
@@ -5092,7 +5433,7 @@
             snakes.push(playerSnake);
             
             // Create AI snakes
-            for (let i = 0; i < 5; i++) {
+            for (let i = 0; i < MAX_AI_SNAKES; i++) {
                 const x = 200 + Math.random() * (WORLD_SIZE - 400);
                 const y = 200 + Math.random() * (WORLD_SIZE - 400);
                 snakes.push(new Snake(x, y, false));
@@ -5502,12 +5843,27 @@
                 updates++;
             }
             
-            // Spawn new AI snakes if needed
+            // Handle AI snake respawning with cooldown
             const aiSnakes = snakes.filter(s => !s.isPlayer && s.alive).length;
-            if (aiSnakes < 5) {
-                const x = 200 + Math.random() * (WORLD_SIZE - 400);
-                const y = 200 + Math.random() * (WORLD_SIZE - 400);
-                snakes.push(new Snake(x, y, false));
+            
+            // Process respawn queue
+            aiRespawnQueue = aiRespawnQueue.filter(respawnTime => {
+                if (currentTime >= respawnTime && aiSnakes < MAX_AI_SNAKES) {
+                    // Spawn new AI snake
+                    const x = 200 + Math.random() * (WORLD_SIZE - 400);
+                    const y = 200 + Math.random() * (WORLD_SIZE - 400);
+                    snakes.push(new Snake(x, y, false));
+                    return false; // Remove from queue
+                }
+                return true; // Keep in queue
+            });
+            
+            // Check if we need to add dead snakes to respawn queue
+            if (aiSnakes < MAX_AI_SNAKES) {
+                const deadAICount = MAX_AI_SNAKES - aiSnakes - aiRespawnQueue.length;
+                for (let i = 0; i < deadAICount; i++) {
+                    aiRespawnQueue.push(currentTime + AI_RESPAWN_COOLDOWN);
+                }
             }
             
             // Update UI
