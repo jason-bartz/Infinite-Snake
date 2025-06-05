@@ -954,15 +954,32 @@
         }
         
         body.mobile .player-info-box {
-            top: 120px;
-            bottom: auto;
-            left: 20px;
+            display: none; /* Hide entirely on mobile */
         }
         
         body.mobile .leaderboard-box {
-            top: 120px;
+            top: 100px;
             bottom: auto;
-            right: 20px;
+            right: 10px;
+            width: 180px;
+            background: rgba(20, 20, 40, 0.6);
+            padding: 8px;
+            font-size: 11px;
+        }
+        
+        body.mobile .leaderboard-header {
+            font-size: 13px;
+            margin-bottom: 5px;
+        }
+        
+        body.mobile .leaderboard-entry {
+            padding: 4px 6px;
+            margin: 2px 0;
+            font-size: 11px;
+        }
+        
+        body.mobile .leaderboard-stats {
+            font-size: 9px;
         }
         
         body.mobile .discovery-feed {
@@ -971,8 +988,12 @@
         }
         
         body.mobile .message-popup {
-            top: 200px;
-            bottom: auto;
+            top: auto;
+            bottom: 220px;
+            font-size: 14px;
+            padding: 8px 16px;
+            border-radius: 6px;
+            border-width: 2px;
         }
         
         body.mobile #pauseText,
@@ -1537,8 +1558,16 @@
         
         // Make canvas fit full window
         function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+            // Use lower resolution on mobile for better performance
+            const scale = isMobile ? 0.8 : 1;
+            canvas.width = window.innerWidth * scale;
+            canvas.height = window.innerHeight * scale;
+            
+            if (isMobile) {
+                // Scale canvas to full size with CSS
+                canvas.style.width = window.innerWidth + 'px';
+                canvas.style.height = window.innerHeight + 'px';
+            }
         }
         resizeCanvas();
         window.addEventListener('resize', resizeCanvas);
@@ -1596,7 +1625,7 @@
         // Nebula border effect variables
         let borderParticles = [];
         let animationTime = 0;
-        const MAX_BORDER_PARTICLES = 150;
+        const MAX_BORDER_PARTICLES = isMobile ? 50 : 150; // Reduced for mobile
         
         // Element database
         let elementDatabase = {};
@@ -2546,7 +2575,8 @@
                     
                     // Create boost particles
                     this.boostParticleTimer++;
-                    if (this.boostParticleTimer % 3 === 0) { // Every 3 frames
+                    const particleFrequency = isMobile ? 6 : 3; // Less frequent on mobile
+                    if (this.boostParticleTimer % particleFrequency === 0) {
                         const particleAngle = this.angle + Math.PI + (Math.random() - 0.5) * 0.5;
                         const particleSpeed = 2 + Math.random() * 2;
                         const vx = Math.cos(particleAngle) * particleSpeed;
@@ -2928,10 +2958,14 @@
                         ctx.restore();
                     } else {
                         // Fallback to emoji if image not loaded
+                        ctx.save(); // Save canvas state
+                        ctx.globalAlpha = 1; // Ensure full opacity
+                        ctx.fillStyle = 'black'; // Set solid color for emoji
                         ctx.font = `${SEGMENT_SIZE * 2}px Arial`;
                         ctx.textAlign = 'center';
                         ctx.textBaseline = 'middle';
                         ctx.fillText(this.isPlayer ? '😊' : '🐍', screenX, screenY);
+                        ctx.restore(); // Restore canvas state
                     }
                     
                     // Draw name
@@ -2944,8 +2978,12 @@
                     
                     // Draw crown if leader
                     if (this.isLeader) {
+                        ctx.save(); // Save canvas state
+                        ctx.globalAlpha = 1; // Ensure full opacity
+                        ctx.fillStyle = 'black'; // Set solid color for emoji
                         ctx.font = '24px Arial';
                         ctx.fillText('👑', screenX, screenY - SEGMENT_SIZE - 30);
+                        ctx.restore(); // Restore canvas state
                     }
                 }
             }
@@ -2979,9 +3017,10 @@
                 const screenX = this.x - camera.x + canvas.width / 2;
                 const screenY = this.y - camera.y + canvas.height / 2;
                 
-                // Skip if off-screen
-                if (screenX < -50 || screenX > canvas.width + 50 ||
-                    screenY < -50 || screenY > canvas.height + 50) return;
+                // Skip if off-screen - tighter culling on mobile
+                const margin = isMobile ? 30 : 50;
+                if (screenX < -margin || screenX > canvas.width + margin ||
+                    screenY < -margin || screenY > canvas.height + margin) return;
                 
                 const scale = 1 + Math.sin(this.pulse) * 0.1;
                 
@@ -3040,10 +3079,14 @@
                 }
                 
                 // Draw emoji
+                ctx.save(); // Save canvas state
+                ctx.globalAlpha = 1; // Ensure full opacity
+                ctx.fillStyle = 'black'; // Set solid color for emoji
                 ctx.font = `${ELEMENT_SIZE * 2 * scale}px Arial`;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText(this.data ? this.data.emoji : '❓', screenX, screenY);
+                ctx.restore(); // Restore canvas state
                 
                 // Draw element name below emoji
                 ctx.font = '10px Arial';
@@ -3099,9 +3142,10 @@
                 const screenX = this.x - camera.x + canvas.width / 2;
                 const screenY = this.y - camera.y + canvas.height / 2;
                 
-                // Skip if off-screen
-                if (screenX < -50 || screenX > canvas.width + 50 ||
-                    screenY < -50 || screenY > canvas.height + 50) return;
+                // Skip if off-screen - tighter culling on mobile
+                const margin = isMobile ? 30 : 50;
+                if (screenX < -margin || screenX > canvas.width + margin ||
+                    screenY < -margin || screenY > canvas.height + margin) return;
                 
                 const scale = 1 + Math.sin(this.pulse) * 0.1;
                 
@@ -3119,10 +3163,14 @@
                 ctx.fillRect(-glowSize, -glowSize, glowSize * 2, glowSize * 2);
                 
                 // Crystal ball emoji
+                ctx.save(); // Save canvas state for emoji
+                ctx.globalAlpha = 1; // Ensure full opacity
+                ctx.fillStyle = 'black'; // Set solid color for emoji
                 ctx.font = `${this.size * 2 * scale}px Arial`;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText('🔮', 0, 0);
+                ctx.restore(); // Restore canvas state
                 
                 // Swirling particles
                 for (let i = 0; i < 3; i++) {
@@ -3160,9 +3208,10 @@
                 const screenX = this.x - camera.x + canvas.width / 2;
                 const screenY = this.y - camera.y + canvas.height / 2;
                 
-                // Skip if off-screen
-                if (screenX < -50 || screenX > canvas.width + 50 ||
-                    screenY < -50 || screenY > canvas.height + 50) return;
+                // Skip if off-screen - tighter culling on mobile
+                const margin = isMobile ? 30 : 50;
+                if (screenX < -margin || screenX > canvas.width + margin ||
+                    screenY < -margin || screenY > canvas.height + margin) return;
                 
                 const scale = 1 + Math.sin(this.pulse) * 0.1;
                 
@@ -3180,10 +3229,14 @@
                 ctx.fillRect(-glowSize, -glowSize, glowSize * 2, glowSize * 2);
                 
                 // Void orb emoji
+                ctx.save(); // Save canvas state for emoji
+                ctx.globalAlpha = 1; // Ensure full opacity
+                ctx.fillStyle = 'black'; // Set solid color for emoji
                 ctx.font = `${this.size * 2 * scale}px Arial`;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText('🌀', 0, 0);
+                ctx.restore(); // Restore canvas state
                 
                 // Swirling particles
                 for (let i = 0; i < 4; i++) {
@@ -3223,9 +3276,10 @@
                 const screenX = this.x - camera.x + canvas.width / 2;
                 const screenY = this.y - camera.y + canvas.height / 2;
                 
-                // Skip if off-screen
-                if (screenX < -50 || screenX > canvas.width + 50 ||
-                    screenY < -50 || screenY > canvas.height + 50) return;
+                // Skip if off-screen - tighter culling on mobile
+                const margin = isMobile ? 30 : 50;
+                if (screenX < -margin || screenX > canvas.width + margin ||
+                    screenY < -margin || screenY > canvas.height + margin) return;
                 
                 const scale = 1 + Math.sin(this.pulse) * 0.15;
                 
@@ -3243,10 +3297,14 @@
                 ctx.fillRect(-glowSize, -glowSize, glowSize * 2, glowSize * 2);
                 
                 // Catalyst gem emoji
+                ctx.save(); // Save canvas state for emoji
+                ctx.globalAlpha = 1; // Ensure full opacity
+                ctx.fillStyle = 'black'; // Set solid color for emoji
                 ctx.font = `${this.size * 2 * scale}px Arial`;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText('💎', 0, 0);
+                ctx.restore(); // Restore canvas state
                 
                 // Sparkle particles
                 for (let i = 0; i < 6; i++) {
@@ -3457,8 +3515,9 @@
         }
         
         function createCombinationParticles(x, y) {
-            for (let i = 0; i < 20; i++) {
-                const angle = (Math.PI * 2 * i) / 20;
+            const particleCount = isMobile ? 10 : 20; // Reduced for mobile
+            for (let i = 0; i < particleCount; i++) {
+                const angle = (Math.PI * 2 * i) / particleCount;
                 const speed = 2 + Math.random() * 3;
                 particles.push(new Particle(
                     x, y,
@@ -3471,8 +3530,8 @@
         
         function createDeathParticles(x, y, snakeLength = 5) {
             // Scale particle count and speed based on snake size
-            const baseParticles = 20;
-            const particleCount = Math.min(baseParticles + Math.floor(snakeLength / 2), 100); // Cap at 100 particles
+            const baseParticles = isMobile ? 10 : 20;
+            const particleCount = Math.min(baseParticles + Math.floor(snakeLength / (isMobile ? 4 : 2)), isMobile ? 30 : 100); // Reduced for mobile
             const speedMultiplier = 1 + (snakeLength / 50); // Bigger snakes = faster explosion
             
             for (let i = 0; i < particleCount; i++) {
@@ -4126,7 +4185,11 @@
         // Game functions
         function initializeStaticStars() {
             staticStars = [];
-            const starCount = 200; // Sparse distribution
+            // Reduce stars on mobile for better performance
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+                || ('ontouchstart' in window)
+                || (navigator.maxTouchPoints > 0);
+            const starCount = isMobile ? 50 : 200; // Much fewer stars on mobile
             
             for (let i = 0; i < starCount; i++) {
                 staticStars.push({
