@@ -1,0 +1,43 @@
+{
+    "name": "Infinite Snake - Craft the Cosmos",
+    "short_name": "Infinite Snake",
+    "description": "Infinite Snake combines classic snake gameplay with element crafting. Discover endless combinations, unlock unique skins, and craft the cosmos in this free browser game!",
+    "icons": [
+        {
+            "src": "/android-chrome-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        }
+        
+    ],
+    "theme_color": "#8A2BE2",
+    "background_color": "#0a0a1a",
+    "display": "fullscreen",
+    "orientation": "any",
+    "start_url": "/",
+    "scope": "/",
+    "categories": ["games", "puzzle", "arcade"],
+    "screenshots": [
+        {
+            "src": "/screenshots/gameplay1.png",
+            "sizes": "1280x720",
+            "type": "image/png",
+            "label": "Element crafting gameplay"
+        },
+        {
+            "src": "/screenshots/gameplay2.png",
+            "sizes": "1280x720",
+            "type": "image/png",
+            "label": "Discovery system"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "New Game",
+            "short_name": "Play",
+            "description": "Start a new game",
+            "url": "/",
+            "icons": [{ "src": "/play-icon-192.png", "sizes": "192x192" }]
+        }
+    ]
+}
