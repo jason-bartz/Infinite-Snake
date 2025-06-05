@@ -1921,6 +1921,7 @@
             <div class="tab-navigation">
                 <button class="tab-button active" onclick="switchTab('skins')">Skins</button>
                 <button class="tab-button" onclick="switchTab('journal')">Discovery Journal</button>
+                <button class="tab-button" onclick="switchTab('howto')">How to Play</button>
             </div>
             
             <!-- Skins Tab -->
@@ -1938,6 +1939,56 @@
                     <h4 style="color: #FFD700; margin-bottom: 10px;">Discovery Journal</h4>
                     <div class="discovery-grid" id="discoveryGrid">
                         <!-- Discoveries will be populated here -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- How to Play Tab -->
+            <div id="howtoTab" class="tab-content">
+                <div style="padding: 20px; max-height: 400px; overflow-y: auto;">
+                    <h4 style="color: #FFD700; margin-bottom: 15px; text-align: center;">How to Play Infinite Snake</h4>
+                    
+                    <div style="color: #ddd; font-size: 14px; line-height: 1.6;">
+                        <div style="margin-bottom: 15px;">
+                            <h5 style="color: #4ecdc4; margin-bottom: 5px;">🎮 Controls</h5>
+                            <p><strong>Desktop:</strong> Mouse to steer</p>
+                            <p><strong>Mobile:</strong> Virtual joystick to steer</p>
+                            <p><strong>Boost:</strong> Click (Desktop) or Boost button (Mobile)</p>
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <h5 style="color: #4ecdc4; margin-bottom: 5px;">🎯 Goal</h5>
+                            <p>Grow your snake by collecting elements and discovering new combinations! Compete with other snakes for the highest score and unlock new skins.</p>
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <h5 style="color: #4ecdc4; margin-bottom: 5px;">🔬 Element System</h5>
+                            <p>• Collect basic elements: Fire 🔥, Water 💧, Earth 🏔️, Air 💨</p>
+                            <p>• Your snake can hold 4 elements to start (capacity grows as you play)</p>
+                            <p>• Elements automatically combine to create new discoveries!</p>
+                            <p>• Example: Fire + Water = Steam ☁️</p>
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <h5 style="color: #4ecdc4; margin-bottom: 5px;">✨ Power-ups</h5>
+                            <p><strong>🔮 Alchemy Vision:</strong> See all possible combinations for 30 seconds</p>
+                            <p><strong>🌀 Void Orb:</strong> Clear your element inventory and convert to points</p>
+                            <p><strong>💎 Catalyst Gem:</strong> Summons up to 4 possible compatible elements for combining</p>
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <h5 style="color: #4ecdc4; margin-bottom: 5px;">⚔️ Combat</h5>
+                            <p>• Collide head-on with smaller snakes to eliminate them</p>
+                            <p>• Collect their dropped elements for points</p>
+                            <p>• Avoid head-on collisions with larger snakes!</p>
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <h5 style="color: #4ecdc4; margin-bottom: 5px;">🏆 Tips</h5>
+                            <p>• Use boost strategically - it drains stamina!</p>
+                            <p>• Experiment with different element combinations</p>
+                            <p>• Stay away from the map borders!</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -4663,7 +4714,7 @@
                             
                             // Visual feedback
                             if (snake.isPlayer) {
-                                showMessage(`🌀 Void consumed! +${points} points<br><small style="opacity: 0.8">Your elements have been purged to the void</small>`, 'info');
+                                showMessage(`🌀 Void Orb consumed! +${points} points<br><small style="opacity: 0.8">Your elements have been purged to the void</small>`, 'info');
                                 if (window.eatSound) {
                                     window.eatSound.play().catch(() => {});
                                 }
@@ -4722,7 +4773,7 @@
                                     elementPool.spawn(elementType, spawnX, spawnY, true);
                                 }
                                 
-                                showMessage(`💎 Catalyst activated! Spawned ${spawnCount} compatible elements<br><small style="opacity: 0.8">New elements have resonated into existence</small>`, 'success');
+                                showMessage(`💎 Catalyst Gem activated! Spawned ${spawnCount} compatible elements<br><small style="opacity: 0.8">New elements have resonated into existence</small>`, 'success');
                             } else if (spawnCount > 0 && !snake.isPlayer) {
                                 // AI snakes get points instead
                                 snake.score += 200;
@@ -5124,6 +5175,8 @@
                 document.getElementById('skinsTab').classList.add('active');
             } else if (tabName === 'journal') {
                 document.getElementById('journalTab').classList.add('active');
+            } else if (tabName === 'howto') {
+                document.getElementById('howtoTab').classList.add('active');
             }
         }
         
@@ -5394,6 +5447,56 @@
                         alchemyVisionPowerUps = [];
                     }
                 }
+                
+                // Spawn AlchemyVision power-ups
+                if (alchemyVisionPowerUps.length === 0 && Date.now() - lastAlchemyVisionSpawn >= ALCHEMY_VISION_SPAWN_INTERVAL) {
+                    // Spawn multiple power-ups spread across the map
+                    for (let i = 0; i < ALCHEMY_VISION_SPAWN_COUNT; i++) {
+                        // Divide the map into sections to spread out spawns
+                        const sectionWidth = WORLD_SIZE / Math.ceil(Math.sqrt(ALCHEMY_VISION_SPAWN_COUNT));
+                        const sectionHeight = WORLD_SIZE / Math.ceil(Math.sqrt(ALCHEMY_VISION_SPAWN_COUNT));
+                        
+                        // Random position within each section
+                        const sectionX = (i % Math.ceil(Math.sqrt(ALCHEMY_VISION_SPAWN_COUNT))) * sectionWidth;
+                        const sectionY = Math.floor(i / Math.ceil(Math.sqrt(ALCHEMY_VISION_SPAWN_COUNT))) * sectionHeight;
+                        
+                        const x = sectionX + 100 + Math.random() * (sectionWidth - 200);
+                        const y = sectionY + 100 + Math.random() * (sectionHeight - 200);
+                        
+                        alchemyVisionPowerUps.push(new AlchemyVision(x, y));
+                    }
+                    lastAlchemyVisionSpawn = Date.now();
+                }
+                
+                // Update AlchemyVision power-ups
+                alchemyVisionPowerUps.forEach(powerUp => powerUp.update());
+                
+                // Spawn Void Orbs to maintain count
+                if (voidOrbs.length < VOID_ORB_SPAWN_COUNT && Date.now() - lastVoidOrbSpawn >= VOID_ORB_SPAWN_INTERVAL / VOID_ORB_SPAWN_COUNT) {
+                    const x = 100 + Math.random() * (WORLD_SIZE - 200);
+                    const y = 100 + Math.random() * (WORLD_SIZE - 200);
+                    voidOrbs.push(new VoidOrb(x, y));
+                    lastVoidOrbSpawn = Date.now();
+                }
+                
+                // Update Void Orbs
+                voidOrbs.forEach(orb => orb.update());
+                
+                // Spawn Catalyst Gems to maintain count (more spread out)
+                if (catalystGems.length < CATALYST_GEM_SPAWN_COUNT && Date.now() - lastCatalystGemSpawn >= CATALYST_GEM_SPAWN_INTERVAL / CATALYST_GEM_SPAWN_COUNT) {
+                    // Divide map into sections for better spread
+                    const sectionWidth = WORLD_SIZE / CATALYST_GEM_SPAWN_COUNT;
+                    const sectionIndex = catalystGems.length;
+                    const sectionX = sectionIndex * sectionWidth;
+                    
+                    const x = sectionX + 100 + Math.random() * (sectionWidth - 200);
+                    const y = 100 + Math.random() * (WORLD_SIZE - 200);
+                    catalystGems.push(new CatalystGem(x, y));
+                    lastCatalystGemSpawn = Date.now();
+                }
+                
+                // Update Catalyst Gems
+                catalystGems.forEach(gem => gem.update());
                 
                 accumulator -= FIXED_TIMESTEP;
                 updates++;
