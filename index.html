@@ -169,7 +169,8 @@
             position: fixed;
             top: 0;
             left: 0;
-            opacity: 1;
+            opacity: 0;
+            transition: opacity 0.8s ease-in;
         }
         
         /* Splash Screen */
@@ -1942,6 +1943,48 @@
         </div>
     </div>
     
+    <!-- Respawn Overlay -->
+    <div id="respawnOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 60; pointer-events: none;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+            <div style="background: linear-gradient(135deg, rgba(20, 20, 40, 0.95) 0%, rgba(30, 30, 50, 0.9) 100%); 
+                        border: 2px solid rgba(255, 68, 68, 0.5); 
+                        border-radius: 15px; 
+                        padding: 30px 40px;
+                        box-shadow: 0 0 30px rgba(255, 68, 68, 0.3);">
+                <h2 style="color: #ff4444; margin: 0 0 20px 0; font-size: 32px; text-shadow: 0 0 10px rgba(255, 68, 68, 0.5);">You Died!</h2>
+                
+                <!-- Stats Summary -->
+                <div style="margin-bottom: 25px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div style="background: rgba(0, 0, 0, 0.3); padding: 10px; border-radius: 8px;">
+                        <div style="color: #AAA; font-size: 14px;">Score</div>
+                        <div id="respawnScore" style="color: #4ecdc4; font-size: 24px; font-weight: bold;">0</div>
+                    </div>
+                    <div style="background: rgba(0, 0, 0, 0.3); padding: 10px; border-radius: 8px;">
+                        <div style="color: #AAA; font-size: 14px;">Discoveries</div>
+                        <div id="respawnDiscoveries" style="color: #FFD700; font-size: 24px; font-weight: bold;">0</div>
+                    </div>
+                    <div style="background: rgba(0, 0, 0, 0.3); padding: 10px; border-radius: 8px;">
+                        <div style="color: #AAA; font-size: 14px;">Best Rank</div>
+                        <div id="respawnRank" style="color: #9c88ff; font-size: 24px; font-weight: bold;">#1</div>
+                    </div>
+                    <div style="background: rgba(0, 0, 0, 0.3); padding: 10px; border-radius: 8px;">
+                        <div style="color: #AAA; font-size: 14px;">Kills</div>
+                        <div id="respawnKills" style="color: #ff6b6b; font-size: 24px; font-weight: bold;">0</div>
+                    </div>
+                </div>
+                
+                <!-- Respawn Timer -->
+                <div style="font-size: 28px; color: #ff4444; font-weight: bold;">
+                    Respawn in <span id="respawnTimer">3</span>s
+                </div>
+                
+                <div style="margin-top: 15px; font-size: 14px; color: #AAA;">
+                    You will keep 25% of your score
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <!-- Pause Overlay -->
     <div id="pauseOverlay">
         <div id="pauseMenu">
@@ -2101,7 +2144,7 @@
         // Game constants
         const WORLD_SIZE = 4000;
         const SEGMENT_SIZE = 15;
-        const SNAKE_SPEED = 3.3; // Increased by 10%
+        const SNAKE_SPEED = 3.6; // Increased by 20% from original 3.0
         const TURN_SPEED = 0.08;
         const ELEMENT_SIZE = 20;
         
@@ -2136,6 +2179,9 @@
         let highScore = parseInt(localStorage.getItem('highScore') || '0');
         let gameStartTime = Date.now();
         let bestRank = 0;
+        let playerRespawnTimer = 0; // Player respawn countdown
+        let comboStreak = 0; // Track consecutive combinations
+        let animationFrameId = null; // Track the animation frame to prevent multiple loops
         
         // Alchemy Vision power-up
         let alchemyVisionPowerUps = [];
@@ -2530,7 +2576,8 @@
             
             setTimeout(() => {
                 gameModeSelect.style.opacity = '0';
-                discoveryLog.style.display = 'block';
+                // Don't show discoveryLog - it's been replaced by discovery feed
+                // discoveryLog.style.display = 'block';
                 gameCanvas.style.opacity = '1';
                 
                 setTimeout(() => {
@@ -2539,6 +2586,7 @@
                     
                     setTimeout(() => {
                         transitionBg.remove();
+                        stopGame(); // Ensure clean state before starting
                         startGame();
                     }, 1000);
                 }, 100);
@@ -2582,7 +2630,8 @@
             // After content fades, start the game
             setTimeout(() => {
                 gameModeSelect.style.display = 'none';
-                discoveryLog.style.display = 'block';
+                // Don't show discoveryLog - it's been replaced by discovery feed
+                // discoveryLog.style.display = 'block';
                 startGame();
                 
                 // Fade in game canvas and fade out transition background
@@ -2665,7 +2714,7 @@
             // Create multiple audio instances for overlapping sounds
             for (let i = 0; i < 5; i++) {
                 const eatSound = new Audio('sounds/8-bit-blip.mp3');
-                eatSound.volume = 0.5; // 50% volume
+                eatSound.volume = 0.25; // 25% volume (reduced by 50%)
                 eatSounds.push(eatSound);
                 
                 const explosionSound = new Audio('sounds/fire-impact.mp3');
@@ -2682,7 +2731,7 @@
                 
                 // Reset the sound to start
                 sound.currentTime = 0;
-                sound.volume = 0.5;
+                sound.volume = 0.25; // Reduced by 50% from 0.5
                 
                 // Try to play
                 const playPromise = sound.play();
@@ -2701,12 +2750,99 @@
                 // Reset the sound to start
                 sound.currentTime = 0;
                 // Set volume based on whether player is involved
-                sound.volume = isPlayerInvolved ? 0.75 : 0.25; // 75% for player, 25% for AI only
+                sound.volume = isPlayerInvolved ? 0.75 : 0.1; // 75% for player, 10% for AI only
                 
                 // Try to play
                 const playPromise = sound.play();
                 if (playPromise !== undefined) {
                     playPromise.catch(e => console.log('Explosion sound error:', e.message));
+                }
+            }
+        }
+        
+        // Power-up sound pools
+        const voidOrbSounds = [];
+        const alchemyVisionSounds = [];
+        const catalystGemSounds = [];
+        const boostSounds = [];
+        
+        function initPowerUpSounds() {
+            // Create multiple instances for overlapping sounds
+            for (let i = 0; i < 3; i++) {
+                // Void Orb sound
+                const voidSound = new Audio('sounds/magic-energy-whoosh.mp3');
+                voidSound.volume = 0.6;
+                voidOrbSounds.push(voidSound);
+                
+                // Alchemy Vision sound
+                const alchemySound = new Audio('sounds/magma-roar.mp3');
+                alchemySound.volume = 0.7;
+                alchemyVisionSounds.push(alchemySound);
+                
+                // Catalyst Gem sound
+                const catalystSound = new Audio('sounds/power-surge.mp3');
+                catalystSound.volume = 0.6;
+                catalystGemSounds.push(catalystSound);
+                
+                // Boost sound
+                const boostSound = new Audio('sounds/whoosh-burst.mp3');
+                boostSound.volume = 0.5;
+                boostSounds.push(boostSound);
+            }
+        }
+        
+        function playVoidOrbSound(isPlayerInvolved = true) {
+            if (!musicMuted && voidOrbSounds.length > 0) {
+                const sound = voidOrbSounds[soundIndex % voidOrbSounds.length];
+                soundIndex++;
+                sound.currentTime = 0;
+                // Set volume based on whether player is involved
+                sound.volume = isPlayerInvolved ? 0.6 : 0.15; // 60% for player, 15% for AI
+                const playPromise = sound.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(e => console.log('Void Orb sound error:', e.message));
+                }
+            }
+        }
+        
+        function playAlchemyVisionSound(isPlayerInvolved = true) {
+            if (!musicMuted && alchemyVisionSounds.length > 0) {
+                const sound = alchemyVisionSounds[soundIndex % alchemyVisionSounds.length];
+                soundIndex++;
+                sound.currentTime = 0;
+                // Set volume based on whether player is involved
+                sound.volume = isPlayerInvolved ? 0.7 : 0.2; // 70% for player, 20% for AI
+                const playPromise = sound.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(e => console.log('Alchemy Vision sound error:', e.message));
+                }
+            }
+        }
+        
+        function playCatalystGemSound(isPlayerInvolved = true) {
+            if (!musicMuted && catalystGemSounds.length > 0) {
+                const sound = catalystGemSounds[soundIndex % catalystGemSounds.length];
+                soundIndex++;
+                sound.currentTime = 0;
+                // Set volume based on whether player is involved
+                sound.volume = isPlayerInvolved ? 0.6 : 0.15; // 60% for player, 15% for AI
+                const playPromise = sound.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(e => console.log('Catalyst Gem sound error:', e.message));
+                }
+            }
+        }
+        
+        function playBoostSound(isPlayerInvolved = true) {
+            if (!musicMuted && boostSounds.length > 0) {
+                const sound = boostSounds[soundIndex % boostSounds.length];
+                soundIndex++;
+                sound.currentTime = 0;
+                // Set volume based on whether player is involved
+                sound.volume = isPlayerInvolved ? 0.5 : 0.05; // 50% for player, 5% for AI
+                const playPromise = sound.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(e => console.log('Boost sound error:', e.message));
                 }
             }
         }
@@ -2939,14 +3075,25 @@
                 this.baseSpeed = SNAKE_SPEED; // Store base speed for boost calculations
                 this.name = isPlayer ? 'You' : generateSnakeName();
                 this.invincibilityTimer = 0;
+                
+                // Debug logging for player snake creation
+                if (isPlayer) {
+                    console.log('[SNAKE CONSTRUCTOR] Creating PLAYER snake at', x, y);
+                    console.trace(); // Show stack trace to see where it's being called from
+                }
                 this.discoveredElements = new Set(['fire', 'water', 'earth', 'air']); // Each snake tracks its own discoveries
                 
                 // Speed boost properties
                 this.stamina = 100; // Max stamina
                 this.maxStamina = 100;
                 this.isBoosting = false;
+                this.wasBoostingLastFrame = false; // Track boost state changes
                 this.staminaRegenCooldown = 0; // Prevents regen immediately after boosting
                 this.boostParticleTimer = 0;
+                
+                // Near-miss tracking
+                this.nearMissTracking = new Map(); // Track distance to other snakes over time
+                this.recentCollisions = new Set(); // Track recent collisions to prevent near-miss after collision
                 
                 // Assign skin
                 if (isPlayer) {
@@ -3031,6 +3178,13 @@
                 
                 // Handle controls
                 if (this.isPlayer) {
+                    // Only apply controls if this is the main player snake
+                    if (this !== playerSnake) {
+                        console.error('[CONTROLS] WARNING: Non-main player snake detected! Skipping controls for snake:', this.name);
+                        this.alive = false; // Kill duplicate player snake
+                        return;
+                    }
+                    
                     // Handle turning
                     let turnMultiplier = 1;
                     if (this.isBoosting) {
@@ -3076,6 +3230,11 @@
                 
                 // Update stamina and speed based on boost
                 if (this.isBoosting && this.stamina > 0) {
+                    // Play boost sound when starting to boost
+                    if (!this.wasBoostingLastFrame) {
+                        playBoostSound(this.isPlayer);
+                    }
+                    
                     // Deplete stamina (5 seconds of continuous use)
                     this.stamina -= (100 / (5 * 60)) * deltaTime; // 100 stamina over 5 seconds
                     this.stamina = Math.max(0, this.stamina);
@@ -3104,8 +3263,8 @@
                     if (this.staminaRegenCooldown > 0) {
                         this.staminaRegenCooldown -= deltaTime;
                     } else if (this.stamina < this.maxStamina) {
-                        // Regenerate stamina (3 seconds to full)
-                        this.stamina += (100 / (3 * 60)) * deltaTime; // 100 stamina over 3 seconds
+                        // Regenerate stamina (2 seconds to full)
+                        this.stamina += (100 / (2 * 60)) * deltaTime; // 100 stamina over 2 seconds
                         this.stamina = Math.min(this.maxStamina, this.stamina);
                     }
                 }
@@ -3150,6 +3309,9 @@
                 
                 // Check element combinations
                 this.checkCombinations();
+                
+                // Update boost state tracking
+                this.wasBoostingLastFrame = this.isBoosting;
             }
             
             checkCombinations() {
@@ -3214,8 +3376,24 @@
                             }
                         }
                     } else {
-                        // Show popup for existing discovery
+                        // Existing combination - add combo streak points
                         if (this.isPlayer && this === playerSnake) {
+                            comboStreak++;
+                            let comboBonus = 100; // Base combo points
+                            
+                            // Calculate streak bonus
+                            if (comboStreak >= 4) {
+                                comboBonus = 2500;
+                                showMessage(`4x COMBO STREAK! +${comboBonus} points!`, 'combo');
+                            } else if (comboStreak >= 3) {
+                                comboBonus = 1000;
+                                showMessage(`3x Combo Streak! +${comboBonus} points!`, 'combo');
+                            } else if (comboStreak >= 2) {
+                                comboBonus = 500;
+                                showMessage(`2x Combo! +${comboBonus} points!`, 'combo');
+                            }
+                            
+                            this.score += comboBonus;
                             showCombinationMessage(newElement, tailElement, result, false); // Show combo
                         }
                     }
@@ -3226,6 +3404,11 @@
                     // Check again in case there are more combinations
                     this.checkCombinations();
                     return;
+                }
+                
+                // No combination found - reset combo streak for player
+                if (this.isPlayer && this === playerSnake) {
+                    comboStreak = 0;
                 }
             }
             
@@ -3356,27 +3539,9 @@
                 
                 // Respawn if player
                 if (this.isPlayer) {
-                    // Lose half points and half capacity on death
-                    const oldScore = this.score;
-                    const oldDiscoveries = this.discoveries;
-                    const oldDiscoveredElements = new Set(this.discoveredElements);
-                    const oldElementsEaten = this.elementsEaten;
-                    const oldCapacity = this.elementCapacity;
-                    const oldKills = this.kills; // Preserve kills
-                    
-                    setTimeout(() => {
-                        // Remove the old dead player snake before creating new one
-                        snakes = snakes.filter(s => s !== this);
-                        
-                        playerSnake = new Snake(WORLD_SIZE / 2, WORLD_SIZE / 2, true);
-                        playerSnake.score = Math.floor(oldScore / 2); // Keep half points
-                        playerSnake.discoveries = oldDiscoveries; // Keep discoveries
-                        playerSnake.discoveredElements = oldDiscoveredElements; // Keep discovered elements
-                        playerSnake.elementsEaten = Math.floor(oldElementsEaten / 2); // Lose half progress
-                        playerSnake.elementCapacity = Math.max(4, Math.floor(oldCapacity / 2)); // Lose half capacity (min 4)
-                        playerSnake.kills = oldKills; // Keep all kills
-                        snakes.push(playerSnake);
-                    }, 3000);
+                    // Player respawn is now handled in the main game loop
+                    // This prevents duplicate player snakes from being created
+                    console.log('[SNAKE DIE] Player died, respawn will be handled by game loop');
                 }
             }
             
@@ -3961,6 +4126,33 @@
                 if (this.isCatalystSpawned) {
                     this.catalystSparkleTime += 0.1 * deltaTime;
                 }
+                
+                // Magnetism effect - draw elements toward nearby snakes
+                const magnetRange = 100; // Range at which magnetism starts
+                const magnetStrength = 4.0; // Speed of attraction
+                
+                for (const snake of snakes) {
+                    if (!snake.alive) continue;
+                    
+                    // Check distance to snake head
+                    const dx = snake.x - this.x;
+                    const dy = snake.y - this.y;
+                    const distance = Math.hypot(dx, dy);
+                    
+                    // Apply magnetism if within range
+                    if (distance < magnetRange && distance > ELEMENT_SIZE) {
+                        // Calculate normalized direction vector
+                        const dirX = dx / distance;
+                        const dirY = dy / distance;
+                        
+                        // Stronger pull when closer
+                        const pullStrength = (1 - distance / magnetRange) * magnetStrength * deltaTime;
+                        
+                        // Move element toward snake
+                        this.x += dirX * pullStrength;
+                        this.y += dirY * pullStrength;
+                    }
+                }
             }
             
             draw() {
@@ -4076,9 +4268,30 @@
                 this.rotation = 0;
             }
             
-            update() {
-                this.pulse += 0.05;
-                this.rotation += 0.02;
+            update(deltaTime = 1) {
+                this.pulse += 0.05 * deltaTime;
+                this.rotation += 0.02 * deltaTime;
+                
+                // Magnetism effect
+                const magnetRange = 120; // Slightly larger range for power-ups
+                const magnetStrength = 5.0; // Stronger pull for power-ups
+                
+                for (const snake of snakes) {
+                    if (!snake.alive) continue;
+                    
+                    const dx = snake.x - this.x;
+                    const dy = snake.y - this.y;
+                    const distance = Math.hypot(dx, dy);
+                    
+                    if (distance < magnetRange && distance > this.size) {
+                        const dirX = dx / distance;
+                        const dirY = dy / distance;
+                        const pullStrength = (1 - distance / magnetRange) * magnetStrength * deltaTime;
+                        
+                        this.x += dirX * pullStrength;
+                        this.y += dirY * pullStrength;
+                    }
+                }
             }
             
             draw() {
@@ -4140,9 +4353,30 @@
                 this.rotation = 0;
             }
             
-            update() {
-                this.pulse += 0.05;
-                this.rotation += 0.03;
+            update(deltaTime = 1) {
+                this.pulse += 0.05 * deltaTime;
+                this.rotation += 0.03 * deltaTime;
+                
+                // Magnetism effect
+                const magnetRange = 120; // Slightly larger range for power-ups
+                const magnetStrength = 5.0; // Stronger pull for power-ups
+                
+                for (const snake of snakes) {
+                    if (!snake.alive) continue;
+                    
+                    const dx = snake.x - this.x;
+                    const dy = snake.y - this.y;
+                    const distance = Math.hypot(dx, dy);
+                    
+                    if (distance < magnetRange && distance > this.size) {
+                        const dirX = dx / distance;
+                        const dirY = dy / distance;
+                        const pullStrength = (1 - distance / magnetRange) * magnetStrength;
+                        
+                        this.x += dirX * pullStrength;
+                        this.y += dirY * pullStrength;
+                    }
+                }
             }
             
             draw() {
@@ -4207,10 +4441,31 @@
                 this.sparkleTime = 0;
             }
             
-            update() {
-                this.pulse += 0.04;
-                this.rotation += 0.02;
-                this.sparkleTime += 0.1;
+            update(deltaTime = 1) {
+                this.pulse += 0.04 * deltaTime;
+                this.rotation += 0.02 * deltaTime;
+                this.sparkleTime += 0.1 * deltaTime;
+                
+                // Magnetism effect
+                const magnetRange = 120; // Slightly larger range for power-ups
+                const magnetStrength = 5.0; // Stronger pull for power-ups
+                
+                for (const snake of snakes) {
+                    if (!snake.alive) continue;
+                    
+                    const dx = snake.x - this.x;
+                    const dy = snake.y - this.y;
+                    const distance = Math.hypot(dx, dy);
+                    
+                    if (distance < magnetRange && distance > this.size) {
+                        const dirX = dx / distance;
+                        const dirY = dy / distance;
+                        const pullStrength = (1 - distance / magnetRange) * magnetStrength;
+                        
+                        this.x += dirX * pullStrength;
+                        this.y += dirY * pullStrength;
+                    }
+                }
             }
             
             draw() {
@@ -4574,8 +4829,51 @@
             
             // Random position if not specified
             if (!x || !y) {
-                x = 100 + Math.random() * (WORLD_SIZE - 200);
-                y = 100 + Math.random() * (WORLD_SIZE - 200);
+                // Try to find a position not too close to snakes
+                let attempts = 0;
+                const maxAttempts = 20;
+                const minDistanceFromSnakes = 150; // Minimum distance from any snake
+                
+                while (attempts < maxAttempts) {
+                    x = 100 + Math.random() * (WORLD_SIZE - 200);
+                    y = 100 + Math.random() * (WORLD_SIZE - 200);
+                    
+                    // Check distance from all snakes
+                    let tooClose = false;
+                    for (const snake of snakes) {
+                        if (snake && snake.alive) {
+                            // Check distance to snake head
+                            const dist = Math.hypot(snake.x - x, snake.y - y);
+                            if (dist < minDistanceFromSnakes) {
+                                tooClose = true;
+                                break;
+                            }
+                            
+                            // Also check first few segments
+                            for (let i = 0; i < Math.min(5, snake.segments.length); i++) {
+                                const segment = snake.segments[i];
+                                const segDist = Math.hypot(segment.x - x, segment.y - y);
+                                if (segDist < minDistanceFromSnakes) {
+                                    tooClose = true;
+                                    break;
+                                }
+                            }
+                            
+                            if (tooClose) break;
+                        }
+                    }
+                    
+                    if (!tooClose) {
+                        break; // Found a good position
+                    }
+                    
+                    attempts++;
+                }
+                
+                // If we couldn't find a good position after max attempts, use the last one
+                if (attempts >= maxAttempts) {
+                    console.log('Could not find element spawn position far from snakes after', maxAttempts, 'attempts');
+                }
             }
             
             elementPool.spawn(type, x, y);
@@ -4912,6 +5210,32 @@
         function updateUI() {
             if (!playerSnake) return;
             
+            // Handle dead player with respawn timer
+            if (!playerSnake.alive && playerRespawnTimer > 0) {
+                const respawnSeconds = Math.ceil(playerRespawnTimer / 1000);
+                
+                // Show respawn overlay
+                const respawnOverlay = document.getElementById('respawnOverlay');
+                if (respawnOverlay) {
+                    respawnOverlay.style.display = 'block';
+                    
+                    // Update respawn stats
+                    document.getElementById('respawnScore').textContent = Math.floor(playerSnake.score).toLocaleString();
+                    document.getElementById('respawnDiscoveries').textContent = playerSnake.discoveries;
+                    document.getElementById('respawnRank').textContent = '#' + (bestRank || 1);
+                    document.getElementById('respawnKills').textContent = playerSnake.kills;
+                    document.getElementById('respawnTimer').textContent = respawnSeconds;
+                }
+                
+                return; // Don't update other UI elements while dead
+            } else {
+                // Hide respawn overlay when alive
+                const respawnOverlay = document.getElementById('respawnOverlay');
+                if (respawnOverlay) {
+                    respawnOverlay.style.display = 'none';
+                }
+            }
+            
             // Update player info box
             document.getElementById('playerScore').textContent = Math.floor(playerSnake.score).toLocaleString();
             
@@ -5027,10 +5351,8 @@
                             // Remove collected power-up
                             alchemyVisionPowerUps.splice(i, 1);
                             
-                            // Play collection sound if available
-                            if (window.eatSound) {
-                                window.eatSound.play().catch(() => {});
-                            }
+                            // Play alchemy vision sound (always player since only player can collect)
+                            playAlchemyVisionSound(true);
                             
                             // Show notification
                             showMessage('🔮 Alchemy Vision Activated! 30s<br><small style="opacity: 0.8">Your eyes are opened to see all combinations</small>', 'success');
@@ -5054,10 +5376,10 @@
                             // Visual feedback
                             if (snake.isPlayer) {
                                 showMessage(`🌀 Void Orb consumed! +${points} points<br><small style="opacity: 0.8">Your elements have been purged to the void</small>`, 'info');
-                                if (window.eatSound) {
-                                    window.eatSound.play().catch(() => {});
-                                }
                             }
+                            
+                            // Play sound at appropriate volume
+                            playVoidOrbSound(snake.isPlayer);
                             
                             // Create particle effect
                             for (let j = 0; j < 15; j++) {
@@ -5118,10 +5440,8 @@
                                 snake.score += 200;
                             }
                             
-                            // Visual feedback
-                            if (window.eatSound) {
-                                window.eatSound.play().catch(() => {});
-                            }
+                            // Play catalyst gem sound at appropriate volume
+                            playCatalystGemSound(snake.isPlayer);
                             
                             // Create particle effect
                             for (let j = 0; j < 20; j++) {
@@ -5146,11 +5466,20 @@
                     if (snake === otherSnake || !otherSnake.alive) continue;
                     
                     // Check head collision with other snake's body
+                    let collisionOccurred = false;
                     for (let i = 3; i < otherSnake.segments.length; i++) {
                         const segment = otherSnake.segments[i];
                         const dist = Math.hypot(segment.x - snake.x, segment.y - snake.y);
                         if (dist < SEGMENT_SIZE) {
+                            // Track collision for near-miss prevention
+                            if (snake.isPlayer) {
+                                snake.recentCollisions.add(otherSnake);
+                            }
+                            if (otherSnake.isPlayer) {
+                                otherSnake.recentCollisions.add(snake);
+                            }
                             snake.explode(otherSnake);
+                            collisionOccurred = true;
                             break;
                         }
                     }
@@ -5170,6 +5499,81 @@
                                 otherSnake.die();
                             }
                         }
+                    }
+                }
+            }
+            
+            // Near-miss detection (only for player snake, runs separately from collision)
+            if (playerSnake && playerSnake.alive) {
+                const now = Date.now();
+                
+                // Clean up old collision records
+                for (const snake of playerSnake.recentCollisions) {
+                    if (!snake.alive) {
+                        playerSnake.recentCollisions.delete(snake);
+                    }
+                }
+                
+                for (const otherSnake of snakes) {
+                    if (otherSnake === playerSnake || !otherSnake.alive) continue;
+                    
+                    // Skip if we recently collided with this snake
+                    if (playerSnake.recentCollisions.has(otherSnake)) continue;
+                    
+                    // Calculate closest distance to any part of the other snake
+                    let closestDistance = Infinity;
+                    
+                    // Check body segments
+                    for (let i = 0; i < otherSnake.segments.length; i++) {
+                        const segment = otherSnake.segments[i];
+                        const dist = Math.hypot(segment.x - playerSnake.x, segment.y - playerSnake.y);
+                        closestDistance = Math.min(closestDistance, dist);
+                    }
+                    
+                    // Check head separately
+                    const headDist = Math.hypot(otherSnake.x - playerSnake.x, otherSnake.y - playerSnake.y);
+                    closestDistance = Math.min(closestDistance, headDist);
+                    
+                    // Get previous tracking data
+                    const trackingData = playerSnake.nearMissTracking.get(otherSnake) || {
+                        wasClose: false,
+                        lastAwardTime: 0,
+                        minDistance: Infinity
+                    };
+                    
+                    // Update minimum distance seen
+                    trackingData.minDistance = Math.min(trackingData.minDistance, closestDistance);
+                    
+                    // Define near-miss zone
+                    const isClose = closestDistance <= SEGMENT_SIZE + 30; // Within 45 pixels
+                    const isSafe = closestDistance > SEGMENT_SIZE + 10; // At least 25 pixels away (no collision)
+                    
+                    // Detect near miss: was close, now moving away, and didn't collide
+                    if (trackingData.wasClose && !isClose && isSafe && 
+                        trackingData.minDistance > SEGMENT_SIZE && // Never got closer than collision distance
+                        trackingData.minDistance <= SEGMENT_SIZE + 20 && // But got pretty close
+                        now - trackingData.lastAwardTime > 3000) { // 3 second cooldown per snake
+                        
+                        // Award near miss points
+                        playerSnake.score += 50;
+                        showMessage('Phew, Near Miss! +50', 'info');
+                        trackingData.lastAwardTime = now;
+                        trackingData.minDistance = Infinity; // Reset for next near miss
+                    }
+                    
+                    // Update tracking state
+                    trackingData.wasClose = isClose;
+                    if (!isClose) {
+                        trackingData.minDistance = Infinity; // Reset when we move away
+                    }
+                    
+                    playerSnake.nearMissTracking.set(otherSnake, trackingData);
+                }
+                
+                // Clean up tracking for dead snakes
+                for (const [snake, data] of playerSnake.nearMissTracking) {
+                    if (!snake.alive) {
+                        playerSnake.nearMissTracking.delete(snake);
                     }
                 }
             }
@@ -5226,14 +5630,14 @@
             }
             
             // Draw world borders with nebula effect
-            const borderThickness = 50; // Increased for gradient effect
+            const borderThickness = 80; // Increased for better visibility
             const leftBorder = -camera.x + canvas.width / 2;
             const rightBorder = WORLD_SIZE - camera.x + canvas.width / 2;
             const topBorder = -camera.y + canvas.height / 2;
             const bottomBorder = WORLD_SIZE - camera.y + canvas.height / 2;
             
-            // Pulsating glow intensity
-            const glowIntensity = 0.7 + Math.sin(animationTime * 2) * 0.3;
+            // Pulsating glow intensity (increased base intensity)
+            const glowIntensity = 0.9 + Math.sin(animationTime * 2) * 0.1;
             
             // Create nebula gradient function
             function createNebulaGradient(x0, y0, x1, y1) {
@@ -5251,11 +5655,19 @@
                 ctx.fillStyle = createNebulaGradient(0, 0, borderWidth, 0);
                 ctx.fillRect(0, 0, borderWidth, canvas.height);
                 
-                // Add danger glow
+                // Add solid danger line
                 ctx.save();
-                ctx.shadowBlur = 20 * glowIntensity;
-                ctx.shadowColor = 'rgba(255, 0, 0, 0.5)';
-                ctx.strokeStyle = `rgba(255, 0, 0, ${glowIntensity * 0.3})`;
+                ctx.shadowBlur = 30;
+                ctx.shadowColor = 'rgba(255, 0, 0, 0.8)';
+                ctx.strokeStyle = `rgba(255, 100, 100, ${glowIntensity})`;
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.moveTo(Math.max(10, leftBorder), 0);
+                ctx.lineTo(Math.max(10, leftBorder), canvas.height);
+                ctx.stroke();
+                
+                // Add inner danger line
+                ctx.strokeStyle = `rgba(255, 200, 200, ${glowIntensity * 0.5})`;
                 ctx.lineWidth = 2;
                 ctx.beginPath();
                 ctx.moveTo(Math.max(10, leftBorder), 0);
@@ -5269,11 +5681,19 @@
                 ctx.fillStyle = createNebulaGradient(canvas.width, 0, rightBorder, 0);
                 ctx.fillRect(rightBorder, 0, canvas.width - rightBorder, canvas.height);
                 
-                // Add danger glow
+                // Add solid danger line
                 ctx.save();
-                ctx.shadowBlur = 20 * glowIntensity;
-                ctx.shadowColor = 'rgba(255, 0, 0, 0.5)';
-                ctx.strokeStyle = `rgba(255, 0, 0, ${glowIntensity * 0.3})`;
+                ctx.shadowBlur = 30;
+                ctx.shadowColor = 'rgba(255, 0, 0, 0.8)';
+                ctx.strokeStyle = `rgba(255, 100, 100, ${glowIntensity})`;
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.moveTo(rightBorder, 0);
+                ctx.lineTo(rightBorder, canvas.height);
+                ctx.stroke();
+                
+                // Add inner danger line
+                ctx.strokeStyle = `rgba(255, 200, 200, ${glowIntensity * 0.5})`;
                 ctx.lineWidth = 2;
                 ctx.beginPath();
                 ctx.moveTo(rightBorder, 0);
@@ -5288,11 +5708,19 @@
                 ctx.fillStyle = createNebulaGradient(0, 0, 0, borderHeight);
                 ctx.fillRect(0, 0, canvas.width, borderHeight);
                 
-                // Add danger glow
+                // Add solid danger line
                 ctx.save();
-                ctx.shadowBlur = 20 * glowIntensity;
-                ctx.shadowColor = 'rgba(255, 0, 0, 0.5)';
-                ctx.strokeStyle = `rgba(255, 0, 0, ${glowIntensity * 0.3})`;
+                ctx.shadowBlur = 30;
+                ctx.shadowColor = 'rgba(255, 0, 0, 0.8)';
+                ctx.strokeStyle = `rgba(255, 100, 100, ${glowIntensity})`;
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.moveTo(0, Math.max(10, topBorder));
+                ctx.lineTo(canvas.width, Math.max(10, topBorder));
+                ctx.stroke();
+                
+                // Add inner danger line
+                ctx.strokeStyle = `rgba(255, 200, 200, ${glowIntensity * 0.5})`;
                 ctx.lineWidth = 2;
                 ctx.beginPath();
                 ctx.moveTo(0, Math.max(10, topBorder));
@@ -5306,11 +5734,19 @@
                 ctx.fillStyle = createNebulaGradient(0, canvas.height, 0, bottomBorder);
                 ctx.fillRect(0, bottomBorder, canvas.width, canvas.height - bottomBorder);
                 
-                // Add danger glow
+                // Add solid danger line
                 ctx.save();
-                ctx.shadowBlur = 20 * glowIntensity;
-                ctx.shadowColor = 'rgba(255, 0, 0, 0.5)';
-                ctx.strokeStyle = `rgba(255, 0, 0, ${glowIntensity * 0.3})`;
+                ctx.shadowBlur = 30;
+                ctx.shadowColor = 'rgba(255, 0, 0, 0.8)';
+                ctx.strokeStyle = `rgba(255, 100, 100, ${glowIntensity})`;
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.moveTo(0, bottomBorder);
+                ctx.lineTo(canvas.width, bottomBorder);
+                ctx.stroke();
+                
+                // Add inner danger line
+                ctx.strokeStyle = `rgba(255, 200, 200, ${glowIntensity * 0.5})`;
                 ctx.lineWidth = 2;
                 ctx.beginPath();
                 ctx.moveTo(0, bottomBorder);
@@ -5387,6 +5823,18 @@
         }
         
         function startGame() {
+            // Cancel any existing game loop
+            if (animationFrameId !== null) {
+                cancelAnimationFrame(animationFrameId);
+                animationFrameId = null;
+            }
+            
+            // Prevent multiple game instances
+            if (gameStarted) {
+                console.log('Game already running, ignoring start request');
+                return;
+            }
+            
             // Clear all game state to ensure fresh start
             snakes = [];
             elements = [];
@@ -5429,8 +5877,10 @@
             gameStartTime = Date.now();
             
             // Create player snake
+            console.log('[GAME START] Creating player snake...');
             playerSnake = new Snake(WORLD_SIZE / 2, WORLD_SIZE / 2, true);
             snakes.push(playerSnake);
+            console.log('[GAME START] Player snake created. Total snakes:', snakes.length);
             
             // Create AI snakes
             for (let i = 0; i < MAX_AI_SNAKES; i++) {
@@ -5438,6 +5888,7 @@
                 const y = 200 + Math.random() * (WORLD_SIZE - 400);
                 snakes.push(new Snake(x, y, false));
             }
+            console.log('[GAME START] AI snakes created. Total snakes:', snakes.length);
             
             
             // Spawn initial elements
@@ -5448,6 +5899,7 @@
             // Initialize music and sound effects
             initMusic();
             initSoundEffects();
+            initPowerUpSounds();
             
             // Update discovery log
             updateDiscoveryLog();
@@ -5459,6 +5911,39 @@
             initializeStaticStars();
             
             gameLoop();
+        }
+        
+        function stopGame() {
+            console.log('[STOP GAME] Stopping game...');
+            
+            // Cancel the game loop
+            if (animationFrameId !== null) {
+                cancelAnimationFrame(animationFrameId);
+                animationFrameId = null;
+            }
+            
+            // Reset game state
+            gameStarted = false;
+            paused = false;
+            
+            // Clear ALL game objects
+            console.log('[STOP GAME] Clearing snakes:', snakes.length, 'Player snakes:', snakes.filter(s => s.isPlayer).length);
+            snakes = [];
+            playerSnake = null;
+            elements = [];
+            particles = [];
+            voidOrbs = [];
+            catalystGems = [];
+            alchemyVisionPowerUps = [];
+            aiRespawnQueue = [];
+            usedAISkins.clear();
+            comboStreak = 0;
+            playerRespawnTimer = 0;
+            
+            // Clear the canvas to prevent solid color issue
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            console.log('[STOP GAME] Game stopped');
         }
         
         function togglePause() {
@@ -5499,6 +5984,7 @@
             paused = false;
             document.getElementById('pauseOverlay').style.display = 'none';
         }
+        
         
         // Tab switching for pause menu
         window.switchTab = function(tabName) {
@@ -5699,11 +6185,17 @@
         const MAX_UPDATES = 5; // Prevent spiral of death
         
         function gameLoop(currentTime) {
-            if (!gameStarted) return;
+            if (!gameStarted) {
+                animationFrameId = null;
+                return;
+            }
             
-            requestAnimationFrame(gameLoop);
+            animationFrameId = requestAnimationFrame(gameLoop);
             
             if (paused) return;
+            
+            // Don't render if canvas is not visible
+            if (canvas.style.opacity === '0') return;
             
             // Initialize lastTime on first frame
             if (lastTime === 0) {
@@ -5751,7 +6243,11 @@
             let updates = 0;
             while (accumulator >= FIXED_TIMESTEP && updates < MAX_UPDATES) {
                 // Update game objects with fixed timestep (1.0 = one 60fps frame)
-                snakes.forEach(snake => snake.update(1.0));
+                snakes.forEach(snake => {
+                    if (snake.alive) {
+                        snake.update(1.0);
+                    }
+                });
                 elementPool.update(1.0);
                 particlePool.update(1.0);
                 
@@ -5770,8 +6266,8 @@
                 // Check collisions
                 checkCollisions();
                 
-                // Remove dead snakes (except the current player if they're respawning)
-                snakes = snakes.filter(snake => snake.alive || (snake.isPlayer && snake === playerSnake));
+                // Remove dead snakes
+                snakes = snakes.filter(snake => snake.alive);
                 
                 // Spawn new elements occasionally
                 if (Math.random() < 0.04 && elementPool.getActiveCount() < 150) {
@@ -5810,7 +6306,7 @@
                 }
                 
                 // Update AlchemyVision power-ups
-                alchemyVisionPowerUps.forEach(powerUp => powerUp.update());
+                alchemyVisionPowerUps.forEach(powerUp => powerUp.update(1.0));
                 
                 // Spawn Void Orbs to maintain count
                 if (voidOrbs.length < VOID_ORB_SPAWN_COUNT && Date.now() - lastVoidOrbSpawn >= VOID_ORB_SPAWN_INTERVAL / VOID_ORB_SPAWN_COUNT) {
@@ -5821,7 +6317,7 @@
                 }
                 
                 // Update Void Orbs
-                voidOrbs.forEach(orb => orb.update());
+                voidOrbs.forEach(orb => orb.update(1.0));
                 
                 // Spawn Catalyst Gems to maintain count (more spread out)
                 if (catalystGems.length < CATALYST_GEM_SPAWN_COUNT && Date.now() - lastCatalystGemSpawn >= CATALYST_GEM_SPAWN_INTERVAL / CATALYST_GEM_SPAWN_COUNT) {
@@ -5837,7 +6333,7 @@
                 }
                 
                 // Update Catalyst Gems
-                catalystGems.forEach(gem => gem.update());
+                catalystGems.forEach(gem => gem.update(1.0));
                 
                 accumulator -= FIXED_TIMESTEP;
                 updates++;
@@ -5863,6 +6359,69 @@
                 const deadAICount = MAX_AI_SNAKES - aiSnakes - aiRespawnQueue.length;
                 for (let i = 0; i < deadAICount; i++) {
                     aiRespawnQueue.push(currentTime + AI_RESPAWN_COOLDOWN);
+                }
+            }
+            
+            // Handle player respawn
+            if (playerSnake && !playerSnake.alive) {
+                if (playerRespawnTimer <= 0) {
+                    // Start respawn timer
+                    playerRespawnTimer = 3000; // 3 seconds
+                    comboStreak = 0; // Reset combo streak on death
+                }
+                
+                // Update respawn timer
+                playerRespawnTimer -= frameTime;
+                
+                if (playerRespawnTimer <= 0) {
+                    // Store previous score before creating new snake
+                    const previousScore = playerSnake.score;
+                    const previousCapacity = playerSnake.elementCapacity;
+                    const previousDiscoveries = playerSnake.discoveries;
+                    const previousKills = playerSnake.kills;
+                    
+                    // Debug logging
+                    console.log('[RESPAWN] Player died, respawning...');
+                    console.log('[RESPAWN] Snakes before cleanup:', snakes.length, 'Player snakes:', snakes.filter(s => s.isPlayer).length);
+                    
+                    // Remove ALL player snakes from array (in case of duplicates)
+                    const oldPlayerCount = snakes.filter(snake => snake.isPlayer).length;
+                    snakes = snakes.filter(snake => !snake.isPlayer);
+                    
+                    // Double check that playerSnake is cleared
+                    if (snakes.some(s => s.isPlayer)) {
+                        console.error('[RESPAWN] ERROR: Player snake still exists after cleanup!');
+                        snakes = snakes.filter(snake => !snake.isPlayer);
+                    }
+                    
+                    console.log('[RESPAWN] Removed', oldPlayerCount, 'player snake(s)');
+                    console.log('[RESPAWN] Snakes after cleanup:', snakes.length);
+                    
+                    // Respawn player at center
+                    playerSnake = new Snake(WORLD_SIZE / 2, WORLD_SIZE / 2, true);
+                    
+                    // Keep only 25% of score (75% penalty reduction from 50%)
+                    playerSnake.score = Math.floor(previousScore * 0.25);
+                    
+                    // Restore some game state
+                    playerSnake.elementCapacity = Math.max(4, Math.floor(previousCapacity * 0.5));
+                    playerSnake.discoveries = Math.floor(previousDiscoveries * 0.5);
+                    playerSnake.kills = Math.floor(previousKills * 0.5);
+                    
+                    // Grant 3 seconds of invincibility on respawn
+                    playerSnake.invincibilityTimer = 3000;
+                    
+                    // Add back to snakes array
+                    snakes.push(playerSnake);
+                    
+                    console.log('[RESPAWN] New player snake created. Total snakes:', snakes.length, 'Player snakes:', snakes.filter(s => s.isPlayer).length);
+                    
+                    // Set camera to new player position to prevent jumping
+                    camera.x = WORLD_SIZE / 2;
+                    camera.y = WORLD_SIZE / 2;
+                    
+                    // Reset respawn timer
+                    playerRespawnTimer = 0;
                 }
             }
             
@@ -5895,6 +6454,11 @@
                 // Additional check for NaN or Infinity
                 if (!isFinite(camera.x)) camera.x = WORLD_SIZE / 2;
                 if (!isFinite(camera.y)) camera.y = WORLD_SIZE / 2;
+            } else if (playerSnake && !playerSnake.alive) {
+                // Keep camera at last known position when player is dead
+                // This prevents camera jumping during respawn
+                if (!isFinite(camera.x)) camera.x = WORLD_SIZE / 2;
+                if (!isFinite(camera.y)) camera.y = WORLD_SIZE / 2;
             }
             
             // Draw everything
@@ -5925,7 +6489,11 @@
             });
             
             // Draw snakes (they already have internal viewport culling)
-            snakes.forEach(snake => snake.draw(interpolation));
+            snakes.forEach(snake => {
+                if (snake.alive) {
+                    snake.draw(interpolation);
+                }
+            });
             
             // Draw particles (particle pool handles viewport culling)
             particlePool.draw();
