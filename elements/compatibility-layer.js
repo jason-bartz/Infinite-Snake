@@ -1,205 +1,221 @@
 /**
- * Compatibility Layer
- * Bridges the new element system with the existing game code
+ * Compatibility Layer - Converts new element system to legacy format
+ * Maintains backward compatibility with existing game code
  */
 
 class ElementCompatibilityLayer {
-    constructor(elementLoader) {
-        this.loader = elementLoader;
-        this.legacyCache = null;
+  constructor() {
+    this.legacyCache = {
+      elements: {},
+      combinations: {}
+    };
+    this.initialized = false;
+  }
+
+  async init() {
+    if (this.initialized) return;
+    
+    console.log('🔄 Initializing Compatibility Layer...');
+    
+    try {
+      // Wait for element loader to be ready
+      if (!window.elementLoader || !window.elementLoader.isLoaded()) {
+        await new Promise((resolve) => {
+          window.addEventListener('elementLoaderReady', resolve, { once: true });
+        });
+      }
+      
+      // Build legacy format cache
+      this.buildLegacyCache();
+      
+      this.initialized = true;
+      console.log('✅ Compatibility Layer initialized');
+      
+      // Dispatch event for game
+      window.dispatchEvent(new CustomEvent('compatibilityLayerReady'));
+      
+    } catch (error) {
+      console.error('❌ Failed to initialize Compatibility Layer:', error);
+      throw error;
     }
+  }
 
-    /**
-     * Initialize compatibility layer
-     */
-    async init() {
-        if (!this.loader.loaded) {
-            await this.loader.init();
-        }
-        
-        // Create legacy format cache
-        this.legacyCache = this.loader.toLegacyFormat();
-        
-        // Override global elements if they exist
-        if (typeof window !== 'undefined') {
-            this.installGlobalHooks();
-        }
+  buildLegacyCache() {
+    const loader = window.elementLoader;
+    
+    // Convert elements to legacy format
+    const elementsMap = loader.getElementsMap();
+    for (const [key, element] of Object.entries(elementsMap)) {
+      this.legacyCache.elements[key] = {
+        emoji: element.emoji,
+        name: element.name,
+        tier: element.tier,
+        base: element.tier === 0,
+        id: element.id
+      };
     }
+    
+    // Convert combinations to legacy format
+    this.legacyCache.combinations = loader.getCombinationsMap();
+    
+    console.log(`Legacy cache built: ${Object.keys(this.legacyCache.elements).length} elements, ${Object.keys(this.legacyCache.combinations).length} combinations`);
+  }
 
-    /**
-     * Install global hooks for backward compatibility
-     */
-    installGlobalHooks() {
-        const self = this;
-        
-        // If there's a global elements object, replace it
-        if (window.elements) {
-            console.log('Replacing global elements with compatibility layer');
-            
-            // Create proxy for elements
-            window.elements = new Proxy({}, {
-                get(target, prop) {
-                    if (prop === 'version') return self.legacyCache.version;
-                    if (prop === 'elements') return self.legacyCache.elements;
-                    if (prop === 'combinations') return self.legacyCache.combinations;
-                    
-                    // Direct element access
-                    const element = self.loader.getElementByKey(prop);
-                    if (element) {
-                        return {
-                            emoji: element.emoji,
-                            name: element.name,
-                            tier: element.tier,
-                            discovered: element.discovered,
-                            base: element.base || false
-                        };
-                    }
-                    
-                    return undefined;
-                }
-            });
-        }
+  // Legacy interface methods
+  getElement(key) {
+    return this.legacyCache.elements[key];
+  }
 
-        // Hook into game functions if they exist
-        this.hookGameFunctions();
+  getCombination(keyA, keyB) {
+    const combo1 = `${keyA}+${keyB}`;
+    const combo2 = `${keyB}+${keyA}`;
+    return this.legacyCache.combinations[combo1] || this.legacyCache.combinations[combo2];
+  }
+
+  getAllElements() {
+    return this.legacyCache.elements;
+  }
+
+  getAllCombinations() {
+    return this.legacyCache.combinations;
+  }
+
+  // Discovery tracking methods
+  getDiscoveredElements() {
+    // Return base elements by default
+    return new Set(['fire', 'water', 'earth', 'air']);
+  }
+
+  markDiscovered(elementKey) {
+    // In the new system, this would be handled by DiscoveryTracker
+    console.log(`Element discovered: ${elementKey}`);
+  }
+
+  // Load discovered elements from storage (compatibility method)
+  loadDiscoveredElements() {
+    try {
+      const saved = localStorage.getItem('discoveredElements');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        console.log(`Loaded ${Object.keys(parsed).length} discovered elements from storage`);
+        return parsed;
+      }
+    } catch (error) {
+      console.warn('Could not load discovered elements:', error);
     }
+    
+    // Return base elements if no save data
+    return {
+      fire: true,
+      water: true,
+      earth: true,
+      air: true
+    };
+  }
 
-    /**
-     * Hook into existing game functions
-     */
-    hookGameFunctions() {
-        // Hook checkCombination if it exists
-        if (typeof window.checkCombination === 'function') {
-            const originalCheckCombination = window.checkCombination;
-            window.checkCombination = (elem1, elem2) => {
-                // Try new system first
-                const result = this.loader.getCombinationByKeys(elem1, elem2);
-                if (result) {
-                    return result.key;
-                }
-                
-                // Fall back to original
-                return originalCheckCombination(elem1, elem2);
-            };
-        }
-
-        // Hook discoverElement if it exists
-        if (typeof window.discoverElement === 'function') {
-            const originalDiscoverElement = window.discoverElement;
-            window.discoverElement = (elementKey) => {
-                // Update new system
-                const element = this.loader.getElementByKey(elementKey);
-                if (element) {
-                    this.loader.discoverElement(element.id);
-                    
-                    // Update legacy cache
-                    if (this.legacyCache.elements[elementKey]) {
-                        this.legacyCache.elements[elementKey].discovered = true;
-                    }
-                }
-                
-                // Call original
-                return originalDiscoverElement(elementKey);
-            };
-        }
-
-        // Hook getDiscoveredElements if it exists
-        if (typeof window.getDiscoveredElements === 'function') {
-            window.getDiscoveredElements = () => {
-                return this.loader.getDiscoveredElements().map(elem => elem.key);
-            };
-        }
+  // Save discovered elements to storage (compatibility method)
+  saveDiscoveredElements(discoveredElements) {
+    try {
+      localStorage.setItem('discoveredElements', JSON.stringify(discoveredElements));
+      console.log(`Saved ${Object.keys(discoveredElements).length} discovered elements`);
+    } catch (error) {
+      console.warn('Could not save discovered elements:', error);
     }
+  }
 
-    /**
-     * Get element data in legacy format
-     */
-    getElementLegacy(key) {
-        const element = this.loader.getElementByKey(key);
-        if (!element) return null;
-        
-        return {
-            emoji: element.emoji,
-            name: element.name,
-            tier: element.tier,
-            discovered: element.discovered,
-            base: element.base || false
-        };
+  // Stats and utility methods
+  getElementCount() {
+    return Object.keys(this.legacyCache.elements).length;
+  }
+
+  getCombinationCount() {
+    return Object.keys(this.legacyCache.combinations).length;
+  }
+
+  isInitialized() {
+    return this.initialized;
+  }
+
+  // Search functionality
+  searchElements(query) {
+    const results = [];
+    const queryLower = query.toLowerCase();
+    
+    for (const [key, element] of Object.entries(this.legacyCache.elements)) {
+      if (element.name.toLowerCase().includes(queryLower)) {
+        results.push({ key, ...element });
+      }
     }
+    
+    return results.slice(0, 10); // Limit results
+  }
 
-    /**
-     * Check combination in legacy format
-     */
-    checkCombinationLegacy(key1, key2) {
-        const result = this.loader.getCombinationByKeys(key1, key2);
-        return result ? result.key : null;
+  // Convert element key to display format
+  formatElementName(key) {
+    const element = this.getElement(key);
+    return element ? element.name : key.charAt(0).toUpperCase() + key.slice(1);
+  }
+
+  // Get element emoji
+  getElementEmoji(key) {
+    const element = this.getElement(key);
+    return element ? element.emoji : '❓';
+  }
+
+  // Tier information
+  getElementTier(key) {
+    const element = this.getElement(key);
+    return element ? element.tier : 0;
+  }
+
+  // Get elements by tier
+  getElementsByTier(tier) {
+    const results = [];
+    for (const [key, element] of Object.entries(this.legacyCache.elements)) {
+      if (element.tier === tier) {
+        results.push({ key, ...element });
+      }
     }
+    return results;
+  }
 
-    /**
-     * Get all combinations in legacy format
-     */
-    getCombinationsLegacy() {
-        const combinations = {};
-        
-        for (const [key, resultId] of this.loader.combinations.entries()) {
-            const [id1, id2] = key.split(',').map(Number);
-            const elem1 = this.loader.getElementById(id1);
-            const elem2 = this.loader.getElementById(id2);
-            const result = this.loader.getElementById(resultId);
-            
-            if (elem1 && elem2 && result) {
-                combinations[`${elem1.key}+${elem2.key}`] = result.key;
-            }
-        }
-        
-        return combinations;
+  // Base elements check
+  isBaseElement(key) {
+    return ['fire', 'water', 'earth', 'air'].includes(key);
+  }
+
+  // Get all possible combinations for an element
+  getCombinationsFor(elementKey) {
+    const combinations = [];
+    
+    for (const [combo, result] of Object.entries(this.legacyCache.combinations)) {
+      if (result === elementKey && combo.includes('+')) {
+        const [a, b] = combo.split('+');
+        combinations.push({ a, b, result });
+      }
     }
+    
+    return combinations;
+  }
 
-    /**
-     * Save discovered elements (integrate with existing save system)
-     */
-    saveDiscoveredElements() {
-        const discovered = this.loader.getDiscoveredElements().map(elem => elem.key);
-        
-        // Try to use existing save mechanism
-        if (typeof window.saveDiscoveredElements === 'function') {
-            window.saveDiscoveredElements(discovered);
-        } else {
-            // Fallback to localStorage
-            localStorage.setItem('discoveredElements', JSON.stringify(discovered));
-        }
+  // Refresh cache (for dynamic updates)
+  refreshCache() {
+    if (window.elementLoader && window.elementLoader.isLoaded()) {
+      this.buildLegacyCache();
+      console.log('🔄 Legacy cache refreshed');
     }
-
-    /**
-     * Load discovered elements
-     */
-    loadDiscoveredElements() {
-        let discovered = [];
-        
-        // Try to use existing load mechanism
-        if (typeof window.loadDiscoveredElements === 'function') {
-            discovered = window.loadDiscoveredElements();
-        } else {
-            // Fallback to localStorage
-            const saved = localStorage.getItem('discoveredElements');
-            if (saved) {
-                discovered = JSON.parse(saved);
-            }
-        }
-
-        // Update element states
-        for (const key of discovered) {
-            const element = this.loader.getElementByKey(key);
-            if (element) {
-                this.loader.discoverElement(element.id);
-            }
-        }
-    }
+  }
 }
 
-// Export for use
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = ElementCompatibilityLayer;
+// Create global instance
+window.elementCompatibility = new ElementCompatibilityLayer();
+
+// Auto-initialize
+if (window.elementLoader) {
+  window.elementCompatibility.init().catch(console.error);
 } else {
-    window.ElementCompatibilityLayer = ElementCompatibilityLayer;
+  // Wait for element loader
+  window.addEventListener('elementLoaderReady', () => {
+    window.elementCompatibility.init().catch(console.error);
+  }, { once: true });
 }

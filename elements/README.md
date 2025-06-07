@@ -1,104 +1,41 @@
-# Element System v2.0
+# Infinite Snake Element System
 
-A scalable, modular element system for Infinite Snake with numeric IDs and optimized lookups.
+## Active Files (DO NOT DELETE)
 
-## Structure
+### Core System Files
+- `game-loader.js` - Loads elements and combinations from JSON files
+- `element-loader.js` - Bridge between new system and game
+- `compatibility-layer.js` - Maintains backward compatibility
+- `dynamic-prefix-system.js` - Runtime prefix variants (Flaming X, Cosmic Y, etc.)
+- `integrate.js` - Orchestrates system initialization
 
-```
-elements/
-├── manifest.json              # Main registry of all element packs
-├── elements-core.json         # Core elements with numeric IDs
-├── combinations-core.json     # Core element combinations
-├── element-dependencies.json  # Dependency graph for elements
-├── element-loader.js         # Module for loading elements
-├── compatibility-layer.js    # Backward compatibility with old system
-├── integrate.js             # Integration script
-└── README.md               # This file
-```
+### Data Files
+- `elements-complete.json` - Complete element database (15,783 elements)
+- `combinations-flexible.json` - Balanced combinations (66,373 recipes)
+- `combinations-expanded.json` - Expanded combinations (49,332 recipes)
+- `combinations-massive.json` - Original combinations (44,325 recipes)
+- `manifest-complete.json` - Database metadata
 
-## Features
+### Core Directory
+Contains tier-specific element and emoji data:
+- `elements-*-repaired.json` - Elements by tier range
+- `emojis-*.json` - Emoji mappings for each tier
 
-- **Numeric IDs**: Fast integer-based lookups instead of string keys
-- **Modular Packs**: Elements organized into loadable packs
-- **Dependency Tracking**: Understand element relationships
-- **Categories**: Elements grouped by type (classical, material, weather, etc.)
-- **Backward Compatible**: Works with existing game code
+## How It Works
 
-## Integration
+1. Game loads scripts in order (see index.html)
+2. `integrate.js` coordinates initialization
+3. `game-loader.js` loads JSON data
+4. `element-loader.js` provides game interface
+5. `compatibility-layer.js` maintains legacy format
+6. `dynamic-prefix-system.js` creates runtime variants
 
-### Quick Integration
+## Archive Directory
 
-Add these scripts to your HTML file before the game scripts:
+The `archive-old-system` directory contains the previous element system for reference only.
 
-```html
-<!-- New Element System -->
-<script src="elements/element-loader.js"></script>
-<script src="elements/compatibility-layer.js"></script>
-<script src="elements/integrate.js"></script>
-```
-
-### Manual Integration
-
-```javascript
-// Initialize the element system
-const loader = new ElementLoader();
-await loader.init();
-
-// Get element by ID (fast)
-const fire = loader.getElementById(1);
-
-// Get element by key (backward compatibility)
-const water = loader.getElementByKey('water');
-
-// Check combination
-const result = loader.getCombination(1, 2); // fire + water
-```
-
-## Data Format
-
-### Element Structure
-```json
-{
-  "1": {
-    "id": 1,
-    "key": "fire",
-    "emoji": "🔥",
-    "name": "Fire",
-    "tier": 0,
-    "discovered": true,
-    "base": true,
-    "category": "classical"
-  }
-}
-```
-
-### Combination Structure
-```json
-{
-  "elements": [1, 2],
-  "result": 5,
-  "description": "fire + water = steam"
-}
-```
-
-## Adding New Elements
-
-1. Add element to `elements-core.json` with unique ID
-2. Add combinations to `combinations-core.json`
-3. Update `element-dependencies.json`
-4. Update manifest metadata
-
-## Performance
-
-- Numeric IDs: ~10x faster lookups
-- Indexed combinations: O(1) lookup time
-- Lazy loading support for large element sets
-- Optimized memory usage with shared references
-
-## Migration from v1
-
-The compatibility layer automatically handles:
-- Legacy string-based lookups
-- Old combination format ("fire+water")
-- Existing save data
-- Game function hooks
+## Stats
+- **Total Elements**: 15,783
+- **Total Combinations**: 44,325
+- **Dynamic Variants**: Unlimited (via prefix system)
+- **Memory Usage**: <2MB

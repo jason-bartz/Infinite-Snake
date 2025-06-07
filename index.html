@@ -484,7 +484,7 @@
         }
         
         #discoveries {
-            display: none; /* Hidden - discoveries shown in sidebar */
+            display: none; /* Hidden - discoveries shown elsewhere */
         }
         
         /* Bottom UI Bar (MMO-style) */
@@ -1777,8 +1777,10 @@
         }
     </style>
     <!-- New Element System Scripts -->
+    <script src="elements/game-loader.js"></script>
     <script src="elements/element-loader.js"></script>
     <script src="elements/compatibility-layer.js"></script>
+    <script src="elements/dynamic-prefix-system.js"></script>
     <script src="elements/integrate.js"></script>
 </head>
 <body>
@@ -4110,10 +4112,20 @@
                 this.type = type;
                 this.x = x;
                 this.y = y;
-                this.data = elementDatabase[type];
-                // Fallback if element not found
+                
+                // Try new element system first
+                if (window.elementLoader && window.elementLoader.isLoaded && window.elementLoader.isLoaded()) {
+                    this.data = window.elementLoader.getElementByKey(type);
+                }
+                
+                // Fallback to old system
                 if (!this.data) {
-                    console.warn(`Element type "${type}" not found in database`);
+                    this.data = elementDatabase[type];
+                }
+                
+                // Final fallback if element not found
+                if (!this.data) {
+                    console.warn(`Element type "${type}" not found in any database`);
                     this.data = { emoji: '❓', name: 'Unknown', tier: 0 };
                 }
                 this.pulse = 0;
@@ -4774,8 +4786,8 @@
         // Helper functions
         function spawnElement(type = null, x = null, y = null) {
             if (!type) {
-                // Use tier-based spawning if new system is available
-                if (window.elementLoader) {
+                // Use tier-based spawning if new system is available and loaded
+                if (window.elementLoader && window.elementLoader.isLoaded && window.elementLoader.isLoaded()) {
                     const rand = Math.random();
                     let selectedElement;
                     
@@ -4784,30 +4796,26 @@
                         const tier0Elements = window.elementLoader.getElementsByTier(0);
                         selectedElement = tier0Elements[Math.floor(Math.random() * tier0Elements.length)];
                     } else if (rand < 0.9) {
-                        // 20% chance for tier 1 elements
+                        // 20% chance for tier 1 elements (ONLY if discovered)
                         const tier1Elements = window.elementLoader.getElementsByTier(1);
-                        if (tier1Elements.length > 0) {
-                            selectedElement = tier1Elements[Math.floor(Math.random() * tier1Elements.length)];
+                        const discoveredTier1 = tier1Elements.filter(e => discoveredElements.has(e.key));
+                        if (discoveredTier1.length > 0) {
+                            selectedElement = discoveredTier1[Math.floor(Math.random() * discoveredTier1.length)];
                         } else {
                             // Fallback to tier 0
                             const tier0Elements = window.elementLoader.getElementsByTier(0);
                             selectedElement = tier0Elements[Math.floor(Math.random() * tier0Elements.length)];
                         }
                     } else {
-                        // 10% chance for tier 2+ elements (if discovered)
+                        // 10% chance for tier 2+ elements (ONLY if discovered)
                         const allElements = window.elementLoader.getAllElements();
                         const higherTierElements = allElements.filter(e => e.tier >= 2 && discoveredElements.has(e.key));
                         if (higherTierElements.length > 0) {
                             selectedElement = higherTierElements[Math.floor(Math.random() * higherTierElements.length)];
                         } else {
-                            // Fallback to tier 1 or 0
-                            const tier1Elements = window.elementLoader.getElementsByTier(1);
-                            if (tier1Elements.length > 0) {
-                                selectedElement = tier1Elements[Math.floor(Math.random() * tier1Elements.length)];
-                            } else {
-                                const tier0Elements = window.elementLoader.getElementsByTier(0);
-                                selectedElement = tier0Elements[Math.floor(Math.random() * tier0Elements.length)];
-                            }
+                            // Fallback to tier 0 only (don't spawn undiscovered tier 1)
+                            const tier0Elements = window.elementLoader.getElementsByTier(0);
+                            selectedElement = tier0Elements[Math.floor(Math.random() * tier0Elements.length)];
                         }
                     }
                     
@@ -5866,10 +5874,29 @@
             lastVoidOrbSpawn = Date.now();
             lastCatalystGemSpawn = Date.now();
             
-            // Clear discovery feed
+            // Initialize discovery feed with base elements
             const discoveryFeed = document.getElementById('discoveryFeed');
             if (discoveryFeed) {
                 discoveryFeed.innerHTML = '';
+                // Add base elements to discovery feed
+                const baseElements = ['fire', 'water', 'earth', 'air'];
+                baseElements.forEach(elementKey => {
+                    let elementData = null;
+                    
+                    // Try new system first
+                    if (window.elementLoader && window.elementLoader.isLoaded && window.elementLoader.isLoaded()) {
+                        elementData = window.elementLoader.getElementByKey(elementKey);
+                    }
+                    
+                    // Fallback to old system
+                    if (!elementData) {
+                        elementData = elementDatabase[elementKey];
+                    }
+                    
+                    if (elementData) {
+                        addDiscoveryToFeed(elementData, 'Starting element');
+                    }
+                });
             }
             
             // Start fresh game
@@ -5891,9 +5918,12 @@
             console.log('[GAME START] AI snakes created. Total snakes:', snakes.length);
             
             
-            // Spawn initial elements
-            for (let i = 0; i < 50; i++) {
-                spawnElement();
+            // Spawn initial elements - ONLY base elements at game start
+            const baseElements = ['fire', 'water', 'earth', 'air'];
+            for (let i = 0; i < 60; i++) {
+                // Spawn only base elements, distributed evenly
+                const elementType = baseElements[i % 4];
+                spawnElement(elementType);
             }
             
             // Initialize music and sound effects
