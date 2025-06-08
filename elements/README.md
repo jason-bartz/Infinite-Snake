@@ -11,9 +11,11 @@
 
 ### Data Files
 - `elements-complete.json` - Complete element database (15,783 elements)
-- `combinations-flexible.json` - Balanced combinations (66,373 recipes)
-- `combinations-expanded.json` - Expanded combinations (49,332 recipes)
-- `combinations-massive.json` - Original combinations (44,325 recipes)
+- `combinations-logical-complete.json` - Logical combinations (20,483 recipes)
+  - Fire + Water = Steam (not Rain!)
+  - Proper evolution chains (bacteria → algae → plants → trees)
+  - Technology progression (stone → tools → machines → factories)
+  - Advanced concepts only at high tiers
 - `manifest-complete.json` - Database metadata
 
 ### Core Directory

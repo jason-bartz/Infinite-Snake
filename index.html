@@ -86,7 +86,7 @@
                 "name": "How do I play Infinite Snake?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Use your mouse or touchpad to guide your snake on desktop, or touch controls on mobile. Collect elemental orbs and combine them in your snake's body to discover new elements. Avoid collisions with other snakes and borders while growing larger."
+                    "text": "Use your mouse, arrow keys, or WASD to control your snake on desktop, or touch controls on mobile. Collect elemental orbs and combine them in your snake's body to discover new elements. Avoid collisions with other snakes and borders while growing larger."
                 }
             },
             {
@@ -403,9 +403,9 @@
             z-index: 1;
         }
         
-        /* Discovery Sidebar */
+        /* Discovery Sidebar - Hidden (using discovery feed instead) */
         #discoveryLog {
-            display: none; /* Hidden - replaced by discovery feed */
+            display: none;
         }
         
         #discoveryLog h3 {
@@ -564,6 +564,154 @@
         @keyframes tailPulse {
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.05); }
+        }
+        
+        /* Combination animation styles */
+        @keyframes combinationGlow {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 20px rgba(255, 215, 0, 0.5),
+                           inset 0 0 10px rgba(255, 215, 0, 0.2);
+            }
+            25% {
+                transform: scale(1.1);
+                box-shadow: 0 0 30px rgba(255, 100, 255, 0.8),
+                           inset 0 0 20px rgba(255, 100, 255, 0.4);
+            }
+            50% {
+                transform: scale(1.15);
+                box-shadow: 0 0 40px rgba(100, 200, 255, 1),
+                           inset 0 0 30px rgba(100, 200, 255, 0.6);
+            }
+            75% {
+                transform: scale(1.1);
+                box-shadow: 0 0 30px rgba(255, 100, 255, 0.8),
+                           inset 0 0 20px rgba(255, 100, 255, 0.4);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 20px rgba(255, 215, 0, 0.5),
+                           inset 0 0 10px rgba(255, 215, 0, 0.2);
+            }
+        }
+        
+        .element-slot.combining {
+            animation: combinationGlow 0.6s ease-in-out;
+            border-color: #FFD700;
+            background: linear-gradient(135deg, 
+                rgba(255, 100, 255, 0.3) 0%,
+                rgba(100, 200, 255, 0.2) 100%
+            );
+        }
+        
+        @keyframes elementMerge {
+            0% {
+                opacity: 1;
+                transform: scale(1) translateX(0);
+            }
+            50% {
+                opacity: 0.8;
+                transform: scale(0.8) translateX(-10px);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0.5) translateX(-20px);
+            }
+        }
+        
+        .element-slot.merging {
+            animation: elementMerge 0.5s ease-out forwards;
+        }
+        
+        @keyframes newElementAppear {
+            0% {
+                opacity: 0;
+                transform: scale(0) rotate(0deg);
+            }
+            50% {
+                opacity: 0.8;
+                transform: scale(1.2) rotate(180deg);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) rotate(360deg);
+            }
+        }
+        
+        .element-slot.new-element {
+            animation: newElementAppear 0.6s ease-out;
+        }
+        
+        /* Particle effect container */
+        .combination-particles {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        
+        /* Screen flash effect for combinations */
+        @keyframes combinationFlash {
+            0% {
+                opacity: 0;
+            }
+            20% {
+                opacity: 0.3;
+            }
+            100% {
+                opacity: 0;
+            }
+        }
+        
+        .combination-flash {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(255, 215, 0, 0.2), rgba(100, 200, 255, 0.1));
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0;
+            animation: combinationFlash 0.5s ease-out;
+        }
+        
+        @keyframes particleFly {
+            0% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(0);
+            }
+            50% {
+                opacity: 1;
+                transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(calc(-50% + var(--tx) * 2), calc(-50% + var(--ty) * 2)) scale(0.5);
+            }
+        }
+        
+        .combination-particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: radial-gradient(circle, rgba(255, 215, 0, 1) 0%, rgba(255, 100, 255, 0) 70%);
+            border-radius: 50%;
+            animation: particleFly 0.6s ease-out forwards;
+        }
+        
+        .element-slot.highlighted-element {
+            border-color: #FFD700;
+            background: linear-gradient(135deg, 
+                rgba(255, 215, 0, 0.2) 0%,
+                rgba(255, 215, 0, 0.1) 100%
+            );
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5),
+                       inset 0 0 10px rgba(255, 215, 0, 0.2);
+            animation: tailPulse 2s ease-in-out infinite;
         }
         
         .element-slot:hover:not(.empty) {
@@ -781,7 +929,7 @@
         /* Player Info Box (Bottom Left) */
         .player-info-box {
             position: absolute;
-            bottom: 120px;
+            bottom: 20px;
             left: 20px;
             width: 280px;
             background: linear-gradient(135deg, 
@@ -852,7 +1000,7 @@
         /* Leaderboard (Bottom Right) */
         .leaderboard-box {
             position: absolute;
-            bottom: 120px;
+            bottom: 20px;
             right: 20px;
             width: 280px;
             background: linear-gradient(135deg, 
@@ -921,17 +1069,27 @@
         
         /* Discovery Feed (Left Side Chat-style) */
         .discovery-feed {
-            position: absolute;
+            position: fixed;
             top: 50%;
             left: 20px;
             transform: translateY(-50%);
             width: 300px;
-            max-height: 60vh;
-            pointer-events: auto;
-            display: flex;
+            max-height: 30vh;
+            pointer-events: none;
+            display: flex !important;
             flex-direction: column;
             justify-content: flex-end;
             overflow: hidden;
+            z-index: 50;
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+        
+        /* Force discovery feed to be visible */
+        #gameContainer .discovery-feed {
+            display: flex !important;
+            opacity: 1 !important;
+            visibility: visible !important;
         }
         
         .discovery-feed-inner {
@@ -1306,6 +1464,16 @@
                 display: none; /* Hide on mobile */
             }
             
+            #discoveryLog {
+                width: 200px;
+                font-size: 12px;
+                padding: 15px;
+            }
+            
+            #discoveryLog h3 {
+                font-size: 16px;
+            }
+            
             .element-slot {
                 width: 42px;
                 height: 42px;
@@ -1579,10 +1747,12 @@
         /* Discovery Journal */
         #discoveryJournal {
             padding: 20px;
+            padding-right: 15px;
             background: rgba(0,0,0,0.5);
             border-radius: 10px;
             flex: 1;
             overflow: hidden;
+            box-sizing: border-box;
             display: flex;
             flex-direction: column;
             min-height: 0;
@@ -1591,15 +1761,36 @@
         
         .discovery-grid {
             display: grid;
-            grid-template-columns: repeat(8, 1fr);
+            grid-template-columns: repeat(8, minmax(90px, 1fr));
             gap: 10px;
             margin-top: 20px;
             flex: 1;
+            padding-right: 15px;
+            box-sizing: border-box;
             align-content: start;
             overflow-y: auto;
             overflow-x: hidden;
             max-width: 100%;
             min-height: 0;
+        }
+        
+        /* Custom scrollbar for discovery grid */
+        .discovery-grid::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .discovery-grid::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+        }
+        
+        .discovery-grid::-webkit-scrollbar-thumb {
+            background: rgba(255, 215, 0, 0.5);
+            border-radius: 4px;
+        }
+        
+        .discovery-grid::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 215, 0, 0.7);
         }
         
         .discovery-item {
@@ -1702,6 +1893,7 @@
             align-content: start;
             overflow-y: auto;
             overflow-x: hidden;
+            padding-right: 10px;
         }
         
         .skin-item {
@@ -1953,7 +2145,7 @@
                         border-radius: 15px; 
                         padding: 30px 40px;
                         box-shadow: 0 0 30px rgba(255, 68, 68, 0.3);">
-                <h2 style="color: #ff4444; margin: 0 0 20px 0; font-size: 32px; text-shadow: 0 0 10px rgba(255, 68, 68, 0.5);">You Died!</h2>
+                <h2 style="color: #ff4444; margin: 0 0 20px 0; font-size: 32px; text-shadow: 0 0 10px rgba(255, 68, 68, 0.5);">Your Form Dissolves Into The Void!</h2>
                 
                 <!-- Stats Summary -->
                 <div style="margin-bottom: 25px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
@@ -1981,7 +2173,7 @@
                 </div>
                 
                 <div style="margin-top: 15px; font-size: 14px; color: #AAA;">
-                    You will keep 25% of your score
+                    You will keep 75% of your score
                 </div>
             </div>
         </div>
@@ -2027,9 +2219,11 @@
                     <div style="color: #ddd; font-size: 14px; line-height: 1.6;">
                         <div style="margin-bottom: 15px;">
                             <h5 style="color: #4ecdc4; margin-bottom: 5px;">🎮 Controls</h5>
-                            <p><strong>Desktop:</strong> Mouse to steer</p>
+                            <p><strong>Desktop:</strong> Mouse to steer OR Arrow keys/WASD</p>
+                            <p><strong>Arrow Keys:</strong> Left/Right to turn, Up to boost</p>
+                            <p><strong>WASD:</strong> A/D to turn, W to boost</p>
                             <p><strong>Mobile:</strong> Virtual joystick to steer</p>
-                            <p><strong>Boost:</strong> Click (Desktop) or Boost button (Mobile)</p>
+                            <p><strong>Boost:</strong> Click/W/Up Arrow (Desktop) or Boost button (Mobile)</p>
                         </div>
                         
                         <div style="margin-bottom: 15px;">
@@ -2040,8 +2234,8 @@
                         <div style="margin-bottom: 15px;">
                             <h5 style="color: #4ecdc4; margin-bottom: 5px;">🔬 Element System</h5>
                             <p>• Collect basic elements: Fire 🔥, Water 💧, Earth 🏔️, Air 💨</p>
-                            <p>• Your snake can hold 4 elements to start (capacity grows as you play)</p>
-                            <p>• Elements automatically combine to create new discoveries!</p>
+                            <p>• Your snake can hold up to 6 elements</p>
+                            <p>• Elements automatically combine when compatible!</p>
                             <p>• Example: Fire + Water = Steam ☁️</p>
                         </div>
                         
@@ -2146,7 +2340,7 @@
         // Game constants
         const WORLD_SIZE = 4000;
         const SEGMENT_SIZE = 15;
-        const SNAKE_SPEED = 3.6; // Increased by 20% from original 3.0
+        const SNAKE_SPEED = 4.14; // Increased by 35% from original 3.0 (additional 15% boost)
         const TURN_SPEED = 0.08;
         const ELEMENT_SIZE = 20;
         
@@ -2166,6 +2360,7 @@
         let paused = false;
         let controlScheme = 'arrows';
         let gameMode = 'infinite'; // 'discovery', 'points', or 'infinite'
+        let gameWon = false; // Track if victory has been achieved
         let gameTarget = 0; // Target value for victory
         let camera = { x: WORLD_SIZE / 2, y: WORLD_SIZE / 2 };
         
@@ -2197,13 +2392,13 @@
         // Void Orb mechanic
         let voidOrbs = [];
         let lastVoidOrbSpawn = 0;
-        const VOID_ORB_SPAWN_INTERVAL = 60000; // 60 seconds
+        const VOID_ORB_SPAWN_INTERVAL = 75000; // 75 seconds (25% less common)
         const VOID_ORB_SPAWN_COUNT = 4; // Number of void orbs to maintain on map
         
         // Catalyst Gem mechanic
         let catalystGems = [];
         let lastCatalystGemSpawn = 0;
-        const CATALYST_GEM_SPAWN_INTERVAL = 90000; // 90 seconds (more rare than void orbs)
+        const CATALYST_GEM_SPAWN_INTERVAL = 45000; // 45 seconds (doubled spawn rate)
         const CATALYST_GEM_SPAWN_COUNT = 3; // Number of catalyst gems to maintain on map
         let catalystSpawnedElements = []; // Track elements spawned by catalyst for visual effect
         
@@ -2302,7 +2497,7 @@
         // Element database
         let elementDatabase = {};
         let combinations = {};
-        let discoveredElements = new Set(['fire', 'water', 'earth', 'air']);
+        let discoveredElements = new Set(); // Start with no discoveries
         
         // All-time discoveries (persistent across sessions)
         let allTimeDiscoveries = new Map(); // Map of element -> recipe
@@ -2470,6 +2665,16 @@
         const keys = {};
         let mouseAngle = 0;
         let mouseDown = false;
+        let mouseMovedRecently = false;
+        let mouseMovedTimer = null;
+        
+        // Combination animation state
+        let combinationAnimationState = {
+            isAnimating: false,
+            combiningIndices: [],
+            animationStartTime: 0,
+            newElementIndex: -1
+        };
         
         // Mobile detection removed - using global definition
         
@@ -2510,6 +2715,19 @@
                 const mouseX = e.clientX - rect.left;
                 const mouseY = e.clientY - rect.top;
                 mouseAngle = Math.atan2(mouseY - centerY, mouseX - centerX);
+                
+                // Track that mouse has moved recently
+                mouseMovedRecently = true;
+                
+                // Clear existing timer
+                if (mouseMovedTimer) {
+                    clearTimeout(mouseMovedTimer);
+                }
+                
+                // Set timer to reset mouseMovedRecently after inactivity
+                mouseMovedTimer = setTimeout(() => {
+                    mouseMovedRecently = false;
+                }, 1000); // Reset after 1 second of no mouse movement
             }
         });
         
@@ -2578,8 +2796,7 @@
             
             setTimeout(() => {
                 gameModeSelect.style.opacity = '0';
-                // Don't show discoveryLog - it's been replaced by discovery feed
-                // discoveryLog.style.display = 'block';
+                // Discovery feed is always visible during gameplay
                 gameCanvas.style.opacity = '1';
                 
                 setTimeout(() => {
@@ -2632,8 +2849,7 @@
             // After content fades, start the game
             setTimeout(() => {
                 gameModeSelect.style.display = 'none';
-                // Don't show discoveryLog - it's been replaced by discovery feed
-                // discoveryLog.style.display = 'block';
+                // Discovery feed is always visible during gameplay
                 startGame();
                 
                 // Fade in game canvas and fade out transition background
@@ -2715,8 +2931,8 @@
         function initSoundEffects() {
             // Create multiple audio instances for overlapping sounds
             for (let i = 0; i < 5; i++) {
-                const eatSound = new Audio('sounds/8-bit-blip.mp3');
-                eatSound.volume = 0.25; // 25% volume (reduced by 50%)
+                const eatSound = new Audio('sounds/blip.mp3');
+                eatSound.volume = 0.3125; // 31.25% volume (increased by 25%)
                 eatSounds.push(eatSound);
                 
                 const explosionSound = new Audio('sounds/fire-impact.mp3');
@@ -2836,17 +3052,55 @@
         }
         
         function playBoostSound(isPlayerInvolved = true) {
-            if (!musicMuted && boostSounds.length > 0) {
+            // Only play sound for player, not AI
+            if (!musicMuted && boostSounds.length > 0 && isPlayerInvolved) {
                 const sound = boostSounds[soundIndex % boostSounds.length];
                 soundIndex++;
                 sound.currentTime = 0;
-                // Set volume based on whether player is involved
-                sound.volume = isPlayerInvolved ? 0.5 : 0.05; // 50% for player, 5% for AI
+                // Reduced volume by 25% (from 0.5 to 0.375)
+                sound.volume = 0.375;
                 const playPromise = sound.play();
                 if (playPromise !== undefined) {
                     playPromise.catch(e => console.log('Boost sound error:', e.message));
                 }
             }
+        }
+        
+        // Combination sound array
+        let combinationSounds = [];
+        
+        function initCombinationSounds() {
+            // Use the 8-bit blip sound for combinations
+            for (let i = 0; i < 3; i++) {
+                const sound = new Audio('sounds/8-bit-blip.mp3');
+                sound.volume = 0.5;
+                combinationSounds.push(sound);
+            }
+        }
+        
+        function playCombinationSound() {
+            if (!musicMuted && combinationSounds.length > 0) {
+                const sound = combinationSounds[soundIndex % combinationSounds.length];
+                soundIndex++;
+                sound.currentTime = 0;
+                sound.volume = 0.7; // Always play at good volume for player combinations
+                const playPromise = sound.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(e => console.log('Combination sound error:', e.message));
+                }
+            }
+        }
+        
+        function createCombinationFlash() {
+            // Create flash overlay
+            const flash = document.createElement('div');
+            flash.className = 'combination-flash';
+            document.body.appendChild(flash);
+            
+            // Remove after animation completes
+            setTimeout(() => {
+                flash.remove();
+            }, 500);
         }
         
         // Music functions
@@ -2996,6 +3250,23 @@
             }
         };
         
+        // Debug function to reset discoveries
+        window.resetDiscoveries = function() {
+            // Clear from localStorage
+            localStorage.removeItem('discoveredElements');
+            localStorage.removeItem('allTimeDiscoveries');
+            
+            // Clear in-game discoveries
+            discoveredElements = new Set(['fire', 'water', 'earth', 'air']);
+            allTimeDiscoveries = new Map();
+            
+            // Update UI
+            updateDiscoveryLog();
+            
+            console.log('Discoveries have been reset! Only base elements remain.');
+            return 'Discoveries reset successfully';
+        };
+        
         // Border particle class
         class BorderParticle {
             constructor(x, y, edge) {
@@ -3065,8 +3336,9 @@
                 this.segments = [];
                 
                 this.elements = [];
-                this.elementCapacity = 4; // Start with 4 element squares
-                this.elementsEaten = 0; // Track total elements eaten for capacity growth
+                this.maxVisibleElements = 6; // Fixed max of 6 visible element slots
+                this.overflowElements = 0; // Count of elements beyond visible slots (for length calculation)
+                this.elementsEaten = 0; // Track total elements eaten
                 this.length = 10;
                 this.score = 0;
                 this.discoveries = 0; // Track discoveries for this snake
@@ -3083,7 +3355,7 @@
                     console.log('[SNAKE CONSTRUCTOR] Creating PLAYER snake at', x, y);
                     console.trace(); // Show stack trace to see where it's being called from
                 }
-                this.discoveredElements = new Set(['fire', 'water', 'earth', 'air']); // Each snake tracks its own discoveries
+                this.discoveredElements = new Set(); // Each snake tracks its own discoveries - starts empty
                 
                 // Speed boost properties
                 this.stamina = 100; // Max stamina
@@ -3145,11 +3417,8 @@
                     });
                 }
                 
-                // Start with some random elements
-                const basicElements = ['fire', 'water', 'earth', 'air'];
-                for (let i = 0; i < 3; i++) {
-                    this.elements.push(basicElements[Math.floor(Math.random() * basicElements.length)]);
-                }
+                // Start with NO elements - snakes must collect them from the map
+                // This ensures players experience the discovery process from scratch
             }
             
             update(deltaTime = 1) {
@@ -3204,26 +3473,34 @@
                         }
                         this.isBoosting = mouseDown && this.stamina > 0;
                     } else if (controlScheme === 'arrows') {
+                        // Arrow keys
                         if (keys['ArrowLeft']) this.angle -= TURN_SPEED * turnMultiplier;
                         if (keys['ArrowRight']) this.angle += TURN_SPEED * turnMultiplier;
-                        // Handle boost
-                        this.isBoosting = keys['ArrowUp'] && this.stamina > 0;
-                    } else if (controlScheme === 'wasd') {
+                        // WASD keys (always available alongside arrows)
                         if (keys['a'] || keys['A']) this.angle -= TURN_SPEED * turnMultiplier;
                         if (keys['d'] || keys['D']) this.angle += TURN_SPEED * turnMultiplier;
-                        // Handle boost
-                        this.isBoosting = (keys['w'] || keys['W']) && this.stamina > 0;
+                        // Handle boost (both ArrowUp and W)
+                        this.isBoosting = (keys['ArrowUp'] || keys['w'] || keys['W']) && this.stamina > 0;
                     } else if (controlScheme === 'mouse') {
-                        // Smooth angle interpolation
-                        let angleDiff = mouseAngle - this.angle;
-                        while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
-                        while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
-                        const angleChange = angleDiff * 0.1 * turnMultiplier;
-                        if (isFinite(angleChange)) {
-                            this.angle += angleChange;
+                        // WASD controls - standard tank controls that just turn the snake
+                        if (keys['a'] || keys['A']) this.angle -= TURN_SPEED * turnMultiplier;
+                        if (keys['d'] || keys['D']) this.angle += TURN_SPEED * turnMultiplier;
+                        
+                        // Mouse steering only if mouse has moved recently and WASD not being used
+                        const usingWASD = keys['a'] || keys['A'] || keys['d'] || keys['D'];
+                        if (!usingWASD && mouseMovedRecently) {
+                            // Smooth angle interpolation toward mouse
+                            let angleDiff = mouseAngle - this.angle;
+                            while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
+                            while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
+                            const angleChange = angleDiff * 0.1 * turnMultiplier;
+                            if (isFinite(angleChange)) {
+                                this.angle += angleChange;
+                            }
                         }
-                        // Handle boost (mouse click)
-                        this.isBoosting = mouseDown && this.stamina > 0;
+                        
+                        // Handle boost (mouse click OR W key)
+                        this.isBoosting = (mouseDown || keys['w'] || keys['W']) && this.stamina > 0;
                     }
                 } else {
                     // Enhanced AI with personality system
@@ -3316,58 +3593,128 @@
                 this.wasBoostingLastFrame = this.isBoosting;
             }
             
-            checkCombinations() {
+            checkCombinations(depth = 0) {
                 if (this.elements.length < 2) return;
                 
-                // Queue-based system: new element (first) combines with tail (last element)
-                const newElement = this.elements[0]; // Most recently added element
-                const tailElement = this.elements[this.elements.length - 1]; // Last element (tail)
-                        
-                // Use the new element system for combination checking if available
-                let result = null;
-                if (window.elementLoader && window.elementCompatibility) {
-                    const resultElement = window.elementLoader.getCombinationByKeys(newElement, tailElement);
-                    result = resultElement ? resultElement.key : null;
-                } else {
-                    // Fallback to old system
-                    const combo1 = `${newElement}+${tailElement}`;
-                    const combo2 = `${tailElement}+${newElement}`;
-                    result = combinations[combo1] || combinations[combo2];
+                // Limit chain reaction depth
+                const MAX_CHAIN_DEPTH = 3;
+                if (depth >= MAX_CHAIN_DEPTH) {
+                    console.log('[DEBUG] Max chain reaction depth reached, stopping');
+                    return;
                 }
+                
+                // Find all possible combinations
+                let possibleCombos = [];
+                
+                for (let i = 0; i < this.elements.length; i++) {
+                    for (let j = i + 1; j < this.elements.length; j++) {
+                        const elem1 = this.elements[i];
+                        const elem2 = this.elements[j];
                         
-                if (result && elementDatabase[result]) {
-                    // Remove the new element and tail element
-                    this.elements.shift(); // Remove new element (first)
-                    this.elements.pop(); // Remove tail element (last)
-                    
-                    // Add the result to the front
-                    this.elements.unshift(result);
+                        // Check if these can combine
+                        let result = null;
+                        if (window.elementLoader && window.elementCompatibility) {
+                            const resultElement = window.elementLoader.getCombinationByKeys(elem1, elem2);
+                            result = resultElement ? resultElement.key : null;
+                        } else {
+                            const combo1 = `${elem1}+${elem2}`;
+                            const combo2 = `${elem2}+${elem1}`;
+                            result = combinations[combo1] || combinations[combo2];
+                        }
+                        
+                        if (result && elementDatabase[result]) {
+                            const isNewDiscovery = !this.discoveredElements.has(result);
+                            const resultTier = elementDatabase[result].tier || 0;
+                            
+                            possibleCombos.push({
+                                index1: i,
+                                index2: j,
+                                elem1,
+                                elem2,
+                                result,
+                                isNewDiscovery,
+                                tier: resultTier
+                            });
+                        }
+                    }
+                }
+                
+                if (possibleCombos.length === 0) {
+                    if (this.isPlayer && this === playerSnake) {
+                        comboStreak = 0;
+                    }
+                    return;
+                }
+                
+                // Prioritize: new discoveries first, then by highest tier
+                possibleCombos.sort((a, b) => {
+                    if (a.isNewDiscovery && !b.isNewDiscovery) return -1;
+                    if (!a.isNewDiscovery && b.isNewDiscovery) return 1;
+                    return b.tier - a.tier;
+                });
+                
+                const chosen = possibleCombos[0];
+                
+                // Debug logging
+                if (depth === 0) {
+                    console.log('[DEBUG] Checking combinations:', {
+                        elements: [...this.elements],
+                        possibleCombos: possibleCombos.length,
+                        chosen: chosen
+                    });
+                }
+                
+                // Start combination animation for player
+                if (this.isPlayer) {
+                    this.startCombinationAnimation(chosen.index1, chosen.index2);
+                    // Play combination sound - disabled
+                    // playCombinationSound();
+                    // Create visual flash effect
+                    createCombinationFlash();
+                    // Update UI immediately to show animation
+                    updateUI();
+                }
+                
+                // Remove the two elements (remove higher index first to maintain indices)
+                const indices = [chosen.index1, chosen.index2].sort((a, b) => b - a);
+                this.elements.splice(indices[0], 1);
+                this.elements.splice(indices[1], 1);
+                
+                // Add the result to a random position in the available slots
+                const insertIndex = Math.floor(Math.random() * (this.elements.length + 1));
+                this.elements.splice(insertIndex, 0, chosen.result);
                             
                     // Discovery check
-                    if (!this.discoveredElements.has(result)) {
-                        this.discoveredElements.add(result);
+                    if (chosen.isNewDiscovery) {
+                        this.discoveredElements.add(chosen.result);
                         this.score += 1000; // 1000 points for new discovery
                         this.discoveries++; // Increment discovery count
                         
                         // Additional effects for player
                         if (this.isPlayer && this === playerSnake) {
-                            discoveredElements.add(result); // Update global discoveries
+                            discoveredElements.add(chosen.result); // Update global discoveries
                             
                             // Save to all-time discoveries with recipe
-                            const recipe = `${elementDatabase[newElement]?.emoji || '?'} ${elementDatabase[newElement]?.name || newElement} + ${elementDatabase[tailElement]?.emoji || '?'} ${elementDatabase[tailElement]?.name || tailElement}`;
-                            allTimeDiscoveries.set(result, recipe);
+                            const recipe = `${elementDatabase[chosen.elem1]?.emoji || '?'} ${elementDatabase[chosen.elem1]?.name || chosen.elem1} + ${elementDatabase[chosen.elem2]?.emoji || '?'} ${elementDatabase[chosen.elem2]?.name || chosen.elem2}`;
+                            allTimeDiscoveries.set(chosen.result, recipe);
                             saveAllTimeDiscoveries();
                             
                             // Update new system if available
                             if (window.elementLoader && window.elementCompatibility) {
-                                const element = window.elementLoader.getElementByKey(result);
+                                const element = window.elementLoader.getElementByKey(chosen.result);
                                 if (element) {
                                     window.elementLoader.discoverElement(element.id);
-                                    window.elementCompatibility.saveDiscoveredElements();
+                                    // Save discovered elements - pass the global discoveredElements set as an object
+                                    const discoveredObj = {};
+                                    discoveredElements.forEach(elem => {
+                                        discoveredObj[elem] = true;
+                                    });
+                                    window.elementCompatibility.saveDiscoveredElements(discoveredObj);
                                 }
                             }
                             
-                            showCombinationMessage(newElement, tailElement, result, true); // Show new discovery
+                            showCombinationMessage(chosen.elem1, chosen.elem2, chosen.result, true); // Show new discovery
+                            console.log('[DEBUG] New discovery triggered:', chosen.elem1, '+', chosen.elem2, '=', chosen.result);
                             // Grant invincibility on new discovery
                             this.invincibilityTimer = 3000; // 3 seconds
                             
@@ -3396,23 +3743,22 @@
                             }
                             
                             this.score += comboBonus;
-                            showCombinationMessage(newElement, tailElement, result, false); // Show combo
+                            showCombinationMessage(chosen.elem1, chosen.elem2, chosen.result, false); // Show combo
                         }
                     }
                             
                     // Create particle effect at snake head
                     createCombinationParticles(this.segments[0].x, this.segments[0].y);
                     
+                    // Log chain reaction info
+                    console.log(`[DEBUG] Combination successful (depth ${depth}):`, {
+                        combination: `${chosen.elem1} + ${chosen.elem2} = ${chosen.result}`,
+                        remainingElements: [...this.elements]
+                    });
+                    
                     // Check again in case there are more combinations
-                    this.checkCombinations();
-                    return;
+                    this.checkCombinations(depth + 1);
                 }
-                
-                // No combination found - reset combo streak for player
-                if (this.isPlayer && this === playerSnake) {
-                    comboStreak = 0;
-                }
-            }
             
             consume(element) {
                 // Play eating sound for player only
@@ -3420,53 +3766,19 @@
                     playEatSound();
                 }
                 
-                // Check if we have space
-                if (this.elements.length >= this.elementCapacity) {
-                    // At capacity - just add points, don't store element
-                    this.score += 100;
-                    
-                    // Still grow snake and track elements eaten
-                    this.length += 2;
-                    this.elementsEaten++;
-                    
-                    // Check for capacity growth
-                    const capacityLevel = Math.floor((this.elementCapacity - 4) / 2);
-                    const elementsNeededForNext = 10 + (capacityLevel * 5);
-                    const elementsForThisLevel = capacityLevel === 0 ? this.elementsEaten : 
-                        this.elementsEaten - (10 + ((capacityLevel - 1) * capacityLevel * 5 / 2));
-                    
-                    if (elementsForThisLevel >= elementsNeededForNext && this.elementCapacity < 30) {
-                        this.elementCapacity += 2;
-                        if (this.isPlayer && this === playerSnake) {
-                            showMessage(`Element capacity increased to ${this.elementCapacity}! Next upgrade: ${10 + ((capacityLevel + 1) * 5)} elements`, false);
-                        }
-                    }
-                    
-                    // Remove element from world
-                    elementPool.remove(element);
-                    
-                    return; // Don't add to queue
+                // Check if we have space in visible slots
+                if (this.elements.length >= this.maxVisibleElements) {
+                    // At visible capacity - remove oldest element (tail)
+                    this.elements.pop(); // Remove oldest (tail)
+                    this.overflowElements++;
                 }
                 
-                // Add element to snake (at the front for queue-based system)
-                this.elements.unshift(element.type);
+                // Add element to a random position
+                const insertIndex = Math.floor(Math.random() * (this.elements.length + 1));
+                this.elements.splice(insertIndex, 0, element.type);
                 
-                // Track elements eaten for capacity growth
+                // Track elements eaten
                 this.elementsEaten++;
-                
-                // Progressive capacity growth - gets harder each time
-                const capacityLevel = Math.floor((this.elementCapacity - 4) / 2); // Current capacity level
-                const elementsNeededForNext = 10 + (capacityLevel * 5); // 10, 15, 20, 25, etc.
-                const elementsForThisLevel = capacityLevel === 0 ? this.elementsEaten : 
-                    this.elementsEaten - (10 + ((capacityLevel - 1) * capacityLevel * 5 / 2)); // Sum of arithmetic sequence
-                
-                if (elementsForThisLevel >= elementsNeededForNext && this.elementCapacity < 30) {
-                    this.elementCapacity += 2;
-                    if (this.isPlayer && this === playerSnake) {
-                        // Visual feedback for capacity growth
-                        showMessage(`Element capacity increased to ${this.elementCapacity}! Next upgrade: ${10 + ((capacityLevel + 1) * 5)} elements`, false);
-                    }
-                }
                 
                 // Grow snake
                 this.length += 2;
@@ -3522,6 +3834,34 @@
                     showMessage(`Digesting ${digestedCount} elements! +${digestBonus} points`, false);
                     // Update UI immediately
                     updateUI();
+                }
+            }
+            
+            startCombinationAnimation(index1, index2) {
+                // Store indices for animation
+                this.combiningIndices = [index1, index2];
+                this.combinationAnimationTime = 0;
+                this.isAnimatingCombination = true;
+                
+                // Update global animation state for UI
+                if (this.isPlayer) {
+                    combinationAnimationState.isAnimating = true;
+                    combinationAnimationState.combiningIndices = [index1, index2];
+                    combinationAnimationState.animationStartTime = Date.now();
+                    
+                    // The new element will be inserted at a random position
+                    // We'll track it after the combination completes
+                    setTimeout(() => {
+                        // Find the newest element (the one that's not in the old positions)
+                        const remainingElements = this.elements.length;
+                        if (remainingElements > 0) {
+                            // Since we insert at random position, we need to find it
+                            // For now, we'll animate the first slot as a placeholder
+                            combinationAnimationState.newElementIndex = Math.floor(Math.random() * remainingElements);
+                            // Update UI to show the new element animation
+                            updateUI();
+                        }
+                    }, 300);
                 }
             }
             
@@ -4786,40 +5126,118 @@
         // Helper functions
         function spawnElement(type = null, x = null, y = null) {
             if (!type) {
-                // Use tier-based spawning if new system is available and loaded
+                // Smart spawning: bias towards elements that can combine with what snakes are carrying
                 if (window.elementLoader && window.elementLoader.isLoaded && window.elementLoader.isLoaded()) {
-                    const rand = Math.random();
-                    let selectedElement;
+                    // Collect all elements currently carried by snakes
+                    const carriedElements = new Set();
+                    const carriedElementsList = [];
                     
-                    if (rand < 0.7) {
-                        // 70% chance for tier 0 (basic) elements
-                        const tier0Elements = window.elementLoader.getElementsByTier(0);
-                        selectedElement = tier0Elements[Math.floor(Math.random() * tier0Elements.length)];
-                    } else if (rand < 0.9) {
-                        // 20% chance for tier 1 elements (ONLY if discovered)
-                        const tier1Elements = window.elementLoader.getElementsByTier(1);
-                        const discoveredTier1 = tier1Elements.filter(e => discoveredElements.has(e.key));
-                        if (discoveredTier1.length > 0) {
-                            selectedElement = discoveredTier1[Math.floor(Math.random() * discoveredTier1.length)];
-                        } else {
-                            // Fallback to tier 0
-                            const tier0Elements = window.elementLoader.getElementsByTier(0);
-                            selectedElement = tier0Elements[Math.floor(Math.random() * tier0Elements.length)];
+                    snakes.forEach(snake => {
+                        if (snake && snake.alive) {
+                            snake.elements.forEach(elem => {
+                                carriedElements.add(elem);
+                                carriedElementsList.push(elem);
+                            });
                         }
-                    } else {
-                        // 10% chance for tier 2+ elements (ONLY if discovered)
-                        const allElements = window.elementLoader.getAllElements();
-                        const higherTierElements = allElements.filter(e => e.tier >= 2 && discoveredElements.has(e.key));
-                        if (higherTierElements.length > 0) {
-                            selectedElement = higherTierElements[Math.floor(Math.random() * higherTierElements.length)];
+                    });
+                    
+                    // Build weighted spawn list
+                    const spawnWeights = new Map();
+                    const allElements = window.elementLoader.getAllElements();
+                    
+                    // 30% chance to prioritize spawning for new discoveries
+                    const prioritizeDiscovery = Math.random() < 0.3;
+                    
+                    // Debug logging
+                    console.log(`[SPAWN] Discovered elements: ${discoveredElements.size}, Prioritize discovery: ${prioritizeDiscovery}`);
+                    
+                    allElements.forEach(element => {
+                        let weight = 1; // Base weight
+                        
+                        // Only spawn discovered elements or base elements
+                        if (!discoveredElements.has(element.key) && element.tier > 0) {
+                            weight = 0; // Don't spawn undiscovered non-base elements
                         } else {
-                            // Fallback to tier 0 only (don't spawn undiscovered tier 1)
-                            const tier0Elements = window.elementLoader.getElementsByTier(0);
-                            selectedElement = tier0Elements[Math.floor(Math.random() * tier0Elements.length)];
+                            // Tier-based base weight
+                            if (element.tier === 0) {
+                                weight = 10; // Strong preference for base elements
+                            } else if (element.tier === 1) {
+                                weight = 3;
+                            } else if (element.tier === 2) {
+                                weight = 1;
+                            } else {
+                                weight = 0.3; // Rare for high-tier elements
+                            }
+                            
+                            let hasUndiscoveredCombo = false;
+                            
+                            // Smart spawning bonus: check if this element can combine with carried elements
+                            if (carriedElements.size > 0) {
+                                carriedElementsList.forEach(carried => {
+                                    // Check if these can combine
+                                    const combo = window.elementLoader.getCombinationByKeys(element.key, carried);
+                                    if (combo) {
+                                        // Check if the result is discovered
+                                        if (!discoveredElements.has(combo.key)) {
+                                            hasUndiscoveredCombo = true;
+                                            if (prioritizeDiscovery) {
+                                                weight *= 5; // Huge bonus for potential new discoveries
+                                            }
+                                        } else {
+                                            weight *= 2; // Double weight for known combinations
+                                        }
+                                    }
+                                });
+                            }
+                            
+                            // Additional bonus for elements that can lead to many undiscovered combinations
+                            if (prioritizeDiscovery && !hasUndiscoveredCombo) {
+                                // Check how many undiscovered combinations this element can create
+                                let undiscoveredPotential = 0;
+                                allElements.forEach(otherElement => {
+                                    if (discoveredElements.has(otherElement.key)) {
+                                        const combo = window.elementLoader.getCombinationByKeys(element.key, otherElement.key);
+                                        if (combo && !discoveredElements.has(combo.key)) {
+                                            undiscoveredPotential++;
+                                        }
+                                    }
+                                });
+                                
+                                if (undiscoveredPotential > 0) {
+                                    weight *= (1 + undiscoveredPotential * 0.5); // Bonus based on discovery potential
+                                }
+                            }
+                        }
+                        
+                        if (weight > 0) {
+                            spawnWeights.set(element.key, weight);
+                        }
+                    });
+                    
+                    // Weighted random selection
+                    let totalWeight = 0;
+                    spawnWeights.forEach(w => totalWeight += w);
+                    
+                    let rand = Math.random() * totalWeight;
+                    let selectedElement = null;
+                    
+                    for (const [elemKey, weight] of spawnWeights) {
+                        rand -= weight;
+                        if (rand <= 0) {
+                            selectedElement = elemKey;
+                            break;
                         }
                     }
                     
-                    type = selectedElement.key;
+                    type = selectedElement || 'fire'; // Fallback to fire if something goes wrong
+                    
+                    // Debug what was selected
+                    if (selectedElement && window.elementLoader) {
+                        const elem = window.elementLoader.getElementByKey(selectedElement);
+                        if (elem) {
+                            console.log(`[SPAWN] Selected: ${elem.name} (Tier ${elem.tier})`);
+                        }
+                    }
                 } else {
                     // Fallback to old system
                     const rand = Math.random();
@@ -4935,9 +5353,23 @@
         }
         
         function showCombinationMessage(elem1, elem2, result, isNew) {
-            const elem1Data = elementDatabase[elem1];
-            const elem2Data = elementDatabase[elem2];
-            const resultData = elementDatabase[result];
+            // Get element data from new system first, fallback to old
+            let elem1Data, elem2Data, resultData;
+            
+            if (window.elementLoader && window.elementLoader.isLoaded && window.elementLoader.isLoaded()) {
+                elem1Data = window.elementLoader.getElementByKey(elem1) || elementDatabase[elem1];
+                elem2Data = window.elementLoader.getElementByKey(elem2) || elementDatabase[elem2];
+                resultData = window.elementLoader.getElementByKey(result) || elementDatabase[result];
+                
+                // Ensure proper format for new element system
+                if (elem1Data && !elem1Data.emoji) elem1Data = elementDatabase[elem1];
+                if (elem2Data && !elem2Data.emoji) elem2Data = elementDatabase[elem2];
+                if (resultData && !resultData.emoji) resultData = elementDatabase[result];
+            } else {
+                elem1Data = elementDatabase[elem1];
+                elem2Data = elementDatabase[elem2];
+                resultData = elementDatabase[result];
+            }
             
             let message = `${elem1Data.emoji} + ${elem2Data.emoji} = ${resultData.emoji} ${resultData.name}`;
             if (isNew) {
@@ -4946,6 +5378,7 @@
                 lastDiscoveredElement = result;
                 updateDiscoveryLog();
                 // Add to discovery feed
+                console.log('[DEBUG] Adding to discovery feed:', resultData.name);
                 addDiscoveryToFeed(resultData, `${elem1Data.emoji} ${elem1Data.name} + ${elem2Data.emoji} ${elem2Data.name}`);
             } else {
                 message = `Combo! ${message}`;
@@ -4987,7 +5420,8 @@
             
             // Set stats
             scoreDisplay.textContent = playerSnake.score.toLocaleString();
-            discoveryDisplay.textContent = `${discoveryCount} / ${elementLoader.elements.size}`;
+            const discoveryCount = discoveredElements.size;
+            discoveryDisplay.textContent = `${discoveryCount}`;
             timeDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
             
             // Set lore message based on victory type
@@ -5024,17 +5458,24 @@
         // Add discovery to the feed (MMO chat-style)
         function addDiscoveryToFeed(element, recipe) {
             const feed = document.getElementById('discoveryFeed');
+            if (!feed) {
+                console.error('Discovery feed element not found!');
+                return;
+            }
+            
+            // Debug: Make sure feed is visible
+            const feedContainer = document.querySelector('.discovery-feed');
+            if (feedContainer) {
+                feedContainer.style.display = 'flex';
+                feedContainer.style.opacity = '1';
+                feedContainer.style.visibility = 'visible';
+            }
+            
             const message = document.createElement('div');
             message.className = 'discovery-message';
             
+            // Recipe is passed as parameter now
             let recipeText = recipe || '';
-            if (element.recipe && element.recipe.length === 2) {
-                const elem1 = elementDatabase[element.recipe[0]];
-                const elem2 = elementDatabase[element.recipe[1]];
-                if (elem1 && elem2) {
-                    recipeText = `${elem1.emoji} ${elem1.name} + ${elem2.emoji} ${elem2.name}`;
-                }
-            }
             
             message.innerHTML = `
                 <span class="emoji">${element.emoji}</span>
@@ -5053,6 +5494,10 @@
             while (feed.children.length > 20) {
                 feed.removeChild(feed.firstChild);
             }
+            
+            console.log('Added to discovery feed:', element.name, 'Recipe:', recipeText);
+            console.log('Feed now has', feed.children.length, 'messages');
+            console.log('Feed container display:', feedContainer ? getComputedStyle(feedContainer).display : 'not found');
         }
         
         function updateLeaderboard() {
@@ -5146,40 +5591,43 @@
             
             // Get all discovered elements and sort by tier (highest first)
             const discovered = Array.from(discoveredElements)
-                .filter(key => {
-                    const element = elementDatabase[key];
-                    return element && element.tier > 0;
-                })
-                .sort((a, b) => {
-                    const elemA = elementDatabase[a];
-                    const elemB = elementDatabase[b];
-                    // Sort by tier descending, then alphabetically
-                    if (elemB.tier !== elemA.tier) {
-                        return elemB.tier - elemA.tier;
+                .map(key => {
+                    // Try new system first
+                    if (window.elementLoader && window.elementLoader.isLoaded && window.elementLoader.isLoaded()) {
+                        const element = window.elementLoader.getElementByKey(key);
+                        if (element) return { key, element };
                     }
-                    return a.localeCompare(b);
+                    // Fallback to old system
+                    const element = elementDatabase[key];
+                    if (element) return { key, element };
+                    return null;
+                })
+                .filter(item => item !== null)
+                .sort((a, b) => {
+                    // Sort by tier descending, then alphabetically
+                    if (b.element.tier !== a.element.tier) {
+                        return b.element.tier - a.element.tier;
+                    }
+                    return a.element.name.localeCompare(b.element.name);
                 });
             
-            discovered.forEach(elementKey => {
-                const element = elementDatabase[elementKey];
-                if (element) {
-                    const div = document.createElement('div');
-                    div.className = 'discovery-item';
-                    
-                    // Highlight if this is the newest discovery
-                    if (elementKey === lastDiscoveredElement) {
-                        div.classList.add('new');
-                    }
-                    
-                    div.innerHTML = `
-                        <div class="emoji">${element.emoji}</div>
-                        <div class="info">
-                            <div class="name">${element.name}</div>
-                            <div class="tier">Tier ${element.tier}</div>
-                        </div>
-                    `;
-                    list.appendChild(div);
+            discovered.forEach(({ key, element }) => {
+                const div = document.createElement('div');
+                div.className = 'discovery-item';
+                
+                // Highlight if this is the newest discovery
+                if (key === lastDiscoveredElement) {
+                    div.classList.add('new');
                 }
+                
+                div.innerHTML = `
+                    <div class="emoji">${element.emoji}</div>
+                    <div class="info">
+                        <div class="name">${element.name}</div>
+                        <div class="tier">Tier ${element.tier}</div>
+                    </div>
+                `;
+                list.appendChild(div);
             });
             
             // Update count in header
@@ -5248,7 +5696,7 @@
             document.getElementById('playerScore').textContent = Math.floor(playerSnake.score).toLocaleString();
             
             // Update discoveries count
-            const discoveryCount = discoveredElements.size - 4; // Subtract base elements
+            const discoveryCount = discoveredElements.size;
             document.getElementById('playerDiscoveries').textContent = discoveryCount;
             
             // Update high score display if current score is higher
@@ -5292,11 +5740,15 @@
             // Update boost bar
             updateBoostBar();
             
-            // Check victory condition
-            if (gameMode === 'discovery' && discoveryCount >= gameTarget) {
-                showVictoryScreen('discovery', gameTarget);
-            } else if (gameMode === 'points' && playerSnake.score >= gameTarget) {
-                showVictoryScreen('points', gameTarget);
+            // Check victory condition (only once)
+            if (!gameWon) {
+                if (gameMode === 'discovery' && discoveryCount >= gameTarget) {
+                    gameWon = true;
+                    showVictoryScreen('discovery', gameTarget);
+                } else if (gameMode === 'points' && playerSnake.score >= gameTarget) {
+                    gameWon = true;
+                    showVictoryScreen('points', gameTarget);
+                }
             }
             
             // Update leaderboard
@@ -5306,8 +5758,11 @@
             const elementBar = document.getElementById('elementBar');
             elementBar.innerHTML = '';
             
-            // Create slots for the full capacity
-            for (let i = 0; i < playerSnake.elementCapacity; i++) {
+            // Check if we're animating a combination
+            const isCombining = playerSnake.isAnimatingCombination && playerSnake.combiningIndices;
+            
+            // Create slots for the fixed 6 slots
+            for (let i = 0; i < playerSnake.maxVisibleElements; i++) {
                 const div = document.createElement('div');
                 div.className = 'element-slot';
                 
@@ -5317,11 +5772,43 @@
                     const element = elementDatabase[elementType];
                     if (element) {
                         div.classList.add('filled');
-                        // Highlight the tail element (last element)
-                        if (i === playerSnake.elements.length - 1 && playerSnake.elements.length > 1) {
-                            div.classList.add('tail-element');
+                        
+                        // Highlight the active element
+                        if (i === playerSnake.highlightedIndex) {
+                            div.classList.add('highlighted-element');
                         }
-                        div.innerHTML = `<div class="emoji">${element.emoji}</div><div class="element-name">${element.name}</div>`;
+                        
+                        // Add combination animation classes
+                        if (isCombining) {
+                            if (playerSnake.combiningIndices.includes(i)) {
+                                div.classList.add('combining');
+                                
+                                // Add particle effects
+                                const particleContainer = document.createElement('div');
+                                particleContainer.className = 'combination-particles';
+                                
+                                // Create multiple particles
+                                for (let p = 0; p < 8; p++) {
+                                    const particle = document.createElement('div');
+                                    particle.className = 'combination-particle';
+                                    const angle = (p / 8) * Math.PI * 2;
+                                    const distance = 30;
+                                    particle.style.setProperty('--tx', `${Math.cos(angle) * distance}px`);
+                                    particle.style.setProperty('--ty', `${Math.sin(angle) * distance}px`);
+                                    particle.style.animationDelay = `${p * 0.05}s`;
+                                    particleContainer.appendChild(particle);
+                                }
+                                
+                                div.appendChild(particleContainer);
+                            }
+                        }
+                        
+                        // Check if this is a newly created element
+                        if (combinationAnimationState.isAnimating && i === combinationAnimationState.newElementIndex) {
+                            div.classList.add('new-element');
+                        }
+                        
+                        div.innerHTML += `<div class="emoji">${element.emoji}</div><div class="element-name">${element.name}</div>`;
                         div.title = element.name;
                     }
                 } else {
@@ -5330,6 +5817,15 @@
                 }
                 
                 elementBar.appendChild(div);
+            }
+            
+            // Reset animation state after animation completes
+            if (combinationAnimationState.isAnimating && Date.now() - combinationAnimationState.animationStartTime > 600) {
+                combinationAnimationState.isAnimating = false;
+                combinationAnimationState.combiningIndices = [];
+                combinationAnimationState.newElementIndex = -1;
+                playerSnake.isAnimatingCombination = false;
+                playerSnake.combiningIndices = null;
             }
         }
         
@@ -5397,6 +5893,79 @@
                                 const vy = Math.sin(angle) * speed;
                                 particlePool.spawn(orb.x, orb.y, vx, vy, 'rgba(100, 200, 255, 0.8)');
                             }
+                            
+                            // 50% chance to spawn a discovery element
+                            if (Math.random() < 0.5) {
+                                console.log('[VOID ORB] Attempting to spawn element...');
+                                
+                                // Get all available elements
+                                let availableElements = [];
+                                if (window.elementLoader && window.elementLoader.isLoaded && window.elementLoader.isLoaded()) {
+                                    // Get all elements and extract their keys
+                                    const allElements = window.elementLoader.getAllElements();
+                                    availableElements = allElements.map(elem => elem.key);
+                                    console.log('[VOID ORB] Using element loader, found', availableElements.length, 'total elements');
+                                } else {
+                                    availableElements = Object.keys(elementDatabase);
+                                    console.log('[VOID ORB] Using legacy database, found', availableElements.length, 'total elements');
+                                }
+                                
+                                // Filter to only discovered elements (except base elements which are always available)
+                                const spawnableElements = availableElements.filter(elemKey => {
+                                    // Always allow base elements (first 4)
+                                    const elemIndex = availableElements.indexOf(elemKey);
+                                    if (elemIndex < 4) return true;
+                                    
+                                    // For other elements, only spawn if discovered
+                                    return discoveredElements.has(elemKey);
+                                });
+                                
+                                // Prioritize elements that can lead to new discoveries
+                                const discoveryPotentialElements = spawnableElements.filter(elemKey => {
+                                    // Check if this element can combine with carried elements for new discoveries
+                                    let hasDiscoveryPotential = false;
+                                    snake.elements.forEach(carried => {
+                                        const result = window.elementLoader ? 
+                                            window.elementLoader.getCombinationByKeys(elemKey, carried) :
+                                            (combinations[`${elemKey}+${carried}`] || combinations[`${carried}+${elemKey}`]);
+                                        if (result && !discoveredElements.has(result.key || result)) {
+                                            hasDiscoveryPotential = true;
+                                        }
+                                    });
+                                    return hasDiscoveryPotential;
+                                });
+                                
+                                // Use discovery potential elements if available, otherwise use any spawnable element
+                                const finalPool = discoveryPotentialElements.length > 0 ? discoveryPotentialElements : spawnableElements;
+                                
+                                console.log('[VOID ORB] Spawnable elements:', spawnableElements.length, 'Discovery potential:', discoveryPotentialElements.length, 'Final pool:', finalPool.length);
+                                
+                                if (finalPool.length > 0) {
+                                    // Pick a random element
+                                    const randomElement = finalPool[Math.floor(Math.random() * finalPool.length)];
+                                    console.log('[VOID ORB] Selected element to spawn:', randomElement);
+                                    
+                                    // Spawn it at a random location near the void orb
+                                    const spawnAngle = Math.random() * Math.PI * 2;
+                                    const spawnDistance = 50 + Math.random() * 100;
+                                    const spawnX = orb.x + Math.cos(spawnAngle) * spawnDistance;
+                                    const spawnY = orb.y + Math.sin(spawnAngle) * spawnDistance;
+                                    
+                                    // Spawn the element with glow effect (using isCatalystSpawned for glow)
+                                    const newElement = elementPool.spawn(randomElement, spawnX, spawnY, true);
+                                    elements.push(newElement);
+                                    
+                                    // Show message if player collected the orb
+                                    if (snake.isPlayer) {
+                                        const elementData = window.elementLoader && window.elementLoader.isLoaded && window.elementLoader.isLoaded() 
+                                            ? window.elementLoader.getElementByKey(randomElement)
+                                            : elementDatabase[randomElement];
+                                        if (elementData) {
+                                            showMessage(`✨ The void reveals: ${elementData.emoji} ${elementData.name}!`, 'discovery');
+                                        }
+                                    }
+                                }
+                            }
                         }
                         
                         // Remove void orb
@@ -5412,38 +5981,157 @@
                     if (dist < SEGMENT_SIZE + gem.size) {
                         // Only activate if snake has elements
                         if (snake.elements.length > 0) {
-                            const tailElement = snake.elements[snake.elements.length - 1];
+                            // Determine which elements to check for combinations
+                            let elementsToCheck = [];
                             
-                            // Find all compatible elements
-                            const compatibleElements = [];
-                            for (const [combo, result] of Object.entries(combinations)) {
-                                const [elem1, elem2] = combo.split('+');
-                                if (elem1 === tailElement) {
-                                    compatibleElements.push(elem2);
-                                } else if (elem2 === tailElement) {
-                                    compatibleElements.push(elem1);
+                            if (snake.elements.length === 1) {
+                                // If player has only 1 element, use it 4 times
+                                elementsToCheck = Array(4).fill(snake.elements[0]);
+                            } else if (snake.elements.length <= 4) {
+                                // If player has 2-4 elements, use all of them
+                                elementsToCheck = [...snake.elements];
+                            } else {
+                                // If player has more than 4 elements, randomly select 4
+                                const shuffled = [...snake.elements].sort(() => Math.random() - 0.5);
+                                elementsToCheck = shuffled.slice(0, 4);
+                            }
+                            
+                            console.log('[CATALYST GEM] Checking elements:', elementsToCheck);
+                            
+                            // Find all compatible elements for each element we're checking
+                            const allCompatibleElements = [];
+                            const compatibleByElement = {};
+                            
+                            for (const element of elementsToCheck) {
+                                compatibleByElement[element] = [];
+                                
+                                if (window.elementLoader && window.elementLoader.isLoaded && window.elementLoader.isLoaded()) {
+                                    // Use new element loader system
+                                    const allElements = window.elementLoader.getAllElements();
+                                    
+                                    for (const otherElement of allElements) {
+                                        // Skip if not discovered (except base elements)
+                                        if (otherElement.tier > 0 && !discoveredElements.has(otherElement.key)) {
+                                            continue;
+                                        }
+                                        
+                                        const result = window.elementLoader.getCombinationByKeys(element, otherElement.key);
+                                        if (result) {
+                                            compatibleByElement[element].push({
+                                                element: otherElement.key,
+                                                result: result.key,
+                                                combo: `${element}+${otherElement.key}`
+                                            });
+                                            allCompatibleElements.push({
+                                                element: otherElement.key,
+                                                result: result.key,
+                                                combo: `${element}+${otherElement.key}`,
+                                                baseElement: element
+                                            });
+                                        }
+                                    }
+                                } else {
+                                    // Fallback to old system
+                                    for (const [combo, result] of Object.entries(combinations)) {
+                                        const [elem1, elem2] = combo.split('+');
+                                        if (elem1 === element) {
+                                            compatibleByElement[element].push({
+                                                element: elem2,
+                                                result: result,
+                                                combo: combo
+                                            });
+                                            allCompatibleElements.push({
+                                                element: elem2,
+                                                result: result,
+                                                combo: combo,
+                                                baseElement: element
+                                            });
+                                        }
+                                    }
                                 }
                             }
                             
-                            // Spawn up to 4 compatible elements
-                            const spawnCount = Math.min(4, compatibleElements.length);
-                            if (spawnCount > 0 && snake.isPlayer) {
-                                // Spawn elements around the player
-                                for (let j = 0; j < spawnCount; j++) {
-                                    const angle = (j / spawnCount) * Math.PI * 2;
+                            console.log('[CATALYST GEM] Found', allCompatibleElements.length, 'compatible elements');
+                            
+                            // Continue with the rest of the logic for spawning elements
+                            if (allCompatibleElements.length > 0 && snake.isPlayer) {
+                                // Try to prioritize combinations that would create new discoveries
+                                const undiscoveredCombos = allCompatibleElements.filter(item => {
+                                    // Check if this combination would result in a new discovery
+                                    return !discoveredElements.has(item.result);
+                                });
+                                
+                                // Use undiscovered combinations if available, otherwise use all compatible
+                                const prioritizedElements = undiscoveredCombos.length > 0 ? undiscoveredCombos : allCompatibleElements;
+                                
+                                const elementsToSpawn = [];
+                                const spawnCount = Math.min(4, allCompatibleElements.length);
+                                
+                                // If we have undiscovered combinations, prioritize at least one
+                                if (undiscoveredCombos.length > 0 && elementsToSpawn.length === 0) {
+                                    const randomUndiscovered = undiscoveredCombos[Math.floor(Math.random() * undiscoveredCombos.length)];
+                                    elementsToSpawn.push(randomUndiscovered.element);
+                                }
+                                
+                                // If we have elements for different base elements, try to get one for each
+                                if (elementsToCheck.length > 1) {
+                                    const uniqueBaseElements = [...new Set(elementsToCheck)];
+                                    for (const baseElement of uniqueBaseElements) {
+                                        if (elementsToSpawn.length >= spawnCount) break;
+                                        
+                                        // First try to find undiscovered combinations for this base element
+                                        const undiscoveredForBase = prioritizedElements.filter(item => 
+                                            item.baseElement === baseElement
+                                        );
+                                        
+                                        if (undiscoveredForBase.length > 0) {
+                                            const randomUndiscovered = undiscoveredForBase[Math.floor(Math.random() * undiscoveredForBase.length)];
+                                            if (!elementsToSpawn.includes(randomUndiscovered.element)) {
+                                                elementsToSpawn.push(randomUndiscovered.element);
+                                            }
+                                        } else {
+                                            // Fall back to any compatible element for this base
+                                            const compatible = compatibleByElement[baseElement];
+                                            if (compatible.length > 0) {
+                                                const randomCompatible = compatible[Math.floor(Math.random() * compatible.length)];
+                                                if (!elementsToSpawn.includes(randomCompatible.element)) {
+                                                    elementsToSpawn.push(randomCompatible.element);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                
+                                // Fill remaining slots with prioritized elements (undiscovered if available)
+                                while (elementsToSpawn.length < spawnCount && prioritizedElements.length > 0) {
+                                    const remainingElements = prioritizedElements.filter(item => 
+                                        !elementsToSpawn.includes(item.element)
+                                    );
+                                    
+                                    if (remainingElements.length > 0) {
+                                        const randomItem = remainingElements[Math.floor(Math.random() * remainingElements.length)];
+                                        elementsToSpawn.push(randomItem.element);
+                                    } else {
+                                        break;
+                                    }
+                                }
+                                
+                                console.log('[CATALYST GEM] Spawning', elementsToSpawn.length, 'elements:', elementsToSpawn);
+                                
+                                // Spawn the elements around the player
+                                for (let j = 0; j < elementsToSpawn.length; j++) {
+                                    const angle = (j / elementsToSpawn.length) * Math.PI * 2;
                                     const distance = 100 + Math.random() * 100;
                                     const spawnX = snake.x + Math.cos(angle) * distance;
                                     const spawnY = snake.y + Math.sin(angle) * distance;
                                     
-                                    // Pick a random compatible element (allowing duplicates)
-                                    const elementType = compatibleElements[Math.floor(Math.random() * compatibleElements.length)];
-                                    
                                     // Create the element with catalyst sparkle effect
-                                    elementPool.spawn(elementType, spawnX, spawnY, true);
+                                    const newElement = elementPool.spawn(elementsToSpawn[j], spawnX, spawnY, true);
+                                    elements.push(newElement); // Add to the game's elements array
                                 }
                                 
-                                showMessage(`💎 Catalyst Gem activated! Spawned ${spawnCount} compatible elements<br><small style="opacity: 0.8">New elements have resonated into existence</small>`, 'success');
-                            } else if (spawnCount > 0 && !snake.isPlayer) {
+                                showMessage(`💎 Catalyst Gem activated! Spawned ${elementsToSpawn.length} compatible elements<br><small style="opacity: 0.8">New elements have resonated into existence</small>`, 'success');
+                            } else if (allCompatibleElements.length > 0 && !snake.isPlayer) {
                                 // AI snakes get points instead
                                 snake.score += 200;
                             }
@@ -5846,6 +6534,7 @@
             // Clear all game state to ensure fresh start
             snakes = [];
             elements = [];
+            gameWon = false; // Reset victory flag
             particles = [];
             voidOrbs = [];
             catalystGems = [];
@@ -5853,8 +6542,23 @@
             aiRespawnQueue = [];
             usedAISkins.clear();
             
-            // Reset discoveries (keep only base elements)
-            discoveredElements = new Set(['fire', 'water', 'earth', 'air']);
+            // Load previously discovered elements if available
+            if (window.elementCompatibility) {
+                const savedDiscovered = window.elementCompatibility.loadDiscoveredElements();
+                discoveredElements = new Set();
+                // Add saved discoveries
+                if (savedDiscovered) {
+                    Object.keys(savedDiscovered).forEach(key => {
+                        if (savedDiscovered[key]) {
+                            discoveredElements.add(key);
+                        }
+                    });
+                    console.log(`[GAME START] Loaded ${discoveredElements.size} discovered elements`);
+                }
+            } else {
+                // Fallback - start with base elements discovered
+                discoveredElements = new Set(['fire', 'water', 'earth', 'air']);
+            }
             
             // Reset game variables
             lastDiscoveredElement = null;
@@ -5874,29 +6578,14 @@
             lastVoidOrbSpawn = Date.now();
             lastCatalystGemSpawn = Date.now();
             
-            // Initialize discovery feed with base elements
+            // Initialize discovery feed - starts empty
             const discoveryFeed = document.getElementById('discoveryFeed');
             if (discoveryFeed) {
                 discoveryFeed.innerHTML = '';
-                // Add base elements to discovery feed
-                const baseElements = ['fire', 'water', 'earth', 'air'];
-                baseElements.forEach(elementKey => {
-                    let elementData = null;
-                    
-                    // Try new system first
-                    if (window.elementLoader && window.elementLoader.isLoaded && window.elementLoader.isLoaded()) {
-                        elementData = window.elementLoader.getElementByKey(elementKey);
-                    }
-                    
-                    // Fallback to old system
-                    if (!elementData) {
-                        elementData = elementDatabase[elementKey];
-                    }
-                    
-                    if (elementData) {
-                        addDiscoveryToFeed(elementData, 'Starting element');
-                    }
-                });
+                // Players must discover everything, even base elements
+                
+                // Discovery feed ready for new discoveries
+                console.log('[DEBUG] Discovery feed initialized');
             }
             
             // Start fresh game
@@ -5930,6 +6619,7 @@
             initMusic();
             initSoundEffects();
             initPowerUpSounds();
+            initCombinationSounds();
             
             // Update discovery log
             updateDiscoveryLog();
@@ -6315,27 +7005,27 @@
                     }
                 }
                 
-                // Spawn AlchemyVision power-ups
-                if (alchemyVisionPowerUps.length === 0 && Date.now() - lastAlchemyVisionSpawn >= ALCHEMY_VISION_SPAWN_INTERVAL) {
-                    // Spawn multiple power-ups spread across the map
-                    for (let i = 0; i < ALCHEMY_VISION_SPAWN_COUNT; i++) {
-                        // Divide the map into sections to spread out spawns
-                        const sectionWidth = WORLD_SIZE / Math.ceil(Math.sqrt(ALCHEMY_VISION_SPAWN_COUNT));
-                        const sectionHeight = WORLD_SIZE / Math.ceil(Math.sqrt(ALCHEMY_VISION_SPAWN_COUNT));
-                        
-                        // Random position within each section
-                        const sectionX = (i % Math.ceil(Math.sqrt(ALCHEMY_VISION_SPAWN_COUNT))) * sectionWidth;
-                        const sectionY = Math.floor(i / Math.ceil(Math.sqrt(ALCHEMY_VISION_SPAWN_COUNT))) * sectionHeight;
-                        
-                        const x = sectionX + 100 + Math.random() * (sectionWidth - 200);
-                        const y = sectionY + 100 + Math.random() * (sectionHeight - 200);
-                        
-                        alchemyVisionPowerUps.push(new AlchemyVision(x, y));
-                    }
-                    lastAlchemyVisionSpawn = Date.now();
-                }
+                // AlchemyVision power-ups removed
+                // if (alchemyVisionPowerUps.length === 0 && Date.now() - lastAlchemyVisionSpawn >= ALCHEMY_VISION_SPAWN_INTERVAL) {
+                //     // Spawn multiple power-ups spread across the map
+                //     for (let i = 0; i < ALCHEMY_VISION_SPAWN_COUNT; i++) {
+                //         // Divide the map into sections to spread out spawns
+                //         const sectionWidth = WORLD_SIZE / Math.ceil(Math.sqrt(ALCHEMY_VISION_SPAWN_COUNT));
+                //         const sectionHeight = WORLD_SIZE / Math.ceil(Math.sqrt(ALCHEMY_VISION_SPAWN_COUNT));
+                //         
+                //         // Random position within each section
+                //         const sectionX = (i % Math.ceil(Math.sqrt(ALCHEMY_VISION_SPAWN_COUNT))) * sectionWidth;
+                //         const sectionY = Math.floor(i / Math.ceil(Math.sqrt(ALCHEMY_VISION_SPAWN_COUNT))) * sectionHeight;
+                //         
+                //         const x = sectionX + 100 + Math.random() * (sectionWidth - 200);
+                //         const y = sectionY + 100 + Math.random() * (sectionHeight - 200);
+                //         
+                //         alchemyVisionPowerUps.push(new AlchemyVision(x, y));
+                //     }
+                //     lastAlchemyVisionSpawn = Date.now();
+                // }
                 
-                // Update AlchemyVision power-ups
+                // Update AlchemyVision power-ups (keeping for existing ones to expire)
                 alchemyVisionPowerUps.forEach(powerUp => powerUp.update(1.0));
                 
                 // Spawn Void Orbs to maintain count
@@ -6430,8 +7120,8 @@
                     // Respawn player at center
                     playerSnake = new Snake(WORLD_SIZE / 2, WORLD_SIZE / 2, true);
                     
-                    // Keep only 25% of score (75% penalty reduction from 50%)
-                    playerSnake.score = Math.floor(previousScore * 0.25);
+                    // Keep 75% of score (25% penalty)
+                    playerSnake.score = Math.floor(previousScore * 0.75);
                     
                     // Restore some game state
                     playerSnake.elementCapacity = Math.max(4, Math.floor(previousCapacity * 0.5));

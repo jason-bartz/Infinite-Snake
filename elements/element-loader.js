@@ -122,6 +122,13 @@ class ElementLoader {
     return this.loaded;
   }
 
+  // Track element discovery
+  discoverElement(elementId) {
+    // This is handled by the global discoveredElements set in the game
+    // We just need to provide this method for compatibility
+    console.log('Element discovered:', elementId);
+  }
+
   // Utility methods
   searchElements(query) {
     if (!this.gameLoader) return [];

@@ -39,7 +39,7 @@ class GameElementLoader {
       
       // Try loading combinations with fallback
       let combinationsData = null;
-      for (const filename of ['combinations-flexible.json', 'combinations-expanded.json', 'combinations-massive.json']) {
+      for (const filename of ['combinations-logical-complete.json', 'combinations-flexible.json', 'combinations-expanded.json']) {
         try {
           combinationsData = await this.loadJSON(filename);
           console.log(`   ✓ Loaded combinations from ${filename}`);

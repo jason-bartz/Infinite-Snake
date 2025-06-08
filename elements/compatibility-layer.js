@@ -95,13 +95,15 @@ class ElementCompatibilityLayer {
   loadDiscoveredElements() {
     try {
       const saved = localStorage.getItem('discoveredElements');
-      if (saved) {
+      if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
         console.log(`Loaded ${Object.keys(parsed).length} discovered elements from storage`);
         return parsed;
       }
     } catch (error) {
       console.warn('Could not load discovered elements:', error);
+      // Clear corrupted data
+      localStorage.removeItem('discoveredElements');
     }
     
     // Return base elements if no save data
