@@ -1236,7 +1236,7 @@
         
         .pause-button-mobile {
             position: absolute;
-            top: 140px; /* Moved much higher to avoid boost button overlap */
+            top: 20px; /* Moved to top of screen */
             right: 20px;
             width: 50px;
             height: 50px;
@@ -1255,7 +1255,7 @@
         
         .mute-button-mobile {
             position: absolute;
-            top: 140px; /* Moved much higher to avoid boost button overlap */
+            top: 20px; /* Moved to top of screen */
             right: 80px;
             width: 50px;
             height: 50px;
@@ -1415,39 +1415,50 @@
         
         /* Mobile splash screen adjustments */
         @media (max-width: 800px) and (orientation: landscape) {
-            #splashContent {
-                padding: 5px 10px; /* Reduced vertical padding */
-                max-height: 85vh; /* Reduced to ensure button visibility */
-                overflow-y: auto;
+            #splashScreen {
                 display: flex;
-                flex-direction: column;
+                align-items: center;
                 justify-content: center;
             }
             
+            #splashContent {
+                padding: 5px 20px;
+                max-height: 100vh;
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                width: 100%;
+            }
+            
             #splashLogo {
-                width: 120px !important; /* Reduced from 150px */
-                max-width: 120px !important;
+                width: 60px !important;
+                max-width: 60px !important;
+                margin-bottom: 5px !important;
+            }
+            
+            #splashTitle {
+                font-size: 18px !important;
                 margin-bottom: 5px !important;
             }
             
             #splashScreen p {
-                font-size: 10px; /* Reduced from 11px */
-                margin: 3px; /* Reduced from 5px */
-                line-height: 1.2; /* Reduced from 1.3 */
-                max-height: 60px; /* Reduced from 80px */
+                font-size: 11px !important;
+                margin: 2px !important;
+                line-height: 1.3 !important;
+                max-height: calc(100vh - 180px);
                 overflow-y: auto;
+                text-align: center;
             }
             
             #startButton {
-                margin-top: 5px;
-                margin-bottom: 10px; /* Increased to ensure visibility */
-                padding: 8px 25px; /* Slightly bigger for easier tapping */
-                font-size: 16px; /* Increased for better visibility */
-            }
-            
-            #splashTitle {
-                font-size: 24px;
-                margin-bottom: 5px;
+                margin-top: 10px !important;
+                margin-bottom: 10px !important;
+                padding: 12px 40px !important;
+                font-size: 18px !important;
+                position: relative !important;
+                bottom: auto !important;
             }
             
             /* Keep controls consistent in landscape */
@@ -1552,6 +1563,153 @@
             .joystick-knob {
                 width: 40px;
                 height: 40px;
+            }
+        }
+        
+        /* Force boost button size in landscape on mobile */
+        @media (max-width: 800px) and (orientation: landscape) {
+            body.mobile .boost-button {
+                width: 100px !important;
+                height: 100px !important;
+            }
+            
+            body.mobile .virtual-joystick {
+                width: 100px !important;
+                height: 100px !important;
+            }
+        }
+        
+        /* Ensure consistent controls in landscape after other media queries */
+        @media (orientation: landscape) {
+            .virtual-joystick {
+                width: 100px !important;
+                height: 100px !important;
+            }
+            
+            .boost-button {
+                width: 100px !important;
+                height: 100px !important;
+            }
+        }
+        
+        /* Additional landscape fixes for all screens */
+        @media (max-height: 500px) {
+            /* Splash screen in extreme landscape */
+            #splashContent {
+                padding: 5px 20px !important;
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                gap: 20px;
+            }
+            
+            #splashLogo {
+                width: 50px !important;
+                flex-shrink: 0;
+            }
+            
+            #splashScreen p {
+                font-size: 10px !important;
+                margin: 0 !important;
+                max-height: none;
+                text-align: left;
+            }
+            
+            #startButton {
+                flex-shrink: 0;
+                padding: 8px 20px !important;
+                font-size: 16px !important;
+            }
+            
+            /* Game mode selection in extreme landscape */
+            #gameModeContent {
+                padding: 5px 20px !important;
+                max-height: 95vh !important;
+            }
+            
+            #gameModeSelect h3 {
+                font-size: 16px !important;
+                margin: 5px 0 !important;
+            }
+            
+            #victoryButtons {
+                gap: 10px !important;
+                margin-bottom: 10px !important;
+            }
+            
+            .victory-column h5 {
+                font-size: 14px !important;
+                margin: 0 0 5px 0 !important;
+            }
+            
+            .modeSection {
+                margin-bottom: 5px !important;
+            }
+            
+            .modeSection h4 {
+                font-size: 12px !important;
+                margin: 5px 0 !important;
+            }
+            
+            #gameModeSelect button {
+                padding: 6px 15px !important;
+                font-size: 12px !important;
+                min-width: 140px !important;
+                margin: 2px !important;
+            }
+            
+            .btn-infinite {
+                min-width: 200px !important;
+                font-size: 14px !important;
+                padding: 8px 20px !important;
+            }
+        }
+        
+        /* Game mode selection landscape adjustments */
+        @media (max-width: 800px) and (orientation: landscape) {
+            #gameModeContent {
+                padding: 10px;
+                max-height: 85vh;
+                overflow-y: auto;
+                margin-top: 5px;
+            }
+            
+            #gameModeSelect {
+                padding: 5px;
+            }
+            
+            #gameModeSelect h3 {
+                font-size: 18px;
+                margin-bottom: 5px;
+                margin-top: 5px;
+            }
+            
+            .modeSection {
+                margin-bottom: 8px;
+            }
+            
+            .modeSection h4 {
+                font-size: 14px;
+                margin-bottom: 5px;
+            }
+            
+            .victoryButton {
+                padding: 6px 12px;
+                margin: 2px;
+                font-size: 12px;
+            }
+            
+            .controlOption {
+                padding: 8px 15px;
+                margin: 3px;
+                font-size: 14px;
+            }
+            
+            #startGameButton {
+                padding: 10px 30px;
+                font-size: 18px;
+                margin-top: 5px;
+                margin-bottom: 10px;
             }
         }
         
