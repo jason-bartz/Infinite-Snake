@@ -1236,7 +1236,7 @@
         
         .pause-button-mobile {
             position: absolute;
-            top: 50px; /* Moved higher from 20px to avoid boost button */
+            top: 80px; /* Moved higher from 50px to avoid boost button overlap */
             right: 20px;
             width: 50px;
             height: 50px;
@@ -1255,7 +1255,7 @@
         
         .mute-button-mobile {
             position: absolute;
-            top: 50px; /* Moved higher from 20px to avoid boost button */
+            top: 80px; /* Moved higher from 50px to avoid boost button overlap */
             right: 80px;
             width: 50px;
             height: 50px;
@@ -1445,6 +1445,17 @@
             #splashTitle {
                 font-size: 24px;
                 margin-bottom: 5px;
+            }
+            
+            /* Keep controls consistent in landscape */
+            .virtual-joystick {
+                width: 100px !important;
+                height: 100px !important;
+            }
+            
+            .boost-button {
+                width: 100px !important;
+                height: 100px !important;
             }
         }
         
