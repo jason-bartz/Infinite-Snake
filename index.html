@@ -217,6 +217,15 @@
             }
         }
         
+        /* Landscape splash logo sizing */
+        @media (orientation: landscape) {
+            #splashLogo {
+                width: 150px !important;
+                max-width: 40% !important;
+                margin-bottom: 10px !important;
+            }
+        }
+        
         @keyframes float {
             0%, 100% { transform: translateY(0px); }
             50% { transform: translateY(-10px); }
@@ -1350,7 +1359,7 @@
         }
         
         body.mobile .leaderboard-box {
-            top: 140px; /* Moved down to avoid top bar overlap */
+            top: 150px; /* Moved down more to avoid top bar overlap */
             bottom: auto;
             right: 10px;
             width: 180px;
@@ -1459,8 +1468,8 @@
             }
             
             #splashLogo {
-                width: 40px !important;
-                max-width: 40px !important;
+                width: 120px !important;
+                max-width: 120px !important;
                 height: auto !important;
                 margin-bottom: 5px !important;
             }
@@ -1637,7 +1646,7 @@
             }
             
             #splashLogo {
-                width: 35px !important;
+                width: 100px !important;
                 height: auto !important;
                 flex-shrink: 0;
             }
