@@ -23,23 +23,24 @@ class GameElementLoader {
     console.log('🎮 Initializing Game Element Loader...');
     
     try {
-      // Load from complete files for now
-      const elementsData = await this.loadJSON('elements-complete.json');
+      // Load from final overhauled files
+      const elementsData = await this.loadJSON('elements-final.json');
       
       // Load emoji files separately to preserve correct mappings
-      const [naturalEmojis, civilizationEmojis, modernEmojis, fictionalEmojis] = await Promise.all([
+      const [naturalEmojis, civilizationEmojis, modernEmojis, fictionalEmojis, overhaulEmojis] = await Promise.all([
         this.loadJSON('core/emojis-natural.json'),
         this.loadJSON('core/emojis-civilization.json'),
         this.loadJSON('core/emojis-modern.json'),
-        this.loadJSON('core/emojis-fictional.json')
+        this.loadJSON('core/emojis-fictional.json'),
+        this.loadJSON('core/emojis-overhaul.json').catch(() => ({})) // Overhaul emoji file
       ]);
       
-      // Build emoji map preserving natural emojis (don't let them be overwritten)
-      const emojisData = { ...fictionalEmojis, ...modernEmojis, ...civilizationEmojis, ...naturalEmojis };
+      // Build emoji map with overhaul taking priority
+      const emojisData = { ...fictionalEmojis, ...modernEmojis, ...civilizationEmojis, ...naturalEmojis, ...overhaulEmojis };
       
       // Try loading combinations with fallback
       let combinationsData = null;
-      for (const filename of ['combinations-logical-complete.json', 'combinations-flexible.json', 'combinations-expanded.json']) {
+      for (const filename of ['combinations-final.json', 'combinations-logical-fixed.json', 'combinations-logical-complete.json', 'combinations-flexible.json', 'combinations-expanded.json']) {
         try {
           combinationsData = await this.loadJSON(filename);
           console.log(`   ✓ Loaded combinations from ${filename}`);

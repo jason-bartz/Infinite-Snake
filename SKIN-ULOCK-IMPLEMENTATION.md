@@ -100,7 +100,7 @@ Time/Activity-based (4 skins)
 Play for 30 minutes total
 Play on 3 different days
 Get 25 kills total
-Eat 10 Void Orbs total
+Eat 15 Void Orbs total
 
 Uncommon Tier Unlocks
 Points-based (3 skins)
@@ -118,7 +118,7 @@ Discover 300 elements
 Special Achievement (3 skins)
 
 Get 50 kills total
-Eat 25 Catalyst Gems total
+Eat 30 Catalyst Gems total
 Play for 1 hour total
 
 Rare Tier Unlocks

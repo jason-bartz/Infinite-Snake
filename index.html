@@ -1236,7 +1236,7 @@
         
         .pause-button-mobile {
             position: absolute;
-            top: 80px; /* Moved higher from 50px to avoid boost button overlap */
+            top: 140px; /* Moved much higher to avoid boost button overlap */
             right: 20px;
             width: 50px;
             height: 50px;
@@ -1255,7 +1255,7 @@
         
         .mute-button-mobile {
             position: absolute;
-            top: 80px; /* Moved higher from 50px to avoid boost button overlap */
+            top: 140px; /* Moved much higher to avoid boost button overlap */
             right: 80px;
             width: 50px;
             height: 50px;
@@ -1325,7 +1325,7 @@
         }
         
         body.mobile .leaderboard-box {
-            top: 100px;
+            top: 140px; /* Moved down to avoid top bar overlap */
             bottom: auto;
             right: 10px;
             width: 180px;
@@ -1416,30 +1416,33 @@
         /* Mobile splash screen adjustments */
         @media (max-width: 800px) and (orientation: landscape) {
             #splashContent {
-                padding: 10px;
-                max-height: 90vh;
+                padding: 5px 10px; /* Reduced vertical padding */
+                max-height: 85vh; /* Reduced to ensure button visibility */
                 overflow-y: auto;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
             }
             
             #splashLogo {
-                width: 150px !important;
-                max-width: 150px !important;
+                width: 120px !important; /* Reduced from 150px */
+                max-width: 120px !important;
                 margin-bottom: 5px !important;
             }
             
             #splashScreen p {
-                font-size: 11px;
-                margin: 5px;
-                line-height: 1.3;
-                max-height: 80px;
+                font-size: 10px; /* Reduced from 11px */
+                margin: 3px; /* Reduced from 5px */
+                line-height: 1.2; /* Reduced from 1.3 */
+                max-height: 60px; /* Reduced from 80px */
                 overflow-y: auto;
             }
             
             #startButton {
                 margin-top: 5px;
-                margin-bottom: 5px;
-                padding: 6px 20px;
-                font-size: 14px;
+                margin-bottom: 10px; /* Increased to ensure visibility */
+                padding: 8px 25px; /* Slightly bigger for easier tapping */
+                font-size: 16px; /* Increased for better visibility */
             }
             
             #splashTitle {
@@ -1451,11 +1454,15 @@
             .virtual-joystick {
                 width: 100px !important;
                 height: 100px !important;
+                bottom: 20px !important;
+                left: 20px !important;
             }
             
             .boost-button {
                 width: 100px !important;
                 height: 100px !important;
+                bottom: 20px !important;
+                right: 20px !important;
             }
         }
         
