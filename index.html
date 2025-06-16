@@ -6784,7 +6784,7 @@
             // Performance optimization: Use for loop instead of for-of
             for (let snakeIdx = 0; snakeIdx < snakes.length; snakeIdx++) {
                 const snake = snakes[snakeIdx];
-                if (!snake.alive) continue;
+                if (!snake || !snake.alive) continue;
                 
                 // Check element collisions
                 const activeElements = elementPool.getActiveElements();
@@ -6797,6 +6797,7 @@
                 
                 for (let elemIdx = 0; elemIdx < activeElementsLength; elemIdx++) {
                     const element = activeElements[elemIdx];
+                    if (!element) continue; // Skip if element is undefined
                     
                     // Performance optimization: Use squared distance for initial check
                     const dx = element.x - snakeX;
@@ -6945,16 +6946,17 @@
                                     const spawnY = orb.y + Math.sin(spawnAngle) * spawnDistance;
                                     
                                     // Spawn the element with glow effect (using isCatalystSpawned for glow)
-                                    const newElement = elementPool.spawn(randomElement, spawnX, spawnY, true);
-                                    elements.push(newElement);
+                                    elementPool.spawn(randomElement, spawnX, spawnY, true);
                                     
                                     // Show message if player collected the orb
                                     if (snake.isPlayer) {
                                         const elementData = window.elementLoader && window.elementLoader.isLoaded && window.elementLoader.isLoaded() 
-                                            ? window.elementLoader.getElementByKey(randomElement)
+                                            ? window.elementLoader.elements.get(randomElement)
                                             : elementDatabase[randomElement];
                                         if (elementData) {
-                                            showMessage(`✨ The void reveals: ${elementData.emoji} ${elementData.name}!`, 'discovery');
+                                            const emoji = window.elementLoader.getEmojiForElement(randomElement, elementData.e);
+                                            const name = elementData.n;
+                                            showMessage(`✨ The void reveals: ${emoji} ${name}!`, 'discovery');
                                         }
                                     }
                                 }
@@ -6980,26 +6982,28 @@
                         if (snake.isPlayer && window.elementLoader && window.elementLoader.isLoaded && window.elementLoader.isLoaded()) {
                             // NEW CATALYST LOGIC: Find combinations that produce undiscovered elements
                             const undiscoveredCombinations = [];
-                            const allCombinations = window.elementLoader.getAllCombinations();
+                            const allCombinations = window.elementLoader.combinations || {};
                             
                             // Find all combinations that result in undiscovered elements
-                            for (const [combo, resultKey] of Object.entries(allCombinations)) {
-                                if (!discoveredElements.has(resultKey)) {
+                            for (const [combo, resultId] of Object.entries(allCombinations)) {
+                                if (!discoveredElements.has(resultId)) {
                                     const [elem1, elem2] = combo.split('+');
+                                    const elem1Id = parseInt(elem1);
+                                    const elem2Id = parseInt(elem2);
                                     
                                     // Check if both elements are discovered or base elements
-                                    const element1 = window.elementLoader.getElement(elem1);
-                                    const element2 = window.elementLoader.getElement(elem2);
+                                    const element1 = window.elementLoader.elements.get(elem1Id);
+                                    const element2 = window.elementLoader.elements.get(elem2Id);
                                     
                                     if (element1 && element2) {
-                                        const elem1Discovered = element1.tier === 0 || discoveredElements.has(elem1);
-                                        const elem2Discovered = element2.tier === 0 || discoveredElements.has(elem2);
+                                        const elem1Discovered = element1.t === 0 || discoveredElements.has(elem1Id);
+                                        const elem2Discovered = element2.t === 0 || discoveredElements.has(elem2Id);
                                         
                                         if (elem1Discovered && elem2Discovered) {
                                             undiscoveredCombinations.push({
-                                                element1: elem1,
-                                                element2: elem2,
-                                                result: resultKey,
+                                                element1: elem1Id,
+                                                element2: elem2Id,
+                                                result: resultId,
                                                 combo: combo
                                             });
                                         }
@@ -7025,15 +7029,14 @@
                                     const spawnY = snake.y + Math.sin(angle) * distance;
                                     
                                     // Create the element with catalyst sparkle effect
-                                    const newElement = elementPool.spawn(elementsToSpawn[j], spawnX, spawnY, true);
-                                    elements.push(newElement); // Add to the game's elements array
+                                    elementPool.spawn(elementsToSpawn[j], spawnX, spawnY, true);
                                 }
                                 
                                 // Get the result element info for the message
-                                const resultElement = window.elementLoader.getElement(selectedCombo.result);
-                                const resultName = resultElement ? resultElement.name : 'Unknown';
+                                const resultElement = window.elementLoader.elements.get(selectedCombo.result);
+                                const resultName = resultElement ? resultElement.n : 'Unknown';
                                 
-                                showMessage(`💎 Catalyst Gem activated!<br><small style="opacity: 0.8">Elements spawned that can create: ${resultName}</small>`, 'success');
+                                showMessage(`💎 Catalyst Gem Activated: New Elements Have Resonated Into Existence`, 'success');
                             } else {
                                 // Fallback: No undiscovered combinations available
                                 // Spawn random discovered elements
@@ -7051,11 +7054,10 @@
                                         const spawnX = snake.x + Math.cos(angle) * distance;
                                         const spawnY = snake.y + Math.sin(angle) * distance;
                                         
-                                        const newElement = elementPool.spawn(elementsToSpawn[j], spawnX, spawnY, true);
-                                        elements.push(newElement);
+                                        elementPool.spawn(elementsToSpawn[j], spawnX, spawnY, true);
                                     }
                                     
-                                    showMessage(`💎 Catalyst Gem activated!<br><small style="opacity: 0.8">All combinations discovered! Spawned random elements</small>`, 'success');
+                                    showMessage(`💎 Catalyst Gem Activated: New Elements Have Resonated Into Existence`, 'success');
                                 }
                             }
                             
@@ -7922,7 +7924,7 @@
             const elapsed = currentTime - lastTime;
             
             // Skip frame if not enough time has passed
-            if (elapsed < targetFrameTime) {
+            if (elapsed < targetFrameTime * 0.9) { // 90% of target time to avoid edge cases
                 return;
             }
             
@@ -7966,20 +7968,11 @@
             let updates = 0;
             while (accumulator >= FIXED_TIMESTEP && updates < MAX_UPDATES) {
                 // Update game objects with fixed timestep (1.0 = one 60fps frame)
-                // Staggered AI updates for better performance
-                const updateFrame = frameCount % 3; // Distribute AI updates across 3 frames
+                // Update all snakes - staggering removed due to complexity
                 for (let i = 0; i < snakes.length; i++) {
                     const snake = snakes[i];
                     if (snake.alive) {
-                        // Player always updates, AI updates are staggered
-                        if (snake.isPlayer || (i % 3) === updateFrame) {
-                            snake.update(1.0);
-                        } else if (!snake.isPlayer) {
-                            // Simple position update for non-updated AI snakes
-                            snake.x += fastMath.cos(snake.angle) * snake.speed;
-                            snake.y += fastMath.sin(snake.angle) * snake.speed;
-                            snake.updateSegments();
-                        }
+                        snake.update(1.0);
                     }
                 }
                 elementPool.update(1.0);
