@@ -11,7 +11,7 @@ class GameElementLoader {
     this.elementsByTier = new Map();
     this.elementsByName = new Map();
     this.loaded = false;
-    this.baseElements = [1, 2, 3, 4]; // Fire, Water, Earth, Air
+    this.baseElements = [1, 2, 3, 4]; // Earth, Air, Fire, Water
   }
 
   /**
@@ -23,36 +23,16 @@ class GameElementLoader {
     console.log('🎮 Initializing Game Element Loader...');
     
     try {
-      // Load from final overhauled files
-      const elementsData = await this.loadJSON('elements-final.json');
+      // Load from new v2 database files
+      const elementsData = await this.loadJSON('elements-final-v2.json');
       
-      // Load emoji files separately to preserve correct mappings
-      const [naturalEmojis, civilizationEmojis, modernEmojis, fictionalEmojis, overhaulEmojis] = await Promise.all([
-        this.loadJSON('core/emojis-natural.json'),
-        this.loadJSON('core/emojis-civilization.json'),
-        this.loadJSON('core/emojis-modern.json'),
-        this.loadJSON('core/emojis-fictional.json'),
-        this.loadJSON('core/emojis-overhaul.json').catch(() => ({})) // Overhaul emoji file
-      ]);
+      // Load emoji file
+      const emojisData = await this.loadJSON('core/emojis-v2.json');
       
-      // Build emoji map with overhaul taking priority
-      const emojisData = { ...fictionalEmojis, ...modernEmojis, ...civilizationEmojis, ...naturalEmojis, ...overhaulEmojis };
+      // Load combinations
+      const combinationsData = await this.loadJSON('combinations-final-v2.json');
       
-      // Try loading combinations with fallback
-      let combinationsData = null;
-      for (const filename of ['combinations-final.json', 'combinations-logical-fixed.json', 'combinations-logical-complete.json', 'combinations-flexible.json', 'combinations-expanded.json']) {
-        try {
-          combinationsData = await this.loadJSON(filename);
-          console.log(`   ✓ Loaded combinations from ${filename}`);
-          break;
-        } catch (error) {
-          console.log(`   ⚠️ Could not load ${filename}, trying next...`);
-        }
-      }
-      
-      if (!combinationsData) {
-        throw new Error('No combination files could be loaded');
-      }
+      console.log(`   ✓ Loaded v2 database files`);
       
       // Process elements
       this.emojis = emojisData;
@@ -141,10 +121,10 @@ class GameElementLoader {
     
     // Fix for base elements by ID
     const baseEmojiById = {
-      1: '🔥',  // Fire
-      2: '💧',  // Water  
-      3: '🌍',  // Earth
-      4: '💨'   // Air
+      1: '🌍',  // Earth
+      2: '💨',  // Air
+      3: '🔥',  // Fire
+      4: '💧'   // Water
     };
     
     // Check by element ID first
@@ -154,10 +134,10 @@ class GameElementLoader {
     
     // Then check by name
     const baseEmojis = {
-      'fire': '🔥',
-      'water': '💧', 
       'earth': '🌍',
-      'air': '💨'
+      'air': '💨',
+      'fire': '🔥',
+      'water': '💧'
     };
     
     const elementKey = element.n.toLowerCase();
