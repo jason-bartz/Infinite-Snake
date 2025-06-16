@@ -4,10 +4,10 @@ const path = require('path');
 
 const PORT = 8080;
 
-// Ensure the elements data directory exists
-const elementsDataDir = path.join(__dirname, 'elements/data');
-if (!fs.existsSync(elementsDataDir)) {
-  fs.mkdirSync(elementsDataDir, { recursive: true });
+// Ensure the elements-new directory exists
+const elementsNewDir = path.join(__dirname, 'elements/elements-new');
+if (!fs.existsSync(elementsNewDir)) {
+  fs.mkdirSync(elementsNewDir, { recursive: true });
 }
 
 const mimeTypes = {
@@ -175,7 +175,7 @@ const server = http.createServer((req, res) => {
         
         // Save element to main file
         if (element) {
-          const elementsPath = path.join(__dirname, 'elements', 'data', 'elements.json');
+          const elementsPath = path.join(__dirname, 'elements', 'elements-new', 'elements-all-unique.json');
           
           // Backup current file
           const backupPath = path.join(backupDir, `elements-all-unique-backup-${timestamp}.json`);
@@ -208,7 +208,7 @@ const server = http.createServer((req, res) => {
         
         // Save combinations to main file
         if (combinations) {
-          const combosPath = path.join(__dirname, 'elements', 'data', 'combinations.json');
+          const combosPath = path.join(__dirname, 'elements', 'elements-new', 'combinations.json');
           
           // Backup current file
           const backupPath = path.join(backupDir, `combinations-backup-${timestamp}.json`);
@@ -227,7 +227,7 @@ const server = http.createServer((req, res) => {
         
         // Save emojis to main file
         if (emojis) {
-          const emojisPath = path.join(__dirname, 'elements', 'data', 'emojis.json');
+          const emojisPath = path.join(__dirname, 'elements', 'elements-new', 'emojis.json');
           
           // Backup current file
           const backupPath = path.join(backupDir, `emojis-backup-${timestamp}.json`);

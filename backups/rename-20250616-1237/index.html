@@ -2265,7 +2265,7 @@
         }
     </style>
     <!-- New Element System Scripts -->
-    <script src="elements/data/loader.js"></script>
+    <script src="elements/elements-new/optimized-game-loader-simple.js"></script>
 </head>
 <body>
     <!-- Splash Screen -->
@@ -6859,48 +6859,146 @@
                     const gem = catalystGems[i];
                     const dist = Math.hypot(gem.x - snake.x, gem.y - snake.y);
                     if (dist < SEGMENT_SIZE + gem.size) {
-                        // Only activate if catalyst gem logic is ready
-                        if (snake.isPlayer && window.elementLoader && window.elementLoader.isLoaded && window.elementLoader.isLoaded()) {
-                            // NEW CATALYST LOGIC: Find combinations that produce undiscovered elements
-                            const undiscoveredCombinations = [];
-                            const allCombinations = window.elementLoader.getAllCombinations();
+                        // Only activate if snake has elements
+                        if (snake.elements.length > 0) {
+                            // Determine which elements to check for combinations
+                            let elementsToCheck = [];
                             
-                            // Find all combinations that result in undiscovered elements
-                            for (const [combo, resultKey] of Object.entries(allCombinations)) {
-                                if (!discoveredElements.has(resultKey)) {
-                                    const [elem1, elem2] = combo.split('+');
+                            if (snake.elements.length === 1) {
+                                // If player has only 1 element, use it 4 times
+                                elementsToCheck = Array(4).fill(snake.elements[0]);
+                            } else if (snake.elements.length <= 4) {
+                                // If player has 2-4 elements, use all of them
+                                elementsToCheck = [...snake.elements];
+                            } else {
+                                // If player has more than 4 elements, randomly select 4
+                                const shuffled = [...snake.elements].sort(() => Math.random() - 0.5);
+                                elementsToCheck = shuffled.slice(0, 4);
+                            }
+                            
+                            console.log('[CATALYST GEM] Checking elements:', elementsToCheck);
+                            
+                            // Find all compatible elements for each element we're checking
+                            const allCompatibleElements = [];
+                            const compatibleByElement = {};
+                            
+                            for (const element of elementsToCheck) {
+                                compatibleByElement[element] = [];
+                                
+                                if (window.elementLoader && window.elementLoader.isLoaded && window.elementLoader.isLoaded()) {
+                                    // Use new element loader system
+                                    const allElements = window.elementLoader.getAllElements();
                                     
-                                    // Check if both elements are discovered or base elements
-                                    const element1 = window.elementLoader.getElement(elem1);
-                                    const element2 = window.elementLoader.getElement(elem2);
-                                    
-                                    if (element1 && element2) {
-                                        const elem1Discovered = element1.tier === 0 || discoveredElements.has(elem1);
-                                        const elem2Discovered = element2.tier === 0 || discoveredElements.has(elem2);
+                                    for (const otherElement of allElements) {
+                                        // Skip if not discovered (except base elements)
+                                        if (otherElement.tier > 0 && !discoveredElements.has(otherElement.key)) {
+                                            continue;
+                                        }
                                         
-                                        if (elem1Discovered && elem2Discovered) {
-                                            undiscoveredCombinations.push({
-                                                element1: elem1,
-                                                element2: elem2,
-                                                result: resultKey,
+                                        const result = window.elementLoader.getCombinationByKeys(element, otherElement.key);
+                                        if (result) {
+                                            compatibleByElement[element].push({
+                                                element: otherElement.key,
+                                                result: result.key,
+                                                combo: `${element}+${otherElement.key}`
+                                            });
+                                            allCompatibleElements.push({
+                                                element: otherElement.key,
+                                                result: result.key,
+                                                combo: `${element}+${otherElement.key}`,
+                                                baseElement: element
+                                            });
+                                        }
+                                    }
+                                } else {
+                                    // Fallback to old system
+                                    for (const [combo, result] of Object.entries(combinations)) {
+                                        const [elem1, elem2] = combo.split('+');
+                                        if (elem1 === element) {
+                                            compatibleByElement[element].push({
+                                                element: elem2,
+                                                result: result,
                                                 combo: combo
+                                            });
+                                            allCompatibleElements.push({
+                                                element: elem2,
+                                                result: result,
+                                                combo: combo,
+                                                baseElement: element
                                             });
                                         }
                                     }
                                 }
                             }
                             
-                            console.log('[CATALYST GEM] Found', undiscoveredCombinations.length, 'combinations that produce undiscovered elements');
+                            console.log('[CATALYST GEM] Found', allCompatibleElements.length, 'compatible elements');
                             
-                            if (undiscoveredCombinations.length > 0) {
-                                // Randomly select one combination
-                                const selectedCombo = undiscoveredCombinations[Math.floor(Math.random() * undiscoveredCombinations.length)];
-                                const elementsToSpawn = [selectedCombo.element1, selectedCombo.element2];
+                            // Continue with the rest of the logic for spawning elements
+                            if (allCompatibleElements.length > 0 && snake.isPlayer) {
+                                // Try to prioritize combinations that would create new discoveries
+                                const undiscoveredCombos = allCompatibleElements.filter(item => {
+                                    // Check if this combination would result in a new discovery
+                                    return !discoveredElements.has(item.result);
+                                });
                                 
-                                console.log('[CATALYST GEM] Selected combination:', selectedCombo.combo, '→', selectedCombo.result);
-                                console.log('[CATALYST GEM] Spawning elements:', elementsToSpawn);
+                                // Use undiscovered combinations if available, otherwise use all compatible
+                                const prioritizedElements = undiscoveredCombos.length > 0 ? undiscoveredCombos : allCompatibleElements;
                                 
-                                // Spawn the two elements around the player
+                                const elementsToSpawn = [];
+                                const spawnCount = Math.min(4, allCompatibleElements.length);
+                                
+                                // If we have undiscovered combinations, prioritize at least one
+                                if (undiscoveredCombos.length > 0 && elementsToSpawn.length === 0) {
+                                    const randomUndiscovered = undiscoveredCombos[Math.floor(Math.random() * undiscoveredCombos.length)];
+                                    elementsToSpawn.push(randomUndiscovered.element);
+                                }
+                                
+                                // If we have elements for different base elements, try to get one for each
+                                if (elementsToCheck.length > 1) {
+                                    const uniqueBaseElements = [...new Set(elementsToCheck)];
+                                    for (const baseElement of uniqueBaseElements) {
+                                        if (elementsToSpawn.length >= spawnCount) break;
+                                        
+                                        // First try to find undiscovered combinations for this base element
+                                        const undiscoveredForBase = prioritizedElements.filter(item => 
+                                            item.baseElement === baseElement
+                                        );
+                                        
+                                        if (undiscoveredForBase.length > 0) {
+                                            const randomUndiscovered = undiscoveredForBase[Math.floor(Math.random() * undiscoveredForBase.length)];
+                                            if (!elementsToSpawn.includes(randomUndiscovered.element)) {
+                                                elementsToSpawn.push(randomUndiscovered.element);
+                                            }
+                                        } else {
+                                            // Fall back to any compatible element for this base
+                                            const compatible = compatibleByElement[baseElement];
+                                            if (compatible.length > 0) {
+                                                const randomCompatible = compatible[Math.floor(Math.random() * compatible.length)];
+                                                if (!elementsToSpawn.includes(randomCompatible.element)) {
+                                                    elementsToSpawn.push(randomCompatible.element);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                
+                                // Fill remaining slots with prioritized elements (undiscovered if available)
+                                while (elementsToSpawn.length < spawnCount && prioritizedElements.length > 0) {
+                                    const remainingElements = prioritizedElements.filter(item => 
+                                        !elementsToSpawn.includes(item.element)
+                                    );
+                                    
+                                    if (remainingElements.length > 0) {
+                                        const randomItem = remainingElements[Math.floor(Math.random() * remainingElements.length)];
+                                        elementsToSpawn.push(randomItem.element);
+                                    } else {
+                                        break;
+                                    }
+                                }
+                                
+                                console.log('[CATALYST GEM] Spawning', elementsToSpawn.length, 'elements:', elementsToSpawn);
+                                
+                                // Spawn the elements around the player
                                 for (let j = 0; j < elementsToSpawn.length; j++) {
                                     const angle = (j / elementsToSpawn.length) * Math.PI * 2;
                                     const distance = 100 + Math.random() * 100;
@@ -6912,53 +7010,14 @@
                                     elements.push(newElement); // Add to the game's elements array
                                 }
                                 
-                                // Get the result element info for the message
-                                const resultElement = window.elementLoader.getElement(selectedCombo.result);
-                                const resultName = resultElement ? resultElement.name : 'Unknown';
-                                
-                                showMessage(`💎 Catalyst Gem activated!<br><small style="opacity: 0.8">Elements spawned that can create: ${resultName}</small>`, 'success');
-                            } else {
-                                // Fallback: No undiscovered combinations available
-                                // Spawn random discovered elements
-                                const discoveredElementsList = Array.from(discoveredElements);
-                                if (discoveredElementsList.length >= 2) {
-                                    const shuffled = [...discoveredElementsList].sort(() => Math.random() - 0.5);
-                                    const elementsToSpawn = shuffled.slice(0, 2);
-                                    
-                                    console.log('[CATALYST GEM] No undiscovered combinations available, spawning random elements:', elementsToSpawn);
-                                    
-                                    // Spawn the elements
-                                    for (let j = 0; j < elementsToSpawn.length; j++) {
-                                        const angle = (j / elementsToSpawn.length) * Math.PI * 2;
-                                        const distance = 100 + Math.random() * 100;
-                                        const spawnX = snake.x + Math.cos(angle) * distance;
-                                        const spawnY = snake.y + Math.sin(angle) * distance;
-                                        
-                                        const newElement = elementPool.spawn(elementsToSpawn[j], spawnX, spawnY, true);
-                                        elements.push(newElement);
-                                    }
-                                    
-                                    showMessage(`💎 Catalyst Gem activated!<br><small style="opacity: 0.8">All combinations discovered! Spawned random elements</small>`, 'success');
-                                }
+                                showMessage(`💎 Catalyst Gem activated! Spawned ${elementsToSpawn.length} compatible elements<br><small style="opacity: 0.8">New elements have resonated into existence</small>`, 'success');
+                            } else if (allCompatibleElements.length > 0 && !snake.isPlayer) {
+                                // AI snakes get points instead
+                                snake.score += 200;
                             }
                             
                             // Play catalyst gem sound at appropriate volume
-                            playCatalystGemSound(true);
-                            
-                            // Create particle effect
-                            for (let j = 0; j < 20; j++) {
-                                const angle = (j / 20) * Math.PI * 2;
-                                const speed = 3 + Math.random() * 4;
-                                const vx = Math.cos(angle) * speed;
-                                const vy = Math.sin(angle) * speed;
-                                particlePool.spawn(gem.x, gem.y, vx, vy, 'rgba(255, 165, 0, 0.8)');
-                            }
-                        } else if (!snake.isPlayer) {
-                            // AI snakes get points instead
-                            snake.score += 200;
-                            
-                            // Play catalyst gem sound at appropriate volume
-                            playCatalystGemSound(false);
+                            playCatalystGemSound(snake.isPlayer);
                             
                             // Create particle effect
                             for (let j = 0; j < 20; j++) {

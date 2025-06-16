@@ -1,1101 +1,1581 @@
-// Admin Panel JavaScript - Fixed version with correct paths and detailed logging
-let allElements = {};
-let allCombinations = {};
-let currentTab = 'database';
-let currentPage = 1;
-const elementsPerPage = 10; // Reduced for better performance
+// Simple Admin Panel
+let elements = {};
+let combinations = {};
+let emojis = {};
+let currentElement = null;
+let deletedElements = [];
+let deletedCombinations = [];
 
-// Performance tracking
-const perfLog = [];
-function logPerf(stage, startTime) {
-    const duration = Date.now() - startTime;
-    const entry = `${stage}: ${duration}ms`;
-    perfLog.push(entry);
-    console.log(`[PERF] ${entry}`);
-}
-
-// Initialize with safety checks
+// Initialize
 document.addEventListener('DOMContentLoaded', async function() {
-    const initStart = Date.now();
-    console.log('[INIT] DOMContentLoaded fired, initializing admin panel...');
+    console.log('Initializing admin panel...');
     
-    // Prevent multiple initializations
-    if (window.adminInitialized) {
-        console.warn('[INIT] Admin panel already initialized');
-        return;
-    }
-    window.adminInitialized = true;
+    await loadData();
     
-    try {
-        // Add loading indicator
-        const container = document.querySelector('.container');
-        if (container) {
-            const loadingDiv = document.createElement('div');
-            loadingDiv.id = 'init-loading';
-            loadingDiv.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1a1a1a; padding: 30px; border-radius: 8px; z-index: 9999; border: 2px solid #4ecdc4;';
-            loadingDiv.innerHTML = '<h2 style="color: #4ecdc4;">Loading Admin Panel...</h2><div id="loading-status" style="margin-top: 10px; color: #888;"></div>';
-            document.body.appendChild(loadingDiv);
+    // Set up search
+    const searchInput = document.getElementById('search');
+    let searchTimeout;
+    
+    searchInput.addEventListener('input', function(e) {
+        clearTimeout(searchTimeout);
+        const query = e.target.value.trim();
+        
+        if (query.length < 2) {
+            hideResults();
+            return;
         }
         
-        const updateLoadingStatus = (msg) => {
-            const statusEl = document.getElementById('loading-status');
-            if (statusEl) statusEl.textContent = msg;
-            console.log(`[LOADING] ${msg}`);
-        };
-        
-        // Load element data
-        updateLoadingStatus('Loading element data...');
-        const elemStart = Date.now();
-        await loadElementData();
-        logPerf('Element data loaded', elemStart);
-        
-        // Load combination data
-        updateLoadingStatus('Loading combination data...');
-        const comboStart = Date.now();
-        await loadCombinationData();
-        logPerf('Combination data loaded', comboStart);
-        
-        // Initial render with error handling
-        updateLoadingStatus('Rendering interface...');
-        const renderStart = Date.now();
-        
-        try {
-            renderDatabaseEmpty();
-        } catch (err) {
-            console.error('[INIT] Error rendering database:', err);
-        }
-        
-        try {
-            renderStats();
-        } catch (err) {
-            console.error('[INIT] Error rendering stats:', err);
-        }
-        
-        logPerf('Initial render complete', renderStart);
-        
-        // Remove loading indicator
-        const loadingDiv = document.getElementById('init-loading');
-        if (loadingDiv) loadingDiv.remove();
-        
-        logPerf('Total initialization', initStart);
-        console.log('[INIT] Admin panel initialization complete');
-        console.log('[PERF] Performance summary:', perfLog);
-        
-        // Set a flag that initialization completed
-        window.adminReady = true;
-        
-    } catch (error) {
-        console.error('[INIT] Error during initialization:', error);
-        console.error('[INIT] Stack trace:', error.stack);
-        
-        // Show error in UI
-        const grid = document.getElementById('element-grid');
-        if (grid) {
-            grid.innerHTML = `<div style="color: #e74c3c; padding: 20px; text-align: center;">
-                <h3>Error Loading Admin Panel</h3>
-                <p>${error.message}</p>
-                <p style="font-size: 14px; margin-top: 10px;">Check the browser console for details</p>
-            </div>`;
-        }
-        
-        // Remove loading indicator on error
-        const loadingDiv = document.getElementById('init-loading');
-        if (loadingDiv) loadingDiv.remove();
-    }
+        // Debounce search
+        searchTimeout = setTimeout(() => {
+            searchElement(query);
+        }, 300);
+    });
 });
 
-// Tab switching - make it globally accessible
-window.switchTab = function(tabName) {
-    console.log(`[TAB] Switching to ${tabName}`);
-    
-    // Update tab buttons
-    document.querySelectorAll('.tab').forEach(tab => {
-        tab.classList.remove('active');
-    });
-    
-    // Find and activate the clicked tab
-    const clickedTab = document.querySelector(`.tab[onclick*="${tabName}"]`);
-    if (clickedTab) {
-        clickedTab.classList.add('active');
-    }
-    
-    // Update content
-    document.querySelectorAll('.tab-content').forEach(content => {
-        content.classList.remove('active');
-    });
-    document.getElementById(`${tabName}-tab`).classList.add('active');
-    
-    currentTab = tabName;
-    
-    // Render appropriate content
-    const renderStart = Date.now();
-    switch(tabName) {
-        case 'database':
-            renderDatabase();
-            break;
-        case 'combinations':
-            renderCombinations();
-            break;
-        case 'trees':
-            // Tree view handled separately
-            break;
-        case 'stats':
-            renderStats();
-            break;
-    }
-    logPerf(`Rendered ${tabName} tab`, renderStart);
-}
-
-// Load element data from game files
-async function loadElementData() {
-    console.log('[LOAD] Starting loadElementData...');
+// Load data
+async function loadData() {
     try {
-        // Load all element files from elements-new subdirectory
-        const files = [
-            '/elements/elements-new/elements-core.json',
-            '/elements/elements-new/elements-life.json',
-            '/elements/elements-new/elements-civilization.json',
-            '/elements/elements-new/elements-modern.json',
-            '/elements/elements-new/elements-fictional.json',
-            '/elements/elements-new/elements-humorous-fusions.json'
-        ];
-        
-        console.log('[LOAD] Loading element files:', files);
-        
-        let totalElementsLoaded = 0;
-        
-        for (const file of files) {
-            try {
-                const fileStart = Date.now();
-                console.log(`[LOAD] Fetching ${file}...`);
-                
-                // Add timeout to prevent hanging
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 5000);
-                
-                const response = await fetch(file, { signal: controller.signal });
-                clearTimeout(timeoutId);
-                
-                console.log(`[LOAD] Response status for ${file}:`, response.status);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                const data = await response.json();
-                let fileElementCount = 0;
-                
-                // Handle both array format and object format
-                if (Array.isArray(data)) {
-                    fileElementCount = data.length;
-                    console.log(`[LOAD] Processing ${fileElementCount} elements from ${file} (array format)`);
-                    
-                    // Convert array format to object format with safety checks
-                    data.forEach((elem, index) => {
-                        if (!elem || typeof elem !== 'object') {
-                            console.warn(`[LOAD] Invalid element at index ${index} in ${file}:`, elem);
-                            return;
-                        }
-                        
-                        const id = elem.i;
-                        if (!id) {
-                            console.warn(`[LOAD] Element missing ID at index ${index} in ${file}:`, elem);
-                            return;
-                        }
-                        
-                        allElements[id] = {
-                            name: elem.n || 'Unknown',
-                            tier: elem.t || 1,
-                            emoji: elem.e || '❓',
-                            flags: elem.f || []
-                        };
-                    });
-                } else if (typeof data === 'object') {
-                    fileElementCount = Object.keys(data).length;
-                    console.log(`[LOAD] Processing ${fileElementCount} elements from ${file} (object format)`);
-                    
-                    // Validate and merge object format
-                    Object.entries(data).forEach(([id, elem]) => {
-                        if (!elem || typeof elem !== 'object') {
-                            console.warn(`[LOAD] Invalid element for ID ${id} in ${file}:`, elem);
-                            return;
-                        }
-                        
-                        allElements[id] = {
-                            name: elem.name || elem.n || 'Unknown',
-                            tier: elem.tier || elem.t || 1,
-                            emoji: elem.emoji || elem.e || '❓',
-                            flags: elem.flags || elem.f || []
-                        };
-                    });
-                } else {
-                    console.error(`[LOAD] Invalid data format in ${file}:`, typeof data);
-                }
-                
-                totalElementsLoaded += fileElementCount;
-                logPerf(`Loaded ${file} (${fileElementCount} elements)`, fileStart);
-                
-            } catch (err) {
-                console.error(`[LOAD] Could not load ${file}:`, err);
-                // Continue loading other files even if one fails
-            }
-        }
-        
-        console.log(`[LOAD] Total unique elements loaded: ${Object.keys(allElements).length} (processed ${totalElementsLoaded} total)`);
-        
-        // Load emojis using dynamic import - FIXED path
+        // Load combined elements file (now includes all custom elements)
         try {
-            console.log('[LOAD] Loading emojis...');
-            const emojiStart = Date.now();
-            const emojiModule = await import('/elements/elements-new/emojis.js');
+            const response = await fetch('/elements/elements-new/elements-all-unique.json');
+            const data = await response.json();
             
-            if (emojiModule.EMOJI_MAP) {
-                window.elementEmojis = emojiModule.EMOJI_MAP;
-                console.log(`[LOAD] Emojis loaded successfully (${Object.keys(emojiModule.EMOJI_MAP).length} entries)`);
-            } else {
-                console.warn('[LOAD] EMOJI_MAP not found in emoji module');
-            }
-            
-            logPerf('Emoji loading', emojiStart);
-        } catch (err) {
-            console.error('[LOAD] Could not load emojis:', err);
-            // Initialize empty emoji map as fallback
-            window.elementEmojis = {};
-        }
-        
-    } catch (error) {
-        console.error('[LOAD] Error loading element data:', error);
-        showMessage('Error loading element data: ' + error.message, 'error');
-        throw error; // Re-throw to handle in initialization
-    }
-}
-
-// Load combination data
-async function loadCombinationData() {
-    console.log('[LOAD] Starting loadCombinationData...');
-    try {
-        // FIXED: Use correct path
-        const file = '/elements/elements-new/combinations.json';
-        const comboStart = Date.now();
-        
-        console.log(`[LOAD] Fetching ${file}...`);
-        const response = await fetch(file);
-        console.log(`[LOAD] Response status for combinations:`, response.status);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        const rawComboCount = Object.keys(data).length;
-        console.log(`[LOAD] Processing ${rawComboCount} combinations`);
-        
-        // Clear existing combinations
-        allCombinations = {};
-        let processedCount = 0;
-        let invalidCount = 0;
-        
-        // Convert the object format to our expected format with validation
-        Object.entries(data).forEach(([key, result]) => {
-            try {
-                // Validate key format
-                if (!key.includes('+')) {
-                    console.warn(`[LOAD] Invalid combination key format: ${key}`);
-                    invalidCount++;
-                    return;
-                }
-                
-                const [elem1Str, elem2Str] = key.split('+');
-                const elem1 = parseInt(elem1Str);
-                const elem2 = parseInt(elem2Str);
-                
-                // Validate element IDs
-                if (isNaN(elem1) || isNaN(elem2)) {
-                    console.warn(`[LOAD] Invalid element IDs in combination: ${key}`);
-                    invalidCount++;
-                    return;
-                }
-                
-                const combo = {
-                    element1: elem1,
-                    element2: elem2,
-                    result: parseInt(result)
+            // Convert array format to object
+            data.forEach(elem => {
+                elements[elem.i] = {
+                    id: elem.i,
+                    name: elem.n,
+                    tier: elem.t,
+                    emojiIndex: elem.e
                 };
+            });
+            
+            console.log(`Loaded ${data.length} elements from main file`);
+        } catch (err) {
+            console.error('Failed to load elements:', err);
+        }
+        
+        console.log(`Loaded ${Object.keys(elements).length} elements`);
+        
+        // Load combinations (now includes all custom combinations)
+        const comboResponse = await fetch('/elements/elements-new/combinations.json');
+        const comboData = await comboResponse.json();
+        
+        // Store combinations in both directions
+        Object.entries(comboData).forEach(([key, result]) => {
+            combinations[key] = result;
+            // Also store reverse
+            const [a, b] = key.split('+');
+            combinations[`${b}+${a}`] = result;
+        });
+        
+        console.log(`Loaded ${Object.keys(combinations).length} combinations`);
+        
+        // Load emojis from JSON file (now includes all custom emojis)
+        try {
+            const emojiResponse = await fetch('/elements/elements-new/emojis.json');
+            emojis = await emojiResponse.json();
+            console.log(`Loaded ${Object.keys(emojis).length} emojis`);
+        } catch (err) {
+            console.warn('Failed to load emojis:', err);
+        }
+        
+        // Load deleted elements list
+        try {
+            const deletedElementsResponse = await fetch('/elements/deleted-elements.json');
+            if (deletedElementsResponse.ok) {
+                deletedElements = await deletedElementsResponse.json();
+                console.log(`Loaded ${deletedElements.length} deleted elements`);
                 
-                // Store both directions for easier lookup
-                const comboKey = `${elem1}_${elem2}`;
-                const reverseKey = `${elem2}_${elem1}`;
-                allCombinations[comboKey] = combo;
-                allCombinations[reverseKey] = combo;
-                processedCount += 2;
-                
-            } catch (err) {
-                console.error(`[LOAD] Error processing combination ${key}:`, err);
-                invalidCount++;
+                // Remove deleted elements from the loaded elements
+                deletedElements.forEach(id => {
+                    delete elements[id];
+                });
             }
-        });
+        } catch (err) {
+            console.log('No deleted elements file yet');
+        }
         
-        console.log(`[LOAD] Combination processing complete:`, {
-            raw: rawComboCount,
-            processed: processedCount,
-            invalid: invalidCount,
-            stored: Object.keys(allCombinations).length
-        });
-        
-        logPerf('Combination data processing', comboStart);
+        // Load deleted combinations list
+        try {
+            const deletedCombosResponse = await fetch('/elements/deleted-combinations.json');
+            if (deletedCombosResponse.ok) {
+                deletedCombinations = await deletedCombosResponse.json();
+                console.log(`Loaded ${deletedCombinations.length} deleted combinations`);
+                
+                // Remove deleted combinations from the loaded combinations
+                deletedCombinations.forEach(combo => {
+                    delete combinations[combo];
+                    const [a, b] = combo.split('+');
+                    delete combinations[`${b}+${a}`];
+                });
+            }
+        } catch (err) {
+            console.log('No deleted combinations file yet');
+        }
         
     } catch (error) {
-        console.error('[LOAD] Error loading combination data:', error);
-        showMessage('Error loading combination data: ' + error.message, 'error');
-        throw error; // Re-throw to handle in initialization
+        console.error('Error loading data:', error);
+        showMessage('Failed to load data', 'error');
     }
 }
 
-// Render empty database view
-function renderDatabaseEmpty() {
-    console.log('[RENDER] Rendering empty database view');
-    const grid = document.getElementById('element-grid');
-    if (!grid) {
-        console.error('[RENDER] Element grid not found!');
+// Search for element
+function searchElement(query) {
+    const results = document.getElementById('results');
+    results.innerHTML = '<div class="loading">Searching...</div>';
+    results.classList.add('active');
+    
+    // Search by ID first
+    if (elements[query]) {
+        showElement(query);
         return;
     }
     
-    grid.innerHTML = `
-        <div style="text-align: center; padding: 50px; color: #888;">
-            <h2 style="color: #4ecdc4; margin-bottom: 20px;">🔍 Search Elements</h2>
-            <p style="font-size: 18px; margin-bottom: 10px;">Enter an element name or ID in the search box above</p>
-            <p style="font-size: 16px;">Or use the tier filter and checkboxes to browse specific categories</p>
-            <p style="font-size: 14px; margin-top: 20px; color: #4ecdc4;">Total elements loaded: ${Object.keys(allElements).length}</p>
-        </div>
-    `;
-    
-    // Update tier filter
-    updateTierFilter();
-    
-    // Clear pagination
-    const pagination = document.getElementById('pagination');
-    if (pagination) pagination.innerHTML = '';
-}
-
-// Render database view
-function renderDatabase() {
-    console.log('[RENDER] Starting database render');
-    const renderStart = Date.now();
-    
-    const grid = document.getElementById('element-grid');
-    
-    if (!grid) {
-        console.error('[RENDER] Element grid not found');
-        return;
-    }
-    
-    // Check if we have loaded elements
-    if (Object.keys(allElements).length === 0) {
-        grid.innerHTML = '<div class="loading">No elements loaded yet. Please refresh the page or check the console for errors.</div>';
-        return;
-    }
-    
-    // Check if there are any search criteria
-    const searchTerm = document.getElementById('element-search')?.value || '';
-    const tierFilter = document.getElementById('tier-filter')?.value || '';
-    const showOrphans = document.getElementById('show-orphans')?.checked || false;
-    const showNoRecipe = document.getElementById('show-no-recipe')?.checked || false;
-    
-    if (!searchTerm && !tierFilter && !showOrphans && !showNoRecipe) {
-        renderDatabaseEmpty();
-        return;
-    }
-    
-    // Require at least 2 characters for search
-    if (searchTerm && searchTerm.length < 2) {
-        grid.innerHTML = '<div style="text-align: center; padding: 50px; color: #888;">Please enter at least 2 characters to search</div>';
-        document.getElementById('pagination').innerHTML = '';
-        return;
-    }
-    
-    const filterStart = Date.now();
-    const filtered = filterElementsData();
-    console.log(`[RENDER] Filtered ${filtered.length} elements in ${Date.now() - filterStart}ms`);
-    
-    const paged = paginate(filtered, currentPage, elementsPerPage);
-    
-    // Update tier filter if needed
-    updateTierFilter();
-    
-    // Render elements
-    grid.innerHTML = '';
-    
-    if (paged.items.length === 0) {
-        grid.innerHTML = '<div class="loading">No elements match your filters.</div>';
-        return;
-    }
-    
-    // Use DocumentFragment for better performance
-    const fragment = document.createDocumentFragment();
-    const cardStart = Date.now();
-    
-    paged.items.forEach(([id, element]) => {
-        const cardHTML = createElementCard(id, element);
-        if (cardHTML) {
-            const temp = document.createElement('div');
-            temp.innerHTML = cardHTML;
-            fragment.appendChild(temp.firstChild);
-        }
-    });
-    
-    grid.appendChild(fragment);
-    console.log(`[RENDER] Created ${paged.items.length} cards in ${Date.now() - cardStart}ms`);
-    
-    // Render pagination
-    renderPagination(paged.totalPages);
-    
-    logPerf('Database render', renderStart);
-}
-
-// Create element card HTML
-function createElementCard(id, element) {
-    if (!element) {
-        console.error(`[RENDER] Element not found for ID: ${id}`);
-        return '';
-    }
-    
-    const emoji = window.elementEmojis?.[id] || element.emoji || '❓';
-    const combinations = findCombinationsForElement(id);
-    
-    return `
-        <div class="element-card" data-id="${id}">
-            <div class="element-header">
-                <div class="element-emoji" onclick="copyEmoji('${emoji}')">${emoji}</div>
-                <div class="element-info">
-                    <div class="element-id">ID: ${id}</div>
-                    <div class="element-name">${element.name}</div>
-                    <div class="element-tier tier-${element.tier || 0}">Tier ${element.tier || 0}</div>
-                </div>
-            </div>
-            ${combinations.length > 0 ? `
-                <div class="combinations-list">
-                    <strong>Recipes (${combinations.length}):</strong>
-                    ${combinations.slice(0, 3).map(combo => `
-                        <div class="combination-item">
-                            ${getElementDisplay(combo.element1)} + ${getElementDisplay(combo.element2)} → ${getElementDisplay(combo.result)}
-                        </div>
-                    `).join('')}
-                    ${combinations.length > 3 ? `<div style="color: #888;">... and ${combinations.length - 3} more</div>` : ''}
-                </div>
-            ` : '<div class="combinations-list" style="color: #888;">No recipes found</div>'}
-            <div style="margin-top: 15px;">
-                <button onclick="editElement('${id}')">✏️ Edit</button>
-                <button class="danger" onclick="deleteElement('${id}')">🗑️ Delete</button>
-            </div>
-        </div>
-    `;
-}
-
-// Get element display (emoji + name)
-function getElementDisplay(elementId) {
-    const element = allElements[elementId];
-    if (!element) return `Unknown (${elementId})`;
-    const emoji = window.elementEmojis?.[elementId] || element.emoji || '❓';
-    return `${emoji} ${element.name}`;
-}
-
-// Find combinations that create or use an element
-function findCombinationsForElement(elementId) {
-    const combinations = [];
-    const seen = new Set();
-    const elementIdNum = parseInt(elementId);
-    
-    Object.values(allCombinations).forEach(combo => {
-        if (combo.result === elementIdNum) {
-            // Create a unique key for this combination
-            const key = [combo.element1, combo.element2].sort().join('_');
-            
-            // Avoid duplicates
-            if (!seen.has(key)) {
-                seen.add(key);
-                combinations.push(combo);
-            }
-        }
-    });
-    
-    return combinations;
-}
-
-// Filter elements based on search and filters
-function filterElementsData() {
-    const searchTerm = document.getElementById('element-search')?.value.toLowerCase() || '';
-    const tierFilter = document.getElementById('tier-filter')?.value || '';
-    const showOrphans = document.getElementById('show-orphans')?.checked || false;
-    const showNoRecipe = document.getElementById('show-no-recipe')?.checked || false;
-    
-    return Object.entries(allElements).filter(([id, element]) => {
-        // Search filter
-        if (searchTerm && !element.name.toLowerCase().includes(searchTerm) && !id.includes(searchTerm)) {
-            return false;
-        }
-        
-        // Tier filter
-        if (tierFilter && element.tier != tierFilter) {
-            return false;
-        }
-        
-        // Orphan filter (elements not used in any combination)
-        if (showOrphans) {
-            const usedInCombos = Object.values(allCombinations).some(combo => 
-                combo.element1 == id || combo.element2 == id
-            );
-            if (usedInCombos) return false;
-        }
-        
-        // No recipe filter
-        if (showNoRecipe) {
-            const hasRecipe = findCombinationsForElement(id).length > 0;
-            if (hasRecipe) return false;
-        }
-        
-        return true;
-    });
-}
-
-// Update tier filter options
-function updateTierFilter() {
-    const filter = document.getElementById('tier-filter');
-    if (!filter || filter.options.length > 1) return;
-    
-    const tiers = new Set();
-    Object.values(allElements).forEach(element => {
-        tiers.add(element.tier || 1);
-    });
-    
-    Array.from(tiers).sort((a, b) => a - b).forEach(tier => {
-        const option = document.createElement('option');
-        option.value = tier;
-        option.textContent = `Tier ${tier}`;
-        filter.appendChild(option);
-    });
-}
-
-// Pagination
-function paginate(items, page, perPage) {
-    const totalPages = Math.ceil(items.length / perPage);
-    const start = (page - 1) * perPage;
-    const end = start + perPage;
-    
-    return {
-        items: items.slice(start, end),
-        totalPages,
-        currentPage: page,
-        totalItems: items.length
-    };
-}
-
-// Render pagination controls
-function renderPagination(totalPages) {
-    const container = document.getElementById('pagination');
-    if (!container) return;
-    
-    container.innerHTML = '';
-    
-    // Previous button
-    if (currentPage > 1) {
-        container.innerHTML += `<button class="page-button" onclick="changePage(${currentPage - 1})">← Previous</button>`;
-    }
-    
-    // Page numbers
-    for (let i = 1; i <= totalPages; i++) {
-        if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
-            container.innerHTML += `<button class="page-button ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
-        } else if (i === currentPage - 3 || i === currentPage + 3) {
-            container.innerHTML += `<span style="padding: 0 10px;">...</span>`;
+    // Search by name
+    const queryLower = query.toLowerCase();
+    for (const [id, elem] of Object.entries(elements)) {
+        if (elem.name.toLowerCase() === queryLower) {
+            showElement(id);
+            return;
         }
     }
     
-    // Next button
-    if (currentPage < totalPages) {
-        container.innerHTML += `<button class="page-button" onclick="changePage(${currentPage + 1})">Next →</button>`;
-    }
-}
-
-// Change page
-window.changePage = function(page) {
-    console.log(`[PAGE] Changing to page ${page}`);
-    currentPage = page;
-    renderDatabase();
-}
-
-// Filter elements
-window.filterElements = function() {
-    console.log('[FILTER] Filter changed, resetting to page 1');
-    currentPage = 1;
-    renderDatabase();
-}
-
-// Refresh database
-window.refreshDatabase = function() {
-    console.log('[REFRESH] Refreshing database...');
-    showMessage('Refreshing database...', 'success');
-    
-    // Clear existing data
-    allElements = {};
-    allCombinations = {};
-    
-    // Reload everything
-    Promise.all([loadElementData(), loadCombinationData()])
-        .then(() => {
-            renderDatabase();
-            showMessage('Database refreshed successfully', 'success');
-        })
-        .catch(error => {
-            console.error('[REFRESH] Error:', error);
-            showMessage('Error refreshing database: ' + error.message, 'error');
-        });
-}
-
-// Edit element
-window.editElement = function(elementId) {
-    const element = allElements[elementId];
-    if (!element) return;
-    
-    const modal = document.getElementById('edit-modal');
-    const modalTitle = document.getElementById('modal-title');
-    const modalBody = document.getElementById('modal-body');
-    
-    modalTitle.textContent = `Edit Element: ${element.name}`;
-    
-    modalBody.innerHTML = `
-        <form onsubmit="saveElement(event, '${elementId}')">
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; margin-bottom: 5px;">ID:</label>
-                <input type="text" value="${elementId}" disabled style="width: 100%;">
-            </div>
-            
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; margin-bottom: 5px;">Name:</label>
-                <input type="text" id="edit-name" value="${element.name}" required style="width: 100%;">
-            </div>
-            
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; margin-bottom: 5px;">Tier:</label>
-                <input type="number" id="edit-tier" value="${element.tier || 1}" min="1" max="10" required style="width: 100%;">
-            </div>
-            
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; margin-bottom: 5px;">Emoji:</label>
-                <input type="text" id="edit-emoji" value="${window.elementEmojis?.[elementId] || element.emoji || ''}" style="width: 100%;">
-            </div>
-            
-            <div style="margin-top: 20px; text-align: right;">
-                <button type="button" onclick="closeModal()" style="margin-right: 10px;">Cancel</button>
-                <button type="submit">Save Changes</button>
-            </div>
-        </form>
-    `;
-    
-    modal.classList.add('active');
-}
-
-// Save element changes
-window.saveElement = function(event, elementId) {
-    event.preventDefault();
-    
-    const name = document.getElementById('edit-name').value;
-    const tier = parseInt(document.getElementById('edit-tier').value);
-    const emoji = document.getElementById('edit-emoji').value;
-    
-    // Update element
-    allElements[elementId] = {
-        ...allElements[elementId],
-        name,
-        tier
-    };
-    
-    if (window.elementEmojis) {
-        window.elementEmojis[elementId] = emoji;
-    }
-    
-    closeModal();
-    renderDatabase();
-    showMessage(`Element "${name}" updated successfully`, 'success');
-}
-
-// Delete element
-window.deleteElement = function(elementId) {
-    if (!confirm(`Are you sure you want to delete "${allElements[elementId].name}"? This will also remove all combinations using this element.`)) {
-        return;
-    }
-    
-    // Remove element
-    delete allElements[elementId];
-    
-    // Remove related combinations
-    Object.keys(allCombinations).forEach(key => {
-        const combo = allCombinations[key];
-        if (combo.element1 == elementId || combo.element2 == elementId || combo.result == elementId) {
-            delete allCombinations[key];
+    // Partial name match
+    const matches = [];
+    for (const [id, elem] of Object.entries(elements)) {
+        if (elem.name.toLowerCase().includes(queryLower)) {
+            matches.push({ id, ...elem });
         }
-    });
-    
-    renderDatabase();
-    showMessage('Element deleted successfully', 'success');
-}
-
-// Copy emoji to clipboard
-window.copyEmoji = function(emoji) {
-    navigator.clipboard.writeText(emoji).then(() => {
-        showMessage('Emoji copied to clipboard!', 'success');
-    }).catch(err => {
-        console.error('[COPY] Failed to copy emoji:', err);
-        showMessage('Failed to copy emoji', 'error');
-    });
-}
-
-// Close modal
-window.closeModal = function() {
-    document.getElementById('edit-modal').classList.remove('active');
-}
-
-// Show message
-function showMessage(text, type = 'success') {
-    console.log(`[MESSAGE] ${type}: ${text}`);
-    const message = document.getElementById('message');
-    if (!message) {
-        console.warn('[MESSAGE] Message element not found');
-        return;
     }
     
-    message.textContent = text;
-    message.className = `message ${type} active`;
-    
-    setTimeout(() => {
-        message.classList.remove('active');
-    }, 3000);
+    if (matches.length === 1) {
+        showElement(matches[0].id);
+    } else if (matches.length > 1) {
+        showSearchResults(matches);
+    } else {
+        results.innerHTML = '<div style="text-align: center; padding: 20px; color: #888;">No elements found</div>';
+    }
 }
 
-// Render combinations view
-function renderCombinations() {
-    console.log('[RENDER] Rendering combinations view');
-    const renderStart = Date.now();
+// Show search results
+function showSearchResults(matches) {
+    const results = document.getElementById('results');
     
-    const grid = document.getElementById('combinations-grid');
-    if (!grid) {
-        console.error('[RENDER] Combinations grid not found');
-        return;
-    }
+    let html = '<div style="margin-bottom: 20px;"><strong>Multiple matches found:</strong></div>';
     
-    const searchTerm = document.getElementById('combo-search')?.value.toLowerCase() || '';
-    
-    grid.innerHTML = '';
-    
-    // Get unique combinations
-    const uniqueCombos = [];
-    const seen = new Set();
-    
-    Object.values(allCombinations).forEach(combo => {
-        const key = [combo.element1, combo.element2].sort().join('_');
-        if (!seen.has(key)) {
-            seen.add(key);
-            uniqueCombos.push(combo);
-        }
-    });
-    
-    console.log(`[RENDER] Processing ${uniqueCombos.length} unique combinations`);
-    
-    // Filter and render with limit for performance
-    let rendered = 0;
-    const maxRender = 100; // Limit to prevent freezing
-    
-    for (const combo of uniqueCombos) {
-        if (rendered >= maxRender) {
-            grid.innerHTML += `<div style="grid-column: 1/-1; text-align: center; padding: 20px; color: #888;">Showing first ${maxRender} combinations. Use search to find specific ones.</div>`;
-            break;
-        }
-        
-        const elem1 = allElements[combo.element1];
-        const elem2 = allElements[combo.element2];
-        const result = allElements[combo.result];
-        
-        if (!elem1 || !elem2 || !result) continue;
-        
-        if (searchTerm) {
-            const matchesSearch = 
-                elem1.name.toLowerCase().includes(searchTerm) ||
-                elem2.name.toLowerCase().includes(searchTerm) ||
-                result.name.toLowerCase().includes(searchTerm);
-            
-            if (!matchesSearch) continue;
-        }
-        
-        grid.innerHTML += `
-            <div class="element-card">
-                <div style="text-align: center; font-size: 20px; margin-bottom: 15px;">
-                    ${getElementDisplay(combo.element1)} + ${getElementDisplay(combo.element2)}
-                </div>
-                <div style="text-align: center; font-size: 24px; margin: 20px 0;">
-                    ↓
-                </div>
-                <div style="text-align: center; font-size: 24px; font-weight: bold;">
-                    ${getElementDisplay(combo.result)}
-                </div>
-                <div style="margin-top: 20px; text-align: center;">
-                    <button onclick="editCombination('${combo.element1}', '${combo.element2}')">✏️ Edit</button>
-                    <button class="danger" onclick="deleteCombination('${combo.element1}', '${combo.element2}')">🗑️ Delete</button>
+    matches.slice(0, 10).forEach(elem => {
+        // Prefer element-specific emoji over shared emojiIndex
+    const emoji = emojis[elem.id] || emojis[elem.emojiIndex] || '❓';
+        html += `
+            <div class="combo-item" style="cursor: pointer;" onclick="showElement('${elem.id}')">
+                <div class="combo-formula">
+                    <span style="font-size: 24px;">${emoji}</span>
+                    <span>${elem.name}</span>
+                    <span style="color: #888;">(ID: ${elem.id})</span>
                 </div>
             </div>
         `;
+    });
+    
+    if (matches.length > 10) {
+        html += `<div style="text-align: center; color: #888; margin-top: 10px;">... and ${matches.length - 10} more</div>`;
+    }
+    
+    results.innerHTML = html;
+}
+
+// Show element details
+function showElement(elementId) {
+    const elem = elements[elementId];
+    if (!elem) return;
+    
+    currentElement = elem;
+    const results = document.getElementById('results');
+    
+    // Prefer element-specific emoji over shared emojiIndex
+    const emoji = emojis[elem.id] || emojis[elem.emojiIndex] || '❓';
+    
+    // Find what creates this element
+    const recipes = [];
+    Object.entries(combinations).forEach(([combo, result]) => {
+        if (result == elementId) {
+            const [a, b] = combo.split('+');
+            // Avoid duplicates
+            if (parseInt(a) <= parseInt(b)) {
+                recipes.push({ elem1: a, elem2: b });
+            }
+        }
+    });
+    
+    // Find what this element creates
+    const creates = [];
+    Object.entries(combinations).forEach(([combo, result]) => {
+        if (combo.includes(elementId + '+') || combo.includes('+' + elementId)) {
+            const [a, b] = combo.split('+');
+            if (a == elementId || b == elementId) {
+                creates.push({ 
+                    otherElem: a == elementId ? b : a, 
+                    result 
+                });
+            }
+        }
+    });
+    
+    let html = `
+        <div class="element-header">
+            <div class="element-emoji" onclick="copyEmoji('${emoji}')" title="Click to copy">${emoji}</div>
+            <div class="element-info">
+                <h2>${elem.name}</h2>
+                <div class="element-id">ID: ${elem.id} | Tier: ${elem.tier}</div>
+            </div>
+        </div>
+    `;
+    
+    // Recipes section
+    html += `
+        <div class="combinations">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3>How to create ${elem.name}:</h3>
+                <button class="add-btn" style="padding: 8px 16px; margin: 0;" onclick="addNewRecipe('${elementId}')">+ Add Recipe</button>
+            </div>
+    `;
+    
+    if (recipes.length > 0) {
+        recipes.forEach(recipe => {
+            const elem1 = elements[recipe.elem1];
+            const elem2 = elements[recipe.elem2];
+            if (elem1 && elem2) {
+                const emoji1 = emojis[elem1.id] || emojis[elem1.emojiIndex] || '❓';
+                const emoji2 = emojis[elem2.id] || emojis[elem2.emojiIndex] || '❓';
+                
+                html += `
+                    <div class="combo-item">
+                        <div class="combo-formula">
+                            <span>${emoji1} ${elem1.name}</span>
+                            <span>+</span>
+                            <span>${emoji2} ${elem2.name}</span>
+                        </div>
+                        <div>
+                            <button onclick="editRecipe('${recipe.elem1}', '${recipe.elem2}', '${elementId}')">Edit</button>
+                            <button class="remove-btn" style="margin-left: 5px;" onclick="deleteRecipe('${recipe.elem1}', '${recipe.elem2}', '${elementId}')">Delete</button>
+                        </div>
+                    </div>
+                `;
+            }
+        });
+    } else {
+        html += '<div style="color: #888; padding: 10px;">No recipes yet. Click "Add Recipe" to create one.</div>';
+    }
+    
+    html += '</div>';
+    
+    // Creates section
+    if (creates.length > 0) {
+        html += `
+            <div class="combinations" style="margin-top: 20px;">
+                <h3>${elem.name} combines with:</h3>
+        `;
         
-        rendered++;
+        creates.slice(0, 10).forEach(item => {
+            const otherElem = elements[item.otherElem];
+            const resultElem = elements[item.result];
+            if (otherElem && resultElem) {
+                const otherEmoji = emojis[otherElem.id] || emojis[otherElem.emojiIndex] || '❓';
+                const resultEmoji = emojis[resultElem.id] || emojis[resultElem.emojiIndex] || '❓';
+                
+                html += `
+                    <div class="combo-item">
+                        <div class="combo-formula">
+                            <span>${emoji} + ${otherEmoji} ${otherElem.name}</span>
+                            <span>→</span>
+                            <span>${resultEmoji} ${resultElem.name}</span>
+                        </div>
+                    </div>
+                `;
+            }
+        });
+        
+        if (creates.length > 10) {
+            html += `<div style="text-align: center; color: #888;">... and ${creates.length - 10} more</div>`;
+        }
+        
+        html += '</div>';
     }
     
-    if (rendered === 0) {
-        grid.innerHTML = '<div style="text-align: center; padding: 50px; color: #888;">No combinations found matching your search.</div>';
+    // Edit form
+    html += `
+        <div class="edit-form">
+            <h3>Edit Element</h3>
+            <div class="form-group">
+                <label>Emoji</label>
+                <div class="emoji-picker">
+                    <input type="text" id="edit-emoji" class="emoji-input" value="${emoji}">
+                </div>
+            </div>
+            <button onclick="saveElement()">Save Changes</button>
+            ${elem.id >= 10000 ? `<button class="remove-btn" style="margin-left: 10px;" onclick="deleteElement('${elem.id}')">Delete Element</button>` : ''}
+        </div>
+    `;
+    
+    results.innerHTML = html;
+    results.classList.add('active');
+}
+
+// Edit recipe
+window.editRecipe = function(elem1, elem2, result) {
+    const results = document.getElementById('results');
+    
+    const e1 = elements[elem1];
+    const e2 = elements[elem2];
+    const res = elements[result];
+    
+    if (!e1 || !e2 || !res) return;
+    
+    const emoji1 = emojis[e1.id] || emojis[e1.emojiIndex] || '❓';
+    const emoji2 = emojis[e2.id] || emojis[e2.emojiIndex] || '❓';
+    const emojiRes = emojis[res.id] || emojis[res.emojiIndex] || '❓';
+    
+    let html = `
+        <div style="background: #1a1a1a; padding: 20px; border-radius: 8px;">
+            <h3 style="color: #4ecdc4; margin-bottom: 20px;">Edit Recipe</h3>
+            
+            <div style="text-align: center; margin-bottom: 30px;">
+                <div style="font-size: 24px; margin-bottom: 20px;">
+                    <span id="preview-elem1">${emoji1} ${e1.name}</span>
+                    <span> + </span>
+                    <span id="preview-elem2">${emoji2} ${e2.name}</span>
+                    <span> → </span>
+                    <span>${emojiRes} ${res.name}</span>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>First Element - Search by name or ID</label>
+                <input type="text" id="recipe-elem1" placeholder="Type to search..." autocomplete="off">
+                <input type="hidden" id="recipe-elem1-id" value="${elem1}">
+                <div id="search-results-1" style="display: none; max-height: 200px; overflow-y: auto; background: #0f0f0f; border: 1px solid #333; border-radius: 6px; margin-top: 5px;"></div>
+            </div>
+            
+            <div class="form-group">
+                <label>Second Element - Search by name or ID</label>
+                <input type="text" id="recipe-elem2" placeholder="Type to search..." autocomplete="off">
+                <input type="hidden" id="recipe-elem2-id" value="${elem2}">
+                <div id="search-results-2" style="display: none; max-height: 200px; overflow-y: auto; background: #0f0f0f; border: 1px solid #333; border-radius: 6px; margin-top: 5px;"></div>
+            </div>
+            
+            <button onclick="saveRecipe('${elem1}', '${elem2}', '${result}')">Save Recipe</button>
+            <button class="secondary" onclick="showElement('${result}')">Cancel</button>
+        </div>
+    `;
+    
+    results.innerHTML = html;
+    
+    // Set up search functionality for both inputs
+    setupRecipeSearch('recipe-elem1', 'recipe-elem1-id', 'search-results-1', 'preview-elem1');
+    setupRecipeSearch('recipe-elem2', 'recipe-elem2-id', 'search-results-2', 'preview-elem2');
+};
+
+// Setup recipe search
+function setupRecipeSearch(inputId, hiddenId, resultsId, previewId) {
+    const input = document.getElementById(inputId);
+    const hidden = document.getElementById(hiddenId);
+    const resultsDiv = document.getElementById(resultsId);
+    const preview = previewId ? document.getElementById(previewId) : null;
+    
+    let searchTimeout;
+    
+    input.addEventListener('input', function(e) {
+        clearTimeout(searchTimeout);
+        const query = e.target.value.trim();
+        
+        if (query.length < 1) {
+            resultsDiv.style.display = 'none';
+            return;
+        }
+        
+        searchTimeout = setTimeout(() => {
+            const matches = [];
+            const queryLower = query.toLowerCase();
+            
+            // Search elements
+            for (const [id, elem] of Object.entries(elements)) {
+                if (elem.name.toLowerCase().includes(queryLower) || id.toString().includes(query)) {
+                    matches.push({ id, ...elem });
+                    if (matches.length >= 20) break;
+                }
+            }
+            
+            if (matches.length > 0) {
+                let html = '';
+                matches.forEach(elem => {
+                    // Prefer element-specific emoji over shared emojiIndex
+    const emoji = emojis[elem.id] || emojis[elem.emojiIndex] || '❓';
+                    html += `
+                        <div style="padding: 10px; cursor: pointer; border-bottom: 1px solid #333;" 
+                             onmouseover="this.style.background='#2a2a2a'" 
+                             onmouseout="this.style.background='transparent'"
+                             onclick="selectRecipeElement('${inputId}', '${hiddenId}', '${previewId}', '${elem.id}', '${elem.name.replace(/'/g, "\\'")}', '${emoji}')"">
+                            <span style="font-size: 20px; margin-right: 10px;">${emoji}</span>
+                            <span>${elem.name}</span>
+                            <span style="color: #888; font-size: 12px; margin-left: 10px;">(ID: ${elem.id})</span>
+                        </div>
+                    `;
+                });
+                resultsDiv.innerHTML = html;
+                resultsDiv.style.display = 'block';
+            } else {
+                resultsDiv.innerHTML = '<div style="padding: 10px; color: #888;">No elements found</div>';
+                resultsDiv.style.display = 'block';
+            }
+        }, 200);
+    });
+    
+    // Hide results when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!input.contains(e.target) && !resultsDiv.contains(e.target)) {
+            resultsDiv.style.display = 'none';
+        }
+    });
+}
+
+// Select element from search
+window.selectRecipeElement = function(inputId, hiddenId, previewId, elemId, elemName, emoji) {
+    document.getElementById(inputId).value = elemName;
+    document.getElementById(hiddenId).value = elemId;
+    if (previewId && document.getElementById(previewId)) {
+        document.getElementById(previewId).textContent = `${emoji} ${elemName}`;
     }
+    // Hide the search results
+    const resultsDiv = document.querySelector(`#${inputId}-results`);
+    if (resultsDiv) {
+        resultsDiv.style.display = 'none';
+    }
+};
+
+// Save recipe
+window.saveRecipe = async function(oldElem1, oldElem2, result) {
+    const newElem1 = document.getElementById('recipe-elem1-id').value;
+    const newElem2 = document.getElementById('recipe-elem2-id').value;
     
-    logPerf(`Rendered ${rendered} combinations`, renderStart);
-}
-
-// Search combinations
-window.searchCombinations = function() {
-    console.log('[SEARCH] Searching combinations');
-    renderCombinations();
-}
-
-// Show all combinations
-window.showAllCombinations = function() {
-    console.log('[SEARCH] Showing all combinations');
-    document.getElementById('combo-search').value = '';
-    renderCombinations();
-}
-
-// Generate discovery tree
-window.generateTree = function() {
-    console.log('[TREE] Generating discovery tree');
-    const searchInput = document.getElementById('tree-search').value;
-    const container = document.getElementById('tree-container');
-    
-    if (!searchInput || searchInput.trim() === '') {
-        container.innerHTML = '<p style="color: #888;">Enter an element name or ID to generate its discovery tree.</p>';
+    if (!newElem1 || !newElem2 || !elements[newElem1] || !elements[newElem2]) {
+        showMessage('Please select valid elements from the search', 'error');
         return;
     }
     
-    // Find element
-    let targetId = null;
-    const searchLower = searchInput.trim().toLowerCase();
+    // Check if this is the same combination (no change)
+    if ((newElem1 === oldElem1 && newElem2 === oldElem2) || (newElem1 === oldElem2 && newElem2 === oldElem1)) {
+        showMessage('No changes made', 'success');
+        showElement(result);
+        return;
+    }
     
-    for (const [id, element] of Object.entries(allElements)) {
-        if (id === searchInput || element.name.toLowerCase() === searchLower) {
-            targetId = id;
-            break;
+    // Check if this combination already exists for a different element
+    const existingResult = combinations[`${newElem1}+${newElem2}`] || combinations[`${newElem2}+${newElem1}`];
+    if (existingResult && existingResult != result) {
+        const existingElement = elements[existingResult];
+        const existingName = existingElement ? existingElement.name : `ID: ${existingResult}`;
+        const existingEmoji = existingElement ? (emojis[existingElement.id] || emojis[existingElement.emojiIndex] || '❓') : '❓';
+        
+        if (!confirm(`⚠️ Warning: This combination already creates "${existingEmoji} ${existingName}".\n\nDo you want to change it to create "${elements[result].name}" instead?`)) {
+            return;
         }
     }
     
-    if (!targetId) {
-        container.innerHTML = '<p style="color: #e74c3c;">Element not found.</p>';
+    // Remove old combination
+    delete combinations[`${oldElem1}+${oldElem2}`];
+    delete combinations[`${oldElem2}+${oldElem1}`];
+    
+    // Add new combination
+    combinations[`${newElem1}+${newElem2}`] = parseInt(result);
+    combinations[`${newElem2}+${newElem1}`] = parseInt(result);
+    
+    // Save to server
+    const newCombos = {};
+    newCombos[`${newElem1}+${newElem2}`] = parseInt(result);
+    newCombos[`${newElem2}+${newElem1}`] = parseInt(result);
+    
+    const saved = await saveToServer(null, newCombos, null);
+    
+    if (saved) {
+        showMessage('Recipe updated and saved!', 'success');
+    } else {
+        // Revert changes if save failed
+        combinations[`${oldElem1}+${oldElem2}`] = parseInt(result);
+        combinations[`${oldElem2}+${oldElem1}`] = parseInt(result);
+        delete combinations[`${newElem1}+${newElem2}`];
+        delete combinations[`${newElem2}+${newElem1}`];
+    }
+    
+    // Return to element view
+    setTimeout(() => {
+        showElement(result);
+    }, 1000);
+};
+
+// Save element
+window.saveElement = async function() {
+    if (!currentElement) return;
+    
+    const newEmoji = document.getElementById('edit-emoji').value.trim();
+    
+    if (newEmoji) {
+        // Only update emoji mapping for this specific element ID
+        // Don't update the shared emojiIndex to avoid changing other elements
+        emojis[currentElement.id] = newEmoji;
+        
+        // Save to server - only save the element-specific emoji
+        const newEmojis = {};
+        newEmojis[currentElement.id] = newEmoji;
+        
+        const saved = await saveToServer(null, null, newEmojis);
+        
+        if (saved) {
+            showMessage('Element emoji updated and saved!', 'success');
+            
+            // Refresh the view
+            setTimeout(() => {
+                showElement(currentElement.id);
+            }, 500);
+        }
+    }
+};
+
+// Copy emoji
+window.copyEmoji = function(emoji) {
+    navigator.clipboard.writeText(emoji).then(() => {
+        showMessage('Emoji copied!', 'success');
+    }).catch(err => {
+        console.error('Failed to copy:', err);
+        showMessage('Failed to copy emoji', 'error');
+    });
+};
+
+// Hide results
+function hideResults() {
+    document.getElementById('results').classList.remove('active');
+}
+
+// Show message
+function showMessage(text, type) {
+    const msg = document.getElementById('message');
+    msg.innerHTML = text.replace(/\n/g, '<br>');
+    msg.className = `message ${type} active`;
+    
+    setTimeout(() => {
+        msg.classList.remove('active');
+    }, 4000); // Slightly longer for multi-line messages
+}
+
+// Make showElement globally accessible
+window.showElement = showElement;
+
+// Save to server (now saves directly to main files)
+async function saveToServer(element, newCombinations, newEmojis) {
+    try {
+        // Try new endpoint first
+        let response = await fetch('/api/save-element-main', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                element: element || null,
+                combinations: newCombinations || null,
+                emojis: newEmojis || null
+            })
+        });
+        
+        // If new endpoint fails, fallback to old endpoint (temporary until server restart)
+        if (!response.ok && response.status === 404) {
+            console.log('New endpoint not available yet, using fallback...');
+            response = await fetch('/api/save-element', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    element: element || null,
+                    combinations: newCombinations || null,
+                    emojis: newEmojis || null
+                })
+            });
+        }
+        
+        if (!response.ok) {
+            throw new Error('Server error');
+        }
+        
+        // If we used the old endpoint, we need to manually update our local data
+        // since the old endpoint saves to custom files which we no longer load
+        if (response.url.includes('/api/save-element')) {
+            showMessage('Saved! (Server restart required for full functionality)', 'success');
+        }
+        
+        return true;
+    } catch (error) {
+        console.error('Failed to save to server:', error);
+        showMessage('Failed to save to server - Please restart the server', 'error');
+        return false;
+    }
+}
+
+// Create new element form
+window.showCreateForm = function() {
+    const results = document.getElementById('results');
+    
+    // Generate next available ID
+    const maxId = Math.max(...Object.keys(elements).map(Number), 0);
+    const newId = maxId + 1;
+    
+    let html = `
+        <div style="background: #1a1a1a; padding: 20px; border-radius: 8px;">
+            <h2 style="color: #4ecdc4; margin-bottom: 20px;">🆕 Create New Element</h2>
+            
+            <div class="form-group">
+                <label>Element Name</label>
+                <input type="text" id="new-name" placeholder="Enter element name..." required>
+            </div>
+            
+            <div class="form-group">
+                <label>Emoji</label>
+                <div class="emoji-picker">
+                    <input type="text" id="new-emoji" class="emoji-input" value="🆕" maxlength="2">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Tier</label>
+                <select id="new-tier" style="width: 100%; padding: 12px; background: #1a1a1a; border: 2px solid #333; color: #e0e0e0; border-radius: 6px;">
+                    <option value="0">Tier 0 - Basic elements (Fire, Water, Earth, Air)</option>
+                    <option value="1">Tier 1 - Simple combinations (Steam, Mud, Lava)</option>
+                    <option value="2">Tier 2 - Complex natural (Ocean, Mountain, Forest)</option>
+                    <option value="3">Tier 3 - Life forms (Plant, Animal, Fish)</option>
+                    <option value="4">Tier 4 - Advanced life (Human, Bird, Tree)</option>
+                    <option value="5">Tier 5 - Civilization (House, Tool, Farm)</option>
+                    <option value="6">Tier 6 - Technology (Computer, Car, Phone)</option>
+                    <option value="7">Tier 7 - Modern concepts (Internet, AI, Space)</option>
+                    <option value="8">Tier 8 - Abstract/Complex (Philosophy, Quantum)</option>
+                    <option value="9">Tier 9 - Fictional/Fantasy (Dragon, Magic, Superhero)</option>
+                    <option value="10">Tier 10 - Ultimate/Joke elements (Universe, Meme)</option>
+                </select>
+                <div style="margin-top: 5px; font-size: 12px; color: #888; line-height: 1.4;">
+                    <strong>Tier Guide:</strong> Higher tiers require more discoveries. Select based on complexity and prerequisites.
+                </div>
+            </div>
+            
+            <div class="form-group" style="margin-top: 10px;">
+                <label style="color: #888;">ID: ${newId} (auto-generated)</label>
+                <input type="hidden" id="new-id" value="${newId}">
+            </div>
+            
+            <div class="section-divider">
+                <h3 style="color: #4ecdc4; margin-bottom: 15px;">How to create this element</h3>
+                <button class="add-btn" onclick="addRecipeRow()">+ Add Recipe</button>
+                <div id="recipe-rows"></div>
+            </div>
+            
+            <div class="section-divider">
+                <h3 style="color: #4ecdc4; margin-bottom: 15px;">This element creates</h3>
+                <button class="add-btn" onclick="addCreatesRow()">+ Add Combination</button>
+                <div id="creates-rows"></div>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 30px;">
+                <button onclick="saveNewElement()">💾 Save & View</button>
+                <button onclick="saveAndCreateAnother()">💾 Save & New</button>
+                <button class="secondary" onclick="hideResults()">Cancel</button>
+            </div>
+        </div>
+    `;
+    
+    results.innerHTML = html;
+    results.classList.add('active');
+    
+    // Focus on name input
+    document.getElementById('new-name').focus();
+};
+
+// Recipe row counter
+let recipeRowId = 0;
+let createsRowId = 0;
+
+// Add recipe row
+window.addRecipeRow = function() {
+    const container = document.getElementById('recipe-rows');
+    const rowId = `recipe-${recipeRowId++}`;
+    
+    const row = document.createElement('div');
+    row.className = 'recipe-row';
+    row.id = rowId;
+    row.innerHTML = `
+        <input type="text" id="${rowId}-elem1" placeholder="Search first element..." autocomplete="off">
+        <input type="hidden" id="${rowId}-elem1-id">
+        <div id="${rowId}-elem1-results" style="display: none; position: absolute; max-height: 200px; overflow-y: auto; background: #0f0f0f; border: 1px solid #333; border-radius: 6px; z-index: 100;"></div>
+        
+        <span style="margin: 0 10px;">+</span>
+        
+        <input type="text" id="${rowId}-elem2" placeholder="Search second element..." autocomplete="off">
+        <input type="hidden" id="${rowId}-elem2-id">
+        <div id="${rowId}-elem2-results" style="display: none; position: absolute; max-height: 200px; overflow-y: auto; background: #0f0f0f; border: 1px solid #333; border-radius: 6px; z-index: 100;"></div>
+        
+        <button class="remove-btn" onclick="removeRow('${rowId}')">✕</button>
+    `;
+    
+    container.appendChild(row);
+    
+    // Setup search for both inputs
+    setupRecipeSearch(`${rowId}-elem1`, `${rowId}-elem1-id`, `${rowId}-elem1-results`, null);
+    setupRecipeSearch(`${rowId}-elem2`, `${rowId}-elem2-id`, `${rowId}-elem2-results`, null);
+};
+
+// Add creates row
+window.addCreatesRow = function() {
+    const container = document.getElementById('creates-rows');
+    const rowId = `creates-${createsRowId++}`;
+    
+    const row = document.createElement('div');
+    row.className = 'recipe-row';
+    row.id = rowId;
+    row.innerHTML = `
+        <span style="color: #888;">This +</span>
+        
+        <input type="text" id="${rowId}-other" placeholder="Search element..." autocomplete="off">
+        <input type="hidden" id="${rowId}-other-id">
+        <div id="${rowId}-other-results" style="display: none; position: absolute; max-height: 200px; overflow-y: auto; background: #0f0f0f; border: 1px solid #333; border-radius: 6px; z-index: 100;"></div>
+        
+        <span style="margin: 0 10px;">=</span>
+        
+        <input type="text" id="${rowId}-result" placeholder="Search or create result..." autocomplete="off">
+        <input type="hidden" id="${rowId}-result-id">
+        <div id="${rowId}-result-results" style="display: none; position: absolute; max-height: 200px; overflow-y: auto; background: #0f0f0f; border: 1px solid #333; border-radius: 6px; z-index: 100;"></div>
+        
+        <button class="remove-btn" onclick="removeRow('${rowId}')">✕</button>
+    `;
+    
+    container.appendChild(row);
+    
+    // Setup search for both elements
+    setupRecipeSearch(`${rowId}-other`, `${rowId}-other-id`, `${rowId}-other-results`, null);
+    setupRecipeSearchWithCreate(`${rowId}-result`, `${rowId}-result-id`, `${rowId}-result-results`);
+};
+
+// Remove row
+window.removeRow = function(rowId) {
+    const row = document.getElementById(rowId);
+    if (row) row.remove();
+};
+
+// Save new element
+window.saveNewElement = async function() {
+    const name = document.getElementById('new-name').value.trim();
+    const emoji = document.getElementById('new-emoji').value.trim();
+    const tier = parseInt(document.getElementById('new-tier').value);
+    const id = document.getElementById('new-id').value;
+    
+    if (!name) {
+        showMessage('Please enter an element name', 'error');
         return;
     }
     
-    // Build discovery tree with performance tracking
-    const treeStart = Date.now();
-    const tree = buildDiscoveryTree(targetId);
-    const treeHTML = renderTree(tree);
-    container.innerHTML = '<h3>Discovery Tree</h3>' + treeHTML;
-    logPerf('Tree generation', treeStart);
-}
-
-// Build discovery tree recursively
-function buildDiscoveryTree(elementId, visited = new Set(), depth = 0) {
-    if (visited.has(elementId) || depth > 5) {
-        return { id: elementId, circular: true, children: [] };
+    // Check if name already exists
+    for (const elem of Object.values(elements)) {
+        if (elem.name.toLowerCase() === name.toLowerCase()) {
+            showMessage('An element with this name already exists', 'error');
+            return;
+        }
     }
     
-    visited.add(elementId);
-    
-    const recipes = findCombinationsForElement(elementId);
-    const children = [];
-    
-    // Limit recipes to prevent performance issues
-    const maxRecipes = depth === 0 ? 10 : 3;
-    recipes.slice(0, maxRecipes).forEach(recipe => {
-        children.push({
-            recipe,
-            left: buildDiscoveryTree(recipe.element1.toString(), new Set(visited), depth + 1),
-            right: buildDiscoveryTree(recipe.element2.toString(), new Set(visited), depth + 1)
-        });
-    });
-    
-    if (recipes.length > maxRecipes) {
-        children.push({ truncated: true, count: recipes.length - maxRecipes });
-    }
-    
-    return {
-        id: elementId,
-        children
+    // Create the new element
+    const newElement = {
+        id: parseInt(id),
+        name: name,
+        tier: tier,
+        emojiIndex: parseInt(id) // Use ID as emoji index
     };
-}
-
-// Render tree HTML
-function renderTree(node, level = 0) {
-    const element = allElements[node.id];
-    if (!element) return '';
     
-    let html = `<div class="tree-container" style="margin-left: ${level * 30}px;">`;
-    html += `<div class="tree-element">${getElementDisplay(node.id)}</div>`;
+    // Add to elements
+    elements[id] = newElement;
     
-    if (node.circular) {
-        html += '<span style="color: #888; margin-left: 10px;">(circular reference)</span>';
+    // Set emoji
+    if (emoji) {
+        emojis[id] = emoji;
+        // Only set emoji for the specific element ID, not the shared emojiIndex
+        emojis[newElement.id] = emoji;
     }
     
-    if (node.children.length > 0) {
-        node.children.forEach(child => {
-            if (child.truncated) {
-                html += `<div style="color: #888; margin-left: 30px;">... and ${child.count} more recipes</div>`;
-            } else {
-                html += '<div class="tree-node">';
-                html += '<div style="display: flex; align-items: center; gap: 10px; margin: 10px 0;">';
-                html += renderTree(child.left, 0);
-                html += '<span class="tree-operator">+</span>';
-                html += renderTree(child.right, 0);
-                html += '</div>';
-                html += '</div>';
+    // Process recipes
+    let recipesAdded = 0;
+    const recipeContainer = document.getElementById('recipe-rows');
+    if (recipeContainer) {
+        const recipeRows = recipeContainer.querySelectorAll('.recipe-row');
+        recipeRows.forEach(row => {
+            const rowId = row.id;
+            const elem1Id = document.getElementById(`${rowId}-elem1-id`).value;
+            const elem2Id = document.getElementById(`${rowId}-elem2-id`).value;
+            
+            if (elem1Id && elem2Id) {
+                // Check if this combination already exists
+                const existingResult = combinations[`${elem1Id}+${elem2Id}`] || combinations[`${elem2Id}+${elem1Id}`];
+                if (existingResult) {
+                    const existingElement = elements[existingResult];
+                    const existingName = existingElement ? existingElement.name : `ID: ${existingResult}`;
+                    const elem1Name = elements[elem1Id]?.name || elem1Id;
+                    const elem2Name = elements[elem2Id]?.name || elem2Id;
+                    showMessage(`⚠️ Warning: ${elem1Name} + ${elem2Name} already creates "${existingName}". Skipping this recipe.`, 'error');
+                } else {
+                    combinations[`${elem1Id}+${elem2Id}`] = parseInt(id);
+                    combinations[`${elem2Id}+${elem1Id}`] = parseInt(id);
+                    recipesAdded++;
+                }
             }
         });
     }
     
-    html += '</div>';
-    return html;
-}
-
-// Render statistics
-function renderStats() {
-    console.log('[STATS] Rendering statistics');
-    const statsStart = Date.now();
-    
-    const grid = document.getElementById('stats-grid');
-    const detailed = document.getElementById('detailed-stats');
-    
-    if (!grid || !detailed) {
-        console.error('[STATS] Stats containers not found');
-        return;
+    // Process creates
+    const createsContainer = document.getElementById('creates-rows');
+    if (createsContainer) {
+        const createsRows = createsContainer.querySelectorAll('.recipe-row');
+        createsRows.forEach(row => {
+            const rowId = row.id;
+            const otherId = document.getElementById(`${rowId}-other-id`).value;
+            const resultIdOrName = document.getElementById(`${rowId}-result-id`).value;
+            
+            if (otherId && resultIdOrName) {
+                let resultId = null;
+                
+                // Check if it's a new element to create
+                if (resultIdOrName.startsWith('NEW:')) {
+                    const resultName = resultIdOrName.substring(4);
+                    // Create new element
+                    const nextId = Math.max(...Object.keys(elements).map(Number), 0) + 1;
+                    resultId = nextId.toString();
+                    const newResultElement = {
+                        id: nextId,
+                        name: resultName,
+                        tier: tier + 1, // One tier higher
+                        emojiIndex: nextId
+                    };
+                    elements[resultId] = newResultElement;
+                    emojis[resultId] = '🆕'; // Default emoji for new results
+                } else {
+                    // Use existing element
+                    resultId = resultIdOrName;
+                }
+                
+                if (resultId) {
+                    // Add combination
+                    combinations[`${id}+${otherId}`] = parseInt(resultId);
+                    combinations[`${otherId}+${id}`] = parseInt(resultId);
+                }
+            }
+        });
     }
     
-    // Calculate stats
-    const totalElements = Object.keys(allElements).length;
-    const totalCombinations = Object.keys(allCombinations).length / 2; // Divided by 2 because we store both directions
-    
-    const tierCounts = {};
-    const orphanElements = [];
-    const noRecipeElements = [];
-    
-    Object.entries(allElements).forEach(([id, element]) => {
-        const tier = element.tier || 1;
-        tierCounts[tier] = (tierCounts[tier] || 0) + 1;
-        
-        // Check if orphan
-        const usedInCombos = Object.values(allCombinations).some(combo => 
-            combo.element1 == id || combo.element2 == id
-        );
-        if (!usedInCombos) {
-            orphanElements.push({ id, element });
-        }
-        
-        // Check if has recipe
-        const hasRecipe = findCombinationsForElement(id).length > 0;
-        if (!hasRecipe) {
-            noRecipeElements.push({ id, element });
+    // Collect all new combinations
+    const newCombos = {};
+    const recipeRows = recipeContainer ? recipeContainer.querySelectorAll('.recipe-row') : [];
+    recipeRows.forEach(row => {
+        const rowId = row.id;
+        const elem1Id = document.getElementById(`${rowId}-elem1-id`).value;
+        const elem2Id = document.getElementById(`${rowId}-elem2-id`).value;
+        if (elem1Id && elem2Id) {
+            newCombos[`${elem1Id}+${elem2Id}`] = parseInt(id);
+            newCombos[`${elem2Id}+${elem1Id}`] = parseInt(id);
         }
     });
     
-    // Render main stats
-    grid.innerHTML = `
-        <div class="stat-card">
-            <div class="stat-value">${totalElements}</div>
-            <div class="stat-label">Total Elements</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-value">${Math.floor(totalCombinations)}</div>
-            <div class="stat-label">Total Combinations</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-value">${orphanElements.length}</div>
-            <div class="stat-label">Orphan Elements</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-value">${noRecipeElements.length}</div>
-            <div class="stat-label">Elements Without Recipes</div>
-        </div>
-    `;
+    const createsRows = createsContainer ? createsContainer.querySelectorAll('.recipe-row') : [];
+    createsRows.forEach(row => {
+        const rowId = row.id;
+        const otherId = document.getElementById(`${rowId}-other-id`).value;
+        const resultId = elements[document.getElementById(`${rowId}-result-id`).value]?.id;
+        if (otherId && resultId) {
+            newCombos[`${id}+${otherId}`] = parseInt(resultId);
+            newCombos[`${otherId}+${id}`] = parseInt(resultId);
+        }
+    });
     
-    // Render detailed stats
-    detailed.innerHTML = `
-        <div class="tree-container">
-            <h3>Elements by Tier</h3>
-            ${Object.entries(tierCounts).sort(([a], [b]) => a - b).map(([tier, count]) => `
-                <div style="margin: 10px 0;">
-                    <strong>Tier ${tier}:</strong> ${count} elements
-                    <div style="background: #333; height: 20px; margin-top: 5px; border-radius: 4px;">
-                        <div style="background: #4ecdc4; height: 100%; width: ${(count / totalElements * 100).toFixed(1)}%; border-radius: 4px;"></div>
+    // Collect new emojis
+    const newEmojis = {};
+    if (emoji) {
+        newEmojis[id] = emoji;
+        newEmojis[newElement.emojiIndex] = emoji;
+    }
+    
+    // Save to server
+    const saved = await saveToServer(newElement, newCombos, newEmojis);
+    
+    if (saved) {
+        // Show detailed success message
+        let successMsg = `✅ Element "${name}" created and saved!`;
+        if (recipesAdded > 0) {
+            successMsg += `\n📝 ${recipesAdded} recipe${recipesAdded > 1 ? 's' : ''} added`;
+        }
+        
+        showMessage(successMsg, 'success');
+        
+        // Show the new element
+        setTimeout(() => {
+            showElement(id);
+        }, 500);
+    }
+};
+
+// Save and create another
+window.saveAndCreateAnother = function() {
+    // First save the current element
+    const name = document.getElementById('new-name').value.trim();
+    if (name) {
+        saveNewElement();
+        
+        // Then show a new create form
+        setTimeout(() => {
+            showCreateForm();
+        }, 1000);
+    }
+};
+
+// Setup recipe search with create option
+function setupRecipeSearchWithCreate(inputId, hiddenId, resultsId) {
+    const input = document.getElementById(inputId);
+    const hidden = document.getElementById(hiddenId);
+    const resultsDiv = document.getElementById(resultsId);
+    
+    let searchTimeout;
+    
+    input.addEventListener('input', function(e) {
+        clearTimeout(searchTimeout);
+        const query = e.target.value.trim();
+        
+        if (query.length < 1) {
+            resultsDiv.style.display = 'none';
+            hidden.value = '';
+            return;
+        }
+        
+        searchTimeout = setTimeout(() => {
+            const matches = [];
+            const queryLower = query.toLowerCase();
+            
+            // Search existing elements
+            for (const [id, elem] of Object.entries(elements)) {
+                if (elem.name.toLowerCase().includes(queryLower) || id.toString().includes(query)) {
+                    matches.push({ id, ...elem });
+                    if (matches.length >= 10) break;
+                }
+            }
+            
+            let html = '';
+            
+            // Show create new option if exact match doesn't exist
+            let exactMatch = false;
+            for (const elem of Object.values(elements)) {
+                if (elem.name.toLowerCase() === queryLower) {
+                    exactMatch = true;
+                    break;
+                }
+            }
+            
+            if (!exactMatch && query.length >= 2) {
+                html += `
+                    <div style="padding: 10px; cursor: pointer; border-bottom: 1px solid #333; background: #1a3a3a;" 
+                         onmouseover="this.style.background='#2a4a4a'" 
+                         onmouseout="this.style.background='#1a3a3a'"
+                         onclick="selectNewElement('${inputId}', '${hiddenId}', '${query}')">
+                        <span style="font-size: 20px; margin-right: 10px;">➕</span>
+                        <span style="color: #4ecdc4;">Create new: "${query}"</span>
                     </div>
-                </div>
-            `).join('')}
-        </div>
-        
-        <div class="tree-container" style="margin-top: 30px;">
-            <h3>Orphan Elements (${orphanElements.length})</h3>
-            <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-                ${orphanElements.slice(0, 20).map(({ id, element }) => `
-                    <div class="tree-element">${getElementDisplay(id)}</div>
-                `).join('')}
-                ${orphanElements.length > 20 ? `<div style="color: #888;">... and ${orphanElements.length - 20} more</div>` : ''}
+                `;
+            }
+            
+            // Show existing matches
+            matches.forEach(elem => {
+                // Prefer element-specific emoji over shared emojiIndex
+    const emoji = emojis[elem.id] || emojis[elem.emojiIndex] || '❓';
+                html += `
+                    <div style="padding: 10px; cursor: pointer; border-bottom: 1px solid #333;" 
+                         onmouseover="this.style.background='#2a2a2a'" 
+                         onmouseout="this.style.background='transparent'"
+                         onclick="selectRecipeElement('${inputId}', '${hiddenId}', null, '${elem.id}', '${elem.name.replace(/'/g, "\\'")}', '${emoji}')">
+                        <span style="font-size: 20px; margin-right: 10px;">${emoji}</span>
+                        <span>${elem.name}</span>
+                        <span style="color: #888; font-size: 12px; margin-left: 10px;">(ID: ${elem.id})</span>
+                    </div>
+                `;
+            });
+            
+            if (html) {
+                resultsDiv.innerHTML = html;
+                resultsDiv.style.display = 'block';
+            } else {
+                resultsDiv.innerHTML = '<div style="padding: 10px; color: #888;">No elements found</div>';
+                resultsDiv.style.display = 'block';
+            }
+        }, 200);
+    });
+    
+    // Hide results when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!input.contains(e.target) && !resultsDiv.contains(e.target)) {
+            resultsDiv.style.display = 'none';
+        }
+    });
+}
+
+// Select new element (to be created)
+window.selectNewElement = function(inputId, hiddenId, name) {
+    document.getElementById(inputId).value = name + ' (new)';
+    document.getElementById(hiddenId).value = 'NEW:' + name;
+    document.getElementById(inputId + '-results').style.display = 'none';
+};
+
+// Add new recipe to existing element
+window.addNewRecipe = function(elementId) {
+    const results = document.getElementById('results');
+    const elem = elements[elementId];
+    if (!elem) return;
+    
+    // Prefer element-specific emoji over shared emojiIndex
+    const emoji = emojis[elem.id] || emojis[elem.emojiIndex] || '❓';
+    
+    let html = `
+        <div style="background: #1a1a1a; padding: 20px; border-radius: 8px;">
+            <h3 style="color: #4ecdc4; margin-bottom: 20px;">Add Recipe for ${emoji} ${elem.name}</h3>
+            
+            <div class="form-group">
+                <label>First Element - Search by name or ID</label>
+                <input type="text" id="new-recipe-elem1" placeholder="Type to search..." autocomplete="off">
+                <input type="hidden" id="new-recipe-elem1-id">
+                <div id="new-recipe-search-1" style="display: none; max-height: 200px; overflow-y: auto; background: #0f0f0f; border: 1px solid #333; border-radius: 6px; margin-top: 5px;"></div>
             </div>
-        </div>
-        
-        <div class="tree-container" style="margin-top: 30px;">
-            <h3>Elements Without Recipes (${noRecipeElements.length})</h3>
-            <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-                ${noRecipeElements.slice(0, 20).map(({ id, element }) => `
-                    <div class="tree-element">${getElementDisplay(id)}</div>
-                `).join('')}
-                ${noRecipeElements.length > 20 ? `<div style="color: #888;">... and ${noRecipeElements.length - 20} more</div>` : ''}
+            
+            <div class="form-group">
+                <label>Second Element - Search by name or ID</label>
+                <input type="text" id="new-recipe-elem2" placeholder="Type to search..." autocomplete="off">
+                <input type="hidden" id="new-recipe-elem2-id">
+                <div id="new-recipe-search-2" style="display: none; max-height: 200px; overflow-y: auto; background: #0f0f0f; border: 1px solid #333; border-radius: 6px; margin-top: 5px;"></div>
             </div>
+            
+            <button onclick="saveNewRecipe('${elementId}')">Save Recipe</button>
+            <button class="secondary" onclick="showElement('${elementId}')">Cancel</button>
         </div>
     `;
     
-    logPerf('Stats calculation and render', statsStart);
-}
+    results.innerHTML = html;
+    
+    // Setup search
+    setupRecipeSearch('new-recipe-elem1', 'new-recipe-elem1-id', 'new-recipe-search-1', null);
+    setupRecipeSearch('new-recipe-elem2', 'new-recipe-elem2-id', 'new-recipe-search-2', null);
+};
 
-// Additional combination functions
-function editCombination(elem1, elem2) {
-    showMessage('Edit combination feature coming soon!', 'success');
-}
-
-function deleteCombination(elem1, elem2) {
-    if (!confirm('Are you sure you want to delete this combination?')) {
+// Save new recipe
+window.saveNewRecipe = async function(resultId) {
+    const elem1Id = document.getElementById('new-recipe-elem1-id').value;
+    const elem2Id = document.getElementById('new-recipe-elem2-id').value;
+    
+    if (!elem1Id || !elem2Id) {
+        showMessage('Please select both elements', 'error');
         return;
     }
     
-    const key1 = `${elem1}_${elem2}`;
-    const key2 = `${elem2}_${elem1}`;
+    // Check if this combination already exists
+    const existingResult = combinations[`${elem1Id}+${elem2Id}`] || combinations[`${elem2Id}+${elem1Id}`];
+    if (existingResult) {
+        const existingElement = elements[existingResult];
+        const existingName = existingElement ? existingElement.name : `ID: ${existingResult}`;
+        const existingEmoji = existingElement ? (emojis[existingElement.id] || emojis[existingElement.emojiIndex] || '❓') : '❓';
+        
+        if (!confirm(`⚠️ Warning: This combination already creates "${existingEmoji} ${existingName}".\n\nDo you want to change it to create "${elements[resultId].name}" instead?`)) {
+            return;
+        }
+    }
     
-    delete allCombinations[key1];
-    delete allCombinations[key2];
+    // Add the combination
+    combinations[`${elem1Id}+${elem2Id}`] = parseInt(resultId);
+    combinations[`${elem2Id}+${elem1Id}`] = parseInt(resultId);
     
-    renderCombinations();
-    showMessage('Combination deleted successfully', 'success');
-}
+    // Save to server
+    const newCombos = {};
+    newCombos[`${elem1Id}+${elem2Id}`] = parseInt(resultId);
+    newCombos[`${elem2Id}+${elem1Id}`] = parseInt(resultId);
+    
+    const saved = await saveToServer(null, newCombos, null);
+    
+    if (saved) {
+        showMessage('Recipe added and saved!', 'success');
+        
+        // Return to element view
+        setTimeout(() => {
+            showElement(resultId);
+        }, 500);
+    } else {
+        // Revert if save failed
+        delete combinations[`${elem1Id}+${elem2Id}`];
+        delete combinations[`${elem2Id}+${elem1Id}`];
+    }
+};
 
-// Global error handler
-window.addEventListener('error', (event) => {
-    console.error('[ERROR] Global error:', event.error);
-    showMessage('An error occurred. Check console for details.', 'error');
-});
+// Delete recipe
+window.deleteRecipe = async function(elem1, elem2, result) {
+    // Check if this is a custom combination by checking if element IDs are >= 20000
+    // or if the combination exists in our loaded custom combinations
+    const isCustomElement1 = parseInt(elem1) >= 20000;
+    const isCustomElement2 = parseInt(elem2) >= 20000;
+    const isCustomResult = parseInt(result) >= 20000;
+    const isCustomCombo = isCustomElement1 || isCustomElement2 || isCustomResult;
+    
+    let confirmMessage = 'Are you sure you want to delete this recipe?';
+    
+    if (!isCustomCombo) {
+        confirmMessage = '⚠️ WARNING: This is a BASE GAME combination!\n\n' +
+            'Deleting base game combinations can:\n' +
+            '- Break element progression chains\n' +
+            '- Make elements uncreatable\n' +
+            '- Be restored on game updates\n\n' +
+            'Are you SURE you want to delete this base game combination?';
+    }
+    
+    if (!confirm(confirmMessage)) {
+        return;
+    }
+    
+    // Store original values
+    const originalValue = combinations[`${elem1}+${elem2}`];
+    
+    // Remove the combination
+    delete combinations[`${elem1}+${elem2}`];
+    delete combinations[`${elem2}+${elem1}`];
+    
+    // Delete from server
+    try {
+        const response = await fetch('/api/delete-combination', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ element1: elem1, element2: elem2 })
+        });
+        
+        if (!response.ok) {
+            throw new Error('Server error');
+        }
+        
+        showMessage('Recipe deleted successfully!', 'success');
+        
+        // Refresh the element view
+        showElement(result);
+    } catch (error) {
+        // Revert if delete failed
+        combinations[`${elem1}+${elem2}`] = originalValue;
+        combinations[`${elem2}+${elem1}`] = originalValue;
+        showMessage('Failed to delete recipe', 'error');
+    }
+};
 
-// Performance monitoring
-window.addEventListener('load', () => {
-    console.log('[PERF] Page fully loaded');
-    if (window.performance && window.performance.timing) {
-        const timing = window.performance.timing;
-        console.log('[PERF] Page load metrics:', {
-            domContentLoaded: timing.domContentLoadedEventEnd - timing.navigationStart,
-            loadComplete: timing.loadEventEnd - timing.navigationStart
+// Analyze element deletion impact
+function analyzeElementDeletion(elementId) {
+    const analysis = {
+        element: elements[elementId],
+        recipesCreating: [],
+        combinationsUsing: [],
+        dependentElements: new Set()
+    };
+    
+    // Find recipes that create this element
+    Object.entries(combinations).forEach(([combo, result]) => {
+        if (result == elementId) {
+            const [a, b] = combo.split('+');
+            // Avoid duplicates
+            if (parseInt(a) <= parseInt(b)) {
+                analysis.recipesCreating.push({ elem1: a, elem2: b, combo });
+            }
+        }
+    });
+    
+    // Find combinations where this element is used
+    Object.entries(combinations).forEach(([combo, result]) => {
+        if (!combo || !combo.includes('+')) return; // Skip invalid combinations
+        
+        if (combo.includes(elementId + '+') || combo.includes('+' + elementId)) {
+            const parts = combo.split('+');
+            if (parts.length !== 2) return; // Skip malformed combinations
+            
+            const [a, b] = parts;
+            if (a == elementId || b == elementId) {
+                const otherElem = a == elementId ? b : a;
+                analysis.combinationsUsing.push({ 
+                    combo,
+                    otherElem,
+                    result,
+                    otherElement: elements[otherElem],
+                    resultElement: elements[result]
+                });
+            }
+        }
+    });
+    
+    // Find dependent elements (elements that can only be created through this element)
+    function findDependents(elemId, visited = new Set()) {
+        if (visited.has(elemId)) return;
+        visited.add(elemId);
+        
+        // Find all elements created using this element
+        analysis.combinationsUsing.forEach(item => {
+            if (item.result != elemId) {
+                // Check if this result element has any other recipes
+                const otherRecipes = [];
+                Object.entries(combinations).forEach(([combo, result]) => {
+                    if (result == item.result && !combo.includes(elemId)) {
+                        otherRecipes.push(combo);
+                    }
+                });
+                
+                // If no other recipes exist, this element is dependent
+                if (otherRecipes.length === 0) {
+                    analysis.dependentElements.add(item.result);
+                    // Recursively find elements dependent on this one
+                    findDependents(item.result, visited);
+                }
+            }
         });
     }
-});
+    
+    findDependents(elementId);
+    
+    return analysis;
+}
+
+// Delete element
+window.deleteElement = async function(elementId) {
+    // Safety check - prevent deletion of core base elements
+    // Core elements are 0-999, other base game elements are 1000-19999, custom are 20000+
+    if (elementId < 1000) {
+        showMessage('Cannot delete core base elements (ID < 1000)!', 'error');
+        return;
+    }
+    
+    // Warning for base game elements
+    if (elementId < 20000) {
+        if (!confirm('⚠️ WARNING: This is a BASE GAME element!\n\nDeleting base game elements can:\n- Break many combinations\n- Make other elements uncreatable\n- Cause game instability\n- Be restored on game updates\n\nAre you SURE you want to delete this base game element?')) {
+            return;
+        }
+    }
+    
+    // Check if element exists
+    if (!elements[elementId]) {
+        showMessage('Element not found!', 'error');
+        return;
+    }
+    
+    // Analyze impact
+    const analysis = analyzeElementDeletion(elementId);
+    
+    // Show impact review screen
+    showDeleteImpact(elementId, analysis);
+};
+
+// Show delete impact screen
+function showDeleteImpact(elementId, analysis) {
+    const elem = analysis.element;
+    // Prefer element-specific emoji over shared emojiIndex
+    const emoji = emojis[elem.id] || emojis[elem.emojiIndex] || '❓';
+    const results = document.getElementById('results');
+    
+    let html = `
+        <div style="background: #1a0a0a; padding: 20px; border-radius: 8px; border: 2px solid #ff4444;">
+            <h2 style="color: #ff4444; margin-bottom: 20px;">⚠️ Delete Element: ${emoji} ${elem.name}</h2>
+            
+            <div style="background: #2a1a1a; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
+                <p style="color: #faa; margin: 0;">This action will permanently delete this element and affect the following:</p>
+            </div>
+    `;
+    
+    // Show recipes that create this element
+    if (analysis.recipesCreating.length > 0) {
+        html += `
+            <div style="margin-bottom: 20px;">
+                <h3 style="color: #ff6666;">🗑️ Recipes that create ${elem.name} (will be deleted):</h3>
+                <div style="background: #1a1a1a; padding: 15px; border-radius: 6px;">
+        `;
+        
+        analysis.recipesCreating.forEach(recipe => {
+            const e1 = elements[recipe.elem1];
+            const e2 = elements[recipe.elem2];
+            if (e1 && e2) {
+                const emoji1 = emojis[e1.id] || emojis[e1.emojiIndex] || '❓';
+                const emoji2 = emojis[e2.id] || emojis[e2.emojiIndex] || '❓';
+                html += `
+                    <div style="padding: 8px; border-bottom: 1px solid #333;">
+                        ${emoji1} ${e1.name} + ${emoji2} ${e2.name} → ${emoji} ${elem.name}
+                    </div>
+                `;
+            }
+        });
+        
+        html += `</div></div>`;
+    }
+    
+    // Show combinations using this element
+    if (analysis.combinationsUsing.length > 0) {
+        html += `
+            <div style="margin-bottom: 20px;">
+                <h3 style="color: #ff9944;">⚠️ Combinations using ${elem.name} (need replacement):</h3>
+                <div id="affected-combos" style="background: #1a1a1a; padding: 15px; border-radius: 6px;">
+        `;
+        
+        analysis.combinationsUsing.forEach((item, index) => {
+            const otherEmoji = item.otherElement ? (emojis[item.otherElement.id] || emojis[item.otherElement.emojiIndex] || '❓') : '❓';
+            const resultEmoji = item.resultElement ? (emojis[item.resultElement.id] || emojis[item.resultElement.emojiIndex] || '❓') : '❓';
+            const otherName = item.otherElement?.name || `ID: ${item.otherElem}`;
+            const resultName = item.resultElement?.name || `ID: ${item.result}`;
+            
+            html += `
+                <div id="combo-${index}" style="padding: 10px; border: 1px solid #444; border-radius: 4px; margin-bottom: 10px;">
+                    <div style="margin-bottom: 10px;">
+                        ${emoji} ${elem.name} + ${otherEmoji} ${otherName} → ${resultEmoji} ${resultName}
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button onclick="editAffectedCombo(${index}, '${item.combo}', '${elementId}', '${item.otherElem}', '${item.result}')" style="padding: 5px 10px;">
+                            ✏️ Edit
+                        </button>
+                        <button class="remove-btn" onclick="deleteAffectedCombo(${index}, '${item.combo}')" style="padding: 5px 10px;">
+                            🗑️ Delete
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += `</div></div>`;
+    }
+    
+    // Show dependent elements
+    if (analysis.dependentElements.size > 0) {
+        html += `
+            <div style="margin-bottom: 20px;">
+                <h3 style="color: #ffaa44;">⚠️ Dependent elements (may become uncreatable):</h3>
+                <div style="background: #1a1a1a; padding: 15px; border-radius: 6px;">
+        `;
+        
+        Array.from(analysis.dependentElements).forEach(depId => {
+            const depElem = elements[depId];
+            if (depElem) {
+                const depEmoji = emojis[depElem.id] || emojis[depElem.emojiIndex] || '❓';
+                html += `
+                    <div style="padding: 8px; border-bottom: 1px solid #333;">
+                        ${depEmoji} ${depElem.name} (ID: ${depId})
+                    </div>
+                `;
+            }
+        });
+        
+        html += `</div></div>`;
+    }
+    
+    // Action buttons
+    html += `
+        <div style="display: flex; gap: 10px; margin-top: 30px;">
+            <button class="remove-btn" onclick="confirmDeleteElement('${elementId}')" style="padding: 10px 20px;">
+                🗑️ Confirm Delete
+            </button>
+            <button class="secondary" onclick="showElement('${elementId}')" style="padding: 10px 20px;">
+                Cancel
+            </button>
+        </div>
+    `;
+    
+    html += `</div>`;
+    
+    results.innerHTML = html;
+    
+    // Store analysis for later use
+    window.currentDeletionAnalysis = analysis;
+}
+
+// Edit affected combination
+window.editAffectedCombo = function(index, combo, deletingElemId, otherElemId, resultId) {
+    const comboDiv = document.getElementById(`combo-${index}`);
+    const [a, b] = combo.split('+');
+    
+    let html = `
+        <div style="background: #2a2a2a; padding: 10px; border-radius: 4px;">
+            <div style="margin-bottom: 10px;">Replace deleted element with:</div>
+            <input type="text" id="replace-${index}" placeholder="Search for element..." style="width: 100%; padding: 8px;">
+            <input type="hidden" id="replace-${index}-id" value="">
+            <div id="replace-${index}-results" style="display: none; max-height: 150px; overflow-y: auto; background: #1a1a1a; border: 1px solid #444; margin-top: 5px;"></div>
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button onclick="saveReplacementCombo(${index}, '${combo}', '${deletingElemId}', '${otherElemId}', '${resultId}')" style="padding: 5px 10px;">
+                    Save
+                </button>
+                <button onclick="cancelEditCombo(${index})" style="padding: 5px 10px;">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    `;
+    
+    comboDiv.innerHTML = html;
+    
+    // Setup search for replacement
+    setupRecipeSearch(`replace-${index}`, `replace-${index}-id`, `replace-${index}-results`);
+};
+
+// Save replacement combo
+window.saveReplacementCombo = function(index, oldCombo, deletingElemId, otherElemId, resultId) {
+    const replacementId = document.getElementById(`replace-${index}-id`).value;
+    
+    if (!replacementId || !elements[replacementId]) {
+        showMessage('Please select a valid replacement element', 'error');
+        return;
+    }
+    
+    // Update the analysis
+    window.currentDeletionAnalysis.combinationsUsing[index].replacement = replacementId;
+    
+    // Update UI to show the change
+    const comboDiv = document.getElementById(`combo-${index}`);
+    const replacementElem = elements[replacementId];
+    const replacementEmoji = emojis[replacementElem.id] || emojis[replacementElem.emojiIndex] || '❓';
+    const otherElem = elements[otherElemId];
+    const otherEmoji = emojis[otherElem.id] || emojis[otherElem.emojiIndex] || '❓';
+    const resultElem = elements[resultId];
+    const resultEmoji = emojis[resultElem.id] || emojis[resultElem.emojiIndex] || '❓';
+    
+    comboDiv.innerHTML = `
+        <div style="padding: 10px;">
+            <div style="margin-bottom: 5px; text-decoration: line-through; opacity: 0.5;">
+                ${oldCombo.split('+').map(id => {
+                    const e = elements[id];
+                    const emoji = emojis[e?.emojiIndex] || emojis[id] || '❓';
+                    return `${emoji} ${e?.name || id}`;
+                }).join(' + ')} → ${resultEmoji} ${resultElem.name}
+            </div>
+            <div style="color: #4ecdc4;">
+                ✅ Will be replaced with: ${replacementEmoji} ${replacementElem.name} + ${otherEmoji} ${otherElem.name} → ${resultEmoji} ${resultElem.name}
+            </div>
+        </div>
+    `;
+};
+
+// Cancel edit combo
+window.cancelEditCombo = function(index) {
+    // Restore the original display for this combo
+    const item = window.currentDeletionAnalysis.combinationsUsing[index];
+    const elem = window.currentDeletionAnalysis.element;
+    // Prefer element-specific emoji over shared emojiIndex
+    const emoji = emojis[elem.id] || emojis[elem.emojiIndex] || '❓';
+    const otherEmoji = item.otherElement ? (emojis[item.otherElement.id] || emojis[item.otherElement.emojiIndex] || '❓') : '❓';
+    const resultEmoji = item.resultElement ? (emojis[item.resultElement.id] || emojis[item.resultElement.emojiIndex] || '❓') : '❓';
+    const otherName = item.otherElement?.name || `ID: ${item.otherElem}`;
+    const resultName = item.resultElement?.name || `ID: ${item.result}`;
+    
+    const comboDiv = document.getElementById(`combo-${index}`);
+    comboDiv.innerHTML = `
+        <div style="margin-bottom: 10px;">
+            ${emoji} ${elem.name} + ${otherEmoji} ${otherName} → ${resultEmoji} ${resultName}
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <button onclick="editAffectedCombo(${index}, '${item.combo}', '${elem.id}', '${item.otherElem}', '${item.result}')" style="padding: 5px 10px;">
+                ✏️ Edit
+            </button>
+            <button class="remove-btn" onclick="deleteAffectedCombo(${index}, '${item.combo}')" style="padding: 5px 10px;">
+                🗑️ Delete
+            </button>
+        </div>
+    `;
+};
+
+// Delete affected combo
+window.deleteAffectedCombo = function(index, combo) {
+    // Mark for deletion
+    window.currentDeletionAnalysis.combinationsUsing[index].markedForDeletion = true;
+    
+    // Update UI
+    const comboDiv = document.getElementById(`combo-${index}`);
+    comboDiv.style.opacity = '0.5';
+    comboDiv.style.textDecoration = 'line-through';
+    comboDiv.innerHTML += '<div style="color: #ff4444; margin-top: 10px;">✗ Marked for deletion</div>';
+};
+
+// Confirm element deletion
+window.confirmDeleteElement = async function(elementId) {
+    const analysis = window.currentDeletionAnalysis;
+    
+    if (!analysis || !analysis.element) {
+        showMessage('Error: Analysis data not found. Please try again.', 'error');
+        return;
+    }
+    
+    if (!confirm(`Are you absolutely sure you want to delete "${analysis.element.name}"?\n\nThis will:\n- Delete ${analysis.recipesCreating.length} recipes\n- Affect ${analysis.combinationsUsing.length} combinations\n- Potentially make ${analysis.dependentElements.size} elements uncreatable`)) {
+        return;
+    }
+    
+    try {
+        // Prepare the deletion data
+        const deletionData = {
+            elementId: elementId,
+            replacements: {},
+            deleteCombos: []
+        };
+        
+        // Process combination changes
+        analysis.combinationsUsing.forEach((item, index) => {
+            if (item.markedForDeletion) {
+                deletionData.deleteCombos.push(item.combo);
+            } else if (item.replacement) {
+                deletionData.replacements[item.combo] = item.replacement;
+            }
+        });
+        
+        // Send deletion request to server
+        const response = await fetch('/api/delete-element', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(deletionData)
+        });
+        
+        if (!response.ok) {
+            throw new Error('Server error');
+        }
+        
+        // Remove from local data
+        delete elements[elementId];
+        delete emojis[elementId];
+        
+        // Remove recipes that create this element
+        analysis.recipesCreating.forEach(recipe => {
+            delete combinations[recipe.combo];
+            delete combinations[`${recipe.elem2}+${recipe.elem1}`];
+        });
+        
+        // Apply combination changes
+        analysis.combinationsUsing.forEach(item => {
+            if (item.markedForDeletion) {
+                delete combinations[item.combo];
+                const [a, b] = item.combo.split('+');
+                delete combinations[`${b}+${a}`];
+            } else if (item.replacement) {
+                delete combinations[item.combo];
+                const [a, b] = item.combo.split('+');
+                delete combinations[`${b}+${a}`];
+                
+                // Add new combination with replacement
+                combinations[`${item.replacement}+${item.otherElem}`] = item.result;
+                combinations[`${item.otherElem}+${item.replacement}`] = item.result;
+            }
+        });
+        
+        showMessage(`Element "${analysis.element.name}" deleted successfully!`, 'success');
+        
+        // Clear search and hide results
+        document.getElementById('search').value = '';
+        hideResults();
+        
+    } catch (error) {
+        console.error('Error deleting element:', error);
+        showMessage(`Failed to delete element: ${error.message}`, 'error');
+    }
+};
