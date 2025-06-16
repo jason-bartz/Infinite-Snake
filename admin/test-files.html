@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test File Access</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #1a1a1a; color: #0f0; }
+        .test { margin: 10px 0; padding: 10px; border: 1px solid #333; }
+        .success { border-color: #0f0; }
+        .error { border-color: #f00; color: #f00; }
+    </style>
+</head>
+<body>
+    <h1>Testing File Access</h1>
+    <div id="results"></div>
+    
+    <script>
+        const files = [
+            '/elements/elements-new/elements-core.json',
+            '/elements/elements-new/elements-life.json',
+            '/elements/elements-new/elements-civilization.json',
+            '/elements/elements-new/elements-modern.json',
+            '/elements/elements-new/elements-fictional.json',
+            '/elements/elements-new/elements-humorous-fusions.json',
+            '/elements/elements-new/combinations.json',
+            '/elements/elements-new/emojis.js'
+        ];
+        
+        const results = document.getElementById('results');
+        
+        async function testFile(file) {
+            const div = document.createElement('div');
+            div.className = 'test';
+            
+            try {
+                const response = await fetch(file);
+                if (response.ok) {
+                    const size = response.headers.get('content-length');
+                    div.className += ' success';
+                    div.innerHTML = `✓ ${file} - Status: ${response.status} - Size: ${size} bytes`;
+                    
+                    // Try to parse JSON
+                    if (file.endsWith('.json')) {
+                        const data = await response.json();
+                        if (Array.isArray(data)) {
+                            div.innerHTML += ` - Array with ${data.length} items`;
+                        } else {
+                            div.innerHTML += ` - Object with ${Object.keys(data).length} keys`;
+                        }
+                    }
+                } else {
+                    div.className += ' error';
+                    div.innerHTML = `✗ ${file} - Status: ${response.status}`;
+                }
+            } catch (err) {
+                div.className += ' error';
+                div.innerHTML = `✗ ${file} - Error: ${err.message}`;
+            }
+            
+            results.appendChild(div);
+        }
+        
+        // Test all files
+        files.forEach(file => testFile(file));
+    </script>
+</body>
+</html>

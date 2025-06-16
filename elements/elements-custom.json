@@ -1,0 +1,764 @@
+{
+  "20306": {
+    "id": 20306,
+    "name": "Joe Biden",
+    "tier": 7,
+    "emojiIndex": 20306
+  },
+  "20307": {
+    "id": 20307,
+    "name": "Zombie",
+    "tier": 4,
+    "emojiIndex": 20307
+  },
+  "20308": {
+    "id": 20308,
+    "name": "Rocket",
+    "tier": 6,
+    "emojiIndex": 20308
+  },
+  "20309": {
+    "id": 20309,
+    "name": "Potato",
+    "tier": 3,
+    "emojiIndex": 20309
+  },
+  "20310": {
+    "id": 20310,
+    "name": "Moon",
+    "tier": 2,
+    "emojiIndex": 20310
+  },
+  "20311": {
+    "id": 20311,
+    "name": "Steve Jobs",
+    "tier": 6,
+    "emojiIndex": 20311
+  },
+  "20312": {
+    "id": 20312,
+    "name": "Football",
+    "tier": 7,
+    "emojiIndex": 20312
+  },
+  "20313": {
+    "id": 20313,
+    "name": "Baseball",
+    "tier": 7,
+    "emojiIndex": 20313
+  },
+  "20314": {
+    "id": 20314,
+    "name": "Amazon Kindle",
+    "tier": 6,
+    "emojiIndex": 20314
+  },
+  "20315": {
+    "id": 20315,
+    "name": "Dog",
+    "tier": 3,
+    "emojiIndex": 20315
+  },
+  "20316": {
+    "id": 20316,
+    "name": "Cat",
+    "tier": 3,
+    "emojiIndex": 20316
+  },
+  "20317": {
+    "id": 20317,
+    "name": "Car",
+    "tier": 6,
+    "emojiIndex": 20317
+  },
+  "20318": {
+    "id": 20318,
+    "name": "Hamburger",
+    "tier": 7,
+    "emojiIndex": 20318
+  },
+  "20319": {
+    "id": 20319,
+    "name": "Banana",
+    "tier": 3,
+    "emojiIndex": 20319
+  },
+  "20320": {
+    "id": 20320,
+    "name": "Space Ship",
+    "tier": 6,
+    "emojiIndex": 20320
+  },
+  "20321": {
+    "id": 20321,
+    "name": "Curtain",
+    "tier": 5,
+    "emojiIndex": 20321
+  },
+  "20322": {
+    "id": 20322,
+    "name": "Niagara Falls",
+    "tier": 2,
+    "emojiIndex": 20322
+  },
+  "20323": {
+    "id": 20323,
+    "name": "Ruins",
+    "tier": 5,
+    "emojiIndex": 20323
+  },
+  "20324": {
+    "id": 20324,
+    "name": "Magic",
+    "tier": 4,
+    "emojiIndex": 20324
+  },
+  "20325": {
+    "id": 20325,
+    "name": "Rocks",
+    "tier": 1,
+    "emojiIndex": 20325
+  },
+  "20326": {
+    "id": 20326,
+    "name": "Surf",
+    "tier": 4,
+    "emojiIndex": 20326
+  },
+  "20327": {
+    "id": 20327,
+    "name": "Screen",
+    "tier": 6,
+    "emojiIndex": 20327
+  },
+  "20328": {
+    "id": 20328,
+    "name": "Sperm",
+    "tier": 2,
+    "emojiIndex": 20328
+  },
+  "20329": {
+    "id": 20329,
+    "name": "Adam",
+    "tier": 4,
+    "emojiIndex": 20329
+  },
+  "20330": {
+    "id": 20330,
+    "name": "Woman",
+    "tier": 4,
+    "emojiIndex": 20330
+  },
+  "20331": {
+    "id": 20331,
+    "name": "Smog",
+    "tier": 1,
+    "emojiIndex": 20331
+  },
+  "20332": {
+    "id": 20332,
+    "name": "Dandelion",
+    "tier": 1,
+    "emojiIndex": 20332
+  },
+  "20333": {
+    "id": 20333,
+    "name": "Seed",
+    "tier": 2,
+    "emojiIndex": 20333
+  },
+  "20334": {
+    "id": 20334,
+    "name": "Grape",
+    "tier": 3,
+    "emojiIndex": 20334
+  },
+  "20335": {
+    "id": 20335,
+    "name": "Tractor",
+    "tier": 5,
+    "emojiIndex": 20335
+  },
+  "20336": {
+    "id": 20336,
+    "name": "Farm",
+    "tier": 5,
+    "emojiIndex": 20336
+  },
+  "20337": {
+    "id": 20337,
+    "name": "Popcorn",
+    "tier": 7,
+    "emojiIndex": 20337
+  },
+  "20338": {
+    "id": 20338,
+    "name": "Flower Patch",
+    "tier": 2,
+    "emojiIndex": 20338
+  },
+  "20339": {
+    "id": 20339,
+    "name": "Seeds",
+    "tier": 3,
+    "emojiIndex": 20339
+  },
+  "20340": {
+    "id": 20340,
+    "name": "Movie",
+    "tier": 7,
+    "emojiIndex": 20340
+  },
+  "20341": {
+    "id": 20341,
+    "name": "Tran",
+    "tier": 5,
+    "emojiIndex": 20341
+  },
+  "20342": {
+    "id": 20342,
+    "name": "Steamboat",
+    "tier": 5,
+    "emojiIndex": 20342
+  },
+  "20343": {
+    "id": 20343,
+    "name": "Pencil",
+    "tier": 5,
+    "emojiIndex": 20343
+  },
+  "20344": {
+    "id": 20344,
+    "name": "Flying Fish",
+    "tier": 3,
+    "emojiIndex": 20344
+  },
+  "20345": {
+    "id": 20345,
+    "name": "Flock",
+    "tier": 3,
+    "emojiIndex": 20345
+  },
+  "20346": {
+    "id": 20346,
+    "name": "Vampire",
+    "tier": 4,
+    "emojiIndex": 20346
+  },
+  "20347": {
+    "id": 20347,
+    "name": "Holy Water",
+    "tier": 2,
+    "emojiIndex": 20347
+  },
+  "20348": {
+    "id": 20348,
+    "name": "Blood",
+    "tier": 4,
+    "emojiIndex": 20348
+  },
+  "20349": {
+    "id": 20349,
+    "name": "Diamond Ring",
+    "tier": 5,
+    "emojiIndex": 20349
+  },
+  "20350": {
+    "id": 20350,
+    "name": "Windmill",
+    "tier": 5,
+    "emojiIndex": 20350
+  },
+  "20351": {
+    "id": 20351,
+    "name": "Donut",
+    "tier": 7,
+    "emojiIndex": 20351
+  },
+  "20352": {
+    "id": 20352,
+    "name": "Nintendo",
+    "tier": 7,
+    "emojiIndex": 20352
+  },
+  "20353": {
+    "id": 20353,
+    "name": "Nintendo Switch 2",
+    "tier": 6,
+    "emojiIndex": 20353
+  },
+  "20354": {
+    "id": 20354,
+    "name": "Fire Swamp",
+    "tier": 4,
+    "emojiIndex": 20354
+  },
+  "20355": {
+    "id": 20355,
+    "name": "Fire Breathing Dragon",
+    "tier": 4,
+    "emojiIndex": 20355
+  },
+  "20356": {
+    "id": 20356,
+    "name": "Blue Eyes White Dragon",
+    "tier": 9,
+    "emojiIndex": 20356
+  },
+  "20357": {
+    "id": 20357,
+    "name": "Yugi",
+    "tier": 9,
+    "emojiIndex": 20357
+  },
+  "20358": {
+    "id": 20358,
+    "name": "Yugioh",
+    "tier": 9,
+    "emojiIndex": 20358
+  },
+  "20359": {
+    "id": 20359,
+    "name": "Steampunk",
+    "tier": 7,
+    "emojiIndex": 20359
+  },
+  "20360": {
+    "id": 20360,
+    "name": "Robot",
+    "tier": 6,
+    "emojiIndex": 20360
+  },
+  "20361": {
+    "id": 20361,
+    "name": "Turtle",
+    "tier": 3,
+    "emojiIndex": 20361
+  },
+  "20362": {
+    "id": 20362,
+    "name": "Jet",
+    "tier": 6,
+    "emojiIndex": 20362
+  },
+  "20363": {
+    "id": 20363,
+    "name": "Head",
+    "tier": 5,
+    "emojiIndex": 20363
+  },
+  "20364": {
+    "id": 20364,
+    "name": "Brick",
+    "tier": 5,
+    "emojiIndex": 20364
+  },
+  "20365": {
+    "id": 20365,
+    "name": "Cheese Wheel",
+    "tier": 5,
+    "emojiIndex": 20365
+  },
+  "20366": {
+    "id": 20366,
+    "name": "Barbecue",
+    "tier": 5,
+    "emojiIndex": 20366
+  },
+  "20367": {
+    "id": 20367,
+    "name": "Cow",
+    "tier": 3,
+    "emojiIndex": 20367
+  },
+  "20368": {
+    "id": 20368,
+    "name": "Grill",
+    "tier": 5,
+    "emojiIndex": 20368
+  },
+  "20369": {
+    "id": 20369,
+    "name": "Solar",
+    "tier": 1,
+    "emojiIndex": 20369
+  },
+  "20370": {
+    "id": 20370,
+    "name": "Cowabunga",
+    "tier": 7,
+    "emojiIndex": 20370
+  },
+  "20371": {
+    "id": 20371,
+    "name": "Wood",
+    "tier": 2,
+    "emojiIndex": 20371
+  },
+  "20372": {
+    "id": 20372,
+    "name": "Hawaii",
+    "tier": 2,
+    "emojiIndex": 20372
+  },
+  "20373": {
+    "id": 20373,
+    "name": "Poke",
+    "tier": 7,
+    "emojiIndex": 20373
+  },
+  "20374": {
+    "id": 20374,
+    "name": "Pokedex",
+    "tier": 9,
+    "emojiIndex": 20374
+  },
+  "20375": {
+    "id": 20375,
+    "name": "Pokeball",
+    "tier": 9,
+    "emojiIndex": 20375
+  },
+  "20376": {
+    "id": 20376,
+    "name": "Masterball",
+    "tier": 9,
+    "emojiIndex": 20376
+  },
+  "20377": {
+    "id": 20377,
+    "name": "Shipwreck",
+    "tier": 5,
+    "emojiIndex": 20377
+  },
+  "20378": {
+    "id": 20378,
+    "name": "Cyborg",
+    "tier": 6,
+    "emojiIndex": 20378
+  },
+  "20379": {
+    "id": 20379,
+    "name": "Fuel",
+    "tier": 5,
+    "emojiIndex": 20379
+  },
+  "20380": {
+    "id": 20380,
+    "name": "Quagmire",
+    "tier": 2,
+    "emojiIndex": 20380
+  },
+  "20381": {
+    "id": 20381,
+    "name": "Alcohol",
+    "tier": 5,
+    "emojiIndex": 20381
+  },
+  "20382": {
+    "id": 20382,
+    "name": "Taxi",
+    "tier": 6,
+    "emojiIndex": 20382
+  },
+  "20383": {
+    "id": 20383,
+    "name": "Profit",
+    "tier": 5,
+    "emojiIndex": 20383
+  },
+  "20384": {
+    "id": 20384,
+    "name": "The Minimal Phone",
+    "tier": 6,
+    "emojiIndex": 20384
+  },
+  "20385": {
+    "id": 20385,
+    "name": "Oasis",
+    "tier": 2,
+    "emojiIndex": 20385
+  },
+  "20386": {
+    "id": 20386,
+    "name": "Weed",
+    "tier": 2,
+    "emojiIndex": 20386
+  },
+  "20387": {
+    "id": 20387,
+    "name": "Chai",
+    "tier": 7,
+    "emojiIndex": 20387
+  },
+  "20388": {
+    "id": 20388,
+    "name": "Pond",
+    "tier": 2,
+    "emojiIndex": 20388
+  },
+  "20389": {
+    "id": 20389,
+    "name": "Chili",
+    "tier": 2,
+    "emojiIndex": 20389
+  },
+  "20390": {
+    "id": 20390,
+    "name": "Jeep",
+    "tier": 6,
+    "emojiIndex": 20390
+  },
+  "20391": {
+    "id": 20391,
+    "name": "Fireworks",
+    "tier": 7,
+    "emojiIndex": 20391
+  },
+  "20392": {
+    "id": 20392,
+    "name": "USA",
+    "tier": 5,
+    "emojiIndex": 20392
+  },
+  "20393": {
+    "id": 20393,
+    "name": "Drunk",
+    "tier": 5,
+    "emojiIndex": 20393
+  },
+  "20394": {
+    "id": 20394,
+    "name": "Frat Party",
+    "tier": 7,
+    "emojiIndex": 20394
+  },
+  "20395": {
+    "id": 20395,
+    "name": "Toga Party",
+    "tier": 5,
+    "emojiIndex": 20395
+  },
+  "20396": {
+    "id": 20396,
+    "name": "Vinegar",
+    "tier": 5,
+    "emojiIndex": 20396
+  },
+  "20397": {
+    "id": 20397,
+    "name": "Dandelion Wine",
+    "tier": 7,
+    "emojiIndex": 20397
+  },
+  "20398": {
+    "id": 20398,
+    "name": "Arrakis",
+    "tier": 9,
+    "emojiIndex": 20398
+  },
+  "20399": {
+    "id": 20399,
+    "name": "Kwisatz Haderach",
+    "tier": 10,
+    "emojiIndex": 20399
+  },
+  "20400": {
+    "id": 20400,
+    "name": "Paul Atreides",
+    "tier": 9,
+    "emojiIndex": 20400
+  },
+  "20401": {
+    "id": 20401,
+    "name": "Asia",
+    "tier": 2,
+    "emojiIndex": 20401
+  },
+  "20402": {
+    "id": 20402,
+    "name": "Optimus Prime",
+    "tier": 9,
+    "emojiIndex": 20402
+  },
+  "20403": {
+    "id": 20403,
+    "name": "Werewolf",
+    "tier": 9,
+    "emojiIndex": 20403
+  },
+  "20404": {
+    "id": 20404,
+    "name": "Transformer",
+    "tier": 9,
+    "emojiIndex": 20404
+  },
+  "20405": {
+    "id": 20405,
+    "name": "Michigan",
+    "tier": 5,
+    "emojiIndex": 20405
+  },
+  "20406": {
+    "id": 20406,
+    "name": "Smoker",
+    "tier": 7,
+    "emojiIndex": 20406
+  },
+  "20407": {
+    "id": 20407,
+    "name": "Cococnut",
+    "tier": 3,
+    "emojiIndex": 20407
+  },
+  "20408": {
+    "id": 20408,
+    "name": "Coco",
+    "tier": 4,
+    "emojiIndex": 20408
+  },
+  "20409": {
+    "id": 20409,
+    "name": "Cocoon",
+    "tier": 3,
+    "emojiIndex": 20409
+  },
+  "20410": {
+    "id": 20410,
+    "name": "Bait",
+    "tier": 3,
+    "emojiIndex": 20410
+  },
+  "20411": {
+    "id": 20411,
+    "name": "Worm",
+    "tier": 3,
+    "emojiIndex": 20411
+  },
+  "20412": {
+    "id": 20412,
+    "name": "Flying",
+    "tier": 6,
+    "emojiIndex": 20412
+  },
+  "20413": {
+    "id": 20413,
+    "name": "Poop",
+    "tier": 3,
+    "emojiIndex": 20413
+  },
+  "20414": {
+    "id": 20414,
+    "name": "Radio Wave",
+    "tier": 6,
+    "emojiIndex": 20414
+  },
+  "20415": {
+    "id": 20415,
+    "name": "Mosaic",
+    "tier": 5,
+    "emojiIndex": 20415
+  },
+  "20416": {
+    "id": 20416,
+    "name": "Smoke Signal",
+    "tier": 4,
+    "emojiIndex": 20416
+  },
+  "20417": {
+    "id": 20417,
+    "name": "Pasta",
+    "tier": 7,
+    "emojiIndex": 20417
+  },
+  "20418": {
+    "id": 20418,
+    "name": "Noodle",
+    "tier": 7,
+    "emojiIndex": 20418
+  },
+  "20419": {
+    "id": 20419,
+    "name": "Incense",
+    "tier": 6,
+    "emojiIndex": 20419
+  },
+  "20420": {
+    "id": 20420,
+    "name": "Peach",
+    "tier": 3,
+    "emojiIndex": 20420
+  },
+  "20421": {
+    "id": 20421,
+    "name": "Jewel",
+    "tier": 5,
+    "emojiIndex": 20421
+  },
+  "20422": {
+    "id": 20422,
+    "name": "Balloon",
+    "tier": 7,
+    "emojiIndex": 20422
+  },
+  "20423": {
+    "id": 20423,
+    "name": "Soda",
+    "tier": 7,
+    "emojiIndex": 20423
+  },
+  "20424": {
+    "id": 20424,
+    "name": "Coke",
+    "tier": 7,
+    "emojiIndex": 20424
+  },
+  "20425": {
+    "id": 20425,
+    "name": "Diet Coke",
+    "tier": 7,
+    "emojiIndex": 20425
+  },
+  "20426": {
+    "id": 20426,
+    "name": "Cruise",
+    "tier": 7,
+    "emojiIndex": 20426
+  },
+  "20427": {
+    "id": 20427,
+    "name": "Rainy Day",
+    "tier": 4,
+    "emojiIndex": 20427
+  },
+  "20428": {
+    "id": 20428,
+    "name": "Boredom",
+    "tier": 4,
+    "emojiIndex": 20428
+  },
+  "20429": {
+    "id": 20429,
+    "name": "Photographer",
+    "tier": 7,
+    "emojiIndex": 20429
+  },
+  "20430": {
+    "id": 20430,
+    "name": "Space Pirate",
+    "tier": 9,
+    "emojiIndex": 20430
+  },
+  "20431": {
+    "id": 20431,
+    "name": "Captain Falcon",
+    "tier": 9,
+    "emojiIndex": 20431
+  },
+  "20432": {
+    "id": 20432,
+    "name": "Magnet",
+    "tier": 5,
+    "emojiIndex": 20432
+  }
+}

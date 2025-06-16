@@ -737,6 +737,47 @@
                        inset 0 2px 4px rgba(0, 0, 0, 0.5);
         }
         
+        /* New glow and wobble animations for element combinations */
+        @keyframes elementGlow {
+            0%, 100% { 
+                box-shadow: 0 0 10px rgba(255, 215, 0, 0.6),
+                           0 0 20px rgba(255, 100, 255, 0.4),
+                           inset 0 0 10px rgba(255, 215, 0, 0.3);
+            }
+            50% { 
+                box-shadow: 0 0 20px rgba(255, 215, 0, 1),
+                           0 0 40px rgba(255, 100, 255, 0.8),
+                           inset 0 0 20px rgba(255, 215, 0, 0.5);
+            }
+        }
+        
+        @keyframes elementWobble {
+            0%, 100% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(-3deg) scale(1.05); }
+            75% { transform: rotate(3deg) scale(1.05); }
+        }
+        
+        .element-slot.glow-wobble {
+            animation: elementGlow 1s ease-in-out infinite,
+                      elementWobble 0.8s ease-in-out infinite;
+            border-color: #FFD700;
+            background: linear-gradient(135deg, 
+                rgba(255, 215, 0, 0.3) 0%,
+                rgba(255, 100, 255, 0.2) 100%
+            );
+        }
+        
+        /* Enhanced combining animation */
+        .element-slot.combining-enhanced {
+            animation: elementGlow 0.6s ease-in-out,
+                      elementWobble 0.4s ease-in-out;
+            border-color: #FFD700;
+            background: linear-gradient(135deg, 
+                rgba(255, 100, 255, 0.4) 0%,
+                rgba(100, 200, 255, 0.3) 100%
+            );
+        }
+        
         .element-slot .emoji {
             font-size: 28px;
             filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
@@ -2224,11 +2265,7 @@
         }
     </style>
     <!-- New Element System Scripts -->
-    <script src="elements/game-loader.js"></script>
-    <script src="elements/element-loader.js"></script>
-    <script src="elements/compatibility-layer.js"></script>
-    <script src="elements/dynamic-prefix-system.js"></script>
-    <script src="elements/integrate.js"></script>
+    <script src="elements/elements-new/optimized-game-loader-simple.js"></script>
 </head>
 <body>
     <!-- Splash Screen -->
@@ -2460,6 +2497,7 @@
             <div id="journalTab" class="tab-content">
                 <div id="discoveryJournal">
                     <h4 style="color: #FFD700; margin-bottom: 10px;">Discovery Journal</h4>
+                    <p id="discoveryCount" style="color: #4ecdc4; margin-bottom: 10px; text-align: center;">Loading discoveries...</p>
                     <div class="discovery-grid" id="discoveryGrid">
                         <!-- Discoveries will be populated here -->
                     </div>
@@ -2667,9 +2705,12 @@
                 boostThreshold: 0.2,        // Boosts frequently
                 chaseDistance: 500,         // Long chase range
                 fleeThreshold: 2.0,         // Only flee if enemy is 2x larger
-                collisionAvoidanceRadius: 60, // Small avoidance radius
+                collisionAvoidanceRadius: 120, // Increased from 60
+                dangerZoneRadius: 200,      // Early warning radius
                 aggressionMultiplier: 2.0,  // How much to prioritize hunting
-                elementIgnoreChance: 0.7    // 70% chance to ignore elements when hunting
+                elementIgnoreChance: 0.7,   // 70% chance to ignore elements when hunting
+                avoidanceStrength: 0.4,     // How strongly to avoid collisions
+                predictiveLookAhead: 0.5    // Look 0.5 seconds ahead
             },
             COMBO_FOCUSED: {
                 name: 'Combo Master',
@@ -2679,9 +2720,12 @@
                 boostThreshold: 0.7,        // Rarely boosts
                 chaseDistance: 50,          // Very short chase range
                 fleeThreshold: 0.9,         // Flee from 90% size snakes
-                collisionAvoidanceRadius: 150, // Large avoidance radius
+                collisionAvoidanceRadius: 250, // Increased from 150
+                dangerZoneRadius: 350,      // Large early warning
                 aggressionMultiplier: 0.2,
-                elementIgnoreChance: 0.0    // Never ignores elements
+                elementIgnoreChance: 0.0,   // Never ignores elements
+                avoidanceStrength: 0.8,     // Strong avoidance
+                predictiveLookAhead: 1.0    // Look 1 second ahead
             },
             BALANCED: {
                 name: 'Balanced',
@@ -2691,9 +2735,12 @@
                 boostThreshold: 0.5,
                 chaseDistance: 250,
                 fleeThreshold: 1.3,
-                collisionAvoidanceRadius: 100,
+                collisionAvoidanceRadius: 180, // Increased from 100
+                dangerZoneRadius: 280,      // Moderate early warning
                 aggressionMultiplier: 1.0,
-                elementIgnoreChance: 0.3
+                elementIgnoreChance: 0.3,
+                avoidanceStrength: 0.6,     // Moderate avoidance
+                predictiveLookAhead: 0.7    // Look 0.7 seconds ahead
             },
             CAUTIOUS: {
                 name: 'Cautious',
@@ -2703,9 +2750,12 @@
                 boostThreshold: 0.85,       // Almost never boosts
                 chaseDistance: 30,          // Tiny chase range
                 fleeThreshold: 0.8,         // Flee from 80% size snakes
-                collisionAvoidanceRadius: 200, // Huge avoidance radius
+                collisionAvoidanceRadius: 300, // Increased from 200
+                dangerZoneRadius: 400,      // Very large early warning
                 aggressionMultiplier: 0.1,
-                elementIgnoreChance: 0.0
+                elementIgnoreChance: 0.0,
+                avoidanceStrength: 1.0,     // Maximum avoidance
+                predictiveLookAhead: 1.2    // Look 1.2 seconds ahead
             },
             OPPORTUNIST: {
                 name: 'Opportunist',
@@ -2715,10 +2765,13 @@
                 boostThreshold: 0.3,
                 chaseDistance: 350,
                 fleeThreshold: 1.1,         // Careful about size matchups
-                collisionAvoidanceRadius: 80,
+                collisionAvoidanceRadius: 150, // Increased from 80
+                dangerZoneRadius: 250,      // Moderate early warning
                 aggressionMultiplier: 1.5,
                 elementIgnoreChance: 0.5,
-                preferWeakTargets: true     // Specifically targets smaller/wounded snakes
+                preferWeakTargets: true,    // Specifically targets smaller/wounded snakes
+                avoidanceStrength: 0.5,     // Moderate avoidance
+                predictiveLookAhead: 0.6    // Look 0.6 seconds ahead
             }
         };
         
@@ -2750,12 +2803,26 @@
         const MAX_BORDER_PARTICLES = isMobile ? 50 : 150; // Reduced for mobile
         
         // Element database
-        let elementDatabase = {};
-        let combinations = {};
-        let discoveredElements = new Set(); // Start with no discoveries
+        let elementDatabase = {}; // Keep for compatibility
+        let combinations = {}; // Keep for compatibility
+        let discoveredElements = new Set(); // Start with no discoveries - global pool of all discovered elements
+        let playerDiscoveredElements = new Set(); // Player-only discoveries for UI and progression
         
         // All-time discoveries (persistent across sessions)
         let allTimeDiscoveries = new Map(); // Map of element -> recipe
+        
+        // Element progression system
+        let recentlySpawnedElements = []; // Track last spawned elements to prevent clustering
+        const MAX_SPAWN_HISTORY = 20; // Remember last 20 spawned elements
+        let recentlyDiscoveredElements = new Map(); // Track recently discovered elements with timestamp
+        const DISCOVERY_ECHO_DURATION = 30000; // 30 seconds of boosted spawn rate
+        
+        // Grid-based spawning for even distribution
+        const ELEMENT_GRID_SIZE = 400; // Divide world into 400x400 cells (10x10 grid)
+        let elementGrid = new Map(); // Track elements per grid cell
+        const MIN_ELEMENTS_PER_CELL = 2; // Minimum elements per grid cell
+        const MAX_ELEMENTS_PER_CELL = 5; // Maximum elements per grid cell
+        const TARGET_ELEMENT_COUNT = 200; // Reduced for better performance
         
         // Snake names data
         let snakeNameData = null;
@@ -2884,11 +2951,11 @@
                 const data = JSON.parse(saved);
                 allTimeDiscoveries = new Map(data);
             } else {
-                // Initialize with base elements
-                allTimeDiscoveries.set('fire', 'Base Element');
-                allTimeDiscoveries.set('water', 'Base Element');
-                allTimeDiscoveries.set('earth', 'Base Element');
-                allTimeDiscoveries.set('air', 'Base Element');
+                // Initialize with base elements using numeric IDs
+                allTimeDiscoveries.set(0, 'Base Element');  // Fire
+                allTimeDiscoveries.set(1, 'Base Element');  // Water
+                allTimeDiscoveries.set(2, 'Base Element');  // Earth
+                allTimeDiscoveries.set(3, 'Base Element');  // Air
                 saveAllTimeDiscoveries();
             }
         }
@@ -3151,21 +3218,22 @@
         async function loadElements() {
             try {
                 // Wait for the new element system to load
-                if (!window.elementLoader || !window.elementCompatibility) {
+                if (!window.elementLoader || !window.elementLoader.isLoaded || !window.elementLoader.isLoaded()) {
                     // Wait for elementsLoaded event
                     await new Promise((resolve) => {
                         window.addEventListener('elementsLoaded', resolve, { once: true });
                     });
                 }
                 
-                // Use the compatibility layer to get legacy format
-                const legacyData = window.elementCompatibility.legacyCache;
+                console.log(`Loaded ${window.elementLoader.elements.size} elements and ${Object.keys(window.elementLoader.combinations).length} combinations`);
                 
-                // Update local references
-                elementDatabase = legacyData.elements;
-                combinations = legacyData.combinations;
-                
-                console.log(`Loaded ${Object.keys(elementDatabase).length} elements and ${Object.keys(combinations).length} combinations`);
+                // Create minimal elementDatabase for compatibility
+                elementDatabase = {
+                    fire: { emoji: '🔥', name: 'Fire', tier: 0, base: true },
+                    water: { emoji: '💧', name: 'Water', tier: 0, base: true },
+                    earth: { emoji: '🌍', name: 'Earth', tier: 0, base: true },
+                    air: { emoji: '💨', name: 'Air', tier: 0, base: true }
+                };
             } catch (error) {
                 console.error('Failed to load elements:', error);
                 // Fallback to basic elements
@@ -3512,7 +3580,8 @@
             localStorage.removeItem('allTimeDiscoveries');
             
             // Clear in-game discoveries
-            discoveredElements = new Set(['fire', 'water', 'earth', 'air']);
+            discoveredElements = new Set([0, 1, 2, 3]); // Earth, Water, Air, Fire IDs
+            playerDiscoveredElements = new Set([0, 1, 2, 3]); // Player starts with base elements
             allTimeDiscoveries = new Map();
             
             // Update UI
@@ -3658,6 +3727,8 @@
                     this.lastCollisionCheck = 0; // Optimize collision checking
                     this.panicMode = false; // Emergency evasion state
                     this.panicTimer = 0;
+                    this.lastDangerAngle = null; // Remember last danger direction
+                    this.consecutiveDangerFrames = 0; // Track how long we've been in danger
                 }
                 
                 // Initialize segments
@@ -3863,30 +3934,32 @@
                 
                 for (let i = 0; i < this.elements.length; i++) {
                     for (let j = i + 1; j < this.elements.length; j++) {
-                        const elem1 = this.elements[i];
-                        const elem2 = this.elements[j];
+                        const id1 = this.elements[i];
+                        const id2 = this.elements[j];
                         
-                        // Check if these can combine
-                        let result = null;
-                        if (window.elementLoader && window.elementCompatibility) {
-                            const resultElement = window.elementLoader.getCombinationByKeys(elem1, elem2);
-                            result = resultElement ? resultElement.key : null;
-                        } else {
-                            const combo1 = `${elem1}+${elem2}`;
-                            const combo2 = `${elem2}+${elem1}`;
-                            result = combinations[combo1] || combinations[combo2];
+                        // Check if these can combine using numeric IDs
+                        let resultId = null;
+                        if (window.elementLoader && window.elementLoader.combinations) {
+                            // Use min/max to ensure consistent key order
+                            const key = `${Math.min(id1, id2)}+${Math.max(id1, id2)}`;
+                            resultId = window.elementLoader.combinations[key];
+                            
+                            if (depth === 0 && i === 0 && j === 1) {
+                                console.log('[DEBUG] Checking combination:', key, '→', resultId);
+                            }
                         }
                         
-                        if (result && elementDatabase[result]) {
-                            const isNewDiscovery = !this.discoveredElements.has(result);
-                            const resultTier = elementDatabase[result].tier || 0;
+                        if (resultId && window.elementLoader.elements.get(resultId)) {
+                            const resultElem = window.elementLoader.elements.get(resultId);
+                            const isNewDiscovery = !this.discoveredElements.has(resultId);
+                            const resultTier = resultElem.t || 0;
                             
                             possibleCombos.push({
                                 index1: i,
                                 index2: j,
-                                elem1,
-                                elem2,
-                                result,
+                                elem1: id1,
+                                elem2: id2,
+                                result: resultId,
                                 isNewDiscovery,
                                 tier: resultTier
                             });
@@ -3926,6 +3999,11 @@
                     // playCombinationSound();
                     // Create visual flash effect
                     createCombinationFlash();
+                    
+                    // Add glow/wobble to both combining elements in the bank
+                    this.glowWobbleIndices = [chosen.index1, chosen.index2];
+                    this.glowWobbleTime = Date.now();
+                    
                     // Update UI immediately to show animation
                     updateUI();
                 }
@@ -3942,30 +4020,36 @@
                     // Discovery check
                     if (chosen.isNewDiscovery) {
                         this.discoveredElements.add(chosen.result);
+                        
+                        // IMPORTANT: Add to global discovered elements for spawning system!
+                        // But delay AI discoveries at game start to give clean beginning
+                        const gameTime = Date.now() - gameStartTime;
+                        if (this.isPlayer || gameTime > 10000) { // Only after 10 seconds for AI
+                            discoveredElements.add(chosen.result);
+                        }
+                        
+                        // Only add to player discoveries if this is the player
+                        if (this.isPlayer && this === playerSnake) {
+                            // Ensure we store as number
+                            const resultId = typeof chosen.result === 'string' ? parseInt(chosen.result) : chosen.result;
+                            playerDiscoveredElements.add(resultId);
+                        }
+                        
                         this.score += 1000; // 1000 points for new discovery
                         this.discoveries++; // Increment discovery count
                         
                         // Additional effects for player
                         if (this.isPlayer && this === playerSnake) {
-                            discoveredElements.add(chosen.result); // Update global discoveries
                             
                             // Save to all-time discoveries with recipe
-                            const recipe = `${elementDatabase[chosen.elem1]?.emoji || '?'} ${elementDatabase[chosen.elem1]?.name || chosen.elem1} + ${elementDatabase[chosen.elem2]?.emoji || '?'} ${elementDatabase[chosen.elem2]?.name || chosen.elem2}`;
-                            allTimeDiscoveries.set(chosen.result, recipe);
-                            saveAllTimeDiscoveries();
-                            
-                            // Update new system if available
-                            if (window.elementLoader && window.elementCompatibility) {
-                                const element = window.elementLoader.getElementByKey(chosen.result);
-                                if (element) {
-                                    window.elementLoader.discoverElement(element.id);
-                                    // Save discovered elements - pass the global discoveredElements set as an object
-                                    const discoveredObj = {};
-                                    discoveredElements.forEach(elem => {
-                                        discoveredObj[elem] = true;
-                                    });
-                                    window.elementCompatibility.saveDiscoveredElements(discoveredObj);
-                                }
+                            const elem1Data = window.elementLoader.elements.get(chosen.elem1);
+                            const elem2Data = window.elementLoader.elements.get(chosen.elem2);
+                            if (elem1Data && elem2Data) {
+                                const emoji1 = window.elementLoader.getEmojiForElement(chosen.elem1, elem1Data.e);
+                                const emoji2 = window.elementLoader.getEmojiForElement(chosen.elem2, elem2Data.e);
+                                const recipe = `${emoji1} ${elem1Data.n} + ${emoji2} ${elem2Data.n}`;
+                                allTimeDiscoveries.set(chosen.result, recipe);
+                                saveAllTimeDiscoveries();
                             }
                             
                             showCombinationMessage(chosen.elem1, chosen.elem2, chosen.result, true); // Show new discovery
@@ -4023,14 +4107,104 @@
                 
                 // Check if we have space in visible slots
                 if (this.elements.length >= this.maxVisibleElements) {
-                    // At visible capacity - remove oldest element (tail)
-                    this.elements.pop(); // Remove oldest (tail)
-                    this.overflowElements++;
+                    // At visible capacity - check if new element can combine with any existing
+                    const newElementId = element.id;
+                    let combined = false;
+                    
+                    // Check combinations with all existing elements
+                    for (let i = 0; i < this.elements.length && !combined; i++) {
+                        const existingId = this.elements[i];
+                        const comboKey = `${Math.min(newElementId, existingId)}+${Math.max(newElementId, existingId)}`;
+                        const resultId = window.elementLoader.combinations[comboKey];
+                        
+                        if (resultId) {
+                            // Found a combination! Replace the existing element with the result
+                            combined = true;
+                            
+                            // Visual feedback for the combination
+                            if (this.isPlayer) {
+                                // Start glow/wobble animation on the bank element
+                                this.pendingCombinationIndex = i;
+                                this.pendingCombinationTime = Date.now();
+                                updateUI(); // Update UI to show the glow effect
+                            }
+                            
+                            // Delay the actual combination for visual effect
+                            setTimeout(() => {
+                                this.elements[i] = resultId;
+                                if (this.isPlayer) {
+                                    this.pendingCombinationIndex = -1;
+                                }
+                                
+                                // Check if it's a new discovery
+                                if (!this.discoveredElements.has(resultId)) {
+                                    this.discoveredElements.add(resultId);
+                                this.score += 1000; // Discovery bonus
+                                this.discoveries++;
+                                
+                                if (this.isPlayer && this === playerSnake) {
+                                    discoveredElements.add(resultId);
+                                    
+                                    // Save discovery
+                                    const elem1Data = window.elementLoader.elements.get(newElementId);
+                                    const elem2Data = window.elementLoader.elements.get(existingId);
+                                    const resultData = window.elementLoader.elements.get(resultId);
+                                    if (elem1Data && elem2Data && resultData) {
+                                        const emoji1 = window.elementLoader.getEmojiForElement(newElementId, elem1Data.e);
+                                        const emoji2 = window.elementLoader.getEmojiForElement(existingId, elem2Data.e);
+                                        const recipe = `${emoji1} ${elem1Data.n} + ${emoji2} ${elem2Data.n}`;
+                                        allTimeDiscoveries.set(resultId, recipe);
+                                        saveAllTimeDiscoveries();
+                                    }
+                                    
+                                    showCombinationMessage(newElementId, existingId, resultId, true);
+                                    this.invincibilityTimer = 3000;
+                                }
+                            } else {
+                                // Existing combination
+                                if (this.isPlayer && this === playerSnake) {
+                                    comboStreak++;
+                                    let comboBonus = 100;
+                                    if (comboStreak >= 4) {
+                                        comboBonus = 2500;
+                                        showMessage(`4x COMBO STREAK! +${comboBonus} points!`, 'combo');
+                                    } else if (comboStreak >= 3) {
+                                        comboBonus = 1000;
+                                        showMessage(`3x Combo Streak! +${comboBonus} points!`, 'combo');
+                                    } else if (comboStreak >= 2) {
+                                        comboBonus = 500;
+                                        showMessage(`2x Combo! +${comboBonus} points!`, 'combo');
+                                    }
+                                    this.score += comboBonus;
+                                    showCombinationMessage(newElementId, existingId, resultId, false);
+                                }
+                            }
+                            
+                            // Create particle effect
+                            createCombinationParticles(this.segments[0].x, this.segments[0].y);
+                            
+                            // Now check if the new result can combine with other elements
+                            this.checkCombinations();
+                            
+                            updateUI(); // Update UI after combination
+                            }, 300); // 300ms delay for visual effect
+                        }
+                    }
+                    
+                    if (!combined) {
+                        // No combination found - just count as overflow
+                        this.overflowElements++;
+                    }
+                } else {
+                    // We have space - add element to a random position
+                    const insertIndex = Math.floor(Math.random() * (this.elements.length + 1));
+                    this.elements.splice(insertIndex, 0, element.id);
+                    
+                    // Check for immediate combinations after adding
+                    if (this.elements.length >= 2) {
+                        this.checkCombinations();
+                    }
                 }
-                
-                // Add element to a random position
-                const insertIndex = Math.floor(Math.random() * (this.elements.length + 1));
-                this.elements.splice(insertIndex, 0, element.type);
                 
                 // Track elements eaten
                 this.elementsEaten++;
@@ -4425,9 +4599,27 @@
                 let threatDistance = Infinity;
                 let preyDistance = Infinity;
                 
-                // Optimize: Only check collisions every few frames for performance
-                if (currentTime - this.lastCollisionCheck > 100) { // Check every 100ms
+                // Optimize: Check collisions more frequently for better avoidance
+                if (currentTime - this.lastCollisionCheck > 30) { // Check even more frequently (was 50ms)
                     this.lastCollisionCheck = currentTime;
+                    
+                    // Add future position prediction
+                    const futureTime = personality.predictiveLookAhead; // seconds
+                    const futureX = this.x + Math.cos(this.angle) * this.speed * futureTime * 60;
+                    const futureY = this.y + Math.sin(this.angle) * this.speed * futureTime * 60;
+                    
+                    // Track segment density around us
+                    let nearbySegmentCount = 0;
+                    const densityRadius = 250;
+                    
+                    // Vision cone parameters - wider and farther for better detection
+                    const visionDistance = 400 + (personality.collisionAvoidanceRadius * 0.7); // Increased vision range
+                    const visionAngle = Math.PI / 2; // 90 degree cone (wider base)
+                    const visionConeAngle = personality.riskTolerance < 0.3 ? visionAngle * 1.2 : visionAngle;
+                    
+                    // Additional peripheral vision for detecting segments to the side
+                    const peripheralDistance = 200 + personality.collisionAvoidanceRadius;
+                    const peripheralAngle = Math.PI * 0.8; // 144 degrees - much wider
                     
                     for (const otherSnake of snakes) {
                         if (otherSnake === this || !otherSnake.alive) continue;
@@ -4466,21 +4658,89 @@
                         }
                         
                         // Check collision with snake body segments
-                        if (distance < personality.collisionAvoidanceRadius) {
-                            for (let i = 3; i < otherSnake.segments.length; i++) {
+                        // ALWAYS check segments, not just when close to head!
+                        const maxCheckDistance = 1000; // Increased check range for better detection
+                        
+                        // For very long snakes, check every Nth segment for performance
+                        const segmentCheckInterval = otherSnake.segments.length > 100 ? 2 : 1; // Check more segments
+                        
+                        // Always check segments regardless of head distance
+                        const startIndex = otherSnake === this ? 5 : 1;
+                        for (let i = startIndex; i < otherSnake.segments.length; i += segmentCheckInterval) {
                                 const segment = otherSnake.segments[i];
                                 const segDx = segment.x - this.x;
                                 const segDy = segment.y - this.y;
                                 const segDistance = Math.hypot(segDx, segDy);
                                 
-                                if (segDistance < personality.collisionAvoidanceRadius) {
-                                    // Add to danger vector (weighted by proximity)
-                                    const weight = 1 - (segDistance / personality.collisionAvoidanceRadius);
-                                    dangerVector.x -= (segDx / segDistance) * weight;
-                                    dangerVector.y -= (segDy / segDistance) * weight;
+                                // Skip segments that are too far away
+                                if (segDistance > maxCheckDistance) continue;
+                                
+                                // Vision cone check - is this segment in our forward path?
+                                const angleToSegment = Math.atan2(segDy, segDx);
+                                let angleDiff = angleToSegment - this.angle;
+                                while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
+                                while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
+                                
+                                const inVisionCone = Math.abs(angleDiff) < visionConeAngle / 2 && segDistance < visionDistance;
+                                const inPeripheral = Math.abs(angleDiff) < peripheralAngle / 2 && segDistance < peripheralDistance;
+                                
+                                // Also check future collision
+                                const futureDx = segment.x - futureX;
+                                const futureDy = segment.y - futureY;
+                                const futureDistance = Math.hypot(futureDx, futureDy);
+                                
+                                // Use the closer of current or future distance
+                                const effectiveDistance = Math.min(segDistance, futureDistance);
+                                
+                                // Use appropriate check radius based on distance
+                                const checkRadius = effectiveDistance < personality.collisionAvoidanceRadius ? 
+                                                  personality.collisionAvoidanceRadius : 
+                                                  personality.dangerZoneRadius;
+                                
+                                if (effectiveDistance < checkRadius || inVisionCone || inPeripheral) {
+                                    // Much stronger weight calculation for close segments
+                                    const proximityWeight = effectiveDistance < 100 ? 
+                                                          2.0 : // Double weight for very close segments
+                                                          (1 - (effectiveDistance / checkRadius));
+                                    const strengthMultiplier = personality.avoidanceStrength;
+                                    
+                                    // Higher multipliers for different detection zones
+                                    let visionMultiplier = 1.0;
+                                    if (inVisionCone && effectiveDistance < 200) {
+                                        visionMultiplier = 4.0; // Very high weight for segments directly ahead
+                                    } else if (inVisionCone) {
+                                        visionMultiplier = 3.0;
+                                    } else if (inPeripheral) {
+                                        visionMultiplier = 2.0; // Good weight for peripheral segments
+                                    }
+                                    
+                                    const weight = proximityWeight * strengthMultiplier * 3 * visionMultiplier; // Increased base multiplier
+                                    
+                                    // Extra weight for player snake segments (they're more dangerous)
+                                    const playerMultiplier = otherSnake.isPlayer ? 2.0 : 1.0; // Increased from 1.5
+                                    
+                                    // Use future position for avoidance if it's closer
+                                    if (futureDistance < segDistance) {
+                                        dangerVector.x -= (futureDx / futureDistance) * weight * playerMultiplier;
+                                        dangerVector.y -= (futureDy / futureDistance) * weight * playerMultiplier;
+                                    } else {
+                                        dangerVector.x -= (segDx / segDistance) * weight * playerMultiplier;
+                                        dangerVector.y -= (segDy / segDistance) * weight * playerMultiplier;
+                                    }
+                                    
+                                    // Count nearby segments for density check
+                                    if (segDistance < densityRadius) {
+                                        nearbySegmentCount++;
+                                    }
                                 }
                             }
-                        }
+                    }
+                    
+                    // Add density-based danger if area is crowded
+                    if (nearbySegmentCount > 10) { // Many segments nearby
+                        const densityFactor = Math.min(nearbySegmentCount / 20, 1.0); // Cap at 1.0
+                        dangerVector.x *= (1 + densityFactor * 0.5); // Amplify danger
+                        dangerVector.y *= (1 + densityFactor * 0.5);
                     }
                 }
                 
@@ -4488,15 +4748,61 @@
                 let targetAngle = null;
                 let shouldBoost = false;
                 
-                // Priority 1: Avoid immediate collisions
-                if (Math.hypot(dangerVector.x, dangerVector.y) > 0.1) {
+                // Priority 1: Avoid immediate collisions - much lower threshold
+                const dangerMagnitude = Math.hypot(dangerVector.x, dangerVector.y);
+                if (dangerMagnitude > 0.05) { // Reduced threshold for faster response
+                    // Calculate escape angle - opposite of danger
                     targetAngle = Math.atan2(dangerVector.y, dangerVector.x);
-                    shouldBoost = personality.riskTolerance < 0.5;
                     
-                    // Enter panic mode if danger is high
-                    if (Math.hypot(dangerVector.x, dangerVector.y) > 0.5) {
+                    // Add smart escape logic - find the clearest path
+                    const escapeAngles = [];
+                    const angleSteps = 12; // Check more directions for better escape
+                    
+                    for (let i = 0; i < angleSteps; i++) {
+                        const testAngle = targetAngle + (i * Math.PI * 2 / angleSteps);
+                        let clearDistance = 0;
+                        
+                        // Check how clear this direction is
+                        const checkStep = 20;
+                        for (let dist = checkStep; dist < personality.collisionAvoidanceRadius; dist += checkStep) {
+                            const checkX = this.x + Math.cos(testAngle) * dist;
+                            const checkY = this.y + Math.sin(testAngle) * dist;
+                            let blocked = false;
+                            
+                            // Quick check against all snake segments
+                            for (const snake of snakes) {
+                                if (snake === this || !snake.alive) continue;
+                                // Check more segments for long snakes
+                                const checkInterval = snake.segments.length > 100 ? 2 : 1;
+                                for (let j = 0; j < snake.segments.length; j += checkInterval) {
+                                    const segment = snake.segments[j];
+                                    const segDist = Math.hypot(segment.x - checkX, segment.y - checkY);
+                                    if (segDist < 40) { // Increased danger zone
+                                        blocked = true;
+                                        break;
+                                    }
+                                }
+                                if (blocked) break;
+                            }
+                            
+                            if (blocked) break;
+                            clearDistance = dist;
+                        }
+                        
+                        escapeAngles.push({ angle: testAngle, clearDistance });
+                    }
+                    
+                    // Choose the angle with most clear space
+                    escapeAngles.sort((a, b) => b.clearDistance - a.clearDistance);
+                    targetAngle = escapeAngles[0].angle;
+                    
+                    // Boost decision based on danger level - more aggressive
+                    shouldBoost = dangerMagnitude > 0.2 || personality.riskTolerance < 0.7; // Lower thresholds
+                    
+                    // Enter panic mode if danger is very high - more sensitive
+                    if (dangerMagnitude > 0.3) { // Reduced from 0.5
                         this.panicMode = true;
-                        this.panicTimer = 60; // 1 second at 60fps
+                        this.panicTimer = 120; // 2 seconds at 60fps (increased from 1.5)
                     }
                 }
                 // Priority 2: Flee from threats
@@ -4633,8 +4939,22 @@
                     while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
                     while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
                     
-                    // Cautious personalities turn more smoothly
-                    const turnSpeed = personality.riskTolerance > 0.7 ? 0.08 : 0.06;
+                    // Dynamic turn speed based on situation - increased for better response
+                    let turnSpeed;
+                    if (this.panicMode || dangerMagnitude > 0.2) { // Lower threshold
+                        // Emergency turn - much faster
+                        turnSpeed = 0.20 + (personality.avoidanceStrength * 0.15); // Increased turn rates
+                    } else if (dangerMagnitude > 0.1) {
+                        // High danger - very fast turn
+                        turnSpeed = 0.18 + (personality.avoidanceStrength * 0.1);
+                    } else if (nearestThreat && threatDistance < 200) {
+                        // Fleeing - fast turn
+                        turnSpeed = 0.15;
+                    } else {
+                        // Normal turn - personality-based
+                        turnSpeed = personality.riskTolerance > 0.7 ? 0.10 : 0.08; // Slightly increased
+                    }
+                    
                     this.angle += angleDiff * turnSpeed;
                 } else {
                     // Wander with personality-based randomness
@@ -4668,30 +4988,48 @@
                 return { x: predictedX, y: predictedY };
             }
             
-            // Helper method for basic pathfinding
+            // Helper method for enhanced pathfinding
             isPathBlocked(targetX, targetY, distance) {
-                // Simple optimization - don't pathfind for distant targets
-                if (distance > 200) return false;
-                
-                const steps = Math.floor(distance / 20); // Check every 20 pixels
+                // Check more thoroughly for nearby targets
+                const checkDistance = Math.min(distance, 300);
+                const steps = Math.floor(checkDistance / 15); // Check every 15 pixels (was 20)
                 if (steps <= 1) return false;
                 
                 const stepX = (targetX - this.x) / steps;
                 const stepY = (targetY - this.y) / steps;
                 
+                // Also check perpendicular to the path for wider clearance
+                const perpX = -stepY / Math.hypot(stepX, stepY) * 30;
+                const perpY = stepX / Math.hypot(stepX, stepY) * 30;
+                
                 for (let i = 1; i < steps; i++) {
                     const checkX = this.x + stepX * i;
                     const checkY = this.y + stepY * i;
                     
-                    // Check if this point is too close to any snake body
-                    for (const snake of snakes) {
-                        if (snake === this || !snake.alive) continue;
-                        
-                        for (let j = 3; j < snake.segments.length; j++) {
-                            const segment = snake.segments[j];
-                            const segDist = Math.hypot(segment.x - checkX, segment.y - checkY);
-                            if (segDist < SEGMENT_SIZE * 2) {
-                                return true; // Path is blocked
+                    // Check center and both sides of the path
+                    const checkPoints = [
+                        { x: checkX, y: checkY },
+                        { x: checkX + perpX, y: checkY + perpY },
+                        { x: checkX - perpX, y: checkY - perpY }
+                    ];
+                    
+                    for (const point of checkPoints) {
+                        // Check if this point is too close to any snake body
+                        for (const snake of snakes) {
+                            if (!snake.alive) continue;
+                            
+                            // For self, check from segment 5 onward
+                            // For others, check from segment 1
+                            const startIndex = snake === this ? 5 : 1;
+                            
+                            for (let j = startIndex; j < snake.segments.length; j++) {
+                                const segment = snake.segments[j];
+                                const segDist = Math.hypot(segment.x - point.x, segment.y - point.y);
+                                
+                                const threshold = snake === this ? 50 : SEGMENT_SIZE * 2.5;
+                                if (segDist < threshold) {
+                                    return true; // Path is blocked
+                                }
                             }
                         }
                     }
@@ -4703,29 +5041,34 @@
         
         // Element class
         class Element {
-            constructor(type, x, y, isCatalystSpawned = false) {
-                this.type = type;
+            constructor(id, x, y, isCatalystSpawned = false) {
+                this.id = id;
                 this.x = x;
                 this.y = y;
                 
-                // Try new element system first
+                // Get element data from new system
                 if (window.elementLoader && window.elementLoader.isLoaded && window.elementLoader.isLoaded()) {
-                    this.data = window.elementLoader.getElementByKey(type);
+                    const elem = window.elementLoader.elements.get(id);
+                    if (elem) {
+                        this.data = {
+                            emoji: window.elementLoader.getEmojiForElement(id, elem.e),
+                            name: elem.n,
+                            tier: elem.t,
+                            base: elem.t === 0
+                        };
+                    }
                 }
                 
-                // Fallback to old system
+                // Fallback if element not found
                 if (!this.data) {
-                    this.data = elementDatabase[type];
-                }
-                
-                // Final fallback if element not found
-                if (!this.data) {
-                    console.warn(`Element type "${type}" not found in any database`);
+                    console.warn(`Element ID ${id} not found`);
                     this.data = { emoji: '❓', name: 'Unknown', tier: 0 };
                 }
                 this.pulse = 0;
                 this.isCatalystSpawned = isCatalystSpawned;
                 this.catalystSparkleTime = 0;
+                this.pendingCombination = false;
+                this.combiningAnimation = 0;
             }
             
             update(deltaTime = 1) {
@@ -4766,7 +5109,14 @@
                 const screenX = this.x - camera.x + canvas.width / 2;
                 const screenY = this.y - camera.y + canvas.height / 2;
                 
-                const scale = 1 + Math.sin(this.pulse || 0) * 0.1;
+                let scale = 1 + Math.sin(this.pulse || 0) * 0.1;
+                
+                // Add wobble effect if this element is about to combine
+                if (this.pendingCombination) {
+                    this.combiningAnimation += 0.15;
+                    const wobble = Math.sin(this.combiningAnimation * 3) * 0.1;
+                    scale = scale * (1 + wobble);
+                }
                 
                 // Check if this element is compatible with player's tail during AlchemyVision
                 let alchemyGlow = null;
@@ -4792,8 +5142,20 @@
                     }
                 }
                 
+                // Draw pending combination glow if this element will combine when eaten
+                if (this.pendingCombination) {
+                    const glowSize = ELEMENT_SIZE * 3.5 * scale;
+                    const gradient = ctx.createRadialGradient(screenX, screenY, 0, screenX, screenY, glowSize);
+                    gradient.addColorStop(0, 'rgba(255, 215, 0, 0.9)');
+                    gradient.addColorStop(0.3, 'rgba(255, 100, 255, 0.6)');
+                    gradient.addColorStop(0.6, 'rgba(100, 200, 255, 0.3)');
+                    gradient.addColorStop(1, 'transparent');
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(screenX - glowSize, screenY - glowSize, glowSize * 2, glowSize * 2);
+                }
+                
                 // Draw appropriate glow effect
-                if (alchemyGlow === 'discovery') {
+                else if (alchemyGlow === 'discovery') {
                     // Golden glow for new discoveries
                     const glowSize = ELEMENT_SIZE * 3 * scale;
                     const gradient = ctx.createRadialGradient(screenX, screenY, 0, screenX, screenY, glowSize);
@@ -4824,7 +5186,8 @@
                 
                 // Draw emoji using cache
                 const emojiSize = Math.round(ELEMENT_SIZE * 2 * scale);
-                const emojiCanvas = getCachedEmoji(this.data ? this.data.emoji : '❓', emojiSize);
+                const emoji = this.data ? window.elementLoader.getEmojiForElement(this.id, this.data.base ? this.id : window.elementLoader.elements.get(this.id)?.e || this.id) : '❓';
+                const emojiCanvas = getCachedEmoji(emoji, emojiSize);
                 ctx.save();
                 ctx.globalAlpha = 1;
                 ctx.drawImage(emojiCanvas, screenX - emojiCanvas.width / 2, screenY - emojiCanvas.height / 2);
@@ -5231,18 +5594,27 @@
                 this.activeElements = [];
             }
             
-            spawn(type, x, y, isCatalystSpawned = false) {
+            spawn(id, x, y, isCatalystSpawned = false) {
                 let element = this.pool.pop();
                 if (!element) {
-                    element = new Element(type, x, y, isCatalystSpawned);
+                    element = new Element(id, x, y, isCatalystSpawned);
                 } else {
                     // Reset existing element
-                    element.type = type;
+                    element.id = id;
                     element.x = x;
                     element.y = y;
-                    element.data = elementDatabase[type];
-                    if (!element.data) {
-                        console.warn(`Element type "${type}" not found in database`);
+                    
+                    // Get element data from new system
+                    const elem = window.elementLoader.elements.get(id);
+                    if (elem) {
+                        element.data = {
+                            emoji: window.elementLoader.getEmojiForElement(id, elem.e),
+                            name: elem.n,
+                            tier: elem.t,
+                            base: elem.t === 0
+                        };
+                    } else {
+                        console.warn(`Element ID ${id} not found`);
                         element.data = { emoji: '❓', name: 'Unknown', tier: 0 };
                     }
                     element.pulse = 0;
@@ -5379,84 +5751,229 @@
         }
         
         // Helper functions
-        function spawnElement(type = null, x = null, y = null) {
-            if (!type) {
+        function getGridKey(x, y) {
+            const gridX = Math.floor(x / ELEMENT_GRID_SIZE);
+            const gridY = Math.floor(y / ELEMENT_GRID_SIZE);
+            return `${gridX},${gridY}`;
+        }
+        
+        function updateElementGrid() {
+            // Rebuild grid map based on current elements
+            elementGrid.clear();
+            const activeElements = elementPool.getActiveElements();
+            
+            activeElements.forEach(element => {
+                const key = getGridKey(element.x, element.y);
+                if (!elementGrid.has(key)) {
+                    elementGrid.set(key, []);
+                }
+                elementGrid.get(key).push(element);
+            });
+        }
+        
+        function spawnElementWithGridDistribution() {
+            // Update grid map
+            updateElementGrid();
+            
+            // Find cells that need more elements
+            const gridCellsX = Math.ceil(WORLD_SIZE / ELEMENT_GRID_SIZE);
+            const gridCellsY = Math.ceil(WORLD_SIZE / ELEMENT_GRID_SIZE);
+            const underfilledCells = [];
+            
+            for (let gx = 0; gx < gridCellsX; gx++) {
+                for (let gy = 0; gy < gridCellsY; gy++) {
+                    const key = `${gx},${gy}`;
+                    const cellElements = elementGrid.get(key) || [];
+                    
+                    if (cellElements.length < MIN_ELEMENTS_PER_CELL) {
+                        // Priority for empty or underfilled cells
+                        underfilledCells.push({ gx, gy, count: cellElements.length, priority: 1 });
+                    } else if (cellElements.length < MAX_ELEMENTS_PER_CELL) {
+                        // Lower priority for partially filled cells
+                        underfilledCells.push({ gx, gy, count: cellElements.length, priority: 0.3 });
+                    }
+                }
+            }
+            
+            if (underfilledCells.length > 0) {
+                // Sort by priority and element count
+                underfilledCells.sort((a, b) => {
+                    if (a.priority !== b.priority) return b.priority - a.priority;
+                    return a.count - b.count;
+                });
+                
+                // Pick from top candidates with some randomness
+                const topCandidates = underfilledCells.slice(0, Math.min(5, underfilledCells.length));
+                const selectedCell = topCandidates[Math.floor(Math.random() * topCandidates.length)];
+                
+                // Spawn in the selected cell
+                const cellX = selectedCell.gx * ELEMENT_GRID_SIZE;
+                const cellY = selectedCell.gy * ELEMENT_GRID_SIZE;
+                
+                // Random position within cell with margin
+                const margin = 50;
+                const x = cellX + margin + Math.random() * (ELEMENT_GRID_SIZE - margin * 2);
+                const y = cellY + margin + Math.random() * (ELEMENT_GRID_SIZE - margin * 2);
+                
+                // Ensure within world bounds
+                const finalX = Math.max(100, Math.min(WORLD_SIZE - 100, x));
+                const finalY = Math.max(100, Math.min(WORLD_SIZE - 100, y));
+                
+                spawnElement(null, finalX, finalY);
+            } else {
+                // Fallback to random spawn if all cells are filled
+                spawnElement();
+            }
+        }
+        
+        function spawnElement(id = null, x = null, y = null) {
+            if (!id) {
                 // Smart spawning: bias towards elements that can combine with what snakes are carrying
                 if (window.elementLoader && window.elementLoader.isLoaded && window.elementLoader.isLoaded()) {
-                    // Collect all elements currently carried by snakes
-                    const carriedElements = new Set();
-                    const carriedElementsList = [];
+                    // Focus on PLAYER's carried elements for smart spawning
+                    const playerCarriedElements = new Set();
+                    const allCarriedElements = new Set();
                     
                     snakes.forEach(snake => {
                         if (snake && snake.alive) {
-                            snake.elements.forEach(elem => {
-                                carriedElements.add(elem);
-                                carriedElementsList.push(elem);
+                            snake.elements.forEach(elemId => {
+                                allCarriedElements.add(elemId);
+                                if (snake.isPlayer) {
+                                    playerCarriedElements.add(elemId);
+                                }
                             });
                         }
                     });
                     
                     // Build weighted spawn list
                     const spawnWeights = new Map();
-                    const allElements = window.elementLoader.getAllElements();
                     
-                    // 30% chance to prioritize spawning for new discoveries
-                    const prioritizeDiscovery = Math.random() < 0.3;
+                    // Determine progression phase based on PLAYER discoveries only (much lower base weights)
+                    const discoveryCount = playerDiscoveredElements.size;
+                    let phase;
+                    if (discoveryCount <= 10) {
+                        phase = { name: 'TUTORIAL', baseWeight: 4, discoveredWeight: 2 };
+                    } else if (discoveryCount <= 25) {
+                        phase = { name: 'EARLY', baseWeight: 1, discoveredWeight: 5 };
+                    } else if (discoveryCount <= 50) {
+                        phase = { name: 'MID', baseWeight: 0.3, discoveredWeight: 8 };
+                    } else if (discoveryCount <= 100) {
+                        phase = { name: 'LATE', baseWeight: 0.1, discoveredWeight: 10 };
+                    } else {
+                        phase = { name: 'MASTER', baseWeight: 0.05, discoveredWeight: 12 };
+                    }
                     
-                    // Debug logging
-                    console.log(`[SPAWN] Discovered elements: ${discoveredElements.size}, Prioritize discovery: ${prioritizeDiscovery}`);
+                    // 60% chance to prioritize spawning for player combinations/discoveries
+                    const prioritizePlayerCombos = Math.random() < 0.6;
+                    const prioritizeDiscovery = Math.random() < 0.4;
                     
-                    allElements.forEach(element => {
-                        let weight = 1; // Base weight
+                    // Less verbose debug logging
+                    if (Math.random() < 0.05) { // Only log 5% of the time
+                        console.log(`[SPAWN] Phase: ${phase.name}, Discoveries: ${discoveryCount}, Prioritize discovery: ${prioritizeDiscovery}`);
+                    }
+                    
+                    // Clean up old discovery echoes
+                    const now = Date.now();
+                    for (const [elemId, timestamp] of recentlyDiscoveredElements) {
+                        if (now - timestamp > DISCOVERY_ECHO_DURATION) {
+                            recentlyDiscoveredElements.delete(elemId);
+                        }
+                    }
+                    
+                    // Iterate through all elements in the new system
+                    let totalDiscoveredNonBase = 0;
+                    for (const [elemId, element] of window.elementLoader.elements) {
+                        let weight = 0; // Start with 0 weight
                         
-                        // Only spawn discovered elements or base elements
-                        if (!discoveredElements.has(element.key) && element.tier > 0) {
-                            weight = 0; // Don't spawn undiscovered non-base elements
-                        } else {
-                            // Tier-based base weight
-                            if (element.tier === 0) {
-                                weight = 10; // Strong preference for base elements
-                            } else if (element.tier === 1) {
-                                weight = 3;
-                            } else if (element.tier === 2) {
-                                weight = 1;
+                        // Check if element should spawn
+                        // IMPORTANT: Only IDs 0,1,2,3 are true base elements, not all tier 0!
+                        const elemIdNum = typeof elemId === 'string' ? parseInt(elemId) : elemId;
+                        const isBaseElement = elemIdNum >= 0 && elemIdNum <= 3;
+                        // IMPORTANT: Only spawn elements the PLAYER has discovered, not AI discoveries
+                        const isPlayerDiscovered = playerDiscoveredElements.has(elemIdNum);
+                        
+                        if (isBaseElement || isPlayerDiscovered) {
+                            // Base weight calculation
+                            if (isBaseElement) {
+                                weight = phase.baseWeight;
                             } else {
-                                weight = 0.3; // Rare for high-tier elements
+                                // Discovered non-base elements
+                                const tierModifier = Math.max(0.5, 1 - (element.t * 0.05)); // Less harsh tier penalty
+                                weight = phase.discoveredWeight * tierModifier;
+                                totalDiscoveredNonBase++;
                             }
                             
+                            // Anti-clustering: reduce weight if recently spawned (less harsh)
+                            const recentSpawnCount = recentlySpawnedElements.filter(id => id === elemId).length;
+                            if (recentSpawnCount > 0) {
+                                weight *= Math.pow(0.5, recentSpawnCount); // 50% reduction per recent spawn (was 80%)
+                            }
+                            
+                            // SPECIAL CASE: Heavily reduce Fire element after early game
+                            if (elemId === 3 && discoveryCount > 10) { // Fire element ID is 3
+                                weight *= 0.1; // 90% reduction for Fire after 10 discoveries
+                            }
+                            
+                            // Discovery echo: boost recently discovered elements
+                            if (recentlyDiscoveredElements.has(elemId)) {
+                                weight *= 5; // 5x boost for recently discovered elements
+                            }
+                            
+                            // Ensure minimum weight for player-discovered elements
+                            if (isPlayerDiscovered && !isBaseElement && weight > 0) {
+                                weight = Math.max(weight, 0.5); // Minimum weight of 0.5 for player-discovered elements
+                            }
+                            
+                            let hasPlayerCombo = false;
                             let hasUndiscoveredCombo = false;
                             
-                            // Smart spawning bonus: check if this element can combine with carried elements
-                            if (carriedElements.size > 0) {
-                                carriedElementsList.forEach(carried => {
-                                    // Check if these can combine
-                                    const combo = window.elementLoader.getCombinationByKeys(element.key, carried);
-                                    if (combo) {
-                                        // Check if the result is discovered
-                                        if (!discoveredElements.has(combo.key)) {
+                            // MASSIVE bonus for elements that can combine with PLAYER's bank
+                            if (prioritizePlayerCombos && playerCarriedElements.size > 0) {
+                                for (const carriedId of playerCarriedElements) {
+                                    const comboKey = `${Math.min(elemId, carriedId)}+${Math.max(elemId, carriedId)}`;
+                                    const resultId = window.elementLoader.combinations[comboKey];
+                                    if (resultId) {
+                                        hasPlayerCombo = true;
+                                        // Check if the result is discovered by player
+                                        if (!playerDiscoveredElements.has(resultId)) {
                                             hasUndiscoveredCombo = true;
-                                            if (prioritizeDiscovery) {
-                                                weight *= 5; // Huge bonus for potential new discoveries
-                                            }
+                                            weight *= 20; // MASSIVE bonus for new discoveries from player's bank
                                         } else {
-                                            weight *= 2; // Double weight for known combinations
+                                            weight *= 10; // Big bonus for known combinations with player's bank
                                         }
                                     }
-                                });
+                                }
+                            }
+                            
+                            // Secondary check for other snakes if not prioritizing player
+                            if (!hasPlayerCombo && allCarriedElements.size > 0) {
+                                for (const carriedId of allCarriedElements) {
+                                    const comboKey = `${Math.min(elemId, carriedId)}+${Math.max(elemId, carriedId)}`;
+                                    const resultId = window.elementLoader.combinations[comboKey];
+                                    if (resultId) {
+                                        if (!playerDiscoveredElements.has(resultId)) {
+                                            weight *= 3; // Smaller bonus for AI snake potential discoveries
+                                        } else {
+                                            weight *= 1.5; // Small bonus for AI snake combinations
+                                        }
+                                        break; // Only apply once
+                                    }
+                                }
                             }
                             
                             // Additional bonus for elements that can lead to many undiscovered combinations
                             if (prioritizeDiscovery && !hasUndiscoveredCombo) {
                                 // Check how many undiscovered combinations this element can create
                                 let undiscoveredPotential = 0;
-                                allElements.forEach(otherElement => {
-                                    if (discoveredElements.has(otherElement.key)) {
-                                        const combo = window.elementLoader.getCombinationByKeys(element.key, otherElement.key);
-                                        if (combo && !discoveredElements.has(combo.key)) {
+                                for (const [otherId, otherElem] of window.elementLoader.elements) {
+                                    if (playerDiscoveredElements.has(otherId) || otherElem.t === 0) { // Player discovered or base element
+                                        const comboKey = `${Math.min(elemId, otherId)}+${Math.max(elemId, otherId)}`;
+                                        const resultId = window.elementLoader.combinations[comboKey];
+                                        if (resultId && !playerDiscoveredElements.has(resultId)) {
                                             undiscoveredPotential++;
                                         }
                                     }
-                                });
+                                }
                                 
                                 if (undiscoveredPotential > 0) {
                                     weight *= (1 + undiscoveredPotential * 0.5); // Bonus based on discovery potential
@@ -5465,46 +5982,89 @@
                         }
                         
                         if (weight > 0) {
-                            spawnWeights.set(element.key, weight);
+                            spawnWeights.set(elemId, weight);
                         }
-                    });
+                    }
                     
                     // Weighted random selection
                     let totalWeight = 0;
                     spawnWeights.forEach(w => totalWeight += w);
                     
-                    let rand = Math.random() * totalWeight;
-                    let selectedElement = null;
+                    // Debug spawn weights at game start
+                    const weightsGameTime = Date.now() - gameStartTime;
+                    if (weightsGameTime < 5000) { // First 5 seconds
+                        console.log(`[SPAWN WEIGHTS DEBUG] Total weights: ${spawnWeights.size}`);
+                        spawnWeights.forEach((weight, elemId) => {
+                            const elem = window.elementLoader.elements.get(elemId);
+                            const elemIdNum = typeof elemId === 'string' ? parseInt(elemId) : elemId;
+                            const isRealBase = elemIdNum >= 0 && elemIdNum <= 3;
+                            if (elem && !isRealBase) { // Non-base elements (excluding IDs 0-3)
+                                console.log(`  - ${elem.n} (ID: ${elemId}, Tier: ${elem.t}) weight: ${weight}`);
+                            }
+                        });
+                    }
                     
-                    for (const [elemKey, weight] of spawnWeights) {
+                    // Add discovered elements debug
+                    if (totalDiscoveredNonBase > 0 && Math.random() < 0.02) {
+                        console.log(`[SPAWN] ${totalDiscoveredNonBase} discovered non-base elements available, ${spawnWeights.size} total spawnable`);
+                    }
+                    
+                    // If we have very few spawn options, force add some player-discovered elements
+                    if (spawnWeights.size < 10 && playerDiscoveredElements.size > 10) {
+                        // Add random player-discovered elements to spawn pool
+                        const playerDiscoveredArray = Array.from(playerDiscoveredElements);
+                        for (let i = 0; i < 5; i++) {
+                            const randomDiscovered = playerDiscoveredArray[Math.floor(Math.random() * playerDiscoveredArray.length)];
+                            if (!spawnWeights.has(randomDiscovered)) {
+                                const elem = window.elementLoader.elements.get(randomDiscovered);
+                                if (elem && elem.t > 0) { // Non-base element
+                                    spawnWeights.set(randomDiscovered, phase.discoveredWeight * 0.5);
+                                    totalWeight += phase.discoveredWeight * 0.5;
+                                }
+                            }
+                        }
+                    }
+                    
+                    let rand = Math.random() * totalWeight;
+                    let selectedId = null;
+                    
+                    for (const [elemId, weight] of spawnWeights) {
                         rand -= weight;
                         if (rand <= 0) {
-                            selectedElement = elemKey;
+                            selectedId = elemId;
                             break;
                         }
                     }
                     
-                    type = selectedElement || 'fire'; // Fallback to fire if something goes wrong
+                    id = selectedId || 3; // Fallback to Fire (ID 3) if something goes wrong
                     
-                    // Debug what was selected
-                    if (selectedElement && window.elementLoader) {
-                        const elem = window.elementLoader.getElementByKey(selectedElement);
-                        if (elem) {
-                            console.log(`[SPAWN] Selected: ${elem.name} (Tier ${elem.tier})`);
+                    // ALWAYS log what's being spawned at game start
+                    const spawnGameTime = Date.now() - gameStartTime;
+                    if (spawnGameTime < 5000) { // First 5 seconds
+                        const elem = window.elementLoader.elements.get(id);
+                        console.log(`[SPAWN DEBUG] Spawning: ${elem?.n} (ID: ${id}, Tier: ${elem?.t}) - playerDiscoveredElements size: ${playerDiscoveredElements.size}`);
+                    }
+                    
+                    // Debug what was selected (with player bank info)
+                    if (selectedId && window.elementLoader && Math.random() < 0.1) {
+                        const elem = window.elementLoader.elements.get(selectedId);
+                        if (elem && playerCarriedElements.size > 0) {
+                            // Check if this can combine with player's bank
+                            let canCombine = false;
+                            for (const carriedId of playerCarriedElements) {
+                                const comboKey = `${Math.min(selectedId, carriedId)}+${Math.max(selectedId, carriedId)}`;
+                                if (window.elementLoader.combinations[comboKey]) {
+                                    canCombine = true;
+                                    break;
+                                }
+                            }
+                            console.log(`[SPAWN] ${elem.n} (T${elem.t}) - Can combine with player: ${canCombine}`);
                         }
                     }
                 } else {
-                    // Fallback to old system
-                    const rand = Math.random();
-                    if (rand < 0.7) {
-                        // Basic element
-                        const basics = ['fire', 'water', 'earth', 'air'];
-                        type = basics[Math.floor(Math.random() * basics.length)];
-                    } else {
-                        // Any discovered element
-                        const available = Object.keys(elementDatabase);
-                        type = available[Math.floor(Math.random() * available.length)];
-                    }
+                    // Fallback - use base elements
+                    const basics = [0, 1, 2, 3]; // Earth, Water, Air, Fire
+                    id = basics[Math.floor(Math.random() * basics.length)];
                 }
             }
             
@@ -5557,7 +6117,28 @@
                 }
             }
             
-            elementPool.spawn(type, x, y);
+            // Add to spawn history for anti-clustering
+            recentlySpawnedElements.push(id);
+            if (recentlySpawnedElements.length > MAX_SPAWN_HISTORY) {
+                recentlySpawnedElements.shift(); // Remove oldest
+            }
+            
+            // Also check distance from other elements to prevent clustering
+            const minDistanceBetweenSameElements = 200;
+            const activeElements = elementPool.getActiveElements();
+            for (const element of activeElements) {
+                if (element.id === id && element !== elementPool.activeElements[elementPool.activeElements.length - 1]) {
+                    const dist = Math.hypot(element.x - x, element.y - y);
+                    if (dist < minDistanceBetweenSameElements) {
+                        // Try to find a better position
+                        x = 100 + Math.random() * (WORLD_SIZE - 200);
+                        y = 100 + Math.random() * (WORLD_SIZE - 200);
+                        break;
+                    }
+                }
+            }
+            
+            elementPool.spawn(id, x, y);
         }
         
         function createCombinationParticles(x, y) {
@@ -5607,34 +6188,38 @@
             }
         }
         
-        function showCombinationMessage(elem1, elem2, result, isNew) {
-            // Get element data from new system first, fallback to old
-            let elem1Data, elem2Data, resultData;
+        function showCombinationMessage(id1, id2, resultId, isNew) {
+            // Get element data from new system using numeric IDs
+            const elem1Data = window.elementLoader.elements.get(id1);
+            const elem2Data = window.elementLoader.elements.get(id2);
+            const resultData = window.elementLoader.elements.get(resultId);
             
-            if (window.elementLoader && window.elementLoader.isLoaded && window.elementLoader.isLoaded()) {
-                elem1Data = window.elementLoader.getElementByKey(elem1) || elementDatabase[elem1];
-                elem2Data = window.elementLoader.getElementByKey(elem2) || elementDatabase[elem2];
-                resultData = window.elementLoader.getElementByKey(result) || elementDatabase[result];
-                
-                // Ensure proper format for new element system
-                if (elem1Data && !elem1Data.emoji) elem1Data = elementDatabase[elem1];
-                if (elem2Data && !elem2Data.emoji) elem2Data = elementDatabase[elem2];
-                if (resultData && !resultData.emoji) resultData = elementDatabase[result];
-            } else {
-                elem1Data = elementDatabase[elem1];
-                elem2Data = elementDatabase[elem2];
-                resultData = elementDatabase[result];
+            if (!elem1Data || !elem2Data || !resultData) {
+                console.error('Missing element data for combination message');
+                return;
             }
             
-            let message = `${elem1Data.emoji} + ${elem2Data.emoji} = ${resultData.emoji} ${resultData.name}`;
+            const emoji1 = window.elementLoader.getEmojiForElement(id1, elem1Data.e);
+            const emoji2 = window.elementLoader.getEmojiForElement(id2, elem2Data.e);
+            const emojiResult = window.elementLoader.getEmojiForElement(resultId, resultData.e);
+            
+            let message = `${emoji1} + ${emoji2} = ${emojiResult} ${resultData.n}`;
             if (isNew) {
                 message = `New Discovery! ${message}`;
                 // Update discovery log for new discoveries
-                lastDiscoveredElement = result;
+                lastDiscoveredElement = resultId;
                 updateDiscoveryLog();
+                
+                // Add to discovery echo system for boosted spawning
+                recentlyDiscoveredElements.set(resultId, Date.now());
+                
                 // Add to discovery feed
-                console.log('[DEBUG] Adding to discovery feed:', resultData.name);
-                addDiscoveryToFeed(resultData, `${elem1Data.emoji} ${elem1Data.name} + ${elem2Data.emoji} ${elem2Data.name}`);
+                console.log('[DEBUG] Adding to discovery feed:', resultData.n);
+                const recipeText = `${emoji1} ${elem1Data.n} + ${emoji2} ${elem2Data.n}`;
+                addDiscoveryToFeed({
+                    emoji: emojiResult,
+                    name: resultData.n
+                }, recipeText);
             } else {
                 message = `Combo! ${message}`;
             }
@@ -5844,8 +6429,8 @@
             const list = document.getElementById('discoveryList');
             list.innerHTML = '';
             
-            // Get all discovered elements and sort by tier (highest first)
-            const discovered = Array.from(discoveredElements)
+            // Get all PLAYER discovered elements and sort by tier (highest first)
+            const discovered = Array.from(playerDiscoveredElements)
                 .map(key => {
                     // Try new system first
                     if (window.elementLoader && window.elementLoader.isLoaded && window.elementLoader.isLoaded()) {
@@ -5932,7 +6517,8 @@
                     
                     // Update respawn stats
                     document.getElementById('respawnScore').textContent = Math.floor(playerSnake.score).toLocaleString();
-                    document.getElementById('respawnDiscoveries').textContent = playerSnake.discoveries;
+                    // Use player discovery count
+                    document.getElementById('respawnDiscoveries').textContent = playerDiscoveredElements.size;
                     document.getElementById('respawnRank').textContent = '#' + (bestRank || 1);
                     document.getElementById('respawnKills').textContent = playerSnake.kills;
                     document.getElementById('respawnTimer').textContent = respawnSeconds;
@@ -5950,9 +6536,12 @@
             // Update player info box
             document.getElementById('playerScore').textContent = Math.floor(playerSnake.score).toLocaleString();
             
-            // Update discoveries count
-            const discoveryCount = discoveredElements.size;
-            document.getElementById('playerDiscoveries').textContent = discoveryCount;
+            // Update discoveries count - use player discoveries only
+            const discoveryCount = playerDiscoveredElements.size;
+            const discoveriesElement = document.getElementById('playerDiscoveries');
+            if (discoveriesElement) {
+                discoveriesElement.textContent = discoveryCount.toString();
+            }
             
             // Update high score display if current score is higher
             if (playerSnake.score > highScore) {
@@ -6023,14 +6612,26 @@
                 
                 if (i < playerSnake.elements.length) {
                     // Filled slot with element
-                    const elementType = playerSnake.elements[i];
-                    const element = elementDatabase[elementType];
+                    const elementId = playerSnake.elements[i];
+                    const element = window.elementLoader.elements.get(elementId);
                     if (element) {
                         div.classList.add('filled');
                         
                         // Highlight the active element
                         if (i === playerSnake.highlightedIndex) {
                             div.classList.add('highlighted-element');
+                        }
+                        
+                        // Add glow/wobble effect for pending combinations (eaten element)
+                        if (playerSnake.pendingCombinationIndex === i && 
+                            Date.now() - playerSnake.pendingCombinationTime < 300) {
+                            div.classList.add('glow-wobble');
+                        }
+                        
+                        // Add glow/wobble effect for bank-to-bank combinations
+                        if (playerSnake.glowWobbleIndices && playerSnake.glowWobbleIndices.includes(i) &&
+                            Date.now() - playerSnake.glowWobbleTime < 600) {
+                            div.classList.add('glow-wobble');
                         }
                         
                         // Add combination animation classes
@@ -6063,8 +6664,9 @@
                             div.classList.add('new-element');
                         }
                         
-                        div.innerHTML += `<div class="emoji">${element.emoji}</div><div class="element-name">${element.name}</div>`;
-                        div.title = element.name;
+                        const emoji = window.elementLoader.getEmojiForElement(elementId, element.e);
+                        div.innerHTML += `<div class="emoji">${emoji}</div><div class="element-name">${element.n}</div>`;
+                        div.title = element.n;
                     }
                 } else {
                     // Empty slot
@@ -6081,6 +6683,8 @@
                 combinationAnimationState.newElementIndex = -1;
                 playerSnake.isAnimatingCombination = false;
                 playerSnake.combiningIndices = null;
+                playerSnake.glowWobbleIndices = null;
+                playerSnake.pendingCombinationIndex = -1;
             }
         }
         
@@ -6092,6 +6696,27 @@
                 const activeElements = elementPool.getActiveElements();
                 for (const element of activeElements) {
                     const dist = Math.hypot(element.x - snake.x, element.y - snake.y);
+                    
+                    // For player snake, check if element will combine when eaten
+                    if (snake.isPlayer) {
+                        if (dist < 150 && snake.elements.length > 0) {
+                            // Check if this element can combine with any in the bank
+                            element.pendingCombination = false;
+                            for (let i = 0; i < snake.elements.length; i++) {
+                                const bankElementId = snake.elements[i];
+                                const comboKey = `${Math.min(element.id, bankElementId)}+${Math.max(element.id, bankElementId)}`;
+                                if (window.elementLoader && window.elementLoader.combinations[comboKey]) {
+                                    element.pendingCombination = true;
+                                    break;
+                                }
+                            }
+                        } else if (dist > 200) {
+                            // Reset state for distant elements
+                            element.pendingCombination = false;
+                            element.combiningAnimation = 0;
+                        }
+                    }
+                    
                     if (dist < SEGMENT_SIZE + ELEMENT_SIZE) {
                         snake.consume(element);
                     }
@@ -6797,23 +7422,26 @@
             aiRespawnQueue = [];
             usedAISkins.clear();
             
-            // Load previously discovered elements if available
+            // ALWAYS start fresh - no saved discoveries affect spawning
+            discoveredElements = new Set([0, 1, 2, 3]); // Only base elements in global pool
+            playerDiscoveredElements = new Set(); // Start with NO discoveries for spawn system
+            
+            // Load saved discoveries for UI/journal only
             if (window.elementCompatibility) {
                 const savedDiscovered = window.elementCompatibility.loadDiscoveredElements();
-                discoveredElements = new Set();
-                // Add saved discoveries
-                if (savedDiscovered) {
+                if (savedDiscovered && Object.keys(savedDiscovered).length > 0) {
+                    // Keep track of all-time discoveries for journal
                     Object.keys(savedDiscovered).forEach(key => {
-                        if (savedDiscovered[key]) {
-                            discoveredElements.add(key);
+                        if (savedDiscovered[key] && allTimeDiscoveries) {
+                            // Add to all-time discoveries but NOT to spawn pool
+                            allTimeDiscoveries.set(key, savedDiscovered[key]);
                         }
                     });
-                    console.log(`[GAME START] Loaded ${discoveredElements.size} discovered elements`);
+                    console.log(`[GAME START] Loaded ${allTimeDiscoveries.size} all-time discoveries (spawn starts with base elements only)`);
                 }
-            } else {
-                // Fallback - start with base elements discovered
-                discoveredElements = new Set(['fire', 'water', 'earth', 'air']);
             }
+            
+            console.log(`[GAME START] Fresh spawn pool - only base elements can spawn initially`);
             
             // Reset game variables
             lastDiscoveredElement = null;
@@ -6862,12 +7490,37 @@
             console.log('[GAME START] AI snakes created. Total snakes:', snakes.length);
             
             
-            // Spawn initial elements - ONLY base elements at game start
-            const baseElements = ['fire', 'water', 'earth', 'air'];
-            for (let i = 0; i < 60; i++) {
-                // Spawn only base elements, distributed evenly
-                const elementType = baseElements[i % 4];
-                spawnElement(elementType);
+            // Spawn initial elements using grid distribution
+            const baseElements = [3, 1, 0, 2]; // Fire, Water, Earth, Air IDs
+            
+            // Clear element grid
+            elementGrid.clear();
+            
+            // Spawn elements to reach initial target count
+            const initialSpawnCount = Math.floor(TARGET_ELEMENT_COUNT * 0.7); // Start with 70% of target
+            for (let i = 0; i < initialSpawnCount; i++) {
+                // ALL initial spawns should be base elements only
+                const elementId = baseElements[i % 4];
+                // Get random position using grid distribution
+                const gridCellsX = Math.ceil(WORLD_SIZE / ELEMENT_GRID_SIZE);
+                const gridCellsY = Math.ceil(WORLD_SIZE / ELEMENT_GRID_SIZE);
+                const gx = Math.floor(Math.random() * gridCellsX);
+                const gy = Math.floor(Math.random() * gridCellsY);
+                
+                const cellX = gx * ELEMENT_GRID_SIZE;
+                const cellY = gy * ELEMENT_GRID_SIZE;
+                
+                // Random position within cell with margin
+                const margin = 50;
+                const x = cellX + margin + Math.random() * (ELEMENT_GRID_SIZE - margin * 2);
+                const y = cellY + margin + Math.random() * (ELEMENT_GRID_SIZE - margin * 2);
+                
+                // Ensure within world bounds
+                const finalX = Math.max(100, Math.min(WORLD_SIZE - 100, x));
+                const finalY = Math.max(100, Math.min(WORLD_SIZE - 100, y));
+                
+                // Spawn specific base element at position
+                spawnElement(elementId, finalX, finalY);
             }
             
             // Initialize music and sound effects
@@ -6977,6 +7630,8 @@
                 document.getElementById('skinsTab').classList.add('active');
             } else if (tabName === 'journal') {
                 document.getElementById('journalTab').classList.add('active');
+                // Populate the discovery journal when tab is opened
+                populateDiscoveryJournal();
             } else if (tabName === 'howto') {
                 document.getElementById('howtoTab').classList.add('active');
             }
@@ -7114,31 +7769,45 @@
             
             grid.innerHTML = '';
             
+            // Check if element loader is ready
+            if (!window.elementLoader || !window.elementLoader.elements) {
+                console.error('Element loader not ready');
+                return;
+            }
+            
+            // Update discovery count
+            const countElement = document.getElementById('discoveryCount');
+            if (countElement) {
+                countElement.textContent = `Total Discoveries: ${allTimeDiscoveries.size}`;
+            }
+            
             // Use allTimeDiscoveries for persistent journal
             const sortedDiscoveries = Array.from(allTimeDiscoveries.entries()).sort((a, b) => {
-                const nameA = elementDatabase[a[0]]?.name || a[0];
-                const nameB = elementDatabase[b[0]]?.name || b[0];
+                const elementA = window.elementLoader.elements.get(parseInt(a[0]));
+                const elementB = window.elementLoader.elements.get(parseInt(b[0]));
+                const nameA = elementA?.n || 'Unknown';
+                const nameB = elementB?.n || 'Unknown';
                 return nameA.localeCompare(nameB);
             });
             
-            sortedDiscoveries.forEach(([elementKey, recipe]) => {
-                const elementData = elementDatabase[elementKey];
+            sortedDiscoveries.forEach(([elementId, recipe]) => {
+                const elementData = window.elementLoader.elements.get(parseInt(elementId));
                 if (!elementData) return;
                 
                 const div = document.createElement('div');
                 div.className = 'discovery-item';
-                div.dataset.name = elementData.name.toLowerCase();
+                div.dataset.name = elementData.n.toLowerCase();
                 div.dataset.recipe = recipe.toLowerCase();
                 
                 // Element emoji/symbol
                 const symbol = document.createElement('div');
                 symbol.className = 'element-symbol';
-                symbol.textContent = elementData.emoji;
+                symbol.textContent = window.elementLoader.getEmojiForElement(parseInt(elementId), elementData.e);
                 
                 // Element name
                 const name = document.createElement('div');
                 name.className = 'element-name';
-                name.textContent = elementData.name;
+                name.textContent = elementData.n;
                 
                 // Recipe tooltip
                 const recipeTooltip = document.createElement('div');
@@ -7178,12 +7847,21 @@
                 return;
             }
             
+            // Frame rate limiting to 60 FPS
+            const targetFrameTime = 16.67; // 60 FPS
+            const elapsed = currentTime - lastTime;
+            
+            // Skip frame if not enough time has passed
+            if (elapsed < targetFrameTime) {
+                return;
+            }
+            
             // Calculate frame time
             if (!isFinite(currentTime)) {
                 console.error('currentTime is not finite:', currentTime);
                 return;
             }
-            const frameTime = Math.min(currentTime - lastTime, 250); // Cap at 250ms (4 FPS min)
+            const frameTime = Math.min(elapsed, 250); // Cap at 250ms (4 FPS min)
             lastTime = currentTime;
             
             // Add to accumulator
@@ -7244,9 +7922,19 @@
                 // Remove dead snakes
                 snakes = snakes.filter(snake => snake.alive);
                 
-                // Spawn new elements occasionally
-                if (Math.random() < 0.04 && elementPool.getActiveCount() < 150) {
-                    spawnElement();
+                // Spawn new elements to maintain target count (less aggressive)
+                const currentElementCount = elementPool.getActiveCount();
+                if (currentElementCount < TARGET_ELEMENT_COUNT - 20) {
+                    // Only spawn if significantly below target
+                    const elementsToSpawn = Math.min(2, Math.floor((TARGET_ELEMENT_COUNT - currentElementCount) / 10));
+                    for (let i = 0; i < elementsToSpawn; i++) {
+                        if (Math.random() < 0.8) { // 80% chance per spawn
+                            spawnElementWithGridDistribution();
+                        }
+                    }
+                } else if (Math.random() < 0.05 && currentElementCount < TARGET_ELEMENT_COUNT) {
+                    // Occasional spawns to replace consumed elements (reduced from 10% to 5%)
+                    spawnElementWithGridDistribution();
                 }
                 
                 // Update AlchemyVision timer

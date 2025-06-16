@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel Test - Step by Step Loading</title>
+    <style>
+        body {
+            font-family: monospace;
+            background: #0f0f0f;
+            color: #e0e0e0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .step {
+            margin: 10px 0;
+            padding: 10px;
+            background: #1a1a1a;
+            border-radius: 4px;
+        }
+        .step.loading {
+            color: #ffa500;
+        }
+        .step.success {
+            color: #00ff00;
+        }
+        .step.error {
+            color: #ff0000;
+        }
+        .data {
+            margin-top: 10px;
+            padding: 10px;
+            background: #2a2a2a;
+            border-radius: 4px;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px 5px;
+            background: #4ecdc4;
+            color: #000;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #45b7b8;
+        }
+    </style>
+</head>
+<body>
+    <h1>Admin Panel Test - Step by Step Debugging</h1>
+    
+    <div id="status"></div>
+    
+    <div style="margin-top: 20px;">
+        <button onclick="runFullTest()">Run Full Test</button>
+        <button onclick="testElementLoad()">Test Element Loading Only</button>
+        <button onclick="testCombinationLoad()">Test Combination Loading Only</button>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <script>
+        const status = document.getElementById('status');
+        let allElements = {};
+        let allCombinations = {};
+        
+        function log(message, type = 'loading', data = null) {
+            const step = document.createElement('div');
+            step.className = `step ${type}`;
+            step.innerHTML = `[${new Date().toLocaleTimeString()}] ${message}`;
+            
+            if (data) {
+                const dataDiv = document.createElement('div');
+                dataDiv.className = 'data';
+                dataDiv.textContent = typeof data === 'object' ? JSON.stringify(data, null, 2) : data;
+                step.appendChild(dataDiv);
+            }
+            
+            status.appendChild(step);
+            // Auto-scroll to bottom
+            status.scrollTop = status.scrollHeight;
+        }
+        
+        function clearLog() {
+            status.innerHTML = '';
+            allElements = {};
+            allCombinations = {};
+        }
+        
+        async function testElementLoad() {
+            clearLog();
+            log('Starting element loading test...');
+            
+            // First, let's check what files actually exist
+            const testFiles = [
+                '/elements/elements-core.json',
+                '/elements/elements-life.json',
+                '/elements/elements-civilization.json',
+                '/elements/elements-modern.json',
+                '/elements/elements-fictional.json',
+                '/elements/elements-humorous-fusions.json',
+                // Also try the "new" path in case
+                '/elements/elements-new/elements-core.json'
+            ];
+            
+            log('Testing file paths to find correct location...');
+            
+            for (const file of testFiles) {
+                try {
+                    log(`Attempting to fetch: ${file}`, 'loading');
+                    const response = await fetch(file);
+                    
+                    if (response.ok) {
+                        log(`✓ Found file at: ${file}`, 'success', {
+                            status: response.status,
+                            contentType: response.headers.get('content-type'),
+                            contentLength: response.headers.get('content-length')
+                        });
+                        
+                        // Try to parse it
+                        try {
+                            const data = await response.json();
+                            const elementCount = Array.isArray(data) ? data.length : Object.keys(data).length;
+                            log(`✓ Successfully parsed JSON from ${file}`, 'success', {
+                                elementCount,
+                                sampleData: Array.isArray(data) ? data.slice(0, 2) : Object.entries(data).slice(0, 2)
+                            });
+                        } catch (parseError) {
+                            log(`✗ Failed to parse JSON from ${file}`, 'error', parseError.message);
+                        }
+                    } else {
+                        log(`✗ File not found: ${file} (${response.status})`, 'error');
+                    }
+                } catch (error) {
+                    log(`✗ Network error for ${file}`, 'error', error.message);
+                }
+            }
+            
+            // Now load with correct paths
+            log('\nLoading elements from correct paths...', 'loading');
+            const correctFiles = [
+                '/elements/elements-core.json',
+                '/elements/elements-life.json',
+                '/elements/elements-civilization.json',
+                '/elements/elements-modern.json',
+                '/elements/elements-fictional.json',
+                '/elements/elements-humorous-fusions.json'
+            ];
+            
+            let totalLoaded = 0;
+            for (const file of correctFiles) {
+                try {
+                    const response = await fetch(file);
+                    if (response.ok) {
+                        const data = await response.json();
+                        
+                        if (Array.isArray(data)) {
+                            log(`Processing ${data.length} elements from ${file} (array format)`, 'loading');
+                            data.forEach(elem => {
+                                const id = elem.i;
+                                allElements[id] = {
+                                    name: elem.n,
+                                    tier: elem.t,
+                                    emoji: elem.e,
+                                    flags: elem.f
+                                };
+                            });
+                            totalLoaded += data.length;
+                        } else {
+                            const count = Object.keys(data).length;
+                            log(`Processing ${count} elements from ${file} (object format)`, 'loading');
+                            Object.assign(allElements, data);
+                            totalLoaded += count;
+                        }
+                    }
+                } catch (err) {
+                    log(`Error loading ${file}`, 'error', err.message);
+                }
+            }
+            
+            log(`\n✓ Total elements loaded: ${Object.keys(allElements).length}`, 'success', {
+                totalUnique: Object.keys(allElements).length,
+                totalProcessed: totalLoaded,
+                sampleElements: Object.entries(allElements).slice(0, 5)
+            });
+            
+            // Test emoji loading
+            log('\nTesting emoji loading...', 'loading');
+            try {
+                const emojiModule = await import('/elements/emojis.js');
+                log('✓ Emoji module loaded', 'success', {
+                    emojiMapExists: !!emojiModule.EMOJI_MAP,
+                    sampleEmojis: emojiModule.EMOJI_MAP ? Object.entries(emojiModule.EMOJI_MAP).slice(0, 5) : null
+                });
+            } catch (err) {
+                log('✗ Failed to load emoji module', 'error', err.message);
+            }
+        }
+        
+        async function testCombinationLoad() {
+            if (Object.keys(allElements).length === 0) {
+                log('Loading elements first (required for combination testing)...', 'loading');
+                await testElementLoad();
+            }
+            
+            log('\nStarting combination loading test...', 'loading');
+            
+            const testFiles = [
+                '/elements/combinations.json',
+                '/elements/elements-new/combinations.json'
+            ];
+            
+            for (const file of testFiles) {
+                try {
+                    log(`Attempting to fetch: ${file}`, 'loading');
+                    const response = await fetch(file);
+                    
+                    if (response.ok) {
+                        log(`✓ Found combinations at: ${file}`, 'success');
+                        
+                        const data = await response.json();
+                        const comboCount = Object.keys(data).length;
+                        log(`✓ Successfully parsed ${comboCount} combinations`, 'success', {
+                            sampleCombos: Object.entries(data).slice(0, 5)
+                        });
+                        
+                        // Process combinations
+                        log('Processing combinations...', 'loading');
+                        let processedCount = 0;
+                        Object.entries(data).forEach(([key, result]) => {
+                            const [elem1, elem2] = key.split('+').map(Number);
+                            const combo = {
+                                element1: elem1,
+                                element2: elem2,
+                                result: result
+                            };
+                            const comboKey = `${elem1}_${elem2}`;
+                            const reverseKey = `${elem2}_${elem1}`;
+                            allCombinations[comboKey] = combo;
+                            allCombinations[reverseKey] = combo;
+                            processedCount += 2;
+                        });
+                        
+                        log(`✓ Processed ${processedCount} combination entries (including reverses)`, 'success');
+                        break;
+                    } else {
+                        log(`✗ Combinations not found at: ${file} (${response.status})`, 'error');
+                    }
+                } catch (error) {
+                    log(`✗ Error loading ${file}`, 'error', error.message);
+                }
+            }
+        }
+        
+        async function runFullTest() {
+            clearLog();
+            log('Starting full admin panel test sequence...');
+            
+            try {
+                // Test 1: Element loading
+                await testElementLoad();
+                
+                // Test 2: Combination loading
+                await testCombinationLoad();
+                
+                // Test 3: Check for DOM elements
+                log('\nChecking DOM elements...', 'loading');
+                const domChecks = {
+                    'element-grid': document.getElementById('element-grid'),
+                    'element-search': document.getElementById('element-search'),
+                    'tier-filter': document.getElementById('tier-filter'),
+                    'pagination': document.getElementById('pagination')
+                };
+                
+                let domOk = true;
+                for (const [id, element] of Object.entries(domChecks)) {
+                    if (element) {
+                        log(`✓ Found DOM element: ${id}`, 'success');
+                    } else {
+                        log(`✗ Missing DOM element: ${id}`, 'error');
+                        domOk = false;
+                    }
+                }
+                
+                if (!domOk) {
+                    log('Note: Missing DOM elements suggest this test page, not the actual admin panel', 'loading');
+                }
+                
+                // Test 4: Memory check
+                log('\nMemory usage check...', 'loading');
+                if (performance.memory) {
+                    log('Memory stats', 'success', {
+                        usedJSHeapSize: `${(performance.memory.usedJSHeapSize / 1048576).toFixed(2)} MB`,
+                        totalJSHeapSize: `${(performance.memory.totalJSHeapSize / 1048576).toFixed(2)} MB`,
+                        jsHeapSizeLimit: `${(performance.memory.jsHeapSizeLimit / 1048576).toFixed(2)} MB`
+                    });
+                } else {
+                    log('Memory stats not available in this browser', 'loading');
+                }
+                
+                log('\n✓ All tests completed!', 'success');
+                
+            } catch (error) {
+                log('✗ Fatal error during testing', 'error', error.stack);
+            }
+        }
+        
+        // Auto-run on load
+        window.addEventListener('DOMContentLoaded', () => {
+            log('Test page loaded, ready to debug...', 'success');
+        });
+    </script>
+</body>
+</html>
