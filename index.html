@@ -2572,9 +2572,66 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         
+        // Performance optimization: Set canvas context properties
+        ctx.imageSmoothingEnabled = false;
+        ctx.imageSmoothingQuality = 'low';
+        
         // Emoji cache for performance
         const emojiCache = new Map();
         const MAX_CACHE_SIZE = 200; // Limit cache size
+        
+        // Performance optimization: Reusable objects to reduce allocations
+        const reusableObjects = {
+            vector: { x: 0, y: 0 },
+            point: { x: 0, y: 0 },
+            distance: { dx: 0, dy: 0, dist: 0 },
+            gradient: null
+        };
+        
+        // Performance optimization: Pre-calculated math tables
+        const mathTables = {
+            sin: new Float32Array(360),
+            cos: new Float32Array(360)
+        };
+        
+        // Initialize math lookup tables
+        for (let i = 0; i < 360; i++) {
+            const rad = (i * Math.PI) / 180;
+            mathTables.sin[i] = Math.sin(rad);
+            mathTables.cos[i] = Math.cos(rad);
+        }
+        
+        // Fast math approximations
+        const fastMath = {
+            // Fast square root approximation (good enough for distance comparisons)
+            fastSqrt: function(n) {
+                if (n < 0) return NaN;
+                if (n === 0) return 0;
+                let x = n;
+                let y = (x + n / x) / 2;
+                if (Math.abs(y - x) < 0.01) return y;
+                x = y;
+                y = (x + n / x) / 2;
+                return y;
+            },
+            
+            // Convert angle to table index
+            angleToIndex: function(angle) {
+                let degrees = (angle * 180 / Math.PI) % 360;
+                if (degrees < 0) degrees += 360;
+                return Math.floor(degrees);
+            },
+            
+            // Fast sin using lookup table
+            sin: function(angle) {
+                return mathTables.sin[this.angleToIndex(angle)];
+            },
+            
+            // Fast cos using lookup table
+            cos: function(angle) {
+                return mathTables.cos[this.angleToIndex(angle)];
+            }
+        };
         
         function getCachedEmoji(emoji, size) {
             // Ensure size is valid
@@ -3881,8 +3938,9 @@
                 }
                 
                 // Move head (apply deltaTime for proper movement)
-                const moveX = Math.cos(this.angle) * this.speed * deltaTime;
-                const moveY = Math.sin(this.angle) * this.speed * deltaTime;
+                // Performance optimization: Use fast math for movement
+                const moveX = fastMath.cos(this.angle) * this.speed * deltaTime;
+                const moveY = fastMath.sin(this.angle) * this.speed * deltaTime;
                 
                 if (isFinite(moveX) && isFinite(moveY)) {
                     this.x += moveX;
@@ -4626,7 +4684,8 @@
                         
                         const dx = otherSnake.x - this.x;
                         const dy = otherSnake.y - this.y;
-                        const distance = Math.hypot(dx, dy);
+                        const distanceSq = dx * dx + dy * dy;
+                        const distance = Math.sqrt(distanceSq);
                         
                         // Check if this snake is a threat or prey
                         const lengthRatio = otherSnake.length / this.length;
@@ -4670,7 +4729,8 @@
                                 const segment = otherSnake.segments[i];
                                 const segDx = segment.x - this.x;
                                 const segDy = segment.y - this.y;
-                                const segDistance = Math.hypot(segDx, segDy);
+                                const segDistanceSq = segDx * segDx + segDy * segDy;
+                                const segDistance = Math.sqrt(segDistanceSq);
                                 
                                 // Skip segments that are too far away
                                 if (segDistance > maxCheckDistance) continue;
@@ -4687,7 +4747,8 @@
                                 // Also check future collision
                                 const futureDx = segment.x - futureX;
                                 const futureDy = segment.y - futureY;
-                                const futureDistance = Math.hypot(futureDx, futureDy);
+                                const futureDistanceSq = futureDx * futureDx + futureDy * futureDy;
+                                const futureDistance = Math.sqrt(futureDistanceSq);
                                 
                                 // Use the closer of current or future distance
                                 const effectiveDistance = Math.min(segDistance, futureDistance);
@@ -4749,7 +4810,8 @@
                 let shouldBoost = false;
                 
                 // Priority 1: Avoid immediate collisions - much lower threshold
-                const dangerMagnitude = Math.hypot(dangerVector.x, dangerVector.y);
+                const dangerMagnitudeSq = dangerVector.x * dangerVector.x + dangerVector.y * dangerVector.y;
+                const dangerMagnitude = Math.sqrt(dangerMagnitudeSq);
                 if (dangerMagnitude > 0.05) { // Reduced threshold for faster response
                     // Calculate escape angle - opposite of danger
                     targetAngle = Math.atan2(dangerVector.y, dangerVector.x);
@@ -4776,8 +4838,10 @@
                                 const checkInterval = snake.segments.length > 100 ? 2 : 1;
                                 for (let j = 0; j < snake.segments.length; j += checkInterval) {
                                     const segment = snake.segments[j];
-                                    const segDist = Math.hypot(segment.x - checkX, segment.y - checkY);
-                                    if (segDist < 40) { // Increased danger zone
+                                    const sdx = segment.x - checkX;
+                                    const sdy = segment.y - checkY;
+                                    const segDistSq = sdx * sdx + sdy * sdy;
+                                    if (segDistSq < 1600) { // 40 * 40 = 1600
                                         blocked = true;
                                         break;
                                     }
@@ -5244,16 +5308,19 @@
                 
                 // Magnetism effect
                 const magnetRange = 120; // Slightly larger range for power-ups
+                const magnetRangeSq = magnetRange * magnetRange;
                 const magnetStrength = 5.0; // Stronger pull for power-ups
+                const sizeSq = this.size * this.size;
                 
                 for (const snake of snakes) {
                     if (!snake.alive) continue;
                     
                     const dx = snake.x - this.x;
                     const dy = snake.y - this.y;
-                    const distance = Math.hypot(dx, dy);
+                    const distanceSq = dx * dx + dy * dy;
                     
-                    if (distance < magnetRange && distance > this.size) {
+                    if (distanceSq < magnetRangeSq && distanceSq > sizeSq) {
+                        const distance = Math.sqrt(distanceSq);
                         const dirX = dx / distance;
                         const dirY = dy / distance;
                         const pullStrength = (1 - distance / magnetRange) * magnetStrength * deltaTime;
@@ -5329,16 +5396,19 @@
                 
                 // Magnetism effect
                 const magnetRange = 120; // Slightly larger range for power-ups
+                const magnetRangeSq = magnetRange * magnetRange;
                 const magnetStrength = 5.0; // Stronger pull for power-ups
+                const sizeSq = this.size * this.size;
                 
                 for (const snake of snakes) {
                     if (!snake.alive) continue;
                     
                     const dx = snake.x - this.x;
                     const dy = snake.y - this.y;
-                    const distance = Math.hypot(dx, dy);
+                    const distanceSq = dx * dx + dy * dy;
                     
-                    if (distance < magnetRange && distance > this.size) {
+                    if (distanceSq < magnetRangeSq && distanceSq > sizeSq) {
+                        const distance = Math.sqrt(distanceSq);
                         const dirX = dx / distance;
                         const dirY = dy / distance;
                         const pullStrength = (1 - distance / magnetRange) * magnetStrength;
@@ -5418,16 +5488,19 @@
                 
                 // Magnetism effect
                 const magnetRange = 120; // Slightly larger range for power-ups
+                const magnetRangeSq = magnetRange * magnetRange;
                 const magnetStrength = 5.0; // Stronger pull for power-ups
+                const sizeSq = this.size * this.size;
                 
                 for (const snake of snakes) {
                     if (!snake.alive) continue;
                     
                     const dx = snake.x - this.x;
                     const dy = snake.y - this.y;
-                    const distance = Math.hypot(dx, dy);
+                    const distanceSq = dx * dx + dy * dy;
                     
-                    if (distance < magnetRange && distance > this.size) {
+                    if (distanceSq < magnetRangeSq && distanceSq > sizeSq) {
+                        const distance = Math.sqrt(distanceSq);
                         const dirX = dx / distance;
                         const dirY = dy / distance;
                         const pullStrength = (1 - distance / magnetRange) * magnetStrength;
@@ -5541,11 +5614,30 @@
             constructor(size = 200) {
                 this.pool = [];
                 this.activeParticles = [];
+                this.poolSize = size;
                 
                 // Pre-allocate particles
                 for (let i = 0; i < size; i++) {
                     this.pool.push(new Particle(0, 0, 0, 0, 'white'));
                 }
+                
+                // Pre-warm the pool by cycling through particles
+                this.preWarm();
+            }
+            
+            preWarm() {
+                // Temporarily activate and deactivate particles to warm up memory
+                const warmupCount = Math.min(50, this.poolSize);
+                const tempParticles = [];
+                for (let i = 0; i < warmupCount; i++) {
+                    tempParticles.push(this.spawn(0, 0, 0, 0, 'white'));
+                }
+                // Return them to pool
+                tempParticles.forEach(p => {
+                    p.active = false;
+                    p.life = 0;
+                });
+                this.update();
             }
             
             spawn(x, y, vx, vy, color) {
@@ -6689,20 +6781,35 @@
         }
         
         function checkCollisions() {
-            for (const snake of snakes) {
+            // Performance optimization: Use for loop instead of for-of
+            for (let snakeIdx = 0; snakeIdx < snakes.length; snakeIdx++) {
+                const snake = snakes[snakeIdx];
                 if (!snake.alive) continue;
                 
                 // Check element collisions
                 const activeElements = elementPool.getActiveElements();
-                for (const element of activeElements) {
-                    const dist = Math.hypot(element.x - snake.x, element.y - snake.y);
+                const activeElementsLength = activeElements.length;
+                
+                // Performance optimization: Cache frequently used values
+                const snakeX = snake.x;
+                const snakeY = snake.y;
+                const collisionDistSq = (SEGMENT_SIZE + ELEMENT_SIZE) * (SEGMENT_SIZE + ELEMENT_SIZE);
+                
+                for (let elemIdx = 0; elemIdx < activeElementsLength; elemIdx++) {
+                    const element = activeElements[elemIdx];
+                    
+                    // Performance optimization: Use squared distance for initial check
+                    const dx = element.x - snakeX;
+                    const dy = element.y - snakeY;
+                    const distSq = dx * dx + dy * dy;
                     
                     // For player snake, check if element will combine when eaten
                     if (snake.isPlayer) {
-                        if (dist < 150 && snake.elements.length > 0) {
+                        if (distSq < 22500 && snake.elements.length > 0) { // 150 * 150
                             // Check if this element can combine with any in the bank
                             element.pendingCombination = false;
-                            for (let i = 0; i < snake.elements.length; i++) {
+                            const snakeElementsLength = snake.elements.length;
+                            for (let i = 0; i < snakeElementsLength; i++) {
                                 const bankElementId = snake.elements[i];
                                 const comboKey = `${Math.min(element.id, bankElementId)}+${Math.max(element.id, bankElementId)}`;
                                 if (window.elementLoader && window.elementLoader.combinations[comboKey]) {
@@ -6710,14 +6817,14 @@
                                     break;
                                 }
                             }
-                        } else if (dist > 200) {
+                        } else if (distSq > 40000) { // 200 * 200
                             // Reset state for distant elements
                             element.pendingCombination = false;
                             element.combiningAnimation = 0;
                         }
                     }
                     
-                    if (dist < SEGMENT_SIZE + ELEMENT_SIZE) {
+                    if (distSq < collisionDistSq) {
                         snake.consume(element);
                     }
                 }
@@ -6726,8 +6833,11 @@
                 if (snake.isPlayer) {
                     for (let i = alchemyVisionPowerUps.length - 1; i >= 0; i--) {
                         const powerUp = alchemyVisionPowerUps[i];
-                        const dist = Math.hypot(powerUp.x - snake.x, powerUp.y - snake.y);
-                        if (dist < SEGMENT_SIZE + powerUp.size) {
+                        // Performance optimization: Use squared distance
+                        const dx = powerUp.x - snakeX;
+                        const dy = powerUp.y - snakeY;
+                        const collisionDist = SEGMENT_SIZE + powerUp.size;
+                        if (dx * dx + dy * dy < collisionDist * collisionDist) {
                             // Activate Alchemy Vision
                             alchemyVisionActive = true;
                             alchemyVisionTimer = ALCHEMY_VISION_DURATION;
@@ -6748,8 +6858,11 @@
                 // Check Void Orb collision (all snakes can collect)
                 for (let i = voidOrbs.length - 1; i >= 0; i--) {
                     const orb = voidOrbs[i];
-                    const dist = Math.hypot(orb.x - snake.x, orb.y - snake.y);
-                    if (dist < SEGMENT_SIZE + orb.size) {
+                    // Performance optimization: Use squared distance
+                    const dx = orb.x - snakeX;
+                    const dy = orb.y - snakeY;
+                    const collisionDist = SEGMENT_SIZE + orb.size;
+                    if (dx * dx + dy * dy < collisionDist * collisionDist) {
                         // Consume the void orb
                         if (snake.elements.length > 0) {
                             const elementCount = snake.elements.length;
@@ -6857,8 +6970,12 @@
                 // Check Catalyst Gem collision (all snakes can collect)
                 for (let i = catalystGems.length - 1; i >= 0; i--) {
                     const gem = catalystGems[i];
-                    const dist = Math.hypot(gem.x - snake.x, gem.y - snake.y);
-                    if (dist < SEGMENT_SIZE + gem.size) {
+                    // Performance optimization: Use squared distance
+                    const dx = gem.x - snake.x;
+                    const dy = gem.y - snake.y;
+                    const collisionDist = SEGMENT_SIZE + gem.size;
+                    const collisionDistSq = collisionDist * collisionDist;
+                    if (dx * dx + dy * dy < collisionDistSq) {
                         // Only activate if catalyst gem logic is ready
                         if (snake.isPlayer && window.elementLoader && window.elementLoader.isLoaded && window.elementLoader.isLoaded()) {
                             // NEW CATALYST LOGIC: Find combinations that produce undiscovered elements
@@ -6984,10 +7101,13 @@
                     
                     // Check head collision with other snake's body
                     let collisionOccurred = false;
+                    const segmentSizeSq = SEGMENT_SIZE * SEGMENT_SIZE;
                     for (let i = 3; i < otherSnake.segments.length; i++) {
                         const segment = otherSnake.segments[i];
-                        const dist = Math.hypot(segment.x - snake.x, segment.y - snake.y);
-                        if (dist < SEGMENT_SIZE) {
+                        // Performance optimization: Use squared distance
+                        const dx = segment.x - snake.x;
+                        const dy = segment.y - snake.y;
+                        if (dx * dx + dy * dy < segmentSizeSq) {
                             // Track collision for near-miss prevention
                             if (snake.isPlayer) {
                                 snake.recentCollisions.add(otherSnake);
@@ -7003,8 +7123,10 @@
                     
                     // Check head-to-head collision
                     if (snake.alive && otherSnake.alive) {
-                        const headDist = Math.hypot(otherSnake.x - snake.x, otherSnake.y - snake.y);
-                        if (headDist < SEGMENT_SIZE) {
+                        // Performance optimization: Use squared distance
+                        const hdx = otherSnake.x - snake.x;
+                        const hdy = otherSnake.y - snake.y;
+                        if (hdx * hdx + hdy * hdy < segmentSizeSq) {
                             // Smaller snake explodes, or both if same size
                             if (snake.length < otherSnake.length) {
                                 snake.explode(otherSnake);
@@ -7041,15 +7163,22 @@
                     let closestDistance = Infinity;
                     
                     // Check body segments
+                    let closestDistanceSq = Infinity;
                     for (let i = 0; i < otherSnake.segments.length; i++) {
                         const segment = otherSnake.segments[i];
-                        const dist = Math.hypot(segment.x - playerSnake.x, segment.y - playerSnake.y);
-                        closestDistance = Math.min(closestDistance, dist);
+                        // Performance optimization: Use squared distance
+                        const dx = segment.x - playerSnake.x;
+                        const dy = segment.y - playerSnake.y;
+                        const distSq = dx * dx + dy * dy;
+                        closestDistanceSq = Math.min(closestDistanceSq, distSq);
                     }
                     
                     // Check head separately
-                    const headDist = Math.hypot(otherSnake.x - playerSnake.x, otherSnake.y - playerSnake.y);
-                    closestDistance = Math.min(closestDistance, headDist);
+                    const hdx = otherSnake.x - playerSnake.x;
+                    const hdy = otherSnake.y - playerSnake.y;
+                    const headDistSq = hdx * hdx + hdy * hdy;
+                    closestDistanceSq = Math.min(closestDistanceSq, headDistSq);
+                    closestDistance = Math.sqrt(closestDistanceSq);
                     
                     // Get previous tracking data
                     const trackingData = playerSnake.nearMissTracking.get(otherSnake) || {
@@ -7837,11 +7966,22 @@
             let updates = 0;
             while (accumulator >= FIXED_TIMESTEP && updates < MAX_UPDATES) {
                 // Update game objects with fixed timestep (1.0 = one 60fps frame)
-                snakes.forEach(snake => {
+                // Staggered AI updates for better performance
+                const updateFrame = frameCount % 3; // Distribute AI updates across 3 frames
+                for (let i = 0; i < snakes.length; i++) {
+                    const snake = snakes[i];
                     if (snake.alive) {
-                        snake.update(1.0);
+                        // Player always updates, AI updates are staggered
+                        if (snake.isPlayer || (i % 3) === updateFrame) {
+                            snake.update(1.0);
+                        } else if (!snake.isPlayer) {
+                            // Simple position update for non-updated AI snakes
+                            snake.x += fastMath.cos(snake.angle) * snake.speed;
+                            snake.y += fastMath.sin(snake.angle) * snake.speed;
+                            snake.updateSegments();
+                        }
                     }
-                });
+                }
                 elementPool.update(1.0);
                 particlePool.update(1.0);
                 
@@ -8072,32 +8212,36 @@
             elementPool.draw();
             
             // Draw AlchemyVision power-ups (with viewport culling)
-            alchemyVisionPowerUps.forEach(powerUp => {
+            for (let i = 0; i < alchemyVisionPowerUps.length; i++) {
+                const powerUp = alchemyVisionPowerUps[i];
                 if (isInViewport(powerUp.x, powerUp.y, 100)) {
                     powerUp.draw();
                 }
-            });
+            }
             
             // Draw Void Orbs (with viewport culling)
-            voidOrbs.forEach(orb => {
+            for (let i = 0; i < voidOrbs.length; i++) {
+                const orb = voidOrbs[i];
                 if (isInViewport(orb.x, orb.y, 100)) {
                     orb.draw();
                 }
-            });
+            }
             
             // Draw Catalyst Gems (with viewport culling)
-            catalystGems.forEach(gem => {
+            for (let i = 0; i < catalystGems.length; i++) {
+                const gem = catalystGems[i];
                 if (isInViewport(gem.x, gem.y, 100)) {
                     gem.draw();
                 }
-            });
+            }
             
             // Draw snakes (they already have internal viewport culling)
-            snakes.forEach(snake => {
+            for (let i = 0; i < snakes.length; i++) {
+                const snake = snakes[i];
                 if (snake.alive) {
                     snake.draw(interpolation);
                 }
-            });
+            }
             
             // Draw particles (particle pool handles viewport culling)
             particlePool.draw();
