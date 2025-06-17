@@ -156,13 +156,24 @@
     <link rel="alternate" hreflang="en" href="https://infinitesnake.io" />
     <link rel="alternate" hreflang="x-default" href="https://infinitesnake.io" />
     <style>
+        /* Global pixel art style */
+        * {
+            box-shadow: none !important;
+            text-shadow: none !important;
+            border-radius: 0 !important;
+            transition-duration: 0s !important;
+        }
+        
         body {
             margin: 0;
             padding: 0;
-            background-color: #0a0a1a;
-            font-family: Arial, sans-serif;
+            background-color: #000011;
+            font-family: 'Courier New', monospace;
             overflow: hidden;
             color: white;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
         }
         
         #gameCanvas {
@@ -535,52 +546,41 @@
         .element-slot {
             width: 56px;
             height: 56px;
-            background: linear-gradient(135deg, 
-                rgba(20, 20, 40, 0.9) 0%,
-                rgba(30, 30, 50, 0.8) 100%
-            );
-            border: 2px solid rgba(138, 43, 226, 0.4);
-            border-radius: 8px;
+            background: #1a1a2e;
+            border: 2px solid #16213e;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             position: relative;
-            transition: all 0.2s;
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
         }
         
         .element-slot.empty {
-            background: linear-gradient(135deg, 
-                rgba(10, 10, 20, 0.6) 0%,
-                rgba(20, 20, 30, 0.5) 100%
-            );
-            border-color: rgba(100, 100, 120, 0.3);
+            background: #0f0f1f;
+            border-color: #2a2a3a;
             border-style: dashed;
         }
         
         .element-slot.filled {
-            background: linear-gradient(135deg, 
-                rgba(40, 40, 60, 0.9) 0%,
-                rgba(50, 50, 70, 0.8) 100%
-            );
-            border-color: rgba(138, 43, 226, 0.6);
+            background: #2a2a3e;
+            border-color: #4B0082;
         }
         
         .element-slot.tail-element {
             border-color: #FFD700;
-            background: linear-gradient(135deg, 
-                rgba(255, 215, 0, 0.2) 0%,
-                rgba(255, 215, 0, 0.1) 100%
-            );
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5),
-                       inset 0 0 10px rgba(255, 215, 0, 0.2);
-            animation: tailPulse 2s ease-in-out infinite;
+            background: #3a3a1e;
+            animation: pixelPulse 1s steps(2) infinite;
         }
         
-        @keyframes tailPulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+        @keyframes pixelPulse {
+            0%, 100% { 
+                background: #3a3a1e;
+                border-color: #FFD700;
+            }
+            50% { 
+                background: #4a4a2e;
+                border-color: #FFFF00;
+            }
         }
         
         /* Combination animation styles */
@@ -801,27 +801,16 @@
         
         .boost-bar-frame {
             height: 24px;
-            background: linear-gradient(to bottom, 
-                rgba(0, 0, 0, 0.8) 0%,
-                rgba(10, 10, 20, 0.9) 100%
-            );
-            border: 2px solid rgba(100, 100, 120, 0.5);
-            border-radius: 12px;
+            background: #1a1a1a;
+            border: 2px solid #333;
             position: relative;
             overflow: hidden;
-            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.8);
         }
         
         .boost-bar-fill {
             height: 100%;
-            background: linear-gradient(90deg, 
-                #00a8ff 0%,
-                #00d4ff 50%,
-                #00a8ff 100%
-            );
-            background-size: 200% 100%;
+            background: #00a8ff;
             position: relative;
-            animation: boostShimmer 3s linear infinite;
         }
         
         @keyframes boostShimmer {
@@ -830,13 +819,11 @@
         }
         
         .boost-bar-fill.low {
-            background: linear-gradient(90deg, #ff4444, #ff6666);
-            animation: none;
+            background: #ff4444;
         }
         
         .boost-bar-fill.boosting {
-            background: linear-gradient(90deg, #44ff44, #66ff66);
-            animation: boostShimmer 1s linear infinite;
+            background: #44ff44;
         }
         
         .boost-bar-text {
@@ -2572,9 +2559,17 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         
-        // Performance optimization: Set canvas context properties
+        // Pixel perfect rendering
         ctx.imageSmoothingEnabled = false;
+        ctx.mozImageSmoothingEnabled = false;
+        ctx.webkitImageSmoothingEnabled = false;
+        ctx.msImageSmoothingEnabled = false;
         ctx.imageSmoothingQuality = 'low';
+        
+        // Set canvas to pixelated rendering
+        canvas.style.imageRendering = 'pixelated';
+        canvas.style.imageRendering = '-moz-crisp-edges';
+        canvas.style.imageRendering = 'crisp-edges';
         
         // Emoji cache for performance
         const emojiCache = new Map();
@@ -2762,12 +2757,14 @@
                 boostThreshold: 0.2,        // Boosts frequently
                 chaseDistance: 500,         // Long chase range
                 fleeThreshold: 2.0,         // Only flee if enemy is 2x larger
+                preyRatioMax: 1.2,          // Hunt snakes up to 1.2x their size
                 collisionAvoidanceRadius: 120, // Increased from 60
                 dangerZoneRadius: 200,      // Early warning radius
                 aggressionMultiplier: 2.0,  // How much to prioritize hunting
                 elementIgnoreChance: 0.7,   // 70% chance to ignore elements when hunting
                 avoidanceStrength: 0.4,     // How strongly to avoid collisions
-                predictiveLookAhead: 0.5    // Look 0.5 seconds ahead
+                predictiveLookAhead: 0.5,   // Look 0.5 seconds ahead
+                bodyAvoidanceMultiplier: 0.7 // Reduced body avoidance for aggressive play
             },
             COMBO_FOCUSED: {
                 name: 'Combo Master',
@@ -2777,12 +2774,14 @@
                 boostThreshold: 0.7,        // Rarely boosts
                 chaseDistance: 50,          // Very short chase range
                 fleeThreshold: 0.9,         // Flee from 90% size snakes
+                preyRatioMax: 0.5,          // Only hunt snakes half their size
                 collisionAvoidanceRadius: 250, // Increased from 150
                 dangerZoneRadius: 350,      // Large early warning
                 aggressionMultiplier: 0.2,
                 elementIgnoreChance: 0.0,   // Never ignores elements
                 avoidanceStrength: 0.8,     // Strong avoidance
-                predictiveLookAhead: 1.0    // Look 1 second ahead
+                predictiveLookAhead: 1.0,   // Look 1 second ahead
+                bodyAvoidanceMultiplier: 1.5 // Extra careful around bodies
             },
             BALANCED: {
                 name: 'Balanced',
@@ -2792,27 +2791,32 @@
                 boostThreshold: 0.5,
                 chaseDistance: 250,
                 fleeThreshold: 1.3,
+                preyRatioMax: 0.8,          // Hunt snakes up to 0.8x their size
                 collisionAvoidanceRadius: 180, // Increased from 100
                 dangerZoneRadius: 280,      // Moderate early warning
                 aggressionMultiplier: 1.0,
                 elementIgnoreChance: 0.3,
                 avoidanceStrength: 0.6,     // Moderate avoidance
-                predictiveLookAhead: 0.7    // Look 0.7 seconds ahead
+                predictiveLookAhead: 0.7,   // Look 0.7 seconds ahead
+                bodyAvoidanceMultiplier: 1.0 // Standard body avoidance
             },
             CAUTIOUS: {
                 name: 'Cautious',
-                huntingPriority: 0.1,       // Rarely hunts
-                comboPriority: 0.9,         // Focuses on elements
+                huntingPriority: 0.0,       // Never hunts
+                comboPriority: 1.0,         // Only focuses on elements
                 riskTolerance: 0.1,         // Very low risk
                 boostThreshold: 0.85,       // Almost never boosts
-                chaseDistance: 30,          // Tiny chase range
+                chaseDistance: 0,           // Never chases
                 fleeThreshold: 0.8,         // Flee from 80% size snakes
+                preyRatioMax: 0.0,          // Never considers hunting
                 collisionAvoidanceRadius: 300, // Increased from 200
                 dangerZoneRadius: 400,      // Very large early warning
-                aggressionMultiplier: 0.1,
+                aggressionMultiplier: 0.0,  // No aggression
                 elementIgnoreChance: 0.0,
                 avoidanceStrength: 1.0,     // Maximum avoidance
-                predictiveLookAhead: 1.2    // Look 1.2 seconds ahead
+                predictiveLookAhead: 1.2,   // Look 1.2 seconds ahead
+                bodyAvoidanceMultiplier: 2.0, // Very cautious around bodies
+                playerAvoidanceRadius: 600  // Stay far away from player
             },
             OPPORTUNIST: {
                 name: 'Opportunist',
@@ -2822,13 +2826,15 @@
                 boostThreshold: 0.3,
                 chaseDistance: 350,
                 fleeThreshold: 1.1,         // Careful about size matchups
+                preyRatioMax: 0.7,          // Hunt snakes up to 0.7x their size
                 collisionAvoidanceRadius: 150, // Increased from 80
                 dangerZoneRadius: 250,      // Moderate early warning
                 aggressionMultiplier: 1.5,
                 elementIgnoreChance: 0.5,
                 preferWeakTargets: true,    // Specifically targets smaller/wounded snakes
                 avoidanceStrength: 0.5,     // Moderate avoidance
-                predictiveLookAhead: 0.6    // Look 0.6 seconds ahead
+                predictiveLookAhead: 0.6,   // Look 0.6 seconds ahead
+                bodyAvoidanceMultiplier: 0.8 // Slightly reduced for opportunistic strikes
             }
         };
         
@@ -2839,6 +2845,9 @@
         
         // Track used AI skins to prevent duplicates
         let usedAISkins = new Set();
+        
+        // Track AI snake data for respawning with scores
+        let aiSnakeDataMap = new Map();
         
         // Personality colors for name display
         const PERSONALITY_COLORS = {
@@ -2853,6 +2862,63 @@
         let staticStars = [];
         let shootingStars = [];
         let lastShootingStarTime = 0;
+        
+        // Pixel art star layers for parallax
+        const pixelStarLayers = [
+            { stars: [], speed: 0.1, size: 1, color: '#666', count: 100 },  // Far
+            { stars: [], speed: 0.3, size: 1, color: '#999', count: 80 },   // Mid
+            { stars: [], speed: 0.5, size: 2, color: '#CCC', count: 60 },   // Near
+            { stars: [], speed: 0.8, size: 2, color: '#FFF', count: 40 }    // Close
+        ];
+        
+        // Pixel nebulae - many smaller, organic shapes
+        const pixelNebulae = [];
+        const nebulaCanvases = new Map(); // Cache for pre-rendered nebulae
+        
+        // Generate many smaller nebulae across the world
+        for (let i = 0; i < 25; i++) {
+            const size = 250 + Math.random() * 350; // Use same size for width and height for circular nebulae
+            pixelNebulae.push({
+                x: Math.random() * WORLD_SIZE,
+                y: Math.random() * WORLD_SIZE,
+                width: size,
+                height: size,
+                color: ['#4B0082', '#8B008B', '#191970', '#483D8B', '#6A0DAD', '#9400D3'][Math.floor(Math.random() * 6)],
+                density: 0.25 + Math.random() * 0.25, // Increased density for better visibility
+                clusters: [] // Will store random pixel clusters for organic shape
+            });
+        }
+        
+        // Pixel planets - many smaller planets
+        const pixelPlanets = [];
+        // Generate many smaller planets
+        for (let i = 0; i < 20; i++) {
+            const planetColors = [
+                { color1: '#8B4513', color2: '#A0522D' },
+                { color1: '#4682B4', color2: '#5F9EA0' },
+                { color1: '#FF6347', color2: '#FF4500' },
+                { color1: '#228B22', color2: '#006400' },
+                { color1: '#DAA520', color2: '#B8860B' },
+                { color1: '#708090', color2: '#2F4F4F' },
+                { color1: '#FF69B4', color2: '#FF1493' },
+                { color1: '#00CED1', color2: '#008B8B' },
+                { color1: '#9370DB', color2: '#6A0DAD' },
+                { color1: '#FF8C00', color2: '#FF6347' },
+                { color1: '#32CD32', color2: '#228B22' }
+            ];
+            const colors = planetColors[Math.floor(Math.random() * planetColors.length)];
+            pixelPlanets.push({
+                x: Math.random() * WORLD_SIZE,
+                y: Math.random() * WORLD_SIZE,
+                radius: 20 + Math.random() * 40, // Much smaller planets
+                color1: colors.color1,
+                color2: colors.color2,
+                rings: Math.random() > 0.7 // 30% chance of rings
+            });
+        }
+        
+        // Pixel asteroids - will be populated dynamically
+        const pixelAsteroids = [];
         
         // Nebula border effect variables
         let borderParticles = [];
@@ -3113,6 +3179,11 @@
         window.addEventListener('mousedown', (e) => {
             if (e.button === 0) { // Left click
                 mouseDown = true;
+                
+                // Spawn shooting star on click (like in demo)
+                if (gameStarted && !gameOver) {
+                    shootingStars.push(new ShootingStar());
+                }
             }
         });
         
@@ -4479,11 +4550,18 @@
                         ctx.fillStyle = colors[i % colors.length];
                     }
                     
-                    ctx.beginPath();
-                    // Ensure segment radius never goes below 1 pixel
+                    // Draw pixelated square segment
+                    const pixelSize = 4;
                     const segmentRadius = Math.max(1, SEGMENT_SIZE - Math.min(i * 0.05, SEGMENT_SIZE - 1));
-                    ctx.arc(screenX, screenY, segmentRadius, 0, Math.PI * 2);
-                    ctx.fill();
+                    const segmentPixels = Math.floor(segmentRadius * 2 / pixelSize);
+                    
+                    // Draw main square segment
+                    ctx.fillRect(
+                        Math.floor(screenX / pixelSize) * pixelSize - segmentPixels * pixelSize / 2,
+                        Math.floor(screenY / pixelSize) * pixelSize - segmentPixels * pixelSize / 2,
+                        segmentPixels * pixelSize,
+                        segmentPixels * pixelSize
+                    );
                 }
                 
                 // Draw head
@@ -4518,13 +4596,24 @@
                     
                     // Draw boost glow around head
                     if (this.isBoosting) {
-                        const glowSize = SEGMENT_SIZE * 4;
-                        const gradient = ctx.createRadialGradient(screenX, screenY, 0, screenX, screenY, glowSize);
-                        gradient.addColorStop(0, this.isPlayer ? 'rgba(100, 200, 255, 0.4)' : 'rgba(255, 100, 100, 0.4)');
-                        gradient.addColorStop(0.5, this.isPlayer ? 'rgba(100, 200, 255, 0.2)' : 'rgba(255, 100, 100, 0.2)');
-                        gradient.addColorStop(1, 'transparent');
-                        ctx.fillStyle = gradient;
-                        ctx.fillRect(screenX - glowSize, screenY - glowSize, glowSize * 2, glowSize * 2);
+                        // Pixelated boost effect
+                        const pixelSize = 8;
+                        const boostColor = this.isPlayer ? 'rgba(100, 200, 255, 0.3)' : 'rgba(255, 100, 100, 0.3)';
+                        ctx.fillStyle = boostColor;
+                        
+                        // Draw pixelated glow pattern
+                        for (let px = -3; px <= 3; px++) {
+                            for (let py = -3; py <= 3; py++) {
+                                if (Math.abs(px) + Math.abs(py) <= 4) {
+                                    ctx.fillRect(
+                                        Math.floor((screenX + px * pixelSize) / pixelSize) * pixelSize,
+                                        Math.floor((screenY + py * pixelSize) / pixelSize) * pixelSize,
+                                        pixelSize,
+                                        pixelSize
+                                    );
+                                }
+                            }
+                        }
                     }
                     
                     // Draw skin image
@@ -4656,28 +4745,33 @@
                 let nearestPrey = null;
                 let threatDistance = Infinity;
                 let preyDistance = Infinity;
+                let lateralThreats = new Map(); // Track threats by direction - moved here to fix scope issue
                 
                 // Optimize: Check collisions more frequently for better avoidance
-                if (currentTime - this.lastCollisionCheck > 30) { // Check even more frequently (was 50ms)
+                if (currentTime - this.lastCollisionCheck > 20) { // Check more frequently for better response
                     this.lastCollisionCheck = currentTime;
                     
-                    // Add future position prediction
-                    const futureTime = personality.predictiveLookAhead; // seconds
+                    // Add future position prediction - longer for better planning
+                    const futureTime = personality.predictiveLookAhead * 1.5; // Increased prediction time
                     const futureX = this.x + Math.cos(this.angle) * this.speed * futureTime * 60;
                     const futureY = this.y + Math.sin(this.angle) * this.speed * futureTime * 60;
                     
                     // Track segment density around us
                     let nearbySegmentCount = 0;
-                    const densityRadius = 250;
+                    const densityRadius = 300; // Increased for better awareness
                     
                     // Vision cone parameters - wider and farther for better detection
-                    const visionDistance = 400 + (personality.collisionAvoidanceRadius * 0.7); // Increased vision range
-                    const visionAngle = Math.PI / 2; // 90 degree cone (wider base)
-                    const visionConeAngle = personality.riskTolerance < 0.3 ? visionAngle * 1.2 : visionAngle;
+                    const visionDistance = 500 + (personality.collisionAvoidanceRadius * 0.8); // Further vision
+                    const visionAngle = Math.PI / 1.5; // 120 degree cone (wider)
+                    const visionConeAngle = personality.riskTolerance < 0.3 ? visionAngle * 1.3 : visionAngle;
                     
                     // Additional peripheral vision for detecting segments to the side
-                    const peripheralDistance = 200 + personality.collisionAvoidanceRadius;
-                    const peripheralAngle = Math.PI * 0.8; // 144 degrees - much wider
+                    const peripheralDistance = 250 + personality.collisionAvoidanceRadius;
+                    const peripheralAngle = Math.PI; // 180 degrees - full side vision
+                    
+                    // Add lateral scanning rays for better side awareness
+                    const lateralCheckAngles = [-Math.PI/2, -Math.PI/4, 0, Math.PI/4, Math.PI/2]; // Check 5 directions
+                    lateralThreats.clear(); // Clear previous threats
                     
                     for (const otherSnake of snakes) {
                         if (otherSnake === this || !otherSnake.alive) continue;
@@ -4690,6 +4784,16 @@
                         // Check if this snake is a threat or prey
                         const lengthRatio = otherSnake.length / this.length;
                         
+                        // Special Cautious behavior - always avoid player
+                        if (personality.playerAvoidanceRadius && otherSnake.isPlayer) {
+                            if (distance < personality.playerAvoidanceRadius) {
+                                // Treat player as major threat regardless of size
+                                const avoidanceWeight = 1 - (distance / personality.playerAvoidanceRadius);
+                                dangerVector.x -= (dx / distance) * avoidanceWeight * 3.0;
+                                dangerVector.y -= (dy / distance) * avoidanceWeight * 3.0;
+                            }
+                        }
+                        
                         // Threat detection
                         if (lengthRatio > personality.fleeThreshold && distance < 300) {
                             if (distance < threatDistance) {
@@ -4698,11 +4802,11 @@
                             }
                         }
                         
-                        // Prey detection - more aggressive for hunting personalities
-                        const isValidPrey = lengthRatio < (1 / personality.fleeThreshold);
+                        // Prey detection - fixed to use preyRatioMax
+                        const isValidPrey = lengthRatio <= personality.preyRatioMax;
                         const inChaseRange = distance < personality.chaseDistance;
                         
-                        if (isValidPrey && inChaseRange) {
+                        if (isValidPrey && inChaseRange && personality.huntingPriority > 0) {
                             // Opportunists prefer wounded or very small targets
                             if (personality.preferWeakTargets) {
                                 const isWeak = otherSnake.length < this.length * 0.5 || otherSnake.stamina < 30;
@@ -4759,26 +4863,44 @@
                                                   personality.dangerZoneRadius;
                                 
                                 if (effectiveDistance < checkRadius || inVisionCone || inPeripheral) {
+                                    // Check if this is a head or body segment
+                                    const isHead = i === 0;
+                                    
+                                    // For aggressive snakes targeting player, don't avoid the head if we're similar size
+                                    if (isHead && personality.huntingPriority > 0.7 && otherSnake.isPlayer) {
+                                        const sizeRatio = this.length / otherSnake.length;
+                                        if (sizeRatio >= 0.8 && sizeRatio <= 1.5) {
+                                            continue; // Skip head avoidance for aggressive head-on attacks
+                                        }
+                                    }
+                                    
                                     // Much stronger weight calculation for close segments
-                                    const proximityWeight = effectiveDistance < 100 ? 
-                                                          2.0 : // Double weight for very close segments
+                                    const proximityWeight = effectiveDistance < 80 ? 
+                                                          3.0 : // Triple weight for very close segments
+                                                          effectiveDistance < 150 ?
+                                                          2.0 : // Double weight for close segments
                                                           (1 - (effectiveDistance / checkRadius));
-                                    const strengthMultiplier = personality.avoidanceStrength;
+                                    
+                                    // Stronger avoidance for body segments vs heads
+                                    const bodyMultiplier = isHead ? 1.0 : personality.bodyAvoidanceMultiplier;
+                                    const strengthMultiplier = personality.avoidanceStrength * bodyMultiplier;
                                     
                                     // Higher multipliers for different detection zones
                                     let visionMultiplier = 1.0;
-                                    if (inVisionCone && effectiveDistance < 200) {
-                                        visionMultiplier = 4.0; // Very high weight for segments directly ahead
+                                    if (inVisionCone && effectiveDistance < 150) {
+                                        visionMultiplier = 6.0; // Very high weight for segments directly ahead
+                                    } else if (inVisionCone && effectiveDistance < 300) {
+                                        visionMultiplier = 4.0;
                                     } else if (inVisionCone) {
                                         visionMultiplier = 3.0;
                                     } else if (inPeripheral) {
-                                        visionMultiplier = 2.0; // Good weight for peripheral segments
+                                        visionMultiplier = 2.5; // Better weight for peripheral segments
                                     }
                                     
-                                    const weight = proximityWeight * strengthMultiplier * 3 * visionMultiplier; // Increased base multiplier
+                                    const weight = proximityWeight * strengthMultiplier * 4 * visionMultiplier; // Increased base multiplier
                                     
                                     // Extra weight for player snake segments (they're more dangerous)
-                                    const playerMultiplier = otherSnake.isPlayer ? 2.0 : 1.0; // Increased from 1.5
+                                    const playerMultiplier = otherSnake.isPlayer ? 2.5 : 1.0; // Increased from 2.0
                                     
                                     // Use future position for avoidance if it's closer
                                     if (futureDistance < segDistance) {
@@ -4793,15 +4915,28 @@
                                     if (segDistance < densityRadius) {
                                         nearbySegmentCount++;
                                     }
+                                    
+                                    // Track lateral threats for smarter navigation
+                                    for (const checkAngle of lateralCheckAngles) {
+                                        const rayAngle = this.angle + checkAngle;
+                                        const rayDx = segment.x - (this.x + Math.cos(rayAngle) * 100);
+                                        const rayDy = segment.y - (this.y + Math.sin(rayAngle) * 100);
+                                        const rayDist = Math.sqrt(rayDx * rayDx + rayDy * rayDy);
+                                        
+                                        if (rayDist < 150) { // Threat detected in this direction
+                                            const currentThreat = lateralThreats.get(checkAngle) || 0;
+                                            lateralThreats.set(checkAngle, currentThreat + (150 - rayDist) / 150);
+                                        }
+                                    }
                                 }
                             }
                     }
                     
                     // Add density-based danger if area is crowded
-                    if (nearbySegmentCount > 10) { // Many segments nearby
-                        const densityFactor = Math.min(nearbySegmentCount / 20, 1.0); // Cap at 1.0
-                        dangerVector.x *= (1 + densityFactor * 0.5); // Amplify danger
-                        dangerVector.y *= (1 + densityFactor * 0.5);
+                    if (nearbySegmentCount > 8) { // Lower threshold for better response
+                        const densityFactor = Math.min(nearbySegmentCount / 15, 1.0); // Cap at 1.0
+                        dangerVector.x *= (1 + densityFactor * 0.8); // Stronger amplification
+                        dangerVector.y *= (1 + densityFactor * 0.8);
                     }
                 }
                 
@@ -4816,32 +4951,54 @@
                     // Calculate escape angle - opposite of danger
                     targetAngle = Math.atan2(dangerVector.y, dangerVector.x);
                     
-                    // Add smart escape logic - find the clearest path
+                    // Add smart escape logic with lateral awareness
                     const escapeAngles = [];
-                    const angleSteps = 12; // Check more directions for better escape
+                    const angleSteps = 16; // More angles for better path finding
+                    
+                    // Use lateral threat data to find safest initial direction
+                    let safestDirection = 0;
+                    let minThreat = Infinity;
+                    for (const [angle, threat] of lateralThreats) {
+                        if (threat < minThreat) {
+                            minThreat = threat;
+                            safestDirection = angle;
+                        }
+                    }
                     
                     for (let i = 0; i < angleSteps; i++) {
-                        const testAngle = targetAngle + (i * Math.PI * 2 / angleSteps);
+                        // Bias search toward safer lateral directions
+                        const biasedAngle = targetAngle + safestDirection * 0.3;
+                        const testAngle = biasedAngle + (i * Math.PI * 2 / angleSteps);
                         let clearDistance = 0;
+                        let narrowestGap = Infinity;
+                        let pathScore = 0;
                         
-                        // Check how clear this direction is
-                        const checkStep = 20;
-                        for (let dist = checkStep; dist < personality.collisionAvoidanceRadius; dist += checkStep) {
+                        // Check how clear this direction is with finer granularity
+                        const checkStep = 15;
+                        for (let dist = checkStep; dist < personality.collisionAvoidanceRadius * 1.2; dist += checkStep) {
                             const checkX = this.x + Math.cos(testAngle) * dist;
                             const checkY = this.y + Math.sin(testAngle) * dist;
                             let blocked = false;
+                            let minDist = Infinity;
                             
                             // Quick check against all snake segments
                             for (const snake of snakes) {
                                 if (snake === this || !snake.alive) continue;
-                                // Check more segments for long snakes
+                                // Skip head check for aggressive snakes hunting player
+                                const startJ = (snake.isPlayer && personality.huntingPriority > 0.7) ? 1 : 0;
                                 const checkInterval = snake.segments.length > 100 ? 2 : 1;
-                                for (let j = 0; j < snake.segments.length; j += checkInterval) {
+                                
+                                for (let j = startJ; j < snake.segments.length; j += checkInterval) {
                                     const segment = snake.segments[j];
                                     const sdx = segment.x - checkX;
                                     const sdy = segment.y - checkY;
-                                    const segDistSq = sdx * sdx + sdy * sdy;
-                                    if (segDistSq < 1600) { // 40 * 40 = 1600
+                                    const segDist = Math.sqrt(sdx * sdx + sdy * sdy);
+                                    
+                                    minDist = Math.min(minDist, segDist);
+                                    
+                                    // Tighter gaps for aggressive, wider for cautious
+                                    const threshold = personality.riskTolerance > 0.7 ? 25 : 35;
+                                    if (segDist < threshold) {
                                         blocked = true;
                                         break;
                                     }
@@ -4849,16 +5006,35 @@
                                 if (blocked) break;
                             }
                             
+                            narrowestGap = Math.min(narrowestGap, minDist);
+                            
                             if (blocked) break;
                             clearDistance = dist;
+                            
+                            // Reward wider paths
+                            if (minDist > 60) pathScore += 2;
+                            else if (minDist > 40) pathScore += 1;
                         }
                         
-                        escapeAngles.push({ angle: testAngle, clearDistance });
+                        // Calculate overall score considering distance, gap width, and path quality
+                        const score = clearDistance + 
+                                     (narrowestGap > 50 ? narrowestGap : narrowestGap * 0.5) +
+                                     pathScore * 10;
+                        
+                        escapeAngles.push({ angle: testAngle, score, clearDistance, narrowestGap });
                     }
                     
-                    // Choose the angle with most clear space
-                    escapeAngles.sort((a, b) => b.clearDistance - a.clearDistance);
-                    targetAngle = escapeAngles[0].angle;
+                    // Sort by score and pick best option based on personality
+                    escapeAngles.sort((a, b) => b.score - a.score);
+                    
+                    // Aggressive snakes willing to take tighter paths
+                    if (personality.riskTolerance > 0.8 && escapeAngles[0].narrowestGap > 30) {
+                        targetAngle = escapeAngles[0].angle;
+                    } else {
+                        // Cautious snakes prefer wider gaps
+                        const safeOptions = escapeAngles.filter(e => e.narrowestGap > 45);
+                        targetAngle = safeOptions.length > 0 ? safeOptions[0].angle : escapeAngles[0].angle;
+                    }
                     
                     // Boost decision based on danger level - more aggressive
                     shouldBoost = dangerMagnitude > 0.2 || personality.riskTolerance < 0.7; // Lower thresholds
@@ -5055,16 +5231,18 @@
             // Helper method for enhanced pathfinding
             isPathBlocked(targetX, targetY, distance) {
                 // Check more thoroughly for nearby targets
-                const checkDistance = Math.min(distance, 300);
-                const steps = Math.floor(checkDistance / 15); // Check every 15 pixels (was 20)
+                const checkDistance = Math.min(distance, 400); // Check further ahead
+                const steps = Math.floor(checkDistance / 12); // Finer granularity
                 if (steps <= 1) return false;
                 
                 const stepX = (targetX - this.x) / steps;
                 const stepY = (targetY - this.y) / steps;
                 
                 // Also check perpendicular to the path for wider clearance
-                const perpX = -stepY / Math.hypot(stepX, stepY) * 30;
-                const perpY = stepX / Math.hypot(stepX, stepY) * 30;
+                // Aggressive snakes check narrower paths
+                const clearanceWidth = this.personality.riskTolerance > 0.7 ? 20 : 30;
+                const perpX = -stepY / Math.hypot(stepX, stepY) * clearanceWidth;
+                const perpY = stepX / Math.hypot(stepX, stepY) * clearanceWidth;
                 
                 for (let i = 1; i < steps; i++) {
                     const checkX = this.x + stepX * i;
@@ -5206,46 +5384,79 @@
                     }
                 }
                 
-                // Draw pending combination glow if this element will combine when eaten
+                // Draw pixelated combination glow if this element will combine when eaten
                 if (this.pendingCombination) {
-                    const glowSize = ELEMENT_SIZE * 3.5 * scale;
-                    const gradient = ctx.createRadialGradient(screenX, screenY, 0, screenX, screenY, glowSize);
-                    gradient.addColorStop(0, 'rgba(255, 215, 0, 0.9)');
-                    gradient.addColorStop(0.3, 'rgba(255, 100, 255, 0.6)');
-                    gradient.addColorStop(0.6, 'rgba(100, 200, 255, 0.3)');
-                    gradient.addColorStop(1, 'transparent');
-                    ctx.fillStyle = gradient;
-                    ctx.fillRect(screenX - glowSize, screenY - glowSize, glowSize * 2, glowSize * 2);
+                    const pixelSize = 8;
+                    ctx.fillStyle = 'rgba(255, 215, 0, 0.5)';
+                    
+                    // Draw pixelated glow pattern
+                    for (let px = -3; px <= 3; px++) {
+                        for (let py = -3; py <= 3; py++) {
+                            if (Math.abs(px) + Math.abs(py) <= 5) {
+                                ctx.fillRect(
+                                    Math.floor((screenX + px * pixelSize) / pixelSize) * pixelSize,
+                                    Math.floor((screenY + py * pixelSize) / pixelSize) * pixelSize,
+                                    pixelSize,
+                                    pixelSize
+                                );
+                            }
+                        }
+                    }
                 }
                 
-                // Draw appropriate glow effect
+                // Draw pixelated glow effects
                 else if (alchemyGlow === 'discovery') {
-                    // Golden glow for new discoveries
-                    const glowSize = ELEMENT_SIZE * 3 * scale;
-                    const gradient = ctx.createRadialGradient(screenX, screenY, 0, screenX, screenY, glowSize);
-                    gradient.addColorStop(0, 'rgba(255, 215, 0, 0.8)');
-                    gradient.addColorStop(0.5, 'rgba(255, 165, 0, 0.4)');
-                    gradient.addColorStop(1, 'transparent');
-                    ctx.fillStyle = gradient;
-                    ctx.fillRect(screenX - glowSize, screenY - glowSize, glowSize * 2, glowSize * 2);
+                    // Golden pixels for new discoveries
+                    const pixelSize = 6;
+                    ctx.fillStyle = 'rgba(255, 215, 0, 0.6)';
+                    
+                    for (let px = -4; px <= 4; px++) {
+                        for (let py = -4; py <= 4; py++) {
+                            if (Math.abs(px) + Math.abs(py) <= 6) {
+                                ctx.fillRect(
+                                    Math.floor((screenX + px * pixelSize) / pixelSize) * pixelSize,
+                                    Math.floor((screenY + py * pixelSize) / pixelSize) * pixelSize,
+                                    pixelSize,
+                                    pixelSize
+                                );
+                            }
+                        }
+                    }
                 } else if (alchemyGlow === 'known') {
-                    // Green glow for known combinations
-                    const glowSize = ELEMENT_SIZE * 2.5 * scale;
-                    const gradient = ctx.createRadialGradient(screenX, screenY, 0, screenX, screenY, glowSize);
-                    gradient.addColorStop(0, 'rgba(0, 255, 0, 0.6)');
-                    gradient.addColorStop(0.5, 'rgba(0, 200, 0, 0.3)');
-                    gradient.addColorStop(1, 'transparent');
-                    ctx.fillStyle = gradient;
-                    ctx.fillRect(screenX - glowSize, screenY - glowSize, glowSize * 2, glowSize * 2);
+                    // Green pixels for known combinations
+                    const pixelSize = 6;
+                    ctx.fillStyle = 'rgba(0, 255, 0, 0.5)';
+                    
+                    for (let px = -3; px <= 3; px++) {
+                        for (let py = -3; py <= 3; py++) {
+                            if (Math.abs(px) + Math.abs(py) <= 4) {
+                                ctx.fillRect(
+                                    Math.floor((screenX + px * pixelSize) / pixelSize) * pixelSize,
+                                    Math.floor((screenY + py * pixelSize) / pixelSize) * pixelSize,
+                                    pixelSize,
+                                    pixelSize
+                                );
+                            }
+                        }
+                    }
                 } else if (this.data && this.data.tier > 0) {
-                    // Normal tier-based glow
-                    const glowSize = ELEMENT_SIZE * 2 * scale;
-                    const gradient = ctx.createRadialGradient(screenX, screenY, 0, screenX, screenY, glowSize);
+                    // Pixelated tier-based glow
+                    const pixelSize = 6;
                     const hue = (this.data.tier * 60) % 360;
-                    gradient.addColorStop(0, `hsla(${hue}, 70%, 50%, 0.3)`);
-                    gradient.addColorStop(1, 'transparent');
-                    ctx.fillStyle = gradient;
-                    ctx.fillRect(screenX - glowSize, screenY - glowSize, glowSize * 2, glowSize * 2);
+                    ctx.fillStyle = `hsla(${hue}, 70%, 50%, 0.4)`;
+                    
+                    for (let px = -2; px <= 2; px++) {
+                        for (let py = -2; py <= 2; py++) {
+                            if (Math.abs(px) + Math.abs(py) <= 3) {
+                                ctx.fillRect(
+                                    Math.floor((screenX + px * pixelSize) / pixelSize) * pixelSize,
+                                    Math.floor((screenY + py * pixelSize) / pixelSize) * pixelSize,
+                                    pixelSize,
+                                    pixelSize
+                                );
+                            }
+                        }
+                    }
                 }
                 
                 // Draw emoji using cache
@@ -5564,16 +5775,17 @@
         
         // Particle class
         class Particle {
-            constructor(x, y, vx, vy, color) {
-                this.reset(x, y, vx, vy, color);
+            constructor(x, y, vx, vy, color, size = 4) {
+                this.reset(x, y, vx, vy, color, size);
             }
             
-            reset(x, y, vx, vy, color) {
+            reset(x, y, vx, vy, color, size = 4) {
                 this.x = x;
                 this.y = y;
                 this.vx = vx;
                 this.vy = vy;
                 this.color = color;
+                this.size = size;
                 this.life = 1;
                 this.active = true;
             }
@@ -5597,14 +5809,21 @@
             draw() {
                 if (!this.active) return;
                 
+                const pixelSize = 4;
                 const screenX = this.x - camera.x + canvas.width / 2;
                 const screenY = this.y - camera.y + canvas.height / 2;
                 
                 ctx.fillStyle = this.color;
                 ctx.globalAlpha = this.life;
-                ctx.beginPath();
-                ctx.arc(screenX, screenY, 3, 0, Math.PI * 2);
-                ctx.fill();
+                
+                // Draw as pixel square
+                ctx.fillRect(
+                    Math.floor(screenX / pixelSize) * pixelSize,
+                    Math.floor(screenY / pixelSize) * pixelSize,
+                    this.size,
+                    this.size
+                );
+                
                 ctx.globalAlpha = 1;
             }
         }
@@ -5640,13 +5859,13 @@
                 this.update();
             }
             
-            spawn(x, y, vx, vy, color) {
+            spawn(x, y, vx, vy, color, size = 4) {
                 let particle = this.pool.pop();
                 if (!particle) {
                     // Pool is empty, create new particle
-                    particle = new Particle(x, y, vx, vy, color);
+                    particle = new Particle(x, y, vx, vy, color, size);
                 } else {
-                    particle.reset(x, y, vx, vy, color);
+                    particle.reset(x, y, vx, vy, color, size);
                 }
                 this.activeParticles.push(particle);
                 return particle;
@@ -5812,31 +6031,38 @@
             }
             
             draw() {
-                // Draw trail
+                // Draw pixelated trail
+                const pixelSize = 2;
                 ctx.save();
+                
                 this.trail.forEach((point, index) => {
                     const screenX = point.x - camera.x + canvas.width / 2;
                     const screenY = point.y - camera.y + canvas.height / 2;
                     
                     ctx.globalAlpha = point.alpha * 0.5;
-                    ctx.fillStyle = '#ffffff';
-                    const size = (index / this.trail.length) * 3;
-                    ctx.beginPath();
-                    ctx.arc(screenX, screenY, size, 0, Math.PI * 2);
-                    ctx.fill();
+                    ctx.fillStyle = '#FFFFFF';
+                    const size = Math.max(pixelSize, Math.floor((index / this.trail.length) * 3) * pixelSize);
+                    
+                    ctx.fillRect(
+                        Math.floor(screenX / pixelSize) * pixelSize,
+                        Math.floor(screenY / pixelSize) * pixelSize,
+                        size,
+                        size
+                    );
                 });
                 
-                // Draw main star
+                // Draw main star as pixel
                 const screenX = this.x - camera.x + canvas.width / 2;
                 const screenY = this.y - camera.y + canvas.height / 2;
                 
                 ctx.globalAlpha = this.life;
-                ctx.fillStyle = '#ffffff';
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = 'rgba(255, 255, 255, 0.8)';
-                ctx.beginPath();
-                ctx.arc(screenX, screenY, 3, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.fillStyle = '#FFFF00';
+                ctx.fillRect(
+                    Math.floor(screenX / pixelSize) * pixelSize,
+                    Math.floor(screenY / pixelSize) * pixelSize,
+                    pixelSize * 3,
+                    pixelSize * 3
+                );
                 
                 ctx.restore();
             }
@@ -6250,31 +6476,37 @@
         function createDeathParticles(x, y, snakeLength = 5) {
             // Scale particle count and speed based on snake size
             const baseParticles = isMobile ? 10 : 20;
-            const particleCount = Math.min(baseParticles + Math.floor(snakeLength / (isMobile ? 4 : 2)), isMobile ? 30 : 100); // Reduced for mobile
-            const speedMultiplier = 1 + (snakeLength / 50); // Bigger snakes = faster explosion
+            const particleCount = Math.min(baseParticles + Math.floor(snakeLength / (isMobile ? 4 : 2)), isMobile ? 30 : 100);
+            const speedMultiplier = 1 + (snakeLength / 50);
+            const pixelSize = 4;
             
             for (let i = 0; i < particleCount; i++) {
                 const angle = Math.random() * Math.PI * 2;
                 const speed = (Math.random() * 5 + 2) * speedMultiplier;
+                const size = Math.random() > 0.5 ? pixelSize : pixelSize * 2;
                 particlePool.spawn(
-                    x, y,
+                    Math.floor(x / pixelSize) * pixelSize,
+                    Math.floor(y / pixelSize) * pixelSize,
                     Math.cos(angle) * speed,
                     Math.sin(angle) * speed,
-                    '#ff0000'
+                    '#ff0000',
+                    size
                 );
             }
             
-            // Add some larger, slower particles for bigger snakes
+            // Add some larger pixel blocks for bigger snakes
             if (snakeLength > 20) {
                 const largeParticleCount = Math.min(Math.floor(snakeLength / 10), 20);
                 for (let i = 0; i < largeParticleCount; i++) {
                     const angle = Math.random() * Math.PI * 2;
                     const speed = (Math.random() * 3 + 1) * speedMultiplier;
                     particlePool.spawn(
-                        x, y,
+                        Math.floor(x / pixelSize) * pixelSize,
+                        Math.floor(y / pixelSize) * pixelSize,
                         Math.cos(angle) * speed,
                         Math.sin(angle) * speed,
-                        '#ff6600'
+                        '#ff6600',
+                        pixelSize * 3
                     );
                 }
             }
@@ -7228,193 +7460,416 @@
         }
         
         function drawBackground() {
-            // Gradient background
-            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-            gradient.addColorStop(0, '#0a0a1a');
-            gradient.addColorStop(1, '#1a0a2a');
-            ctx.fillStyle = gradient;
+            // Deep space background
+            ctx.fillStyle = '#000011';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // Draw static stars (before grid so they appear behind)
-            ctx.save();
-            staticStars.forEach(star => {
-                const screenX = star.x - camera.x + canvas.width / 2;
-                const screenY = star.y - camera.y + canvas.height / 2;
+            // Initialize grid pattern cache if needed
+            if (!window.gridPatternCanvas) {
+                window.gridPatternCanvas = document.createElement('canvas');
+                window.gridPatternCanvas.width = 128;
+                window.gridPatternCanvas.height = 128;
+                const gridCtx = window.gridPatternCanvas.getContext('2d');
+                gridCtx.strokeStyle = '#001122';
+                gridCtx.lineWidth = 1;
+                const gridSize = 64;
                 
-                // Skip if off-screen
-                if (screenX < -10 || screenX > canvas.width + 10 ||
-                    screenY < -10 || screenY > canvas.height + 10) return;
+                // Draw grid pattern
+                for (let x = 0; x < 128; x += gridSize) {
+                    gridCtx.beginPath();
+                    gridCtx.moveTo(x, 0);
+                    gridCtx.lineTo(x, 128);
+                    gridCtx.stroke();
+                }
                 
-                ctx.globalAlpha = star.opacity;
-                ctx.fillStyle = star.color;
-                ctx.beginPath();
-                ctx.arc(screenX, screenY, star.size, 0, Math.PI * 2);
-                ctx.fill();
+                for (let y = 0; y < 128; y += gridSize) {
+                    gridCtx.beginPath();
+                    gridCtx.moveTo(0, y);
+                    gridCtx.lineTo(128, y);
+                    gridCtx.stroke();
+                }
+            }
+            
+            // Draw pixel star layers with parallax
+            pixelStarLayers.forEach((layer, layerIndex) => {
+                layer.stars.forEach(star => {
+                    const x = (star.x - camera.x * layer.speed) % WORLD_SIZE;
+                    const y = (star.y - camera.y * layer.speed) % WORLD_SIZE;
+                    
+                    const screenX = x - camera.x + canvas.width / 2;
+                    const screenY = y - camera.y + canvas.height / 2;
+                    
+                    // Skip if off-screen
+                    if (screenX < -10 || screenX > canvas.width + 10 ||
+                        screenY < -10 || screenY > canvas.height + 10) return;
+                    
+                    // Twinkle effect
+                    star.twinkle += 0.05;
+                    const brightness = 0.5 + Math.sin(star.twinkle) * 0.5;
+                    
+                    ctx.fillStyle = layer.color;
+                    ctx.globalAlpha = brightness;
+                    ctx.fillRect(
+                        Math.floor(screenX / 2) * 2,
+                        Math.floor(screenY / 2) * 2,
+                        layer.size * 2,
+                        layer.size * 2
+                    );
+                });
             });
-            ctx.restore();
+            ctx.globalAlpha = 1;
+            
+            // Draw pixel nebulae BEFORE grid
+            drawPixelNebulae();
+            
+            // Draw pixel planets BEFORE grid
+            drawPixelPlanets();
+            
+            // Draw pixel asteroids
+            drawPixelAsteroids();
+            
+            // Draw pixel grid using cached pattern - optimized
+            const gridSize = 64;
+            const offsetX = (camera.x * 0.1) % gridSize;
+            const offsetY = (camera.y * 0.1) % gridSize;
+            
+            // Use the cached grid pattern
+            ctx.save();
+            ctx.translate(-offsetX, -offsetY);
+            
+            // Draw the cached grid canvas tiled across the screen
+            const tilesX = Math.ceil((canvas.width + gridSize) / 128);
+            const tilesY = Math.ceil((canvas.height + gridSize) / 128);
+            
+            for (let tx = 0; tx < tilesX; tx++) {
+                for (let ty = 0; ty < tilesY; ty++) {
+                    ctx.drawImage(window.gridPatternCanvas, tx * 128, ty * 128);
+                }
+            }
+            
+            ctx.restore()
             
             // Draw shooting stars
             shootingStars.forEach(star => star.draw());
             
-            // Grid
-            ctx.strokeStyle = 'rgba(138, 43, 226, 0.1)';
-            ctx.lineWidth = 1;
-            const gridSize = 50;
-            const offsetX = camera.x % gridSize;
-            const offsetY = camera.y % gridSize;
-            
-            for (let x = -offsetX; x < canvas.width; x += gridSize) {
-                ctx.beginPath();
-                ctx.moveTo(x, 0);
-                ctx.lineTo(x, canvas.height);
-                ctx.stroke();
-            }
-            
-            for (let y = -offsetY; y < canvas.height; y += gridSize) {
-                ctx.beginPath();
-                ctx.moveTo(0, y);
-                ctx.lineTo(canvas.width, y);
-                ctx.stroke();
-            }
-            
-            // Draw world borders with nebula effect
-            const borderThickness = 80; // Increased for better visibility
+            // Draw world borders with subtle pixel grid
+            const borderThickness = 60;
             const leftBorder = -camera.x + canvas.width / 2;
             const rightBorder = WORLD_SIZE - camera.x + canvas.width / 2;
             const topBorder = -camera.y + canvas.height / 2;
             const bottomBorder = WORLD_SIZE - camera.y + canvas.height / 2;
             
-            // Pulsating glow intensity (increased base intensity)
-            const glowIntensity = 0.9 + Math.sin(animationTime * 2) * 0.1;
+            // Pulsating effect for barriers
+            const pulsePhase = Math.floor((animationTime * 2) % 4);
+            const pixelSize = 8;
             
-            // Create nebula gradient function
-            function createNebulaGradient(x0, y0, x1, y1) {
-                const gradient = ctx.createLinearGradient(x0, y0, x1, y1);
-                gradient.addColorStop(0, `rgba(147, 51, 234, ${glowIntensity})`); // purple
-                gradient.addColorStop(0.3, `rgba(236, 72, 153, ${glowIntensity * 0.8})`); // pink
-                gradient.addColorStop(0.6, `rgba(59, 130, 246, ${glowIntensity * 0.6})`); // blue
-                gradient.addColorStop(1, 'rgba(0, 0, 0, 0)'); // fade to transparent
-                return gradient;
-            }
-            
-            // Left border nebula
+            // Left border barrier
             if (leftBorder > -borderThickness) {
-                const borderWidth = Math.max(borderThickness, leftBorder);
-                ctx.fillStyle = createNebulaGradient(0, 0, borderWidth, 0);
-                ctx.fillRect(0, 0, borderWidth, canvas.height);
-                
-                // Add solid danger line
-                ctx.save();
-                ctx.shadowBlur = 30;
-                ctx.shadowColor = 'rgba(255, 0, 0, 0.8)';
-                ctx.strokeStyle = `rgba(255, 100, 100, ${glowIntensity})`;
-                ctx.lineWidth = 4;
-                ctx.beginPath();
-                ctx.moveTo(Math.max(10, leftBorder), 0);
-                ctx.lineTo(Math.max(10, leftBorder), canvas.height);
-                ctx.stroke();
-                
-                // Add inner danger line
-                ctx.strokeStyle = `rgba(255, 200, 200, ${glowIntensity * 0.5})`;
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.moveTo(Math.max(10, leftBorder), 0);
-                ctx.lineTo(Math.max(10, leftBorder), canvas.height);
-                ctx.stroke();
-                ctx.restore();
-            }
-            
-            // Right border nebula
-            if (rightBorder < canvas.width + borderThickness) {
-                ctx.fillStyle = createNebulaGradient(canvas.width, 0, rightBorder, 0);
-                ctx.fillRect(rightBorder, 0, canvas.width - rightBorder, canvas.height);
-                
-                // Add solid danger line
-                ctx.save();
-                ctx.shadowBlur = 30;
-                ctx.shadowColor = 'rgba(255, 0, 0, 0.8)';
-                ctx.strokeStyle = `rgba(255, 100, 100, ${glowIntensity})`;
-                ctx.lineWidth = 4;
-                ctx.beginPath();
-                ctx.moveTo(rightBorder, 0);
-                ctx.lineTo(rightBorder, canvas.height);
-                ctx.stroke();
-                
-                // Add inner danger line
-                ctx.strokeStyle = `rgba(255, 200, 200, ${glowIntensity * 0.5})`;
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.moveTo(rightBorder, 0);
-                ctx.lineTo(rightBorder, canvas.height);
-                ctx.stroke();
-                ctx.restore();
-            }
-            
-            // Top border nebula
-            if (topBorder > -borderThickness) {
-                const borderHeight = Math.max(borderThickness, topBorder);
-                ctx.fillStyle = createNebulaGradient(0, 0, 0, borderHeight);
-                ctx.fillRect(0, 0, canvas.width, borderHeight);
-                
-                // Add solid danger line
-                ctx.save();
-                ctx.shadowBlur = 30;
-                ctx.shadowColor = 'rgba(255, 0, 0, 0.8)';
-                ctx.strokeStyle = `rgba(255, 100, 100, ${glowIntensity})`;
-                ctx.lineWidth = 4;
-                ctx.beginPath();
-                ctx.moveTo(0, Math.max(10, topBorder));
-                ctx.lineTo(canvas.width, Math.max(10, topBorder));
-                ctx.stroke();
-                
-                // Add inner danger line
-                ctx.strokeStyle = `rgba(255, 200, 200, ${glowIntensity * 0.5})`;
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.moveTo(0, Math.max(10, topBorder));
-                ctx.lineTo(canvas.width, Math.max(10, topBorder));
-                ctx.stroke();
-                ctx.restore();
-            }
-            
-            // Bottom border nebula
-            if (bottomBorder < canvas.height + borderThickness) {
-                ctx.fillStyle = createNebulaGradient(0, canvas.height, 0, bottomBorder);
-                ctx.fillRect(0, bottomBorder, canvas.width, canvas.height - bottomBorder);
-                
-                // Add solid danger line
-                ctx.save();
-                ctx.shadowBlur = 30;
-                ctx.shadowColor = 'rgba(255, 0, 0, 0.8)';
-                ctx.strokeStyle = `rgba(255, 100, 100, ${glowIntensity})`;
-                ctx.lineWidth = 4;
-                ctx.beginPath();
-                ctx.moveTo(0, bottomBorder);
-                ctx.lineTo(canvas.width, bottomBorder);
-                ctx.stroke();
-                
-                // Add inner danger line
-                ctx.strokeStyle = `rgba(255, 200, 200, ${glowIntensity * 0.5})`;
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.moveTo(0, bottomBorder);
-                ctx.lineTo(canvas.width, bottomBorder);
-                ctx.stroke();
-                ctx.restore();
-            }
-            
-            // Draw border particles
-            borderParticles.forEach(particle => {
-                // Only draw particles that are visible on screen
-                if (particle.edge === 'left' && leftBorder > -borderThickness - 20) {
-                    particle.draw(ctx);
-                } else if (particle.edge === 'right' && rightBorder < canvas.width + borderThickness + 20) {
-                    particle.draw(ctx);
-                } else if (particle.edge === 'top' && topBorder > -borderThickness - 20) {
-                    particle.draw(ctx);
-                } else if (particle.edge === 'bottom' && bottomBorder < canvas.height + borderThickness + 20) {
-                    particle.draw(ctx);
+                // Draw subtle grid pattern
+                for (let y = 0; y < canvas.height; y += pixelSize * 2) {
+                    for (let x = 0; x < Math.min(borderThickness, leftBorder); x += pixelSize * 2) {
+                        const fadeAlpha = 1 - (x / borderThickness);
+                        const pulse = (pulsePhase === 0 || pulsePhase === 2) ? 0.8 : 0.4;
+                        ctx.fillStyle = `rgba(64, 32, 128, ${fadeAlpha * pulse})`;
+                        ctx.fillRect(x, y, pixelSize, pixelSize);
+                    }
                 }
+                
+                // Warning line
+                ctx.fillStyle = '#6633CC';
+                const lineX = Math.max(10, leftBorder);
+                for (let y = 0; y < canvas.height; y += pixelSize * 4) {
+                    ctx.fillRect(lineX - 2, y, 4, pixelSize * 2);
+                }
+            }
+            
+            // Right border barrier
+            if (rightBorder < canvas.width + borderThickness) {
+                // Draw subtle grid pattern
+                for (let y = 0; y < canvas.height; y += pixelSize * 2) {
+                    for (let x = Math.max(rightBorder - borderThickness, rightBorder); x < canvas.width; x += pixelSize * 2) {
+                        const fadeAlpha = 1 - ((canvas.width - x) / borderThickness);
+                        const pulse = (pulsePhase === 0 || pulsePhase === 2) ? 0.8 : 0.4;
+                        ctx.fillStyle = `rgba(64, 32, 128, ${fadeAlpha * pulse})`;
+                        ctx.fillRect(x, y, pixelSize, pixelSize);
+                    }
+                }
+                
+                // Warning line
+                ctx.fillStyle = '#6633CC';
+                for (let y = 0; y < canvas.height; y += pixelSize * 4) {
+                    ctx.fillRect(rightBorder - 2, y, 4, pixelSize * 2);
+                }
+            }
+            
+            // Top border barrier
+            if (topBorder > -borderThickness) {
+                // Draw subtle grid pattern
+                for (let y = 0; y < Math.min(borderThickness, topBorder); y += pixelSize * 2) {
+                    for (let x = 0; x < canvas.width; x += pixelSize * 2) {
+                        const fadeAlpha = 1 - (y / borderThickness);
+                        const pulse = (pulsePhase === 0 || pulsePhase === 2) ? 0.8 : 0.4;
+                        ctx.fillStyle = `rgba(64, 32, 128, ${fadeAlpha * pulse})`;
+                        ctx.fillRect(x, y, pixelSize, pixelSize);
+                    }
+                }
+                
+                // Warning line
+                ctx.fillStyle = '#6633CC';
+                const lineY = Math.max(10, topBorder);
+                for (let x = 0; x < canvas.width; x += pixelSize * 4) {
+                    ctx.fillRect(x, lineY - 2, pixelSize * 2, 4);
+                }
+            }
+            
+            // Bottom border barrier
+            if (bottomBorder < canvas.height + borderThickness) {
+                // Draw subtle grid pattern
+                for (let y = Math.max(bottomBorder - borderThickness, bottomBorder); y < canvas.height; y += pixelSize * 2) {
+                    for (let x = 0; x < canvas.width; x += pixelSize * 2) {
+                        const fadeAlpha = 1 - ((canvas.height - y) / borderThickness);
+                        const pulse = (pulsePhase === 0 || pulsePhase === 2) ? 0.8 : 0.4;
+                        ctx.fillStyle = `rgba(64, 32, 128, ${fadeAlpha * pulse})`;
+                        ctx.fillRect(x, y, pixelSize, pixelSize);
+                    }
+                }
+                
+                // Warning line
+                ctx.fillStyle = '#6633CC';
+                for (let x = 0; x < canvas.width; x += pixelSize * 4) {
+                    ctx.fillRect(x, bottomBorder - 2, pixelSize * 2, 4);
+                }
+            }
+            
+            // Add scanline effect for retro monitor feel
+            ctx.fillStyle = 'rgba(0,255,0,0.02)';
+            for (let y = 0; y < canvas.height; y += 4) {
+                if (y % 8 === 0) {
+                    ctx.fillRect(0, y, canvas.width, 2);
+                }
+            }
+        }
+        
+        // Draw pixel nebulae with parallax
+        function drawPixelNebulae() {
+            const pixelSize = 8;
+            
+            pixelNebulae.forEach((nebula, index) => {
+                // Check if nebula is cached
+                const cacheKey = `nebula_${index}`;
+                let cachedCanvas = nebulaCanvases.get(cacheKey);
+                
+                // If not cached, render it once
+                if (!cachedCanvas) {
+                    // Initialize clusters if not already done
+                    if (nebula.clusters.length === 0) {
+                        // Create organic shape with multiple overlapping circular clusters
+                        const clusterCount = 3 + Math.floor(Math.random() * 4);
+                        const centerX = nebula.width / 2;
+                        const centerY = nebula.height / 2;
+                        
+                        for (let i = 0; i < clusterCount; i++) {
+                            // Create clusters that overlap near the center for more organic shapes
+                            const angle = (i / clusterCount) * Math.PI * 2;
+                            const distance = Math.random() * nebula.width * 0.2; // Keep clusters close to center
+                            nebula.clusters.push({
+                                cx: centerX + Math.cos(angle) * distance,
+                                cy: centerY + Math.sin(angle) * distance,
+                                radius: nebula.width * (0.4 + Math.random() * 0.3)
+                            });
+                        }
+                    }
+                    
+                    // Create offscreen canvas
+                    cachedCanvas = document.createElement('canvas');
+                    cachedCanvas.width = nebula.width;
+                    cachedCanvas.height = nebula.height;
+                    const cacheCtx = cachedCanvas.getContext('2d');
+                    
+                    // Pre-calculate values for optimization
+                    const centerX = nebula.width / 2;
+                    const centerY = nebula.height / 2;
+                    const maxRadius = Math.min(nebula.width, nebula.height) / 2;
+                    const maxRadiusSquared = maxRadius * maxRadius;
+                    
+                    // Draw nebula once to cache
+                    for (let nx = 0; nx < nebula.width; nx += pixelSize) {
+                        for (let ny = 0; ny < nebula.height; ny += pixelSize) {
+                            // Optimized distance check (squared distance to avoid sqrt)
+                            const dx = nx - centerX;
+                            const dy = ny - centerY;
+                            const distFromCenterSquared = dx * dx + dy * dy;
+                            if (distFromCenterSquared > maxRadiusSquared) continue;
+                            
+                            // Check if pixel is within any cluster
+                            let inCluster = false;
+                            let minDist = Infinity;
+                            
+                            for (const cluster of nebula.clusters) {
+                                const cdx = nx - cluster.cx;
+                                const cdy = ny - cluster.cy;
+                                const distSquared = cdx * cdx + cdy * cdy;
+                                const radiusSquared = cluster.radius * cluster.radius;
+                                
+                                if (distSquared < radiusSquared) {
+                                    inCluster = true;
+                                    const dist = Math.sqrt(distSquared);
+                                    minDist = Math.min(minDist, dist / cluster.radius);
+                                }
+                            }
+                            
+                            if (inCluster) {
+                                // More cloud-like density with smoother falloff
+                                const density = nebula.density * (1 - minDist * minDist); // Quadratic falloff
+                                if (Math.random() < density) {
+                                    const opacity = 0.05 + (1 - minDist) * 0.3; // Lower opacity for more ethereal look
+                                    
+                                    cacheCtx.fillStyle = nebula.color;
+                                    cacheCtx.globalAlpha = opacity;
+                                    cacheCtx.fillRect(
+                                        Math.floor(nx / pixelSize) * pixelSize,
+                                        Math.floor(ny / pixelSize) * pixelSize,
+                                        pixelSize,
+                                        pixelSize
+                                    );
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Store in cache
+                    nebulaCanvases.set(cacheKey, cachedCanvas);
+                }
+                
+                // Calculate position with parallax
+                const parallaxFactor = 0.2 + (index % 5) * 0.05;
+                const x = nebula.x - camera.x * parallaxFactor + canvas.width / 2;
+                const y = nebula.y - camera.y * parallaxFactor + canvas.height / 2;
+                
+                // Viewport culling with margin
+                const margin = 200;
+                if (x + nebula.width < -margin || x > canvas.width + margin ||
+                    y + nebula.height < -margin || y > canvas.height + margin) return;
+                
+                // Draw the cached nebula
+                ctx.drawImage(cachedCanvas, x, y);
+            });
+        }
+        
+        // Draw pixel planets with parallax
+        function drawPixelPlanets() {
+            pixelPlanets.forEach((planet, i) => {
+                const parallaxFactor = 0.3 + i * 0.1;
+                const x = planet.x - camera.x * parallaxFactor + canvas.width / 2;
+                const y = planet.y - camera.y * parallaxFactor + canvas.height / 2;
+                
+                // Only draw if in viewport
+                if (x < -planet.radius * 2 || x > canvas.width + planet.radius * 2 ||
+                    y < -planet.radius * 2 || y > canvas.height + planet.radius * 2) return;
+                
+                drawPixelPlanet(x, y, planet.radius, planet.color1, planet.color2, planet.rings);
+            });
+        }
+        
+        // Draw a single pixel planet
+        function drawPixelPlanet(x, y, radius, color1, color2, hasRings) {
+            const pixelSize = 4;
+            
+            // Create blocky circle - optimized with squared distance
+            const radiusSquared = radius * radius;
+            for (let py = -radius; py <= radius; py += pixelSize) {
+                for (let px = -radius; px <= radius; px += pixelSize) {
+                    const distSquared = px * px + py * py;
+                    if (distSquared <= radiusSquared) {
+                        // Determine color based on position for banding effect
+                        const band = Math.floor((py + radius) / (radius * 0.4));
+                        ctx.fillStyle = band % 2 === 0 ? color1 : color2;
+                        
+                        ctx.fillRect(
+                            Math.floor((x + px) / pixelSize) * pixelSize,
+                            Math.floor((y + py) / pixelSize) * pixelSize,
+                            pixelSize,
+                            pixelSize
+                        );
+                    }
+                }
+            }
+            
+            // Shadow - optimized with squared distance
+            ctx.fillStyle = 'rgba(0,0,0,0.5)';
+            for (let py = -radius * 0.7; py <= radius * 0.7; py += pixelSize) {
+                for (let px = radius * 0.3; px <= radius; px += pixelSize) {
+                    const distSquared = px * px + py * py;
+                    if (distSquared <= radiusSquared) {
+                        ctx.fillRect(
+                            Math.floor((x + px) / pixelSize) * pixelSize,
+                            Math.floor((y + py) / pixelSize) * pixelSize,
+                            pixelSize,
+                            pixelSize
+                        );
+                    }
+                }
+            }
+            
+            // Rings
+            if (hasRings) {
+                ctx.strokeStyle = '#D2691E';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.ellipse(x, y, radius * 1.5, radius * 0.5, 0, 0, Math.PI * 2);
+                ctx.stroke();
+                
+                // Ring segments
+                for (let i = 0; i < 8; i++) {
+                    const angle = (i / 8) * Math.PI * 2;
+                    const rx = x + Math.cos(angle) * radius * 1.5;
+                    const ry = y + Math.sin(angle) * radius * 0.5;
+                    ctx.fillStyle = i % 2 === 0 ? '#D2691E' : '#A0522D';
+                    ctx.fillRect(rx - 2, ry - 2, 4, 4);
+                }
+            }
+        }
+        
+        // Draw pixel asteroids with parallax
+        function drawPixelAsteroids() {
+            // Update asteroid positions
+            pixelAsteroids.forEach(asteroid => {
+                asteroid.x += asteroid.driftX;
+                asteroid.y += asteroid.driftY;
+                asteroid.rotation += asteroid.rotSpeed;
+                
+                // Wrap around world
+                if (asteroid.x < 0) asteroid.x = WORLD_SIZE;
+                if (asteroid.x > WORLD_SIZE) asteroid.x = 0;
+                if (asteroid.y < 0) asteroid.y = WORLD_SIZE;
+                if (asteroid.y > WORLD_SIZE) asteroid.y = 0;
+            });
+            
+            // Draw asteroids
+            pixelAsteroids.forEach(asteroid => {
+                const x = asteroid.x - camera.x * 0.5 + canvas.width / 2;
+                const y = asteroid.y - camera.y * 0.5 + canvas.height / 2;
+                
+                // Only draw if in viewport
+                if (x < -20 || x > canvas.width + 20 || y < -20 || y > canvas.height + 20) return;
+                
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.rotate(asteroid.rotation);
+                
+                // Irregular asteroid shape
+                ctx.fillStyle = '#696969';
+                ctx.fillRect(-asteroid.size/2, -asteroid.size/2, asteroid.size, asteroid.size);
+                
+                // Details
+                ctx.fillStyle = '#808080';
+                ctx.fillRect(-asteroid.size/2 + 2, -asteroid.size/2 + 2, 4, 4);
+                ctx.fillRect(asteroid.size/2 - 6, asteroid.size/2 - 6, 4, 4);
+                
+                ctx.fillStyle = '#505050';
+                ctx.fillRect(0, 0, 4, 4);
+                
+                ctx.restore();
             });
         }
         
@@ -7431,6 +7886,32 @@
                     size: Math.random() * 2 + 1, // 1-3px
                     opacity: Math.random() * 0.2 + 0.1, // 0.1-0.3 opacity
                     color: Math.random() > 0.5 ? '#ffffff' : '#e0e8ff' // white or pale blue
+                });
+            }
+            
+            // Initialize pixel star layers
+            pixelStarLayers.forEach(layer => {
+                layer.stars = [];
+                for (let i = 0; i < layer.count; i++) {
+                    layer.stars.push({
+                        x: Math.random() * WORLD_SIZE,
+                        y: Math.random() * WORLD_SIZE,
+                        twinkle: Math.random() * Math.PI * 2
+                    });
+                }
+            });
+            
+            // Initialize pixel asteroids - many small ones
+            pixelAsteroids.length = 0;
+            for (let i = 0; i < 50; i++) {
+                pixelAsteroids.push({
+                    x: Math.random() * WORLD_SIZE,
+                    y: Math.random() * WORLD_SIZE,
+                    size: 4 + Math.random() * 8, // Smaller asteroids
+                    rotation: Math.random() * Math.PI * 2,
+                    rotSpeed: (Math.random() - 0.5) * 0.05,
+                    driftX: (Math.random() - 0.5) * 0.2,
+                    driftY: (Math.random() - 0.5) * 0.2
                 });
             }
         }
@@ -7985,13 +8466,30 @@
                 shootingStars = shootingStars.filter(star => star.update(1.0));
                 
                 // Spawn shooting star occasionally (10-15 seconds)
-                if (currentTime - lastShootingStarTime > (10000 + Math.random() * 5000) && shootingStars.length === 0) {
+                if (currentTime - lastShootingStarTime > (5000 + Math.random() * 3000) && shootingStars.length < 2) {
                     shootingStars.push(new ShootingStar());
                     lastShootingStarTime = currentTime;
                 }
                 
                 // Check collisions
                 checkCollisions();
+                
+                // Store AI snake data before removing dead snakes
+                snakes.forEach(snake => {
+                    if (!snake.alive && !snake.isPlayer) {
+                        // Store AI snake data for respawning with score
+                        const snakeId = snake.name || `AI_${Date.now()}`;
+                        aiSnakeDataMap.set(snakeId, {
+                            score: snake.score,
+                            kills: snake.kills,
+                            discoveries: snake.discoveries,
+                            elementCapacity: snake.elementCapacity,
+                            personality: snake.personality,
+                            name: snake.name,
+                            skin: snake.skin
+                        });
+                    }
+                });
                 
                 // Remove dead snakes
                 snakes = snakes.filter(snake => snake.alive);
@@ -8085,7 +8583,27 @@
                     // Spawn new AI snake
                     const x = 200 + Math.random() * (WORLD_SIZE - 400);
                     const y = 200 + Math.random() * (WORLD_SIZE - 400);
-                    snakes.push(new Snake(x, y, false));
+                    const newAISnake = new Snake(x, y, false);
+                    
+                    // Try to restore data from a dead AI snake
+                    if (aiSnakeDataMap.size > 0) {
+                        // Get the first available AI snake data
+                        const [snakeId, snakeData] = aiSnakeDataMap.entries().next().value;
+                        
+                        // Restore the AI snake's score and stats (no penalty for AI)
+                        newAISnake.score = snakeData.score;
+                        newAISnake.kills = snakeData.kills;
+                        newAISnake.discoveries = snakeData.discoveries;
+                        newAISnake.elementCapacity = snakeData.elementCapacity;
+                        newAISnake.personality = snakeData.personality;
+                        newAISnake.name = snakeData.name;
+                        newAISnake.skin = snakeData.skin;
+                        
+                        // Remove used data
+                        aiSnakeDataMap.delete(snakeId);
+                    }
+                    
+                    snakes.push(newAISnake);
                     return false; // Remove from queue
                 }
                 return true; // Keep in queue
