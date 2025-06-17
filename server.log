@@ -1,0 +1,1633 @@
+
+🚀 Infinite Snake Server
+📍 Local: http://localhost:8080
+🛡️  Admin: http://localhost:8080/admin
+
+Press Ctrl+C to stop
+
+GET /admin/ from ::1
+GET /admin/ - 200 (9ms)
+GET /admin/admin.js from ::1
+GET /admin/admin.js - 200 (1ms)
+GET /elements/data/elements.json from ::1
+GET /elements/data/elements.json - 200 (2ms)
+GET /elements/data/combinations.json from ::1
+GET /elements/data/combinations.json - 200 (1ms)
+GET /elements/data/emojis.json from ::1
+GET /elements/data/emojis.json - 200 (2ms)
+GET /elements/deleted-elements.json from ::1
+GET /elements/deleted-elements.json - 200 (1ms)
+GET /elements/deleted-combinations.json from ::1
+GET /elements/deleted-combinations.json - 200 (0ms)
+GET /favicon.ico from ::1
+GET /favicon.ico - 200 (1ms)
+GET / from ::1
+GET / - 200 (2ms)
+GET /elements/data/loader.js from ::1
+GET /elements/data/loader.js - 200 (1ms)
+GET /assets/word-logo.webp from ::1
+GET /assets/word-logo.webp - 200 (0ms)
+GET /skins/snake-default-green.png from ::1
+GET /skins/snake-default-green.png - 200 (0ms)
+GET /js/main.js from ::1
+GET /js/main.js - 200 (1ms)
+GET /js/config.js from ::1
+GET /js/config.js - 200 (1ms)
+GET /js/utils.js from ::1
+GET /js/utils.js - 200 (0ms)
+GET /elements/data/elements.json from ::1
+GET /elements/data/elements.json - 200 (1ms)
+GET /elements/deleted-elements.json from ::1
+GET /elements/deleted-elements.json - 200 (1ms)
+GET /favicon-32x32.png from ::1
+GET /favicon-32x32.png - 200 (1ms)
+GET /site.webmanifest from ::1
+GET /site.webmanifest - 200 (1ms)
+GET /elements/data/combinations.json from ::1
+GET /elements/data/combinations.json - 200 (2ms)
+GET /android-chrome-192x192.png from ::1
+GET /android-chrome-192x192.png - 200 (1ms)
+GET /elements/deleted-combinations.json from ::1
+GET /elements/deleted-combinations.json - 200 (1ms)
+GET /elements/data/emojis.json from ::1
+GET /elements/data/emojis.json - 200 (1ms)
+GET /.well-known/appspecific/com.chrome.devtools.json from ::1
+GET /.well-known/appspecific/com.chrome.devtools.json - 404 (1ms)
+GET /site.webmanifest from ::1
+GET /site.webmanifest - 200 (1ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (8ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (1ms)
+GET / from ::1
+GET / - 200 (5ms)
+GET /elements/data/loader.js from ::1
+GET /elements/data/loader.js - 200 (0ms)
+GET /assets/word-logo.webp from ::1
+GET /assets/word-logo.webp - 200 (1ms)
+GET /skins/snake-default-green.png from ::1
+GET /skins/snake-default-green.png - 200 (1ms)
+GET /.well-known/appspecific/com.chrome.devtools.json from ::1
+GET /.well-known/appspecific/com.chrome.devtools.json - 404 (0ms)
+GET /snake-names.json from ::1
+GET /snake-names.json - 200 (1ms)
+GET /elements/data/elements.json from ::1
+GET /elements/data/elements.json - 200 (2ms)
+GET /elements/deleted-elements.json from ::1
+GET /elements/deleted-elements.json - 200 (1ms)
+GET /favicon-32x32.png from ::1
+GET /favicon-32x32.png - 200 (5ms)
+GET /elements/data/combinations.json from ::1
+GET /elements/data/combinations.json - 200 (11ms)
+GET /site.webmanifest from ::1
+GET /site.webmanifest - 200 (2ms)
+GET /elements/deleted-combinations.json from ::1
+GET /elements/deleted-combinations.json - 200 (2ms)
+GET /android-chrome-192x192.png from ::1
+GET /android-chrome-192x192.png - 200 (1ms)
+GET /elements/data/emojis.json from ::1
+GET /elements/data/emojis.json - 200 (0ms)
+GET /skins/neko.png from ::1
+GET /skins/neko.png - 200 (1ms)
+GET /skins/35mm.png from ::1
+GET /skins/35mm.png - 200 (1ms)
+GET /skins/Frank.png from ::1
+GET /skins/Frank.png - 200 (4ms)
+GET /skins/af-one.png from ::1
+GET /skins/af-one.png - 200 (2ms)
+GET /skins/coffee.png from ::1
+GET /skins/coffee.png - 200 (1ms)
+GET /skins/controller.png from ::1
+GET /skins/controller.png - 200 (1ms)
+GET /skins/camera-guy.png from ::1
+GET /skins/camera-guy.png - 200 (0ms)
+GET /skins/barbi.png from ::1
+GET /skins/barbi.png - 200 (1ms)
+GET /skins/dog.png from ::1
+GET /skins/dog.png - 200 (1ms)
+GET /skins/donut.png from ::1
+GET /skins/donut.png - 200 (1ms)
+GET /skins/flame.png from ::1
+GET /skins/flame.png - 200 (0ms)
+GET /skins/diet-cola.png from ::1
+GET /skins/diet-cola.png - 200 (1ms)
+GET /skins/boat-mcboatface.png from ::1
+GET /skins/boat-mcboatface.png - 200 (1ms)
+GET /skins/fries.png from ::1
+GET /skins/fries.png - 200 (1ms)
+GET /skins/green-dragon.png from ::1
+GET /skins/green-dragon.png - 200 (0ms)
+GET /skins/handheld-game.png from ::1
+GET /skins/handheld-game.png - 200 (0ms)
+GET /skins/hotdog.png from ::1
+GET /skins/hotdog.png - 200 (0ms)
+GET /skins/football.png from ::1
+GET /skins/football.png - 200 (1ms)
+GET /skins/kid-car.png from ::1
+GET /skins/kid-car.png - 200 (0ms)
+GET /skins/lovecraft.png from ::1
+GET /skins/lovecraft.png - 200 (1ms)
+GET /skins/nyan.png from ::1
+GET /skins/nyan.png - 200 (1ms)
+GET /skins/pizza.png from ::1
+GET /skins/pizza.png - 200 (1ms)
+GET /skins/infinity-glove.png from ::1
+GET /skins/infinity-glove.png - 200 (0ms)
+GET /skins/racer.png from ::1
+GET /skins/racer.png - 200 (1ms)
+GET /skins/ramen.png from ::1
+GET /skins/ramen.png - 200 (0ms)
+GET /skins/red-dragon.png from ::1
+GET /skins/red-dragon.png - 200 (1ms)
+GET /skins/robot.png from ::1
+GET /skins/robot.png - 200 (1ms)
+GET /skins/potato.png from ::1
+GET /skins/potato.png - 200 (0ms)
+GET /skins/saturn.png from ::1
+GET /skins/saturn.png - 200 (0ms)
+GET /skins/skibidi.png from ::1
+GET /skins/skibidi.png - 200 (1ms)
+GET /skins/snake-2.png from ::1
+GET /skins/snake-2.png - 200 (1ms)
+GET /skins/space-cadet.png from ::1
+GET /skins/space-cadet.png - 200 (0ms)
+GET /skins/santa.png from ::1
+GET /skins/santa.png - 200 (4ms)
+GET /skins/tv.png from ::1
+GET /skins/tv.png - 200 (1ms)
+GET /skins/unicorn.png from ::1
+GET /skins/unicorn.png - 200 (1ms)
+GET /skins/brick-man.png from ::1
+GET /skins/brick-man.png - 200 (0ms)
+GET /skins/buffalo.png from ::1
+GET /skins/buffalo.png - 200 (1ms)
+GET /skins/clock.png from ::1
+GET /skins/clock.png - 200 (1ms)
+GET /skins/tornado.png from ::1
+GET /skins/tornado.png - 200 (1ms)
+GET /skins/floral.png from ::1
+GET /skins/floral.png - 200 (1ms)
+GET /skins/gnome.png from ::1
+GET /skins/gnome.png - 200 (0ms)
+GET /skins/mac.png from ::1
+GET /skins/mac.png - 200 (1ms)
+GET /skins/murica.png from ::1
+GET /skins/murica.png - 200 (1ms)
+GET /skins/pod-player.png from ::1
+GET /skins/pod-player.png - 200 (1ms)
+GET /skins/whale.png from ::1
+GET /skins/whale.png - 200 (3ms)
+GET /sounds/blip.mp3 from ::1
+GET /sounds/blip.mp3 - 200 (5ms)
+GET /sounds/fire-impact.mp3 from ::1
+GET /sounds/fire-impact.mp3 - 200 (3ms)
+GET /sounds/blip.mp3 from ::1
+GET /sounds/blip.mp3 - 200 (1ms)
+GET /sounds/fire-impact.mp3 from ::1
+GET /sounds/fire-impact.mp3 - 200 (0ms)
+GET /sounds/blip.mp3 from ::1
+GET /sounds/blip.mp3 - 200 (0ms)
+GET /sounds/fire-impact.mp3 from ::1
+GET /sounds/fire-impact.mp3 - 200 (0ms)
+GET /sounds/blip.mp3 from ::1
+GET /sounds/blip.mp3 - 200 (0ms)
+GET /sounds/fire-impact.mp3 from ::1
+GET /sounds/fire-impact.mp3 - 200 (0ms)
+GET /sounds/blip.mp3 from ::1
+GET /sounds/blip.mp3 - 200 (1ms)
+GET /sounds/magic-energy-whoosh.mp3 from ::1
+GET /sounds/magic-energy-whoosh.mp3 - 200 (2ms)
+GET /sounds/magic-energy-whoosh.mp3 from ::1
+GET /sounds/magic-energy-whoosh.mp3 - 200 (1ms)
+GET /sounds/power-surge.mp3 from ::1
+GET /sounds/power-surge.mp3 - 200 (0ms)
+GET /sounds/whoosh-burst.mp3 from ::1
+GET /sounds/whoosh-burst.mp3 - 200 (1ms)
+GET /sounds/magma-roar.mp3 from ::1
+GET /sounds/magma-roar.mp3 - 200 (3ms)
+GET /sounds/power-surge.mp3 from ::1
+GET /sounds/power-surge.mp3 - 200 (3ms)
+GET /sounds/whoosh-burst.mp3 from ::1
+GET /sounds/whoosh-burst.mp3 - 200 (1ms)
+GET /sounds/magic-energy-whoosh.mp3 from ::1
+GET /sounds/magic-energy-whoosh.mp3 - 200 (1ms)
+GET /sounds/fire-impact.mp3 from ::1
+GET /sounds/fire-impact.mp3 - 200 (0ms)
+GET /sounds/8-bit-blip.mp3 from ::1
+GET /sounds/8-bit-blip.mp3 - 200 (0ms)
+GET /sounds/power-surge.mp3 from ::1
+GET /sounds/power-surge.mp3 - 200 (1ms)
+GET /sounds/whoosh-burst.mp3 from ::1
+GET /sounds/whoosh-burst.mp3 - 200 (0ms)
+GET /sounds/magma-roar.mp3 from ::1
+GET /sounds/magma-roar.mp3 - 200 (0ms)
+GET /sounds/8-bit-blip.mp3 from ::1
+GET /sounds/8-bit-blip.mp3 - 200 (0ms)
+GET /music/good-times.mp3 from ::1
+GET /music/good-times.mp3 - 200 (3ms)
+GET /sounds/magma-roar.mp3 from ::1
+GET /sounds/magma-roar.mp3 - 200 (0ms)
+GET /sounds/8-bit-blip.mp3 from ::1
+GET /sounds/8-bit-blip.mp3 - 200 (0ms)
+GET /sounds/blip.mp3 from ::1
+GET /sounds/blip.mp3 - 200 (0ms)
+GET /admin/ from ::1
+GET /admin/ - 200 (1ms)
+GET /admin/admin.js from ::1
+GET /admin/admin.js - 200 (1ms)
+GET /elements/elements-new/elements-all-unique.json from ::1
+GET /elements/elements-new/elements-all-unique.json - 404 (0ms)
+GET /elements/elements-new/combinations.json from ::1
+GET /elements/elements-new/combinations.json - 404 (0ms)
+GET /favicon.ico from ::1
+GET /favicon.ico - 200 (1ms)
+GET /admin/ from ::1
+GET /admin/ - 200 (0ms)
+GET /admin/admin.js from ::1
+GET /admin/admin.js - 200 (1ms)
+GET /elements/elements-new/elements-all-unique.json from ::1
+GET /elements/elements-new/elements-all-unique.json - 404 (1ms)
+GET /favicon.ico from ::1
+GET /favicon.ico - 200 (0ms)
+GET /elements/elements-new/combinations.json from ::1
+GET /elements/elements-new/combinations.json - 404 (0ms)
+GET /admin/ from ::1
+GET /admin/ - 200 (1ms)
+GET /admin/admin.js from ::1
+GET /admin/admin.js - 200 (1ms)
+GET /elements/elements-new/elements-all-unique.json from ::1
+GET /elements/elements-new/elements-all-unique.json - 404 (1ms)
+GET /elements/elements-new/combinations.json from ::1
+GET /elements/elements-new/combinations.json - 404 (0ms)
+GET /favicon.ico from ::1
+GET /favicon.ico - 200 (0ms)
+GET /admin/ from ::1
+GET /admin/ - 200 (1ms)
+GET /admin/admin.js from ::1
+GET /admin/admin.js - 200 (1ms)
+GET /elements/elements-new/elements-all-unique.json from ::1
+GET /elements/elements-new/elements-all-unique.json - 404 (2ms)
+GET /favicon.ico from ::1
+GET /favicon.ico - 200 (0ms)
+GET /elements/elements-new/combinations.json from ::1
+GET /elements/elements-new/combinations.json - 404 (0ms)
+GET /admin/ from ::1
+GET /admin/ - 200 (2ms)
+GET /admin/admin.js from ::1
+GET /admin/admin.js - 200 (1ms)
+GET /elements/elements-new/elements-all-unique.json from ::1
+GET /elements/elements-new/elements-all-unique.json - 404 (1ms)
+GET /favicon.ico from ::1
+GET /favicon.ico - 200 (3ms)
+GET /elements/elements-new/combinations.json from ::1
+GET /elements/elements-new/combinations.json - 404 (0ms)
+GET /admin/ from ::1
+GET /admin/ - 200 (2ms)
+GET /admin/admin.js from ::1
+GET /admin/admin.js - 200 (1ms)
+GET /elements/elements-new/elements-all-unique.json from ::1
+GET /elements/elements-new/elements-all-unique.json - 404 (4ms)
+GET /favicon.ico from ::1
+GET /favicon.ico - 200 (1ms)
+GET /elements/elements-new/combinations.json from ::1
+GET /elements/elements-new/combinations.json - 404 (1ms)
+GET /.well-known/appspecific/com.chrome.devtools.json from ::1
+GET /.well-known/appspecific/com.chrome.devtools.json - 404 (2ms)
+GET /admin/ from ::1
+GET /admin/ - 200 (5ms)
+GET /admin/admin.js from ::1
+GET /admin/admin.js - 200 (4ms)
+GET /elements/data/elements.json from ::1
+GET /elements/data/elements.json - 200 (1ms)
+GET /favicon.ico from ::1
+GET /favicon.ico - 200 (3ms)
+GET /elements/data/combinations.json from ::1
+GET /elements/data/combinations.json - 200 (2ms)
+GET /elements/data/emojis.json from ::1
+GET /elements/data/emojis.json - 200 (2ms)
+GET /elements/deleted-elements.json from ::1
+GET /elements/deleted-elements.json - 200 (3ms)
+GET /elements/deleted-combinations.json from ::1
+GET /elements/deleted-combinations.json - 200 (1ms)
+GET /admin/ from ::1
+GET /admin/ - 200 (4ms)
+GET /admin/admin.js from ::1
+GET /admin/admin.js - 200 (2ms)
+GET /elements/data/elements.json from ::1
+GET /elements/data/elements.json - 200 (9ms)
+GET /favicon.ico from ::1
+GET /favicon.ico - 200 (1ms)
+GET /elements/data/combinations.json from ::1
+GET /elements/data/combinations.json - 200 (1ms)
+GET /elements/data/emojis.json from ::1
+GET /elements/data/emojis.json - 200 (1ms)
+GET /elements/deleted-elements.json from ::1
+GET /elements/deleted-elements.json - 200 (1ms)
+GET /elements/deleted-combinations.json from ::1
+GET /elements/deleted-combinations.json - 200 (1ms)
+GET /admin/ from ::1
+GET /admin/ - 200 (1ms)
+GET /admin/admin.js from ::1
+GET /admin/admin.js - 200 (2ms)
+GET /elements/data/elements.json from ::1
+GET /elements/data/elements.json - 200 (1ms)
+GET /favicon.ico from ::1
+GET /favicon.ico - 200 (1ms)
+GET /elements/data/combinations.json from ::1
+GET /elements/data/combinations.json - 200 (1ms)
+GET /elements/data/emojis.json from ::1
+GET /elements/data/emojis.json - 200 (1ms)
+GET /elements/deleted-elements.json from ::1
+GET /elements/deleted-elements.json - 200 (1ms)
+GET /elements/deleted-combinations.json from ::1
+GET /elements/deleted-combinations.json - 200 (1ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (34ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (52ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (70ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (3ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (12ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (54ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (5ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (5ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (3ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (5ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (55ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (9ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (62ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (13ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (55ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (5ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (49ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (6ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (7ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (51ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (7ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (0ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (1ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (52ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (1ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (8ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (50ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (4ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (5ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (94ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (8ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (51ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (57ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (8ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (5ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (45ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (5ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (67ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (6ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (5ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (60ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (9ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (3ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (4ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (54ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (58ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (6ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (6ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (46ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (10ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (93ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (53ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (51ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (6ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (3ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (52ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (10ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (4ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (1ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (68ms)
+GET /admin/ from ::1
+GET /admin/ - 200 (2ms)
+GET /admin/admin.js from ::1
+GET /admin/admin.js - 200 (1ms)
+GET /elements/data/elements.json from ::1
+GET /elements/data/elements.json - 200 (2ms)
+GET /favicon.ico from ::1
+GET /favicon.ico - 200 (2ms)
+GET /elements/data/combinations.json from ::1
+GET /elements/data/combinations.json - 200 (3ms)
+GET /elements/data/emojis.json from ::1
+GET /elements/data/emojis.json - 200 (0ms)
+GET /elements/deleted-elements.json from ::1
+GET /elements/deleted-elements.json - 200 (1ms)
+GET /elements/deleted-combinations.json from ::1
+GET /elements/deleted-combinations.json - 200 (0ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (12ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (48ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (5ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (69ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (7ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (91ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (77ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (4ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (48ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (52ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (14ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (100ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (3ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (6ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (50ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (69ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (52ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (7ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (6ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (58ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (7ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (78ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (4ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (3ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (57ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (4ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (1ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (3ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (66ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (6ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (5ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (3ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (1ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (7ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (101ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (56ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (1ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (68ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (15ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (3ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (1ms)
+GET /admin/ from ::1
+GET /admin/ - 200 (6ms)
+GET /admin/admin.js from ::1
+GET /admin/admin.js - 200 (1ms)
+GET /elements/data/elements.json from ::1
+GET /elements/data/elements.json - 200 (2ms)
+GET /favicon.ico from ::1
+GET /favicon.ico - 200 (1ms)
+GET /elements/data/combinations.json from ::1
+GET /elements/data/combinations.json - 200 (2ms)
+GET /elements/data/emojis.json from ::1
+GET /elements/data/emojis.json - 200 (1ms)
+GET /elements/deleted-elements.json from ::1
+GET /elements/deleted-elements.json - 200 (1ms)
+GET /elements/deleted-combinations.json from ::1
+GET /elements/deleted-combinations.json - 200 (0ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (63ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (9ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (3ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (3ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (47ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (45ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (60ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (110ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (49ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (71ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (4ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (1ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (54ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (75ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (60ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (56ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (3ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (54ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (53ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (65ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (11ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (6ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (59ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (8ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (13ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (45ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (54ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (8ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (4ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (1ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (50ms)
+GET /admin/ from ::1
+GET /admin/ - 200 (2ms)
+GET /admin/admin.js from ::1
+GET /admin/admin.js - 200 (1ms)
+GET /elements/data/elements.json from ::1
+GET /elements/data/elements.json - 200 (5ms)
+GET /favicon.ico from ::1
+GET /favicon.ico - 200 (1ms)
+GET /elements/data/combinations.json from ::1
+GET /elements/data/combinations.json - 200 (1ms)
+GET /elements/data/emojis.json from ::1
+GET /elements/data/emojis.json - 200 (1ms)
+GET /elements/deleted-elements.json from ::1
+GET /elements/deleted-elements.json - 200 (1ms)
+GET /elements/deleted-combinations.json from ::1
+GET /elements/deleted-combinations.json - 200 (5ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (76ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (11ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (4ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (1ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (89ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (81ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (48ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (4ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (59ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (5ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (3ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (42ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (3ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (1ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (1ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (49ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (85ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (6ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (4ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (53ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (3ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (3ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (54ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (3ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (1ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (64ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (1ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (5ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (82ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (72ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (8ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (3ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (3ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (54ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (5ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (64ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (9ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (5ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (1ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (69ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (4ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (1ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (48ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (46ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (1ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (53ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (7ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (1ms)
+GET /admin/ from ::1
+GET /admin/ - 200 (5ms)
+GET /admin/admin.js from ::1
+GET /admin/admin.js - 200 (1ms)
+GET /elements/data/elements.json from ::1
+GET /elements/data/elements.json - 200 (2ms)
+GET /favicon.ico from ::1
+GET /favicon.ico - 200 (4ms)
+GET /elements/data/combinations.json from ::1
+GET /elements/data/combinations.json - 200 (3ms)
+GET /elements/data/emojis.json from ::1
+GET /elements/data/emojis.json - 200 (2ms)
+GET /elements/deleted-elements.json from ::1
+GET /elements/deleted-elements.json - 200 (1ms)
+GET /elements/deleted-combinations.json from ::1
+GET /elements/deleted-combinations.json - 200 (1ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (70ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (13ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (57ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (4ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (3ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (43ms)
+GET /admin/ from ::1
+GET /admin/ - 200 (2ms)
+GET /admin/admin.js from ::1
+GET /admin/admin.js - 200 (0ms)
+GET /elements/data/elements.json from ::1
+GET /elements/data/elements.json - 200 (3ms)
+GET /favicon.ico from ::1
+GET /favicon.ico - 200 (2ms)
+GET /elements/data/combinations.json from ::1
+GET /elements/data/combinations.json - 200 (1ms)
+GET /elements/data/emojis.json from ::1
+GET /elements/data/emojis.json - 200 (3ms)
+GET /elements/deleted-elements.json from ::1
+GET /elements/deleted-elements.json - 200 (1ms)
+GET /elements/deleted-combinations.json from ::1
+GET /elements/deleted-combinations.json - 200 (1ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (10ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (68ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (4ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (5ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (4ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (50ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (5ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (8ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (3ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (65ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (8ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (1ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (50ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (8ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (5ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (1ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (57ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (61ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (1ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (43ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (1ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (50ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (6ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (1ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (14ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (64ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (9ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (50ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (4ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (55ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (48ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (3ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (1ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (48ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (5ms)
+GET / from ::1
+GET / - 200 (7ms)
+GET /elements/data/loader.js from ::1
+GET /elements/data/loader.js - 200 (1ms)
+GET /assets/word-logo.webp from ::1
+GET /assets/word-logo.webp - 200 (0ms)
+GET /skins/snake-default-green.png from ::1
+GET /skins/snake-default-green.png - 200 (0ms)
+GET / from ::1
+GET / - 200 (2ms)
+GET /elements/data/loader.js from ::1
+GET /elements/data/loader.js - 200 (1ms)
+GET /assets/word-logo.webp from ::1
+GET /assets/word-logo.webp - 200 (0ms)
+GET /skins/snake-default-green.png from ::1
+GET /skins/snake-default-green.png - 200 (1ms)
+GET /site.webmanifest from ::1
+GET /site.webmanifest - 200 (2ms)
+GET /snake-names.json from ::1
+GET /snake-names.json - 200 (1ms)
+GET /elements/data/elements.json from ::1
+GET /elements/data/elements.json - 200 (1ms)
+GET /favicon-32x32.png from ::1
+GET /favicon-32x32.png - 200 (2ms)
+GET /elements/deleted-elements.json from ::1
+GET /elements/deleted-elements.json - 200 (2ms)
+GET /android-chrome-192x192.png from ::1
+GET /android-chrome-192x192.png - 200 (1ms)
+GET /elements/data/combinations.json from ::1
+GET /elements/data/combinations.json - 200 (2ms)
+GET /elements/deleted-combinations.json from ::1
+GET /elements/deleted-combinations.json - 200 (1ms)
+GET /elements/data/emojis.json from ::1
+GET /elements/data/emojis.json - 200 (1ms)
+GET /skins/neko.png from ::1
+GET /skins/neko.png - 200 (3ms)
+GET /skins/35mm.png from ::1
+GET /skins/35mm.png - 200 (1ms)
+GET /skins/Frank.png from ::1
+GET /skins/Frank.png - 200 (1ms)
+GET /skins/af-one.png from ::1
+GET /skins/af-one.png - 200 (1ms)
+GET /skins/camera-guy.png from ::1
+GET /skins/camera-guy.png - 200 (1ms)
+GET /skins/coffee.png from ::1
+GET /skins/coffee.png - 200 (1ms)
+GET /skins/controller.png from ::1
+GET /skins/controller.png - 200 (1ms)
+GET /skins/barbi.png from ::1
+GET /skins/barbi.png - 200 (1ms)
+GET /skins/donut.png from ::1
+GET /skins/donut.png - 200 (1ms)
+GET /skins/dog.png from ::1
+GET /skins/dog.png - 200 (1ms)
+GET /skins/diet-cola.png from ::1
+GET /skins/diet-cola.png - 200 (1ms)
+GET /skins/boat-mcboatface.png from ::1
+GET /skins/boat-mcboatface.png - 200 (1ms)
+GET /skins/handheld-game.png from ::1
+GET /skins/handheld-game.png - 200 (0ms)
+GET /skins/green-dragon.png from ::1
+GET /skins/green-dragon.png - 200 (1ms)
+GET /skins/fries.png from ::1
+GET /skins/fries.png - 200 (1ms)
+GET /skins/flame.png from ::1
+GET /skins/flame.png - 200 (1ms)
+GET /skins/football.png from ::1
+GET /skins/football.png - 200 (1ms)
+GET /skins/infinity-glove.png from ::1
+GET /skins/infinity-glove.png - 200 (4ms)
+GET /skins/kid-car.png from ::1
+GET /skins/kid-car.png - 200 (1ms)
+GET /skins/lovecraft.png from ::1
+GET /skins/lovecraft.png - 200 (1ms)
+GET /skins/nyan.png from ::1
+GET /skins/nyan.png - 200 (1ms)
+GET /skins/pizza.png from ::1
+GET /skins/pizza.png - 200 (1ms)
+GET /skins/hotdog.png from ::1
+GET /skins/hotdog.png - 200 (0ms)
+GET /skins/potato.png from ::1
+GET /skins/potato.png - 200 (3ms)
+GET /skins/racer.png from ::1
+GET /skins/racer.png - 200 (1ms)
+GET /skins/ramen.png from ::1
+GET /skins/ramen.png - 200 (0ms)
+GET /skins/red-dragon.png from ::1
+GET /skins/red-dragon.png - 200 (0ms)
+GET /skins/saturn.png from ::1
+GET /skins/saturn.png - 200 (1ms)
+GET /skins/skibidi.png from ::1
+GET /skins/skibidi.png - 200 (2ms)
+GET /skins/robot.png from ::1
+GET /skins/robot.png - 200 (1ms)
+GET /skins/santa.png from ::1
+GET /skins/santa.png - 200 (1ms)
+GET /skins/tornado.png from ::1
+GET /skins/tornado.png - 200 (1ms)
+GET /skins/snake-2.png from ::1
+GET /skins/snake-2.png - 200 (0ms)
+GET /skins/space-cadet.png from ::1
+GET /skins/space-cadet.png - 200 (0ms)
+GET /skins/tv.png from ::1
+GET /skins/tv.png - 200 (1ms)
+GET /skins/unicorn.png from ::1
+GET /skins/unicorn.png - 200 (1ms)
+GET /skins/brick-man.png from ::1
+GET /skins/brick-man.png - 200 (0ms)
+GET /skins/buffalo.png from ::1
+GET /skins/buffalo.png - 200 (1ms)
+GET /skins/clock.png from ::1
+GET /skins/clock.png - 200 (0ms)
+GET /skins/floral.png from ::1
+GET /skins/floral.png - 200 (1ms)
+GET /skins/gnome.png from ::1
+GET /skins/gnome.png - 200 (0ms)
+GET /skins/mac.png from ::1
+GET /skins/mac.png - 200 (2ms)
+GET /skins/murica.png from ::1
+GET /skins/murica.png - 200 (1ms)
+GET /skins/pod-player.png from ::1
+GET /skins/pod-player.png - 200 (1ms)
+GET /skins/whale.png from ::1
+GET /skins/whale.png - 200 (0ms)
+GET / from ::1
+GET / - 200 (0ms)
+GET /elements/data/loader.js from ::1
+GET /elements/data/loader.js - 200 (1ms)
+GET /assets/word-logo.webp from ::1
+GET /assets/word-logo.webp - 200 (1ms)
+GET /skins/snake-default-green.png from ::1
+GET /skins/snake-default-green.png - 200 (0ms)
+GET /snake-names.json from ::1
+GET /snake-names.json - 200 (0ms)
+GET /elements/data/elements.json from ::1
+GET /elements/data/elements.json - 200 (1ms)
+GET /site.webmanifest from ::1
+GET /site.webmanifest - 200 (0ms)
+GET /favicon-32x32.png from ::1
+GET /favicon-32x32.png - 200 (0ms)
+GET /elements/deleted-elements.json from ::1
+GET /elements/deleted-elements.json - 200 (0ms)
+GET /android-chrome-192x192.png from ::1
+GET /android-chrome-192x192.png - 200 (1ms)
+GET /elements/data/combinations.json from ::1
+GET /elements/data/combinations.json - 200 (2ms)
+GET /elements/deleted-combinations.json from ::1
+GET /elements/deleted-combinations.json - 200 (0ms)
+GET /elements/data/emojis.json from ::1
+GET /elements/data/emojis.json - 200 (0ms)
+GET /skins/neko.png from ::1
+GET /skins/neko.png - 200 (1ms)
+GET /skins/35mm.png from ::1
+GET /skins/35mm.png - 200 (1ms)
+GET /skins/Frank.png from ::1
+GET /skins/Frank.png - 200 (1ms)
+GET /skins/af-one.png from ::1
+GET /skins/af-one.png - 200 (0ms)
+GET /skins/barbi.png from ::1
+GET /skins/barbi.png - 200 (1ms)
+GET /skins/coffee.png from ::1
+GET /skins/coffee.png - 200 (0ms)
+GET /skins/controller.png from ::1
+GET /skins/controller.png - 200 (0ms)
+GET /skins/diet-cola.png from ::1
+GET /skins/diet-cola.png - 200 (0ms)
+GET /skins/boat-mcboatface.png from ::1
+GET /skins/boat-mcboatface.png - 200 (1ms)
+GET /skins/camera-guy.png from ::1
+GET /skins/camera-guy.png - 200 (0ms)
+GET /skins/donut.png from ::1
+GET /skins/donut.png - 200 (1ms)
+GET /skins/flame.png from ::1
+GET /skins/flame.png - 200 (0ms)
+GET /skins/football.png from ::1
+GET /skins/football.png - 200 (1ms)
+GET /skins/green-dragon.png from ::1
+GET /skins/green-dragon.png - 200 (1ms)
+GET /skins/fries.png from ::1
+GET /skins/fries.png - 200 (0ms)
+GET /skins/dog.png from ::1
+GET /skins/dog.png - 200 (1ms)
+GET /skins/handheld-game.png from ::1
+GET /skins/handheld-game.png - 200 (0ms)
+GET /skins/hotdog.png from ::1
+GET /skins/hotdog.png - 200 (1ms)
+GET /skins/infinity-glove.png from ::1
+GET /skins/infinity-glove.png - 200 (0ms)
+GET /skins/kid-car.png from ::1
+GET /skins/kid-car.png - 200 (0ms)
+GET /skins/lovecraft.png from ::1
+GET /skins/lovecraft.png - 200 (0ms)
+GET /skins/pizza.png from ::1
+GET /skins/pizza.png - 200 (0ms)
+GET /skins/potato.png from ::1
+GET /skins/potato.png - 200 (0ms)
+GET /skins/racer.png from ::1
+GET /skins/racer.png - 200 (1ms)
+GET /skins/ramen.png from ::1
+GET /skins/ramen.png - 200 (0ms)
+GET /skins/nyan.png from ::1
+GET /skins/nyan.png - 200 (1ms)
+GET /skins/robot.png from ::1
+GET /skins/robot.png - 200 (0ms)
+GET /skins/santa.png from ::1
+GET /skins/santa.png - 200 (1ms)
+GET /skins/saturn.png from ::1
+GET /skins/saturn.png - 200 (0ms)
+GET /skins/skibidi.png from ::1
+GET /skins/skibidi.png - 200 (0ms)
+GET /skins/red-dragon.png from ::1
+GET /skins/red-dragon.png - 200 (1ms)
+GET /skins/space-cadet.png from ::1
+GET /skins/space-cadet.png - 200 (0ms)
+GET /skins/tornado.png from ::1
+GET /skins/tornado.png - 200 (0ms)
+GET /skins/tv.png from ::1
+GET /skins/tv.png - 200 (1ms)
+GET /skins/snake-2.png from ::1
+GET /skins/snake-2.png - 200 (0ms)
+GET /skins/buffalo.png from ::1
+GET /skins/buffalo.png - 200 (0ms)
+GET /skins/clock.png from ::1
+GET /skins/clock.png - 200 (0ms)
+GET /skins/unicorn.png from ::1
+GET /skins/unicorn.png - 200 (0ms)
+GET /skins/brick-man.png from ::1
+GET /skins/brick-man.png - 200 (0ms)
+GET /skins/mac.png from ::1
+GET /skins/mac.png - 200 (1ms)
+GET /skins/murica.png from ::1
+GET /skins/murica.png - 200 (0ms)
+GET /skins/floral.png from ::1
+GET /skins/floral.png - 200 (0ms)
+GET /skins/gnome.png from ::1
+GET /skins/gnome.png - 200 (0ms)
+GET /skins/pod-player.png from ::1
+GET /skins/pod-player.png - 200 (1ms)
+GET /skins/whale.png from ::1
+GET /skins/whale.png - 200 (0ms)
+GET /sounds/blip.mp3 from ::1
+GET /sounds/blip.mp3 - 200 (1ms)
+GET /sounds/blip.mp3 from ::1
+GET /sounds/blip.mp3 - 200 (1ms)
+GET /sounds/fire-impact.mp3 from ::1
+GET /sounds/fire-impact.mp3 - 200 (2ms)
+GET /sounds/blip.mp3 from ::1
+GET /sounds/blip.mp3 - 200 (0ms)
+GET /sounds/fire-impact.mp3 from ::1
+GET /sounds/fire-impact.mp3 - 200 (1ms)
+GET /sounds/blip.mp3 from ::1
+GET /sounds/blip.mp3 - 200 (1ms)
+GET /sounds/fire-impact.mp3 from ::1
+GET /sounds/fire-impact.mp3 - 200 (0ms)
+GET /sounds/blip.mp3 from ::1
+GET /sounds/blip.mp3 - 200 (0ms)
+GET /sounds/fire-impact.mp3 from ::1
+GET /sounds/fire-impact.mp3 - 200 (0ms)
+GET /sounds/magma-roar.mp3 from ::1
+GET /sounds/magma-roar.mp3 - 200 (0ms)
+GET /sounds/magic-energy-whoosh.mp3 from ::1
+GET /sounds/magic-energy-whoosh.mp3 - 200 (1ms)
+GET /sounds/fire-impact.mp3 from ::1
+GET /sounds/fire-impact.mp3 - 200 (0ms)
+GET /sounds/power-surge.mp3 from ::1
+GET /sounds/power-surge.mp3 - 200 (0ms)
+GET /sounds/magic-energy-whoosh.mp3 from ::1
+GET /sounds/magic-energy-whoosh.mp3 - 200 (0ms)
+GET /sounds/whoosh-burst.mp3 from ::1
+GET /sounds/whoosh-burst.mp3 - 200 (1ms)
+GET /sounds/magma-roar.mp3 from ::1
+GET /sounds/magma-roar.mp3 - 200 (0ms)
+GET /sounds/power-surge.mp3 from ::1
+GET /sounds/power-surge.mp3 - 200 (0ms)
+GET /sounds/magma-roar.mp3 from ::1
+GET /sounds/magma-roar.mp3 - 200 (0ms)
+GET /sounds/magic-energy-whoosh.mp3 from ::1
+GET /sounds/magic-energy-whoosh.mp3 - 200 (1ms)
+GET /sounds/whoosh-burst.mp3 from ::1
+GET /sounds/whoosh-burst.mp3 - 200 (0ms)
+GET /sounds/power-surge.mp3 from ::1
+GET /sounds/power-surge.mp3 - 200 (0ms)
+GET /sounds/whoosh-burst.mp3 from ::1
+GET /sounds/whoosh-burst.mp3 - 200 (1ms)
+GET /music/last-ones-standing.mp3 from ::1
+GET /music/last-ones-standing.mp3 - 200 (1ms)
+GET /sounds/8-bit-blip.mp3 from ::1
+GET /sounds/8-bit-blip.mp3 - 200 (0ms)
+GET /sounds/8-bit-blip.mp3 from ::1
+GET /sounds/8-bit-blip.mp3 - 200 (0ms)
+GET /sounds/8-bit-blip.mp3 from ::1
+GET /sounds/8-bit-blip.mp3 - 200 (0ms)
+GET /sounds/blip.mp3 from ::1
+GET /sounds/blip.mp3 - 200 (2ms)
+GET /sounds/blip.mp3 from ::1
+GET /sounds/blip.mp3 - 200 (2ms)
+GET /sounds/whoosh-burst.mp3 from ::1
+GET /sounds/whoosh-burst.mp3 - 200 (0ms)
+GET /sounds/blip.mp3 from ::1
+GET /sounds/blip.mp3 - 200 (1ms)
+GET /sounds/blip.mp3 from ::1
+GET /sounds/blip.mp3 - 200 (0ms)
+GET /sounds/whoosh-burst.mp3 from ::1
+GET /sounds/whoosh-burst.mp3 - 200 (1ms)
+GET /sounds/blip.mp3 from ::1
+GET /sounds/blip.mp3 - 200 (1ms)
+GET /sounds/whoosh-burst.mp3 from ::1
+GET /sounds/whoosh-burst.mp3 - 200 (1ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (54ms)
+GET / from ::1
+GET / - 200 (2ms)
+GET /elements/data/loader.js from ::1
+GET /elements/data/loader.js - 200 (0ms)
+GET /assets/word-logo.webp from ::1
+GET /assets/word-logo.webp - 200 (1ms)
+GET /skins/snake-default-green.png from ::1
+GET /skins/snake-default-green.png - 200 (0ms)
+GET /snake-names.json from ::1
+GET /snake-names.json - 200 (1ms)
+GET /elements/data/elements.json from ::1
+GET /elements/data/elements.json - 200 (2ms)
+GET /favicon-32x32.png from ::1
+GET /favicon-32x32.png - 200 (2ms)
+GET /site.webmanifest from ::1
+GET /site.webmanifest - 200 (2ms)
+GET /elements/deleted-elements.json from ::1
+GET /elements/deleted-elements.json - 200 (1ms)
+GET /android-chrome-192x192.png from ::1
+GET /android-chrome-192x192.png - 200 (1ms)
+GET /elements/data/combinations.json from ::1
+GET /elements/data/combinations.json - 200 (2ms)
+GET /elements/deleted-combinations.json from ::1
+GET /elements/deleted-combinations.json - 200 (0ms)
+GET /elements/data/emojis.json from ::1
+GET /elements/data/emojis.json - 200 (1ms)
+GET /skins/neko.png from ::1
+GET /skins/neko.png - 200 (1ms)
+GET /skins/35mm.png from ::1
+GET /skins/35mm.png - 200 (0ms)
+GET /skins/Frank.png from ::1
+GET /skins/Frank.png - 200 (0ms)
+GET /skins/af-one.png from ::1
+GET /skins/af-one.png - 200 (0ms)
+GET /skins/barbi.png from ::1
+GET /skins/barbi.png - 200 (0ms)
+GET /skins/boat-mcboatface.png from ::1
+GET /skins/boat-mcboatface.png - 200 (0ms)
+GET /skins/camera-guy.png from ::1
+GET /skins/camera-guy.png - 200 (0ms)
+GET /skins/coffee.png from ::1
+GET /skins/coffee.png - 200 (1ms)
+GET /skins/controller.png from ::1
+GET /skins/controller.png - 200 (0ms)
+GET /skins/diet-cola.png from ::1
+GET /skins/diet-cola.png - 200 (0ms)
+GET /skins/dog.png from ::1
+GET /skins/dog.png - 200 (0ms)
+GET /skins/donut.png from ::1
+GET /skins/donut.png - 200 (0ms)
+GET /skins/flame.png from ::1
+GET /skins/flame.png - 200 (1ms)
+GET /skins/football.png from ::1
+GET /skins/football.png - 200 (0ms)
+GET /skins/fries.png from ::1
+GET /skins/fries.png - 200 (1ms)
+GET /skins/green-dragon.png from ::1
+GET /skins/green-dragon.png - 200 (0ms)
+GET /skins/handheld-game.png from ::1
+GET /skins/handheld-game.png - 200 (2ms)
+GET /skins/hotdog.png from ::1
+GET /skins/hotdog.png - 200 (1ms)
+GET /skins/lovecraft.png from ::1
+GET /skins/lovecraft.png - 200 (0ms)
+GET /skins/nyan.png from ::1
+GET /skins/nyan.png - 200 (0ms)
+GET /skins/infinity-glove.png from ::1
+GET /skins/infinity-glove.png - 200 (2ms)
+GET /skins/kid-car.png from ::1
+GET /skins/kid-car.png - 200 (1ms)
+GET /skins/ramen.png from ::1
+GET /skins/ramen.png - 200 (1ms)
+GET /skins/racer.png from ::1
+GET /skins/racer.png - 200 (1ms)
+GET /skins/red-dragon.png from ::1
+GET /skins/red-dragon.png - 200 (0ms)
+GET /skins/pizza.png from ::1
+GET /skins/pizza.png - 200 (0ms)
+GET /skins/potato.png from ::1
+GET /skins/potato.png - 200 (0ms)
+GET /skins/santa.png from ::1
+GET /skins/santa.png - 200 (1ms)
+GET /skins/saturn.png from ::1
+GET /skins/saturn.png - 200 (0ms)
+GET /skins/skibidi.png from ::1
+GET /skins/skibidi.png - 200 (1ms)
+GET /skins/snake-2.png from ::1
+GET /skins/snake-2.png - 200 (0ms)
+GET /skins/robot.png from ::1
+GET /skins/robot.png - 200 (1ms)
+GET /skins/tornado.png from ::1
+GET /skins/tornado.png - 200 (2ms)
+GET /skins/unicorn.png from ::1
+GET /skins/unicorn.png - 200 (1ms)
+GET /skins/tv.png from ::1
+GET /skins/tv.png - 200 (1ms)
+GET /skins/brick-man.png from ::1
+GET /skins/brick-man.png - 200 (1ms)
+GET /skins/space-cadet.png from ::1
+GET /skins/space-cadet.png - 200 (0ms)
+GET /skins/clock.png from ::1
+GET /skins/clock.png - 200 (1ms)
+GET /skins/floral.png from ::1
+GET /skins/floral.png - 200 (0ms)
+GET /skins/gnome.png from ::1
+GET /skins/gnome.png - 200 (1ms)
+GET /skins/mac.png from ::1
+GET /skins/mac.png - 200 (0ms)
+GET /skins/murica.png from ::1
+GET /skins/murica.png - 200 (0ms)
+GET /skins/buffalo.png from ::1
+GET /skins/buffalo.png - 200 (1ms)
+GET /skins/pod-player.png from ::1
+GET /skins/pod-player.png - 200 (0ms)
+GET /skins/whale.png from ::1
+GET /skins/whale.png - 200 (1ms)
+GET /sounds/blip.mp3 from ::1
+GET /sounds/blip.mp3 - 200 (2ms)
+GET /sounds/blip.mp3 from ::1
+GET /sounds/blip.mp3 - 200 (0ms)
+GET /sounds/fire-impact.mp3 from ::1
+GET /sounds/fire-impact.mp3 - 200 (0ms)
+GET /sounds/fire-impact.mp3 from ::1
+GET /sounds/fire-impact.mp3 - 200 (1ms)
+GET /sounds/blip.mp3 from ::1
+GET /sounds/blip.mp3 - 200 (1ms)
+GET /sounds/fire-impact.mp3 from ::1
+GET /sounds/fire-impact.mp3 - 200 (1ms)
+GET /sounds/blip.mp3 from ::1
+GET /sounds/blip.mp3 - 200 (1ms)
+GET /sounds/fire-impact.mp3 from ::1
+GET /sounds/fire-impact.mp3 - 200 (2ms)
+GET /sounds/magic-energy-whoosh.mp3 from ::1
+GET /sounds/magic-energy-whoosh.mp3 - 200 (1ms)
+GET /sounds/blip.mp3 from ::1
+GET /sounds/blip.mp3 - 200 (1ms)
+GET /sounds/magma-roar.mp3 from ::1
+GET /sounds/magma-roar.mp3 - 200 (1ms)
+GET /sounds/power-surge.mp3 from ::1
+GET /sounds/power-surge.mp3 - 200 (6ms)
+GET /sounds/whoosh-burst.mp3 from ::1
+GET /sounds/whoosh-burst.mp3 - 200 (1ms)
+GET /sounds/magma-roar.mp3 from ::1
+GET /sounds/magma-roar.mp3 - 200 (1ms)
+GET /sounds/magic-energy-whoosh.mp3 from ::1
+GET /sounds/magic-energy-whoosh.mp3 - 200 (1ms)
+GET /sounds/fire-impact.mp3 from ::1
+GET /sounds/fire-impact.mp3 - 200 (0ms)
+GET /sounds/whoosh-burst.mp3 from ::1
+GET /sounds/whoosh-burst.mp3 - 200 (0ms)
+GET /sounds/magma-roar.mp3 from ::1
+GET /sounds/magma-roar.mp3 - 200 (0ms)
+GET /sounds/power-surge.mp3 from ::1
+GET /sounds/power-surge.mp3 - 200 (1ms)
+GET /sounds/magic-energy-whoosh.mp3 from ::1
+GET /sounds/magic-energy-whoosh.mp3 - 200 (1ms)
+GET /sounds/whoosh-burst.mp3 from ::1
+GET /sounds/whoosh-burst.mp3 - 200 (1ms)
+GET /sounds/power-surge.mp3 from ::1
+GET /sounds/power-surge.mp3 - 200 (0ms)
+GET /music/summer-haze.mp3 from ::1
+GET /music/summer-haze.mp3 - 200 (3ms)
+GET /sounds/8-bit-blip.mp3 from ::1
+GET /sounds/8-bit-blip.mp3 - 200 (0ms)
+GET /sounds/8-bit-blip.mp3 from ::1
+GET /sounds/8-bit-blip.mp3 - 200 (0ms)
+GET /sounds/8-bit-blip.mp3 from ::1
+GET /sounds/8-bit-blip.mp3 - 200 (1ms)
+GET /sounds/blip.mp3 from ::1
+GET /sounds/blip.mp3 - 200 (1ms)
+GET /sounds/blip.mp3 from ::1
+GET /sounds/blip.mp3 - 200 (0ms)
+GET /sounds/blip.mp3 from ::1
+GET /sounds/blip.mp3 - 200 (1ms)
+GET /sounds/blip.mp3 from ::1
+GET /sounds/blip.mp3 - 200 (0ms)
+GET /sounds/blip.mp3 from ::1
+GET /sounds/blip.mp3 - 200 (1ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (17ms)
+GET /sounds/whoosh-burst.mp3 from ::1
+GET /sounds/whoosh-burst.mp3 - 200 (2ms)
+GET /sounds/magic-energy-whoosh.mp3 from ::1
+GET /sounds/magic-energy-whoosh.mp3 - 200 (1ms)
+GET /sounds/fire-impact.mp3 from ::1
+GET /sounds/fire-impact.mp3 - 200 (2ms)
+GET /sounds/whoosh-burst.mp3 from ::1
+GET /sounds/whoosh-burst.mp3 - 200 (2ms)
+GET /sounds/whoosh-burst.mp3 from ::1
+GET /sounds/whoosh-burst.mp3 - 200 (1ms)
+GET /sounds/power-surge.mp3 from ::1
+GET /sounds/power-surge.mp3 - 200 (2ms)
+GET /sounds/fire-impact.mp3 from ::1
+GET /sounds/fire-impact.mp3 - 200 (1ms)
+GET /sounds/fire-impact.mp3 from ::1
+GET /sounds/fire-impact.mp3 - 200 (1ms)
+GET /sounds/fire-impact.mp3 from ::1
+GET /sounds/fire-impact.mp3 - 200 (1ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (13ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (54ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (4ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (6ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (49ms)
+GET /music/headliner.mp3 from ::1
+GET /music/headliner.mp3 - 200 (4ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (1ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (1ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (5ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (3ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (63ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (11ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (3ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (47ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (6ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (9ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (62ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (5ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (1ms)
+GET /music/on-the-up.mp3 from ::1
+GET /music/on-the-up.mp3 - 200 (6ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (54ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (51ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (47ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (5ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (3ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (55ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (4ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (1ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (52ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (3ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (46ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (3ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (1ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (42ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (59ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (3ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (50ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (1ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (61ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (97ms)
+GET /music/good-times.mp3 from ::1
+GET /music/good-times.mp3 - 200 (5ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (76ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (5ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (1ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (5ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (4ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (51ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (5ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (1ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (49ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (5ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (6ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (1ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (57ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (6ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (1ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (56ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (45ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (4ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (3ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (52ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (4ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (49ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (5ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (3ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (2ms)
+GET /music/last-ones-standing.mp3 from ::1
+GET /music/last-ones-standing.mp3 - 200 (7ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (19ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (54ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (15ms)
+DELETE /api/delete-combination from ::1
+DELETE /api/delete-combination - 200 (4ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (51ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (89ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (10ms)
+GET /music/bright-white-lights.mp3 from ::1
+GET /music/bright-white-lights.mp3 - 200 (14ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (92ms)
+POST /api/save-element-main from ::1
+POST /api/save-element-main - 200 (83ms)
+GET /music/on-the-up.mp3 from ::1
+GET /music/on-the-up.mp3 - 200 (13ms)

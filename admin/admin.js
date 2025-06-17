@@ -37,7 +37,7 @@ async function loadData() {
     try {
         // Load combined elements file (now includes all custom elements)
         try {
-            const response = await fetch('/elements/elements-new/elements-all-unique.json');
+            const response = await fetch('/elements/data/elements.json');
             const data = await response.json();
             
             // Convert array format to object
@@ -58,7 +58,7 @@ async function loadData() {
         console.log(`Loaded ${Object.keys(elements).length} elements`);
         
         // Load combinations (now includes all custom combinations)
-        const comboResponse = await fetch('/elements/elements-new/combinations.json');
+        const comboResponse = await fetch('/elements/data/combinations.json');
         const comboData = await comboResponse.json();
         
         // Store combinations in both directions
@@ -73,7 +73,7 @@ async function loadData() {
         
         // Load emojis from JSON file (now includes all custom emojis)
         try {
-            const emojiResponse = await fetch('/elements/elements-new/emojis.json');
+            const emojiResponse = await fetch('/elements/data/emojis.json');
             emojis = await emojiResponse.json();
             console.log(`Loaded ${Object.keys(emojis).length} emojis`);
         } catch (err) {
@@ -164,7 +164,7 @@ function showSearchResults(matches) {
     
     let html = '<div style="margin-bottom: 20px;"><strong>Multiple matches found:</strong></div>';
     
-    matches.slice(0, 10).forEach(elem => {
+    matches.slice(0, 100).forEach(elem => {
         // Prefer element-specific emoji over shared emojiIndex
     const emoji = emojis[elem.id] || emojis[elem.emojiIndex] || '❓';
         html += `
@@ -178,8 +178,8 @@ function showSearchResults(matches) {
         `;
     });
     
-    if (matches.length > 10) {
-        html += `<div style="text-align: center; color: #888; margin-top: 10px;">... and ${matches.length - 10} more</div>`;
+    if (matches.length > 100) {
+        html += `<div style="text-align: center; color: #888; margin-top: 10px;">... and ${matches.length - 100} more</div>`;
     }
     
     results.innerHTML = html;
@@ -402,7 +402,7 @@ function setupRecipeSearch(inputId, hiddenId, resultsId, previewId) {
             for (const [id, elem] of Object.entries(elements)) {
                 if (elem.name.toLowerCase().includes(queryLower) || id.toString().includes(query)) {
                     matches.push({ id, ...elem });
-                    if (matches.length >= 20) break;
+                    if (matches.length >= 100) break;
                 }
             }
             
@@ -962,7 +962,7 @@ function setupRecipeSearchWithCreate(inputId, hiddenId, resultsId) {
             for (const [id, elem] of Object.entries(elements)) {
                 if (elem.name.toLowerCase().includes(queryLower) || id.toString().includes(query)) {
                     matches.push({ id, ...elem });
-                    if (matches.length >= 10) break;
+                    if (matches.length >= 100) break;
                 }
             }
             
