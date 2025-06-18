@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <title>Leaderboard - Infinite Snake | Global Rankings</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="View the global leaderboard for Infinite Snake. See top players, high scores, and compete for the #1 spot!" />
+    <meta property="og:title" content="Infinite Snake Leaderboard" />
+    <meta property="og:description" content="View the global leaderboard for Infinite Snake. See top players, high scores, and compete for the #1 spot!" />
+    <meta property="og:image" content="https://infinitesnake.io/assets/snake-logo.png" />
+    <meta property="og:url" content="https://infinitesnake.io/leaderboard" />
+    
+    <!-- Favicons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    
+    <!-- Supabase -->
+    <script type="module" src="js/supabase.js"></script>
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #0a0a0a;
+            color: white;
+            font-family: monospace;
+            overflow-x: hidden;
+            image-rendering: pixelated;
+        }
+        
+        /* Animated starfield background */
+        #stars-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+        
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(20, 20, 40, 0.9) 0%, rgba(30, 30, 50, 0.8) 100%);
+            border: 3px solid #4ecdc4;
+            box-shadow: 0 0 20px rgba(78, 205, 196, 0.5);
+        }
+        
+        h1 {
+            font-size: 48px;
+            color: #4ecdc4;
+            margin: 0 0 10px 0;
+            text-shadow: 0 0 20px rgba(78, 205, 196, 0.5);
+        }
+        
+        .subtitle {
+            color: #AAA;
+            font-size: 18px;
+        }
+        
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: linear-gradient(135deg, #4B0082, #2E0549);
+            border: 2px solid #8B00FF;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s;
+        }
+        
+        .back-button:hover {
+            background: linear-gradient(135deg, #6B0082, #4E0569);
+            box-shadow: 0 0 15px rgba(139, 0, 255, 0.6);
+            transform: scale(1.05);
+        }
+        
+        /* Tab navigation */
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid #333;
+        }
+        
+        .tab {
+            flex: 1;
+            max-width: 200px;
+            padding: 15px;
+            background: transparent;
+            border: none;
+            color: #888;
+            font-size: 18px;
+            cursor: pointer;
+            font-family: monospace;
+            transition: all 0.3s;
+            border-right: 2px solid #333;
+        }
+        
+        .tab:last-child {
+            border-right: none;
+        }
+        
+        .tab.active {
+            color: #4ecdc4;
+            background: rgba(78, 205, 196, 0.1);
+            border-bottom: 3px solid #4ecdc4;
+        }
+        
+        .tab:hover {
+            background: rgba(78, 205, 196, 0.05);
+        }
+        
+        /* Leaderboard table */
+        .leaderboard-container {
+            background: linear-gradient(135deg, rgba(20, 20, 40, 0.95) 0%, rgba(30, 30, 50, 0.9) 100%);
+            border: 3px solid #333;
+            padding: 20px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .leaderboard-header {
+            display: grid;
+            grid-template-columns: 80px 250px 150px 120px 120px 100px;
+            gap: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid #555;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #AAA;
+        }
+        
+        .leaderboard-entry {
+            display: grid;
+            grid-template-columns: 80px 250px 150px 120px 120px 100px;
+            gap: 20px;
+            padding: 15px;
+            margin-bottom: 5px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        
+        .leaderboard-entry:hover {
+            background: rgba(78, 205, 196, 0.1);
+            border-color: rgba(78, 205, 196, 0.3);
+            transform: translateX(5px);
+        }
+        
+        .leaderboard-entry.player-entry {
+            background: rgba(78, 205, 196, 0.2);
+            border-color: #4ecdc4;
+            animation: glow 2s ease-in-out infinite;
+        }
+        
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 10px rgba(78, 205, 196, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(78, 205, 196, 0.8); }
+        }
+        
+        .rank-1 { color: #FFD700; font-size: 20px; }
+        .rank-2 { color: #C0C0C0; font-size: 18px; }
+        .rank-3 { color: #CD7F32; font-size: 18px; }
+        
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: #888;
+            font-size: 20px;
+        }
+        
+        .error {
+            text-align: center;
+            padding: 60px;
+            color: #ff4444;
+            font-size: 18px;
+        }
+        
+        @media (max-width: 768px) {
+            h1 { font-size: 32px; }
+            .tabs { flex-wrap: wrap; }
+            .tab { max-width: none; }
+            .leaderboard-header,
+            .leaderboard-entry {
+                grid-template-columns: 60px 1fr 80px;
+                gap: 10px;
+            }
+            .leaderboard-header > div:nth-child(4),
+            .leaderboard-header > div:nth-child(5),
+            .leaderboard-header > div:nth-child(6),
+            .leaderboard-entry > div:nth-child(4),
+            .leaderboard-entry > div:nth-child(5),
+            .leaderboard-entry > div:nth-child(6) {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="stars-canvas"></canvas>
+    
+    <a href="/" class="back-button">← Back to Game</a>
+    
+    <div class="container">
+        <header>
+            <h1>GLOBAL LEADERBOARD</h1>
+            <p class="subtitle">Infinite Mode Rankings</p>
+        </header>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="switchPeriod('daily')">DAILY</button>
+            <button class="tab" onclick="switchPeriod('weekly')">WEEKLY</button>
+            <button class="tab" onclick="switchPeriod('monthly')">MONTHLY</button>
+            <button class="tab" onclick="switchPeriod('all')">ALL TIME</button>
+        </div>
+        
+        <div class="leaderboard-container">
+            <div class="leaderboard-header">
+                <div>RANK</div>
+                <div>PLAYER</div>
+                <div style="text-align: right;">SCORE</div>
+                <div style="text-align: right;">ELEMENTS</div>
+                <div style="text-align: right;">TIME</div>
+                <div style="text-align: right;">KILLS</div>
+            </div>
+            
+            <div id="leaderboard-content">
+                <div class="loading">Loading leaderboard...</div>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module">
+        import { initializeAuth, getLeaderboard } from './js/supabase.js';
+        
+        let currentPeriod = 'daily';
+        
+        // Initialize
+        async function init() {
+            await initializeAuth();
+            drawStars();
+            animateStars();
+            await loadLeaderboard('daily');
+        }
+        
+        // Switch period
+        window.switchPeriod = async function(period) {
+            currentPeriod = period;
+            
+            // Update tab styles
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            await loadLeaderboard(period);
+        }
+        
+        // Load leaderboard
+        async function loadLeaderboard(period) {
+            const content = document.getElementById('leaderboard-content');
+            content.innerHTML = '<div class="loading">Loading leaderboard...</div>';
+            
+            try {
+                const data = await getLeaderboard(period, 100);
+                
+                if (!data || data.length === 0) {
+                    content.innerHTML = '<div class="loading">No scores yet. Be the first to claim the top spot!</div>';
+                    return;
+                }
+                
+                const currentUsername = localStorage.getItem('lastUsername');
+                
+                content.innerHTML = data.map(entry => {
+                    const isPlayer = currentUsername && entry.username === currentUsername;
+                    const rankClass = entry.rank <= 3 ? `rank-${entry.rank}` : '';
+                    
+                    // Format time
+                    const minutes = Math.floor(entry.play_time / 60);
+                    const seconds = entry.play_time % 60;
+                    const timeStr = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                    
+                    return `
+                        <div class="leaderboard-entry ${isPlayer ? 'player-entry' : ''}">
+                            <div class="${rankClass}" style="font-weight: bold;">#${entry.rank}</div>
+                            <div style="color: ${isPlayer ? '#4ecdc4' : '#FFF'};">${entry.username}</div>
+                            <div style="color: #4ecdc4; text-align: right;">${entry.score.toLocaleString()}</div>
+                            <div style="color: #FFD700; text-align: right;">${entry.elements_discovered}</div>
+                            <div style="color: #AAA; text-align: right;">${timeStr}</div>
+                            <div style="color: #ff6b6b; text-align: right;">${entry.kills}</div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Failed to load leaderboard:', error);
+                content.innerHTML = '<div class="error">Failed to load leaderboard. Please try again later.</div>';
+            }
+        }
+        
+        // Starfield animation
+        const canvas = document.getElementById('stars-canvas');
+        const ctx = canvas.getContext('2d');
+        let stars = [];
+        
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        
+        function drawStars() {
+            resizeCanvas();
+            stars = [];
+            
+            // Create static stars
+            for (let i = 0; i < 200; i++) {
+                stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 2,
+                    speed: Math.random() * 0.5 + 0.1
+                });
+            }
+        }
+        
+        function animateStars() {
+            ctx.fillStyle = 'rgba(10, 10, 10, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = '#FFF';
+            stars.forEach(star => {
+                ctx.fillRect(star.x, star.y, star.size, star.size);
+                
+                star.y += star.speed;
+                if (star.y > canvas.height) {
+                    star.y = 0;
+                    star.x = Math.random() * canvas.width;
+                }
+            });
+            
+            requestAnimationFrame(animateStars);
+        }
+        
+        window.addEventListener('resize', drawStars);
+        
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>

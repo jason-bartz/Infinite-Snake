@@ -414,6 +414,25 @@
             box-shadow: 0 0 20px rgba(156, 39, 176, 0.6);
         }
         
+        /* Leaderboard Button */
+        .btn-leaderboard {
+            background: linear-gradient(135deg, #1976D2, #0D47A1) !important;
+            border: 2px solid #2196F3 !important;
+            min-width: 250px !important;
+            font-size: 16px !important;
+            padding: 12px 25px !important;
+            color: white;
+            cursor: pointer;
+            font-family: monospace;
+            transition: all 0.3s;
+        }
+        
+        .btn-leaderboard:hover {
+            background: linear-gradient(135deg, #1E88E5, #1565C0) !important;
+            box-shadow: 0 0 20px rgba(33, 150, 243, 0.6);
+            transform: scale(1.05);
+        }
+        
         #loadingIndicator {
             display: none;
             margin: 10px 0;
@@ -505,6 +524,8 @@
             height: 100%;
             pointer-events: none;
             z-index: 10;
+            opacity: 0;
+            transition: opacity 0.8s ease-in;
         }
         
         #score {
@@ -2253,11 +2274,16 @@
     </style>
     <!-- New Element System Scripts -->
     <script src="elements/data/loader.js"></script>
+    <!-- Supabase Integration -->
+    <script type="module" src="js/supabase.js"></script>
 </head>
 <body>
     <!-- Splash Screen -->
     <div id="splashScreen">
         <canvas id="splashStarsCanvas"></canvas>
+        <div style="position: absolute; top: 20px; right: 20px; z-index: 10;">
+            <a href="/leaderboard.html" style="color: #4ecdc4; text-decoration: none; font-family: monospace; font-size: 16px;">🏆 Leaderboard</a>
+        </div>
         <div id="splashContent">
             <img src="assets/word-logo.webp" alt="Infinite Snake" id="splashLogo" style="width: 400px; max-width: 80%; margin-bottom: 30px;" onerror="this.style.display='none'; document.getElementById('splashTitle').style.display='block';">
             <h1 id="splashTitle">Infinite Snake</h1>
@@ -2279,8 +2305,8 @@
             <div id="victoryButtons">
                 <div class="victory-column">
                     <h5>🧪 Discovery Race</h5>
-                    <button class="btn-discovery" onclick="selectVictoryMode('discovery', 100)">Discover 100 Elements</button>
-                    <button class="btn-discovery" onclick="selectVictoryMode('discovery', 500)">Discover 500 Elements</button>
+                    <button class="btn-discovery" onclick="selectVictoryMode('discovery', 50)">Discover 50 Elements</button>
+                    <button class="btn-discovery" onclick="selectVictoryMode('discovery', 250)">Discover 250 Elements</button>
                 </div>
                 <div class="victory-column">
                     <h5>⭐ Points Race</h5>
@@ -2417,13 +2443,14 @@
     </div>
     
     <!-- Respawn Overlay -->
-    <div id="respawnOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 60; pointer-events: none;">
-        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+    <div id="respawnOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 60; pointer-events: auto;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; pointer-events: auto;">
             <div style="background: linear-gradient(135deg, rgba(20, 20, 40, 0.95) 0%, rgba(30, 30, 50, 0.9) 100%); 
                         border: 2px solid rgba(255, 68, 68, 0.5); 
                         border-radius: 15px; 
                         padding: 30px 40px;
-                        box-shadow: 0 0 30px rgba(255, 68, 68, 0.3);">
+                        box-shadow: 0 0 30px rgba(255, 68, 68, 0.3);
+                        pointer-events: auto;">
                 <h2 style="color: #ff4444; margin: 0 0 20px 0; font-size: 32px; text-shadow: 0 0 10px rgba(255, 68, 68, 0.5);">Your Form Dissolves Into The Void!</h2>
                 
                 <!-- Stats Summary -->
@@ -2446,13 +2473,61 @@
                     </div>
                 </div>
                 
+                <!-- Leaderboard Submission for Infinite Mode -->
+                <div id="leaderboardSubmission" style="display: none; margin: 20px 0;">
+                    <div style="margin-bottom: 15px;">
+                        <div style="color: #4ecdc4; font-size: 16px; margin-bottom: 10px;">Submit to Global Leaderboard</div>
+                        <div id="playTimeWarning" style="display: none; color: #ff4444; font-size: 14px; margin-bottom: 10px;">
+                            ⚠️ Minimum 10 seconds play time required
+                        </div>
+                        <input type="text" id="usernameInput" placeholder="Enter username..." maxlength="20" 
+                               onkeypress="if(event.key === 'Enter') submitToLeaderboard()"
+                               style="background: rgba(0, 0, 0, 0.5); 
+                                      border: 2px solid #4ecdc4; 
+                                      color: white; 
+                                      padding: 10px; 
+                                      font-size: 16px; 
+                                      font-family: monospace;
+                                      width: 250px;
+                                      text-align: center;
+                                      image-rendering: pixelated;">
+                        <div style="margin-top: 10px;">
+                            <button type="button" id="submitScoreBtn" onclick="submitToLeaderboard()" style="background: #4ecdc4; color: white; border: none; padding: 10px 20px; font-size: 16px; font-family: monospace; cursor: pointer; image-rendering: pixelated; border: 2px solid #4ecdc4; position: relative; z-index: 100;">
+                                SUBMIT SCORE
+                            </button>
+                            <button type="button" id="skipScoreBtn" onclick="skipLeaderboard()" style="background: transparent; color: #AAA; border: 2px solid #666; padding: 10px 20px; font-size: 16px; font-family: monospace; cursor: pointer; margin-left: 10px; image-rendering: pixelated; position: relative; z-index: 100;">
+                                SKIP
+                            </button>
+                        </div>
+                    </div>
+                    <div id="submissionStatus" style="margin-top: 10px; font-size: 14px;"></div>
+                </div>
+                
                 <!-- Respawn Timer -->
-                <div style="font-size: 28px; color: #ff4444; font-weight: bold;">
+                <div id="respawnTimerDiv" style="font-size: 28px; color: #ff4444; font-weight: bold;">
                     Respawn in <span id="respawnTimer">3</span>s
                 </div>
                 
                 <div style="margin-top: 15px; font-size: 14px; color: #AAA;">
                     You will keep 75% of your score
+                </div>
+                
+                <!-- Quick Respawn Button -->
+                <div id="quickRespawnDiv" style="display: none; margin-top: 20px;">
+                    <button onclick="forceRespawn()" 
+                            style="background: #9c88ff; 
+                                   color: white; 
+                                   border: none; 
+                                   padding: 12px 25px; 
+                                   font-size: 16px; 
+                                   font-family: monospace;
+                                   cursor: pointer;
+                                   border: 2px solid #9c88ff;">
+                        RESPAWN NOW
+                    </button>
+                    <div style="margin-top: 10px; font-size: 12px; color: #AAA;">
+                        or press SPACE
+                    </div>
                 </div>
             </div>
         </div>
@@ -2469,6 +2544,7 @@
                 <button class="tab-button active" onclick="switchTab('skins')">Skins</button>
                 <button class="tab-button" onclick="switchTab('journal')">Discovery Journal</button>
                 <button class="tab-button" onclick="switchTab('howto')">How to Play</button>
+                <button class="tab-button" onclick="switchTab('leaderboard')">Leaderboard</button>
             </div>
             
             <!-- Skins Tab -->
@@ -2543,12 +2619,159 @@
                 </div>
             </div>
             
+            <!-- Leaderboard Tab -->
+            <div id="leaderboardTab" class="tab-content">
+                <div style="padding: 20px; max-height: 400px; overflow-y: auto;">
+                    <h4 style="color: #4ecdc4; margin-bottom: 15px; text-align: center;">Global Leaderboard - Infinite Mode</h4>
+                    
+                    <!-- Mini leaderboard tabs -->
+                    <div style="display: flex; margin-bottom: 15px; border-bottom: 2px solid #333;">
+                        <button class="mini-lb-tab active" onclick="loadPauseLeaderboard('daily')" 
+                                style="flex: 1; padding: 10px; background: transparent; border: none; 
+                                       color: #4ecdc4; font-size: 14px; cursor: pointer; font-family: monospace;">
+                            Daily
+                        </button>
+                        <button class="mini-lb-tab" onclick="loadPauseLeaderboard('weekly')" 
+                                style="flex: 1; padding: 10px; background: transparent; border: none; 
+                                       color: #888; font-size: 14px; cursor: pointer; font-family: monospace;">
+                            Weekly
+                        </button>
+                        <button class="mini-lb-tab" onclick="loadPauseLeaderboard('all')" 
+                                style="flex: 1; padding: 10px; background: transparent; border: none; 
+                                       color: #888; font-size: 14px; cursor: pointer; font-family: monospace;">
+                            All Time
+                        </button>
+                    </div>
+                    
+                    <!-- Leaderboard entries -->
+                    <div id="pauseLeaderboardEntries" style="font-family: monospace;">
+                        <div style="color: #888; text-align: center; padding: 20px;">Loading...</div>
+                    </div>
+                    
+                    <button onclick="showLeaderboard()" style="margin-top: 15px; width: 100%; padding: 10px; 
+                                                              background: #4ecdc4; color: white; border: none; 
+                                                              font-size: 16px; cursor: pointer; font-family: monospace;">
+                        View Full Leaderboard
+                    </button>
+                </div>
+            </div>
+            
             <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(138, 43, 226, 0.3);">
                 <button onclick="resumeGame()" style="margin: 10px; padding: 10px 30px; font-size: 18px; background: #4ecdc4; color: white; border: none; border-radius: 10px; cursor: pointer;">Resume</button>
                 <button onclick="location.reload()" style="margin: 10px; padding: 10px 30px; font-size: 18px; background: #ff6b6b; color: white; border: none; border-radius: 10px; cursor: pointer;">New Game</button>
             </div>
         </div>
     </div>
+    
+    <!-- Leaderboard Modal -->
+    <div id="leaderboardModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 100;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+                    width: 90%; max-width: 800px; max-height: 90vh; 
+                    background: linear-gradient(135deg, rgba(20, 20, 40, 0.98) 0%, rgba(30, 30, 50, 0.95) 100%);
+                    border: 3px solid #4ecdc4;
+                    box-shadow: 0 0 20px rgba(78, 205, 196, 0.5);
+                    overflow: hidden;
+                    image-rendering: pixelated;">
+            
+            <!-- Header -->
+            <div style="background: rgba(0, 0, 0, 0.5); padding: 20px; border-bottom: 2px solid #4ecdc4;">
+                <h2 style="color: #4ecdc4; margin: 0; font-family: monospace; font-size: 28px; text-align: center;">
+                    GLOBAL LEADERBOARD
+                </h2>
+                <button onclick="closeLeaderboard()" 
+                        style="position: absolute; top: 15px; right: 15px; 
+                               background: transparent; border: 2px solid #ff4444; 
+                               color: #ff4444; width: 40px; height: 40px; 
+                               font-size: 20px; cursor: pointer; font-family: monospace;">
+                    X
+                </button>
+            </div>
+            
+            <!-- Time Period Tabs -->
+            <div style="display: flex; background: rgba(0, 0, 0, 0.3); border-bottom: 2px solid #333;">
+                <button class="leaderboard-tab active" onclick="switchLeaderboardPeriod('daily')" 
+                        style="flex: 1; padding: 15px; background: transparent; border: none; 
+                               color: #4ecdc4; font-size: 16px; cursor: pointer; 
+                               font-family: monospace; border-right: 2px solid #333;">
+                    DAILY
+                </button>
+                <button class="leaderboard-tab" onclick="switchLeaderboardPeriod('weekly')" 
+                        style="flex: 1; padding: 15px; background: transparent; border: none; 
+                               color: #888; font-size: 16px; cursor: pointer; 
+                               font-family: monospace; border-right: 2px solid #333;">
+                    WEEKLY
+                </button>
+                <button class="leaderboard-tab" onclick="switchLeaderboardPeriod('monthly')" 
+                        style="flex: 1; padding: 15px; background: transparent; border: none; 
+                               color: #888; font-size: 16px; cursor: pointer; 
+                               font-family: monospace; border-right: 2px solid #333;">
+                    MONTHLY
+                </button>
+                <button class="leaderboard-tab" onclick="switchLeaderboardPeriod('all')" 
+                        style="flex: 1; padding: 15px; background: transparent; border: none; 
+                               color: #888; font-size: 16px; cursor: pointer; 
+                               font-family: monospace;">
+                    ALL TIME
+                </button>
+            </div>
+            
+            <!-- Leaderboard Content -->
+            <div id="leaderboardContent" style="padding: 20px; overflow-y: auto; max-height: calc(90vh - 180px);">
+                <!-- Table Header -->
+                <div style="display: grid; grid-template-columns: 60px 200px 100px 100px 100px 80px; 
+                            gap: 10px; padding: 10px; background: rgba(0, 0, 0, 0.3); 
+                            border: 2px solid #333; margin-bottom: 10px; font-family: monospace;">
+                    <div style="color: #888; font-size: 14px;">RANK</div>
+                    <div style="color: #888; font-size: 14px;">NAME</div>
+                    <div style="color: #888; font-size: 14px; text-align: right;">SCORE</div>
+                    <div style="color: #888; font-size: 14px; text-align: right;">ELEMENTS</div>
+                    <div style="color: #888; font-size: 14px; text-align: right;">TIME</div>
+                    <div style="color: #888; font-size: 14px; text-align: right;">KILLS</div>
+                </div>
+                
+                <!-- Leaderboard Entries -->
+                <div id="leaderboardEntries">
+                    <div style="color: #888; text-align: center; padding: 40px; font-family: monospace;">
+                        Loading leaderboard...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <style>
+        .leaderboard-tab.active {
+            color: #4ecdc4 !important;
+            border-bottom: 2px solid #4ecdc4 !important;
+        }
+        
+        .leaderboard-entry {
+            display: grid;
+            grid-template-columns: 60px 200px 100px 100px 100px 80px;
+            gap: 10px;
+            padding: 10px;
+            margin-bottom: 5px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 2px solid transparent;
+            font-family: monospace;
+            transition: all 0.2s;
+        }
+        
+        .leaderboard-entry:hover {
+            background: rgba(78, 205, 196, 0.1);
+            border-color: rgba(78, 205, 196, 0.3);
+        }
+        
+        .leaderboard-entry.player-entry {
+            background: rgba(78, 205, 196, 0.2);
+            border-color: #4ecdc4;
+            animation: pixelPulse 2s steps(2) infinite;
+        }
+        
+        .rank-1 { color: #FFD700; }
+        .rank-2 { color: #C0C0C0; }
+        .rank-3 { color: #CD7F32; }
+    </style>
     
     <script>
         // Mobile detection (needs to be before canvas setup)
@@ -2865,10 +3088,10 @@
         
         // Pixel art star layers for parallax
         const pixelStarLayers = [
-            { stars: [], speed: 0.1, size: 1, color: '#666', count: 100 },  // Far
-            { stars: [], speed: 0.3, size: 1, color: '#999', count: 80 },   // Mid
-            { stars: [], speed: 0.5, size: 2, color: '#CCC', count: 60 },   // Near
-            { stars: [], speed: 0.8, size: 2, color: '#FFF', count: 40 }    // Close
+            { stars: [], speed: 0.05, size: 1, color: '#666', count: 100 },  // Far
+            { stars: [], speed: 0.1, size: 1, color: '#999', count: 80 },   // Mid
+            { stars: [], speed: 0.15, size: 2, color: '#CCC', count: 60 },   // Near
+            { stars: [], speed: 0.2, size: 2, color: '#FFF', count: 40 }    // Close
         ];
         
         // Pixel nebulae - many smaller, organic shapes
@@ -2889,36 +3112,86 @@
             });
         }
         
-        // Pixel planets - many smaller planets
+        // Pixel planets - many smaller planets with grid-based distribution
         const pixelPlanets = [];
-        // Generate many smaller planets
-        for (let i = 0; i < 20; i++) {
-            const planetColors = [
-                { color1: '#8B4513', color2: '#A0522D' },
-                { color1: '#4682B4', color2: '#5F9EA0' },
-                { color1: '#FF6347', color2: '#FF4500' },
-                { color1: '#228B22', color2: '#006400' },
-                { color1: '#DAA520', color2: '#B8860B' },
-                { color1: '#708090', color2: '#2F4F4F' },
-                { color1: '#FF69B4', color2: '#FF1493' },
-                { color1: '#00CED1', color2: '#008B8B' },
-                { color1: '#9370DB', color2: '#6A0DAD' },
-                { color1: '#FF8C00', color2: '#FF6347' },
-                { color1: '#32CD32', color2: '#228B22' }
-            ];
-            const colors = planetColors[Math.floor(Math.random() * planetColors.length)];
-            pixelPlanets.push({
-                x: Math.random() * WORLD_SIZE,
-                y: Math.random() * WORLD_SIZE,
-                radius: 20 + Math.random() * 40, // Much smaller planets
-                color1: colors.color1,
-                color2: colors.color2,
-                rings: Math.random() > 0.7 // 30% chance of rings
-            });
+        // Generate planets in a 5x4 grid for uniform distribution
+        const gridCols = 5;
+        const gridRows = 4;
+        const cellWidth = WORLD_SIZE / gridCols;
+        const cellHeight = WORLD_SIZE / gridRows;
+        
+        for (let row = 0; row < gridRows; row++) {
+            for (let col = 0; col < gridCols; col++) {
+                const planetColors = [
+                    { color1: '#5A3A0D', color2: '#704020' }, // Darker browns
+                    { color1: '#2E5A74', color2: '#3F6E80' }, // Darker blues
+                    { color1: '#B24430', color2: '#B23000' }, // Darker reds
+                    { color1: '#165916', color2: '#004400' }, // Darker greens
+                    { color1: '#9A7016', color2: '#856008' }, // Darker golds
+                    { color1: '#4A5A6A', color2: '#1F2F2F' }, // Darker grays
+                    { color1: '#B2497F', color2: '#B21066' }, // Darker pinks
+                    { color1: '#009091', color2: '#005B5B' }, // Darker cyans
+                    { color1: '#654E92', color2: '#4A0D7A' }, // Darker purples
+                    { color1: '#B26200', color2: '#B24430' }, // Darker oranges
+                    { color1: '#229022', color2: '#165916' }  // Darker lime greens
+                ];
+                const colors = planetColors[Math.floor(Math.random() * planetColors.length)];
+                
+                // Place planet randomly within its grid cell
+                const x = col * cellWidth + (cellWidth * 0.2) + (Math.random() * cellWidth * 0.6);
+                const y = row * cellHeight + (cellHeight * 0.2) + (Math.random() * cellHeight * 0.6);
+                
+                pixelPlanets.push({
+                    x: x,
+                    y: y,
+                    radius: 20 + Math.random() * 40, // Varied planet sizes (20-60)
+                    color1: colors.color1,
+                    color2: colors.color2,
+                    rings: Math.random() > 0.7, // 30% chance of rings
+                    opacity: 0.6 // 40% transparency
+                });
+            }
         }
         
         // Pixel asteroids - will be populated dynamically
         const pixelAsteroids = [];
+        
+        // Asteroid clusters for more interesting space fields
+        const asteroidClusters = [];
+        // Generate 8-10 asteroid clusters
+        const numClusters = 8 + Math.floor(Math.random() * 3);
+        for (let i = 0; i < numClusters; i++) {
+            const clusterX = Math.random() * WORLD_SIZE;
+            const clusterY = Math.random() * WORLD_SIZE;
+            const clusterRadius = 200 + Math.random() * 100; // 200-300 pixel radius
+            const numAsteroids = 15 + Math.floor(Math.random() * 11); // 15-25 asteroids per cluster
+            
+            const cluster = {
+                x: clusterX,
+                y: clusterY,
+                radius: clusterRadius,
+                asteroids: []
+            };
+            
+            for (let j = 0; j < numAsteroids; j++) {
+                const angle = Math.random() * Math.PI * 2;
+                const distance = Math.random() * clusterRadius;
+                const asteroidX = clusterX + Math.cos(angle) * distance;
+                const asteroidY = clusterY + Math.sin(angle) * distance;
+                
+                cluster.asteroids.push({
+                    x: asteroidX,
+                    y: asteroidY,
+                    size: 2 + Math.random() * 6, // Smaller asteroids in clusters (2-8 pixels)
+                    rotation: Math.random() * Math.PI * 2,
+                    rotationSpeed: (Math.random() - 0.5) * 0.02,
+                    driftX: (Math.random() - 0.5) * 0.1,
+                    driftY: (Math.random() - 0.5) * 0.1
+                });
+            }
+            
+            asteroidClusters.push(cluster);
+        }
         
         // Nebula border effect variables
         let borderParticles = [];
@@ -3075,10 +3348,10 @@
                 allTimeDiscoveries = new Map(data);
             } else {
                 // Initialize with base elements using numeric IDs
-                allTimeDiscoveries.set(0, 'Base Element');  // Fire
+                allTimeDiscoveries.set(0, 'Base Element');  // Earth
                 allTimeDiscoveries.set(1, 'Base Element');  // Water
-                allTimeDiscoveries.set(2, 'Base Element');  // Earth
-                allTimeDiscoveries.set(3, 'Base Element');  // Air
+                allTimeDiscoveries.set(2, 'Base Element');  // Air
+                allTimeDiscoveries.set(3, 'Base Element');  // Fire
                 saveAllTimeDiscoveries();
             }
         }
@@ -3137,6 +3410,15 @@
                 toggleMusic();
             }
             
+            // Quick respawn with Space key
+            if (e.key === ' ' && playerSnake && !playerSnake.alive && playerRespawnTimer > 0) {
+                const quickRespawnDiv = document.getElementById('quickRespawnDiv');
+                if (quickRespawnDiv && quickRespawnDiv.style.display !== 'none') {
+                    e.preventDefault(); // Prevent page scroll
+                    forceRespawn();
+                }
+            }
+            
             // Resume pending music on first interaction
             if (window.pendingMusicTrack && !musicMuted) {
                 window.pendingMusicTrack.play().then(() => {
@@ -3181,7 +3463,7 @@
                 mouseDown = true;
                 
                 // Spawn shooting star on click (like in demo)
-                if (gameStarted && !gameOver) {
+                if (gameStarted) {
                     shootingStars.push(new ShootingStar());
                 }
             }
@@ -3246,8 +3528,6 @@
             
             setTimeout(() => {
                 gameModeSelect.style.opacity = '0';
-                // Discovery feed is always visible during gameplay
-                gameCanvas.style.opacity = '1';
                 
                 setTimeout(() => {
                     gameModeSelect.style.display = 'none';
@@ -3257,6 +3537,11 @@
                         transitionBg.remove();
                         stopGame(); // Ensure clean state before starting
                         startGame();
+                        // Only show canvas and UI after game starts
+                        setTimeout(() => {
+                            gameCanvas.style.opacity = '1';
+                            document.getElementById('ui').style.opacity = '1';
+                        }, 100);
                     }, 1000);
                 }, 100);
             }, 500);
@@ -3354,6 +3639,10 @@
                 }
                 
                 console.log(`Loaded ${window.elementLoader.elements.size} elements and ${Object.keys(window.elementLoader.combinations).length} combinations`);
+                
+                // Debug: Show some example combinations
+                const sampleCombos = Object.entries(window.elementLoader.combinations).slice(0, 5);
+                console.log('Sample combinations:', sampleCombos);
                 
                 // Create minimal elementDatabase for compatibility
                 elementDatabase = {
@@ -3789,7 +4078,6 @@
                 
                 this.elements = [];
                 this.maxVisibleElements = 6; // Fixed max of 6 visible element slots
-                this.overflowElements = 0; // Count of elements beyond visible slots (for length calculation)
                 this.elementsEaten = 0; // Track total elements eaten
                 this.length = 10;
                 this.score = 0;
@@ -4051,11 +4339,43 @@
             checkCombinations(depth = 0) {
                 if (this.elements.length < 2) return;
                 
+                // Safety check - ensure we never exceed max elements
+                if (this.elements.length > this.maxVisibleElements) {
+                    console.error('[CRITICAL] Elements array exceeds max visible elements!', this.elements.length);
+                    // Trim to max size
+                    this.elements = this.elements.slice(0, this.maxVisibleElements);
+                }
+                
                 // Limit chain reaction depth
                 const MAX_CHAIN_DEPTH = 3;
                 if (depth >= MAX_CHAIN_DEPTH) {
                     console.log('[DEBUG] Max chain reaction depth reached, stopping');
                     return;
+                }
+                
+                // Log bank state periodically for player
+                if (this.isPlayer && depth === 0 && Math.random() < 0.1) {
+                    console.log('[BANK STATE] Current elements:', this.elements.map(id => {
+                        const elem = window.elementLoader.elements.get(id);
+                        return elem ? `${id}:${elem.n}` : `${id}:?`;
+                    }), 'Bank size:', this.elements.length, '/', this.maxVisibleElements);
+                    
+                    // Log all possible combinations
+                    const combosFound = [];
+                    for (let i = 0; i < this.elements.length; i++) {
+                        for (let j = i + 1; j < this.elements.length; j++) {
+                            const id1 = this.elements[i];
+                            const id2 = this.elements[j];
+                            const key = `${Math.min(id1, id2)}+${Math.max(id1, id2)}`;
+                            const resultId = window.elementLoader && window.elementLoader.combinations ? window.elementLoader.combinations[key] : null;
+                            if (resultId) {
+                                combosFound.push(`${key} → ${resultId}`);
+                            }
+                        }
+                    }
+                    if (combosFound.length > 0) {
+                        console.log('[POSSIBLE COMBOS]', combosFound);
+                    }
                 }
                 
                 // Find all possible combinations
@@ -4073,8 +4393,8 @@
                             const key = `${Math.min(id1, id2)}+${Math.max(id1, id2)}`;
                             resultId = window.elementLoader.combinations[key];
                             
-                            if (depth === 0 && i === 0 && j === 1) {
-                                console.log('[DEBUG] Checking combination:', key, '→', resultId);
+                            if (depth === 0 && this.isPlayer && possibleCombos.length === 0 && resultId) {
+                                console.log('[AUTO-COMBO] Found combination in bank:', key, '→', resultId);
                             }
                         }
                         
@@ -4234,17 +4554,42 @@
                     playEatSound();
                 }
                 
+                // Safety check - ensure we never have more than max elements
+                if (this.elements.length > this.maxVisibleElements) {
+                    console.error('[CRITICAL] Bank already exceeds maximum!', this.elements.length);
+                    this.elements = this.elements.slice(0, this.maxVisibleElements);
+                }
+                
                 // Check if we have space in visible slots
                 if (this.elements.length >= this.maxVisibleElements) {
                     // At visible capacity - check if new element can combine with any existing
                     const newElementId = element.id;
                     let combined = false;
                     
+                    // Add safety check for elementLoader
+                    if (!window.elementLoader || !window.elementLoader.combinations) {
+                        console.error('[ERROR] ElementLoader or combinations not loaded!');
+                        return;
+                    }
+                    
                     // Check combinations with all existing elements
                     for (let i = 0; i < this.elements.length && !combined; i++) {
                         const existingId = this.elements[i];
+                        // Use min/max to ensure consistent key order
                         const comboKey = `${Math.min(newElementId, existingId)}+${Math.max(newElementId, existingId)}`;
                         const resultId = window.elementLoader.combinations[comboKey];
+                        
+                        // Debug log
+                        if (this.isPlayer) {
+                            console.log(`[BANK FULL] Checking combination: ${comboKey} = ${resultId}`, {
+                                newElementId,
+                                existingId,
+                                existingElement: window.elementLoader.elements.get(existingId),
+                                newElement: window.elementLoader.elements.get(newElementId),
+                                combinationsLoaded: Object.keys(window.elementLoader.combinations).length,
+                                bankSlot: i
+                            });
+                        }
                         
                         if (resultId) {
                             // Found a combination! Replace the existing element with the result
@@ -4273,6 +4618,17 @@
                                 
                                 if (this.isPlayer && this === playerSnake) {
                                     discoveredElements.add(resultId);
+                                    
+                                    // Track discovery event
+                                    if (supabaseModule && supabaseModule.addGameEvent) {
+                                        supabaseModule.addGameEvent('discovery', {
+                                            element_id: resultId,
+                                            element_name: resultData?.n || 'Unknown',
+                                            recipe: [newElementId, existingId],
+                                            score: this.score,
+                                            total_discoveries: this.discoveries
+                                        });
+                                    }
                                     
                                     // Save discovery
                                     const elem1Data = window.elementLoader.elements.get(newElementId);
@@ -4321,17 +4677,34 @@
                     }
                     
                     if (!combined) {
-                        // No combination found - just count as overflow
-                        this.overflowElements++;
+                        // No combination found with the new element
+                        // Force a check for existing combinations in the bank
+                        console.log('[BANK FULL] No combo with new element, checking existing bank combinations...');
+                        this.checkCombinations();
+                        
+                        // Bank is full and no combination possible - element is lost
                     }
                 } else {
-                    // We have space - add element to a random position
-                    const insertIndex = Math.floor(Math.random() * (this.elements.length + 1));
-                    this.elements.splice(insertIndex, 0, element.id);
-                    
-                    // Check for immediate combinations after adding
-                    if (this.elements.length >= 2) {
-                        this.checkCombinations();
+                    // We have space - add element to a random position within the 6 slots
+                    // Ensure we never exceed maxVisibleElements
+                    if (this.elements.length < this.maxVisibleElements) {
+                        const insertIndex = Math.floor(Math.random() * (this.elements.length + 1));
+                        this.elements.splice(insertIndex, 0, element.id);
+                        
+                        if (this.isPlayer) {
+                            console.log(`[ELEMENT ADDED] Bank now has ${this.elements.length} elements:`, this.elements.map(id => {
+                                const elem = window.elementLoader.elements.get(id);
+                                return elem ? `${id}:${elem.n}` : `${id}:?`;
+                            }));
+                        }
+                        
+                        // Check for immediate combinations after adding
+                        if (this.elements.length >= 2) {
+                            this.checkCombinations();
+                        }
+                    } else {
+                        // This should never happen if our logic is correct
+                        console.error('[ERROR] Trying to add element when bank is already full!');
                     }
                 }
                 
@@ -4428,10 +4801,36 @@
                 console.trace();
                 this.alive = false;
                 
-                // Drop all elements
+                // Drop all elements with scatter effect
                 for (let i = 0; i < this.elements.length && i < this.segments.length; i++) {
                     const segment = this.segments[i];
-                    spawnElement(this.elements[i], segment.x, segment.y);
+                    
+                    // Calculate scatter radius based on position in snake
+                    // Head elements scatter less, tail elements scatter more
+                    const baseRadius = 30; // Base scatter radius
+                    const maxRadius = 80; // Maximum scatter radius
+                    const radiusProgress = i / Math.max(1, this.elements.length - 1); // 0 to 1
+                    const scatterRadius = baseRadius + (maxRadius - baseRadius) * radiusProgress;
+                    
+                    // Random angle for circular distribution
+                    const angle = Math.random() * Math.PI * 2;
+                    
+                    // Calculate offset with some randomness
+                    const actualRadius = scatterRadius * (0.5 + Math.random() * 0.5); // 50% to 100% of radius
+                    const offsetX = Math.cos(angle) * actualRadius;
+                    const offsetY = Math.sin(angle) * actualRadius;
+                    
+                    // Calculate final position
+                    let finalX = segment.x + offsetX;
+                    let finalY = segment.y + offsetY;
+                    
+                    // Ensure elements stay within world bounds
+                    const margin = 50;
+                    finalX = Math.max(margin, Math.min(WORLD_SIZE - margin, finalX));
+                    finalY = Math.max(margin, Math.min(WORLD_SIZE - margin, finalY));
+                    
+                    // Spawn the element at the scattered position
+                    spawnElement(this.elements[i], finalX, finalY);
                 }
                 
                 // Create death particles scaled to snake size
@@ -4454,6 +4853,17 @@
                 if (killer && killer.alive) {
                     killer.score += 500; // 500 points for snake explosion
                     killer.kills++; // Increment kill count
+                    
+                    // Track kill event if player is the killer
+                    if (killer.isPlayer && supabaseModule && supabaseModule.addGameEvent) {
+                        supabaseModule.addGameEvent('kill', {
+                            victim_name: this.name,
+                            victim_score: this.score,
+                            victim_length: this.body.length,
+                            killer_score: killer.score,
+                            total_kills: killer.kills
+                        });
+                    }
                     
                     // Check for new high score if player
                     if (killer.isPlayer && killer.score > highScore) {
@@ -5387,12 +5797,13 @@
                 // Draw pixelated combination glow if this element will combine when eaten
                 if (this.pendingCombination) {
                     const pixelSize = 8;
-                    ctx.fillStyle = 'rgba(255, 215, 0, 0.5)';
+                    const glowIntensity = 0.3 + Math.sin(Date.now() * 0.005) * 0.3; // Pulsing glow
+                    ctx.fillStyle = `rgba(255, 215, 0, ${glowIntensity})`;
                     
-                    // Draw pixelated glow pattern
-                    for (let px = -3; px <= 3; px++) {
-                        for (let py = -3; py <= 3; py++) {
-                            if (Math.abs(px) + Math.abs(py) <= 5) {
+                    // Draw larger pixelated glow pattern
+                    for (let px = -4; px <= 4; px++) {
+                        for (let py = -4; py <= 4; py++) {
+                            if (Math.abs(px) + Math.abs(py) <= 6) {
                                 ctx.fillRect(
                                     Math.floor((screenX + px * pixelSize) / pixelSize) * pixelSize,
                                     Math.floor((screenY + py * pixelSize) / pixelSize) * pixelSize,
@@ -6002,6 +6413,18 @@
                 this.maxTrailLength = 20;
                 this.life = 1.0;
                 this.fadeSpeed = 0.01; // Slower fade for 1-2 second visibility
+                
+                // Add color variety
+                const colorSchemes = [
+                    { star: '#FFFF00', trail: '#FFFFFF' }, // Classic yellow/white
+                    { star: '#00FFFF', trail: '#E0FFFF' }, // Cyan/light blue
+                    { star: '#FFE4B5', trail: '#FFF8DC' }, // Pale yellow/cream
+                    { star: '#FF69B4', trail: '#FFB6C1' }, // Pink/light pink
+                    { star: '#98FB98', trail: '#F0FFF0' }  // Pale green/honeydew
+                ];
+                const scheme = colorSchemes[Math.floor(Math.random() * colorSchemes.length)];
+                this.starColor = scheme.star;
+                this.trailColor = scheme.trail;
             }
             
             update(deltaTime = 1) {
@@ -6040,7 +6463,7 @@
                     const screenY = point.y - camera.y + canvas.height / 2;
                     
                     ctx.globalAlpha = point.alpha * 0.5;
-                    ctx.fillStyle = '#FFFFFF';
+                    ctx.fillStyle = this.trailColor;
                     const size = Math.max(pixelSize, Math.floor((index / this.trail.length) * 3) * pixelSize);
                     
                     ctx.fillRect(
@@ -6056,7 +6479,7 @@
                 const screenY = this.y - camera.y + canvas.height / 2;
                 
                 ctx.globalAlpha = this.life;
-                ctx.fillStyle = '#FFFF00';
+                ctx.fillStyle = this.starColor;
                 ctx.fillRect(
                     Math.floor(screenX / pixelSize) * pixelSize,
                     Math.floor(screenY / pixelSize) * pixelSize,
@@ -6228,7 +6651,7 @@
                             }
                             
                             // SPECIAL CASE: Heavily reduce Fire element after early game
-                            if (elemId === 3 && discoveryCount > 10) { // Fire element ID is 3
+                            if (elemId === 3 && discoveryCount > 10) { // Fire element ID is 3 (correct)
                                 weight *= 0.1; // 90% reduction for Fire after 10 discoveries
                             }
                             
@@ -6527,7 +6950,7 @@
             const emoji2 = window.elementLoader.getEmojiForElement(id2, elem2Data.e);
             const emojiResult = window.elementLoader.getEmojiForElement(resultId, resultData.e);
             
-            let message = `${emoji1} + ${emoji2} = ${emojiResult} ${resultData.n}`;
+            let message = `${emoji1} ${elem1Data.n} + ${emoji2} ${elem2Data.n} = ${emojiResult} ${resultData.n}`;
             if (isNew) {
                 message = `New Discovery! ${message}`;
                 // Update discovery log for new discoveries
@@ -6827,6 +7250,369 @@
             }
         }
         
+        // Leaderboard Integration Variables
+        console.log('Leaderboard script section loaded');
+        let supabaseModule = null;
+        let leaderboardSubmitted = false;
+        let currentGameSessionId = null;
+        let gameSessionStartTime = null;
+        
+        // Test function to verify script is working
+        window.testLeaderboard = function() {
+            console.log('Test function called successfully');
+            console.log('supabaseModule:', supabaseModule);
+            console.log('leaderboardSubmitted:', leaderboardSubmitted);
+            console.log('gameSessionStartTime:', gameSessionStartTime);
+            console.log('submitToLeaderboard function:', window.submitToLeaderboard);
+            console.log('skipLeaderboard function:', window.skipLeaderboard);
+        }
+        
+        // Initialize Supabase when the module loads
+        async function initSupabase() {
+            try {
+                console.log('Initializing Supabase...');
+                supabaseModule = await import('./js/supabase.js');
+                await supabaseModule.initializeAuth();
+                console.log('Supabase initialized successfully');
+                
+                // Update any waiting submission forms
+                const statusEl = document.getElementById('submissionStatus');
+                if (statusEl && statusEl.textContent.includes('not ready')) {
+                    statusEl.innerHTML = '';
+                }
+            } catch (error) {
+                console.error('Failed to initialize Supabase:', error);
+                // Show error in submission status if visible
+                const statusEl = document.getElementById('submissionStatus');
+                if (statusEl) {
+                    statusEl.innerHTML = '<span style="color: #ff4444;">Leaderboard service unavailable</span>';
+                }
+            }
+        }
+        
+        // Call this when the game starts
+        initSupabase();
+        
+        // Add event listeners when elements become visible
+        function setupLeaderboardListeners() {
+            console.log('Setting up leaderboard button listeners');
+            
+            // Only set up the username input Enter key listener
+            // The buttons already have onclick attributes, so we don't need to add more listeners
+            const usernameInput = document.getElementById('usernameInput');
+            if (usernameInput && !usernameInput.hasListener) {
+                usernameInput.hasListener = true;
+                usernameInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        console.log('Enter key pressed in username input');
+                        window.submitToLeaderboard();
+                    }
+                });
+            }
+            
+            console.log('Leaderboard listeners setup complete');
+        }
+        
+        // Try to set up listeners on page load and when respawn overlay is shown
+        document.addEventListener('DOMContentLoaded', setupLeaderboardListeners);
+        
+        // Also expose it globally so we can call it when the overlay is shown
+        window.setupLeaderboardListeners = setupLeaderboardListeners;
+        
+        // Submit score to leaderboard
+        window.submitToLeaderboard = async function() {
+            console.log('submitToLeaderboard called - Button click registered!');
+            
+            // Visual feedback
+            const submitBtn = document.getElementById('submitScoreBtn');
+            if (submitBtn) {
+                submitBtn.style.opacity = '0.7';
+            }
+            
+            // Check if Supabase module is loaded
+            if (!supabaseModule) {
+                console.error('Supabase module not loaded');
+                document.getElementById('submissionStatus').innerHTML = 
+                    '<span style="color: #ff4444;">Leaderboard service not ready. Please try again.</span>';
+                if (submitBtn) {
+                    submitBtn.style.opacity = '1';
+                }
+                return;
+            }
+            
+            // Check if already submitted
+            if (leaderboardSubmitted) {
+                console.log('Score already submitted');
+                return;
+            }
+            
+            const usernameInput = document.getElementById('usernameInput');
+            const username = usernameInput.value.trim();
+            
+            if (!username) {
+                document.getElementById('submissionStatus').innerHTML = 
+                    '<span style="color: #ff4444;">Please enter a username</span>';
+                return;
+            }
+            
+            // Check minimum play time
+            const playTime = gameSessionStartTime ? 
+                Math.floor((Date.now() - gameSessionStartTime) / 1000) : 0;
+            
+            if (playTime < 10) {
+                document.getElementById('submissionStatus').innerHTML = 
+                    `<span style="color: #ff4444;">Play for at least 10 seconds (current: ${playTime}s)</span>`;
+                return;
+            }
+            
+            // Store username for future use
+            localStorage.setItem('lastUsername', username);
+            
+            // Reuse the submitBtn variable from earlier
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'SUBMITTING...';
+            
+            document.getElementById('submissionStatus').innerHTML = 
+                '<span style="color: #4ecdc4;">Submitting score...</span>';
+            
+            try {
+                console.log('Submitting score for player:', username);
+                
+                // Calculate play time in seconds
+                const playTime = gameSessionStartTime ? 
+                    Math.floor((Date.now() - gameSessionStartTime) / 1000) : 0;
+                
+                console.log('Score data:', {
+                    username,
+                    score: Math.floor(playerSnake.score),
+                    elements: playerDiscoveredElements.size,
+                    playTime,
+                    kills: playerSnake.kills
+                });
+                
+                // Check validation rules
+                console.log('Validation checks:');
+                console.log('- Play time >= 10s:', playTime >= 10);
+                console.log('- Score <= playTime * 200:', Math.floor(playerSnake.score) <= (playTime * 200));
+                console.log('- Elements <= playTime * 10:', playerDiscoveredElements.size <= (playTime * 10));
+                console.log('- Kills <= playTime * 2:', playerSnake.kills <= (playTime * 2));
+                
+                let result;
+                try {
+                    result = await supabaseModule.submitScore(
+                        username,
+                        Math.floor(playerSnake.score),
+                        playerDiscoveredElements.size,
+                        playTime,
+                        playerSnake.kills
+                    );
+                    console.log('Submission result:', result);
+                } catch (supabaseError) {
+                    console.error('Supabase error details:', supabaseError);
+                    
+                    // Extract error message from Supabase error
+                    let errorMsg = 'Score validation failed';
+                    if (supabaseError.message) {
+                        errorMsg = supabaseError.message;
+                    }
+                    if (supabaseError.details) {
+                        errorMsg = supabaseError.details;
+                    }
+                    
+                    throw new Error(errorMsg);
+                }
+                
+                // If we got here, submission was successful
+                if (result !== null && result !== undefined) {
+                    leaderboardSubmitted = true;
+                    const rank = result.daily_rank || result.rank || result || 'Submitted';
+                    document.getElementById('submissionStatus').innerHTML = 
+                        `<span style="color: #4ecdc4;">Score submitted! ${typeof rank === 'number' ? `Daily Rank: #${rank}` : ''}</span>`;
+                    
+                    // Re-enable submit button after successful submission
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'SUBMIT SCORE';
+                    submitBtn.style.opacity = '1';
+                    
+                    // Hide submission form and show respawn timer after short delay
+                    setTimeout(() => {
+                        document.getElementById('leaderboardSubmission').style.display = 'none';
+                        document.getElementById('respawnTimerDiv').style.display = 'block';
+                        document.getElementById('quickRespawnDiv').style.display = 'block';
+                    }, 2000);
+                } else {
+                    throw new Error('No response from server');
+                }
+            } catch (error) {
+                console.error('Leaderboard submission error:', error);
+                
+                // Check if it's a Supabase error with details
+                let errorMessage = 'Score validation failed';
+                if (error.message) {
+                    errorMessage = error.message;
+                }
+                if (error.details) {
+                    console.error('Error details:', error.details);
+                }
+                if (error.code) {
+                    console.error('Error code:', error.code);
+                }
+                
+                document.getElementById('submissionStatus').innerHTML = 
+                    `<span style="color: #ff4444;">Failed to submit: ${errorMessage}</span>`;
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'SUBMIT SCORE';
+                submitBtn.style.opacity = '1';
+            }
+        }
+        
+        // Skip leaderboard submission
+        window.skipLeaderboard = function() {
+            console.log('skipLeaderboard called - Skip button clicked!');
+            
+            // Visual feedback
+            const skipBtn = document.getElementById('skipScoreBtn');
+            if (skipBtn) {
+                skipBtn.style.opacity = '0.7';
+            }
+            
+            leaderboardSubmitted = true;
+            document.getElementById('leaderboardSubmission').style.display = 'none';
+            document.getElementById('respawnTimerDiv').style.display = 'block';
+            document.getElementById('quickRespawnDiv').style.display = 'block';
+            
+            console.log('Skip successful - showing respawn timer');
+        }
+        
+        // Force immediate respawn
+        window.forceRespawn = function() {
+            console.log('forceRespawn called');
+            if (playerRespawnTimer > 0) {
+                playerRespawnTimer = 100; // Set to almost 0 to trigger respawn
+            }
+        }
+        
+        // Leaderboard UI Functions
+        let currentLeaderboardPeriod = 'daily';
+        let leaderboardData = [];
+        
+        window.showLeaderboard = async function() {
+            document.getElementById('leaderboardModal').style.display = 'block';
+            await loadLeaderboard(currentLeaderboardPeriod);
+        }
+        
+        window.closeLeaderboard = function() {
+            document.getElementById('leaderboardModal').style.display = 'none';
+        }
+        
+        window.switchLeaderboardPeriod = async function(period) {
+            currentLeaderboardPeriod = period;
+            
+            // Update tab styles
+            document.querySelectorAll('.leaderboard-tab').forEach(tab => {
+                tab.classList.remove('active');
+                tab.style.color = '#888';
+            });
+            event.target.classList.add('active');
+            event.target.style.color = '#4ecdc4';
+            
+            await loadLeaderboard(period);
+        }
+        
+        // Load mini leaderboard for pause menu
+        let currentPauseLBPeriod = 'daily';
+        
+        window.loadPauseLeaderboard = async function(period) {
+            currentPauseLBPeriod = period;
+            
+            // Update mini tab styles
+            document.querySelectorAll('.mini-lb-tab').forEach(tab => {
+                tab.classList.remove('active');
+                tab.style.color = '#888';
+            });
+            event.target.classList.add('active');
+            event.target.style.color = '#4ecdc4';
+            
+            if (!supabaseModule) return;
+            
+            const entriesDiv = document.getElementById('pauseLeaderboardEntries');
+            entriesDiv.innerHTML = '<div style="color: #888; text-align: center; padding: 20px;">Loading...</div>';
+            
+            try {
+                const data = await supabaseModule.getLeaderboard(period, 10); // Top 10 only
+                
+                if (!data || data.length === 0) {
+                    entriesDiv.innerHTML = '<div style="color: #888; text-align: center; padding: 20px;">No scores yet. Be the first!</div>';
+                    return;
+                }
+                
+                const currentUsername = localStorage.getItem('lastUsername');
+                
+                entriesDiv.innerHTML = data.map(entry => {
+                    const isPlayer = currentUsername && entry.username === currentUsername;
+                    const rankClass = entry.rank <= 3 ? `rank-${entry.rank}` : '';
+                    
+                    return `
+                        <div style="display: flex; justify-content: space-between; padding: 8px; 
+                                    background: ${isPlayer ? 'rgba(78, 205, 196, 0.2)' : 'rgba(0, 0, 0, 0.2)'}; 
+                                    margin-bottom: 5px; border: 2px solid ${isPlayer ? '#4ecdc4' : 'transparent'};">
+                            <span class="${rankClass}" style="font-weight: bold;">#${entry.rank}</span>
+                            <span style="color: ${isPlayer ? '#4ecdc4' : '#FFF'}; flex: 1; margin: 0 10px; overflow: hidden; text-overflow: ellipsis;">${entry.username}</span>
+                            <span style="color: #4ecdc4;">${entry.score.toLocaleString()}</span>
+                        </div>
+                    `;
+                }).join('');
+                
+            } catch (error) {
+                console.error('Failed to load pause leaderboard:', error);
+                entriesDiv.innerHTML = '<div style="color: #ff4444; text-align: center; padding: 20px;">Failed to load</div>';
+            }
+        }
+        
+        async function loadLeaderboard(period) {
+            if (!supabaseModule) return;
+            
+            const entriesDiv = document.getElementById('leaderboardEntries');
+            entriesDiv.innerHTML = '<div style="color: #888; text-align: center; padding: 40px; font-family: monospace;">Loading leaderboard...</div>';
+            
+            try {
+                leaderboardData = await supabaseModule.getLeaderboard(period, 100);
+                
+                if (!leaderboardData || leaderboardData.length === 0) {
+                    entriesDiv.innerHTML = '<div style="color: #888; text-align: center; padding: 40px; font-family: monospace;">No scores yet. Be the first!</div>';
+                    return;
+                }
+                
+                // Get current player's username to highlight their entries
+                const currentUsername = localStorage.getItem('lastUsername');
+                
+                entriesDiv.innerHTML = leaderboardData.map(entry => {
+                    const isPlayer = currentUsername && entry.username === currentUsername;
+                    const rankClass = entry.rank <= 3 ? `rank-${entry.rank}` : '';
+                    
+                    // Format time from seconds to MM:SS
+                    const minutes = Math.floor(entry.play_time / 60);
+                    const seconds = entry.play_time % 60;
+                    const timeStr = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                    
+                    return `
+                        <div class="leaderboard-entry ${isPlayer ? 'player-entry' : ''}">
+                            <div class="${rankClass}" style="font-size: 16px; font-weight: bold;">#${entry.rank}</div>
+                            <div style="color: ${isPlayer ? '#4ecdc4' : '#FFF'}; overflow: hidden; text-overflow: ellipsis;">${entry.username}</div>
+                            <div style="color: #4ecdc4; text-align: right;">${entry.score.toLocaleString()}</div>
+                            <div style="color: #FFD700; text-align: right;">${entry.elements_discovered}</div>
+                            <div style="color: #AAA; text-align: right;">${timeStr}</div>
+                            <div style="color: #ff6b6b; text-align: right;">${entry.kills}</div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Failed to load leaderboard:', error);
+                entriesDiv.innerHTML = '<div style="color: #ff4444; text-align: center; padding: 40px; font-family: monospace;">Failed to load leaderboard. Please try again.</div>';
+            }
+        }
+        
         function updateUI() {
             if (!playerSnake) return;
             
@@ -6846,6 +7632,43 @@
                     document.getElementById('respawnRank').textContent = '#' + (bestRank || 1);
                     document.getElementById('respawnKills').textContent = playerSnake.kills;
                     document.getElementById('respawnTimer').textContent = respawnSeconds;
+                    
+                    // Show leaderboard submission for infinite mode if not already submitted
+                    if (gameMode === 'infinite' && !leaderboardSubmitted && playerSnake.score > 0) {
+                        document.getElementById('leaderboardSubmission').style.display = 'block';
+                        document.getElementById('respawnTimerDiv').style.display = 'none';
+                        
+                        // Check play time and show warning if needed
+                        const playTime = gameSessionStartTime ? 
+                            Math.floor((Date.now() - gameSessionStartTime) / 1000) : 0;
+                        const playTimeWarning = document.getElementById('playTimeWarning');
+                        if (playTime < 10) {
+                            playTimeWarning.style.display = 'block';
+                            playTimeWarning.innerHTML = `⚠️ Minimum 10 seconds play time required (played: ${playTime}s)`;
+                        } else {
+                            playTimeWarning.style.display = 'none';
+                        }
+                        
+                        // Pre-fill username if available
+                        const lastUsername = localStorage.getItem('lastUsername');
+                        if (lastUsername) {
+                            document.getElementById('usernameInput').value = lastUsername;
+                        }
+                        
+                        // Focus username input and setup listeners
+                        setTimeout(() => {
+                            document.getElementById('usernameInput').focus();
+                            // Setup button listeners after elements are visible
+                            window.setupLeaderboardListeners();
+                        }, 100);
+                    } else {
+                        document.getElementById('leaderboardSubmission').style.display = 'none';
+                        document.getElementById('respawnTimerDiv').style.display = 'block';
+                        // Show quick respawn if already submitted or no score
+                        if (leaderboardSubmitted || playerSnake.score === 0) {
+                            document.getElementById('quickRespawnDiv').style.display = 'block';
+                        }
+                    }
                 }
                 
                 return; // Don't update other UI elements while dead
@@ -6854,6 +7677,11 @@
                 const respawnOverlay = document.getElementById('respawnOverlay');
                 if (respawnOverlay) {
                     respawnOverlay.style.display = 'none';
+                }
+                // Also hide quick respawn div
+                const quickRespawnDiv = document.getElementById('quickRespawnDiv');
+                if (quickRespawnDiv) {
+                    quickRespawnDiv.style.display = 'none';
                 }
             }
             
@@ -7047,6 +7875,7 @@
                                 const comboKey = `${Math.min(element.id, bankElementId)}+${Math.max(element.id, bankElementId)}`;
                                 if (window.elementLoader && window.elementLoader.combinations[comboKey]) {
                                     element.pendingCombination = true;
+                                    element.combiningAnimation = 0.5; // Start animation immediately
                                     break;
                                 }
                             }
@@ -7504,7 +8333,7 @@
                         screenY < -10 || screenY > canvas.height + 10) return;
                     
                     // Twinkle effect
-                    star.twinkle += 0.05;
+                    star.twinkle += 0.03; // Slower, more subtle twinkling
                     const brightness = 0.5 + Math.sin(star.twinkle) * 0.5;
                     
                     ctx.fillStyle = layer.color;
@@ -7530,8 +8359,8 @@
             
             // Draw pixel grid using cached pattern - optimized
             const gridSize = 64;
-            const offsetX = (camera.x * 0.1) % gridSize;
-            const offsetY = (camera.y * 0.1) % gridSize;
+            const offsetX = (camera.x * 0.05) % gridSize;
+            const offsetY = (camera.y * 0.05) % gridSize;
             
             // Use the cached grid pattern
             ctx.save();
@@ -7759,7 +8588,7 @@
         // Draw pixel planets with parallax
         function drawPixelPlanets() {
             pixelPlanets.forEach((planet, i) => {
-                const parallaxFactor = 0.3 + i * 0.1;
+                const parallaxFactor = 0.3 + i * 0.05; // Increased parallax for better visibility
                 const x = planet.x - camera.x * parallaxFactor + canvas.width / 2;
                 const y = planet.y - camera.y * parallaxFactor + canvas.height / 2;
                 
@@ -7767,13 +8596,17 @@
                 if (x < -planet.radius * 2 || x > canvas.width + planet.radius * 2 ||
                     y < -planet.radius * 2 || y > canvas.height + planet.radius * 2) return;
                 
-                drawPixelPlanet(x, y, planet.radius, planet.color1, planet.color2, planet.rings);
+                drawPixelPlanet(x, y, planet.radius, planet.color1, planet.color2, planet.rings, planet.opacity);
             });
         }
         
         // Draw a single pixel planet
-        function drawPixelPlanet(x, y, radius, color1, color2, hasRings) {
+        function drawPixelPlanet(x, y, radius, color1, color2, hasRings, opacity = 1) {
             const pixelSize = 4;
+            
+            // Save context for opacity
+            ctx.save();
+            ctx.globalAlpha = opacity;
             
             // Create blocky circle - optimized with squared distance
             const radiusSquared = radius * radius;
@@ -7813,6 +8646,7 @@
             
             // Rings
             if (hasRings) {
+                ctx.globalAlpha = opacity * 0.5; // Rings at 50% of planet's opacity
                 ctx.strokeStyle = '#D2691E';
                 ctx.lineWidth = 2;
                 ctx.beginPath();
@@ -7828,6 +8662,9 @@
                     ctx.fillRect(rx - 2, ry - 2, 4, 4);
                 }
             }
+            
+            // Restore context
+            ctx.restore();
         }
         
         // Draw pixel asteroids with parallax
@@ -7847,8 +8684,8 @@
             
             // Draw asteroids
             pixelAsteroids.forEach(asteroid => {
-                const x = asteroid.x - camera.x * 0.5 + canvas.width / 2;
-                const y = asteroid.y - camera.y * 0.5 + canvas.height / 2;
+                const x = asteroid.x - camera.x * 0.15 + canvas.width / 2;
+                const y = asteroid.y - camera.y * 0.15 + canvas.height / 2;
                 
                 // Only draw if in viewport
                 if (x < -20 || x > canvas.width + 20 || y < -20 || y > canvas.height + 20) return;
@@ -7870,6 +8707,39 @@
                 ctx.fillRect(0, 0, 4, 4);
                 
                 ctx.restore();
+            });
+            
+            // Draw asteroid clusters
+            asteroidClusters.forEach(cluster => {
+                cluster.asteroids.forEach(asteroid => {
+                    // Update rotation
+                    asteroid.rotation += asteroid.rotationSpeed;
+                    
+                    // Slow drift
+                    asteroid.x += asteroid.driftX;
+                    asteroid.y += asteroid.driftY;
+                    
+                    // Calculate screen position with parallax
+                    const x = asteroid.x - camera.x * 0.15 + canvas.width / 2;
+                    const y = asteroid.y - camera.y * 0.15 + canvas.height / 2;
+                    
+                    // Skip if off-screen
+                    if (x < -10 || x > canvas.width + 10 || y < -10 || y > canvas.height + 10) return;
+                    
+                    // Draw small asteroid
+                    ctx.save();
+                    ctx.translate(x, y);
+                    ctx.rotate(asteroid.rotation);
+                    
+                    ctx.fillStyle = '#696969';
+                    ctx.fillRect(-asteroid.size/2, -asteroid.size/2, asteroid.size, asteroid.size);
+                    
+                    // Darker detail
+                    ctx.fillStyle = '#525252';
+                    ctx.fillRect(-asteroid.size/4, -asteroid.size/4, asteroid.size/2, asteroid.size/2);
+                    
+                    ctx.restore();
+                });
             });
         }
         
@@ -7977,7 +8847,7 @@
             
             // ALWAYS start fresh - no saved discoveries affect spawning
             discoveredElements = new Set([0, 1, 2, 3]); // Only base elements in global pool
-            playerDiscoveredElements = new Set(); // Start with NO discoveries for spawn system
+            playerDiscoveredElements = new Set([0, 1, 2, 3]); // Start with base elements for spawn system
             
             // Load saved discoveries for UI/journal only
             if (window.elementCompatibility) {
@@ -8034,6 +8904,20 @@
             snakes.push(playerSnake);
             console.log('[GAME START] Player snake created. Total snakes:', snakes.length);
             
+            // Initialize leaderboard session for infinite mode
+            if (gameMode === 'infinite') {
+                leaderboardSubmitted = false;
+                gameSessionStartTime = Date.now();
+                console.log('[GAME START] Game session start time set:', new Date(gameSessionStartTime));
+                
+                if (supabaseModule) {
+                    supabaseModule.startGameSession().then(sessionId => {
+                        currentGameSessionId = sessionId;
+                        console.log('[GAME START] Game session started:', sessionId);
+                    });
+                }
+            }
+            
             // Create AI snakes
             for (let i = 0; i < MAX_AI_SNAKES; i++) {
                 const x = 200 + Math.random() * (WORLD_SIZE - 400);
@@ -8044,7 +8928,7 @@
             
             
             // Spawn initial elements using grid distribution
-            const baseElements = [3, 1, 0, 2]; // Fire, Water, Earth, Air IDs
+            const baseElements = [0, 1, 2, 3]; // Earth, Water, Air, Fire IDs
             
             // Clear element grid
             elementGrid.clear();
@@ -8187,6 +9071,10 @@
                 populateDiscoveryJournal();
             } else if (tabName === 'howto') {
                 document.getElementById('howtoTab').classList.add('active');
+            } else if (tabName === 'leaderboard') {
+                document.getElementById('leaderboardTab').classList.add('active');
+                // Load leaderboard when tab is opened
+                window.loadPauseLeaderboard(currentPauseLBPeriod);
             }
         }
         
@@ -8465,8 +9353,8 @@
                 // Update shooting stars
                 shootingStars = shootingStars.filter(star => star.update(1.0));
                 
-                // Spawn shooting star occasionally (10-15 seconds)
-                if (currentTime - lastShootingStarTime > (5000 + Math.random() * 3000) && shootingStars.length < 2) {
+                // Spawn shooting star occasionally (3-5 seconds)
+                if (currentTime - lastShootingStarTime > (3000 + Math.random() * 2000) && shootingStars.length < 3) {
                     shootingStars.push(new ShootingStar());
                     lastShootingStarTime = currentTime;
                 }
@@ -8621,8 +9509,19 @@
             if (playerSnake && !playerSnake.alive) {
                 if (playerRespawnTimer <= 0) {
                     // Start respawn timer
-                    playerRespawnTimer = 3000; // 3 seconds
+                    playerRespawnTimer = 10000; // 10 seconds
                     comboStreak = 0; // Reset combo streak on death
+                    
+                    // Track death event
+                    if (supabaseModule && supabaseModule.addGameEvent) {
+                        supabaseModule.addGameEvent('death', {
+                            score: playerSnake.score,
+                            discoveries: playerSnake.discoveries,
+                            kills: playerSnake.kills,
+                            length: playerSnake.body.length,
+                            play_time: gameSessionStartTime ? Math.floor((Date.now() - gameSessionStartTime) / 1000) : 0
+                        });
+                    }
                 }
                 
                 // Update respawn timer
@@ -8677,6 +9576,21 @@
                     
                     // Reset respawn timer
                     playerRespawnTimer = 0;
+                    
+                    // Reset leaderboard submission flag for next death
+                    leaderboardSubmitted = false;
+                    
+                    // Reset game session start time for proper validation on next death
+                    gameSessionStartTime = Date.now();
+                    console.log('[RESPAWN] Reset game session start time for validation');
+                    
+                    // Start a new game session for proper server-side validation
+                    if (gameMode === 'infinite' && supabaseModule) {
+                        supabaseModule.startGameSession().then(sessionId => {
+                            currentGameSessionId = sessionId;
+                            console.log('[RESPAWN] Started new game session:', sessionId);
+                        });
+                    }
                 }
             }
             
