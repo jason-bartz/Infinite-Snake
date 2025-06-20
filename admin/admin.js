@@ -6,6 +6,10 @@ let currentElement = null;
 let deletedElements = [];
 let deletedCombinations = [];
 
+// Pagination variables
+let currentCombinationsPage = 1;
+const COMBINATIONS_PER_PAGE = 25;
+
 // Initialize
 document.addEventListener('DOMContentLoaded', async function() {
     console.log('Initializing admin panel...');
@@ -185,12 +189,13 @@ function showSearchResults(matches) {
     results.innerHTML = html;
 }
 
-// Show element details
+// Enhanced showElement function with pagination support
 function showElement(elementId) {
     const elem = elements[elementId];
     if (!elem) return;
     
     currentElement = elem;
+    currentCombinationsPage = 1; // Reset to first page when showing new element
     const results = document.getElementById('results');
     
     // Prefer element-specific emoji over shared emojiIndex
@@ -215,8 +220,9 @@ function showElement(elementId) {
             const [a, b] = combo.split('+');
             if (a == elementId || b == elementId) {
                 creates.push({ 
-                    otherElem: a == elementId ? b : a, 
-                    result 
+                    otherElem: a == elementId ? b : a,
+                    result: result,
+                    combo: combo
                 });
             }
         }
@@ -224,21 +230,16 @@ function showElement(elementId) {
     
     let html = `
         <div class="element-header">
-            <div class="element-emoji" onclick="copyEmoji('${emoji}')" title="Click to copy">${emoji}</div>
-            <div class="element-info">
-                <h2>${elem.name}</h2>
-                <div class="element-id">ID: ${elem.id} | Tier: ${elem.tier}</div>
-            </div>
+            <h2>${emoji} ${elem.name}</h2>
+            <div style="color: #888;">ID: ${elem.id} | Tier: ${elem.tier || 'N/A'}</div>
         </div>
     `;
     
     // Recipes section
     html += `
-        <div class="combinations">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h3>How to create ${elem.name}:</h3>
-                <button class="add-btn" style="padding: 8px 16px; margin: 0;" onclick="addNewRecipe('${elementId}')">+ Add Recipe</button>
-            </div>
+        <div class="recipes" style="margin-top: 20px;">
+            <h3>How to create ${elem.name}:</h3>
+            ${elem.id >= 10000 ? '<button class="add-btn" onclick="addNewRecipe(\'' + elem.id + '\')">+ Add Recipe</button>' : ''}
     `;
     
     if (recipes.length > 0) {
@@ -252,13 +253,11 @@ function showElement(elementId) {
                 html += `
                     <div class="combo-item">
                         <div class="combo-formula">
-                            <span>${emoji1} ${elem1.name}</span>
-                            <span>+</span>
-                            <span>${emoji2} ${elem2.name}</span>
+                            <span>${emoji1} ${elem1.name} + ${emoji2} ${elem2.name}</span>
                         </div>
-                        <div>
-                            <button onclick="editRecipe('${recipe.elem1}', '${recipe.elem2}', '${elementId}')">Edit</button>
-                            <button class="remove-btn" style="margin-left: 5px;" onclick="deleteRecipe('${recipe.elem1}', '${recipe.elem2}', '${elementId}')">Delete</button>
+                        <div class="actions">
+                            <button class="edit-btn" onclick="editRecipe('${recipe.elem1}', '${recipe.elem2}', '${elem.id}')">Edit</button>
+                            <button class="remove-btn" onclick="deleteRecipe('${recipe.elem1}', '${recipe.elem2}', '${elem.id}')">Delete</button>
                         </div>
                     </div>
                 `;
@@ -270,37 +269,16 @@ function showElement(elementId) {
     
     html += '</div>';
     
-    // Creates section
+    // Creates section with pagination
     if (creates.length > 0) {
         html += `
             <div class="combinations" style="margin-top: 20px;">
-                <h3>${elem.name} combines with:</h3>
+                <h3>${elem.name} combines with: (${creates.length} total)</h3>
+                <div id="combinations-list">
+                    ${renderCombinationsList(creates, elementId, emoji)}
+                </div>
+            </div>
         `;
-        
-        creates.slice(0, 10).forEach(item => {
-            const otherElem = elements[item.otherElem];
-            const resultElem = elements[item.result];
-            if (otherElem && resultElem) {
-                const otherEmoji = emojis[otherElem.id] || emojis[otherElem.emojiIndex] || '❓';
-                const resultEmoji = emojis[resultElem.id] || emojis[resultElem.emojiIndex] || '❓';
-                
-                html += `
-                    <div class="combo-item">
-                        <div class="combo-formula">
-                            <span>${emoji} + ${otherEmoji} ${otherElem.name}</span>
-                            <span>→</span>
-                            <span>${resultEmoji} ${resultElem.name}</span>
-                        </div>
-                    </div>
-                `;
-            }
-        });
-        
-        if (creates.length > 10) {
-            html += `<div style="text-align: center; color: #888;">... and ${creates.length - 10} more</div>`;
-        }
-        
-        html += '</div>';
     }
     
     // Edit form
@@ -321,6 +299,130 @@ function showElement(elementId) {
     results.innerHTML = html;
     results.classList.add('active');
 }
+
+// New function to render paginated combinations list
+function renderCombinationsList(creates, elementId, elementEmoji) {
+    const totalPages = Math.ceil(creates.length / COMBINATIONS_PER_PAGE);
+    const startIndex = (currentCombinationsPage - 1) * COMBINATIONS_PER_PAGE;
+    const endIndex = startIndex + COMBINATIONS_PER_PAGE;
+    const pageItems = creates.slice(startIndex, endIndex);
+    
+    let html = '';
+    
+    pageItems.forEach((item, index) => {
+        const otherElem = elements[item.otherElem];
+        const resultElem = elements[item.result];
+        if (otherElem && resultElem) {
+            const otherEmoji = emojis[otherElem.id] || emojis[otherElem.emojiIndex] || '❓';
+            const resultEmoji = emojis[resultElem.id] || emojis[resultElem.emojiIndex] || '❓';
+            
+            html += `
+                <div class="combo-item" id="combo-item-${startIndex + index}">
+                    <div class="combo-formula">
+                        <span>${elementEmoji} + ${otherEmoji} ${otherElem.name}</span>
+                        <span>→</span>
+                        <span style="cursor: pointer;" onclick="showElement('${item.result}')">${resultEmoji} ${resultElem.name}</span>
+                    </div>
+                    <div class="actions">
+                        <button class="remove-btn" onclick="deleteCombination('${elementId}', '${item.otherElem}', '${item.result}', ${startIndex + index})">Delete</button>
+                    </div>
+                </div>
+            `;
+        }
+    });
+    
+    // Pagination controls
+    if (totalPages > 1) {
+        html += `
+            <div class="pagination" style="margin-top: 20px; text-align: center;">
+                <button 
+                    ${currentCombinationsPage === 1 ? 'disabled' : ''} 
+                    onclick="changeCombinationsPage(${currentCombinationsPage - 1}, '${elementId}')"
+                    style="margin-right: 10px;"
+                >
+                    Previous
+                </button>
+                <span style="margin: 0 15px;">
+                    Page ${currentCombinationsPage} of ${totalPages}
+                </span>
+                <button 
+                    ${currentCombinationsPage === totalPages ? 'disabled' : ''} 
+                    onclick="changeCombinationsPage(${currentCombinationsPage + 1}, '${elementId}')"
+                    style="margin-left: 10px;"
+                >
+                    Next
+                </button>
+            </div>
+        `;
+    }
+    
+    return html;
+}
+
+// Function to change combinations page
+window.changeCombinationsPage = function(page, elementId) {
+    currentCombinationsPage = page;
+    showElement(elementId); // Refresh the view
+};
+
+// Enhanced delete combination function with inline support
+window.deleteCombination = async function(elem1, elem2, result, itemIndex) {
+    const resultElem = elements[result];
+    const resultName = resultElem ? resultElem.name : `ID: ${result}`;
+    
+    if (!confirm(`Delete combination that creates "${resultName}"?`)) {
+        return;
+    }
+    
+    // Show loading state on the specific item
+    const itemElement = document.getElementById(`combo-item-${itemIndex}`);
+    if (itemElement) {
+        itemElement.style.opacity = '0.5';
+        itemElement.style.pointerEvents = 'none';
+    }
+    
+    // Store original values in case we need to revert
+    const originalValue1 = combinations[`${elem1}+${elem2}`];
+    const originalValue2 = combinations[`${elem2}+${elem1}`];
+    
+    // Remove from local data
+    delete combinations[`${elem1}+${elem2}`];
+    delete combinations[`${elem2}+${elem1}`];
+    
+    try {
+        // Send deletion request
+        const response = await fetch('/api/delete-combination', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                combination: `${elem1}+${elem2}`
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to delete combination');
+        }
+        
+        showMessage('Combination deleted successfully!', 'success');
+        
+        // Refresh the element view to update the list
+        showElement(elem1); // Show the current element's page
+    } catch (error) {
+        // Revert if delete failed
+        combinations[`${elem1}+${elem2}`] = originalValue1;
+        combinations[`${elem2}+${elem1}`] = originalValue2;
+        
+        // Restore item appearance
+        if (itemElement) {
+            itemElement.style.opacity = '1';
+            itemElement.style.pointerEvents = 'auto';
+        }
+        
+        showMessage('Failed to delete combination', 'error');
+    }
+};
 
 // Edit recipe
 window.editRecipe = function(elem1, elem2, result) {
@@ -1579,3 +1681,50 @@ window.confirmDeleteElement = async function(elementId) {
         showMessage(`Failed to delete element: ${error.message}`, 'error');
     }
 };
+
+// Add this CSS to your styles
+const paginationStyles = `
+    .pagination button {
+        padding: 8px 16px;
+        background: #4ecdc4;
+        color: #000;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: all 0.3s;
+    }
+    
+    .pagination button:hover:not(:disabled) {
+        background: #45b8b0;
+        transform: scale(1.05);
+    }
+    
+    .pagination button:disabled {
+        background: #333;
+        color: #666;
+        cursor: not-allowed;
+        transform: none;
+    }
+    
+    .combo-item {
+        transition: all 0.3s;
+    }
+    
+    .combo-item .actions {
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+    
+    .combo-item:hover .actions {
+        opacity: 1;
+    }
+`;
+
+// Add styles to document if not already present
+if (!document.getElementById('pagination-styles')) {
+    const styleElement = document.createElement('style');
+    styleElement.id = 'pagination-styles';
+    styleElement.textContent = paginationStyles;
+    document.head.appendChild(styleElement);
+}
