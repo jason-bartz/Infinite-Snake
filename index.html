@@ -3684,15 +3684,27 @@
         
         // Make canvas fit full window
         function resizeCanvas() {
-            // Use lower resolution on mobile for better performance
-            const scale = isMobile ? 0.8 : 1;
-            canvas.width = window.innerWidth * scale;
-            canvas.height = window.innerHeight * scale;
-            
+            // Mobile performance optimizations
             if (isMobile) {
+                // Use much lower resolution on mobile for better performance
+                const mobileScale = 0.5; // Reduced from 0.8 for better performance
+                const dpr = Math.min(window.devicePixelRatio || 1, 1.5); // Cap DPR on mobile
+                
+                canvas.width = window.innerWidth * mobileScale;
+                canvas.height = window.innerHeight * mobileScale;
+                
                 // Scale canvas to full size with CSS
                 canvas.style.width = window.innerWidth + 'px';
                 canvas.style.height = window.innerHeight + 'px';
+                
+                // Enable image smoothing for better appearance at lower resolution
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'low';
+            } else {
+                // Desktop keeps full resolution
+                const scale = 1;
+                canvas.width = window.innerWidth * scale;
+                canvas.height = window.innerHeight * scale;
             }
             
             // Clear emoji cache on resize as sizes might change
@@ -4846,18 +4858,29 @@
             }
             
             draw(ctx) {
-                ctx.save();
-                ctx.globalAlpha = this.opacity;
-                ctx.fillStyle = this.color + this.opacity + ')';
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-                
-                // Add glow effect
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = this.color + '0.8)';
-                ctx.fill();
-                ctx.restore();
+                if (isMobile) {
+                    // Simplified rendering for mobile - no shadows
+                    ctx.globalAlpha = this.opacity;
+                    ctx.fillStyle = this.color + this.opacity + ')';
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                } else {
+                    // Desktop keeps full effects
+                    ctx.save();
+                    ctx.globalAlpha = this.opacity;
+                    ctx.fillStyle = this.color + this.opacity + ')';
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Add glow effect
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = this.color + '0.8)';
+                    ctx.fill();
+                    ctx.restore();
+                }
             }
         }
         
@@ -5718,8 +5741,8 @@
                 }
                 */
                 
-                // Draw boost trail effect
-                if (this.isBoosting && this.segments && this.segments.length > 1) {
+                // Draw boost trail effect (desktop only)
+                if (!isMobile && this.isBoosting && this.segments && this.segments.length > 1) {
                     ctx.save();
                     ctx.globalAlpha = 0.3;
                     
@@ -5828,8 +5851,8 @@
                     const screenX = (headX + offsetX) - camera.x + canvas.width / 2;
                     const screenY = (headY + offsetY) - camera.y + canvas.height / 2;
                     
-                    // Draw boost glow around head
-                    if (this.isBoosting) {
+                    // Draw boost glow around head (desktop only)
+                    if (this.isBoosting && !isMobile) {
                         // Pixelated boost effect
                         const pixelSize = 8;
                         const boostColor = this.isPlayer ? 'rgba(100, 200, 255, 0.3)' : 'rgba(255, 100, 100, 0.3)';
@@ -6618,77 +6641,80 @@
                     }
                 }
                 
-                // Draw pixelated combination glow if this element will combine when eaten
-                if (this.pendingCombination) {
-                    const pixelSize = 8;
-                    const glowIntensity = 0.3 + Math.sin(Date.now() * 0.005) * 0.3; // Pulsing glow
-                    ctx.fillStyle = `rgba(255, 215, 0, ${glowIntensity})`;
-                    
-                    // Draw larger pixelated glow pattern
-                    for (let px = -4; px <= 4; px++) {
-                        for (let py = -4; py <= 4; py++) {
-                            if (Math.abs(px) + Math.abs(py) <= 6) {
-                                ctx.fillRect(
-                                    Math.floor((screenX + px * pixelSize) / pixelSize) * pixelSize,
-                                    Math.floor((screenY + py * pixelSize) / pixelSize) * pixelSize,
-                                    pixelSize,
-                                    pixelSize
-                                );
+                // Skip all glow effects on mobile for better performance
+                if (!isMobile) {
+                    // Draw pixelated combination glow if this element will combine when eaten
+                    if (this.pendingCombination) {
+                        const pixelSize = 8;
+                        const glowIntensity = 0.3 + Math.sin(Date.now() * 0.005) * 0.3; // Pulsing glow
+                        ctx.fillStyle = `rgba(255, 215, 0, ${glowIntensity})`;
+                        
+                        // Draw larger pixelated glow pattern
+                        for (let px = -4; px <= 4; px++) {
+                            for (let py = -4; py <= 4; py++) {
+                                if (Math.abs(px) + Math.abs(py) <= 6) {
+                                    ctx.fillRect(
+                                        Math.floor((screenX + px * pixelSize) / pixelSize) * pixelSize,
+                                        Math.floor((screenY + py * pixelSize) / pixelSize) * pixelSize,
+                                        pixelSize,
+                                        pixelSize
+                                    );
+                                }
                             }
                         }
                     }
-                }
-                
-                // Draw pixelated glow effects
-                else if (alchemyGlow === 'discovery') {
-                    // Golden pixels for new discoveries
-                    const pixelSize = 6;
-                    ctx.fillStyle = 'rgba(255, 215, 0, 0.6)';
                     
-                    for (let px = -4; px <= 4; px++) {
-                        for (let py = -4; py <= 4; py++) {
-                            if (Math.abs(px) + Math.abs(py) <= 6) {
-                                ctx.fillRect(
-                                    Math.floor((screenX + px * pixelSize) / pixelSize) * pixelSize,
-                                    Math.floor((screenY + py * pixelSize) / pixelSize) * pixelSize,
-                                    pixelSize,
-                                    pixelSize
-                                );
+                    // Draw pixelated glow effects
+                    else if (alchemyGlow === 'discovery') {
+                        // Golden pixels for new discoveries
+                        const pixelSize = 6;
+                        ctx.fillStyle = 'rgba(255, 215, 0, 0.6)';
+                        
+                        for (let px = -4; px <= 4; px++) {
+                            for (let py = -4; py <= 4; py++) {
+                                if (Math.abs(px) + Math.abs(py) <= 6) {
+                                    ctx.fillRect(
+                                        Math.floor((screenX + px * pixelSize) / pixelSize) * pixelSize,
+                                        Math.floor((screenY + py * pixelSize) / pixelSize) * pixelSize,
+                                        pixelSize,
+                                        pixelSize
+                                    );
+                                }
                             }
                         }
-                    }
-                } else if (alchemyGlow === 'known') {
-                    // Green pixels for known combinations
-                    const pixelSize = 6;
-                    ctx.fillStyle = 'rgba(0, 255, 0, 0.5)';
-                    
-                    for (let px = -3; px <= 3; px++) {
-                        for (let py = -3; py <= 3; py++) {
-                            if (Math.abs(px) + Math.abs(py) <= 4) {
-                                ctx.fillRect(
-                                    Math.floor((screenX + px * pixelSize) / pixelSize) * pixelSize,
-                                    Math.floor((screenY + py * pixelSize) / pixelSize) * pixelSize,
-                                    pixelSize,
-                                    pixelSize
-                                );
+                    } else if (alchemyGlow === 'known') {
+                        // Green pixels for known combinations
+                        const pixelSize = 6;
+                        ctx.fillStyle = 'rgba(0, 255, 0, 0.5)';
+                        
+                        for (let px = -3; px <= 3; px++) {
+                            for (let py = -3; py <= 3; py++) {
+                                if (Math.abs(px) + Math.abs(py) <= 4) {
+                                    ctx.fillRect(
+                                        Math.floor((screenX + px * pixelSize) / pixelSize) * pixelSize,
+                                        Math.floor((screenY + py * pixelSize) / pixelSize) * pixelSize,
+                                        pixelSize,
+                                        pixelSize
+                                    );
+                                }
                             }
                         }
-                    }
-                } else if (this.data && this.data.tier > 0) {
-                    // Pixelated tier-based glow
-                    const pixelSize = 6;
-                    const hue = (this.data.tier * 60) % 360;
-                    ctx.fillStyle = `hsla(${hue}, 70%, 50%, 0.4)`;
-                    
-                    for (let px = -2; px <= 2; px++) {
-                        for (let py = -2; py <= 2; py++) {
-                            if (Math.abs(px) + Math.abs(py) <= 3) {
-                                ctx.fillRect(
-                                    Math.floor((screenX + px * pixelSize) / pixelSize) * pixelSize,
-                                    Math.floor((screenY + py * pixelSize) / pixelSize) * pixelSize,
-                                    pixelSize,
-                                    pixelSize
-                                );
+                    } else if (this.data && this.data.tier > 0) {
+                        // Pixelated tier-based glow
+                        const pixelSize = 6;
+                        const hue = (this.data.tier * 60) % 360;
+                        ctx.fillStyle = `hsla(${hue}, 70%, 50%, 0.4)`;
+                        
+                        for (let px = -2; px <= 2; px++) {
+                            for (let py = -2; py <= 2; py++) {
+                                if (Math.abs(px) + Math.abs(py) <= 3) {
+                                    ctx.fillRect(
+                                        Math.floor((screenX + px * pixelSize) / pixelSize) * pixelSize,
+                                        Math.floor((screenY + py * pixelSize) / pixelSize) * pixelSize,
+                                        pixelSize,
+                                        pixelSize
+                                    );
+                                }
                             }
                         }
                     }
@@ -6712,8 +6738,8 @@
                 ctx.strokeText(name, screenX, screenY + ELEMENT_SIZE + 5);
                 ctx.fillText(name, screenX, screenY + ELEMENT_SIZE + 5);
                 
-                // Draw catalyst sparkles if this element was spawned by catalyst
-                if (this.isCatalystSpawned) {
+                // Draw catalyst sparkles if this element was spawned by catalyst (desktop only)
+                if (this.isCatalystSpawned && !isMobile) {
                     ctx.save();
                     for (let i = 0; i < 4; i++) {
                         const angle = (this.catalystSparkleTime + i * Math.PI / 2) % (Math.PI * 2);
@@ -7234,7 +7260,7 @@
                 this.vy = Math.sin(angle) * speed;
                 
                 this.trail = [];
-                this.maxTrailLength = 20;
+                this.maxTrailLength = isMobile ? 5 : 20; // Shorter trails on mobile
                 this.life = 1.0;
                 this.fadeSpeed = 0.01; // Slower fade for 1-2 second visibility
                 
@@ -9125,7 +9151,19 @@
             ctx.fillStyle = '#000011';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // Initialize grid pattern cache if needed
+            // Skip complex background on mobile for better performance
+            if (isMobile) {
+                // Just draw minimal stars for mobile
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+                for (let i = 0; i < 20; i++) {
+                    const x = (i * 137 + camera.x * 0.1) % canvas.width;
+                    const y = (i * 241 + camera.y * 0.1) % canvas.height;
+                    ctx.fillRect(x, y, 1, 1);
+                }
+                return; // Skip all other background effects
+            }
+            
+            // Initialize grid pattern cache if needed (desktop only)
             if (!window.gridPatternCanvas) {
                 window.gridPatternCanvas = document.createElement('canvas');
                 window.gridPatternCanvas.width = 128;
@@ -9210,8 +9248,10 @@
             
             ctx.restore()
             
-            // Draw shooting stars
-            shootingStars.forEach(star => star.draw());
+            // Draw shooting stars (desktop only)
+            if (!isMobile) {
+                shootingStars.forEach(star => star.draw());
+            }
             
             // Draw world borders with subtle pixel grid
             const borderThickness = 60;
@@ -9302,11 +9342,13 @@
                 }
             }
             
-            // Add scanline effect for retro monitor feel
-            ctx.fillStyle = 'rgba(0,255,0,0.02)';
-            for (let y = 0; y < canvas.height; y += 4) {
-                if (y % 8 === 0) {
-                    ctx.fillRect(0, y, canvas.width, 2);
+            // Add scanline effect for retro monitor feel (desktop only)
+            if (!isMobile) {
+                ctx.fillStyle = 'rgba(0,255,0,0.02)';
+                for (let y = 0; y < canvas.height; y += 4) {
+                    if (y % 8 === 0) {
+                        ctx.fillRect(0, y, canvas.width, 2);
+                    }
                 }
             }
         }
@@ -9837,8 +9879,10 @@
             // Update discovery log
             updateDiscoveryLog();
             
-            // Initialize border particles
-            initializeBorderParticles();
+            // Initialize border particles (desktop only)
+            if (!isMobile) {
+                initializeBorderParticles();
+            }
             
             // Initialize static stars
             initializeStaticStars();
@@ -10223,16 +10267,20 @@
                 elementPool.update(1.0);
                 particlePool.update(1.0);
                 
-                // Update border particles
-                borderParticles.forEach(particle => particle.update(1.0));
+                // Update border particles (desktop only)
+                if (!isMobile) {
+                    borderParticles.forEach(particle => particle.update(1.0));
+                }
                 
-                // Update shooting stars
-                shootingStars = shootingStars.filter(star => star.update(1.0));
-                
-                // Spawn shooting star occasionally (3-5 seconds)
-                if (currentTime - lastShootingStarTime > (3000 + Math.random() * 2000) && shootingStars.length < 3) {
-                    shootingStars.push(new ShootingStar());
-                    lastShootingStarTime = currentTime;
+                // Update shooting stars (desktop only)
+                if (!isMobile) {
+                    shootingStars = shootingStars.filter(star => star.update(1.0));
+                    
+                    // Spawn shooting star occasionally (3-5 seconds)
+                    if (currentTime - lastShootingStarTime > (3000 + Math.random() * 2000) && shootingStars.length < 3) {
+                        shootingStars.push(new ShootingStar());
+                        lastShootingStarTime = currentTime;
+                    }
                 }
                 
                 // Check collisions
