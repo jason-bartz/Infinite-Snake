@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Combinations Report - Admin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        h1 {
+            color: #4ecdc4;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .nav-tab {
+            padding: 10px 20px;
+            background: white;
+            color: #4ecdc4;
+            text-decoration: none;
+            border: 2px solid #4ecdc4;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .nav-tab:hover {
+            background: #4ecdc4;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(78, 205, 196, 0.2);
+        }
+        
+        .nav-tab.active {
+            background: #4ecdc4;
+            color: white;
+        }
+        
+        .filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .search-box {
+            flex: 2;
+            min-width: 300px;
+        }
+        
+        .filter-select {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        input[type="text"], select {
+            width: 100%;
+            padding: 12px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            color: #333;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        
+        input[type="text"]:focus, select:focus {
+            outline: none;
+            border-color: #4ecdc4;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .stat-item {
+            flex: 1;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4ecdc4;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .table-header {
+            display: grid;
+            grid-template-columns: 40px 1fr 60px 1fr 60px 1fr 80px;
+            gap: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        
+        .combination-row {
+            display: grid;
+            grid-template-columns: 40px 1fr 60px 1fr 60px 1fr 80px;
+            gap: 20px;
+            padding: 15px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            align-items: center;
+            transition: all 0.2s;
+        }
+        
+        .combination-row:hover {
+            border-color: #4ecdc4;
+            box-shadow: 0 2px 8px rgba(78, 205, 196, 0.1);
+        }
+        
+        .element-cell {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+        
+        .element-cell:hover {
+            color: #4ecdc4;
+        }
+        
+        .element-emoji {
+            font-size: 24px;
+        }
+        
+        .element-name {
+            font-weight: 500;
+        }
+        
+        .operator {
+            text-align: center;
+            color: #666;
+            font-size: 20px;
+        }
+        
+        .delete-btn {
+            padding: 6px 12px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .delete-btn:hover {
+            background: #c0392b;
+            transform: scale(1.05);
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .pagination button {
+            padding: 8px 16px;
+            background: #f0f0f0;
+            color: #333;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .pagination button:hover:not(:disabled) {
+            background: #e0e0e0;
+        }
+        
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .pagination input {
+            width: 60px;
+            padding: 8px;
+            text-align: center;
+            background: white;
+            border: 1px solid #e0e0e0;
+            color: #333;
+            border-radius: 4px;
+        }
+        
+        .page-info {
+            color: #666;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .message {
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .message.active {
+            display: block;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .checkbox-cell {
+            display: flex;
+            align-items: center;
+            padding-right: 15px;
+        }
+        
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
+        .bulk-actions {
+            display: none;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            align-items: center;
+            gap: 20px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .bulk-actions.active {
+            display: flex;
+        }
+        
+        .bulk-info {
+            flex: 1;
+            color: #4ecdc4;
+            font-weight: 600;
+        }
+        
+        .bulk-delete-btn {
+            padding: 10px 20px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .bulk-delete-btn:hover {
+            background: #c0392b;
+            transform: scale(1.05);
+        }
+        
+        .deselect-btn {
+            padding: 10px 20px;
+            background: #f0f0f0;
+            color: #333;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .deselect-btn:hover {
+            background: #e0e0e0;
+        }
+        
+        @media (max-width: 768px) {
+            .combination-row,
+            .table-header {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .table-header {
+                display: none;
+            }
+            
+            .combination-row {
+                padding: 20px;
+            }
+            
+            .element-cell {
+                margin-bottom: 5px;
+            }
+            
+            .operator {
+                display: none;
+            }
+            
+            .delete-btn {
+                width: 100%;
+                margin-top: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔗 Combinations Report</h1>
+            <div class="nav-tabs">
+                <a href="/admin/" class="nav-tab">Elements</a>
+                <a href="/admin/cleanup.html" class="nav-tab">Cleanup</a>
+                <a href="/admin/combinations.html" class="nav-tab active">Combinations Report</a>
+            </div>
+        </div>
+        
+        <div id="message" class="message"></div>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-value" id="total-combinations">0</div>
+                <div class="stat-label">Total Combinations</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="filtered-combinations">0</div>
+                <div class="stat-label">Filtered Results</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="unique-combinations">0</div>
+                <div class="stat-label">Unique Combinations</div>
+            </div>
+        </div>
+        
+        <div class="filters">
+            <div class="search-box">
+                <input type="text" id="search" placeholder="Search by element name or ID...">
+            </div>
+            <div class="filter-select">
+                <select id="tier-filter">
+                    <option value="">Filter by Result Tier</option>
+                    <option value="0">Tier 0 Results</option>
+                    <option value="1">Tier 1 Results</option>
+                    <option value="2">Tier 2 Results</option>
+                    <option value="3">Tier 3 Results</option>
+                    <option value="4">Tier 4 Results</option>
+                    <option value="5">Tier 5 Results</option>
+                    <option value="6">Tier 6 Results</option>
+                    <option value="7">Tier 7 Results</option>
+                    <option value="8">Tier 8 Results</option>
+                    <option value="9">Tier 9 Results</option>
+                    <option value="10">Tier 10 Results</option>
+                </select>
+            </div>
+            <div class="filter-select">
+                <select id="sort-by">
+                    <option value="result-name">Sort by Result Name</option>
+                    <option value="result-id">Sort by Result ID</option>
+                    <option value="tier">Sort by Tier</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="bulk-actions" id="bulk-actions">
+            <div class="bulk-info">
+                <span id="selected-count">0</span> combinations selected
+            </div>
+            <button class="deselect-btn" onclick="deselectAll()">Deselect All</button>
+            <button class="bulk-delete-btn" onclick="bulkDelete()">Delete Selected</button>
+        </div>
+        
+        <div class="table-container">
+            <div class="table-header">
+                <div class="checkbox-cell">
+                    <input type="checkbox" id="select-all" onchange="toggleSelectAll()">
+                </div>
+                <div>Element 1</div>
+                <div></div>
+                <div>Element 2</div>
+                <div></div>
+                <div>Result</div>
+                <div>Action</div>
+            </div>
+            <div id="combinations-list">
+                <div class="loading">Loading combinations...</div>
+            </div>
+        </div>
+        
+        <div class="pagination" id="pagination">
+            <!-- Pagination controls will be inserted here -->
+        </div>
+    </div>
+    
+    <script src="combinations.js"></script>
+</body>
+</html>

@@ -413,6 +413,224 @@ const server = http.createServer((req, res) => {
     return;
   }
   
+  // API endpoint to find and mark broken combinations
+  if (req.method === 'POST' && req.url === '/api/cleanup-broken-combinations') {
+    console.log('[DEBUG] Finding broken combinations');
+    
+    try {
+      // Load elements
+      const elementsPath = path.join(__dirname, 'elements', 'data', 'elements.json');
+      const elementsData = JSON.parse(fs.readFileSync(elementsPath, 'utf8'));
+      
+      // Create a set of valid element IDs for faster lookup
+      const validElementIds = new Set();
+      elementsData.forEach(elem => {
+        validElementIds.add(elem.i.toString());
+      });
+      
+      console.log(`[DEBUG] Loaded ${validElementIds.size} valid element IDs`);
+      
+      // Load combinations
+      const combinationsPath = path.join(__dirname, 'elements', 'data', 'combinations.json');
+      const combinations = JSON.parse(fs.readFileSync(combinationsPath, 'utf8'));
+      
+      // Load existing deleted combinations
+      const deletedCombosPath = path.join(__dirname, 'elements', 'deleted-combinations.json');
+      let deletedCombinations = [];
+      if (fs.existsSync(deletedCombosPath)) {
+        deletedCombinations = JSON.parse(fs.readFileSync(deletedCombosPath, 'utf8'));
+      }
+      
+      // Find broken combinations
+      const brokenCombinations = [];
+      const brokenDetails = [];
+      
+      Object.entries(combinations).forEach(([combo, result]) => {
+        const [elem1, elem2] = combo.split('+');
+        let isBroken = false;
+        let reason = [];
+        
+        // Check if element 1 exists
+        if (!validElementIds.has(elem1)) {
+          isBroken = true;
+          reason.push(`Element 1 (${elem1}) not found`);
+        }
+        
+        // Check if element 2 exists
+        if (!validElementIds.has(elem2)) {
+          isBroken = true;
+          reason.push(`Element 2 (${elem2}) not found`);
+        }
+        
+        // Check if result element exists
+        if (!validElementIds.has(result.toString())) {
+          isBroken = true;
+          reason.push(`Result element (${result}) not found`);
+        }
+        
+        if (isBroken) {
+          // Normalize combination (smaller ID first)
+          const normalized = parseInt(elem1) <= parseInt(elem2) ? `${elem1}+${elem2}` : `${elem2}+${elem1}`;
+          
+          // Only add if not already in broken list and not already deleted
+          if (!brokenCombinations.includes(normalized) && !deletedCombinations.includes(normalized)) {
+            brokenCombinations.push(normalized);
+            brokenDetails.push({
+              combo: normalized,
+              elem1,
+              elem2,
+              result,
+              reasons: reason
+            });
+          }
+        }
+      });
+      
+      console.log(`[DEBUG] Found ${brokenCombinations.length} broken combinations`);
+      
+      // Add broken combinations to deleted list
+      let addedCount = 0;
+      brokenCombinations.forEach(combo => {
+        if (!deletedCombinations.includes(combo)) {
+          deletedCombinations.push(combo);
+          addedCount++;
+        }
+      });
+      
+      // Save updated deleted combinations
+      if (addedCount > 0) {
+        fs.writeFileSync(deletedCombosPath, JSON.stringify(deletedCombinations, null, 2));
+        console.log(`[DEBUG] Added ${addedCount} broken combinations to deletion list`);
+      }
+      
+      res.writeHead(200, { 
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      });
+      res.end(JSON.stringify({ 
+        success: true,
+        message: `Found and marked ${brokenCombinations.length} broken combinations`,
+        stats: {
+          found: brokenCombinations.length,
+          added: addedCount,
+          totalDeleted: deletedCombinations.length
+        },
+        examples: brokenDetails.slice(0, 10)
+      }));
+      
+    } catch (err) {
+      console.error('Find broken combinations error:', err);
+      res.writeHead(500, { 
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      });
+      res.end(JSON.stringify({ error: err.message }));
+    }
+    return;
+  }
+  
+  if (req.method === 'POST' && req.url === '/api/cleanup-combinations') {
+    console.log('[DEBUG] Running cleanup combinations');
+    
+    try {
+      // Load deleted combinations
+      const deletedCombosPath = path.join(__dirname, 'elements', 'deleted-combinations.json');
+      const combinationsPath = path.join(__dirname, 'elements', 'data', 'combinations.json');
+      
+      if (!fs.existsSync(deletedCombosPath)) {
+        res.writeHead(404, { 
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        });
+        res.end(JSON.stringify({ error: 'No deleted combinations file found' }));
+        return;
+      }
+      
+      const deletedCombos = JSON.parse(fs.readFileSync(deletedCombosPath, 'utf8'));
+      
+      if (deletedCombos.length === 0) {
+        res.writeHead(200, { 
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        });
+        res.end(JSON.stringify({ 
+          success: true, 
+          message: 'No combinations to clean up',
+          stats: { deleted: 0, total: 0 }
+        }));
+        return;
+      }
+      
+      // Load current combinations
+      const combinations = JSON.parse(fs.readFileSync(combinationsPath, 'utf8'));
+      const originalCount = Object.keys(combinations).length;
+      
+      // Create a set of combinations to delete (including reverse combinations)
+      const toDelete = new Set();
+      deletedCombos.forEach(combo => {
+        toDelete.add(combo);
+        // Also add the reverse combination
+        const [a, b] = combo.split('+');
+        if (a && b) {
+          toDelete.add(`${b}+${a}`);
+        }
+      });
+      
+      // Delete the combinations
+      let deletedCount = 0;
+      const deletedList = [];
+      toDelete.forEach(combo => {
+        if (combinations[combo]) {
+          delete combinations[combo];
+          deletedCount++;
+          deletedList.push(combo);
+        }
+      });
+      
+      const finalCount = Object.keys(combinations).length;
+      
+      // Backup the original file
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+      const backupDir = path.join(__dirname, 'backups');
+      if (!fs.existsSync(backupDir)) {
+        fs.mkdirSync(backupDir);
+      }
+      const backupPath = path.join(backupDir, `combinations-backup-${timestamp}.json`);
+      fs.copyFileSync(combinationsPath, backupPath);
+      
+      // Write the updated combinations
+      fs.writeFileSync(combinationsPath, JSON.stringify(combinations, null, 2));
+      
+      console.log(`[DEBUG] Cleanup complete - deleted ${deletedCount} combinations`);
+      
+      res.writeHead(200, { 
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      });
+      res.end(JSON.stringify({ 
+        success: true,
+        message: `Successfully cleaned up ${deletedCount} combinations`,
+        stats: {
+          originalCount,
+          deleted: deletedCount,
+          finalCount,
+          reducedBy: originalCount - finalCount,
+          backupFile: path.basename(backupPath)
+        },
+        examples: deletedList.slice(0, 10)
+      }));
+      
+    } catch (err) {
+      console.error('Cleanup error:', err);
+      res.writeHead(500, { 
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      });
+      res.end(JSON.stringify({ error: err.message }));
+    }
+    return;
+  }
+  
   // Remove query parameters from URL
   console.log(`[DEBUG] Falling through to static file handler for: ${req.method} ${req.url}`);
   const urlParts = req.url.split('?');

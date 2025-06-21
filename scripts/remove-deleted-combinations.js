@@ -15,7 +15,7 @@ console.log('=== Remove Deleted Combinations Script ===\n');
 // Paths
 const projectRoot = path.join(__dirname, '..');
 const deletedCombosPath = path.join(projectRoot, 'elements', 'deleted-combinations.json');
-const combinationsPath = path.join(projectRoot, 'elements', 'elements-new', 'combinations.json');
+const combinationsPath = path.join(projectRoot, 'elements', 'data', 'combinations.json');
 
 // Check if files exist
 if (!fs.existsSync(deletedCombosPath)) {

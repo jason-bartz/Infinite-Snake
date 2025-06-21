@@ -1,10 +1,20 @@
 // Simple Admin Panel
-let elements = {};
-let combinations = {};
-let emojis = {};
+// Initialize global variables if they don't exist
+if (typeof elements === 'undefined') {
+    window.elements = {};
+}
+if (typeof combinations === 'undefined') {
+    window.combinations = {};
+}
+if (typeof emojis === 'undefined') {
+    window.emojis = {};
+}
 let currentElement = null;
 let deletedElements = [];
 let deletedCombinations = [];
+
+// Flag to indicate data is loading
+window.adminDataLoading = true;
 
 // Pagination variables
 let currentCombinationsPage = 1;
@@ -14,35 +24,79 @@ const COMBINATIONS_PER_PAGE = 25;
 document.addEventListener('DOMContentLoaded', async function() {
     console.log('Initializing admin panel...');
     
+    window.adminDataLoading = true;
     await loadData();
+    window.adminDataLoading = false;
+    
+    // Add a small delay to ensure all data is fully processed
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    // Check for URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchParam = urlParams.get('search');
+    const elementParam = urlParams.get('element');
     
     // Set up search
     const searchInput = document.getElementById('search');
-    let searchTimeout;
+    if (searchInput) {
+        // Mark this as admin search to prevent conflict with elements.js
+        searchInput.setAttribute('data-admin-search', 'true');
+        let searchTimeout;
+        
+        searchInput.addEventListener('input', function(e) {
+            clearTimeout(searchTimeout);
+            const query = e.target.value.trim();
+            
+            if (query.length < 2) {
+                hideResults();
+                return;
+            }
+            
+            // Debounce search
+            searchTimeout = setTimeout(() => {
+                searchElement(query);
+            }, 300);
+        });
+    }
     
-    searchInput.addEventListener('input', function(e) {
-        clearTimeout(searchTimeout);
-        const query = e.target.value.trim();
-        
-        if (query.length < 2) {
-            hideResults();
-            return;
+    // Handle URL parameters after data is loaded
+    if (elementParam) {
+        // Direct element ID provided
+        showElement(elementParam);
+    } else if (searchParam) {
+        // Search query provided
+        if (searchInput) {
+            searchInput.value = searchParam;
         }
-        
-        // Debounce search
-        searchTimeout = setTimeout(() => {
-            searchElement(query);
-        }, 300);
-    });
+        searchElement(searchParam);
+    }
+    
+    // Load cleanup stats
+    loadCleanupStats();
 });
 
 // Load data
 async function loadData() {
     try {
+        console.log('=== Starting loadData ===');
+        
+        // Initialize combinations if not exists
+        if (typeof combinations === 'undefined') {
+            window.combinations = {};
+            console.log('Initialized empty combinations object');
+        }
         // Load combined elements file (now includes all custom elements)
         try {
             const response = await fetch('/elements/data/elements.json');
+            if (!response.ok) {
+                throw new Error(`Failed to fetch elements: ${response.status} ${response.statusText}`);
+            }
             const data = await response.json();
+            
+            // Clear and reload elements
+            if (typeof elements === 'undefined') {
+                window.elements = {};
+            }
             
             // Convert array format to object
             data.forEach(elem => {
@@ -57,29 +111,74 @@ async function loadData() {
             console.log(`Loaded ${data.length} elements from main file`);
         } catch (err) {
             console.error('Failed to load elements:', err);
+            throw err;
         }
         
         console.log(`Loaded ${Object.keys(elements).length} elements`);
         
-        // Load combinations (now includes all custom combinations)
-        const comboResponse = await fetch('/elements/data/combinations.json');
-        const comboData = await comboResponse.json();
+        // Load combinations
+        console.log('Fetching combinations...');
+        try {
+            const comboResponse = await fetch('/elements/data/combinations.json');
+            if (!comboResponse.ok) {
+                throw new Error(`Failed to fetch combinations: ${comboResponse.status} ${comboResponse.statusText}`);
+            }
+            
+            const comboData = await comboResponse.json();
+            console.log('Combinations data received:', Object.keys(comboData).length, 'entries');
+            
+            // Clear existing combinations
+            combinations = {};
+            window.combinations = combinations; // Ensure global reference
+            
+            // Store combinations in both directions
+            let validCombos = 0;
+            Object.entries(comboData).forEach(([key, result]) => {
+                if (key && result !== undefined && result !== null) {
+                    combinations[key] = result;
+                    validCombos++;
+                    
+                    // Also store reverse
+                    const parts = key.split('+');
+                    if (parts.length === 2 && parts[0] && parts[1]) {
+                        combinations[`${parts[1]}+${parts[0]}`] = result;
+                        validCombos++;
+                    }
+                }
+            });
+            
+            console.log(`Loaded ${validCombos} combinations (including reverses)`);
+            console.log('Combinations object is now:', Object.keys(combinations).length > 0 ? 'populated' : 'still empty');
+            console.log('Sample combination keys:', Object.keys(combinations).slice(0, 5));
+            
+        } catch (err) {
+            console.error('CRITICAL: Failed to load combinations:', err);
+            console.error('Error details:', err.message, err.stack);
+            // Don't throw - let the app continue without combinations
+        }
         
-        // Store combinations in both directions
-        Object.entries(comboData).forEach(([key, result]) => {
-            combinations[key] = result;
-            // Also store reverse
-            const [a, b] = key.split('+');
-            combinations[`${b}+${a}`] = result;
-        });
+        // Debug: Log sample combinations to verify format
+        console.log('Sample combinations:', Object.entries(combinations).slice(0, 5).map(([k, v]) => ({
+            key: k,
+            value: v,
+            keyType: typeof k,
+            valueType: typeof v
+        })));
         
-        console.log(`Loaded ${Object.keys(combinations).length} combinations`);
+        // Additional debug: Check if we have any combinations for common elements
+        const testResults = Object.entries(combinations).filter(([k, v]) => v == 735 || v === 735 || v == "735" || v === "735");
+        console.log(`Test: Found ${testResults.length} combinations that create element 735 (Acacia Tree)`);
+        if (testResults.length > 0) {
+            console.log('Sample results for 735:', testResults.slice(0, 3));
+        }
         
-        // Load emojis from JSON file (now includes all custom emojis)
+        // Load emojis
         try {
             const emojiResponse = await fetch('/elements/data/emojis.json');
-            emojis = await emojiResponse.json();
-            console.log(`Loaded ${Object.keys(emojis).length} emojis`);
+            if (emojiResponse.ok) {
+                emojis = await emojiResponse.json();
+                console.log(`Loaded ${Object.keys(emojis).length} emojis`);
+            }
         } catch (err) {
             console.warn('Failed to load emojis:', err);
         }
@@ -110,23 +209,56 @@ async function loadData() {
                 // Remove deleted combinations from the loaded combinations
                 deletedCombinations.forEach(combo => {
                     delete combinations[combo];
-                    const [a, b] = combo.split('+');
-                    delete combinations[`${b}+${a}`];
+                    const parts = combo.split('+');
+                    if (parts.length === 2 && parts[0] && parts[1]) {
+                        delete combinations[`${parts[1]}+${parts[0]}`];
+                    }
                 });
             }
         } catch (err) {
             console.log('No deleted combinations file yet');
         }
         
+        console.log('=== Final loadData results ===');
+        console.log('Elements loaded:', Object.keys(elements).length);
+        console.log('Combinations loaded:', Object.keys(combinations).length);
+        console.log('Emojis loaded:', Object.keys(emojis).length);
+        
+        // Verify combinations are accessible
+        if (Object.keys(combinations).length === 0) {
+            console.error('WARNING: No combinations were loaded!');
+            console.log('Checking combinations.json accessibility...');
+            
+            // Try direct fetch to debug
+            fetch('/elements/data/combinations.json')
+                .then(r => {
+                    console.log('Direct fetch status:', r.status, r.statusText);
+                    return r.text();
+                })
+                .then(text => {
+                    console.log('Raw response length:', text.length);
+                    console.log('First 200 chars:', text.substring(0, 200));
+                })
+                .catch(e => console.error('Direct fetch failed:', e));
+        }
+        
     } catch (error) {
-        console.error('Error loading data:', error);
-        showMessage('Failed to load data', 'error');
+        console.error('Error in loadData:', error);
+        showMessage('Failed to load data: ' + error.message, 'error');
     }
 }
 
 // Search for element
 function searchElement(query) {
     const results = document.getElementById('results');
+    if (!results) return;
+    
+    // Hide the elements grid when searching
+    const grid = document.getElementById('elements-grid');
+    const pagination = document.getElementById('pagination');
+    if (grid) grid.style.display = 'none';
+    if (pagination) pagination.style.display = 'none';
+    
     results.innerHTML = '<div class="loading">Searching...</div>';
     results.classList.add('active');
     
@@ -172,7 +304,7 @@ function showSearchResults(matches) {
         // Prefer element-specific emoji over shared emojiIndex
     const emoji = emojis[elem.id] || emojis[elem.emojiIndex] || '❓';
         html += `
-            <div class="combo-item" style="cursor: pointer;" onclick="showElement('${elem.id}')">
+            <div class="combo-item" style="cursor: pointer;" onclick="showElement('${elem.id}', false)">
                 <div class="combo-formula">
                     <span style="font-size: 24px;">${emoji}</span>
                     <span>${elem.name}</span>
@@ -189,49 +321,68 @@ function showSearchResults(matches) {
     results.innerHTML = html;
 }
 
-// Enhanced showElement function with pagination support
-function showElement(elementId) {
+// BYPASS SOLUTION - Skip all the complex loading and just fetch when needed
+function showElement(elementId, preservePage = false, cachedCreates = null) {
+    elementId = String(elementId);
+    
     const elem = elements[elementId];
-    if (!elem) return;
+    if (!elem) {
+        console.error('Element not found:', elementId);
+        return;
+    }
     
+    // Store current element for other functions that might need it
     currentElement = elem;
-    currentCombinationsPage = 1; // Reset to first page when showing new element
-    const results = document.getElementById('results');
     
-    // Prefer element-specific emoji over shared emojiIndex
+    // Fetch combinations fresh every time (bypass the loading issue)
+    fetch('/elements/data/combinations.json')
+        .then(response => response.json())
+        .then(combinationsData => {
+            console.log('Fetched combinations:', Object.keys(combinationsData).length);
+            
+            // Now we have the data, find recipes and creates
+            const recipes = [];
+            const creates = [];
+            
+            Object.entries(combinationsData).forEach(([combo, result]) => {
+                // Check if this creates our element
+                if (String(result) === elementId) {
+                    const [a, b] = combo.split('+');
+                    recipes.push({ elem1: a, elem2: b });
+                }
+                
+                // Check if our element is used in this combo
+                const [a, b] = combo.split('+');
+                if (String(a) === elementId || String(b) === elementId) {
+                    creates.push({
+                        otherElem: String(a) === elementId ? b : a,
+                        result: result,
+                        combo: combo
+                    });
+                }
+            });
+            
+            console.log(`Found ${recipes.length} recipes and ${creates.length} creates for ${elem.name}`);
+            
+            // Build and display the HTML
+            displayElementDetails(elem, recipes, creates, elementId);
+        })
+        .catch(error => {
+            console.error('Failed to load combinations:', error);
+            alert('Failed to load combinations data');
+        });
+}
+
+// Helper function to display the element details
+function displayElementDetails(elem, recipes, creates, elementId) {
+    const results = document.getElementById('results');
     const emoji = emojis[elem.id] || emojis[elem.emojiIndex] || '❓';
     
-    // Find what creates this element
-    const recipes = [];
-    Object.entries(combinations).forEach(([combo, result]) => {
-        if (result == elementId) {
-            const [a, b] = combo.split('+');
-            // Avoid duplicates
-            if (parseInt(a) <= parseInt(b)) {
-                recipes.push({ elem1: a, elem2: b });
-            }
-        }
-    });
-    
-    // Find what this element creates
-    const creates = [];
-    Object.entries(combinations).forEach(([combo, result]) => {
-        if (combo.includes(elementId + '+') || combo.includes('+' + elementId)) {
-            const [a, b] = combo.split('+');
-            if (a == elementId || b == elementId) {
-                creates.push({ 
-                    otherElem: a == elementId ? b : a,
-                    result: result,
-                    combo: combo
-                });
-            }
-        }
-    });
-    
     let html = `
+        <button class="secondary" onclick="hideResults()" style="margin-bottom: 20px;">← Back to Elements</button>
         <div class="element-header">
             <h2>${emoji} ${elem.name}</h2>
-            <div style="color: #888;">ID: ${elem.id} | Tier: ${elem.tier || 'N/A'}</div>
+            <div style="color: #666;">ID: ${elem.id} | Tier: ${elem.tier || 'N/A'}</div>
         </div>
     `;
     
@@ -239,7 +390,7 @@ function showElement(elementId) {
     html += `
         <div class="recipes" style="margin-top: 20px;">
             <h3>How to create ${elem.name}:</h3>
-            ${elem.id >= 10000 ? '<button class="add-btn" onclick="addNewRecipe(\'' + elem.id + '\')">+ Add Recipe</button>' : ''}
+            <button class="add-btn" onclick="addNewRecipe('${elem.id}')">+ Add Recipe</button>
     `;
     
     if (recipes.length > 0) {
@@ -269,16 +420,33 @@ function showElement(elementId) {
     
     html += '</div>';
     
-    // Creates section with pagination
+    // Creates section
     if (creates.length > 0) {
         html += `
             <div class="combinations" style="margin-top: 20px;">
                 <h3>${elem.name} combines with: (${creates.length} total)</h3>
-                <div id="combinations-list">
-                    ${renderCombinationsList(creates, elementId, emoji)}
-                </div>
-            </div>
         `;
+        
+        creates.forEach(item => {
+            const otherElem = elements[item.otherElem];
+            const resultElem = elements[item.result];
+            if (otherElem && resultElem) {
+                const otherEmoji = emojis[otherElem.id] || emojis[otherElem.emojiIndex] || '❓';
+                const resultEmoji = emojis[resultElem.id] || emojis[resultElem.emojiIndex] || '❓';
+                
+                html += `
+                    <div class="combo-item">
+                        <div class="combo-formula">
+                            <span>${emoji} + ${otherEmoji} ${otherElem.name}</span>
+                            <span>→</span>
+                            <span style="cursor: pointer;" onclick="showElement('${item.result}')">${resultEmoji} ${resultElem.name}</span>
+                        </div>
+                    </div>
+                `;
+            }
+        });
+        
+        html += '</div>';
     }
     
     // Edit form
@@ -292,7 +460,7 @@ function showElement(elementId) {
                 </div>
             </div>
             <button onclick="saveElement()">Save Changes</button>
-            ${elem.id >= 10000 ? `<button class="remove-btn" style="margin-left: 10px;" onclick="deleteElement('${elem.id}')">Delete Element</button>` : ''}
+            <button class="remove-btn" style="margin-left: 10px;" onclick="deleteElement('${elem.id}')">Delete Element</button>
         </div>
     `;
     
@@ -321,7 +489,7 @@ function renderCombinationsList(creates, elementId, elementEmoji) {
                     <div class="combo-formula">
                         <span>${elementEmoji} + ${otherEmoji} ${otherElem.name}</span>
                         <span>→</span>
-                        <span style="cursor: pointer;" onclick="showElement('${item.result}')">${resultEmoji} ${resultElem.name}</span>
+                        <span style="cursor: pointer;" onclick="showElement('${item.result}', false)">${resultEmoji} ${resultElem.name}</span>
                     </div>
                     <div class="actions">
                         <button class="remove-btn" onclick="deleteCombination('${elementId}', '${item.otherElem}', '${item.result}', ${startIndex + index})">Delete</button>
@@ -362,7 +530,27 @@ function renderCombinationsList(creates, elementId, elementEmoji) {
 // Function to change combinations page
 window.changeCombinationsPage = function(page, elementId) {
     currentCombinationsPage = page;
-    showElement(elementId); // Refresh the view
+    
+    // Get the cached creates data from the DOM
+    const combinationsListDiv = document.getElementById('combinations-list');
+    let creates = null;
+    if (combinationsListDiv && combinationsListDiv.dataset.creates) {
+        try {
+            creates = JSON.parse(combinationsListDiv.dataset.creates);
+        } catch (e) {
+            console.error('Failed to parse cached creates data:', e);
+        }
+    }
+    
+    // If we have cached data, just update the combinations list without re-rendering everything
+    if (creates && combinationsListDiv) {
+        const elem = elements[elementId];
+        const emoji = emojis[elem.id] || emojis[elem.emojiIndex] || '❓';
+        combinationsListDiv.innerHTML = renderCombinationsList(creates, elementId, emoji);
+    } else {
+        // Fallback to full refresh if we don't have cached data
+        showElement(elementId, true, creates);
+    }
 };
 
 // Enhanced delete combination function with inline support
@@ -397,7 +585,8 @@ window.deleteCombination = async function(elem1, elem2, result, itemIndex) {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                combination: `${elem1}+${elem2}`
+                element1: elem1,
+                element2: elem2
             })
         });
         
@@ -655,7 +844,17 @@ window.copyEmoji = function(emoji) {
 
 // Hide results
 function hideResults() {
-    document.getElementById('results').classList.remove('active');
+    const results = document.getElementById('results');
+    if (results) {
+        results.classList.remove('active');
+        results.innerHTML = '';
+    }
+    
+    // Show the elements grid again
+    const grid = document.getElementById('elements-grid');
+    const pagination = document.getElementById('pagination');
+    if (grid) grid.style.display = 'grid';
+    if (pagination) pagination.style.display = 'flex';
 }
 
 // Show message
@@ -725,6 +924,13 @@ async function saveToServer(element, newCombinations, newEmojis) {
 // Create new element form
 window.showCreateForm = function() {
     const results = document.getElementById('results');
+    if (!results) return;
+    
+    // Hide the elements grid
+    const grid = document.getElementById('elements-grid');
+    const pagination = document.getElementById('pagination');
+    if (grid) grid.style.display = 'none';
+    if (pagination) pagination.style.display = 'none';
     
     // Generate next available ID
     const maxId = Math.max(...Object.keys(elements).map(Number), 0);
@@ -1277,6 +1483,7 @@ window.deleteRecipe = async function(elem1, elem2, result) {
 
 // Analyze element deletion impact
 function analyzeElementDeletion(elementId) {
+    const numericElementId = parseInt(elementId);
     const analysis = {
         element: elements[elementId],
         recipesCreating: [],
@@ -1286,7 +1493,7 @@ function analyzeElementDeletion(elementId) {
     
     // Find recipes that create this element
     Object.entries(combinations).forEach(([combo, result]) => {
-        if (result == elementId) {
+        if (parseInt(result) === numericElementId) {
             const [a, b] = combo.split('+');
             // Avoid duplicates
             if (parseInt(a) <= parseInt(b)) {
@@ -1299,21 +1506,19 @@ function analyzeElementDeletion(elementId) {
     Object.entries(combinations).forEach(([combo, result]) => {
         if (!combo || !combo.includes('+')) return; // Skip invalid combinations
         
-        if (combo.includes(elementId + '+') || combo.includes('+' + elementId)) {
-            const parts = combo.split('+');
-            if (parts.length !== 2) return; // Skip malformed combinations
-            
-            const [a, b] = parts;
-            if (a == elementId || b == elementId) {
-                const otherElem = a == elementId ? b : a;
-                analysis.combinationsUsing.push({ 
-                    combo,
-                    otherElem,
-                    result,
-                    otherElement: elements[otherElem],
-                    resultElement: elements[result]
-                });
-            }
+        const parts = combo.split('+');
+        if (parts.length !== 2) return; // Skip malformed combinations
+        
+        const [a, b] = parts;
+        if (parseInt(a) === numericElementId || parseInt(b) === numericElementId) {
+            const otherElem = parseInt(a) === numericElementId ? b : a;
+            analysis.combinationsUsing.push({ 
+                combo,
+                otherElem,
+                result,
+                otherElement: elements[otherElem],
+                resultElement: elements[result]
+            });
         }
     });
     
@@ -1328,7 +1533,7 @@ function analyzeElementDeletion(elementId) {
                 // Check if this result element has any other recipes
                 const otherRecipes = [];
                 Object.entries(combinations).forEach(([combo, result]) => {
-                    if (result == item.result && !combo.includes(elemId)) {
+                    if (parseInt(result) === parseInt(item.result) && combo.split('+').every(id => parseInt(id) !== parseInt(elemId))) {
                         otherRecipes.push(combo);
                     }
                 });
@@ -1728,3 +1933,236 @@ if (!document.getElementById('pagination-styles')) {
     styleElement.textContent = paginationStyles;
     document.head.appendChild(styleElement);
 }
+
+// Load cleanup stats
+async function loadCleanupStats() {
+    try {
+        // Count deleted combinations
+        let deletedCount = 0;
+        try {
+            const deletedResponse = await fetch('/elements/deleted-combinations.json');
+            if (deletedResponse.ok) {
+                const deletedData = await deletedResponse.json();
+                deletedCount = deletedData.length;
+            }
+        } catch (err) {
+            console.log('No deleted combinations file');
+        }
+        
+        // Update UI if elements exist
+        const deletedCountEl = document.getElementById('deleted-count');
+        const totalCombosEl = document.getElementById('total-combos');
+        if (deletedCountEl) deletedCountEl.textContent = deletedCount;
+        if (totalCombosEl) totalCombosEl.textContent = Object.keys(combinations).length;
+        
+        // Disable button if nothing to clean
+        const cleanupBtn = document.getElementById('cleanup-btn');
+        if (deletedCount === 0) {
+            cleanupBtn.textContent = 'Nothing to Clean';
+            cleanupBtn.disabled = true;
+        }
+    } catch (err) {
+        console.error('Error loading cleanup stats:', err);
+    }
+}
+
+// Find broken combinations
+window.findBrokenCombinations = async function() {
+    const brokenBtn = document.getElementById('broken-btn');
+    const resultDiv = document.getElementById('broken-result');
+    
+    // Show loading state
+    brokenBtn.disabled = true;
+    brokenBtn.textContent = 'Finding broken combinations...';
+    resultDiv.classList.remove('active');
+    
+    try {
+        const response = await fetch('/api/cleanup-broken-combinations', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            // Show success message
+            resultDiv.className = 'broken-result success active';
+            
+            let html = `<strong>✅ ${result.message}</strong><br>`;
+            
+            if (result.stats.found > 0) {
+                html += `<small>
+                    Found: ${result.stats.found} broken combinations<br>
+                    Added to deletion list: ${result.stats.added}<br>
+                    Total marked for deletion: ${result.stats.totalDeleted}
+                </small>`;
+                
+                // Show examples
+                if (result.examples && result.examples.length > 0) {
+                    html += `<div class="broken-examples">
+                        <strong>Examples of broken combinations:</strong><br>`;
+                    
+                    result.examples.forEach(example => {
+                        html += `<div class="broken-example">
+                            ${example.combo} → ${example.result} 
+                            <span style="color: #e74c3c;">(${example.reasons.join(', ')})</span>
+                        </div>`;
+                    });
+                    
+                    if (result.stats.found > result.examples.length) {
+                        html += `<div style="color: #888; margin-top: 5px;">
+                            ... and ${result.stats.found - result.examples.length} more
+                        </div>`;
+                    }
+                    
+                    html += `</div>`;
+                }
+                
+                // Update deleted count in cleanup section
+                document.getElementById('deleted-count').textContent = result.stats.totalDeleted;
+                
+                // Enable cleanup button if there are deletions
+                const cleanupBtn = document.getElementById('cleanup-btn');
+                if (result.stats.totalDeleted > 0) {
+                    cleanupBtn.textContent = 'Run Cleanup';
+                    cleanupBtn.disabled = false;
+                }
+            } else {
+                html += '<small>No broken combinations found. All combinations reference valid elements!</small>';
+            }
+            
+            resultDiv.innerHTML = html;
+            
+        } else {
+            // Show error
+            resultDiv.className = 'broken-result error active';
+            resultDiv.innerHTML = `<strong>❌ Error:</strong> ${result.error || 'Failed to find broken combinations'}`;
+        }
+    } catch (err) {
+        console.error('Find broken combinations error:', err);
+        resultDiv.className = 'broken-result error active';
+        resultDiv.innerHTML = `<strong>❌ Error:</strong> ${err.message}`;
+    } finally {
+        // Reset button
+        brokenBtn.textContent = 'Find & Mark Broken';
+        brokenBtn.disabled = false;
+    }
+};
+
+// Run cleanup
+// Add a manual reload function for debugging
+window.reloadCombinations = async function() {
+    console.log('Manually reloading combinations...');
+    try {
+        const response = await fetch('/elements/data/combinations.json');
+        const data = await response.json();
+        console.log('Fetched data:', data);
+        console.log('Type:', typeof data);
+        console.log('Keys:', Object.keys(data).length);
+        console.log('Sample:', Object.entries(data).slice(0, 5));
+        
+        // Try to manually set combinations
+        window.combinations = data;
+        console.log('Set window.combinations to:', window.combinations);
+        console.log('Combinations now has', Object.keys(window.combinations).length, 'entries');
+    } catch (e) {
+        console.error('Manual reload failed:', e);
+    }
+};
+
+// Debug function to help diagnose combination issues
+window.debugCombinations = function(elementId) {
+    elementId = String(elementId);
+    console.log(`\n=== Debug for element ${elementId} ===`);
+    console.log('Total combinations:', Object.keys(combinations).length);
+    
+    // Find recipes
+    const recipes = Object.entries(combinations).filter(([k, v]) => String(v) === elementId);
+    console.log(`Recipes creating element ${elementId}:`, recipes);
+    
+    // Find uses
+    const uses = Object.entries(combinations).filter(([k, v]) => {
+        const [a, b] = k.split('+');
+        return String(a) === elementId || String(b) === elementId;
+    });
+    console.log(`Combinations using element ${elementId}:`, uses);
+    
+    // Check data types
+    if (recipes.length > 0) {
+        console.log('Recipe value types:', recipes.map(([k, v]) => ({ combo: k, resultType: typeof v, resultValue: v })));
+    }
+};
+
+window.runCleanup = async function() {
+    const cleanupBtn = document.getElementById('cleanup-btn');
+    const resultDiv = document.getElementById('cleanup-result');
+    
+    // Show loading state
+    cleanupBtn.disabled = true;
+    cleanupBtn.textContent = 'Running cleanup...';
+    resultDiv.classList.remove('active');
+    
+    try {
+        const response = await fetch('/api/cleanup-combinations', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            // Show success message
+            resultDiv.className = 'cleanup-result success active';
+            resultDiv.innerHTML = `
+                <strong>✅ ${result.message}</strong><br>
+                <small>
+                    Removed ${result.stats.deleted} combinations<br>
+                    Total reduced from ${result.stats.originalCount} to ${result.stats.finalCount}<br>
+                    Backup saved as: ${result.stats.backupFile}
+                </small>
+            `;
+            
+            // Update stats
+            document.getElementById('deleted-count').textContent = '0';
+            document.getElementById('total-combos').textContent = result.stats.finalCount;
+            
+            // Update button
+            cleanupBtn.textContent = 'Nothing to Clean';
+            cleanupBtn.disabled = true;
+            
+            // Reload combinations data
+            combinations = {};
+            const comboResponse = await fetch('/elements/data/combinations.json');
+            const comboData = await comboResponse.json();
+            Object.entries(comboData).forEach(([key, result]) => {
+                combinations[key] = result;
+                const [a, b] = key.split('+');
+                combinations[`${b}+${a}`] = result;
+            });
+            
+            // Clear deleted combinations from memory
+            deletedCombinations = [];
+            
+        } else {
+            // Show error
+            resultDiv.className = 'cleanup-result error active';
+            resultDiv.innerHTML = `<strong>❌ Error:</strong> ${result.error || 'Failed to run cleanup'}`;
+            
+            // Reset button
+            cleanupBtn.textContent = 'Run Cleanup';
+            cleanupBtn.disabled = false;
+        }
+    } catch (err) {
+        console.error('Cleanup error:', err);
+        resultDiv.className = 'cleanup-result error active';
+        resultDiv.innerHTML = `<strong>❌ Error:</strong> ${err.message}`;
+        
+        // Reset button
+        cleanupBtn.textContent = 'Run Cleanup';
+        cleanupBtn.disabled = false;
+    }
+};
