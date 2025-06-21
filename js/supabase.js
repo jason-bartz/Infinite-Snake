@@ -1,196 +1,198 @@
-// Supabase configuration
-const SUPABASE_URL = 'https://aftlnhoetforoghbqfhs.supabase.co'
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmdGxuaG9ldGZvcm9naGJxZmhzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAxOTc5MjcsImV4cCI6MjA2NTc3MzkyN30.oIXwvY4Ajg-QT7GjDh3rA4Q3Ys4gKOKQEEcvM-K-vYs'
+// js/supabase.js - Upstash Redis Leaderboard Client
+// This maintains compatibility with your existing game code
 
-// Import Supabase from CDN
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+const API_ENDPOINT = '/api/leaderboard';
 
-export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+// Cache for leaderboard data to reduce API calls
+let leaderboardCache = {
+  daily: { data: null, timestamp: 0 },
+  weekly: { data: null, timestamp: 0 },
+  monthly: { data: null, timestamp: 0 },
+  all: { data: null, timestamp: 0 }
+};
 
-// Initialize anonymous auth
+const CACHE_DURATION = 30000; // 30 seconds
+
+// Initialize (kept for compatibility with existing code)
 export async function initializeAuth() {
-    try {
-        let { data: { user } } = await supabase.auth.getUser()
-        
-        if (!user) {
-            const { data, error } = await supabase.auth.signInAnonymously()
-            if (error) throw error
-            console.log('Anonymous user created:', data.user.id)
-        }
-        
-        return true
-    } catch (error) {
-        console.error('Auth error:', error)
-        return false
+  console.log('Upstash Leaderboard system initializing...');
+  
+  // Test API connection
+  try {
+    const response = await fetch(`${API_ENDPOINT}?limit=1`);
+    if (response.ok) {
+      console.log('✅ Leaderboard API connected successfully');
+      return true;
+    } else {
+      console.error('❌ Leaderboard API returned error:', response.status);
     }
+  } catch (error) {
+    console.error('❌ Failed to connect to leaderboard API:', error);
+  }
+  return false;
 }
 
-// Device fingerprint for security
-export function generateDeviceFingerprint() {
-    const canvas = document.createElement('canvas')
-    const ctx = canvas.getContext('2d')
-    ctx.textBaseline = 'top'
-    ctx.font = '14px Arial'
-    ctx.fillText('fingerprint', 2, 2)
-    
-    const dataURL = canvas.toDataURL()
-    let hash = 0
-    for (let i = 0; i < dataURL.length; i++) {
-        const char = dataURL.charCodeAt(i)
-        hash = ((hash << 5) - hash) + char
-        hash = hash & hash
-    }
-    
-    return Math.abs(hash).toString(36)
-}
-
-// Game session management
-let currentGameSession = null
-
+// Start game session (kept for compatibility)
 export async function startGameSession() {
-    try {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) return null
-        
-        const sessionId = crypto.randomUUID()
-        currentGameSession = {
-            id: sessionId,
-            user_id: user.id,
-            started_at: new Date().toISOString(),
-            game_events: []
-        }
-        
-        // Create session in database
-        const { data, error } = await supabase
-            .from('game_sessions')
-            .insert({
-                id: sessionId,
-                user_id: user.id,
-                started_at: currentGameSession.started_at,
-                status: 'active'
-            })
-            
-        if (error) {
-            console.error('Error creating game session:', error)
-            return null
-        }
-        
-        return sessionId
-    } catch (error) {
-        console.error('Session error:', error)
-        return null
-    }
-}
-
-export function addGameEvent(eventType, eventData) {
-    if (!currentGameSession) return
-    
-    currentGameSession.game_events.push({
-        type: eventType,
-        data: eventData,
-        timestamp: Date.now()
-    })
+  const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  console.log('Game session started:', sessionId);
+  return sessionId;
 }
 
 // Submit score to leaderboard
 export async function submitScore(username, score, elementsDiscovered, playTime, kills) {
-    try {
-        // Ensure auth is initialized
-        const authOk = await initializeAuth()
-        if (!authOk) {
-            throw new Error('Authentication failed')
-        }
-        
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) {
-            throw new Error('No authenticated user')
-        }
-        
-        // Call the submit_game_score function
-        const { data, error } = await supabase.rpc('submit_game_score', {
-            p_session_id: currentGameSession?.id || null,
-            p_username: username,
-            p_score: score,
-            p_elements: elementsDiscovered,
-            p_play_time: Math.floor(playTime),
-            p_kills: kills,
-            p_game_events: currentGameSession?.game_events || []
-        })
-        
-        if (error) {
-            console.error('Score submission error:', error)
-            throw error
-        }
-        
-        return data
-    } catch (error) {
-        console.error('Error submitting score:', error)
-        throw error
+  try {
+    // Clear cache on new submission
+    Object.keys(leaderboardCache).forEach(key => {
+      leaderboardCache[key] = { data: null, timestamp: 0 };
+    });
+    
+    console.log('Submitting score:', { username, score, elementsDiscovered, playTime, kills });
+    
+    const response = await fetch(API_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        username,
+        score,
+        elements_discovered: elementsDiscovered,
+        play_time: playTime,
+        kills
+      })
+    });
+    
+    const responseData = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(responseData.error || 'Failed to submit score');
     }
+    
+    console.log('✅ Score submitted successfully! Daily rank:', responseData.daily_rank);
+    
+    // Return the daily rank for the UI
+    return responseData.daily_rank;
+    
+  } catch (error) {
+    console.error('❌ Submit score error:', error);
+    throw error;
+  }
 }
 
-// Get leaderboard data
-export async function getLeaderboard(period = 'daily', limit = 100, offset = 0) {
-    try {
-        const { data, error } = await supabase.rpc('get_leaderboard', {
-            p_period: period,
-            p_limit: limit,
-            p_offset: offset
-        })
-        
-        if (error) {
-            console.error('Leaderboard fetch error:', error)
-            throw error
-        }
-        
-        return data || []
-    } catch (error) {
-        console.error('Error fetching leaderboard:', error)
-        return []
+// Get leaderboard with caching
+export async function getLeaderboard(period = 'daily', limit = 100) {
+  try {
+    // Check cache first
+    const cached = leaderboardCache[period];
+    if (cached && cached.data && Date.now() - cached.timestamp < CACHE_DURATION) {
+      console.log(`Using cached ${period} leaderboard`);
+      return cached.data.slice(0, limit);
     }
+    
+    console.log(`Fetching ${period} leaderboard...`);
+    
+    const response = await fetch(`${API_ENDPOINT}?period=${period}&limit=${limit}`);
+    
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to fetch leaderboard');
+    }
+    
+    const data = await response.json();
+    
+    // Cache the results
+    if (data.leaderboard) {
+      leaderboardCache[period] = {
+        data: data.leaderboard,
+        timestamp: Date.now()
+      };
+    }
+    
+    return data.leaderboard || [];
+    
+  } catch (error) {
+    console.error('❌ Get leaderboard error:', error);
+    
+    // Return cached data if available, even if expired
+    if (leaderboardCache[period] && leaderboardCache[period].data) {
+      console.log('Returning stale cache due to error');
+      return leaderboardCache[period].data.slice(0, limit);
+    }
+    
+    throw error;
+  }
 }
 
-// Get player's rank for a specific score
-export async function getPlayerRank(score, period = 'daily') {
-    try {
-        const { data, error } = await supabase
-            .from('scores')
-            .select('score', { count: 'exact' })
-            .gt('score', score)
-            
-        if (error) {
-            console.error('Rank fetch error:', error)
-            return null
-        }
-        
-        return (data?.length || 0) + 1
-    } catch (error) {
-        console.error('Error fetching rank:', error)
-        return null
+// Get user's rank and score
+export async function getUserRank(username, period = 'daily') {
+  try {
+    const response = await fetch(
+      `${API_ENDPOINT}?period=${period}&limit=1&username=${encodeURIComponent(username)}`
+    );
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch user rank');
     }
+    
+    const data = await response.json();
+    return data.userRank;
+    
+  } catch (error) {
+    console.error('Get user rank error:', error);
+    return null;
+  }
 }
 
-// Get player's best score
+// Clear cache (useful for testing)
+export function clearCache() {
+  Object.keys(leaderboardCache).forEach(key => {
+    leaderboardCache[key] = { data: null, timestamp: 0 };
+  });
+  console.log('Leaderboard cache cleared');
+}
+
+// Utility function to format time
+export function formatPlayTime(seconds) {
+  const minutes = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${minutes}:${secs.toString().padStart(2, '0')}`;
+}
+
+// Keep these exports for compatibility with existing code
+export function generateDeviceFingerprint() {
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.textBaseline = 'top';
+  ctx.font = '14px Arial';
+  ctx.fillText('fingerprint', 2, 2);
+  
+  const dataURL = canvas.toDataURL();
+  let hash = 0;
+  for (let i = 0; i < dataURL.length; i++) {
+    const char = dataURL.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash;
+  }
+  
+  return Math.abs(hash).toString(36);
+}
+
+// Keep this for compatibility but it's no longer used
+export function addGameEvent(eventType, eventData) {
+  // No-op - events are not tracked in Redis version
+  console.log('Game event (not tracked):', eventType, eventData);
+}
+
+// No longer needed, but kept for compatibility
 export async function getPlayerBestScore() {
-    try {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) return null
-        
-        const { data, error } = await supabase
-            .from('scores')
-            .select('score')
-            .eq('user_id', user.id)
-            .order('score', { ascending: false })
-            .limit(1)
-            
-        if (error) {
-            console.error('Best score fetch error:', error)
-            return null
-        }
-        
-        return data?.[0]?.score || 0
-    } catch (error) {
-        console.error('Error fetching best score:', error)
-        return null
-    }
+  return null;
 }
+
+// No longer needed, but kept for compatibility  
+export async function getPlayerRank(score, period = 'daily') {
+  return null;
+}
+
+// For backward compatibility - no longer using Supabase
+export const supabase = null;
