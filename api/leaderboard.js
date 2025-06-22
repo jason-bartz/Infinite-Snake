@@ -1,8 +1,27 @@
 // api/leaderboard.js
 import { Redis } from '@upstash/redis';
 
-// Initialize Redis client
-const redis = Redis.fromEnv();
+// Initialize Redis client with better error handling
+let redis;
+try {
+  // First try fromEnv() which is the recommended approach
+  redis = Redis.fromEnv();
+} catch (error) {
+  console.error('Redis.fromEnv() failed:', error.message);
+  
+  // Fallback to explicit initialization
+  if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) {
+    console.error('Missing required environment variables');
+    console.error('UPSTASH_REDIS_REST_URL exists:', !!process.env.UPSTASH_REDIS_REST_URL);
+    console.error('UPSTASH_REDIS_REST_TOKEN exists:', !!process.env.UPSTASH_REDIS_REST_TOKEN);
+    throw new Error('Upstash Redis environment variables not configured');
+  }
+  
+  redis = new Redis({
+    url: process.env.UPSTASH_REDIS_REST_URL,
+    token: process.env.UPSTASH_REDIS_REST_TOKEN,
+  });
+}
 
 // Helper to generate Redis keys for different periods
 function getLeaderboardKeys(period) {
@@ -50,6 +69,15 @@ export default async function handler(req, res) {
   // Handle preflight requests
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
+  }
+  
+  // Check if Redis is initialized
+  if (!redis) {
+    console.error('Redis client not initialized');
+    return res.status(500).json({ 
+      error: 'Database connection not configured',
+      details: 'Redis client initialization failed'
+    });
   }
   
   try {
@@ -230,15 +258,20 @@ export default async function handler(req, res) {
     console.error('Leaderboard API error:', error);
     
     // Check if it's a Redis connection error
-    if (error.message?.includes('UPSTASH_REDIS_REST_URL')) {
+    if (error.message?.includes('UPSTASH_REDIS_REST_URL') || 
+        error.message?.includes('Redis') ||
+        error.message?.includes('Upstash')) {
       return res.status(500).json({ 
-        error: 'Database not configured. Please check Upstash connection.' 
+        error: 'Database connection error',
+        details: error.message,
+        hint: 'Please check Upstash environment variables'
       });
     }
     
     return res.status(500).json({ 
       error: 'Internal server error',
-      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      details: error.message,
+      type: error.constructor.name
     });
   }
 }
