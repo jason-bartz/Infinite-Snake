@@ -142,15 +142,24 @@ export default async function handler(req, res) {
       const userKey = `user:${username.toLowerCase()}:best`;
       const currentBestStr = await redis.get(userKey);
       let currentBest = null;
+      let currentBestScore = 0;
+      
       if (currentBestStr) {
         try {
+          // Try to parse as JSON first
           currentBest = JSON.parse(currentBestStr);
+          currentBestScore = currentBest.score || 0;
         } catch (e) {
-          console.error('Failed to parse current best score:', e);
+          // If parsing fails, it might be a plain number
+          const numValue = parseFloat(currentBestStr);
+          if (!isNaN(numValue)) {
+            currentBestScore = numValue;
+          }
+          console.log('Current best is a plain number:', currentBestScore);
         }
       }
       
-      if (!currentBest || scoreEntry.score > (currentBest.score || 0)) {
+      if (scoreEntry.score > currentBestScore) {
         await redis.setex(userKey, 2592000, JSON.stringify(scoreEntry)); // Expire in 30 days
       }
       
