@@ -41,7 +41,7 @@
         .container {
             position: relative;
             z-index: 1;
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 20px;
         }
@@ -135,8 +135,8 @@
         
         .leaderboard-header {
             display: grid;
-            grid-template-columns: 80px 250px 150px 120px 120px 100px;
-            gap: 20px;
+            grid-template-columns: 80px 80px 200px 150px 120px 120px 100px;
+            gap: 15px;
             padding: 15px;
             background: rgba(0, 0, 0, 0.5);
             border: 2px solid #555;
@@ -147,8 +147,8 @@
         
         .leaderboard-entry {
             display: grid;
-            grid-template-columns: 80px 250px 150px 120px 120px 100px;
-            gap: 20px;
+            grid-template-columns: 80px 80px 200px 150px 120px 120px 100px;
+            gap: 15px;
             padding: 15px;
             margin-bottom: 5px;
             background: rgba(0, 0, 0, 0.3);
@@ -177,6 +177,16 @@
         .rank-2 { color: #C0C0C0; font-size: 18px; }
         .rank-3 { color: #CD7F32; font-size: 18px; }
         
+        .country-flag {
+            font-size: 20px;
+            margin-right: 5px;
+        }
+        
+        .country-code {
+            font-size: 14px;
+            color: #888;
+        }
+        
         .loading {
             text-align: center;
             padding: 60px;
@@ -197,15 +207,15 @@
             .tab { max-width: none; }
             .leaderboard-header,
             .leaderboard-entry {
-                grid-template-columns: 60px 1fr 80px;
+                grid-template-columns: 50px 60px 1fr 80px;
                 gap: 10px;
             }
-            .leaderboard-header > div:nth-child(4),
             .leaderboard-header > div:nth-child(5),
             .leaderboard-header > div:nth-child(6),
-            .leaderboard-entry > div:nth-child(4),
+            .leaderboard-header > div:nth-child(7),
             .leaderboard-entry > div:nth-child(5),
-            .leaderboard-entry > div:nth-child(6) {
+            .leaderboard-entry > div:nth-child(6),
+            .leaderboard-entry > div:nth-child(7) {
                 display: none;
             }
         }
@@ -232,6 +242,7 @@
         <div class="leaderboard-container">
             <div class="leaderboard-header">
                 <div>RANK</div>
+                <div>COUNTRY</div>
                 <div>PLAYER</div>
                 <div style="text-align: right;">SCORE</div>
                 <div style="text-align: right;">ELEMENTS</div>
@@ -247,6 +258,43 @@
     
     <script>
         let currentPeriod = 'daily';
+        
+        // Country code to flag emoji mapping
+        const countryFlags = {
+            'US': '🇺🇸', 'CA': '🇨🇦', 'GB': '🇬🇧', 'DE': '🇩🇪', 'FR': '🇫🇷',
+            'JP': '🇯🇵', 'AU': '🇦🇺', 'BR': '🇧🇷', 'IN': '🇮🇳', 'CN': '🇨🇳',
+            'RU': '🇷🇺', 'MX': '🇲🇽', 'IT': '🇮🇹', 'ES': '🇪🇸', 'KR': '🇰🇷',
+            'NL': '🇳🇱', 'SE': '🇸🇪', 'NO': '🇳🇴', 'DK': '🇩🇰', 'FI': '🇫🇮',
+            'PL': '🇵🇱', 'BE': '🇧🇪', 'AT': '🇦🇹', 'CH': '🇨🇭', 'IE': '🇮🇪',
+            'PT': '🇵🇹', 'GR': '🇬🇷', 'CZ': '🇨🇿', 'HU': '🇭🇺', 'RO': '🇷🇴',
+            'BG': '🇧🇬', 'HR': '🇭🇷', 'SK': '🇸🇰', 'SI': '🇸🇮', 'LT': '🇱🇹',
+            'LV': '🇱🇻', 'EE': '🇪🇪', 'IS': '🇮🇸', 'TR': '🇹🇷', 'IL': '🇮🇱',
+            'SA': '🇸🇦', 'AE': '🇦🇪', 'EG': '🇪🇬', 'ZA': '🇿🇦', 'NG': '🇳🇬',
+            'KE': '🇰🇪', 'MA': '🇲🇦', 'TN': '🇹🇳', 'DZ': '🇩🇿', 'GH': '🇬🇭',
+            'AR': '🇦🇷', 'CL': '🇨🇱', 'CO': '🇨🇴', 'PE': '🇵🇪', 'VE': '🇻🇪',
+            'UY': '🇺🇾', 'PY': '🇵🇾', 'BO': '🇧🇴', 'EC': '🇪🇨', 'CR': '🇨🇷',
+            'PA': '🇵🇦', 'GT': '🇬🇹', 'HN': '🇭🇳', 'SV': '🇸🇻', 'NI': '🇳🇮',
+            'BZ': '🇧🇿', 'JM': '🇯🇲', 'TT': '🇹🇹', 'BB': '🇧🇧', 'GY': '🇬🇾',
+            'SR': '🇸🇷', 'UG': '🇺🇬', 'TZ': '🇹🇿', 'RW': '🇷🇼', 'ZM': '🇿🇲',
+            'ZW': '🇿🇼', 'BW': '🇧🇼', 'NA': '🇳🇦', 'SZ': '🇸🇿', 'LS': '🇱🇸',
+            'MG': '🇲🇬', 'MU': '🇲🇺', 'SC': '🇸🇨', 'KM': '🇰🇲', 'DJ': '🇩🇯',
+            'SO': '🇸🇴', 'ET': '🇪🇹', 'ER': '🇪🇷', 'SS': '🇸🇸', 'SD': '🇸🇩',
+            'LY': '🇱🇾', 'TD': '🇹🇩', 'CF': '🇨🇫', 'CM': '🇨🇲', 'GQ': '🇬🇶',
+            'GA': '🇬🇦', 'CG': '🇨🇬', 'CD': '🇨🇩', 'AO': '🇦🇴', 'ST': '🇸🇹',
+            'TH': '🇹🇭', 'VN': '🇻🇳', 'MY': '🇲🇾', 'SG': '🇸🇬', 'ID': '🇮🇩',
+            'PH': '🇵🇭', 'MM': '🇲🇲', 'KH': '🇰🇭', 'LA': '🇱🇦', 'BD': '🇧🇩',
+            'LK': '🇱🇰', 'NP': '🇳🇵', 'BT': '🇧🇹', 'MV': '🇲🇻', 'AF': '🇦🇫',
+            'PK': '🇵🇰', 'IR': '🇮🇷', 'IQ': '🇮🇶', 'SY': '🇸🇾', 'LB': '🇱🇧',
+            'JO': '🇯🇴', 'PS': '🇵🇸', 'KW': '🇰🇼', 'QA': '🇶🇦', 'BH': '🇧🇭',
+            'OM': '🇴🇲', 'YE': '🇾🇪', 'UZ': '🇺🇿', 'KZ': '🇰🇿', 'KG': '🇰🇬',
+            'TJ': '🇹🇯', 'TM': '🇹🇲', 'MN': '🇲🇳', 'GE': '🇬🇪', 'AM': '🇦🇲',
+            'AZ': '🇦🇿', 'BY': '🇧🇾', 'UA': '🇺🇦', 'MD': '🇲🇩', 'XX': '🌍'
+        };
+        
+        function getCountryDisplay(countryCode, countryName) {
+            const flag = countryFlags[countryCode] || '🌍';
+            return `<span class="country-flag">${flag}</span><span class="country-code">${countryCode}</span>`;
+        }
         
         // API functions to connect to your Redis backend
         async function getLeaderboard(period, limit = 100) {
@@ -311,9 +359,16 @@
                     const seconds = entry.play_time % 60;
                     const timeStr = `${minutes}:${seconds.toString().padStart(2, '0')}`;
                     
+                    // Handle country display
+                    const countryDisplay = getCountryDisplay(
+                        entry.country_code || 'XX', 
+                        entry.country_name || 'Unknown'
+                    );
+                    
                     return `
                         <div class="leaderboard-entry ${isPlayer ? 'player-entry' : ''}">
                             <div class="${rankClass}" style="font-weight: bold;">#${entry.rank}</div>
+                            <div>${countryDisplay}</div>
                             <div style="color: ${isPlayer ? '#4ecdc4' : '#FFF'};">${entry.username}</div>
                             <div style="color: #4ecdc4; text-align: right;">${entry.score.toLocaleString()}</div>
                             <div style="color: #FFD700; text-align: right;">${entry.elements_discovered}</div>

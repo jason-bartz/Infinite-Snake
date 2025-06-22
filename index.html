@@ -237,26 +237,19 @@
             width: 100%;
             height: 100%;
             background: var(--snes-black);
-            background-image: 
-                repeating-linear-gradient(
-                    0deg,
-                    transparent,
-                    transparent 2px,
-                    #000033 2px,
-                    #000033 4px
-                );
             overflow: hidden;
             z-index: 1000;
-            transition: opacity 1s;
+            transition: opacity 0.3s;
         }
         
+        /* Removed - using persistent star canvas
         #splashStarsCanvas {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-        }
+        } */
         
         #splashContent {
             position: relative;
@@ -364,26 +357,21 @@
             width: 100%;
             height: 100%;
             background: var(--snes-black);
-            background-image: 
-                repeating-linear-gradient(
-                    45deg,
-                    transparent,
-                    transparent 10px,
-                    #000033 10px,
-                    #000033 20px
-                );
             overflow: hidden;
             display: none;
             z-index: 50;
+            opacity: 0;
+            transition: opacity 0.3s;
         }
         
+        /* Removed - using persistent star canvas
         #gameModeStarsCanvas {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-        }
+        } */
         
         #gameModeContent {
             position: absolute;
@@ -654,7 +642,7 @@
             pointer-events: none;
             z-index: 10;
             opacity: 0;
-            transition: opacity 0.8s ease-in;
+            transition: opacity 0.3s ease-in;
         }
         
         #score {
@@ -2787,9 +2775,11 @@
     <script type="module" src="js/supabase.js"></script>
 </head>
 <body>
+    <!-- Persistent Star Background -->
+    <canvas id="persistentStarsCanvas" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;"></canvas>
+    
     <!-- Splash Screen -->
     <div id="splashScreen">
-        <canvas id="splashStarsCanvas"></canvas>
         <div style="position: absolute; top: 20px; right: 20px; z-index: 10;">
             <a href="/leaderboard.html" style="color: #4ecdc4; text-decoration: none; font-family: monospace; font-size: 16px;">🏆 Leaderboard</a>
         </div>
@@ -2805,7 +2795,6 @@
     
     <!-- Game Mode Selection -->
     <div id="gameModeSelect">
-        <canvas id="gameModeStarsCanvas"></canvas>
         <div id="gameModeContent">
             <h3>Game Setup</h3>
         
@@ -4303,7 +4292,11 @@
             setTimeout(() => {
                 document.getElementById('splashScreen').style.display = 'none';
                 document.getElementById('gameModeSelect').style.display = 'block';
-            }, 1000);
+                // Fade in game mode select
+                setTimeout(() => {
+                    document.getElementById('gameModeSelect').style.opacity = '1';
+                }, 50);
+            }, 300);
         });
         
         // Game mode selection
@@ -4319,107 +4312,33 @@
         }
         
         function startGameTransition() {
-            // Create fade transition
             const gameModeSelect = document.getElementById('gameModeSelect');
-            const discoveryLog = document.getElementById('discoveryLog');
             const gameCanvas = document.getElementById('gameCanvas');
-            const gameModeStarsCanvas = document.getElementById('gameModeStarsCanvas');
             
             // Add transition styles
-            gameModeSelect.style.transition = 'opacity 0.8s ease-out';
-            gameCanvas.style.transition = 'opacity 0.8s ease-in';
+            gameCanvas.style.transition = 'opacity 0.3s ease-in';
             gameCanvas.style.opacity = '0';
             
-            // Create a temporary background during transition
-            const transitionBg = document.createElement('div');
-            transitionBg.style.position = 'fixed';
-            transitionBg.style.top = '0';
-            transitionBg.style.left = '0';
-            transitionBg.style.width = '100%';
-            transitionBg.style.height = '100%';
-            transitionBg.style.background = '#000';
-            transitionBg.style.zIndex = '40';
-            transitionBg.appendChild(gameModeStarsCanvas.cloneNode(true));
-            transitionBg.style.transition = 'opacity 1s ease-out';
-            document.body.appendChild(transitionBg);
-            
-            // Fade out menu content but keep stars visible
-            const menuContent = gameModeSelect.querySelector('#gameModeContent');
-            menuContent.style.transition = 'opacity 0.5s ease-out';
-            menuContent.style.opacity = '0';
+            // Fade out game mode select
+            gameModeSelect.style.opacity = '0';
             
             setTimeout(() => {
-                gameModeSelect.style.opacity = '0';
+                gameModeSelect.style.display = 'none';
+                stopGame(); // Ensure clean state before starting
+                startGame();
                 
+                // Show canvas and UI
                 setTimeout(() => {
-                    gameModeSelect.style.display = 'none';
-                    transitionBg.style.opacity = '0';
-                    
-                    setTimeout(() => {
-                        transitionBg.remove();
-                        stopGame(); // Ensure clean state before starting
-                        startGame();
-                        // Only show canvas and UI after game starts
-                        setTimeout(() => {
-                            gameCanvas.style.opacity = '1';
-                            document.getElementById('ui').style.opacity = '1';
-                        }, 100);
-                    }, 1000);
+                    gameCanvas.style.opacity = '1';
+                    document.getElementById('ui').style.opacity = '1';
                 }, 100);
-            }, 500);
+            }, 300);
         }
         
         function selectControls(scheme) {
             controlScheme = scheme;
-            
-            // Create fade transition
-            const gameModeSelect = document.getElementById('gameModeSelect');
-            const discoveryLog = document.getElementById('discoveryLog');
-            const gameCanvas = document.getElementById('gameCanvas');
-            const gameModeStarsCanvas = document.getElementById('gameModeStarsCanvas');
-            
-            // Add transition styles
-            gameModeSelect.style.transition = 'opacity 0.8s ease-out';
-            gameCanvas.style.transition = 'opacity 0.8s ease-in';
-            gameCanvas.style.opacity = '0';
-            
-            // Create a temporary background during transition
-            const transitionBg = document.createElement('div');
-            transitionBg.style.position = 'fixed';
-            transitionBg.style.top = '0';
-            transitionBg.style.left = '0';
-            transitionBg.style.width = '100%';
-            transitionBg.style.height = '100%';
-            transitionBg.style.background = '#000';
-            transitionBg.style.zIndex = '40';
-            transitionBg.appendChild(gameModeStarsCanvas.cloneNode(true));
-            transitionBg.style.transition = 'opacity 1s ease-out';
-            document.body.appendChild(transitionBg);
-            
-            // Fade out menu content but keep stars visible
-            const menuContent = gameModeSelect.querySelector('#gameModeContent');
-            if (menuContent) {
-                menuContent.style.transition = 'opacity 0.4s ease-out';
-                menuContent.style.opacity = '0';
-            }
-            
-            // After content fades, start the game
-            setTimeout(() => {
-                gameModeSelect.style.display = 'none';
-                // Discovery feed is always visible during gameplay
-                startGame();
-                
-                // Fade in game canvas and fade out transition background
-                setTimeout(() => {
-                    gameCanvas.style.opacity = '1';
-                    transitionBg.style.opacity = '0';
-                    
-                    // Remove transition background after fade
-                    setTimeout(() => {
-                        transitionBg.remove();
-                    }, 1000);
-                }, 100);
-            }, 400);
+            // Use the same simplified transition
+            startGameTransition();
         }
         
         // Load snake names
@@ -10821,22 +10740,18 @@
             initMobileControls();
         });
         
-        // Stars animation for splash and game mode screens
+        // Persistent stars animation for all screens
         (function() {
-            const splashCanvas = document.getElementById('splashStarsCanvas');
-            const splashCtx = splashCanvas.getContext('2d');
-            const gameModeCanvas = document.getElementById('gameModeStarsCanvas');
-            const gameModeCtx = gameModeCanvas.getContext('2d');
+            const persistentCanvas = document.getElementById('persistentStarsCanvas');
+            const ctx = persistentCanvas.getContext('2d');
             
-            // Resize canvases
-            function resizeCanvases() {
-                splashCanvas.width = window.innerWidth;
-                splashCanvas.height = window.innerHeight;
-                gameModeCanvas.width = window.innerWidth;
-                gameModeCanvas.height = window.innerHeight;
+            // Resize canvas
+            function resizeCanvas() {
+                persistentCanvas.width = window.innerWidth;
+                persistentCanvas.height = window.innerHeight;
             }
-            resizeCanvases();
-            window.addEventListener('resize', resizeCanvases);
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
             
             // Stars array (shared between both screens)
             const stars = [];
@@ -10935,33 +10850,19 @@
             
             // Animation loop
             function animateStars(timestamp) {
-                // Check which screen is active
-                const splashActive = document.getElementById('splashScreen').style.display !== 'none' && 
-                                   document.getElementById('splashScreen').style.opacity !== '0';
-                const gameModeActive = document.getElementById('gameModeSelect').style.display !== 'none';
-                
-                if (!splashActive && !gameModeActive) {
-                    requestAnimationFrame(animateStars);
-                    return;
-                }
-                
-                // Determine which canvas to draw on
-                const activeCanvas = splashActive ? splashCanvas : gameModeCanvas;
-                const activeCtx = splashActive ? splashCtx : gameModeCtx;
-                
                 // Clear canvas
-                activeCtx.clearRect(0, 0, activeCanvas.width, activeCanvas.height);
+                ctx.clearRect(0, 0, persistentCanvas.width, persistentCanvas.height);
                 
                 // Draw static stars with twinkling
                 stars.forEach(star => {
                     star.opacity += Math.sin(timestamp * star.twinkleSpeed) * 0.05;
                     star.opacity = Math.max(0.1, Math.min(0.8, star.opacity));
                     
-                    activeCtx.globalAlpha = star.opacity;
-                    activeCtx.fillStyle = '#ffffff';
-                    activeCtx.beginPath();
-                    activeCtx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
-                    activeCtx.fill();
+                    ctx.globalAlpha = star.opacity;
+                    ctx.fillStyle = '#ffffff';
+                    ctx.beginPath();
+                    ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                    ctx.fill();
                 });
                 
                 // Update and draw shooting stars
@@ -10969,7 +10870,7 @@
                     if (!star.update()) {
                         shootingStars.splice(index, 1);
                     } else {
-                        star.draw(activeCtx);
+                        star.draw(ctx);
                     }
                 });
                 
@@ -10979,7 +10880,7 @@
                     lastShootingStarTime = timestamp;
                 }
                 
-                activeCtx.globalAlpha = 1;
+                ctx.globalAlpha = 1;
                 requestAnimationFrame(animateStars);
             }
             

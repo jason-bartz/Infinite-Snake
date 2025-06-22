@@ -1,6 +1,48 @@
 // api/leaderboard.js
 import { Redis } from '@upstash/redis';
 
+// Country code to name mapping (partial list)
+const COUNTRY_NAMES = {
+  'US': 'United States',
+  'CA': 'Canada', 
+  'GB': 'United Kingdom',
+  'DE': 'Germany',
+  'FR': 'France',
+  'JP': 'Japan',
+  'AU': 'Australia',
+  'BR': 'Brazil',
+  'IN': 'India',
+  'CN': 'China',
+  'RU': 'Russia',
+  'MX': 'Mexico',
+  'IT': 'Italy',
+  'ES': 'Spain',
+  'KR': 'South Korea',
+  'NL': 'Netherlands',
+  'SE': 'Sweden',
+  'NO': 'Norway',
+  'DK': 'Denmark',
+  'FI': 'Finland',
+  // Add more as needed
+};
+
+// Get country from request headers (Vercel provides this)
+function getCountryFromRequest(req) {
+  // Vercel provides country in x-vercel-ip-country header
+  const countryCode = req.headers['x-vercel-ip-country'] || 
+                     req.headers['cf-ipcountry'] || // Cloudflare
+                     'XX'; // Unknown
+  
+  const countryName = COUNTRY_NAMES[countryCode] || countryCode;
+  
+  console.log('Detected country:', { code: countryCode, name: countryName });
+  
+  return {
+    code: countryCode,
+    name: countryName
+  };
+}
+
 // Initialize Redis client with better error handling
 let redis;
 try {
@@ -99,7 +141,10 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: validation.error });
       }
       
-      // Create score entry
+      // Get country from IP
+      const country = getCountryFromRequest(req);
+      
+      // Create score entry with country
       const scoreEntry = {
         id: generateScoreId(),
         username: username.substring(0, 20).trim(), // Limit username length
@@ -107,6 +152,8 @@ export default async function handler(req, res) {
         elements_discovered: elements_discovered || 0,
         play_time: play_time || 0,
         kills: kills || 0,
+        country_code: country.code,
+        country_name: country.name,
         timestamp: Date.now()
       };
       
@@ -192,12 +239,13 @@ export default async function handler(req, res) {
         await redis.setex(userKey, 2592000, JSON.stringify(scoreEntry)); // Expire in 30 days
       }
       
-      console.log(`Score submitted: ${username} - ${score} (rank: ${dailyRank !== null ? dailyRank + 1 : 'unknown'})`);
+      console.log(`Score submitted: ${username} (${country.code}) - ${score} (rank: ${dailyRank !== null ? dailyRank + 1 : 'unknown'})`);
       
       return res.status(200).json({
         success: true,
         daily_rank: dailyRank !== null ? dailyRank + 1 : null,
-        score_id: scoreEntry.id
+        score_id: scoreEntry.id,
+        country: country
       });
     }
     
