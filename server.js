@@ -92,11 +92,18 @@ const server = http.createServer((req, res) => {
   // Admin panel protection - only allow localhost access
   if (req.url.startsWith('/admin') || req.url.startsWith('/api/')) {
     const clientIP = req.connection.remoteAddress;
-    const isLocalhost = clientIP === '127.0.0.1' || clientIP === '::1' || clientIP === '::ffff:127.0.0.1';
+    const forwardedFor = req.headers['x-forwarded-for'];
+    const isLocalhost = clientIP === '127.0.0.1' || clientIP === '::1' || clientIP === '::ffff:127.0.0.1' ||
+                       forwardedFor === '127.0.0.1' || forwardedFor === '::1';
+    
+    console.log(`[Admin Access] IP: ${clientIP}, Forwarded: ${forwardedFor}, Is Localhost: ${isLocalhost}`);
     
     if (!isLocalhost) {
-      res.writeHead(403);
-      res.end('Access denied - admin panel only accessible from localhost');
+      res.writeHead(403, { 
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      });
+      res.end(JSON.stringify({ error: 'Access denied - admin panel only accessible from localhost' }));
       return;
     }
   }
@@ -142,11 +149,17 @@ const server = http.createServer((req, res) => {
           fs.writeFileSync(customEmojisPath, JSON.stringify(customData.emojis, null, 2));
         }
         
-        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.writeHead(200, { 
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        });
         res.end(JSON.stringify({ success: true }));
       } catch (err) {
         console.error('Save error:', err);
-        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.writeHead(500, { 
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        });
         res.end(JSON.stringify({ error: err.message }));
       }
     });
@@ -262,6 +275,7 @@ const server = http.createServer((req, res) => {
   }
   
   if (req.method === 'DELETE' && req.url.startsWith('/api/delete-combination')) {
+    console.log('[DELETE] Handling delete-combination request');
     let body = '';
     req.on('data', chunk => {
       body += chunk.toString();
@@ -316,9 +330,8 @@ const server = http.createServer((req, res) => {
     return;
   }
   
-  console.log(`[DEBUG] Checking DELETE endpoint: method=${req.method}, url=${req.url}`);
   if (req.method === 'DELETE' && req.url === '/api/delete-element') {
-    console.log('[DEBUG] Matched /api/delete-element endpoint');
+    console.log('[DELETE] Handling delete-element request');
     let body = '';
     req.on('data', chunk => {
       body += chunk.toString();
@@ -628,6 +641,18 @@ const server = http.createServer((req, res) => {
       });
       res.end(JSON.stringify({ error: err.message }));
     }
+    return;
+  }
+  
+  // Only serve static files for GET requests
+  if (req.method !== 'GET' && req.method !== 'HEAD') {
+    console.log(`[DEBUG] Unsupported method ${req.method} for ${req.url}`);
+    res.writeHead(405, { 
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+      'Allow': 'GET, POST, DELETE, OPTIONS'
+    });
+    res.end(JSON.stringify({ error: `Method ${req.method} not allowed for this endpoint` }));
     return;
   }
   

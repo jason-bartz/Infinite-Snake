@@ -15,13 +15,29 @@
             this.deletedElements = new Set();
             this.deletedCombinations = new Set();
         }
+        
+        // Force reload data (for admin panel updates)
+        async reloadData() {
+            console.log('[GameLoader] Reloading game data...');
+            this.loaded = false;
+            this.elements.clear();
+            this.combinations = {};
+            this.emojiMap = {};
+            this.deletedElements.clear();
+            this.deletedCombinations.clear();
+            await this.loadAll();
+            console.log('[GameLoader] Data reloaded successfully');
+            // Dispatch event so game knows data has been reloaded
+            window.dispatchEvent(new Event('elementsReloaded'));
+        }
 
         async loadAll() {
             if (this.loaded) return;
 
             try {
-                // Load combined element file
-                const elementsResponse = await fetch('elements/data/elements.json');
+                // Load combined element file with cache busting
+                const timestamp = Date.now();
+                const elementsResponse = await fetch(`elements/data/elements.json?t=${timestamp}`);
                 const allElements = await elementsResponse.json();
                 
                 // Process all elements
@@ -31,7 +47,7 @@
 
                 // Load deleted elements
                 try {
-                    const deletedElementsResponse = await fetch('elements/deleted-elements.json');
+                    const deletedElementsResponse = await fetch(`elements/deleted-elements.json?t=${timestamp}`);
                     if (deletedElementsResponse.ok) {
                         const deletedArray = await deletedElementsResponse.json();
                         this.deletedElements = new Set(deletedArray.map(id => parseInt(id)));
@@ -47,12 +63,12 @@
                 }
 
                 // Load combinations
-                const combinationsResponse = await fetch('elements/data/combinations.json');
+                const combinationsResponse = await fetch(`elements/data/combinations.json?t=${timestamp}`);
                 this.combinations = await combinationsResponse.json();
                 
                 // Load deleted combinations
                 try {
-                    const deletedCombosResponse = await fetch('elements/deleted-combinations.json');
+                    const deletedCombosResponse = await fetch(`elements/deleted-combinations.json?t=${timestamp}`);
                     if (deletedCombosResponse.ok) {
                         const deletedArray = await deletedCombosResponse.json();
                         this.deletedCombinations = new Set(deletedArray);
@@ -71,7 +87,7 @@
 
                 // Load emoji mapping from JSON
                 try {
-                    const emojiResponse = await fetch('elements/data/emojis.json');
+                    const emojiResponse = await fetch(`elements/data/emojis.json?t=${timestamp}`);
                     const emojiData = await emojiResponse.json();
                     
                     // Build the emoji map

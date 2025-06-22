@@ -2776,7 +2776,7 @@
 </head>
 <body>
     <!-- Persistent Star Background -->
-    <canvas id="persistentStarsCanvas" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;"></canvas>
+    <canvas id="persistentStarsCanvas" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none;"></canvas>
     
     <!-- Splash Screen -->
     <div id="splashScreen">
@@ -3301,7 +3301,7 @@
         @media (orientation: landscape) and (max-width: 1024px) {
             /* Player Card - Top Left */
             body.mobile .player-info-box {
-                top: 20px !important;
+                top: 70px !important; /* Aligned with element bank */
                 left: 20px !important;
                 bottom: auto !important;
                 width: 200px !important;
@@ -3309,11 +3309,11 @@
             
             /* Leaderboard - Top Right */
             body.mobile .leaderboard-box {
-                top: 20px !important;
+                top: 70px !important; /* Aligned with element bank */
                 right: 20px !important;
                 bottom: auto !important;
                 left: auto !important;
-                width: 220px !important;
+                width: 240px !important; /* Slightly wider for comfortable text */
             }
             
             /* Discovery Feed - Left Middle */
@@ -3331,9 +3331,19 @@
                 top: 10px !important;
                 bottom: auto !important;
                 padding: 10px 20px !important;
-                left: 240px !important; /* Clear player card */
-                right: 250px !important; /* Clear leaderboard */
+                left: 230px !important; /* Clear player card */
+                right: 260px !important; /* Clear leaderboard */
                 width: auto !important;
+            }
+            
+            /* Shrink boost bar for landscape */
+            body.mobile .boost-bar-container {
+                height: 30px !important;
+                margin-bottom: 10px !important;
+            }
+            
+            body.mobile .boost-bar-frame {
+                height: 30px !important;
             }
             
             /* Joystick - Bottom Left Corner */
@@ -3349,20 +3359,21 @@
                 left: auto !important;
             }
             
-            /* Pause & Mute - Vertically stacked above boost button */
+            /* Pause & Mute - Bottom center */
             body.mobile .pause-button-mobile,
             body.mobile .mute-button-mobile {
-                bottom: auto !important;
-                right: 50px !important;
+                bottom: 20px !important;
                 top: auto !important;
+                left: 50% !important;
+                right: auto !important;
             }
             
             body.mobile .pause-button-mobile {
-                bottom: 140px !important; /* Above boost button */
+                transform: translateX(-80px) !important; /* Offset left from center */
             }
             
             body.mobile .mute-button-mobile {
-                bottom: 200px !important; /* Above pause button */
+                transform: translateX(20px) !important; /* Offset right from center */
             }
             
             /* Pop-up messages area - Bottom of screen */
@@ -3377,7 +3388,7 @@
         @media (orientation: portrait) and (max-width: 1024px) {
             /* Player Card - Top Left with increased margin */
             body.mobile .player-info-box {
-                top: 90px !important; /* Increased from 80px to prevent overlap */
+                top: 80px !important; /* Moved up slightly */
                 left: 10px !important;
                 bottom: auto !important;
                 width: 160px !important;
@@ -3386,11 +3397,11 @@
             
             /* Leaderboard - Top Right with increased margin */
             body.mobile .leaderboard-box {
-                top: 90px !important; /* Increased from 80px to prevent overlap */
+                top: 80px !important; /* Moved up slightly */
                 right: 10px !important;
                 left: auto !important;
                 bottom: auto !important;
-                width: 160px !important;
+                width: 180px !important; /* Widened for comfortable text */
                 font-size: 9px !important;
             }
             
@@ -3408,7 +3419,17 @@
             body.mobile .bottom-ui {
                 top: 0 !important;
                 bottom: auto !important;
-                padding: 10px 15px !important;
+                padding: 8px 15px !important;
+            }
+            
+            /* Shrink boost bar for portrait */
+            body.mobile .boost-bar-container {
+                height: 25px !important;
+                margin-bottom: 8px !important;
+            }
+            
+            body.mobile .boost-bar-frame {
+                height: 25px !important;
             }
             
             body.mobile .element-collection-bar {
@@ -3429,17 +3450,21 @@
                 left: auto !important;
             }
             
-            /* Pause & Mute - Above boost button to prevent overlap */
-            body.mobile .pause-button-mobile {
-                bottom: 130px !important; /* Above boost button */
-                right: 40px !important;
+            /* Pause & Mute - Bottom center */
+            body.mobile .pause-button-mobile,
+            body.mobile .mute-button-mobile {
+                bottom: 20px !important;
                 top: auto !important;
+                left: 50% !important;
+                right: auto !important;
+            }
+            
+            body.mobile .pause-button-mobile {
+                transform: translateX(-80px) !important; /* Offset left from center */
             }
             
             body.mobile .mute-button-mobile {
-                bottom: 190px !important; /* Above pause button */
-                right: 40px !important;
-                top: auto !important;
+                transform: translateX(20px) !important; /* Offset right from center */
             }
             
             /* Pop-up messages - Bottom of screen */
@@ -3466,6 +3491,12 @@
             }
         }
 
+        /* ===== MOBILE FONT SIZE REDUCTIONS ===== */
+        /* Reduce game element font sizes on mobile */
+        body.mobile canvas {
+            /* This will be handled in the drawing code */
+        }
+        
         /* ===== ENHANCED MOBILE CONTROLS ===== */
         .virtual-joystick {
             background: rgba(0, 0, 0, 0.6) !important;
@@ -5577,13 +5608,18 @@
             }
             
             die() {
-                console.error('Snake dying!', 'isPlayer:', this.isPlayer, 'position:', this.x, this.y);
+                console.error('Snake dying!', 'isPlayer:', this.isPlayer, 'position:', this.x || 'undefined', this.y || 'undefined');
                 console.trace();
                 this.alive = false;
                 
                 // Drop all elements with scatter effect
                 for (let i = 0; i < this.elements.length && i < this.segments.length; i++) {
                     const segment = this.segments[i];
+                    
+                    // Skip if segment is undefined or missing position
+                    if (!segment || segment.x === undefined || segment.y === undefined) {
+                        continue;
+                    }
                     
                     // Calculate scatter radius based on position in snake
                     // Head elements scatter less, tail elements scatter more
@@ -5833,7 +5869,8 @@
                     }
                     
                     // Draw name (with colored personality for AI snakes)
-                    ctx.font = 'bold 14px Arial';
+                    const nameFontSize = isMobile ? 11 : 14;
+                    ctx.font = `bold ${nameFontSize}px Arial`;
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'bottom';
                     const nameY = screenY - SEGMENT_SIZE * cameraZoom - 10;
@@ -6666,7 +6703,8 @@
                 ctx.restore();
                 
                 // Draw element name below emoji
-                ctx.font = '12px Arial';
+                const elementNameFontSize = isMobile ? 10 : 12;
+                ctx.font = `${elementNameFontSize}px Arial`;
                 ctx.fillStyle = 'white';
                 ctx.strokeStyle = 'black';
                 ctx.lineWidth = 3;
@@ -7952,9 +7990,10 @@
                 
                 const statsDiv = document.createElement('div');
                 statsDiv.className = 'leaderboard-stats';
+                const discoveriesText = isMobile ? 'disc.' : 'discoveries';
                 statsDiv.innerHTML = `
                     <div>${Math.floor(snake.score).toLocaleString()} pts</div>
-                    <div>${snake.discoveries || 0} discoveries</div>
+                    <div>${snake.discoveries || 0} ${discoveriesText}</div>
                 `;
                 
                 div.appendChild(nameSpan);
@@ -10741,7 +10780,7 @@
         });
         
         // Persistent stars animation for all screens
-        (function() {
+        document.addEventListener('DOMContentLoaded', function() {
             const persistentCanvas = document.getElementById('persistentStarsCanvas');
             const ctx = persistentCanvas.getContext('2d');
             
@@ -10886,7 +10925,7 @@
             
             // Start animation
             requestAnimationFrame(animateStars);
-        })();
+        });
         
         // Try to play music on first user interaction
         document.addEventListener('click', function playMusicOnInteraction() {

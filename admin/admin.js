@@ -87,7 +87,13 @@ async function loadData() {
         }
         // Load combined elements file (now includes all custom elements)
         try {
-            const response = await fetch('/elements/data/elements.json');
+            const response = await fetch('/elements/data/elements.json', {
+                cache: 'no-store',
+                headers: {
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache'
+                }
+            });
             if (!response.ok) {
                 throw new Error(`Failed to fetch elements: ${response.status} ${response.statusText}`);
             }
@@ -119,7 +125,13 @@ async function loadData() {
         // Load combinations
         console.log('Fetching combinations...');
         try {
-            const comboResponse = await fetch('/elements/data/combinations.json');
+            const comboResponse = await fetch('/elements/data/combinations.json', {
+                cache: 'no-store',
+                headers: {
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache'
+                }
+            });
             if (!comboResponse.ok) {
                 throw new Error(`Failed to fetch combinations: ${comboResponse.status} ${comboResponse.statusText}`);
             }
@@ -325,20 +337,54 @@ function showSearchResults(matches) {
 function showElement(elementId, preservePage = false, cachedCreates = null) {
     elementId = String(elementId);
     
-    const elem = elements[elementId];
-    if (!elem) {
-        console.error('Element not found:', elementId);
-        return;
-    }
-    
-    // Store current element for other functions that might need it
-    currentElement = elem;
-    
-    // Fetch combinations fresh every time (bypass the loading issue)
-    Promise.all([
-        fetch('/elements/data/combinations.json').then(r => r.json()),
-        fetch('/elements/deleted-combinations.json').then(r => r.ok ? r.json() : [])
-    ])
+    // First reload elements to ensure we have the latest data
+    const timestamp = Date.now();
+    fetch(`/elements/data/elements.json?t=${timestamp}`, {
+        cache: 'no-store',
+        headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache'
+        }
+    })
+    .then(r => r.json())
+    .then(elementsData => {
+        // Update global elements
+        window.elements = {};
+        elementsData.forEach(elem => {
+            window.elements[elem.i] = {
+                id: elem.i,
+                name: elem.n,
+                tier: elem.t,
+                emojiIndex: elem.e
+            };
+        });
+        
+        const elem = elements[elementId];
+        if (!elem) {
+            console.error('Element not found:', elementId);
+            return;
+        }
+        
+        // Store current element for other functions that might need it
+        currentElement = elem;
+        
+        // Fetch combinations fresh every time with cache busting
+        Promise.all([
+            fetch(`/elements/data/combinations.json?t=${timestamp}`, {
+                cache: 'no-store',
+                headers: {
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache'
+                }
+            }).then(r => r.json()),
+            fetch(`/elements/deleted-combinations.json?t=${timestamp}`, {
+                cache: 'no-store',
+                headers: {
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache'
+                }
+            }).then(r => r.ok ? r.json() : [])
+        ])
         .then(([combinationsData, deletedCombos]) => {
             console.log('Fetched combinations:', Object.keys(combinationsData).length);
             console.log('Fetched deleted combinations:', deletedCombos.length);
@@ -389,6 +435,11 @@ function showElement(elementId, preservePage = false, cachedCreates = null) {
             console.error('Failed to load combinations:', error);
             alert('Failed to load combinations data');
         });
+    })
+    .catch(error => {
+        console.error('Failed to load elements:', error);
+        alert('Failed to load elements data');
+    });
 }
 
 // Helper function to display the element details
@@ -814,6 +865,10 @@ window.saveRecipe = async function(oldElem1, oldElem2, result) {
     
     if (saved) {
         showMessage('Recipe updated and saved!', 'success');
+        
+        // Ensure global combinations are updated
+        window.combinations[`${newElem1}+${newElem2}`] = parseInt(result);
+        window.combinations[`${newElem2}+${newElem1}`] = parseInt(result);
     } else {
         // Revert changes if save failed
         combinations[`${oldElem1}+${oldElem2}`] = parseInt(result);
@@ -1239,6 +1294,14 @@ window.saveNewElement = async function() {
     const saved = await saveToServer(newElement, newCombos, newEmojis);
     
     if (saved) {
+        // Ensure the element is properly added to global elements
+        window.elements[id] = newElement;
+        
+        // Ensure all emojis are updated globally
+        if (emoji) {
+            window.emojis[id] = emoji;
+        }
+        
         // Show detailed success message
         let successMsg = `✅ Element "${name}" created and saved!`;
         if (recipesAdded > 0) {
@@ -1437,6 +1500,10 @@ window.saveNewRecipe = async function(resultId) {
     if (saved) {
         showMessage('Recipe added and saved!', 'success');
         
+        // Update the global combinations object to ensure it's in sync
+        window.combinations[`${elem1Id}+${elem2Id}`] = parseInt(resultId);
+        window.combinations[`${elem2Id}+${elem1Id}`] = parseInt(resultId);
+        
         // Return to element view
         setTimeout(() => {
             showElement(resultId);
@@ -1492,6 +1559,10 @@ window.deleteRecipe = async function(elem1, elem2, result) {
         if (!response.ok) {
             throw new Error('Server error');
         }
+        
+        // Ensure the combinations are removed from global object
+        delete window.combinations[`${elem1}+${elem2}`];
+        delete window.combinations[`${elem2}+${elem1}`];
         
         showMessage('Recipe deleted successfully!', 'success');
         
