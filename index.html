@@ -1773,7 +1773,7 @@
             
             body.mobile .player-info-box,
             body.mobile .leaderboard-box {
-                top: 100px;
+                /* Default mobile position - will be overridden by orientation-specific rules */
             }
             
             .discovery-feed {
@@ -3298,17 +3298,20 @@
         }
 
         /* ===== LANDSCAPE ORIENTATION (iPad Mini and larger tablets) ===== */
-        @media (orientation: landscape) and (max-width: 1024px) {
-            /* Player Card - Top Left */
+        @media screen and (orientation: landscape) and (max-width: 1024px) {
+            /* Player Card - Top Left - FIXED POSITIONING */
             body.mobile .player-info-box {
+                position: fixed !important;
                 top: 70px !important; /* Aligned with element bank */
                 left: 20px !important;
                 bottom: auto !important;
+                right: auto !important;
                 width: 200px !important;
             }
             
-            /* Leaderboard - Top Right */
+            /* Leaderboard - Top Right - FIXED POSITIONING */
             body.mobile .leaderboard-box {
+                position: fixed !important;
                 top: 70px !important; /* Aligned with element bank */
                 right: 20px !important;
                 bottom: auto !important;
@@ -3359,21 +3362,23 @@
                 left: auto !important;
             }
             
-            /* Pause & Mute - Bottom center */
-            body.mobile .pause-button-mobile,
-            body.mobile .mute-button-mobile {
+            /* Pause & Mute - Bottom center - OVERRIDE DEFAULT POSITIONS */
+            body.mobile .pause-button-mobile {
+                position: fixed !important;
                 bottom: 20px !important;
                 top: auto !important;
                 left: 50% !important;
                 right: auto !important;
-            }
-            
-            body.mobile .pause-button-mobile {
-                transform: translateX(-80px) !important; /* Offset left from center */
+                transform: translateX(-60px) !important; /* Offset left from center */
             }
             
             body.mobile .mute-button-mobile {
-                transform: translateX(20px) !important; /* Offset right from center */
+                position: fixed !important;
+                bottom: 20px !important;
+                top: auto !important;
+                left: 50% !important;
+                right: auto !important;
+                transform: translateX(10px) !important; /* Offset right from center */
             }
             
             /* Pop-up messages area - Bottom of screen */
@@ -3592,6 +3597,33 @@
             right: 110px !important;
             font-size: 10px !important;
             color: rgba(255, 255, 255, 0.5) !important;
+        }
+        
+        /* ===== FINAL LANDSCAPE OVERRIDES - MUST BE LAST ===== */
+        @media screen and (orientation: landscape) and (max-width: 1024px) {
+            /* Force landscape positions to override all other mobile rules */
+            body.mobile .player-info-box {
+                position: fixed !important;
+                top: 70px !important;
+                left: 20px !important;
+                bottom: auto !important;
+                right: auto !important;
+            }
+            
+            body.mobile .leaderboard-box {
+                position: fixed !important;
+                top: 70px !important;
+                right: 20px !important;
+                bottom: auto !important;
+                left: auto !important;
+            }
+            
+            body.mobile .pause-button-mobile,
+            body.mobile .mute-button-mobile {
+                position: fixed !important;
+                top: auto !important;
+                bottom: 20px !important;
+            }
         }
     </style>
     
