@@ -49,7 +49,7 @@ function getWeekNumber(date) {
 function validateScore(score, elements, playTime, kills) {
   // Your game's validation rules
   if (playTime < 10) return { valid: false, error: 'Minimum 10 seconds play time required' };
-  if (score > playTime * 200) return { valid: false, error: 'Score too high for play time' };
+  if (score > playTime * 1000) return { valid: false, error: 'Score too high for play time' }; // Allow up to 1000 points per second
   if (elements > playTime * 10) return { valid: false, error: 'Too many elements for play time' };
   if (kills > playTime * 2) return { valid: false, error: 'Too many kills for play time' };
   return { valid: true };
