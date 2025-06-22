@@ -114,29 +114,44 @@ export default async function handler(req, res) {
       const keys = getLeaderboardKeys();
       const scoreData = JSON.stringify(scoreEntry);
       
-      // Use pipeline for atomic operations
-      const pipe = redis.pipeline();
+      // Ensure score is a number
+      const numericScore = Number(scoreEntry.score);
       
-      // Add to daily leaderboard (expires in 7 days)
-      pipe.zadd(keys.daily, scoreEntry.score, scoreData);
-      pipe.expire(keys.daily, 604800); // 7 days in seconds
+      console.log('Adding score:', { key: keys.daily, score: numericScore, member: scoreData });
       
-      // Add to weekly leaderboard (expires in 30 days)
-      pipe.zadd(keys.weekly, scoreEntry.score, scoreData);
-      pipe.expire(keys.weekly, 2592000); // 30 days
-      
-      // Add to monthly leaderboard (expires in 90 days)
-      pipe.zadd(keys.monthly, scoreEntry.score, scoreData);
-      pipe.expire(keys.monthly, 7776000); // 90 days
-      
-      // Add to all-time leaderboard (no expiry)
-      pipe.zadd(keys.all, scoreEntry.score, scoreData);
-      
-      // Execute all commands
-      await pipe.exec();
+      // Use individual operations instead of pipeline to debug
+      try {
+        // Add to daily leaderboard (expires in 7 days)
+        await redis.zadd(keys.daily, { score: numericScore, member: scoreData });
+        await redis.expire(keys.daily, 604800); // 7 days in seconds
+        
+        // Add to weekly leaderboard (expires in 30 days)
+        await redis.zadd(keys.weekly, { score: numericScore, member: scoreData });
+        await redis.expire(keys.weekly, 2592000); // 30 days
+        
+        // Add to monthly leaderboard (expires in 90 days)
+        await redis.zadd(keys.monthly, { score: numericScore, member: scoreData });
+        await redis.expire(keys.monthly, 7776000); // 90 days
+        
+        // Add to all-time leaderboard (no expiry)
+        await redis.zadd(keys.all, { score: numericScore, member: scoreData });
+        
+        console.log('All zadd operations completed successfully');
+        
+      } catch (zaddError) {
+        console.error('ZADD operation failed:', zaddError);
+        console.error('Score data:', { score: numericScore, member: scoreData });
+        throw zaddError;
+      }
       
       // Get player's rank in daily leaderboard
-      const dailyRank = await redis.zrevrank(keys.daily, scoreData);
+      let dailyRank = null;
+      try {
+        dailyRank = await redis.zrevrank(keys.daily, scoreData);
+      } catch (rankError) {
+        console.error('Failed to get rank:', rankError);
+        // Continue anyway - rank is not critical
+      }
       
       // Also update user's best score
       const userKey = `user:${username.toLowerCase()}:best`;
@@ -163,7 +178,7 @@ export default async function handler(req, res) {
         await redis.setex(userKey, 2592000, JSON.stringify(scoreEntry)); // Expire in 30 days
       }
       
-      console.log(`Score submitted: ${username} - ${score} (rank: ${dailyRank + 1})`);
+      console.log(`Score submitted: ${username} - ${score} (rank: ${dailyRank !== null ? dailyRank + 1 : 'unknown'})`);
       
       return res.status(200).json({
         success: true,
