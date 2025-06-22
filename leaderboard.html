@@ -17,9 +17,6 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="manifest" href="/site.webmanifest">
     
-    <!-- Supabase -->
-    <script type="module" src="js/supabase.js"></script>
-    
     <style>
         body {
             margin: 0;
@@ -248,14 +245,30 @@
         </div>
     </div>
     
-    <script type="module">
-        import { initializeAuth, getLeaderboard } from './js/supabase.js';
-        
+    <script>
         let currentPeriod = 'daily';
+        
+        // API functions to connect to your Redis backend
+        async function getLeaderboard(period, limit = 100) {
+            try {
+                const response = await fetch(`/api/leaderboard?period=${period}&limit=${limit}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('Leaderboard response:', data);
+                
+                return data.leaderboard || [];
+            } catch (error) {
+                console.error('Failed to fetch leaderboard:', error);
+                throw error;
+            }
+        }
         
         // Initialize
         async function init() {
-            await initializeAuth();
             drawStars();
             animateStars();
             await loadLeaderboard('daily');
