@@ -179,8 +179,13 @@ export default async function handler(req, res) {
       }
       
       // Get the appropriate key
-      const key = getLeaderboardKeys(period)[period];
+      const keys = getLeaderboardKeys();
+      const key = keys[period];
       console.log('Fetching leaderboard for key:', key);
+      
+      if (!key) {
+        return res.status(400).json({ error: 'Invalid period specified' });
+      }
       
       // Fetch leaderboard data with pagination
       const start = parseInt(offset) || 0;
@@ -261,7 +266,13 @@ export default async function handler(req, res) {
         return res.status(401).json({ error: 'Unauthorized' });
       }
       
-      const key = getLeaderboardKeys(period)[period];
+      const keys = getLeaderboardKeys();
+      const key = keys[period];
+      
+      if (!key) {
+        return res.status(400).json({ error: 'Invalid period specified' });
+      }
+      
       await redis.del(key);
       
       return res.status(200).json({ 
