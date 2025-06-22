@@ -117,7 +117,21 @@ export default async function handler(req, res) {
       // Ensure score is a number
       const numericScore = Number(scoreEntry.score);
       
-      console.log('Adding score:', { key: keys.daily, score: numericScore, member: scoreData });
+      console.log('Adding score:', { 
+        key: keys.daily, 
+        score: numericScore, 
+        memberLength: scoreData.length,
+        memberPreview: scoreData.substring(0, 100) + '...'
+      });
+      
+      // Validate that scoreData is proper JSON
+      try {
+        const testParse = JSON.parse(scoreData);
+        console.log('JSON validation passed for scoreData');
+      } catch (jsonError) {
+        console.error('Invalid JSON being stored:', jsonError);
+        throw new Error('Failed to create valid JSON for storage');
+      }
       
       // Use individual operations instead of pipeline to debug
       try {
@@ -216,30 +230,88 @@ export default async function handler(req, res) {
       const end = start + (parseInt(limit) || 100) - 1;
       console.log('Range:', start, 'to', end);
       
-      // Get scores in descending order
+      // Get scores in descending order with scores included
       let scores;
       try {
-        scores = await redis.zrange(key, start, end, { rev: true });
+        // Use WITHSCORES to get both member and score
+        scores = await redis.zrange(key, start, end, { 
+          rev: true,
+          withScores: true 
+        });
         console.log('Scores retrieved:', scores ? scores.length : 'null');
+        console.log('First few entries:', scores?.slice(0, 4));
       } catch (zrangeError) {
         console.error('zrange error:', zrangeError);
-        // Try without options as fallback
-        scores = await redis.zrange(key, start, end);
+        // Try without withScores as fallback
+        try {
+          scores = await redis.zrange(key, start, end, { rev: true });
+        } catch (fallbackError) {
+          // Final fallback - basic zrange
+          scores = await redis.zrange(key, start, end);
+        }
       }
       
       // Parse and format results
-      const leaderboard = (scores || []).map((entry, index) => {
-        try {
-          const data = JSON.parse(entry);
-          return {
-            ...data,
-            rank: start + index + 1
-          };
-        } catch (e) {
-          console.error('Failed to parse leaderboard entry:', e);
-          return null;
+      const leaderboard = [];
+      
+      if (scores && scores.length > 0) {
+        // Handle the case where we might have [member, score, member, score, ...] format
+        const isWithScores = scores.length > 0 && typeof scores[1] === 'number';
+        
+        if (isWithScores) {
+          // Process pairs of [member, score]
+          for (let i = 0; i < scores.length; i += 2) {
+            try {
+              const member = scores[i];
+              const score = scores[i + 1];
+              
+              console.log(`Processing entry ${i/2 + 1}:`, { member, score });
+              
+              // Try to parse the member as JSON
+              let data;
+              if (typeof member === 'string') {
+                data = JSON.parse(member);
+              } else if (typeof member === 'object') {
+                data = member;
+              } else {
+                console.error('Unexpected member type:', typeof member, member);
+                continue;
+              }
+              
+              leaderboard.push({
+                ...data,
+                rank: start + (i / 2) + 1
+              });
+            } catch (e) {
+              console.error('Failed to parse leaderboard entry:', e, 'Raw data:', scores[i]);
+            }
+          }
+        } else {
+          // Process as simple array of members
+          scores.forEach((entry, index) => {
+            try {
+              console.log(`Processing simple entry ${index + 1}:`, entry);
+              
+              let data;
+              if (typeof entry === 'string') {
+                data = JSON.parse(entry);
+              } else if (typeof entry === 'object') {
+                data = entry;
+              } else {
+                console.error('Unexpected entry type:', typeof entry, entry);
+                return;
+              }
+              
+              leaderboard.push({
+                ...data,
+                rank: start + index + 1
+              });
+            } catch (e) {
+              console.error('Failed to parse leaderboard entry:', e, 'Raw data:', entry);
+            }
+          });
         }
-      }).filter(Boolean);
+      }
       
       // If username provided, also get their rank
       let userRank = null;
