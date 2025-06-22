@@ -1415,8 +1415,8 @@
             position: absolute;
             width: 100%;
             height: 100%;
-            background: rgba(255, 255, 255, 0.1);
-            border: 3px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.05);
+            border: 3px solid rgba(255, 255, 255, 0.15);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -1427,8 +1427,8 @@
             position: absolute;
             width: 50px;
             height: 50px;
-            background: rgba(255, 255, 255, 0.5);
-            border: 2px solid white;
+            background: rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.5);
             border-radius: 50%;
             transition: none;
             transform: translate(-50%, -50%);
@@ -1442,22 +1442,22 @@
             right: 40px;
             width: 80px;
             height: 80px;
-            background: rgba(78, 205, 196, 0.3);
-            border: 3px solid #4ecdc4;
+            background: rgba(78, 205, 196, 0.15);
+            border: 3px solid rgba(78, 205, 196, 0.5);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 16px;
             font-weight: bold;
-            color: white;
+            color: rgba(255, 255, 255, 0.8);
             pointer-events: auto;
             user-select: none;
             -webkit-user-select: none;
         }
         
         .boost-button.active {
-            background: rgba(78, 205, 196, 0.6);
+            background: rgba(78, 205, 196, 0.4);
             transform: scale(0.95);
         }
         
@@ -1499,20 +1499,22 @@
             -webkit-user-select: none;
         }
         
-        /* Fix pause/mute button positions in landscape */
+        /* Fix pause/mute button positions in landscape - move to bottom center */
         @media (orientation: landscape) {
-            .pause-button-mobile,
-            .mute-button-mobile {
-                top: 50% !important;
-                transform: translateY(-50%);
-            }
-            
             .pause-button-mobile {
-                right: 160px !important; /* Move further left to avoid boost button */
+                top: auto !important;
+                bottom: 20px !important;
+                right: auto !important;
+                left: 50% !important;
+                transform: translateX(-50%) translateX(30px) !important;
             }
             
             .mute-button-mobile {
-                right: 220px !important; /* Move further left to avoid boost button */
+                top: auto !important;
+                bottom: 20px !important;
+                right: auto !important;
+                left: 50% !important;
+                transform: translateX(-50%) translateX(-30px) !important;
             }
         }
         
@@ -1553,10 +1555,79 @@
             );
         }
         
-        /* Commented out - replaced by professional mobile UI
-        body.mobile .player-info-box {
-            display: none; /* Hide entirely on mobile */
-        } */
+        /* Professional mobile UI with orientation-aware positioning */
+        
+        /* Portrait mode mobile */
+        @media (max-width: 800px) and (orientation: portrait) {
+            body.mobile .player-info-box {
+                top: 20px;
+                bottom: auto;
+                left: 10px;
+                width: 45%;
+                font-size: 7px !important;
+                padding: 6px;
+            }
+            
+            body.mobile .leaderboard-box {
+                top: 20px;
+                bottom: auto;
+                right: 10px;
+                left: auto;
+                width: 45%;
+                font-size: 9px !important;
+            }
+            
+            body.mobile .boost-bar-container {
+                bottom: 160px;
+                width: 70%;
+            }
+        }
+        
+        /* Landscape mode mobile */
+        @media (max-width: 800px) and (orientation: landscape) {
+            body.mobile .player-info-box {
+                top: 10px;
+                bottom: auto;
+                left: 10px;
+                width: 200px;
+                font-size: 7px !important;
+                padding: 6px;
+            }
+            
+            body.mobile .leaderboard-box {
+                top: 10px;
+                bottom: auto;
+                right: 10px;
+                left: auto;
+                width: 220px;
+                font-size: 9px !important;
+            }
+            
+            body.mobile .boost-bar-container {
+                bottom: 130px;
+                width: 60%;
+                max-width: 400px;
+            }
+            
+            body.mobile .boost-bar-frame {
+                height: 18px !important;
+            }
+            
+            body.mobile .element-collection-bar {
+                padding: 0 10px;
+                margin-bottom: 5px;
+            }
+            
+            body.mobile .element-slot {
+                width: 48px;
+                height: 48px;
+            }
+            
+            body.mobile .bottom-ui {
+                padding-top: 10px;
+                padding-bottom: 10px;
+            }
+        }
         
         /* Alchemy Vision Timer on Mobile - Bottom Center */
         body.mobile .alchemy-vision-timer {
@@ -2511,6 +2582,22 @@
             .tab-button {
                 font-size: 8px;
                 padding: 8px 5px;
+            }
+        }
+        
+        /* Portrait mobile specific - fix discovery journal cutoff */
+        @media (max-width: 600px) and (orientation: portrait) {
+            .discovery-grid {
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 6px;
+            }
+            
+            .discovery-item .element-symbol {
+                font-size: 18px;
+            }
+            
+            .discovery-item .element-name {
+                font-size: 6px;
             }
         }
         
