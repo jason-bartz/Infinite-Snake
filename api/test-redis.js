@@ -51,8 +51,13 @@ export default async function handler(req, res) {
     console.log('Successfully retrieved test value:', retrieved);
     
     // Get Redis info
-    const dbSize = await redis.dbsize();
-    console.log('Database size:', dbSize);
+    let dbSize = 'unknown';
+    try {
+      dbSize = await redis.dbsize();
+      console.log('Database size:', dbSize);
+    } catch (e) {
+      console.log('Could not get dbsize:', e.message);
+    }
     
     return res.status(200).json({
       success: true,

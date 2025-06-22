@@ -180,17 +180,26 @@ export default async function handler(req, res) {
       
       // Get the appropriate key
       const key = getLeaderboardKeys(period)[period];
+      console.log('Fetching leaderboard for key:', key);
       
       // Fetch leaderboard data with pagination
       const start = parseInt(offset) || 0;
       const end = start + (parseInt(limit) || 100) - 1;
+      console.log('Range:', start, 'to', end);
       
       // Get scores in descending order
-      // Note: Upstash returns members with scores when using WITHSCORES
-      const scores = await redis.zrevrange(key, start, end);
+      let scores;
+      try {
+        scores = await redis.zrange(key, start, end, { rev: true });
+        console.log('Scores retrieved:', scores ? scores.length : 'null');
+      } catch (zrangeError) {
+        console.error('zrange error:', zrangeError);
+        // Try without options as fallback
+        scores = await redis.zrange(key, start, end);
+      }
       
       // Parse and format results
-      const leaderboard = scores.map((entry, index) => {
+      const leaderboard = (scores || []).map((entry, index) => {
         try {
           const data = JSON.parse(entry);
           return {
@@ -208,8 +217,8 @@ export default async function handler(req, res) {
       if (username) {
         // Get all scores to find user's position (inefficient for large sets)
         // For production, consider maintaining a separate user->score mapping
-        const allScores = await redis.zrevrange(key, 0, -1);
-        const userIndex = allScores.findIndex(entry => {
+        const allScores = await redis.zrange(key, 0, -1, { rev: true });
+        const userIndex = (allScores || []).findIndex(entry => {
           try {
             const data = JSON.parse(entry);
             return data.username.toLowerCase() === username.toLowerCase();
