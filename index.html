@@ -2460,6 +2460,72 @@
             right: 5px;
             font-size: 16px;
         }
+        /* Mobile pause menu fixes */
+        @media (max-width: 800px) {
+            #pauseMenu {
+                width: 95%;
+                max-width: 95%;
+                padding: 10px;
+                margin: 10px;
+            }
+            
+            #skinGrid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 8px;
+                padding-right: 0;
+                overflow-x: hidden;
+            }
+            
+            .skin-item {
+                padding: 6px;
+            }
+            
+            .skin-image {
+                max-width: 50px;
+                max-height: 50px;
+            }
+            
+            .skin-name {
+                font-size: 8px;
+            }
+            
+            .discovery-grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 8px;
+                padding-right: 0;
+                overflow-x: hidden;
+            }
+            
+            .discovery-item {
+                padding: 4px;
+            }
+            
+            .discovery-item .element-symbol {
+                font-size: 20px;
+            }
+            
+            .discovery-item .element-name {
+                font-size: 7px;
+            }
+            
+            .tab-button {
+                font-size: 8px;
+                padding: 8px 5px;
+            }
+        }
+        
+        /* Landscape mobile specific */
+        @media (max-width: 800px) and (orientation: landscape) {
+            #pauseMenu {
+                max-height: 85vh;
+            }
+            
+            #skinGrid,
+            .discovery-grid {
+                grid-template-columns: repeat(5, 1fr);
+                max-height: 200px;
+            }
+        }
     </style>
 
     <!-- UI Fixes CSS - Added to improve readability and visual appeal -->
@@ -3024,7 +3090,7 @@
                         RESPAWN NOW
                     </button>
                     <div style="margin-top: 10px; font-size: 12px; color: #AAA;">
-                        or press SPACE
+                        or press SPACE / tap screen
                     </div>
                 </div>
             </div>
@@ -3623,6 +3689,203 @@
                 position: fixed !important;
                 top: auto !important;
                 bottom: 20px !important;
+            }
+        }
+        
+        /* ===== MOBILE PAUSE MENU FIXES ===== */
+        @media (max-width: 768px) {
+            #pauseMenu {
+                width: 95vw !important;
+                height: 95vh !important;
+                max-width: 95vw !important;
+                max-height: 95vh !important;
+                padding: 16px !important;
+            }
+            
+            /* Smaller tab buttons for mobile */
+            .tab-button {
+                padding: 8px 12px !important;
+                font-size: 8px !important;
+                box-shadow: 2px 2px 0 rgba(0,0,0,0.5) !important;
+            }
+            
+            .tab-navigation {
+                gap: 4px !important;
+                margin: 8px 0 !important;
+                padding-bottom: 8px !important;
+            }
+            
+            /* Fix skin grid for mobile */
+            #skinGrid {
+                grid-template-columns: repeat(4, 1fr) !important;
+                gap: 8px !important;
+                padding-right: 5px !important;
+            }
+            
+            .skin-item {
+                padding: 6px !important;
+            }
+            
+            .skin-item h5 {
+                font-size: 8px !important;
+                margin-top: 4px !important;
+            }
+            
+            .skin-preview {
+                width: 40px !important;
+                height: 40px !important;
+            }
+            
+            /* Fix discovery grid for mobile */
+            .discovery-grid {
+                grid-template-columns: repeat(4, 1fr) !important;
+                gap: 8px !important;
+                padding-right: 5px !important;
+            }
+            
+            .discovery-item {
+                padding: 2px !important;
+            }
+            
+            .discovery-item .emoji {
+                font-size: 24px !important;
+            }
+            
+            .discovery-item .discovery-item-name {
+                font-size: 7px !important;
+            }
+            
+            /* Headers in pause menu */
+            #pauseMenu h3 {
+                font-size: 14px !important;
+                margin-bottom: 8px !important;
+            }
+            
+            #pauseMenu h4 {
+                font-size: 12px !important;
+                margin-bottom: 8px !important;
+            }
+            
+            /* Available unlocks text */
+            #availableUnlocks {
+                font-size: 12px !important;
+                margin-bottom: 8px !important;
+            }
+            
+            /* Discovery count text */
+            #discoveryCount {
+                font-size: 10px !important;
+                margin-bottom: 8px !important;
+            }
+            
+            /* Tab content adjustments */
+            .tab-content {
+                padding: 8px !important;
+                overflow-y: auto !important;
+                -webkit-overflow-scrolling: touch !important;
+            }
+            
+            /* Ensure proper scrolling */
+            #skinSelection,
+            #discoveryJournal {
+                height: 100% !important;
+                display: flex !important;
+                flex-direction: column !important;
+            }
+            
+            /* Fix button spacing in pause menu */
+            #pauseMenu button {
+                margin: 4px !important;
+            }
+            
+            /* Fix leaderboard content on mobile */
+            #leaderboardContent {
+                padding: 10px !important;
+                max-height: calc(90vh - 140px) !important;
+            }
+            
+            /* Make leaderboard grid responsive */
+            #leaderboardContent > div[style*="grid-template-columns"] {
+                grid-template-columns: 40px 1fr 60px 60px 60px 50px !important;
+                gap: 5px !important;
+                font-size: 10px !important;
+            }
+            
+            /* How to play content */
+            #howToPlayTab {
+                font-size: 10px !important;
+                line-height: 1.4 !important;
+            }
+            
+            #howToPlayTab h4 {
+                font-size: 11px !important;
+            }
+            
+            #howToPlayTab ul {
+                padding-left: 15px !important;
+            }
+            
+            /* Resume and New Game buttons */
+            button[onclick*="resumeGame"],
+            button[onclick*="reload"] {
+                padding: 8px 20px !important;
+                font-size: 12px !important;
+                margin: 5px !important;
+            }
+            
+            /* Fix the bottom button container */
+            #pauseMenu > div > div[style*="margin-top: 20px"] {
+                margin-top: 10px !important;
+                padding-top: 10px !important;
+            }
+        }
+        
+        /* Landscape mobile specific */
+        @media screen and (orientation: landscape) and (max-width: 812px) {
+            #pauseMenu {
+                padding: 12px !important;
+            }
+            
+            .tab-button {
+                padding: 6px 10px !important;
+                font-size: 7px !important;
+            }
+            
+            /* Even smaller grids in landscape */
+            #skinGrid,
+            .discovery-grid {
+                grid-template-columns: repeat(5, 1fr) !important;
+                gap: 6px !important;
+            }
+            
+            .skin-preview {
+                width: 35px !important;
+                height: 35px !important;
+            }
+            
+            .discovery-item .emoji {
+                font-size: 20px !important;
+            }
+            
+            #pauseMenu h3 {
+                font-size: 12px !important;
+            }
+            
+            #pauseMenu h4 {
+                font-size: 10px !important;
+            }
+        }
+        
+        /* Small mobile portrait (iPhone SE, etc) */
+        @media (max-width: 375px) and (orientation: portrait) {
+            #skinGrid,
+            .discovery-grid {
+                grid-template-columns: repeat(3, 1fr) !important;
+            }
+            
+            .tab-button {
+                padding: 6px 8px !important;
+                font-size: 7px !important;
             }
         }
     </style>
