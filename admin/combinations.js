@@ -48,15 +48,15 @@ async function loadData() {
         // Convert to list format and deduplicate
         const seen = new Set();
         Object.entries(comboData).forEach(([combo, result]) => {
-            const [a, b] = combo.split('+');
+            const [a, b] = combo.split('+').map(id => parseInt(id));
             // Normalize combination (smaller ID first) to avoid duplicates
-            const normalized = parseInt(a) <= parseInt(b) ? `${a}+${b}` : `${b}+${a}`;
+            const normalized = a <= b ? `${a}+${b}` : `${b}+${a}`;
             
             if (!seen.has(normalized)) {
                 seen.add(normalized);
                 combinationsList.push({
-                    elem1: parseInt(a) <= parseInt(b) ? a : b,
-                    elem2: parseInt(a) <= parseInt(b) ? b : a,
+                    elem1: String(a <= b ? a : b),
+                    elem2: String(a <= b ? b : a),
                     result: result,
                     combo: normalized
                 });
@@ -64,6 +64,21 @@ async function loadData() {
         });
         
         console.log(`Loaded ${combinationsList.length} unique combinations before filtering`);
+        
+        // Double-check for any duplicates
+        const checkSet = new Set();
+        let duplicateCount = 0;
+        combinationsList.forEach(item => {
+            const reverseCombo = `${item.elem2}+${item.elem1}`;
+            if (checkSet.has(reverseCombo)) {
+                duplicateCount++;
+                console.warn(`Found duplicate: ${item.combo} (reverse of ${reverseCombo})`);
+            }
+            checkSet.add(item.combo);
+        });
+        if (duplicateCount > 0) {
+            console.error(`WARNING: Found ${duplicateCount} duplicate combinations after deduplication!`);
+        }
         
         // Load deleted combinations list
         try {

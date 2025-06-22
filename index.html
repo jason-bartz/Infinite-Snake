@@ -3310,19 +3310,20 @@
 
         /* ===== LANDSCAPE ORIENTATION (iPad Mini and larger tablets) ===== */
         @media (orientation: landscape) and (max-width: 1024px) {
-            /* Player Card - Bottom Left */
+            /* Player Card - Top Left */
             body.mobile .player-info-box {
-                bottom: 20px !important;
+                top: 20px !important;
                 left: 20px !important;
-                top: auto !important;
+                bottom: auto !important;
                 width: 200px !important;
             }
             
-            /* Leaderboard - Bottom Right */
+            /* Leaderboard - Top Right */
             body.mobile .leaderboard-box {
-                bottom: 20px !important;
+                top: 20px !important;
                 right: 20px !important;
-                top: auto !important;
+                bottom: auto !important;
+                left: auto !important;
                 width: 220px !important;
             }
             
@@ -3336,44 +3337,48 @@
                 max-height: 40vh !important;
             }
             
-            /* Boost Bar & Element Bank - Top Center */
+            /* Boost Bar & Element Bank - Top Center (shrink width) */
             body.mobile .bottom-ui {
                 top: 10px !important;
                 bottom: auto !important;
                 padding: 10px 20px !important;
+                left: 240px !important; /* Clear player card */
+                right: 250px !important; /* Clear leaderboard */
+                width: auto !important;
             }
             
             /* Joystick - Bottom Left Corner */
             body.mobile .virtual-joystick {
-                bottom: 160px !important; /* Above player card */
+                bottom: 40px !important;
                 left: 40px !important;
             }
             
             /* Boost Button - Bottom Right Corner */
             body.mobile .boost-button {
-                bottom: 160px !important; /* Above leaderboard */
+                bottom: 40px !important;
                 right: 40px !important;
                 left: auto !important;
             }
             
-            /* Pause & Mute - Top Right */
+            /* Pause & Mute - Vertically stacked above boost button */
             body.mobile .pause-button-mobile,
             body.mobile .mute-button-mobile {
-                top: 20px !important;
                 bottom: auto !important;
+                right: 50px !important;
+                top: auto !important;
             }
             
             body.mobile .pause-button-mobile {
-                right: 70px !important;
+                bottom: 140px !important; /* Above boost button */
             }
             
             body.mobile .mute-button-mobile {
-                right: 20px !important;
+                bottom: 200px !important; /* Above pause button */
             }
             
-            /* Pop-up messages area - Center bottom */
+            /* Pop-up messages area - Bottom of screen */
             body.mobile #recentDiscovery {
-                bottom: 40px !important;
+                bottom: 20% !important; /* Bottom 20% of screen */
                 left: 50% !important;
                 transform: translateX(-50%) !important;
             }
@@ -3381,18 +3386,18 @@
 
         /* ===== PORTRAIT ORIENTATION ===== */
         @media (orientation: portrait) and (max-width: 1024px) {
-            /* Player Card - Top Left */
+            /* Player Card - Top Left with increased margin */
             body.mobile .player-info-box {
-                top: 80px !important; /* Below boost bar */
+                top: 90px !important; /* Increased from 80px to prevent overlap */
                 left: 10px !important;
                 bottom: auto !important;
                 width: 160px !important;
                 font-size: 7px !important;
             }
             
-            /* Leaderboard - Top Right */
+            /* Leaderboard - Top Right with increased margin */
             body.mobile .leaderboard-box {
-                top: 80px !important; /* Below boost bar */
+                top: 90px !important; /* Increased from 80px to prevent overlap */
                 right: 10px !important;
                 left: auto !important;
                 bottom: auto !important;
@@ -3435,24 +3440,25 @@
                 left: auto !important;
             }
             
-            /* Pause & Mute - Top corners with boost bar */
+            /* Pause & Mute - Above boost button to prevent overlap */
             body.mobile .pause-button-mobile {
-                top: 15px !important;
-                right: 60px !important;
-                bottom: auto !important;
+                bottom: 130px !important; /* Above boost button */
+                right: 40px !important;
+                top: auto !important;
             }
             
             body.mobile .mute-button-mobile {
-                top: 15px !important;
-                right: 15px !important;
-                bottom: auto !important;
+                bottom: 190px !important; /* Above pause button */
+                right: 40px !important;
+                top: auto !important;
             }
             
-            /* Pop-up messages - Center of screen */
+            /* Pop-up messages - Bottom of screen */
             body.mobile #recentDiscovery {
-                bottom: 50% !important;
+                bottom: 25% !important; /* Bottom 25% of screen */
                 left: 50% !important;
-                transform: translate(-50%, 50%) !important;
+                top: auto !important;
+                transform: translateX(-50%) !important;
             }
             
             /* Smaller stat text for portrait */
@@ -3720,15 +3726,22 @@
         const TURN_SPEED = 0.08;
         const ELEMENT_SIZE = 20;
         
+        // Convert world coordinates to screen coordinates with zoom
+        function worldToScreen(x, y) {
+            return {
+                x: (x - camera.x) * cameraZoom + canvas.width / 2,
+                y: (y - camera.y) * cameraZoom + canvas.height / 2
+            };
+        }
+        
         // Viewport culling helper
         function isInViewport(x, y, margin = 100) {
-            const screenX = x - camera.x + canvas.width / 2;
-            const screenY = y - camera.y + canvas.height / 2;
+            const screen = worldToScreen(x, y);
             
-            return screenX >= -margin && 
-                   screenX <= canvas.width + margin && 
-                   screenY >= -margin && 
-                   screenY <= canvas.height + margin;
+            return screen.x >= -margin && 
+                   screen.x <= canvas.width + margin && 
+                   screen.y >= -margin && 
+                   screen.y <= canvas.height + margin;
         }
         
         // Game state
@@ -3739,6 +3752,7 @@
         let gameWon = false; // Track if victory has been achieved
         let gameTarget = 0; // Target value for victory
         let camera = { x: WORLD_SIZE / 2, y: WORLD_SIZE / 2 };
+        let cameraZoom = isMobile ? 0.5 : 1.0; // 0.5 = zoom out by 100% (double visible area) for mobile
         
         // Game loop timing variables
         let lastTime = 0;
@@ -5788,8 +5802,9 @@
                         y = segment.prevY + (segment.y - segment.prevY) * interpolation;
                     }
                     
-                    const screenX = x - camera.x + canvas.width / 2;
-                    const screenY = y - camera.y + canvas.height / 2;
+                    const screen = worldToScreen(x, y);
+                    const screenX = screen.x;
+                    const screenY = screen.y;
                     
                     // Skip if off-screen
                     if (screenX < -50 || screenX > canvas.width + 50 ||
@@ -5809,7 +5824,7 @@
                     
                     // Draw pixelated square segment
                     const pixelSize = 4;
-                    const segmentRadius = Math.max(1, SEGMENT_SIZE - Math.min(i * 0.05, SEGMENT_SIZE - 1));
+                    const segmentRadius = Math.max(1, SEGMENT_SIZE - Math.min(i * 0.05, SEGMENT_SIZE - 1)) * cameraZoom;
                     const segmentPixels = Math.floor(segmentRadius * 2 / pixelSize);
                     
                     // Draw main square segment
@@ -5848,8 +5863,9 @@
                     const offsetX = Math.cos(angle) * offsetDistance;
                     const offsetY = Math.sin(angle) * offsetDistance;
                     
-                    const screenX = (headX + offsetX) - camera.x + canvas.width / 2;
-                    const screenY = (headY + offsetY) - camera.y + canvas.height / 2;
+                    const screen = worldToScreen(headX + offsetX, headY + offsetY);
+                    const screenX = screen.x;
+                    const screenY = screen.y;
                     
                     // Draw boost glow around head (desktop only)
                     if (this.isBoosting && !isMobile) {
@@ -5880,7 +5896,7 @@
                             ctx.save();
                             ctx.translate(screenX, screenY);
                             ctx.rotate(angle - Math.PI/2); // Rotate 90 degrees counter-clockwise so top faces body
-                            const size = SEGMENT_SIZE * 3.47875; // Increased by another 10% (3.1625 * 1.1)
+                            const size = SEGMENT_SIZE * 3.47875 * cameraZoom; // Increased by another 10% (3.1625 * 1.1)
                             ctx.drawImage(skinImage, -size/2, -size/2, size, size);
                             ctx.restore();
                         } catch (e) {
@@ -5889,7 +5905,7 @@
                         }
                     } else {
                         // Fallback to emoji if image not loaded
-                        const snakeEmojiSize = Math.round(SEGMENT_SIZE * 2);
+                        const snakeEmojiSize = Math.round(SEGMENT_SIZE * 2 * cameraZoom);
                         const snakeEmojiCanvas = getCachedEmoji(this.isPlayer ? '😊' : '🐍', snakeEmojiSize);
                         ctx.save();
                         ctx.globalAlpha = 1;
@@ -5901,7 +5917,7 @@
                     ctx.font = 'bold 14px Arial';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'bottom';
-                    const nameY = screenY - SEGMENT_SIZE - 10;
+                    const nameY = screenY - SEGMENT_SIZE * cameraZoom - 10;
                     
                     if (!this.isPlayer && this.personality) {
                         // Split name into personality and actual name parts
@@ -5942,7 +5958,7 @@
                         const crownCanvas = getCachedEmoji('👑', crownSize);
                         ctx.save();
                         ctx.globalAlpha = 1;
-                        ctx.drawImage(crownCanvas, screenX - crownCanvas.width / 2, screenY - SEGMENT_SIZE - 30 - crownCanvas.height / 2);
+                        ctx.drawImage(crownCanvas, screenX - crownCanvas.width / 2, screenY - SEGMENT_SIZE * cameraZoom - 30 - crownCanvas.height / 2);
                         ctx.restore();
                     }
                 }
@@ -6605,8 +6621,9 @@
             }
             
             draw() {
-                const screenX = this.x - camera.x + canvas.width / 2;
-                const screenY = this.y - camera.y + canvas.height / 2;
+                const screen = worldToScreen(this.x, this.y);
+                const screenX = screen.x;
+                const screenY = screen.y;
                 
                 let scale = 1 + Math.sin(this.pulse || 0) * 0.1;
                 
@@ -6721,7 +6738,7 @@
                 }
                 
                 // Draw emoji using cache
-                const emojiSize = Math.round(ELEMENT_SIZE * 2 * scale);
+                const emojiSize = Math.round(ELEMENT_SIZE * 2 * scale * cameraZoom);
                 const emoji = this.data ? window.elementLoader.getEmojiForElement(this.id, this.data.base ? this.id : window.elementLoader.elements.get(this.id)?.e || this.id) : '❓';
                 const emojiCanvas = getCachedEmoji(emoji, emojiSize);
                 ctx.save();
@@ -6735,15 +6752,15 @@
                 ctx.strokeStyle = 'black';
                 ctx.lineWidth = 3;
                 const name = this.data ? this.data.name : 'Unknown';
-                ctx.strokeText(name, screenX, screenY + ELEMENT_SIZE + 5);
-                ctx.fillText(name, screenX, screenY + ELEMENT_SIZE + 5);
+                ctx.strokeText(name, screenX, screenY + ELEMENT_SIZE * cameraZoom + 5);
+                ctx.fillText(name, screenX, screenY + ELEMENT_SIZE * cameraZoom + 5);
                 
                 // Draw catalyst sparkles if this element was spawned by catalyst (desktop only)
                 if (this.isCatalystSpawned && !isMobile) {
                     ctx.save();
                     for (let i = 0; i < 4; i++) {
                         const angle = (this.catalystSparkleTime + i * Math.PI / 2) % (Math.PI * 2);
-                        const dist = ELEMENT_SIZE + 10 + Math.sin(this.catalystSparkleTime * 2) * 5;
+                        const dist = (ELEMENT_SIZE * cameraZoom) + 10 + Math.sin(this.catalystSparkleTime * 2) * 5;
                         const px = screenX + Math.cos(angle) * dist;
                         const py = screenY + Math.sin(angle) * dist;
                         
@@ -6804,8 +6821,9 @@
             }
             
             draw() {
-                const screenX = this.x - camera.x + canvas.width / 2;
-                const screenY = this.y - camera.y + canvas.height / 2;
+                const screen = worldToScreen(this.x, this.y);
+                const screenX = screen.x;
+                const screenY = screen.y;
                 
                 // Skip if off-screen - tighter culling on mobile
                 const margin = isMobile ? 30 : 50;
@@ -6892,8 +6910,9 @@
             }
             
             draw() {
-                const screenX = this.x - camera.x + canvas.width / 2;
-                const screenY = this.y - camera.y + canvas.height / 2;
+                const screen = worldToScreen(this.x, this.y);
+                const screenX = screen.x;
+                const screenY = screen.y;
                 
                 // Skip if off-screen - tighter culling on mobile
                 const margin = isMobile ? 30 : 50;
@@ -6984,8 +7003,9 @@
             }
             
             draw() {
-                const screenX = this.x - camera.x + canvas.width / 2;
-                const screenY = this.y - camera.y + canvas.height / 2;
+                const screen = worldToScreen(this.x, this.y);
+                const screenX = screen.x;
+                const screenY = screen.y;
                 
                 // Skip if off-screen - tighter culling on mobile
                 const margin = isMobile ? 30 : 50;
@@ -7071,8 +7091,9 @@
                 if (!this.active) return;
                 
                 const pixelSize = 4;
-                const screenX = this.x - camera.x + canvas.width / 2;
-                const screenY = this.y - camera.y + canvas.height / 2;
+                const screen = worldToScreen(this.x, this.y);
+                const screenX = screen.x;
+                const screenY = screen.y;
                 
                 ctx.fillStyle = this.color;
                 ctx.globalAlpha = this.life;
@@ -7325,8 +7346,9 @@
                 });
                 
                 // Draw main star as pixel
-                const screenX = this.x - camera.x + canvas.width / 2;
-                const screenY = this.y - camera.y + canvas.height / 2;
+                const screen = worldToScreen(this.x, this.y);
+                const screenX = screen.x;
+                const screenY = screen.y;
                 
                 ctx.globalAlpha = this.life;
                 ctx.fillStyle = this.starColor;
@@ -9195,8 +9217,9 @@
                     const x = (star.x - camera.x * layer.speed) % WORLD_SIZE;
                     const y = (star.y - camera.y * layer.speed) % WORLD_SIZE;
                     
-                    const screenX = x - camera.x + canvas.width / 2;
-                    const screenY = y - camera.y + canvas.height / 2;
+                    const screen = worldToScreen(x, y);
+                    const screenX = screen.x;
+                    const screenY = screen.y;
                     
                     // Skip if off-screen
                     if (screenX < -10 || screenX > canvas.width + 10 ||

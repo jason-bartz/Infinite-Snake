@@ -118,19 +118,19 @@ export default async function handler(req, res) {
       const pipe = redis.pipeline();
       
       // Add to daily leaderboard (expires in 7 days)
-      pipe.zadd(keys.daily, { score: scoreEntry.score, member: scoreData });
+      pipe.zadd(keys.daily, scoreEntry.score, scoreData);
       pipe.expire(keys.daily, 604800); // 7 days in seconds
       
       // Add to weekly leaderboard (expires in 30 days)
-      pipe.zadd(keys.weekly, { score: scoreEntry.score, member: scoreData });
+      pipe.zadd(keys.weekly, scoreEntry.score, scoreData);
       pipe.expire(keys.weekly, 2592000); // 30 days
       
       // Add to monthly leaderboard (expires in 90 days)
-      pipe.zadd(keys.monthly, { score: scoreEntry.score, member: scoreData });
+      pipe.zadd(keys.monthly, scoreEntry.score, scoreData);
       pipe.expire(keys.monthly, 7776000); // 90 days
       
       // Add to all-time leaderboard (no expiry)
-      pipe.zadd(keys.all, { score: scoreEntry.score, member: scoreData });
+      pipe.zadd(keys.all, scoreEntry.score, scoreData);
       
       // Execute all commands
       await pipe.exec();
@@ -140,10 +140,18 @@ export default async function handler(req, res) {
       
       // Also update user's best score
       const userKey = `user:${username.toLowerCase()}:best`;
-      const currentBest = await redis.get(userKey);
+      const currentBestStr = await redis.get(userKey);
+      let currentBest = null;
+      if (currentBestStr) {
+        try {
+          currentBest = JSON.parse(currentBestStr);
+        } catch (e) {
+          console.error('Failed to parse current best score:', e);
+        }
+      }
       
       if (!currentBest || scoreEntry.score > (currentBest.score || 0)) {
-        await redis.set(userKey, scoreEntry, { ex: 2592000 }); // Expire in 30 days
+        await redis.setex(userKey, 2592000, JSON.stringify(scoreEntry)); // Expire in 30 days
       }
       
       console.log(`Score submitted: ${username} - ${score} (rank: ${dailyRank + 1})`);
@@ -178,7 +186,8 @@ export default async function handler(req, res) {
       const end = start + (parseInt(limit) || 100) - 1;
       
       // Get scores in descending order
-      const scores = await redis.zrange(key, start, end, { rev: true });
+      // Note: Upstash returns members with scores when using WITHSCORES
+      const scores = await redis.zrevrange(key, start, end);
       
       // Parse and format results
       const leaderboard = scores.map((entry, index) => {
@@ -199,7 +208,7 @@ export default async function handler(req, res) {
       if (username) {
         // Get all scores to find user's position (inefficient for large sets)
         // For production, consider maintaining a separate user->score mapping
-        const allScores = await redis.zrange(key, 0, -1, { rev: true });
+        const allScores = await redis.zrevrange(key, 0, -1);
         const userIndex = allScores.findIndex(entry => {
           try {
             const data = JSON.parse(entry);

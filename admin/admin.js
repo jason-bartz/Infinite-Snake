@@ -335,16 +335,34 @@ function showElement(elementId, preservePage = false, cachedCreates = null) {
     currentElement = elem;
     
     // Fetch combinations fresh every time (bypass the loading issue)
-    fetch('/elements/data/combinations.json')
-        .then(response => response.json())
-        .then(combinationsData => {
+    Promise.all([
+        fetch('/elements/data/combinations.json').then(r => r.json()),
+        fetch('/elements/deleted-combinations.json').then(r => r.ok ? r.json() : [])
+    ])
+        .then(([combinationsData, deletedCombos]) => {
             console.log('Fetched combinations:', Object.keys(combinationsData).length);
+            console.log('Fetched deleted combinations:', deletedCombos.length);
+            
+            // Create a set of deleted combinations for faster lookup
+            const deletedSet = new Set(deletedCombos);
+            // Also add reverse combinations to the set
+            deletedCombos.forEach(combo => {
+                const [a, b] = combo.split('+');
+                if (a && b) {
+                    deletedSet.add(`${b}+${a}`);
+                }
+            });
             
             // Now we have the data, find recipes and creates
             const recipes = [];
             const creates = [];
             
             Object.entries(combinationsData).forEach(([combo, result]) => {
+                // Skip if this combination is deleted
+                if (deletedSet.has(combo)) {
+                    return;
+                }
+                
                 // Check if this creates our element
                 if (String(result) === elementId) {
                     const [a, b] = combo.split('+');
@@ -592,6 +610,12 @@ window.deleteCombination = async function(elem1, elem2, result, itemIndex) {
         
         if (!response.ok) {
             throw new Error('Failed to delete combination');
+        }
+        
+        // Add to local deleted combinations list for immediate filtering
+        const normalizedCombo = parseInt(elem1) <= parseInt(elem2) ? `${elem1}+${elem2}` : `${elem2}+${elem1}`;
+        if (!deletedCombinations.includes(normalizedCombo)) {
+            deletedCombinations.push(normalizedCombo);
         }
         
         showMessage('Combination deleted successfully!', 'success');

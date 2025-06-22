@@ -43,7 +43,7 @@ export default async function handler(req, res) {
     const testValue = new Date().toISOString();
     
     // Try to set a value
-    await redis.set(testKey, testValue, { ex: 60 }); // Expire in 60 seconds
+    await redis.setex(testKey, 60, testValue); // Expire in 60 seconds
     console.log('Successfully set test value');
     
     // Try to get it back
