@@ -8681,19 +8681,49 @@
                     leaderboardSubmitted = true;
                     const rank = result.daily_rank || result.rank || result || 'Submitted';
                     document.getElementById('submissionStatus').innerHTML = 
-                        `<span style="color: #4ecdc4;">Score submitted! ${typeof rank === 'number' ? `Daily Rank: #${rank}` : ''}</span>`;
+                        `<div style="background: linear-gradient(135deg, rgba(78, 205, 196, 0.3) 0%, rgba(78, 205, 196, 0.1) 100%);
+                                    border: 2px solid #4ecdc4;
+                                    border-radius: 8px;
+                                    padding: 15px;
+                                    margin: 10px 0;
+                                    text-align: center;
+                                    animation: successPulse 0.5s ease-out;">
+                            <div style="font-size: 24px; margin-bottom: 5px;">✅</div>
+                            <span style="color: #4ecdc4; font-size: 16px; font-weight: bold;">
+                                Score Successfully Submitted!
+                            </span>
+                            <div style="color: #4ecdc4; font-size: 18px; margin-top: 8px;">
+                                ${typeof rank === 'number' ? `🏆 Daily Rank: #${rank}` : ''}
+                            </div>
+                        </div>`;
                     
-                    // Re-enable submit button after successful submission
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = 'SUBMIT SCORE';
-                    submitBtn.style.opacity = '1';
+                    // Add success animation CSS if not already present
+                    if (!document.getElementById('successAnimationStyle')) {
+                        const style = document.createElement('style');
+                        style.id = 'successAnimationStyle';
+                        style.textContent = `
+                            @keyframes successPulse {
+                                0% { transform: scale(0.9); opacity: 0; }
+                                50% { transform: scale(1.05); }
+                                100% { transform: scale(1); opacity: 1; }
+                            }
+                        `;
+                        document.head.appendChild(style);
+                    }
                     
-                    // Hide submission form and show respawn timer after short delay
+                    // Disable submit button to prevent double submission
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'SUBMITTED ✓';
+                    submitBtn.style.opacity = '0.6';
+                    submitBtn.style.background = '#4ecdc4';
+                    submitBtn.style.color = '#000';
+                    
+                    // Hide submission form and show respawn timer after longer delay
                     setTimeout(() => {
                         document.getElementById('leaderboardSubmission').style.display = 'none';
                         document.getElementById('respawnTimerDiv').style.display = 'block';
                         document.getElementById('quickRespawnDiv').style.display = 'block';
-                    }, 2000);
+                    }, 3000);
                 } else {
                     throw new Error('No response from server');
                 }
@@ -8807,12 +8837,12 @@
                     const rankClass = entry.rank <= 3 ? `rank-${entry.rank}` : '';
                     
                     return `
-                        <div style="display: flex; justify-content: space-between; padding: 8px; 
+                        <div style="display: flex; justify-content: space-between; padding: 10px; 
                                     background: ${isPlayer ? 'rgba(78, 205, 196, 0.2)' : 'rgba(0, 0, 0, 0.2)'}; 
-                                    margin-bottom: 5px; border: 2px solid ${isPlayer ? '#4ecdc4' : 'transparent'};">
-                            <span class="${rankClass}" style="font-weight: bold;">#${entry.rank}</span>
-                            <span style="color: ${isPlayer ? '#4ecdc4' : '#FFF'}; flex: 1; margin: 0 10px; overflow: hidden; text-overflow: ellipsis;">${entry.username}</span>
-                            <span style="color: #4ecdc4;">${entry.score.toLocaleString()}</span>
+                                    margin-bottom: 5px; border: 2px solid ${isPlayer ? '#4ecdc4' : 'transparent'}; font-size: 14px;">
+                            <span class="${rankClass}" style="font-weight: bold; font-size: 14px;">#${entry.rank}</span>
+                            <span style="color: ${isPlayer ? '#4ecdc4' : '#FFF'}; flex: 1; margin: 0 10px; overflow: hidden; text-overflow: ellipsis; font-size: 14px;">${entry.username}</span>
+                            <span style="color: #4ecdc4; font-size: 14px;">${entry.score.toLocaleString()}</span>
                         </div>
                     `;
                 }).join('');
