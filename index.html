@@ -3494,7 +3494,7 @@
             /* Player Card - Top Left - FIXED POSITIONING */
             body.mobile .player-info-box {
                 position: fixed !important;
-                top: 70px !important; /* Aligned with element bank */
+                top: 25px !important; /* Move to top */
                 left: 20px !important;
                 bottom: auto !important;
                 right: auto !important;
@@ -3504,7 +3504,7 @@
             /* Leaderboard - Top Right - FIXED POSITIONING */
             body.mobile .leaderboard-box {
                 position: fixed !important;
-                top: 70px !important; /* Aligned with element bank */
+                top: 25px !important; /* Move to top */
                 right: 20px !important;
                 bottom: auto !important;
                 left: auto !important;
@@ -9752,7 +9752,7 @@
             
             // Pulsating effect for barriers
             const pulsePhase = Math.floor((animationTime * 2) % 4);
-            const pixelSize = 8;
+            const pixelSize = isMobile ? 16 : 8; // Larger pixels on mobile for visibility
             
             // Left border barrier
             if (leftBorder > -borderThickness) {
@@ -9761,7 +9761,8 @@
                     for (let x = 0; x < Math.min(borderThickness, leftBorder); x += pixelSize * 2) {
                         const fadeAlpha = 1 - (x / borderThickness);
                         const pulse = (pulsePhase === 0 || pulsePhase === 2) ? 0.8 : 0.4;
-                        ctx.fillStyle = `rgba(64, 32, 128, ${fadeAlpha * pulse})`;
+                        const mobileMultiplier = isMobile ? 1.5 : 1; // Increase opacity on mobile
+                        ctx.fillStyle = `rgba(64, 32, 128, ${Math.min(1, fadeAlpha * pulse * mobileMultiplier)})`;
                         ctx.fillRect(x, y, pixelSize, pixelSize);
                     }
                 }
@@ -9781,7 +9782,8 @@
                     for (let x = Math.max(rightBorder - borderThickness, rightBorder); x < canvas.width; x += pixelSize * 2) {
                         const fadeAlpha = 1 - ((canvas.width - x) / borderThickness);
                         const pulse = (pulsePhase === 0 || pulsePhase === 2) ? 0.8 : 0.4;
-                        ctx.fillStyle = `rgba(64, 32, 128, ${fadeAlpha * pulse})`;
+                        const mobileMultiplier = isMobile ? 1.5 : 1;
+                        ctx.fillStyle = `rgba(64, 32, 128, ${Math.min(1, fadeAlpha * pulse * mobileMultiplier)})`;
                         ctx.fillRect(x, y, pixelSize, pixelSize);
                     }
                 }
@@ -9800,7 +9802,8 @@
                     for (let x = 0; x < canvas.width; x += pixelSize * 2) {
                         const fadeAlpha = 1 - (y / borderThickness);
                         const pulse = (pulsePhase === 0 || pulsePhase === 2) ? 0.8 : 0.4;
-                        ctx.fillStyle = `rgba(64, 32, 128, ${fadeAlpha * pulse})`;
+                        const mobileMultiplier = isMobile ? 1.5 : 1;
+                        ctx.fillStyle = `rgba(64, 32, 128, ${Math.min(1, fadeAlpha * pulse * mobileMultiplier)})`;
                         ctx.fillRect(x, y, pixelSize, pixelSize);
                     }
                 }
@@ -9820,7 +9823,8 @@
                     for (let x = 0; x < canvas.width; x += pixelSize * 2) {
                         const fadeAlpha = 1 - ((canvas.height - y) / borderThickness);
                         const pulse = (pulsePhase === 0 || pulsePhase === 2) ? 0.8 : 0.4;
-                        ctx.fillStyle = `rgba(64, 32, 128, ${fadeAlpha * pulse})`;
+                        const mobileMultiplier = isMobile ? 1.5 : 1;
+                        ctx.fillStyle = `rgba(64, 32, 128, ${Math.min(1, fadeAlpha * pulse * mobileMultiplier)})`;
                         ctx.fillRect(x, y, pixelSize, pixelSize);
                     }
                 }
