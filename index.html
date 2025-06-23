@@ -4481,7 +4481,7 @@
         let elementGrid = new Map(); // Track elements per grid cell
         const MIN_ELEMENTS_PER_CELL = 2; // Minimum elements per grid cell
         const MAX_ELEMENTS_PER_CELL = 5; // Maximum elements per grid cell
-        const TARGET_ELEMENT_COUNT = 200; // Reduced for better performance
+        const TARGET_ELEMENT_COUNT = isMobile ? 100 : 200; // Further reduced for mobile performance
         
         // Snake names data
         let snakeNameData = null;
@@ -5512,8 +5512,10 @@
                     console.error('Invalid movement!', 'angle:', this.angle, 'speed:', this.speed, 'deltaTime:', deltaTime);
                 }
                 
-                // World boundaries
-                if (this.x < 0 || this.x > WORLD_SIZE || this.y < 0 || this.y > WORLD_SIZE) {
+                // World boundaries - add small margin for floating point precision
+                const boundaryMargin = 2; // Small margin to prevent edge case deaths
+                if (this.x <= -boundaryMargin || this.x >= WORLD_SIZE + boundaryMargin || 
+                    this.y <= -boundaryMargin || this.y >= WORLD_SIZE + boundaryMargin) {
                     this.die();
                     return;
                 }
@@ -6086,6 +6088,14 @@
                 const isPlayerInvolved = this.isPlayer || (killer && killer.isPlayer);
                 playExplosionSound(isPlayerInvolved);
                 
+                // Add screen flash effect for player death (helps identify what killed you)
+                if (this.isPlayer && canvas) {
+                    ctx.save();
+                    ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.restore();
+                }
+                
                 // Award points and kills to killer
                 if (killer && killer.alive) {
                     killer.score += 500; // 500 points for snake explosion
@@ -6115,21 +6125,23 @@
                 if (!this.alive) return;
                 
                 // Early viewport check for the whole snake
-                // TEMPORARILY DISABLED FOR DEBUGGING
-                /*
+                // Skip rendering if snake is completely off-screen (performance optimization)
                 if (this.segments.length > 0) {
-                    // Check if any segment is in viewport
-                    let anyInViewport = false;
-                    const margin = isMobile ? 150 : 200;
-                    for (const segment of this.segments) {
-                        if (isInViewport(segment.x, segment.y, margin)) {
-                            anyInViewport = true;
-                            break;
+                    // Quick check using head position first
+                    const margin = isMobile ? 300 : 400; // Larger margin to ensure smooth appearance
+                    if (!isInViewport(this.x, this.y, margin)) {
+                        // Check if any segment is visible
+                        let anyInViewport = false;
+                        // Check every 5th segment for performance
+                        for (let i = 0; i < this.segments.length; i += 5) {
+                            if (isInViewport(this.segments[i].x, this.segments[i].y, margin)) {
+                                anyInViewport = true;
+                                break;
+                            }
                         }
+                        if (!anyInViewport) return;
                     }
-                    if (!anyInViewport) return;
                 }
-                */
                 
                 // Draw boost trail effect (desktop only)
                 if (!isMobile && this.isBoosting && this.segments && this.segments.length > 1) {
@@ -7556,7 +7568,7 @@
         }
         
         // Initialize particle pool
-        const particlePool = new ParticlePool(isMobile ? 100 : 200);
+        const particlePool = new ParticlePool(isMobile ? 50 : 200); // Further reduced for mobile performance
         
         // Element pool for performance
         class ElementPool {
@@ -9482,6 +9494,12 @@
                 for (const otherSnake of snakes) {
                     if (snake === otherSnake || !otherSnake.alive || !snake.alive || diedThisFrame.has(otherSnake)) continue;
                     
+                    // Skip collision check if snakes are too far apart (optimization for mobile)
+                    const maxCollisionDistance = 500; // Maximum distance for collision checks
+                    const dx = otherSnake.x - snake.x;
+                    const dy = otherSnake.y - snake.y;
+                    if (dx * dx + dy * dy > maxCollisionDistance * maxCollisionDistance) continue;
+                    
                     // Check head collision with other snake's body
                     let collisionOccurred = false;
                     const segmentSizeSq = SEGMENT_SIZE * SEGMENT_SIZE;
@@ -10680,14 +10698,8 @@
                 return;
             }
             
-            // Frame rate limiting to 60 FPS
-            const targetFrameTime = 16.67; // 60 FPS
+            // Calculate elapsed time
             const elapsed = currentTime - lastTime;
-            
-            // Skip frame if not enough time has passed
-            if (elapsed < targetFrameTime * 0.9) { // 90% of target time to avoid edge cases
-                return;
-            }
             
             // Calculate frame time
             if (!isFinite(currentTime)) {
@@ -11013,8 +11025,10 @@
                 }
                 
                 // Ensure camera coordinates stay within reasonable bounds to prevent overflow
-                camera.x = Math.max(0, Math.min(WORLD_SIZE, playerX));
-                camera.y = Math.max(0, Math.min(WORLD_SIZE, playerY));
+                // Use viewport half-size as margin to prevent edge visibility issues
+                const viewportMargin = Math.max(canvas.width, canvas.height) / (2 * cameraZoom);
+                camera.x = Math.max(viewportMargin, Math.min(WORLD_SIZE - viewportMargin, playerX));
+                camera.y = Math.max(viewportMargin, Math.min(WORLD_SIZE - viewportMargin, playerY));
                 
                 // Additional check for NaN or Infinity
                 if (!isFinite(camera.x)) camera.x = WORLD_SIZE / 2;
