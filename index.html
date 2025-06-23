@@ -6096,7 +6096,7 @@
                         supabaseModule.addGameEvent('kill', {
                             victim_name: this.name,
                             victim_score: this.score,
-                            victim_length: this.body.length,
+                            victim_length: this.segments.length,
                             killer_score: killer.score,
                             total_kills: killer.kills
                         });
@@ -9158,10 +9158,13 @@
         }
         
         function checkCollisions() {
+            // Track snakes that have already died this frame to prevent multiple collisions
+            const diedThisFrame = new Set();
+            
             // Performance optimization: Use for loop instead of for-of
             for (let snakeIdx = 0; snakeIdx < snakes.length; snakeIdx++) {
                 const snake = snakes[snakeIdx];
-                if (!snake || !snake.alive) continue;
+                if (!snake || !snake.alive || diedThisFrame.has(snake)) continue;
                 
                 // Check element collisions
                 const activeElements = elementPool.getActiveElements();
@@ -9477,7 +9480,7 @@
                 if (snake.invincibilityTimer > 0) continue;
                 
                 for (const otherSnake of snakes) {
-                    if (snake === otherSnake || !otherSnake.alive) continue;
+                    if (snake === otherSnake || !otherSnake.alive || !snake.alive || diedThisFrame.has(otherSnake)) continue;
                     
                     // Check head collision with other snake's body
                     let collisionOccurred = false;
@@ -9496,10 +9499,14 @@
                                 otherSnake.recentCollisions.add(snake);
                             }
                             snake.explode(otherSnake);
+                            diedThisFrame.add(snake);
                             collisionOccurred = true;
                             break;
                         }
                     }
+                    
+                    // Skip further collision checks if this snake died
+                    if (collisionOccurred || !snake.alive) break;
                     
                     // Check head-to-head collision
                     if (snake.alive && otherSnake.alive) {
@@ -9510,13 +9517,18 @@
                             // Smaller snake explodes, or both if same size
                             if (snake.length < otherSnake.length) {
                                 snake.explode(otherSnake);
+                                diedThisFrame.add(snake);
                             } else if (otherSnake.length < snake.length) {
                                 otherSnake.explode(snake);
+                                diedThisFrame.add(otherSnake);
                             } else {
                                 // Same size - both explode, no points awarded
                                 snake.die();
                                 otherSnake.die();
+                                diedThisFrame.add(snake);
+                                diedThisFrame.add(otherSnake);
                             }
+                            break;
                         }
                     }
                 }
