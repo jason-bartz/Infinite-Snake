@@ -3796,7 +3796,7 @@
             /* Force landscape positions to override all other mobile rules */
             body.mobile .player-info-box {
                 position: fixed !important;
-                top: 70px !important;
+                top: 25px !important;
                 left: 20px !important;
                 bottom: auto !important;
                 right: auto !important;
@@ -3804,7 +3804,7 @@
             
             body.mobile .leaderboard-box {
                 position: fixed !important;
-                top: 70px !important;
+                top: 25px !important;
                 right: 20px !important;
                 bottom: auto !important;
                 left: auto !important;
@@ -9745,10 +9745,10 @@
             
             // Draw world borders with subtle pixel grid
             const borderThickness = 60;
-            const leftBorder = -camera.x + canvas.width / 2;
-            const rightBorder = WORLD_SIZE - camera.x + canvas.width / 2;
-            const topBorder = -camera.y + canvas.height / 2;
-            const bottomBorder = WORLD_SIZE - camera.y + canvas.height / 2;
+            const leftBorder = (-camera.x) * cameraZoom + canvas.width / 2;
+            const rightBorder = (WORLD_SIZE - camera.x) * cameraZoom + canvas.width / 2;
+            const topBorder = (-camera.y) * cameraZoom + canvas.height / 2;
+            const bottomBorder = (WORLD_SIZE - camera.y) * cameraZoom + canvas.height / 2;
             
             // Pulsating effect for barriers
             const pulsePhase = Math.floor((animationTime * 2) % 4);
