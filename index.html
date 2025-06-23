@@ -1587,7 +1587,7 @@
         @media (max-width: 800px) and (orientation: landscape) {
             body.mobile .player-info-box {
                 position: absolute !important;
-                top: 80px !important;
+                top: 25px !important;
                 bottom: auto !important;
                 left: 10px !important;
                 width: 180px !important;
@@ -1598,7 +1598,7 @@
             
             body.mobile .leaderboard-box {
                 position: absolute !important;
-                top: 80px !important;
+                top: 25px !important;
                 bottom: auto !important;
                 right: 10px !important;
                 left: auto !important;
@@ -11024,11 +11024,10 @@
                     playerY = playerSnake.prevY + (playerSnake.y - playerSnake.prevY) * interpolation;
                 }
                 
-                // Ensure camera coordinates stay within reasonable bounds to prevent overflow
-                // Use viewport half-size as margin to prevent edge visibility issues
-                const viewportMargin = Math.max(canvas.width, canvas.height) / (2 * cameraZoom);
-                camera.x = Math.max(viewportMargin, Math.min(WORLD_SIZE - viewportMargin, playerX));
-                camera.y = Math.max(viewportMargin, Math.min(WORLD_SIZE - viewportMargin, playerY));
+                // Ensure camera coordinates stay within world bounds
+                // Allow camera to reach edges so player can see the entire map
+                camera.x = Math.max(0, Math.min(WORLD_SIZE, playerX));
+                camera.y = Math.max(0, Math.min(WORLD_SIZE, playerY));
                 
                 // Additional check for NaN or Infinity
                 if (!isFinite(camera.x)) camera.x = WORLD_SIZE / 2;
