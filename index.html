@@ -4567,7 +4567,7 @@
                 emoji: "💨",
                 color: "#87ceeb",
                 maxHealth: 5,
-                attackCooldown: 15000,
+                attackCooldown: 5000, // Reduced from 15s to 5s to match other bosses
                 defeated: false,
                 skin: 'zephyrus',
                 attackSound: 'sounds/power-surge.mp3'
@@ -4601,6 +4601,7 @@
         let elementVacuumActive = false;
         let elementVacuumTimer = 0;
         let vacuumedElements = []; // Store elements being sucked into void
+        let damageNumbers = []; // Floating damage numbers
         
         // Skin system
         const skinMetadata = {
@@ -7946,12 +7947,23 @@
                 this.isBoss = true;
                 this.size = 3; // 300% larger than normal snakes
                 this.length = 30; // Longer than normal snakes
-                this.speed = SNAKE_SPEED; // Same speed as regular snakes
-                this.baseSpeed = SNAKE_SPEED;
+                this.speed = SNAKE_SPEED * 0.8; // 80% of normal speed (20% slower)
+                this.baseSpeed = SNAKE_SPEED * 0.8;
                 this.attackTimer = 0;
                 this.introAnimationTimer = 120; // 2 seconds of intro animation
                 this.damageFlashTimer = 0;
                 this.stunTimer = 0;
+                
+                // Stationary attack phase management
+                this.attackPhase = false;
+                this.attackPhaseTimer = 0;
+                this.attackPhaseDuration = 180; // 3 seconds
+                this.chasePhaseDuration = 240; // 4 seconds
+                this.phaseTimer = this.chasePhaseDuration; // Start in chase phase
+                
+                // Special attack counter for Zephyrus vacuum
+                this.specialAttackCounter = 0;
+                this.vacuumAttackInterval = 4; // Use vacuum every 4th attack
                 
                 // Override segment initialization for longer boss
                 this.segments = [];
@@ -7990,11 +8002,45 @@
                     return; // Don't move or attack while stunned
                 }
                 
+                // Update phase timer
+                this.phaseTimer -= deltaTime;
+                
+                // Switch between chase and attack phases
+                if (this.phaseTimer <= 0) {
+                    if (this.attackPhase) {
+                        // Exit attack phase, return to chase
+                        this.attackPhase = false;
+                        this.phaseTimer = this.chasePhaseDuration;
+                        this.speed = this.baseSpeed; // Resume movement
+                    } else {
+                        // Enter attack phase
+                        this.attackPhase = true;
+                        this.phaseTimer = this.attackPhaseDuration;
+                        this.speed = 0; // Stop moving
+                        
+                        // Show attack warning message
+                        switch(this.bossType) {
+                            case 'PYRAXIS':
+                                showMessage("The Molten One gathers primordial flames!", 'orange', 2000);
+                                break;
+                            case 'ABYSSOS':
+                                showMessage("The Deep One summons torrential fury!", 'blue', 2000);
+                                break;
+                            case 'OSSEUS':
+                                showMessage("The Bone Sovereign calls forth earthen devastation!", 'brown', 2000);
+                                break;
+                            case 'ZEPHYRUS':
+                                showMessage("The Storm Caller harnesses the void!", 'purple', 2000);
+                                break;
+                        }
+                    }
+                }
+                
                 // Update attack timer
                 this.attackTimer += deltaTime * 16; // Convert to milliseconds
                 
                 // Boss AI - Strategic hunting behavior
-                if (playerSnake && playerSnake.alive) {
+                if (playerSnake && playerSnake.alive && !this.attackPhase) {
                     const dx = playerSnake.x - this.x;
                     const dy = playerSnake.y - this.y;
                     const distance = Math.sqrt(dx * dx + dy * dy);
@@ -8113,22 +8159,25 @@
                         baseTurnSpeed * 1.5 : baseTurnSpeed;
                     this.angle += angleDiff * turnSpeed;
                     
-                    // Apply speed based on state and boss type
-                    if (this.bossType === 'ZEPHYRUS' && elementVacuumActive) {
-                        this.speed = this.baseSpeed * 2 * speedMultiplier;
-                    } else {
-                        this.speed = this.baseSpeed * speedMultiplier;
+                    // Apply speed based on state and boss type (only if not in attack phase)
+                    if (!this.attackPhase) {
+                        if (this.bossType === 'ZEPHYRUS' && elementVacuumActive) {
+                            this.speed = this.baseSpeed * 2 * speedMultiplier;
+                        } else {
+                            this.speed = this.baseSpeed * speedMultiplier;
+                        }
                     }
                     
                     // Store player angle for prediction
                     this.lastPlayerAngle = playerSnake.angle;
                 }
                 
-                // Execute attack pattern
-                if (this.attackTimer >= this.attackCooldown) {
+                // Execute attack pattern only during attack phase
+                if (this.attackPhase && this.attackTimer >= this.attackCooldown) {
                     this.executeAttack();
                     this.attackTimer = 0;
                 }
+                
                 
                 // Call parent update
                 super.update(deltaTime);
@@ -8148,7 +8197,15 @@
                         this.rockFallAttack();
                         break;
                     case 'ZEPHYRUS':
-                        this.elementVacuumAttack();
+                        this.specialAttackCounter++;
+                        // Use vacuum attack every Nth attack, otherwise shoot void projectiles
+                        if (this.specialAttackCounter >= this.vacuumAttackInterval) {
+                            this.elementVacuumAttack();
+                            this.specialAttackCounter = 0;
+                            showMessage("Zephyrus summons a void vortex!", 'purple', 2000);
+                        } else {
+                            this.shootVoidProjectiles();
+                        }
                         break;
                 }
                 
@@ -8184,17 +8241,24 @@
             }
             
             waterWaveAttack() {
-                // Create expanding water wave from position
-                bossProjectiles.push({
-                    x: this.x,
-                    y: this.y,
-                    type: 'waterwave',
-                    radius: 0,
-                    maxRadius: 400,
-                    expandSpeed: 5,
-                    damage: 0.25,
-                    elementId: 1 // Water element
-                });
+                // Shoot water orbs in all directions
+                const orbs = 16; // Number of orbs to shoot
+                for (let i = 0; i < orbs; i++) {
+                    const angle = (Math.PI * 2 * i) / orbs;
+                    const speed = 6;
+                    
+                    bossProjectiles.push({
+                        x: this.x,
+                        y: this.y,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed,
+                        type: 'waterorb',
+                        size: 25,
+                        damage: 0.25,
+                        elementId: 1, // Water element
+                        life: 400 // 6.7 seconds
+                    });
+                }
             }
             
             rockFallAttack() {
@@ -8202,27 +8266,49 @@
                 bossScreenShakeTimer = 30;
                 bossScreenShakeIntensity = 10;
                 
-                // Create falling rocks at random positions
-                for (let i = 0; i < 8; i++) {
-                    const targetX = playerSnake.x + (Math.random() - 0.5) * 400;
-                    const targetY = playerSnake.y + (Math.random() - 0.5) * 400;
+                // Create falling rocks across the entire visible screen width
+                const screenBounds = {
+                    left: camera.x - canvas.width / (2 * cameraZoom),
+                    right: camera.x + canvas.width / (2 * cameraZoom),
+                    top: camera.y - canvas.height / (2 * cameraZoom),
+                    bottom: camera.y + canvas.height / (2 * cameraZoom)
+                };
+                
+                // Create waves of rocks with gaps for dodging
+                const rocksPerWave = 12;
+                const gapSize = 100; // Size of safe gaps between rocks
+                const screenWidth = screenBounds.right - screenBounds.left;
+                
+                for (let wave = 0; wave < 3; wave++) {
+                    // Random gap position for each wave
+                    const gapPosition = Math.random() * (screenWidth - gapSize * 2) + gapSize;
                     
-                    bossProjectiles.push({
-                        x: targetX,
-                        y: targetY - 600, // Start above screen
-                        targetY: targetY,
-                        type: 'rock',
-                        size: 30,
-                        damage: 0.25,
-                        elementId: 0, // Earth element
-                        falling: true,
-                        shadowY: targetY
-                    });
+                    for (let i = 0; i < rocksPerWave; i++) {
+                        const xPos = screenBounds.left + (screenWidth / rocksPerWave) * i;
+                        
+                        // Skip rocks in the gap area
+                        if (Math.abs(xPos - (screenBounds.left + gapPosition)) < gapSize) continue;
+                        
+                        const targetY = screenBounds.bottom - 50; // Near bottom of screen
+                        
+                        bossProjectiles.push({
+                            x: xPos,
+                            y: screenBounds.top - 100 - (wave * 150), // Stagger waves
+                            targetY: targetY,
+                            type: 'rock',
+                            size: 30,
+                            damage: 0.25,
+                            elementId: 0, // Earth element
+                            falling: true,
+                            shadowY: targetY,
+                            fallSpeed: 8 + wave * 2 // Later waves fall faster
+                        });
+                    }
                 }
             }
             
             elementVacuumAttack() {
-                // ALL elements disappear for 7 seconds
+                // ALL elements get vacuumed for 7 seconds
                 elementVacuumActive = true;
                 elementVacuumTimer = 420; // 7 seconds at 60fps
                 
@@ -8236,6 +8322,32 @@
                         originalY: element.y
                     });
                 });
+            }
+            
+            shootVoidProjectiles() {
+                if (!playerSnake || !playerSnake.alive) return;
+                
+                // Shoot void energy directly at player
+                const angle = Math.atan2(playerSnake.y - this.y, playerSnake.x - this.x);
+                const speed = 10;
+                
+                // Create a burst of 3 void projectiles
+                for (let i = -1; i <= 1; i++) {
+                    const spreadAngle = angle + (i * 0.1); // Slight spread
+                    
+                    bossProjectiles.push({
+                        x: this.x,
+                        y: this.y,
+                        vx: Math.cos(spreadAngle) * speed,
+                        vy: Math.sin(spreadAngle) * speed,
+                        type: 'void',
+                        size: 35,
+                        damage: 0.3,
+                        elementId: 2, // Air element
+                        life: 300,
+                        color: '#9b59b6' // Purple void energy
+                    });
+                }
             }
             
             takeDamage(source = 'unknown') {
@@ -8258,6 +8370,16 @@
                 this.damageFlashTimer = 30;
                 this.stunTimer = 120; // 2 second stun
                 bossDamageFlashTimer = 20;
+                
+                // Create damage number
+                damageNumbers.push({
+                    x: this.x,
+                    y: this.y - 50,
+                    text: '-1',
+                    color: '#FFD700',
+                    life: 60,
+                    vy: -3
+                });
                 
                 // Create damage particles
                 for (let i = 0; i < 20; i++) {
@@ -8290,10 +8412,11 @@
                 defeatedBosses.add(this.bossType);
                 bossesDefeatedThisCycle++;
                 
-                // Victory explosion
-                for (let i = 0; i < 50; i++) {
+                // Epic victory explosion sequence
+                // First wave - main explosion
+                for (let i = 0; i < 100; i++) {
                     const angle = Math.random() * Math.PI * 2;
-                    const speed = 1 + Math.random() * 5;
+                    const speed = 2 + Math.random() * 8;
                     particlePool.spawn(
                         this.x,
                         this.y,
@@ -8301,6 +8424,56 @@
                         Math.sin(angle) * speed,
                         this.color
                     );
+                }
+                
+                // Second wave - delayed secondary explosions
+                setTimeout(() => {
+                    for (let j = 0; j < 5; j++) {
+                        const offsetAngle = (Math.PI * 2 / 5) * j;
+                        const offsetDist = 100;
+                        const offsetX = this.x + Math.cos(offsetAngle) * offsetDist;
+                        const offsetY = this.y + Math.sin(offsetAngle) * offsetDist;
+                        
+                        for (let i = 0; i < 20; i++) {
+                            const angle = Math.random() * Math.PI * 2;
+                            const speed = 1 + Math.random() * 4;
+                            particlePool.spawn(
+                                offsetX,
+                                offsetY,
+                                Math.cos(angle) * speed,
+                                Math.sin(angle) * speed,
+                                this.color
+                            );
+                        }
+                    }
+                }, 200);
+                
+                // Screen flash and shake
+                bossScreenShakeTimer = 60;
+                bossScreenShakeIntensity = 20;
+                
+                // Victory damage number
+                damageNumbers.push({
+                    x: this.x,
+                    y: this.y - 100,
+                    text: 'VICTORY!',
+                    color: '#FFD700',
+                    life: 120,
+                    vy: -2
+                });
+                
+                // Elemental burst - spawn elements in a spiral
+                for (let i = 0; i < 16; i++) {
+                    const angle = (Math.PI * 2 / 16) * i;
+                    const delay = i * 50; // Stagger the spawns
+                    
+                    setTimeout(() => {
+                        const dist = 150;
+                        spawnElement(this.elementId, 
+                            this.x + Math.cos(angle) * dist,
+                            this.y + Math.sin(angle) * dist
+                        );
+                    }, delay);
                 }
                 
                 // Play explosion shockwave sound
@@ -8434,6 +8607,24 @@
                 const glowIntensity = this.damageFlashTimer > 0 ? 
                     Math.sin(this.damageFlashTimer * 0.3) : 0;
                 
+                // Health phase effects
+                const healthPercent = this.health / this.maxHealth;
+                let phaseColor = this.color;
+                let phaseGlow = false;
+                
+                if (healthPercent <= 0.25) {
+                    // Critical phase - red tint and strong glow
+                    phaseColor = '#ff0000';
+                    phaseGlow = true;
+                } else if (healthPercent <= 0.5) {
+                    // Danger phase - orange tint
+                    phaseColor = '#ff8800';
+                    phaseGlow = true;
+                } else if (healthPercent <= 0.75) {
+                    // Caution phase - yellow tint
+                    phaseColor = '#ffff00';
+                }
+                
                 // Don't scale SEGMENT_SIZE globally - it can break viewport calculations
                 // Instead, we'll pass the size to the parent draw method
                 try {
@@ -8448,14 +8639,34 @@
                 // No need to restore SEGMENT_SIZE since we didn't change it
                 
                 // Add boss glow effect
-                if (glowIntensity > 0) {
+                if (glowIntensity > 0 || phaseGlow) {
                     ctx.save();
-                    ctx.globalAlpha = glowIntensity * 0.5;
-                    ctx.fillStyle = this.color;
                     const screen = worldToScreen(this.x, this.y);
+                    
+                    // Damage flash or phase glow
+                    if (glowIntensity > 0) {
+                        ctx.globalAlpha = glowIntensity * 0.5;
+                        ctx.fillStyle = this.color;
+                    } else if (phaseGlow) {
+                        const phasePulse = Math.sin(Date.now() * 0.005) * 0.3 + 0.7;
+                        ctx.globalAlpha = phasePulse * 0.4;
+                        ctx.fillStyle = phaseColor;
+                    }
+                    
                     ctx.beginPath();
                     ctx.arc(screen.x, screen.y, 100 * cameraZoom, 0, Math.PI * 2);
                     ctx.fill();
+                    
+                    // Add phase indicator ring
+                    if (phaseGlow) {
+                        ctx.strokeStyle = phaseColor;
+                        ctx.lineWidth = 5 * cameraZoom;
+                        ctx.globalAlpha = 0.8;
+                        ctx.beginPath();
+                        ctx.arc(screen.x, screen.y, 80 * cameraZoom, 0, Math.PI * 2);
+                        ctx.stroke();
+                    }
+                    
                     ctx.restore();
                 }
             }
@@ -8687,7 +8898,8 @@
                         
                     case 'rock':
                         if (projectile.falling) {
-                            projectile.y += 10 * deltaTime;
+                            const fallSpeed = projectile.fallSpeed || 10;
+                            projectile.y += fallSpeed * deltaTime;
                             
                             if (projectile.y >= projectile.shadowY) {
                                 projectile.falling = false;
@@ -8711,6 +8923,48 @@
                         }
                         
                         return projectile.falling;
+                        
+                case 'waterorb':
+                    // Update water orb position
+                    projectile.x += projectile.vx * deltaTime;
+                    projectile.y += projectile.vy * deltaTime;
+                    projectile.life -= deltaTime;
+                    
+                    // Check collision with player
+                    if (playerSnake && playerSnake.alive) {
+                        const dx = projectile.x - playerSnake.x;
+                        const dy = projectile.y - playerSnake.y;
+                        if (Math.sqrt(dx * dx + dy * dy) < projectile.size + SEGMENT_SIZE) {
+                            if (playerSnake.invincibilityTimer <= 0) {
+                                playerSnake.health -= projectile.damage;
+                                playerSnake.die();
+                            }
+                            return true; // Remove projectile
+                        }
+                    }
+                    
+                    return projectile.life <= 0;
+                    
+                case 'void':
+                    // Update void projectile position
+                    projectile.x += projectile.vx * deltaTime;
+                    projectile.y += projectile.vy * deltaTime;
+                    projectile.life -= deltaTime;
+                    
+                    // Check collision with player
+                    if (playerSnake && playerSnake.alive) {
+                        const dx = projectile.x - playerSnake.x;
+                        const dy = projectile.y - playerSnake.y;
+                        if (Math.sqrt(dx * dx + dy * dy) < projectile.size + SEGMENT_SIZE) {
+                            if (playerSnake.invincibilityTimer <= 0) {
+                                playerSnake.health -= projectile.damage;
+                                playerSnake.die();
+                            }
+                            return true; // Remove projectile
+                        }
+                    }
+                    
+                    return projectile.life <= 0;
                 }
                 
                 return false;
@@ -8874,28 +9128,16 @@
             if (dist < 500) { // Within 500 pixels
                 let canDamage = false;
                 
-                // Check combinations based on boss type
-                switch(currentBoss.bossType) {
-                    case 'PYRAXIS': // Fire boss - needs Fire + Water
-                        if (allPlayerElements.includes(3) && allPlayerElements.includes(1)) {
-                            canDamage = true;
-                        }
-                        break;
-                    case 'ABYSSOS': // Water boss - needs Water + Earth
-                        if (allPlayerElements.includes(1) && allPlayerElements.includes(0)) {
-                            canDamage = true;
-                        }
-                        break;
-                    case 'OSSEUS': // Earth boss - needs Earth + Air
-                        if (allPlayerElements.includes(0) && allPlayerElements.includes(2)) {
-                            canDamage = true;
-                        }
-                        break;
-                    case 'ZEPHYRUS': // Air boss - needs Air + Fire
-                        if (allPlayerElements.includes(2) && allPlayerElements.includes(3)) {
-                            canDamage = true;
-                        }
-                        break;
+                // Check if player has ANY combination containing the boss's element
+                const bossElementId = currentBoss.elementId;
+                
+                // Check if player has the boss's element
+                if (allPlayerElements.includes(bossElementId)) {
+                    // Check if player has at least 2 different elements (a combination)
+                    const uniqueElements = [...new Set(allPlayerElements)];
+                    if (uniqueElements.length >= 2) {
+                        canDamage = true;
+                    }
                 }
                 
                 if (canDamage) {
@@ -8969,8 +9211,21 @@
                         
                     case 'rock':
                         if (projectile.falling) {
-                            // Draw shadow at target position
+                            // Draw shadow at target position with warning indicator
                             const shadowScreen = worldToScreen(projectile.x, projectile.targetY);
+                            
+                            // Draw pulsing red warning circle
+                            const warningPulse = Math.sin(Date.now() * 0.01) * 0.3 + 0.7;
+                            ctx.globalAlpha = warningPulse * 0.5;
+                            ctx.strokeStyle = '#ff0000';
+                            ctx.lineWidth = 3 * cameraZoom;
+                            ctx.beginPath();
+                            ctx.arc(shadowScreen.x, shadowScreen.y, 
+                                  projectile.size * 1.5 * cameraZoom, 
+                                  0, Math.PI * 2);
+                            ctx.stroke();
+                            
+                            // Draw shadow
                             ctx.globalAlpha = 0.3;
                             ctx.fillStyle = '#000';
                             ctx.beginPath();
@@ -8996,7 +9251,78 @@
                         const rockCanvas = getCachedEmoji('🪨', Math.round(projectile.size * 1.5 * cameraZoom));
                         ctx.drawImage(rockCanvas, screen.x - rockCanvas.width / 2, screen.y - rockCanvas.height / 2);
                         break;
+                        
+                    case 'waterorb':
+                        // Draw water orb
+                        const waterOrbGradient = ctx.createRadialGradient(screen.x, screen.y, 0, screen.x, screen.y, projectile.size * cameraZoom);
+                        waterOrbGradient.addColorStop(0, 'rgba(100, 200, 255, 0.8)');
+                        waterOrbGradient.addColorStop(0.5, 'rgba(64, 164, 223, 0.6)');
+                        waterOrbGradient.addColorStop(1, 'rgba(30, 100, 200, 0.4)');
+                        
+                        ctx.fillStyle = waterOrbGradient;
+                        ctx.beginPath();
+                        ctx.arc(screen.x, screen.y, projectile.size * cameraZoom, 0, Math.PI * 2);
+                        ctx.fill();
+                        
+                        // Add water emoji
+                        const waterCanvas = getCachedEmoji('💧', Math.round(projectile.size * 1.2 * cameraZoom));
+                        ctx.drawImage(waterCanvas, screen.x - waterCanvas.width / 2, screen.y - waterCanvas.height / 2);
+                        break;
+                        
+                    case 'void':
+                        // Draw void projectile with dark purple energy
+                        const voidGradient = ctx.createRadialGradient(screen.x, screen.y, 0, screen.x, screen.y, projectile.size * cameraZoom);
+                        voidGradient.addColorStop(0, 'rgba(155, 89, 182, 0.9)');
+                        voidGradient.addColorStop(0.5, 'rgba(75, 0, 130, 0.7)');
+                        voidGradient.addColorStop(1, 'rgba(25, 0, 51, 0.5)');
+                        
+                        ctx.fillStyle = voidGradient;
+                        ctx.beginPath();
+                        ctx.arc(screen.x, screen.y, projectile.size * cameraZoom, 0, Math.PI * 2);
+                        ctx.fill();
+                        
+                        // Add void/dark energy effect
+                        ctx.strokeStyle = 'rgba(155, 89, 182, 0.8)';
+                        ctx.lineWidth = 3 * cameraZoom;
+                        ctx.stroke();
+                        
+                        // Add void emoji or symbol
+                        const voidCanvas = getCachedEmoji('🌀', Math.round(projectile.size * 1.3 * cameraZoom));
+                        ctx.drawImage(voidCanvas, screen.x - voidCanvas.width / 2, screen.y - voidCanvas.height / 2);
+                        break;
                 }
+                
+                ctx.restore();
+            });
+        }
+        
+        function updateDamageNumbers(deltaTime) {
+            damageNumbers = damageNumbers.filter(num => {
+                num.y += num.vy * deltaTime;
+                num.life -= deltaTime;
+                num.vy += 0.2 * deltaTime; // Gravity
+                return num.life > 0;
+            });
+        }
+        
+        function drawDamageNumbers() {
+            damageNumbers.forEach(num => {
+                const screen = worldToScreen(num.x, num.y);
+                
+                ctx.save();
+                ctx.globalAlpha = num.life / 60; // Fade out
+                ctx.font = `bold ${40 * cameraZoom}px ${FONT_FAMILY}`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                
+                // Draw outline
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 4 * cameraZoom;
+                ctx.strokeText(num.text, screen.x, screen.y);
+                
+                // Draw text
+                ctx.fillStyle = num.color;
+                ctx.fillText(num.text, screen.x, screen.y);
                 
                 ctx.restore();
             });
@@ -9888,14 +10214,9 @@
             }
             
             // Check minimum play time
+            // Time validation removed - allow immediate submission
             const playTime = gameSessionStartTime ? 
                 Math.floor((Date.now() - gameSessionStartTime) / 1000) : 0;
-            
-            if (playTime < 10) {
-                document.getElementById('submissionStatus').innerHTML = 
-                    `<span style="color: #ff4444;">Play for at least 10 seconds (current: ${playTime}s)</span>`;
-                return;
-            }
             
             // Store username for future use
             localStorage.setItem('lastUsername', username);
@@ -10365,6 +10686,7 @@
                     const element = window.elementLoader.elements.get(elementId);
                     if (element) {
                         div.classList.add('filled');
+                        div.dataset.elementId = elementId; // Store element ID for boss damage checking
                         
                         // Highlight the active element
                         if (i === playerSnake.highlightedIndex) {
@@ -12138,19 +12460,31 @@
                 // Remove dead snakes
                 snakes = snakes.filter(snake => snake.alive);
                 
-                // Spawn new elements to maintain target count (less aggressive)
+                // Spawn new elements to maintain target count (increased during boss battles)
                 const currentElementCount = elementPool.getActiveCount();
+                const bossSpawnMultiplier = bossEncounterActive ? 3 : 1; // 3x spawn rate during boss battles
+                
                 if (currentElementCount < TARGET_ELEMENT_COUNT - 20) {
                     // Only spawn if significantly below target
-                    const elementsToSpawn = Math.min(2, Math.floor((TARGET_ELEMENT_COUNT - currentElementCount) / 10));
+                    const elementsToSpawn = Math.min(2 * bossSpawnMultiplier, Math.floor((TARGET_ELEMENT_COUNT - currentElementCount) / 10));
                     for (let i = 0; i < elementsToSpawn; i++) {
                         if (Math.random() < 0.8) { // 80% chance per spawn
-                            spawnElementWithGridDistribution();
+                            if (bossEncounterActive && currentBoss && Math.random() < 0.5) {
+                                // 50% chance to spawn boss's element type during boss battles
+                                spawnElement(currentBoss.elementId);
+                            } else {
+                                spawnElementWithGridDistribution();
+                            }
                         }
                     }
-                } else if (Math.random() < 0.05 && currentElementCount < TARGET_ELEMENT_COUNT) {
-                    // Occasional spawns to replace consumed elements (reduced from 10% to 5%)
-                    spawnElementWithGridDistribution();
+                } else if (Math.random() < (0.05 * bossSpawnMultiplier) && currentElementCount < TARGET_ELEMENT_COUNT) {
+                    // Occasional spawns to replace consumed elements (increased during boss battles)
+                    if (bossEncounterActive && currentBoss && Math.random() < 0.5) {
+                        // 50% chance to spawn boss's element type during boss battles
+                        spawnElement(currentBoss.elementId);
+                    } else {
+                        spawnElementWithGridDistribution();
+                    }
                 }
                 
                 // Update AlchemyVision timer
@@ -12237,6 +12571,9 @@
                 if (bossEncounterActive && currentBoss) {
                     // Update boss projectiles
                     updateBossProjectiles(1.0);
+                    
+                    // Update damage numbers
+                    updateDamageNumbers(1.0);
                     
                     // Update element vacuum
                     if (elementVacuumActive) {
@@ -12466,6 +12803,7 @@
             // Draw boss projectiles
             if (bossEncounterActive) {
                 drawBossProjectiles();
+                drawDamageNumbers();
             }
             
             // Draw snakes (they already have internal viewport culling)
