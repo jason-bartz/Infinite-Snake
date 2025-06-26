@@ -3011,7 +3011,7 @@
     <!-- Splash Screen -->
     <div id="splashScreen">
         <div style="position: absolute; top: 20px; right: 20px; z-index: 10;">
-            <a href="#" onclick="showHowToPlay(); return false;" style="color: #4ecdc4; text-decoration: none; font-family: monospace; font-size: 16px; margin-right: 20px;">📖 How to Play</a>
+            <a href="/how-to-play.html" style="color: #4ecdc4; text-decoration: none; font-family: monospace; font-size: 16px; margin-right: 20px;">📖 How to Play</a>
             <a href="/leaderboard.html" style="color: #4ecdc4; text-decoration: none; font-family: monospace; font-size: 16px;">🏆 Leaderboard</a>
         </div>
         <div id="splashContent">
@@ -3398,75 +3398,6 @@
             <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(138, 43, 226, 0.3);">
                 <button onclick="resumeGame()" style="margin: 10px; padding: 10px 30px; font-size: 18px; background: #4ecdc4; color: white; border: none; border-radius: 10px; cursor: pointer;">Resume</button>
                 <button onclick="location.reload()" style="margin: 10px; padding: 10px 30px; font-size: 18px; background: #ff6b6b; color: white; border: none; border-radius: 10px; cursor: pointer;">New Game</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- How to Play Modal -->
-    <div id="howToPlayModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 100;">
-        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1a1a2e; border: 2px solid #4ecdc4; border-radius: 10px; padding: 30px; max-width: 600px; max-height: 80vh; overflow-y: auto;">
-            <button onclick="closeHowToPlay()" style="position: absolute; top: 10px; right: 10px; background: transparent; border: none; color: #4ecdc4; font-size: 24px; cursor: pointer;">✕</button>
-            <h2 style="color: #FFD700; margin-bottom: 20px; text-align: center; font-family: 'Press Start 2P', monospace;">How to Play Infinite Snake</h2>
-            
-            <div style="color: #ddd; font-size: 14px; line-height: 1.6;">
-                <div style="margin-bottom: 15px;">
-                    <h5 style="color: #4ecdc4; margin-bottom: 5px;">🎮 Controls</h5>
-                    <p><strong>Desktop:</strong> Mouse to steer OR WASD keys</p>
-                    <p><strong>WASD:</strong> A/D to turn, W to boost</p>
-                    <p><strong>Mobile:</strong> Virtual joystick to steer, Boost button to accelerate</p>
-                    <p><strong>Boost:</strong> Click/W (Desktop) or Boost button (Mobile)</p>
-                </div>
-                
-                <div style="margin-bottom: 15px;">
-                    <h5 style="color: #4ecdc4; margin-bottom: 5px;">🎯 Goal</h5>
-                    <p>Grow your snake by collecting elements and discovering new combinations! Climb the global leaderboard in Infinite Mode, unlock new skins, and build your Discovery Journal.</p>
-                </div>
-                
-                <div style="margin-bottom: 15px;">
-                    <h5 style="color: #4ecdc4; margin-bottom: 5px;">🔬 Element System</h5>
-                    <p>• Collect basic elements: Earth 🌍, Air 💨, Fire 🔥, Water 💧</p>
-                    <p>• Your snake can hold up to 6 elements</p>
-                    <p>• Elements automatically combine when compatible!</p>
-                    <p>• Example: Fire + Water = Steam ☁️</p>
-                    <p>• New elements and combinations are added regularly!</p>
-                </div>
-                
-                <div style="margin-bottom: 15px;">
-                    <h5 style="color: #4ecdc4; margin-bottom: 5px;">📖 Discovery Journal</h5>
-                    <p>• Build your personal collection of discovered elements</p>
-                    <p>• Your discoveries persist between sessions</p>
-                    <p>• Track your progress and unlock achievements</p>
-                    <p>• Compare your collection with other players</p>
-                </div>
-                
-                <div style="margin-bottom: 15px;">
-                    <h5 style="color: #4ecdc4; margin-bottom: 5px;">✨ Power-ups</h5>
-                    <p><strong>🌀 Void Orb:</strong> Clear your element inventory and convert to points (may produce a random element!)</p>
-                    <p><strong>💎 Catalyst Gem:</strong> Summons 2 random compatible elements for combining</p>
-                </div>
-                
-                <div style="margin-bottom: 15px;">
-                    <h5 style="color: #4ecdc4; margin-bottom: 5px;">⚔️ Combat</h5>
-                    <p>• Collide head-on with smaller snakes to eliminate them</p>
-                    <p>• Collect their dropped elements for points</p>
-                    <p>• Avoid head-on collisions with larger snakes!</p>
-                </div>
-                
-                <div style="margin-bottom: 15px;">
-                    <h5 style="color: #4ecdc4; margin-bottom: 5px;">🏆 Competitive Play</h5>
-                    <p>• Play Infinite Mode to compete on the global leaderboard</p>
-                    <p>• Daily, Weekly, Monthly, and All-Time rankings</p>
-                    <p>• Submit your best scores and climb the ranks</p>
-                    <p>• Track your personal best and improvement</p>
-                </div>
-                
-                <div style="margin-bottom: 15px;">
-                    <h5 style="color: #4ecdc4; margin-bottom: 5px;">💡 Tips</h5>
-                    <p>• Use boost strategically - it drains stamina!</p>
-                    <p>• Experiment with different element combinations</p>
-                    <p>• Stay away from the map borders!</p>
-                    <p>• Check back regularly for new elements and features</p>
-                </div>
             </div>
         </div>
     </div>
@@ -10595,15 +10526,6 @@
             const flag = countryFlags[countryCode] || '🌍';
             return `<span style="font-size: 18px; display: inline-block;">${flag}</span> <span style="font-size: 11px; color: #888;">${countryCode || 'XX'}</span>`;
         }
-        
-        // How to Play Modal Functions
-        window.showHowToPlay = function() {
-            document.getElementById('howToPlayModal').style.display = 'block';
-        };
-        
-        window.closeHowToPlay = function() {
-            document.getElementById('howToPlayModal').style.display = 'none';
-        };
         
         // Leaderboard UI Functions
         let currentLeaderboardPeriod = 'daily';

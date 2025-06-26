@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <title>How to Play - Infinite Snake | Game Guide</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Learn how to play Infinite Snake. Master the controls, discover element combinations, and climb the global leaderboard!" />
+    <meta property="og:title" content="How to Play Infinite Snake" />
+    <meta property="og:description" content="Learn how to play Infinite Snake. Master the controls, discover element combinations, and climb the global leaderboard!" />
+    <meta property="og:image" content="https://infinitesnake.io/assets/snake-logo.png" />
+    <meta property="og:url" content="https://infinitesnake.io/how-to-play" />
+    
+    <!-- Favicons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #0a0a0a;
+            color: white;
+            font-family: monospace;
+            overflow-x: hidden;
+            image-rendering: pixelated;
+        }
+        
+        /* Animated starfield background */
+        #stars-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+        
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(20, 20, 40, 0.9) 0%, rgba(30, 30, 50, 0.8) 100%);
+            border: 3px solid #4ecdc4;
+            box-shadow: 0 0 20px rgba(78, 205, 196, 0.5);
+        }
+        
+        h1 {
+            font-size: 48px;
+            color: #FFD700;
+            margin: 0 0 10px 0;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+        
+        .subtitle {
+            color: #AAA;
+            font-size: 18px;
+        }
+        
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: linear-gradient(135deg, #4B0082, #2E0549);
+            border: 2px solid #8B00FF;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s;
+        }
+        
+        .back-button:hover {
+            background: linear-gradient(135deg, #6B0082, #4E0569);
+            box-shadow: 0 0 15px rgba(139, 0, 255, 0.6);
+            transform: scale(1.05);
+        }
+        
+        .content {
+            background: linear-gradient(135deg, rgba(20, 20, 40, 0.95) 0%, rgba(30, 30, 50, 0.9) 100%);
+            border: 2px solid #333;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            line-height: 1.8;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-left: 4px solid #4ecdc4;
+        }
+        
+        .section h2 {
+            color: #4ecdc4;
+            margin: 0 0 15px 0;
+            font-size: 24px;
+        }
+        
+        .section p {
+            margin: 10px 0;
+            color: #ddd;
+            font-size: 16px;
+        }
+        
+        .section ul {
+            margin: 10px 0;
+            padding-left: 25px;
+        }
+        
+        .section li {
+            margin: 8px 0;
+            color: #ddd;
+            font-size: 16px;
+        }
+        
+        .highlight {
+            color: #FFD700;
+            font-weight: bold;
+        }
+        
+        .tip {
+            background: rgba(78, 205, 196, 0.1);
+            border: 1px solid #4ecdc4;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        
+        .tip-header {
+            color: #4ecdc4;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 32px;
+            }
+            
+            .container {
+                padding: 10px;
+            }
+            
+            .back-button {
+                top: 10px;
+                left: 10px;
+                padding: 8px 15px;
+                font-size: 14px;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .section {
+                padding: 15px;
+            }
+            
+            .section h2 {
+                font-size: 20px;
+            }
+            
+            .section p, .section li {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="stars-canvas"></canvas>
+    
+    <a href="/" class="back-button">← Back to Game</a>
+    
+    <div class="container">
+        <header>
+            <h1>How to Play</h1>
+            <p class="subtitle">Master the art of elemental snake combat</p>
+        </header>
+        
+        <div class="content">
+            <div class="section">
+                <h2>🎮 Controls</h2>
+                <p><strong>Desktop:</strong></p>
+                <ul>
+                    <li>Mouse to steer OR WASD keys</li>
+                    <li>WASD: A/D to turn, W to boost</li>
+                    <li>Click or W to activate boost</li>
+                    <li>P to pause game</li>
+                    <li>M to mute/unmute music</li>
+                </ul>
+                <p><strong>Mobile:</strong></p>
+                <ul>
+                    <li>Virtual joystick to steer</li>
+                    <li>Boost button to accelerate</li>
+                    <li>Tap pause/mute buttons for menu and sound</li>
+                </ul>
+            </div>
+            
+            <div class="section">
+                <h2>🎯 Goal</h2>
+                <p>Grow your snake by collecting elements and discovering new combinations! Your objectives:</p>
+                <ul>
+                    <li>Climb the global leaderboard in <span class="highlight">Infinite Mode</span></li>
+                    <li>Unlock new snake skins through achievements</li>
+                    <li>Build your Discovery Journal with unique element combinations</li>
+                    <li>Compete in Daily, Weekly, Monthly, and All-Time rankings</li>
+                </ul>
+            </div>
+            
+            <div class="section">
+                <h2>🔬 Element System</h2>
+                <p>The core of Infinite Snake is the element combination system:</p>
+                <ul>
+                    <li>Start with basic elements: Earth 🌍, Air 💨, Fire 🔥, Water 💧</li>
+                    <li>Your snake can hold up to <span class="highlight">6 elements</span> at a time</li>
+                    <li>Elements automatically combine when compatible!</li>
+                    <li>Example: Fire + Water = Steam ☁️</li>
+                    <li><span class="highlight">Over 10,000 elements</span> available today!</li>
+                    <li><span class="highlight">New elements and combinations are added regularly!</span></li>
+                </ul>
+                <div class="tip">
+                    <div class="tip-header">💡 Pro Tip:</div>
+                    Experiment with different combinations - there are countless to discover!
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>📖 Discovery Journal</h2>
+                <p>Your personal collection of discovered elements:</p>
+                <ul>
+                    <li>Build your collection of discovered elements</li>
+                    <li>Your discoveries <span class="highlight">persist between sessions</span></li>
+                    <li>Track your progress and unlock achievements</li>
+                    <li>Compare your collection with other players</li>
+                    <li>Access your journal from the pause menu</li>
+                </ul>
+            </div>
+            
+            <div class="section">
+                <h2>✨ Power-ups</h2>
+                <p>Special items that appear on the map:</p>
+                <ul>
+                    <li><strong>🌀 Void Orb:</strong> Clears your element inventory and converts to points. <span class="highlight">May produce a random element!</span></li>
+                    <li><strong>💎 Catalyst Gem:</strong> Summons <span class="highlight">2 random compatible elements</span> for combining</li>
+                </ul>
+            </div>
+            
+            <div class="section">
+                <h2>⚔️ Combat</h2>
+                <p>Size matters in snake combat:</p>
+                <ul>
+                    <li>Collide head-on with <span class="highlight">smaller snakes</span> to eliminate them</li>
+                    <li>Collect their dropped elements for points</li>
+                    <li>Avoid head-on collisions with larger snakes!</li>
+                    <li>Use boost strategically to escape or attack</li>
+                </ul>
+            </div>
+            
+            <div class="section">
+                <h2>🏆 Competitive Play</h2>
+                <p>Compete globally in Infinite Mode:</p>
+                <ul>
+                    <li>Play <span class="highlight">Infinite Mode</span> to compete on the global leaderboard</li>
+                    <li>Rankings: Daily, Weekly, Monthly, and All-Time</li>
+                    <li>Submit your best scores and climb the ranks</li>
+                    <li>Track your personal best and improvement</li>
+                    <li>Earn recognition as a top player</li>
+                </ul>
+            </div>
+            
+            <div class="section">
+                <h2>💡 General Tips</h2>
+                <ul>
+                    <li>Use boost strategically - it drains stamina!</li>
+                    <li>Experiment with different element combinations</li>
+                    <li>Stay away from the map borders - they're deadly!</li>
+                    <li>Check back regularly for new elements and features</li>
+                    <li>Plan your element combinations for maximum points</li>
+                </ul>
+            </div>
+            
+            <div class="section">
+                <h2>👹 Boss Encounters</h2>
+                <p>During your adventure, ancient beings known as the <span class="highlight">Deep Old Ones</span> may emerge from the void to challenge you:</p>
+                <ul>
+                    <li>Powerful entities with unique attack patterns</li>
+                    <li>Conquer them to unlock exclusive snake skins</li>
+                    <li>Earn rare elements and special buffs</li>
+                    <li>Each boss presents a unique challenge</li>
+                </ul>
+                <div class="tip">
+                    <div class="tip-header">🌟 Hint:</div>
+                    Keep your eyes open... you never know when the void might stir!
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>🎮 Game Modes</h2>
+                <p>Choose your challenge:</p>
+                <ul>
+                    <li><strong>Discovery Race:</strong> First to discover 50 or 250 elements wins</li>
+                    <li><strong>Points Race:</strong> First to reach 50,000 or 250,000 points wins</li>
+                    <li><strong>Infinite Mode:</strong> Play forever and compete on the global leaderboard</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Animated starfield background (same as leaderboard)
+        const canvas = document.getElementById('stars-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        const stars = [];
+        for (let i = 0; i < 200; i++) {
+            stars.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                size: Math.random() * 2,
+                speed: Math.random() * 0.5 + 0.1
+            });
+        }
+        
+        function animateStars() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = 'white';
+            
+            stars.forEach(star => {
+                ctx.globalAlpha = Math.random() * 0.8 + 0.2;
+                ctx.fillRect(star.x, star.y, star.size, star.size);
+                
+                star.y += star.speed;
+                if (star.y > canvas.height) {
+                    star.y = 0;
+                    star.x = Math.random() * canvas.width;
+                }
+            });
+            
+            requestAnimationFrame(animateStars);
+        }
+        
+        animateStars();
+        
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>
