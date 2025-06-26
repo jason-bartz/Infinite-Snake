@@ -3011,6 +3011,7 @@
     <!-- Splash Screen -->
     <div id="splashScreen">
         <div style="position: absolute; top: 20px; right: 20px; z-index: 10;">
+            <a href="#" onclick="showHowToPlay(); return false;" style="color: #4ecdc4; text-decoration: none; font-family: monospace; font-size: 16px; margin-right: 20px;">📖 How to Play</a>
             <a href="/leaderboard.html" style="color: #4ecdc4; text-decoration: none; font-family: monospace; font-size: 16px;">🏆 Leaderboard</a>
         </div>
         <div id="splashContent">
@@ -3303,16 +3304,15 @@
                     <div style="color: #ddd; font-size: 14px; line-height: 1.6;">
                         <div style="margin-bottom: 15px;">
                             <h5 style="color: #4ecdc4; margin-bottom: 5px;">🎮 Controls</h5>
-                            <p><strong>Desktop:</strong> Mouse to steer OR Arrow keys/WASD</p>
-                            <p><strong>Arrow Keys:</strong> Left/Right to turn, Up to boost</p>
+                            <p><strong>Desktop:</strong> Mouse to steer OR WASD keys</p>
                             <p><strong>WASD:</strong> A/D to turn, W to boost</p>
-                            <p><strong>Mobile:</strong> Virtual joystick to steer</p>
-                            <p><strong>Boost:</strong> Click/W/Up Arrow (Desktop) or Boost button (Mobile)</p>
+                            <p><strong>Mobile:</strong> Virtual joystick to steer, Boost button to accelerate</p>
+                            <p><strong>Boost:</strong> Click/W (Desktop) or Boost button (Mobile)</p>
                         </div>
                         
                         <div style="margin-bottom: 15px;">
                             <h5 style="color: #4ecdc4; margin-bottom: 5px;">🎯 Goal</h5>
-                            <p>Grow your snake by collecting elements and discovering new combinations! Compete with other snakes for the highest score and unlock new skins.</p>
+                            <p>Grow your snake by collecting elements and discovering new combinations! Climb the global leaderboard in Infinite Mode, unlock new skins, and build your Discovery Journal.</p>
                         </div>
                         
                         <div style="margin-bottom: 15px;">
@@ -3321,13 +3321,21 @@
                             <p>• Your snake can hold up to 6 elements</p>
                             <p>• Elements automatically combine when compatible!</p>
                             <p>• Example: Fire + Water = Steam ☁️</p>
+                            <p>• New elements and combinations are added regularly!</p>
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <h5 style="color: #4ecdc4; margin-bottom: 5px;">📖 Discovery Journal</h5>
+                            <p>• Build your personal collection of discovered elements</p>
+                            <p>• Your discoveries persist between sessions</p>
+                            <p>• Track your progress and unlock achievements</p>
+                            <p>• Compare your collection with other players</p>
                         </div>
                         
                         <div style="margin-bottom: 15px;">
                             <h5 style="color: #4ecdc4; margin-bottom: 5px;">✨ Power-ups</h5>
-                            <p><strong>🔮 Alchemy Vision:</strong> See all possible combinations for 30 seconds</p>
-                            <p><strong>🌀 Void Orb:</strong> Clear your element inventory and convert to points</p>
-                            <p><strong>💎 Catalyst Gem:</strong> Summons up to 4 possible compatible elements for combining</p>
+                            <p><strong>🌀 Void Orb:</strong> Clear your element inventory and convert to points (may produce a random element!)</p>
+                            <p><strong>💎 Catalyst Gem:</strong> Summons 2 random compatible elements for combining</p>
                         </div>
                         
                         <div style="margin-bottom: 15px;">
@@ -3338,10 +3346,19 @@
                         </div>
                         
                         <div style="margin-bottom: 15px;">
-                            <h5 style="color: #4ecdc4; margin-bottom: 5px;">🏆 Tips</h5>
+                            <h5 style="color: #4ecdc4; margin-bottom: 5px;">🏆 Competitive Play</h5>
+                            <p>• Play Infinite Mode to compete on the global leaderboard</p>
+                            <p>• Daily, Weekly, Monthly, and All-Time rankings</p>
+                            <p>• Submit your best scores and climb the ranks</p>
+                            <p>• Track your personal best and improvement</p>
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <h5 style="color: #4ecdc4; margin-bottom: 5px;">💡 Tips</h5>
                             <p>• Use boost strategically - it drains stamina!</p>
                             <p>• Experiment with different element combinations</p>
                             <p>• Stay away from the map borders!</p>
+                            <p>• Check back regularly for new elements and features</p>
                         </div>
                     </div>
                 </div>
@@ -3381,6 +3398,75 @@
             <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(138, 43, 226, 0.3);">
                 <button onclick="resumeGame()" style="margin: 10px; padding: 10px 30px; font-size: 18px; background: #4ecdc4; color: white; border: none; border-radius: 10px; cursor: pointer;">Resume</button>
                 <button onclick="location.reload()" style="margin: 10px; padding: 10px 30px; font-size: 18px; background: #ff6b6b; color: white; border: none; border-radius: 10px; cursor: pointer;">New Game</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- How to Play Modal -->
+    <div id="howToPlayModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 100;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1a1a2e; border: 2px solid #4ecdc4; border-radius: 10px; padding: 30px; max-width: 600px; max-height: 80vh; overflow-y: auto;">
+            <button onclick="closeHowToPlay()" style="position: absolute; top: 10px; right: 10px; background: transparent; border: none; color: #4ecdc4; font-size: 24px; cursor: pointer;">✕</button>
+            <h2 style="color: #FFD700; margin-bottom: 20px; text-align: center; font-family: 'Press Start 2P', monospace;">How to Play Infinite Snake</h2>
+            
+            <div style="color: #ddd; font-size: 14px; line-height: 1.6;">
+                <div style="margin-bottom: 15px;">
+                    <h5 style="color: #4ecdc4; margin-bottom: 5px;">🎮 Controls</h5>
+                    <p><strong>Desktop:</strong> Mouse to steer OR WASD keys</p>
+                    <p><strong>WASD:</strong> A/D to turn, W to boost</p>
+                    <p><strong>Mobile:</strong> Virtual joystick to steer, Boost button to accelerate</p>
+                    <p><strong>Boost:</strong> Click/W (Desktop) or Boost button (Mobile)</p>
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <h5 style="color: #4ecdc4; margin-bottom: 5px;">🎯 Goal</h5>
+                    <p>Grow your snake by collecting elements and discovering new combinations! Climb the global leaderboard in Infinite Mode, unlock new skins, and build your Discovery Journal.</p>
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <h5 style="color: #4ecdc4; margin-bottom: 5px;">🔬 Element System</h5>
+                    <p>• Collect basic elements: Earth 🌍, Air 💨, Fire 🔥, Water 💧</p>
+                    <p>• Your snake can hold up to 6 elements</p>
+                    <p>• Elements automatically combine when compatible!</p>
+                    <p>• Example: Fire + Water = Steam ☁️</p>
+                    <p>• New elements and combinations are added regularly!</p>
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <h5 style="color: #4ecdc4; margin-bottom: 5px;">📖 Discovery Journal</h5>
+                    <p>• Build your personal collection of discovered elements</p>
+                    <p>• Your discoveries persist between sessions</p>
+                    <p>• Track your progress and unlock achievements</p>
+                    <p>• Compare your collection with other players</p>
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <h5 style="color: #4ecdc4; margin-bottom: 5px;">✨ Power-ups</h5>
+                    <p><strong>🌀 Void Orb:</strong> Clear your element inventory and convert to points (may produce a random element!)</p>
+                    <p><strong>💎 Catalyst Gem:</strong> Summons 2 random compatible elements for combining</p>
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <h5 style="color: #4ecdc4; margin-bottom: 5px;">⚔️ Combat</h5>
+                    <p>• Collide head-on with smaller snakes to eliminate them</p>
+                    <p>• Collect their dropped elements for points</p>
+                    <p>• Avoid head-on collisions with larger snakes!</p>
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <h5 style="color: #4ecdc4; margin-bottom: 5px;">🏆 Competitive Play</h5>
+                    <p>• Play Infinite Mode to compete on the global leaderboard</p>
+                    <p>• Daily, Weekly, Monthly, and All-Time rankings</p>
+                    <p>• Submit your best scores and climb the ranks</p>
+                    <p>• Track your personal best and improvement</p>
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <h5 style="color: #4ecdc4; margin-bottom: 5px;">💡 Tips</h5>
+                    <p>• Use boost strategically - it drains stamina!</p>
+                    <p>• Experiment with different element combinations</p>
+                    <p>• Stay away from the map borders!</p>
+                    <p>• Check back regularly for new elements and features</p>
+                </div>
             </div>
         </div>
     </div>
@@ -4992,6 +5078,8 @@
         const eatSounds = [];
         const explosionSounds = [];
         let soundIndex = 0;
+        let lastExplosionSoundTime = 0;
+        const EXPLOSION_SOUND_COOLDOWN = 100; // 100ms cooldown between explosion sounds
         
         function initSoundEffects() {
             // Create multiple audio instances for overlapping sounds
@@ -5026,6 +5114,15 @@
         
         function playExplosionSound(isPlayerInvolved = true) {
             if (!musicMuted && explosionSounds.length > 0) {
+                // Check cooldown - only apply to AI-only explosions
+                const currentTime = Date.now();
+                if (!isPlayerInvolved && currentTime - lastExplosionSoundTime < EXPLOSION_SOUND_COOLDOWN) {
+                    return; // Skip this sound due to cooldown
+                }
+                
+                // Update last explosion time
+                lastExplosionSoundTime = currentTime;
+                
                 // Use round-robin to cycle through sound instances
                 const sound = explosionSounds[soundIndex % explosionSounds.length];
                 soundIndex++;
@@ -5298,10 +5395,27 @@
                 if (currentTrack) {
                     currentTrack.pause();
                 }
+                // Also pause boss music
+                if (bossIntroMusic) {
+                    bossIntroMusic.pause();
+                }
+                if (bossBattleMusic) {
+                    bossBattleMusic.pause();
+                }
             } else {
                 if (currentTrack && gameStarted) {
                     currentTrack.volume = musicVolume;
                     currentTrack.play().catch(() => {});
+                }
+                // Resume boss music if boss encounter is active
+                if (bossEncounterActive) {
+                    if (bossIntroMusic && !bossIntroMusic.ended) {
+                        bossIntroMusic.volume = 0.7 * musicVolume;
+                        bossIntroMusic.play().catch(() => {});
+                    } else if (bossBattleMusic && currentBoss && currentBoss.alive) {
+                        bossBattleMusic.volume = 0.6 * musicVolume;
+                        bossBattleMusic.play().catch(() => {});
+                    }
                 }
             }
         };
@@ -5310,8 +5424,17 @@
             musicVolume = value / 100;
             document.getElementById('volumeDisplay').textContent = value + '%';
             
-            if (currentTrack && !musicMuted) {
-                currentTrack.volume = musicVolume;
+            if (!musicMuted) {
+                if (currentTrack) {
+                    currentTrack.volume = musicVolume;
+                }
+                // Also update boss music volume
+                if (bossIntroMusic) {
+                    bossIntroMusic.volume = 0.7 * musicVolume;
+                }
+                if (bossBattleMusic) {
+                    bossBattleMusic.volume = 0.6 * musicVolume;
+                }
             }
         };
         
@@ -5531,9 +5654,19 @@
                 if (this.isPlayer) {
                     // Only apply controls if this is the main player snake
                     if (this !== playerSnake) {
-                        console.error('[CONTROLS] WARNING: Non-main player snake detected! Skipping controls for snake:', this.name);
-                        this.alive = false; // Kill duplicate player snake
-                        return;
+                        // Count how many player snakes exist
+                        const playerSnakeCount = snakes.filter(s => s.isPlayer && s.alive).length;
+                        
+                        // Only kill if there's actually more than one player snake
+                        if (playerSnakeCount > 1) {
+                            console.error('[CONTROLS] WARNING: Multiple player snakes detected! Killing duplicate:', this.name);
+                            this.alive = false; // Kill duplicate player snake
+                            return;
+                        } else {
+                            // If there's only one player snake, update the reference
+                            console.warn('[CONTROLS] Player snake reference mismatch, updating reference');
+                            playerSnake = this;
+                        }
                     }
                     
                     // Handle turning
@@ -6250,9 +6383,14 @@
             }
             
             explode(killer) {
-                // Play explosion sound - louder if player is involved
-                const isPlayerInvolved = this.isPlayer || (killer && killer.isPlayer);
-                playExplosionSound(isPlayerInvolved);
+                // Check if killer is a boss - bosses don't make explosion sounds
+                const killerIsBoss = killer && killer.isBoss;
+                
+                // Play explosion sound - louder if player is involved, skip if killer is boss
+                if (!killerIsBoss) {
+                    const isPlayerInvolved = this.isPlayer || (killer && killer.isPlayer);
+                    playExplosionSound(isPlayerInvolved);
+                }
                 
                 // Add screen flash effect for player death (helps identify what killed you)
                 if (this.isPlayer && canvas) {
@@ -8404,6 +8542,27 @@
                     const healthPercent = (this.health / this.maxHealth) * 100;
                     bossHealthBar.style.width = healthPercent + '%';
                 }
+                
+                // Update boss name with prefix based on health
+                if (bossNameDisplay) {
+                    let prefix = '';
+                    const healthRatio = this.health / this.maxHealth;
+                    
+                    if (healthRatio <= 0.2) {
+                        prefix = 'Desperate ';
+                    } else if (healthRatio <= 0.4) {
+                        prefix = 'Furious ';
+                    } else if (healthRatio <= 0.6) {
+                        prefix = 'Enraged ';
+                    } else if (healthRatio < 1.0) {
+                        prefix = 'Angry ';
+                    }
+                    
+                    // Get base name without any existing prefix
+                    const baseName = this.name.replace(/^(Undead |Angry |Enraged |Furious |Desperate )/g, '');
+                    const displayName = this.name.includes('Undead') ? `Undead ${prefix}${baseName}` : `${prefix}${baseName}`;
+                    bossNameDisplay.textContent = `💀 ${displayName}`;
+                }
             }
             
             defeatBoss() {
@@ -8735,14 +8894,14 @@
             // Play boss intro music
             if (!musicMuted) {
                 bossIntroMusic = new Audio('sounds/low-pitched-melody.mp3');
-                bossIntroMusic.volume = 0.7;
+                bossIntroMusic.volume = 0.7 * musicVolume;
                 bossIntroMusic.play().catch(e => console.log('Boss intro music error:', e));
                 
                 // Start battle music when intro ends
                 bossIntroMusic.addEventListener('ended', () => {
                     if (!musicMuted && currentBoss && currentBoss.alive) {
                         bossBattleMusic = new Audio('music/dramatic-pounding-percussion.mp3');
-                        bossBattleMusic.volume = 0.6;
+                        bossBattleMusic.volume = 0.6 * musicVolume;
                         bossBattleMusic.loop = true;
                         bossBattleMusic.play().catch(e => console.log('Boss battle music error:', e));
                     }
@@ -8801,7 +8960,7 @@
             bossHealthBarContainer.style.top = '50px';
             bossHealthBarContainer.style.left = '50%';
             bossHealthBarContainer.style.transform = 'translateX(-50%)';
-            bossHealthBarContainer.style.width = '400px';
+            bossHealthBarContainer.style.width = '500px'; // Increased width to prevent name overflow
             bossHealthBarContainer.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
             bossHealthBarContainer.style.border = '3px solid #fff';
             bossHealthBarContainer.style.borderRadius = '10px';
@@ -8853,9 +9012,12 @@
                             const dx = playerSnake.x - projectile.x;
                             const dy = playerSnake.y - projectile.y;
                             if (dx * dx + dy * dy < projectile.size * projectile.size) {
-                                // Boss elemental attacks are insta-death
-                                playerSnake.die(true);
-                                showMessage('Incinerated by Pyraxis!', 'red');
+                                // Check invincibility before dealing damage
+                                if (playerSnake.invincibilityTimer <= 0) {
+                                    // Boss elemental attacks are insta-death
+                                    playerSnake.die(true);
+                                    showMessage('Incinerated by Pyraxis!', 'red');
+                                }
                                 
                                 // Sometimes leave fire element
                                 if (Math.random() < 0.3) {
@@ -8878,9 +9040,12 @@
                             const dist = Math.sqrt(dx * dx + dy * dy);
                             
                             if (dist < projectile.radius && dist > projectile.radius - 20 && !projectile.hasHitPlayer) {
-                                // Boss elemental attacks are insta-death
-                                playerSnake.die(true);
-                                showMessage('Drowned by Abyssos!', 'red');
+                                // Check invincibility before dealing damage
+                                if (playerSnake.invincibilityTimer <= 0) {
+                                    // Boss elemental attacks are insta-death
+                                    playerSnake.die(true);
+                                    showMessage('Drowned by Abyssos!', 'red');
+                                }
                                 projectile.hasHitPlayer = true; // Prevent multiple hits from same wave
                             }
                         }
@@ -8909,9 +9074,12 @@
                                     const dx = playerSnake.x - projectile.x;
                                     const dy = playerSnake.y - projectile.targetY;
                                     if (dx * dx + dy * dy < projectile.size * projectile.size) {
-                                        // Boss elemental attacks are insta-death
-                                        playerSnake.die(true);
-                                        showMessage('Crushed by Osseus!', 'red');
+                                        // Check invincibility before dealing damage
+                                        if (playerSnake.invincibilityTimer <= 0) {
+                                            // Boss elemental attacks are insta-death
+                                            playerSnake.die(true);
+                                            showMessage('Crushed by Osseus!', 'red');
+                                        }
                                         bossScreenShakeTimer = 30;
                                         bossScreenShakeIntensity = 10;
                                     }
@@ -9059,18 +9227,24 @@
             
             // Create pulsing effect
             const pulseScale = 1 + Math.sin(Date.now() * 0.003) * 0.2;
-            const indicatorSize = 30 * pulseScale;
+            const indicatorSize = 50 * pulseScale; // Increased from 30 to 50
             
             // Draw background circle with boss color
             ctx.fillStyle = currentBoss.color;
-            ctx.globalAlpha = 0.3;
+            ctx.globalAlpha = 0.5; // Increased from 0.3
             ctx.beginPath();
             ctx.arc(indicatorX, indicatorY, indicatorSize, 0, Math.PI * 2);
             ctx.fill();
             
             // Draw border circle
             ctx.strokeStyle = currentBoss.color;
-            ctx.lineWidth = 3;
+            ctx.lineWidth = 5; // Increased from 3
+            ctx.globalAlpha = 1.0; // Increased from 0.8
+            ctx.stroke();
+            
+            // Add white outline for better visibility
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
             ctx.globalAlpha = 0.8;
             ctx.stroke();
             
@@ -9087,13 +9261,13 @@
             
             // Arrow pointing outward
             ctx.strokeStyle = '#fff';
-            ctx.lineWidth = 2;
-            ctx.globalAlpha = 0.8;
+            ctx.lineWidth = 4; // Increased from 2
+            ctx.globalAlpha = 1.0; // Increased from 0.8
             ctx.beginPath();
-            ctx.moveTo(indicatorSize + 5, 0);
-            ctx.lineTo(indicatorSize + 15, -5);
-            ctx.moveTo(indicatorSize + 5, 0);
-            ctx.lineTo(indicatorSize + 15, 5);
+            ctx.moveTo(indicatorSize + 10, 0);
+            ctx.lineTo(indicatorSize + 25, -10); // Increased arrow size
+            ctx.moveTo(indicatorSize + 10, 0);
+            ctx.lineTo(indicatorSize + 25, 10); // Increased arrow size
             ctx.stroke();
             
             ctx.restore();
@@ -10279,14 +10453,17 @@
                 if (result !== null && result !== undefined) {
                     leaderboardSubmitted = true;
                     const rank = result.daily_rank || result.rank || result || 'Submitted';
-                    document.getElementById('submissionStatus').innerHTML = 
+                    const statusElement = document.getElementById('submissionStatus');
+                    statusElement.innerHTML = 
                         `<div style="background: linear-gradient(135deg, rgba(78, 205, 196, 0.3) 0%, rgba(78, 205, 196, 0.1) 100%);
                                     border: 2px solid #4ecdc4;
                                     border-radius: 8px;
                                     padding: 15px;
                                     margin: 10px 0;
                                     text-align: center;
-                                    animation: successPulse 0.5s ease-out;">
+                                    animation: successPulse 0.5s ease-out;
+                                    position: relative;
+                                    z-index: 1000;">
                             <div style="font-size: 24px; margin-bottom: 5px;">✅</div>
                             <span style="color: #4ecdc4; font-size: 16px; font-weight: bold;">
                                 Score Successfully Submitted!
@@ -10295,6 +10472,26 @@
                                 ${typeof rank === 'number' ? `🏆 Daily Rank: #${rank}` : ''}
                             </div>
                         </div>`;
+                    
+                    // Force immediate DOM update and ensure visibility
+                    statusElement.style.display = 'block';
+                    statusElement.style.visibility = 'visible';
+                    statusElement.style.opacity = '1';
+                    statusElement.style.position = 'relative';
+                    statusElement.style.zIndex = '1000';
+                    
+                    // Force browser to recalculate styles
+                    statusElement.offsetHeight;
+                    
+                    // Ensure parent container is visible
+                    const submissionContainer = document.getElementById('leaderboardSubmission');
+                    if (submissionContainer) {
+                        submissionContainer.style.display = 'block';
+                        submissionContainer.style.opacity = '1';
+                        submissionContainer.style.visibility = 'visible';
+                        submissionContainer.style.position = 'relative';
+                        submissionContainer.style.zIndex = '1000';
+                    }
                     
                     // Add success animation CSS if not already present
                     if (!document.getElementById('successAnimationStyle')) {
@@ -10398,6 +10595,15 @@
             const flag = countryFlags[countryCode] || '🌍';
             return `<span style="font-size: 18px; display: inline-block;">${flag}</span> <span style="font-size: 11px; color: #888;">${countryCode || 'XX'}</span>`;
         }
+        
+        // How to Play Modal Functions
+        window.showHowToPlay = function() {
+            document.getElementById('howToPlayModal').style.display = 'block';
+        };
+        
+        window.closeHowToPlay = function() {
+            document.getElementById('howToPlayModal').style.display = 'none';
+        };
         
         // Leaderboard UI Functions
         let currentLeaderboardPeriod = 'daily';
@@ -12172,31 +12378,53 @@
                 img.className = 'skin-image';
                 // Boss skins are in a different directory
                 if (skinMetadata[skinId].isBoss) {
-                    img.src = `assets/boss-skins/${skinId}.png`;
+                    // Hide boss skin images until unlocked
+                    if (skinData.unlocked) {
+                        img.src = `assets/boss-skins/${skinId}.png`;
+                    } else {
+                        // Show a lock icon or placeholder for locked boss skins
+                        img.style.display = 'none';
+                        const placeholder = document.createElement('div');
+                        placeholder.style.width = '100%';
+                        placeholder.style.height = '100%';
+                        placeholder.style.display = 'flex';
+                        placeholder.style.alignItems = 'center';
+                        placeholder.style.justifyContent = 'center';
+                        placeholder.style.fontSize = '48px';
+                        placeholder.style.backgroundColor = 'rgba(0,0,0,0.3)';
+                        placeholder.textContent = '🔒';
+                        div.appendChild(placeholder);
+                    }
                 } else {
                     img.src = `skins/${skinId}.png`;
                 }
                 img.alt = skinData.name;
-                img.onerror = function() {
-                    const isBoss = skinMetadata[skinId].isBoss;
-                    const originalPath = isBoss ? `assets/boss-skins/${skinId}.png` : `skins/${skinId}.png`;
-                    console.error(`Failed to load skin image: ${originalPath}`);
-                    // Try with .webp extension as fallback
-                    if (isBoss) {
-                        this.src = `assets/boss-skins/${skinId}.webp`;
-                    } else {
-                        this.src = `skins/${skinId}.webp`;
-                    }
-                    this.onerror = function() {
-                        console.error(`Failed to load skin image with both .png and .webp: ${skinId}`);
+                // Only set onerror for visible images
+                if (!skinMetadata[skinId].isBoss || skinData.unlocked) {
+                    img.onerror = function() {
+                        const isBoss = skinMetadata[skinId].isBoss;
+                        const originalPath = isBoss ? `assets/boss-skins/${skinId}.png` : `skins/${skinId}.png`;
+                        console.error(`Failed to load skin image: ${originalPath}`);
+                        // Try with .webp extension as fallback
+                        if (isBoss) {
+                            this.src = `assets/boss-skins/${skinId}.webp`;
+                        } else {
+                            this.src = `skins/${skinId}.webp`;
+                        }
+                        this.onerror = function() {
+                            console.error(`Failed to load skin image with both .png and .webp: ${skinId}`);
+                        };
                     };
-                };
+                }
                 
                 const name = document.createElement('div');
                 name.className = 'skin-name';
                 name.textContent = skinData.name;
                 
-                div.appendChild(img);
+                // Only append image if it's not a locked boss skin
+                if (!skinMetadata[skinId].isBoss || skinData.unlocked) {
+                    div.appendChild(img);
+                }
                 div.appendChild(name);
                 
                 // Add unlock icon if applicable
