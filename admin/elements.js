@@ -1,12 +1,9 @@
 // Elements Browser Admin Panel
-// Prevent double loading
 if (window.elementsJsLoaded) {
-    console.log('elements.js already loaded, skipping...');
     throw new Error('elements.js already loaded');
 }
 window.elementsJsLoaded = true;
 
-// These will be shared with admin.js
 let elementsList = [];
 let filteredElements = [];
 let currentPage = 1;
@@ -16,23 +13,15 @@ let tierFilter = '';
 
 const ELEMENTS_PER_PAGE = 100;
 
-// Initialize
 document.addEventListener('DOMContentLoaded', async function() {
-    // Check if this is a duplicate initialization
     if (window.elementsGridInitialized) {
-        console.log('elements.js: Elements grid already initialized');
         return;
     }
     
-    // Wait for admin.js to load first if it exists
     if (document.querySelector('script[src="admin.js"]')) {
-        // Give admin.js time to load data
         await new Promise(resolve => setTimeout(resolve, 100));
         
-        // Check if admin.js has loaded combinations
         if (window.combinations && Object.keys(window.combinations).length > 0) {
-            console.log('elements.js: Using data loaded by admin.js');
-            // Just set up the UI without reloading data
             elementsList = Object.values(elements);
             elementsList.sort((a, b) => a.name.localeCompare(b.name));
             document.getElementById('total-elements').textContent = elementsList.length;
@@ -44,7 +33,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     }
     
-    console.log('Initializing elements browser...');
     window.elementsGridInitialized = true;
     
     await loadData();
@@ -53,28 +41,20 @@ document.addEventListener('DOMContentLoaded', async function() {
     filterAndDisplay();
 });
 
-// Load data
 async function loadData() {
     try {
-        // Clear elementsList to prevent duplicates
         elementsList = [];
         
-        // Check if elements are already loaded from admin.js
         if (typeof elements !== 'undefined' && Object.keys(elements).length > 0) {
-            // Elements already loaded, just populate elementsList
             elementsList = Object.values(elements);
-            console.log(`Using ${elementsList.length} elements from admin.js`);
         } else {
-            // Load elements if not already loaded
             const elementsResponse = await fetch('/elements/data/elements.json');
             const elementsData = await elementsResponse.json();
             
-            // Initialize elements object if it doesn't exist
             if (typeof elements === 'undefined') {
                 window.elements = {};
             }
             
-            // Convert array format to object and list
             elementsData.forEach(elem => {
                 const element = {
                     id: elem.i,
@@ -87,12 +67,9 @@ async function loadData() {
             });
         }
         
-        // Sort elements by name
         elementsList.sort((a, b) => a.name.localeCompare(b.name));
         
-        console.log(`Loaded ${elementsList.length} elements`);
         
-        // Load emojis if not already loaded
         if (typeof emojis === 'undefined' || Object.keys(emojis).length === 0) {
             try {
                 if (typeof emojis === 'undefined') {
@@ -100,13 +77,11 @@ async function loadData() {
                 }
                 const emojiResponse = await fetch('/elements/data/emojis.json');
                 emojis = await emojiResponse.json();
-                console.log(`Loaded ${Object.keys(emojis).length} emojis`);
             } catch (err) {
                 console.warn('Failed to load emojis:', err);
             }
         }
         
-        // Update stats
         document.getElementById('total-elements').textContent = elementsList.length;
         
     } catch (error) {
@@ -115,23 +90,22 @@ async function loadData() {
     }
 }
 
-// Setup event listeners
 function setupEventListeners() {
-    // Only set up elements.js specific search if we're not on a page with admin.js search
     const searchInput = document.getElementById('search');
     if (searchInput && !searchInput.hasAttribute('data-admin-search')) {
         let searchTimeout;
         searchInput.addEventListener('input', function(e) {
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(() => {
-                searchQuery = e.target.value.trim().toLowerCase();
+                const value = e.target.value.trim();
+                // Don't lowercase if it's an emoji
+                searchQuery = /\p{Emoji}/u.test(value) ? value : value.toLowerCase();
                 currentPage = 1;
                 filterAndDisplay();
             }, 300);
         });
     }
     
-    // Tier filter
     const tierFilter = document.getElementById('tier-filter');
     if (tierFilter) {
         tierFilter.addEventListener('change', function(e) {
@@ -142,11 +116,9 @@ function setupEventListeners() {
     }
 }
 
-// Initialize alphabet navigation
 function initAlphabetNav() {
     const nav = document.getElementById('alphabet-nav');
     
-    // Add A-Z buttons
     for (let i = 65; i <= 90; i++) {
         const letter = String.fromCharCode(i);
         const btn = document.createElement('button');
@@ -157,7 +129,6 @@ function initAlphabetNav() {
         nav.appendChild(btn);
     }
     
-    // Add number button for elements starting with numbers
     const numBtn = document.createElement('button');
     numBtn.className = 'letter-btn';
     numBtn.dataset.letter = '0-9';
@@ -166,27 +137,21 @@ function initAlphabetNav() {
     nav.appendChild(numBtn);
 }
 
-// Select letter filter
 function selectLetter(letter) {
     currentLetter = letter;
     currentPage = 1;
     
-    // Update active button
     document.querySelectorAll('.letter-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.letter === letter);
     });
     
-    // Update current filter display
     document.getElementById('current-letter').textContent = letter === 'all' ? 'All' : letter;
     
     filterAndDisplay();
 }
 
-// Filter and display elements
 function filterAndDisplay() {
-    // Apply filters
     filteredElements = elementsList.filter(elem => {
-        // Letter filter
         if (currentLetter !== 'all') {
             const firstChar = elem.name.charAt(0).toUpperCase();
             if (currentLetter === '0-9') {
@@ -196,14 +161,19 @@ function filterAndDisplay() {
             }
         }
         
-        // Search filter
         if (searchQuery) {
-            const matchesName = elem.name.toLowerCase().includes(searchQuery);
-            const matchesId = elem.id.toString().includes(searchQuery);
-            if (!matchesName && !matchesId) return false;
+            // Check if search query is an emoji
+            const isEmoji = /\p{Emoji}/u.test(searchQuery);
+            if (isEmoji) {
+                const elemEmoji = emojis[elem.id] || emojis[elem.emojiIndex];
+                if (elemEmoji !== searchQuery) return false;
+            } else {
+                const matchesName = elem.name.toLowerCase().includes(searchQuery);
+                const matchesId = elem.id.toString().includes(searchQuery);
+                if (!matchesName && !matchesId) return false;
+            }
         }
         
-        // Tier filter
         if (tierFilter !== '' && elem.tier !== parseInt(tierFilter)) {
             return false;
         }
@@ -211,28 +181,22 @@ function filterAndDisplay() {
         return true;
     });
     
-    // Update filtered count
     document.getElementById('filtered-elements').textContent = filteredElements.length;
     
-    // Display current page
     displayPage();
 }
 
-// Display current page of elements
 function displayPage() {
     const grid = document.getElementById('elements-grid');
     const totalPages = Math.ceil(filteredElements.length / ELEMENTS_PER_PAGE);
     
-    // Ensure current page is valid
     if (currentPage > totalPages) currentPage = totalPages;
     if (currentPage < 1) currentPage = 1;
     
-    // Calculate slice indices
     const startIndex = (currentPage - 1) * ELEMENTS_PER_PAGE;
     const endIndex = startIndex + ELEMENTS_PER_PAGE;
     const pageElements = filteredElements.slice(startIndex, endIndex);
     
-    // Clear grid
     grid.innerHTML = '';
     
     if (pageElements.length === 0) {
@@ -241,17 +205,14 @@ function displayPage() {
         return;
     }
     
-    // Display elements
     pageElements.forEach(elem => {
         const emoji = emojis[elem.id] || emojis[elem.emojiIndex] || '❓';
         
         const card = document.createElement('div');
         card.className = 'element-card';
         card.onclick = () => {
-            // Hide the grid and show search results
             document.getElementById('elements-grid').style.display = 'none';
             document.getElementById('pagination').style.display = 'none';
-            // Show element details in results div
             if (typeof showElement === 'function') {
                 showElement(elem.id);
             }
@@ -268,11 +229,9 @@ function displayPage() {
         grid.appendChild(card);
     });
     
-    // Update pagination
     updatePagination(totalPages);
 }
 
-// Update pagination controls
 function updatePagination(totalPages) {
     const pagination = document.getElementById('pagination');
     
@@ -297,7 +256,6 @@ function updatePagination(totalPages) {
     `;
 }
 
-// Go to specific page
 window.goToPage = function(page) {
     const totalPages = Math.ceil(filteredElements.length / ELEMENTS_PER_PAGE);
     
@@ -307,11 +265,9 @@ window.goToPage = function(page) {
     currentPage = page;
     displayPage();
     
-    // Scroll to top
     window.scrollTo(0, 0);
 };
 
-// Show message
 function showMessage(text, type) {
     const msg = document.getElementById('message');
     msg.textContent = text;
@@ -321,4 +277,80 @@ function showMessage(text, type) {
         msg.classList.remove('active');
     }, 3000);
 }
+
+// Emoji filter functionality
+let selectedEmoji = null;
+
+function showEmojiFilter() {
+    const modal = document.getElementById('emoji-filter-modal');
+    const emojiGrid = document.getElementById('emoji-grid');
+    
+    // Count emoji usage
+    const emojiUsage = {};
+    elementsList.forEach(elem => {
+        const emoji = emojis[elem.id] || emojis[elem.emojiIndex];
+        if (emoji) {
+            emojiUsage[emoji] = (emojiUsage[emoji] || 0) + 1;
+        }
+    });
+    
+    // Sort emojis by usage count
+    const sortedEmojis = Object.entries(emojiUsage)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 50); // Show top 50 most used emojis
+    
+    // Create emoji grid
+    emojiGrid.innerHTML = sortedEmojis.map(([emoji, count]) => `
+        <div class="emoji-item ${selectedEmoji === emoji ? 'selected' : ''}" onclick="selectEmoji('${emoji}')">
+            <div class="emoji-char">${emoji}</div>
+            <div class="emoji-count">${count}</div>
+        </div>
+    `).join('');
+    
+    modal.classList.add('active');
+}
+
+function closeEmojiFilter() {
+    const modal = document.getElementById('emoji-filter-modal');
+    modal.classList.remove('active');
+}
+
+function selectEmoji(emoji) {
+    if (selectedEmoji === emoji) {
+        selectedEmoji = null;
+    } else {
+        selectedEmoji = emoji;
+    }
+    
+    // Update search input
+    const searchInput = document.getElementById('search');
+    searchInput.value = selectedEmoji || '';
+    
+    // Trigger search
+    searchQuery = selectedEmoji || '';
+    currentPage = 1;
+    filterAndDisplay();
+    
+    // Update visual selection
+    document.querySelectorAll('.emoji-item').forEach(item => {
+        const itemEmoji = item.querySelector('.emoji-char').textContent;
+        item.classList.toggle('selected', itemEmoji === selectedEmoji);
+    });
+}
+
+function clearEmojiFilter() {
+    selectedEmoji = null;
+    const searchInput = document.getElementById('search');
+    searchInput.value = '';
+    searchQuery = '';
+    currentPage = 1;
+    filterAndDisplay();
+    closeEmojiFilter();
+}
+
+// Make functions global
+window.showEmojiFilter = showEmojiFilter;
+window.closeEmojiFilter = closeEmojiFilter;
+window.selectEmoji = selectEmoji;
+window.clearEmojiFilter = clearEmojiFilter;
 

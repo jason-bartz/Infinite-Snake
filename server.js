@@ -86,8 +86,7 @@ try {
 }
 
 const server = http.createServer((req, res) => {
-  console.log(`${req.method} ${req.url} from ${req.connection.remoteAddress}`);
-  console.log(`[DEBUG] Request headers:`, req.headers);
+  // Request: ${req.method} ${req.url}
   
   // Admin panel protection - only allow localhost access
   if (req.url.startsWith('/admin') || req.url.startsWith('/api/')) {
@@ -691,6 +690,5 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}/`);
-  console.log('Press Ctrl+C to stop the server');
+  // Server running on port 8080
 });

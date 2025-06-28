@@ -190,7 +190,14 @@
         .element-emoji {
             font-size: 48px;
             margin-bottom: 10px;
+            transition: transform 0.3s ease;
+            display: inline-block;
         }
+        
+        .element-card:hover .element-emoji {
+            transform: scale(1.2) rotate(5deg);
+        }
+        
         
         .element-name {
             font-weight: 600;
@@ -312,6 +319,24 @@
             background: #229954;
         }
         
+        .emoji-filter-btn {
+            background: #9b59b6;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .emoji-filter-btn:hover {
+            background: #8e44ad;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(155, 89, 182, 0.2);
+        }
+        
         /* Search results display */
         .results {
             display: none;
@@ -402,6 +427,135 @@
         
         button.remove-btn:hover {
             background: #c0392b;
+        }
+        
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s;
+        }
+        
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            animation: slideIn 0.3s;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .modal-header h3 {
+            margin: 0;
+            color: #333;
+        }
+        
+        .close {
+            font-size: 28px;
+            font-weight: bold;
+            color: #aaa;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        
+        .close:hover {
+            color: #000;
+        }
+        
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+        
+        .modal-footer {
+            padding: 20px;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        .emoji-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+            gap: 10px;
+        }
+        
+        .emoji-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .emoji-item:hover {
+            background: #f0f0f0;
+            border-color: #4ecdc4;
+            transform: scale(1.1);
+        }
+        
+        .emoji-item.selected {
+            background: #4ecdc4;
+            border-color: #4ecdc4;
+            color: white;
+        }
+        
+        .emoji-char {
+            font-size: 32px;
+            margin-bottom: 5px;
+        }
+        
+        .emoji-count {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .emoji-item.selected .emoji-count {
+            color: white;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
         
         .edit-btn {
@@ -609,6 +763,7 @@
                 <a href="/admin/" class="nav-tab active">Elements</a>
                 <a href="/admin/cleanup.html" class="nav-tab">Cleanup</a>
                 <a href="/admin/combinations.html" class="nav-tab">Combinations Report</a>
+                <a href="/admin/emoji-stats.html" class="nav-tab">Emoji Stats</a>
             </div>
         </div>
         
@@ -653,6 +808,7 @@
                     <option value="10">Tier 10</option>
                 </select>
             </div>
+            <button class="emoji-filter-btn" onclick="showEmojiFilter()">🔍 Filter by Emoji</button>
             <button class="create-btn" onclick="showCreateForm()">➕ Create New Element</button>
         </div>
         
@@ -666,6 +822,25 @@
         
         <div class="pagination" id="pagination">
             <!-- Pagination controls will be inserted here -->
+        </div>
+        
+        <!-- Emoji Filter Modal -->
+        <div id="emoji-filter-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Filter by Emoji</h3>
+                    <span class="close" onclick="closeEmojiFilter()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div id="emoji-grid" class="emoji-grid">
+                        <!-- Emojis will be populated here -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="secondary" onclick="clearEmojiFilter()">Clear Filter</button>
+                    <button class="secondary" onclick="closeEmojiFilter()">Close</button>
+                </div>
+            </div>
         </div>
     </div>
     

@@ -15,7 +15,7 @@ const COMBINATIONS_PER_PAGE = 200;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', async function() {
-    console.log('Initializing combinations report...');
+    // Initializing combinations report
     
     await loadData();
     setupEventListeners();
@@ -39,7 +39,7 @@ async function loadData() {
             };
         });
         
-        console.log(`Loaded ${Object.keys(elements).length} elements`);
+        // Elements loaded
         
         // Load combinations
         const comboResponse = await fetch('/elements/data/combinations.json');
@@ -63,7 +63,7 @@ async function loadData() {
             }
         });
         
-        console.log(`Loaded ${combinationsList.length} unique combinations before filtering`);
+        // Unique combinations loaded
         
         // Double-check for any duplicates
         const checkSet = new Set();
@@ -72,12 +72,12 @@ async function loadData() {
             const reverseCombo = `${item.elem2}+${item.elem1}`;
             if (checkSet.has(reverseCombo)) {
                 duplicateCount++;
-                console.warn(`Found duplicate: ${item.combo} (reverse of ${reverseCombo})`);
+                // Found duplicate combination
             }
             checkSet.add(item.combo);
         });
         if (duplicateCount > 0) {
-            console.error(`WARNING: Found ${duplicateCount} duplicate combinations after deduplication!`);
+            // Found duplicate combinations after deduplication
         }
         
         // Load deleted combinations list
@@ -85,7 +85,7 @@ async function loadData() {
             const deletedCombosResponse = await fetch('/elements/deleted-combinations.json');
             if (deletedCombosResponse.ok) {
                 deletedCombinations = await deletedCombosResponse.json();
-                console.log(`Loaded ${deletedCombinations.length} deleted combinations`);
+                // Deleted combinations loaded
                 
                 // Create a set for faster lookup
                 const deletedSet = new Set();
@@ -104,19 +104,19 @@ async function loadData() {
                     return !isDeleted;
                 });
                 
-                console.log(`After filtering deleted: ${combinationsList.length} combinations remain`);
+                // Filtered deleted combinations
             }
         } catch (err) {
-            console.log('No deleted combinations file found');
+            // No deleted combinations file found
         }
         
         // Load emojis
         try {
             const emojiResponse = await fetch('/elements/data/emojis.json');
             emojis = await emojiResponse.json();
-            console.log(`Loaded ${Object.keys(emojis).length} emojis`);
+            // Emojis loaded
         } catch (err) {
-            console.warn('Failed to load emojis:', err);
+            // Failed to load emojis
         }
         
         // Update stats

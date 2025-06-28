@@ -4613,6 +4613,8 @@
         let bossDamageFlashTimer = 0;
         let bossStunTimer = 0;
         let bossProjectiles = [];
+        let bossDamageCooldown = 0;
+        let shockwaves = [];
         let bossScreenShakeTimer = 0;
         let bossScreenShakeIntensity = 0;
         let elementVacuumActive = false;
@@ -4834,7 +4836,6 @@
             // Resume pending music on first interaction
             if (window.pendingMusicTrack && !musicMuted) {
                 window.pendingMusicTrack.play().then(() => {
-                    console.log('Music resumed after user interaction');
                 }).catch(err => {
                     console.error('Failed to resume music:', err);
                 });
@@ -4948,7 +4949,6 @@
                 const response = await fetch('snake-names.json');
                 const data = await response.json();
                 snakeNameData = data;
-                console.log('Loaded snake names data');
             } catch (error) {
                 console.error('Failed to load snake names:', error);
                 // Fallback data
@@ -4980,11 +4980,6 @@
                     });
                 }
                 
-                console.log(`Loaded ${window.elementLoader.elements.size} elements and ${Object.keys(window.elementLoader.combinations).length} combinations`);
-                
-                // Debug: Show some example combinations
-                const sampleCombos = Object.entries(window.elementLoader.combinations).slice(0, 5);
-                console.log('Sample combinations:', sampleCombos);
                 
                 // Create minimal elementDatabase for compatibility
                 elementDatabase = {
@@ -5038,7 +5033,7 @@
                 // Try to play
                 const playPromise = sound.play();
                 if (playPromise !== undefined) {
-                    playPromise.catch(e => console.log('Eat sound error:', e.message));
+                    playPromise.catch(e => {});
                 }
             }
         }
@@ -5066,7 +5061,7 @@
                 // Try to play
                 const playPromise = sound.play();
                 if (playPromise !== undefined) {
-                    playPromise.catch(e => console.log('Explosion sound error:', e.message));
+                    playPromise.catch(e => {});
                 }
             }
         }
@@ -5111,7 +5106,7 @@
                 sound.volume = isPlayerInvolved ? 0.6 : 0.15; // 60% for player, 15% for AI
                 const playPromise = sound.play();
                 if (playPromise !== undefined) {
-                    playPromise.catch(e => console.log('Void Orb sound error:', e.message));
+                    playPromise.catch(e => {});
                 }
             }
         }
@@ -5125,7 +5120,7 @@
                 sound.volume = isPlayerInvolved ? 0.7 : 0.2; // 70% for player, 20% for AI
                 const playPromise = sound.play();
                 if (playPromise !== undefined) {
-                    playPromise.catch(e => console.log('Alchemy Vision sound error:', e.message));
+                    playPromise.catch(e => {});
                 }
             }
         }
@@ -5139,7 +5134,7 @@
                 sound.volume = isPlayerInvolved ? 0.6 : 0.15; // 60% for player, 15% for AI
                 const playPromise = sound.play();
                 if (playPromise !== undefined) {
-                    playPromise.catch(e => console.log('Catalyst Gem sound error:', e.message));
+                    playPromise.catch(e => {});
                 }
             }
         }
@@ -5154,7 +5149,7 @@
                 sound.volume = 0.375;
                 const playPromise = sound.play();
                 if (playPromise !== undefined) {
-                    playPromise.catch(e => console.log('Boost sound error:', e.message));
+                    playPromise.catch(e => {});
                 }
             }
         }
@@ -5179,7 +5174,7 @@
                 sound.volume = 0.7; // Always play at good volume for player combinations
                 const playPromise = sound.play();
                 if (playPromise !== undefined) {
-                    playPromise.catch(e => console.log('Combination sound error:', e.message));
+                    playPromise.catch(e => {});
                 }
             }
         }
@@ -5209,7 +5204,6 @@
         async function checkAvailableTracks() {
             // For now, assume all tracks are available
             availableTracks = [...musicTracks];
-            console.log('Available tracks loaded:', availableTracks);
             return true;
         }
         
@@ -5218,14 +5212,12 @@
         function playRandomTrack() {
             // Prevent multiple simultaneous calls
             if (isPlayingNext) {
-                console.log('Already playing next track, ignoring call');
                 return;
             }
             isPlayingNext = true;
             
             // Refill available tracks if empty
             if (availableTracks.length === 0) {
-                console.log('Refilling available tracks...');
                 availableTracks = [...musicTracks];
             }
             
@@ -5247,7 +5239,6 @@
             
             // Remove the selected track from available tracks
             availableTracks.splice(randomIndex, 1);
-            console.log(`Playing: ${trackName}, remaining tracks: ${availableTracks.length}`);
             
             // Create audio element
             currentTrack = new Audio(`music/${trackName}`);
@@ -5255,13 +5246,11 @@
             
             // Create event handlers that we can reference later for removal
             currentTrack.endedHandler = function() {
-                console.log(`Track "${trackName}" ended, stopRequested: ${this.stopRequested}, currentTime: ${this.currentTime}, duration: ${this.duration}`);
                 // Reset the playing flag first
                 isPlayingNext = false;
                 
                 // Only play next if the track wasn't stopped intentionally and actually ended
                 if (!this.stopRequested && this.currentTime > 0 && this.duration > 0 && this.currentTime >= this.duration - 0.5) {
-                    console.log('Track ended naturally, playing next track...');
                     setTimeout(() => {
                         try {
                             playRandomTrack();
@@ -5272,7 +5261,6 @@
                         }
                     }, 1000); // Wait 1 second before next track
                 } else {
-                    console.log('Track was stopped or ended prematurely, not playing next track');
                 }
             };
             
@@ -5294,10 +5282,8 @@
             const playPromise = currentTrack.play();
             if (playPromise !== undefined) {
                 playPromise.then(() => {
-                    console.log('Music started playing successfully');
                     isPlayingNext = false; // Reset flag on success
                 }).catch(e => {
-                    console.log('Music autoplay blocked:', e.message);
                     // Store track to retry on user interaction
                     window.pendingMusicTrack = currentTrack;
                     isPlayingNext = false; // Reset flag on error
@@ -5383,7 +5369,6 @@
             // Update UI
             updateDiscoveryLog();
             
-            console.log('Discoveries have been reset! Only base elements remain.');
             return 'Discoveries reset successfully';
         };
         
@@ -5479,10 +5464,10 @@
                 this.baseSpeed = SNAKE_SPEED; // Store base speed for boost calculations
                 this.name = isPlayer ? 'You' : generateSnakeName();
                 this.invincibilityTimer = 0;
+                this.size = 1; // Default size for normal snakes
                 
                 // Debug logging for player snake creation
                 if (isPlayer) {
-                    console.log('[SNAKE CONSTRUCTOR] Creating PLAYER snake at', x, y);
                     console.trace(); // Show stack trace to see where it's being called from
                 }
                 this.discoveredElements = new Set(); // Each snake tracks its own discoveries - starts empty
@@ -5522,12 +5507,14 @@
                     // Mark this skin as used
                     usedAISkins.add(this.skin);
                     
-                    // Assign random personality to AI snakes
-                    const personalities = Object.keys(AI_PERSONALITIES);
-                    const personalityKey = personalities[Math.floor(Math.random() * personalities.length)];
-                    this.personality = AI_PERSONALITIES[personalityKey];
-                    this.name = this.personality.name + ' ' + this.name;
-                    this.personalityColor = PERSONALITY_COLORS[this.personality.name];
+                    // Assign random personality to AI snakes (but not bosses)
+                    if (!this.isBoss) {
+                        const personalities = Object.keys(AI_PERSONALITIES);
+                        const personalityKey = personalities[Math.floor(Math.random() * personalities.length)];
+                        this.personality = AI_PERSONALITIES[personalityKey];
+                        this.name = this.personality.name + ' ' + this.name;
+                        this.personalityColor = PERSONALITY_COLORS[this.personality.name];
+                    }
                     
                     // AI-specific properties
                     this.targetMemory = null; // Remember targets for a few frames
@@ -5753,34 +5740,10 @@
                 // Limit chain reaction depth
                 const MAX_CHAIN_DEPTH = 3;
                 if (depth >= MAX_CHAIN_DEPTH) {
-                    console.log('[DEBUG] Max chain reaction depth reached, stopping');
                     return;
                 }
                 
                 // Log bank state periodically for player
-                if (this.isPlayer && depth === 0 && Math.random() < 0.1) {
-                    console.log('[BANK STATE] Current elements:', this.elements.map(id => {
-                        const elem = window.elementLoader.elements.get(id);
-                        return elem ? `${id}:${elem.n}` : `${id}:?`;
-                    }), 'Bank size:', this.elements.length, '/', this.maxVisibleElements);
-                    
-                    // Log all possible combinations
-                    const combosFound = [];
-                    for (let i = 0; i < this.elements.length; i++) {
-                        for (let j = i + 1; j < this.elements.length; j++) {
-                            const id1 = this.elements[i];
-                            const id2 = this.elements[j];
-                            const key = `${Math.min(id1, id2)}+${Math.max(id1, id2)}`;
-                            const resultId = window.elementLoader && window.elementLoader.combinations ? window.elementLoader.combinations[key] : null;
-                            if (resultId !== undefined && resultId !== null) {
-                                combosFound.push(`${key} → ${resultId}`);
-                            }
-                        }
-                    }
-                    if (combosFound.length > 0) {
-                        console.log('[POSSIBLE COMBOS]', combosFound);
-                    }
-                }
                 
                 // Find all possible combinations
                 let possibleCombos = [];
@@ -5798,7 +5761,6 @@
                             resultId = window.elementLoader.combinations[key];
                             
                             if (depth === 0 && this.isPlayer && possibleCombos.length === 0 && resultId !== undefined && resultId !== null) {
-                                console.log('[AUTO-COMBO] Found combination in bank:', key, '→', resultId);
                             }
                         }
                         
@@ -5837,13 +5799,6 @@
                 const chosen = possibleCombos[0];
                 
                 // Debug logging
-                if (depth === 0) {
-                    console.log('[DEBUG] Checking combinations:', {
-                        elements: [...this.elements],
-                        possibleCombos: possibleCombos.length,
-                        chosen: chosen
-                    });
-                }
                 
                 // Start combination animation for player
                 if (this.isPlayer) {
@@ -5912,7 +5867,6 @@
                             }
                             
                             showCombinationMessage(chosen.elem1, chosen.elem2, chosen.result, true); // Show new discovery
-                            console.log('[DEBUG] New discovery triggered:', chosen.elem1, '+', chosen.elem2, '=', chosen.result);
                             // Grant invincibility on new discovery
                             this.invincibilityTimer = 3000; // 3 seconds
                             
@@ -5949,10 +5903,6 @@
                     createCombinationParticles(this.segments[0].x, this.segments[0].y);
                     
                     // Log chain reaction info
-                    console.log(`[DEBUG] Combination successful (depth ${depth}):`, {
-                        combination: `${chosen.elem1} + ${chosen.elem2} = ${chosen.result}`,
-                        remainingElements: [...this.elements]
-                    });
                     
                     // Check again in case there are more combinations
                     this.checkCombinations(depth + 1);
@@ -5966,7 +5916,6 @@
                 
                 // Debug logging
                 if (this.isPlayer) {
-                    console.log(`[CONSUME] Before: ${this.elements.length} elements, maxVisibleElements: ${this.maxVisibleElements}`);
                 }
                 
                 // Safety check - ensure we never have more than max elements (use global elementBankSlots)
@@ -5977,7 +5926,6 @@
                 
                 // Debug element consumption
                 if (this.isPlayer && window.debugElementBank) {
-                    console.log(`[CONSUME] Bank status - Current: ${this.elements.length}, Max: ${elementBankSlots}, Element to add: ${element.id} (${element.data?.n})`);
                 }
                 
                 // Check if we have space in visible slots (use global elementBankSlots)
@@ -5999,17 +5947,6 @@
                         const comboKey = `${Math.min(newElementId, existingId)}+${Math.max(newElementId, existingId)}`;
                         const resultId = window.elementLoader.combinations[comboKey];
                         
-                        // Debug log
-                        if (this.isPlayer) {
-                            console.log(`[BANK FULL] Checking combination: ${comboKey} = ${resultId}`, {
-                                newElementId,
-                                existingId,
-                                existingElement: window.elementLoader.elements.get(existingId),
-                                newElement: window.elementLoader.elements.get(newElementId),
-                                combinationsLoaded: Object.keys(window.elementLoader.combinations).length,
-                                bankSlot: i
-                            });
-                        }
                         
                         if (resultId !== undefined && resultId !== null) {
                             // Found a combination! Replace the existing element with the result
@@ -6108,7 +6045,6 @@
                     if (!combined) {
                         // No combination found with the new element
                         // Force a check for existing combinations in the bank
-                        console.log('[BANK FULL] No combo with new element, checking existing bank combinations...');
                         this.checkCombinations();
                         
                         // Bank is full and no combination possible - element is lost
@@ -6124,17 +6060,6 @@
                         this.elements = this.elements.slice(0, elementBankSlots);
                     }
                     
-                    if (this.isPlayer) {
-                        console.log(`[ELEMENT ADDED] Bank now has ${this.elements.length} elements:`, this.elements.map(id => {
-                            const elem = window.elementLoader.elements.get(id);
-                            return elem ? `${id}:${elem.n}` : `${id}:?`;
-                        }));
-                        
-                        // Extra debug for bank issues
-                        if (window.debugElementBank && this.elements.length < elementBankSlots) {
-                            console.warn(`[BANK WARNING] Only ${this.elements.length}/${elementBankSlots} slots filled after adding element!`);
-                        }
-                    }
                     
                     // Check for immediate combinations after adding
                     if (this.elements.length >= 2) {
@@ -6297,7 +6222,7 @@
                     if (!musicMuted) {
                         const explosionSound = new Audio('sounds/big-powerful-explosion.mp3');
                         explosionSound.volume = 0.7;
-                        explosionSound.play().catch(e => console.log('Boss death explosion sound error:', e));
+                        explosionSound.play().catch(e => {});
                     }
                     
                     // Add intense screen shake
@@ -6309,16 +6234,16 @@
                 if (this.isPlayer) {
                     // Player respawn is now handled in the main game loop
                     // This prevents duplicate player snakes from being created
-                    console.log('[SNAKE DIE] Player died, respawn will be handled by game loop');
                 }
             }
             
             explode(killer) {
-                // Check if killer is a boss - bosses don't make explosion sounds
+                // Check if either party is a boss - bosses don't make explosion sounds
                 const killerIsBoss = killer && killer.isBoss;
+                const thisIsBoss = this.isBoss;
                 
-                // Play explosion sound - louder if player is involved, skip if killer is boss
-                if (!killerIsBoss) {
+                // Play explosion sound - louder if player is involved, skip if either party is boss
+                if (!killerIsBoss && !thisIsBoss) {
                     const isPlayerInvolved = this.isPlayer || (killer && killer.isPlayer);
                     playExplosionSound(isPlayerInvolved);
                 }
@@ -6361,6 +6286,18 @@
                 
                 // Get size multiplier (bosses have size = 3, normal snakes have size = 1)
                 const sizeMultiplier = this.size || 1;
+                
+                // Debug logging for player invisibility issue
+                if (this.isPlayer && bossEncounterActive) {
+                    console.log('[PLAYER DRAW DEBUG]', {
+                        size: this.size,
+                        sizeMultiplier: sizeMultiplier,
+                        segments: this.segments.length,
+                        position: { x: this.x, y: this.y },
+                        alive: this.alive,
+                        cameraZoom: cameraZoom
+                    });
+                }
                 
                 // Early viewport check for the whole snake
                 // Skip rendering if snake is completely off-screen (performance optimization)
@@ -6441,27 +6378,38 @@
                     const skinData = skinMetadata[this.skin];
                     const colors = skinData ? skinData.colors : ['#4ecdc4', '#45b7aa'];
                     
-                    if (this.invincibilityTimer > 0 && this.isPlayer) {
-                        // Flash effect during invincibility
-                        const flash = Math.sin(this.invincibilityTimer * 0.01) > 0;
-                        ctx.fillStyle = flash ? '#FFD700' : colors[i % colors.length];
-                    } else {
-                        ctx.fillStyle = colors[i % colors.length];
-                    }
+                    // Always use normal colors
+                    ctx.fillStyle = colors[i % colors.length];
                     
                     // Draw pixelated square segment
                     const pixelSize = 4;
                     const baseSegmentSize = SEGMENT_SIZE * sizeMultiplier;
                     const segmentRadius = Math.max(1, baseSegmentSize - Math.min(i * 0.05, baseSegmentSize - 1)) * cameraZoom;
-                    const segmentPixels = Math.floor(segmentRadius * 2 / pixelSize);
+                    const segmentPixels = Math.max(1, Math.floor(segmentRadius * 2 / pixelSize)); // Ensure at least 1 pixel
                     
                     // Draw main square segment
-                    ctx.fillRect(
-                        Math.floor(screenX / pixelSize) * pixelSize - segmentPixels * pixelSize / 2,
-                        Math.floor(screenY / pixelSize) * pixelSize - segmentPixels * pixelSize / 2,
-                        segmentPixels * pixelSize,
-                        segmentPixels * pixelSize
-                    );
+                    const segmentX = Math.floor(screenX / pixelSize) * pixelSize - segmentPixels * pixelSize / 2;
+                    const segmentY = Math.floor(screenY / pixelSize) * pixelSize - segmentPixels * pixelSize / 2;
+                    const segmentSize = segmentPixels * pixelSize;
+                    
+                    ctx.fillRect(segmentX, segmentY, segmentSize, segmentSize);
+                    
+                    // Draw invincibility glow outline for player
+                    if (this.invincibilityTimer > 0 && this.isPlayer) {
+                        ctx.save();
+                        // Pulsing glow effect
+                        const glowIntensity = Math.abs(Math.sin(this.invincibilityTimer * 0.005)) * 0.8 + 0.2;
+                        ctx.globalAlpha = glowIntensity;
+                        ctx.strokeStyle = '#FFD700';
+                        ctx.lineWidth = pixelSize * 2;
+                        ctx.strokeRect(
+                            segmentX - pixelSize,
+                            segmentY - pixelSize,
+                            segmentSize + pixelSize * 2,
+                            segmentSize + pixelSize * 2
+                        );
+                        ctx.restore();
+                    }
                 }
                 
                 // Draw head
@@ -6515,6 +6463,19 @@
                                 }
                             }
                         }
+                    }
+                    
+                    // Draw invincibility glow around head for player
+                    if (this.invincibilityTimer > 0 && this.isPlayer) {
+                        ctx.save();
+                        const glowIntensity = Math.abs(Math.sin(this.invincibilityTimer * 0.005)) * 0.8 + 0.2;
+                        ctx.globalAlpha = glowIntensity;
+                        ctx.strokeStyle = '#FFD700';
+                        ctx.lineWidth = 4 * cameraZoom;
+                        ctx.beginPath();
+                        ctx.arc(screenX, screenY, SEGMENT_SIZE * sizeMultiplier * 2 * cameraZoom, 0, Math.PI * 2);
+                        ctx.stroke();
+                        ctx.restore();
                     }
                     
                     // Draw skin image
@@ -7997,10 +7958,13 @@
         class Boss extends Snake {
             constructor(bossType, x, y) {
                 super(x, y, false);
+                this.isBoss = true; // Set this early to prevent personality assignment
                 
                 // Boss configuration
                 this.bossType = bossType;
                 const bossData = BOSS_TYPES[bossType];
+                this.baseName = bossData.name; // Store the original base name
+                this.isUndead = bossIsUndead;
                 this.name = bossIsUndead ? `Undead ${bossData.name}` : bossData.name;
                 this.maxHealth = bossIsUndead ? bossData.maxHealth * 2 : bossData.maxHealth;
                 this.health = this.maxHealth;
@@ -8282,7 +8246,7 @@
                 if (this.attackSound && !musicMuted) {
                     const audio = new Audio(this.attackSound);
                     audio.volume = 0.5;
-                    audio.play().catch(e => console.log('Boss attack sound error:', e));
+                    audio.play().catch(e => {});
                 }
             }
             
@@ -8420,7 +8384,6 @@
             }
             
             takeDamage(source = 'unknown') {
-                console.log('[BOSS] Taking damage from:', source);
                 console.trace('[BOSS] Damage call stack');
                 
                 // Only allow damage from player elemental combinations
@@ -8431,7 +8394,6 @@
                 
                 // Make Zephyrus invincible during element vacuum
                 if (this.bossType === 'ZEPHYRUS' && elementVacuumActive) {
-                    console.log('[BOSS] Zephyrus invincible during element vacuum');
                     return;
                 }
                 
@@ -8489,9 +8451,8 @@
                         prefix = 'Angry ';
                     }
                     
-                    // Get base name without any existing prefix
-                    const baseName = this.name.replace(/^(Undead |Angry |Enraged |Furious |Desperate )/g, '');
-                    const displayName = this.name.includes('Undead') ? `Undead ${prefix}${baseName}` : `${prefix}${baseName}`;
+                    // Build display name using the stored base name
+                    const displayName = this.isUndead ? `Undead ${prefix}${this.baseName}` : `${prefix}${this.baseName}`;
                     bossNameDisplay.textContent = `💀 ${displayName}`;
                 }
             }
@@ -8570,7 +8531,7 @@
                 if (!musicMuted) {
                     const shockwaveSound = new Audio('sounds/explosion-shockwave.mp3');
                     shockwaveSound.volume = 0.8;
-                    shockwaveSound.play().catch(e => console.log('Boss defeat shockwave sound error:', e));
+                    shockwaveSound.play().catch(e => {});
                 }
                 
                 // Spawn rewards
@@ -8615,7 +8576,6 @@
                 const bossData = BOSS_TYPES[this.bossType];
                 const bossSkinName = bossData.skin;
                 if (!unlockedSkins.has(bossSkinName)) {
-                    console.log(`Unlocking boss skin: ${bossSkinName} for boss type: ${this.bossType}`);
                     unlockedSkins.add(bossSkinName);
                     if (skinMetadata[bossSkinName]) {
                         skinMetadata[bossSkinName].unlocked = true;
@@ -8806,7 +8766,6 @@
             // Select a random boss that hasn't been defeated this cycle
             const availableBosses = Object.keys(BOSS_TYPES).filter(boss => !defeatedBosses.has(boss));
             if (availableBosses.length === 0) {
-                console.log('All bosses defeated this cycle');
                 return;
             }
             
@@ -8826,7 +8785,7 @@
             if (!musicMuted) {
                 bossIntroMusic = new Audio('sounds/low-pitched-melody.mp3');
                 bossIntroMusic.volume = 0.7 * musicVolume;
-                bossIntroMusic.play().catch(e => console.log('Boss intro music error:', e));
+                bossIntroMusic.play().catch(e => {});
                 
                 // Start battle music when intro ends
                 bossIntroMusic.addEventListener('ended', () => {
@@ -8834,7 +8793,7 @@
                         bossBattleMusic = new Audio('music/dramatic-pounding-percussion.mp3');
                         bossBattleMusic.volume = 0.6 * musicVolume;
                         bossBattleMusic.loop = true;
-                        bossBattleMusic.play().catch(e => console.log('Boss battle music error:', e));
+                        bossBattleMusic.play().catch(e => {});
                     }
                 });
             }
@@ -8945,6 +8904,18 @@
                             if (dx * dx + dy * dy < projectile.size * projectile.size) {
                                 // Check invincibility before dealing damage
                                 if (playerSnake.invincibilityTimer <= 0) {
+                                    // Create explosion particles before death
+                                    for (let i = 0; i < 30; i++) {
+                                        const angle = Math.random() * Math.PI * 2;
+                                        const speed = 2 + Math.random() * 5;
+                                        particlePool.spawn(
+                                            playerSnake.x,
+                                            playerSnake.y,
+                                            Math.cos(angle) * speed,
+                                            Math.sin(angle) * speed,
+                                            '#ff6600'
+                                        );
+                                    }
                                     // Boss elemental attacks are insta-death
                                     playerSnake.die(true);
                                     showMessage('Incinerated by Pyraxis!', 'red');
@@ -8973,6 +8944,18 @@
                             if (dist < projectile.radius && dist > projectile.radius - 20 && !projectile.hasHitPlayer) {
                                 // Check invincibility before dealing damage
                                 if (playerSnake.invincibilityTimer <= 0) {
+                                    // Create water splash particles before death
+                                    for (let i = 0; i < 30; i++) {
+                                        const angle = Math.random() * Math.PI * 2;
+                                        const speed = 2 + Math.random() * 5;
+                                        particlePool.spawn(
+                                            playerSnake.x,
+                                            playerSnake.y,
+                                            Math.cos(angle) * speed,
+                                            Math.sin(angle) * speed,
+                                            '#0066ff'
+                                        );
+                                    }
                                     // Boss elemental attacks are insta-death
                                     playerSnake.die(true);
                                     showMessage('Drowned by Abyssos!', 'red');
@@ -9007,6 +8990,18 @@
                                     if (dx * dx + dy * dy < projectile.size * projectile.size) {
                                         // Check invincibility before dealing damage
                                         if (playerSnake.invincibilityTimer <= 0) {
+                                            // Create rock debris particles before death
+                                            for (let i = 0; i < 30; i++) {
+                                                const angle = Math.random() * Math.PI * 2;
+                                                const speed = 2 + Math.random() * 5;
+                                                particlePool.spawn(
+                                                    playerSnake.x,
+                                                    playerSnake.y,
+                                                    Math.cos(angle) * speed,
+                                                    Math.sin(angle) * speed,
+                                                    '#8b6914'
+                                                );
+                                            }
                                             // Boss elemental attacks are insta-death
                                             playerSnake.die(true);
                                             showMessage('Crushed by Osseus!', 'red');
@@ -9035,14 +9030,33 @@
                         const dy = projectile.y - playerSnake.y;
                         if (Math.sqrt(dx * dx + dy * dy) < projectile.size + SEGMENT_SIZE) {
                             if (playerSnake.invincibilityTimer <= 0) {
-                                playerSnake.health -= projectile.damage;
-                                playerSnake.die();
+                                // Create water splash particles before death
+                                for (let i = 0; i < 30; i++) {
+                                    const angle = Math.random() * Math.PI * 2;
+                                    const speed = 2 + Math.random() * 5;
+                                    particlePool.spawn(
+                                        playerSnake.x,
+                                        playerSnake.y,
+                                        Math.cos(angle) * speed,
+                                        Math.sin(angle) * speed,
+                                        '#40a4df'
+                                    );
+                                }
+                                // Boss elemental attacks are insta-death
+                                playerSnake.die(true);
+                                showMessage('Swept away by Abyssos!', 'red');
                             }
-                            return true; // Remove projectile
+                            
+                            // Sometimes leave water element
+                            if (Math.random() < 0.3) {
+                                spawnElement(projectile.elementId, projectile.x, projectile.y);
+                            }
+                            
+                            return false; // Remove projectile
                         }
                     }
                     
-                    return projectile.life <= 0;
+                    return projectile.life > 0;
                     
                 case 'void':
                     // Update void projectile position
@@ -9056,10 +9070,22 @@
                         const dy = projectile.y - playerSnake.y;
                         if (Math.sqrt(dx * dx + dy * dy) < projectile.size + SEGMENT_SIZE) {
                             if (playerSnake.invincibilityTimer <= 0) {
-                                playerSnake.health -= projectile.damage;
-                                playerSnake.die();
+                                // Create void particles before death
+                                for (let i = 0; i < 30; i++) {
+                                    const angle = Math.random() * Math.PI * 2;
+                                    const speed = 2 + Math.random() * 5;
+                                    particlePool.spawn(
+                                        playerSnake.x,
+                                        playerSnake.y,
+                                        Math.cos(angle) * speed,
+                                        Math.sin(angle) * speed,
+                                        '#9b59b6'
+                                    );
+                                }
+                                playerSnake.die(true);
+                                showMessage('Consumed by the void!', 'red');
                             }
-                            return true; // Remove projectile
+                            return false; // Remove projectile
                         }
                     }
                     
@@ -9220,6 +9246,12 @@
         function checkBossElementalDamage() {
             if (!currentBoss || !currentBoss.alive || !playerSnake || !playerSnake.alive) return;
             
+            // Check cooldown to prevent spam damage
+            if (bossDamageCooldown > 0) return;
+            
+            // Don't allow damage while boss is stunned
+            if (currentBoss.stunTimer > 0) return;
+            
             // Check player's element bank for combinations
             const playerElements = playerSnake.elements;
             const elementBank = getElementBankElements();
@@ -9248,6 +9280,34 @@
                 if (canDamage) {
                     currentBoss.takeDamage('player_elemental');
                     showMessage('Elemental Resonance!', 'gold');
+                    bossDamageCooldown = 120; // 2 second cooldown
+                    
+                    // Create shockwave effect
+                    const elementColors = {
+                        0: '#8b6914', // Earth - brown
+                        1: '#0066ff', // Water - blue
+                        2: '#ffffff', // Air - white
+                        3: '#ff4444'  // Fire - red
+                    };
+                    
+                    // Determine the color based on player's primary element
+                    let shockwaveColor = '#FFD700'; // Default gold
+                    if (allPlayerElements.length > 0) {
+                        const primaryElement = allPlayerElements[0];
+                        shockwaveColor = elementColors[primaryElement] || '#FFD700';
+                    }
+                    
+                    shockwaves.push({
+                        x: playerSnake.x,
+                        y: playerSnake.y,
+                        targetX: currentBoss.x,
+                        targetY: currentBoss.y,
+                        radius: 0,
+                        maxRadius: dist,
+                        speed: 15,
+                        color: shockwaveColor,
+                        life: 1.0
+                    });
                 }
             }
         }
@@ -9273,6 +9333,55 @@
             if (gameStarted && playerSnake) {
                 updateUI();
             }
+        }
+        
+        function updateShockwaves(deltaTime) {
+            shockwaves = shockwaves.filter(shockwave => {
+                shockwave.radius += shockwave.speed * deltaTime;
+                shockwave.life = 1.0 - (shockwave.radius / shockwave.maxRadius);
+                return shockwave.life > 0;
+            });
+        }
+        
+        function drawShockwaves() {
+            shockwaves.forEach(shockwave => {
+                ctx.save();
+                
+                // Calculate angle from source to target
+                const angle = Math.atan2(
+                    shockwave.targetY - shockwave.y,
+                    shockwave.targetX - shockwave.x
+                );
+                
+                // Calculate current position along the path
+                const currentX = shockwave.x + Math.cos(angle) * shockwave.radius;
+                const currentY = shockwave.y + Math.sin(angle) * shockwave.radius;
+                
+                const screen = worldToScreen(currentX, currentY);
+                
+                // Draw expanding ring
+                ctx.globalAlpha = shockwave.life * 0.8;
+                ctx.strokeStyle = shockwave.color;
+                ctx.lineWidth = 4 * cameraZoom;
+                ctx.beginPath();
+                ctx.arc(screen.x, screen.y, 20 * cameraZoom * (1 + shockwave.radius / shockwave.maxRadius), 0, Math.PI * 2);
+                ctx.stroke();
+                
+                // Draw inner glow
+                ctx.globalAlpha = shockwave.life * 0.5;
+                ctx.strokeStyle = shockwave.color;
+                ctx.lineWidth = 8 * cameraZoom;
+                ctx.stroke();
+                
+                // Draw center bright spot
+                ctx.globalAlpha = shockwave.life;
+                ctx.fillStyle = shockwave.color;
+                ctx.beginPath();
+                ctx.arc(screen.x, screen.y, 5 * cameraZoom, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.restore();
+            });
         }
         
         function drawBossProjectiles() {
@@ -9552,7 +9661,6 @@
                     
                     // Less verbose debug logging
                     if (Math.random() < 0.05) { // Only log 5% of the time
-                        console.log(`[SPAWN] Phase: ${phase.name}, Discoveries: ${discoveryCount}, Prioritize discovery: ${prioritizeDiscovery}`);
                     }
                     
                     // Clean up old discovery echoes
@@ -9676,20 +9784,17 @@
                     // Debug spawn weights at game start
                     const weightsGameTime = Date.now() - gameStartTime;
                     if (weightsGameTime < 5000) { // First 5 seconds
-                        console.log(`[SPAWN WEIGHTS DEBUG] Total weights: ${spawnWeights.size}`);
                         spawnWeights.forEach((weight, elemId) => {
                             const elem = window.elementLoader.elements.get(elemId);
                             const elemIdNum = typeof elemId === 'string' ? parseInt(elemId) : elemId;
                             const isRealBase = elemIdNum >= 0 && elemIdNum <= 3;
                             if (elem && !isRealBase) { // Non-base elements (excluding IDs 0-3)
-                                console.log(`  - ${elem.n} (ID: ${elemId}, Tier: ${elem.t}) weight: ${weight}`);
                             }
                         });
                     }
                     
                     // Add discovered elements debug
                     if (totalDiscoveredNonBase > 0 && Math.random() < 0.02) {
-                        console.log(`[SPAWN] ${totalDiscoveredNonBase} discovered non-base elements available, ${spawnWeights.size} total spawnable`);
                     }
                     
                     // If we have very few spawn options, force add some player-discovered elements
@@ -9725,7 +9830,6 @@
                     const spawnGameTime = Date.now() - gameStartTime;
                     if (spawnGameTime < 5000) { // First 5 seconds
                         const elem = window.elementLoader.elements.get(id);
-                        console.log(`[SPAWN DEBUG] Spawning: ${elem?.n} (ID: ${id}, Tier: ${elem?.t}) - playerDiscoveredElements size: ${playerDiscoveredElements.size}`);
                     }
                     
                     // Debug what was selected (with player bank info)
@@ -9741,7 +9845,6 @@
                                     break;
                                 }
                             }
-                            console.log(`[SPAWN] ${elem.n} (T${elem.t}) - Can combine with player: ${canCombine}`);
                         }
                     }
                 } else {
@@ -9796,7 +9899,6 @@
                 
                 // If we couldn't find a good position after max attempts, use the last one
                 if (attempts >= maxAttempts) {
-                    console.log('Could not find element spawn position far from snakes after', maxAttempts, 'attempts');
                 }
             }
             
@@ -9903,7 +10005,6 @@
                 recentlyDiscoveredElements.set(resultId, Date.now());
                 
                 // Add to discovery feed
-                console.log('[DEBUG] Adding to discovery feed:', resultData.n);
                 const recipeText = `${emoji1} ${elem1Data.n} + ${emoji2} ${elem2Data.n}`;
                 addDiscoveryToFeed({
                     emoji: emojiResult,
@@ -9999,7 +10100,7 @@
                 const sound = eatSounds[0];
                 sound.currentTime = 0;
                 sound.volume = 0.75;
-                sound.play().catch(e => console.log('Could not play victory sound'));
+                sound.play().catch(e => {});
             }
         }
         
@@ -10043,9 +10144,6 @@
                 feed.removeChild(feed.firstChild);
             }
             
-            console.log('Added to discovery feed:', element.name, 'Recipe:', recipeText);
-            console.log('Feed now has', feed.children.length, 'messages');
-            console.log('Feed container display:', feedContainer ? getComputedStyle(feedContainer).display : 'not found');
         }
         
         function updateLeaderboard() {
@@ -10213,7 +10311,6 @@
         }
         
         // Leaderboard Integration Variables
-        console.log('Leaderboard script section loaded');
         let supabaseModule = null;
         let leaderboardSubmitted = false;
         let currentGameSessionId = null;
@@ -10221,21 +10318,13 @@
         
         // Test function to verify script is working
         window.testLeaderboard = function() {
-            console.log('Test function called successfully');
-            console.log('supabaseModule:', supabaseModule);
-            console.log('leaderboardSubmitted:', leaderboardSubmitted);
-            console.log('gameSessionStartTime:', gameSessionStartTime);
-            console.log('submitToLeaderboard function:', window.submitToLeaderboard);
-            console.log('skipLeaderboard function:', window.skipLeaderboard);
         }
         
         // Initialize Supabase when the module loads
         async function initSupabase() {
             try {
-                console.log('Initializing Supabase...');
                 supabaseModule = await import('./js/supabase.js');
                 await supabaseModule.initializeAuth();
-                console.log('Supabase initialized successfully');
                 
                 // Update any waiting submission forms
                 const statusEl = document.getElementById('submissionStatus');
@@ -10257,7 +10346,6 @@
         
         // Add event listeners when elements become visible
         function setupLeaderboardListeners() {
-            console.log('Setting up leaderboard button listeners');
             
             // Only set up the username input Enter key listener
             // The buttons already have onclick attributes, so we don't need to add more listeners
@@ -10267,13 +10355,11 @@
                 usernameInput.addEventListener('keypress', function(e) {
                     if (e.key === 'Enter') {
                         e.preventDefault();
-                        console.log('Enter key pressed in username input');
                         window.submitToLeaderboard();
                     }
                 });
             }
             
-            console.log('Leaderboard listeners setup complete');
         }
         
         // Try to set up listeners on page load and when respawn overlay is shown
@@ -10284,7 +10370,6 @@
         
         // Submit score to leaderboard
         window.submitToLeaderboard = async function() {
-            console.log('submitToLeaderboard called - Button click registered!');
             
             // Visual feedback
             const submitBtn = document.getElementById('submitScoreBtn');
@@ -10305,7 +10390,6 @@
             
             // Check if already submitted
             if (leaderboardSubmitted) {
-                console.log('Score already submitted');
                 return;
             }
             
@@ -10334,7 +10418,6 @@
                 '<span style="color: #4ecdc4;">Submitting score...</span>';
             
             try {
-                console.log('Submitting score for player:', username);
                 
                 // Calculate play time in seconds
                 const playTime = gameSessionStartTime ? 
@@ -10348,12 +10431,6 @@
                     kills: playerSnake.kills
                 });
                 
-                // Check validation rules
-                console.log('Validation checks:');
-                console.log('- Play time >= 10s:', playTime >= 10);
-                console.log('- Score <= playTime * 200:', Math.floor(playerSnake.score) <= (playTime * 200));
-                console.log('- Elements <= playTime * 10:', playerDiscoveredElements.size <= (playTime * 10));
-                console.log('- Kills <= playTime * 2:', playerSnake.kills <= (playTime * 2));
                 
                 let result;
                 try {
@@ -10801,7 +10878,6 @@
             
             // Debug logging for element bank issues
             if (playerSnake.elements.length < elementBankSlots && window.debugElementBank) {
-                console.log(`[ELEMENT BANK] Only ${playerSnake.elements.length} elements in bank (max: ${elementBankSlots})`);
             }
             
             for (let i = 0; i < elementBankSlots; i++) {
@@ -11122,15 +11198,12 @@
                                 }
                             }
                             
-                            console.log('[CATALYST GEM] Found', undiscoveredCombinations.length, 'combinations that produce undiscovered elements');
                             
                             if (undiscoveredCombinations.length > 0) {
                                 // Randomly select one combination
                                 const selectedCombo = undiscoveredCombinations[Math.floor(Math.random() * undiscoveredCombinations.length)];
                                 const elementsToSpawn = [selectedCombo.element1, selectedCombo.element2];
                                 
-                                console.log('[CATALYST GEM] Selected combination:', selectedCombo.combo, '→', selectedCombo.result);
-                                console.log('[CATALYST GEM] Spawning elements:', elementsToSpawn);
                                 
                                 // Spawn the two elements around the player
                                 for (let j = 0; j < elementsToSpawn.length; j++) {
@@ -11156,7 +11229,6 @@
                                     const shuffled = [...discoveredElementsList].sort(() => Math.random() - 0.5);
                                     const elementsToSpawn = shuffled.slice(0, 2);
                                     
-                                    console.log('[CATALYST GEM] No undiscovered combinations available, spawning random elements:', elementsToSpawn);
                                     
                                     // Spawn the elements
                                     for (let j = 0; j < elementsToSpawn.length; j++) {
@@ -12032,7 +12104,6 @@
                 // Players must discover everything, even base elements
                 
                 // Discovery feed ready for new discoveries
-                console.log('[DEBUG] Discovery feed initialized');
             }
             
             // Start fresh game
@@ -12049,12 +12120,10 @@
             if (gameMode === 'infinite') {
                 leaderboardSubmitted = false;
                 gameSessionStartTime = Date.now();
-                console.log('[GAME START] Game session start time set:', new Date(gameSessionStartTime));
                 
                 if (supabaseModule) {
                     supabaseModule.startGameSession().then(sessionId => {
                         currentGameSessionId = sessionId;
-                        console.log('[GAME START] Game session started:', sessionId);
                     });
                 }
             }
@@ -12065,7 +12134,6 @@
                 const y = 200 + Math.random() * (WORLD_SIZE - 400);
                 snakes.push(new Snake(x, y, false));
             }
-            console.log('[GAME START] AI snakes created. Total snakes:', snakes.length);
             
             
             // Spawn initial elements using grid distribution
@@ -12076,7 +12144,6 @@
             
             // Spawn elements to reach initial target count
             const initialSpawnCount = Math.floor(TARGET_ELEMENT_COUNT * 0.7); // Start with 70% of target
-            console.log(`[BASE ELEMENT SPAWN] Starting to spawn ${initialSpawnCount} initial elements`);
             
             // Track how many of each base element we spawn
             const baseElementCounts = {
@@ -12114,11 +12181,6 @@
             }
             
             // Verify all base elements were spawned
-            console.log('[BASE ELEMENT SPAWN] Spawn distribution:', baseElementCounts);
-            console.log('[BASE ELEMENT SPAWN] Earth:', baseElementCounts[0], 
-                        'Water:', baseElementCounts[1], 
-                        'Air:', baseElementCounts[2], 
-                        'Fire:', baseElementCounts[3]);
             
             // Verify all 4 base elements are represented
             const missingElements = [];
@@ -12132,10 +12194,8 @@
                 console.warn('[BASE ELEMENT SPAWN] WARNING: Missing base elements:', missingElements);
                 console.warn('[BASE ELEMENT SPAWN] This should not happen with proper distribution!');
             } else {
-                console.log('[BASE ELEMENT SPAWN] ✓ All 4 base elements successfully spawned');
             }
             
-            console.log('[BASE ELEMENT SPAWN] Total elements spawned:', elements.length);
             
             // Initialize music and sound effects
             initMusic();
@@ -12158,7 +12218,6 @@
         }
         
         function stopGame() {
-            console.log('[STOP GAME] Stopping game...');
             
             // Cancel the game loop
             if (animationFrameId !== null) {
@@ -12171,7 +12230,6 @@
             paused = false;
             
             // Clear ALL game objects
-            console.log('[STOP GAME] Clearing snakes:', snakes.length, 'Player snakes:', snakes.filter(s => s.isPlayer).length);
             snakes = [];
             playerSnake = null;
             elements = [];
@@ -12187,7 +12245,6 @@
             // Clear the canvas to prevent solid color issue
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            console.log('[STOP GAME] Game stopped');
         }
         
         function togglePause() {
@@ -12233,7 +12290,6 @@
         window.debugElementBank = false;
         window.enableElementBankDebug = function() {
             window.debugElementBank = true;
-            console.log('[DEBUG] Element bank debugging enabled. Watch console for bank status.');
             return 'Element bank debugging enabled';
         }
         
@@ -12721,6 +12777,7 @@
                 if (bossEncounterActive && currentBoss) {
                     // Update boss projectiles
                     updateBossProjectiles(1.0);
+                    updateShockwaves(1.0);
                     
                     // Update damage numbers
                     updateDamageNumbers(1.0);
@@ -12824,8 +12881,6 @@
                     const previousKills = playerSnake.kills;
                     
                     // Debug logging
-                    console.log('[RESPAWN] Player died, respawning...');
-                    console.log('[RESPAWN] Snakes before cleanup:', snakes.length, 'Player snakes:', snakes.filter(s => s.isPlayer).length);
                     
                     // Remove ALL player snakes from array (in case of duplicates)
                     const oldPlayerCount = snakes.filter(snake => snake.isPlayer).length;
@@ -12837,8 +12892,6 @@
                         snakes = snakes.filter(snake => !snake.isPlayer);
                     }
                     
-                    console.log('[RESPAWN] Removed', oldPlayerCount, 'player snake(s)');
-                    console.log('[RESPAWN] Snakes after cleanup:', snakes.length);
                     
                     // Respawn player at center
                     playerSnake = new Snake(WORLD_SIZE / 2, WORLD_SIZE / 2, true);
@@ -12857,7 +12910,6 @@
                     // Add back to snakes array
                     snakes.push(playerSnake);
                     
-                    console.log('[RESPAWN] New player snake created. Total snakes:', snakes.length, 'Player snakes:', snakes.filter(s => s.isPlayer).length);
                     
                     // Set camera to new player position to prevent jumping
                     camera.x = WORLD_SIZE / 2;
@@ -12871,13 +12923,11 @@
                     
                     // Reset game session start time for proper validation on next death
                     gameSessionStartTime = Date.now();
-                    console.log('[RESPAWN] Reset game session start time for validation');
                     
                     // Start a new game session for proper server-side validation
                     if (gameMode === 'infinite' && supabaseModule) {
                         supabaseModule.startGameSession().then(sessionId => {
                             currentGameSessionId = sessionId;
-                            console.log('[RESPAWN] Started new game session:', sessionId);
                         });
                     }
                 }
@@ -12953,6 +13003,7 @@
             // Draw boss projectiles
             if (bossEncounterActive) {
                 drawBossProjectiles();
+                drawShockwaves();
                 drawDamageNumbers();
             }
             
@@ -12989,6 +13040,11 @@
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ctx.restore();
                 bossDamageFlashTimer--;
+            }
+            
+            // Update boss damage cooldown
+            if (bossDamageCooldown > 0) {
+                bossDamageCooldown--;
             }
         }
         
@@ -13168,7 +13224,6 @@
         
         // Initialize
         Promise.all([loadElements(), loadSnakeNames()]).then(() => {
-            console.log('Game ready!');
             
             // Sync discovered elements from new system if available
             if (window.elementLoader && window.elementCompatibility) {
@@ -13179,7 +13234,6 @@
                     for (const elementKey of savedDiscovered) {
                         discoveredElements.add(elementKey);
                     }
-                    console.log(`Loaded ${savedDiscovered.size} discovered elements from new system`);
                 }
             }
             

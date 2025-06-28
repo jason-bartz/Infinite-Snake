@@ -18,7 +18,7 @@
         
         // Force reload data (for admin panel updates)
         async reloadData() {
-            console.log('[GameLoader] Reloading game data...');
+            // Reloading game data
             this.loaded = false;
             this.elements.clear();
             this.combinations = {};
@@ -26,7 +26,7 @@
             this.deletedElements.clear();
             this.deletedCombinations.clear();
             await this.loadAll();
-            console.log('[GameLoader] Data reloaded successfully');
+            // Data reloaded successfully
             // Dispatch event so game knows data has been reloaded
             window.dispatchEvent(new Event('elementsReloaded'));
         }
@@ -51,7 +51,7 @@
                     if (deletedElementsResponse.ok) {
                         const deletedArray = await deletedElementsResponse.json();
                         this.deletedElements = new Set(deletedArray.map(id => parseInt(id)));
-                        console.log(`[GameLoader] Loaded ${this.deletedElements.size} deleted elements`);
+                        // Loaded deleted elements
                         
                         // Remove deleted elements
                         this.deletedElements.forEach(id => {
@@ -59,7 +59,7 @@
                         });
                     }
                 } catch (err) {
-                    console.log('[GameLoader] No deleted elements found');
+                    // No deleted elements found
                 }
 
                 // Load combinations
@@ -72,7 +72,7 @@
                     if (deletedCombosResponse.ok) {
                         const deletedArray = await deletedCombosResponse.json();
                         this.deletedCombinations = new Set(deletedArray);
-                        console.log(`[GameLoader] Loaded ${this.deletedCombinations.size} deleted combinations`);
+                        // Loaded deleted combinations
                         
                         // Remove deleted combinations
                         this.deletedCombinations.forEach(combo => {
@@ -82,7 +82,7 @@
                         });
                     }
                 } catch (err) {
-                    console.log('[GameLoader] No deleted combinations found');
+                    // No deleted combinations found
                 }
 
                 // Load emoji mapping from JSON
@@ -113,7 +113,7 @@
                 }
 
                 this.loaded = true;
-                console.log(`Loaded ${this.elements.size} elements and ${Object.keys(this.combinations).length} combinations`);
+                // Elements and combinations loaded
 
                 // Dispatch loaded event
                 window.dispatchEvent(new Event('elementsLoaded'));
