@@ -1179,6 +1179,126 @@
             outline-color: #ff8c00;
         }
         
+        /* Boss Victory Message - Epic announcement */
+        #bossVictoryMessage {
+            position: absolute;
+            top: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(10, 0, 30, 0.98);
+            color: var(--snes-gold);
+            font-size: 14px;
+            font-weight: bold;
+            text-shadow: 2px 2px 0 rgba(0,0,0,0.8);
+            padding: 24px 48px;
+            border-radius: 0;
+            border: 6px solid var(--snes-gold);
+            border-color: var(--snes-gold) #A88800 #A88800 var(--snes-gold);
+            text-align: center;
+            pointer-events: none;
+            box-shadow: 8px 8px 0 rgba(0,0,0,0.9), 
+                        0 0 30px rgba(255, 215, 0, 0.3),
+                        inset 0 0 20px rgba(255, 215, 0, 0.1);
+            opacity: 0;
+            transition: none;
+            animation: none;
+            z-index: 30;
+            min-width: 400px;
+            display: none;
+        }
+        
+        #bossVictoryMessage.show {
+            display: block;
+            opacity: 1;
+            animation: epicBossVictory 0.8s steps(12);
+        }
+        
+        #bossVictoryMessage h2 {
+            margin: 0 0 16px 0;
+            font-size: 24px;
+            color: var(--snes-gold);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            animation: victoryPulse 1s steps(2) infinite;
+        }
+        
+        #bossVictoryMessage .boss-name {
+            font-size: 18px;
+            color: var(--snes-white);
+            margin-bottom: 12px;
+        }
+        
+        #bossVictoryMessage .defeat-text {
+            font-size: 14px;
+            color: var(--snes-cosmic-teal);
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+        
+        #bossVictoryMessage .rewards {
+            border-top: 2px solid var(--snes-gold);
+            padding-top: 16px;
+            margin-top: 16px;
+        }
+        
+        #bossVictoryMessage .reward-item {
+            font-size: 13px;
+            color: var(--snes-white);
+            margin: 8px 0;
+            text-align: left;
+            padding-left: 20px;
+        }
+        
+        #bossVictoryMessage .reward-item.highlight {
+            color: var(--snes-gold);
+            font-size: 14px;
+        }
+        
+        @keyframes epicBossVictory {
+            0% {
+                transform: translateX(-50%) scale(0.1);
+                opacity: 0;
+            }
+            50% {
+                transform: translateX(-50%) scale(1.1);
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(-50%) scale(1);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes victoryPulse {
+            0%, 50% {
+                transform: scale(1);
+            }
+            51%, 100% {
+                transform: scale(1.05);
+            }
+        }
+        
+        /* Mobile responsive for boss victory */
+        @media screen and (max-width: 600px) {
+            #bossVictoryMessage {
+                min-width: 300px;
+                padding: 16px 24px;
+                font-size: 12px;
+            }
+            
+            #bossVictoryMessage h2 {
+                font-size: 18px;
+            }
+            
+            #bossVictoryMessage .boss-name {
+                font-size: 14px;
+            }
+            
+            #bossVictoryMessage .reward-item {
+                font-size: 11px;
+            }
+        }
+        
         /* Player Info Box (Bottom Left) - SNES Style */
         .player-info-box {
             position: absolute;
@@ -3062,6 +3182,7 @@
     <!-- UI Overlay -->
     <div id="ui">
         <div id="recentDiscovery"></div>
+        <div id="bossVictoryMessage"></div>
         <div id="score">Score: 0</div>
         <div id="discoveries">Discoveries: 0</div>
         <div id="elementQueue"></div>
@@ -4551,7 +4672,8 @@
                 attackCooldown: 4000,
                 defeated: false,
                 skin: 'pyraxis',
-                attackSound: 'sounds/magma-roar.mp3'
+                attackSound: 'sounds/magma-roar.mp3',
+                laughSound: 'sounds/pyraxis-laugh.mp3'
             },
             ABYSSOS: {
                 name: "Abyssos the Deep One",
@@ -4563,7 +4685,8 @@
                 attackCooldown: 6000,
                 defeated: false,
                 skin: 'abyssos',
-                attackSound: 'sounds/negative-low-pitch.mp3'
+                attackSound: 'sounds/negative-low-pitch.mp3',
+                laughSound: 'sounds/abyssos-laugh.mp3'
             },
             OSSEUS: {
                 name: "Osseus the Bone Sovereign",
@@ -4575,7 +4698,8 @@
                 attackCooldown: 5000,
                 defeated: false,
                 skin: 'osseus',
-                attackSound: 'sounds/boom-explosion.mp3'
+                attackSound: 'sounds/boom-explosion.mp3',
+                laughSound: 'sounds/osseus-laugh.mp3'
             },
             ZEPHYRUS: {
                 name: "Zephyrus the Storm Caller",
@@ -4584,10 +4708,11 @@
                 emoji: "💨",
                 color: "#87ceeb",
                 maxHealth: 5,
-                attackCooldown: 5000, // Reduced from 15s to 5s to match other bosses
+                attackCooldown: 8000, // Increased to allow element repopulation after vacuum
                 defeated: false,
                 skin: 'zephyrus',
-                attackSound: 'sounds/power-surge.mp3'
+                attackSound: 'sounds/power-surge.mp3',
+                laughSound: 'sounds/zephyrus-laugh.mp3'
             }
         };
         
@@ -4621,6 +4746,7 @@
         let elementVacuumTimer = 0;
         let vacuumedElements = []; // Store elements being sucked into void
         let damageNumbers = []; // Floating damage numbers
+        let bossFissures = []; // Ground fissures for Osseus
         
         // Skin system
         const skinMetadata = {
@@ -5416,12 +5542,13 @@
             draw(ctx) {
                 if (isMobile) {
                     // Simplified rendering for mobile - no shadows
+                    ctx.save();
                     ctx.globalAlpha = this.opacity;
                     ctx.fillStyle = this.color + this.opacity + ')';
                     ctx.beginPath();
                     ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
                     ctx.fill();
-                    ctx.globalAlpha = 1;
+                    ctx.restore();
                 } else {
                     // Desktop keeps full effects
                     ctx.save();
@@ -5466,8 +5593,15 @@
                 this.invincibilityTimer = 0;
                 this.size = 1; // Default size for normal snakes
                 
+                // Validate size to prevent invisibility
+                if (!this.size || this.size <= 0) {
+                    this.size = 1;
+                    console.warn('Snake size was invalid, setting to 1');
+                }
+                
                 // Debug logging for player snake creation
                 if (isPlayer) {
+                    console.log('[PLAYER CREATED] Size:', this.size);
                     console.trace(); // Show stack trace to see where it's being called from
                 }
                 this.discoveredElements = new Set(); // Each snake tracks its own discoveries - starts empty
@@ -5885,13 +6019,13 @@
                             // Calculate streak bonus
                             if (comboStreak >= 4) {
                                 comboBonus = 2500;
-                                showMessage(`4x COMBO STREAK! +${comboBonus} points!`, 'combo');
+                                showMessage(`4x COMBO STREAK! +${comboBonus} points!`, 'combo', 5000);
                             } else if (comboStreak >= 3) {
                                 comboBonus = 1000;
-                                showMessage(`3x Combo Streak! +${comboBonus} points!`, 'combo');
+                                showMessage(`3x Combo Streak! +${comboBonus} points!`, 'combo', 5000);
                             } else if (comboStreak >= 2) {
                                 comboBonus = 500;
-                                showMessage(`2x Combo! +${comboBonus} points!`, 'combo');
+                                showMessage(`2x Combo! +${comboBonus} points!`, 'combo', 5000);
                             }
                             
                             this.score += comboBonus;
@@ -5901,6 +6035,54 @@
                             
                     // Create particle effect at snake head
                     createCombinationParticles(this.segments[0].x, this.segments[0].y);
+                    
+                    // Debug: Log when any snake creates a combination during boss fight
+                    if (currentBoss && currentBoss.alive) {
+                        console.log('[COMBINATION] Snake:', this.name, 'isPlayer:', this.isPlayer, 'created combination:', chosen.elem1, '+', chosen.elem2, '=', chosen.result, 'Boss element:', currentBoss.elementId);
+                    }
+                    
+                    // Check if this combination involves the boss's element and create shockwave
+                    if (this.isPlayer && this === playerSnake && currentBoss && currentBoss.alive) {
+                        const bossElementId = currentBoss.elementId;
+                        // Check if either of the combining elements or the result is the boss element
+                        if (chosen.elem1 === bossElementId || chosen.elem2 === bossElementId || chosen.result === bossElementId) {
+                            console.log('[SHOCKWAVE] Creating shockwave for player:', this.name, 'isPlayer:', this.isPlayer, 'playerSnake match:', this === playerSnake);
+                            // Create shockwave effect
+                            const elementColors = {
+                                0: '#8b6914', // Earth - brown
+                                1: '#0066ff', // Water - blue
+                                2: '#ffffff', // Air - white
+                                3: '#ff4444'  // Fire - red
+                            };
+                            
+                            // Determine the color based on player's primary element
+                            let shockwaveColor = '#FFD700'; // Default gold
+                            if (this.elements.length > 0) {
+                                const primaryElement = this.elements[0];
+                                shockwaveColor = elementColors[primaryElement] || '#FFD700';
+                            }
+                            
+                            shockwaves.push({
+                                x: this.segments[0].x,
+                                y: this.segments[0].y,
+                                radius: 0,
+                                maxRadius: 600, // Fixed max radius for omnidirectional wave
+                                speed: 10, // Slower expansion for visibility
+                                color: shockwaveColor,
+                                life: 1.0,
+                                type: 'omnidirectional',
+                                owner: 'player' // Mark this as a player shockwave
+                            });
+                            
+                            // Play explosion shockwave sound
+                            const shockwaveSound = new Audio('sounds/explosion-shockwave.mp3');
+                            shockwaveSound.volume = 0.8;
+                            shockwaveSound.play().catch(e => {});
+                            
+                            // Show special message for boss element combination
+                            showMessage('Boss Element Resonance!', 'gold', 3000);
+                        }
+                    }
                     
                     // Log chain reaction info
                     
@@ -6018,13 +6200,13 @@
                                     let comboBonus = 100;
                                     if (comboStreak >= 4) {
                                         comboBonus = 2500;
-                                        showMessage(`4x COMBO STREAK! +${comboBonus} points!`, 'combo');
+                                        showMessage(`4x COMBO STREAK! +${comboBonus} points!`, 'combo', 5000);
                                     } else if (comboStreak >= 3) {
                                         comboBonus = 1000;
-                                        showMessage(`3x Combo Streak! +${comboBonus} points!`, 'combo');
+                                        showMessage(`3x Combo Streak! +${comboBonus} points!`, 'combo', 5000);
                                     } else if (comboStreak >= 2) {
                                         comboBonus = 500;
-                                        showMessage(`2x Combo! +${comboBonus} points!`, 'combo');
+                                        showMessage(`2x Combo! +${comboBonus} points!`, 'combo', 5000);
                                     }
                                     this.score += comboBonus;
                                     showCombinationMessage(newElementId, existingId, resultId, false);
@@ -6206,16 +6388,16 @@
                     for (let i = 0; i < 50; i++) {
                         const angle = (Math.PI * 2 * i) / 50;
                         const speed = 5 + Math.random() * 10;
-                        particlePool.add({
-                            x: this.x,
-                            y: this.y,
-                            vx: Math.cos(angle) * speed,
-                            vy: Math.sin(angle) * speed,
-                            color: ['#ff0000', '#ff6600', '#ffaa00', '#ffff00'][Math.floor(Math.random() * 4)],
-                            size: 10 + Math.random() * 15,
-                            life: 1.0,
-                            type: 'explosion'
-                        });
+                        const color = ['#ff0000', '#ff6600', '#ffaa00', '#ffff00'][Math.floor(Math.random() * 4)];
+                        const size = 10 + Math.random() * 15;
+                        particlePool.spawn(
+                            this.x,
+                            this.y,
+                            Math.cos(angle) * speed,
+                            Math.sin(angle) * speed,
+                            color,
+                            size
+                        );
                     }
                     
                     // Play powerful explosion sound
@@ -6285,19 +6467,8 @@
                 if (!this.alive) return;
                 
                 // Get size multiplier (bosses have size = 3, normal snakes have size = 1)
-                const sizeMultiplier = this.size || 1;
-                
-                // Debug logging for player invisibility issue
-                if (this.isPlayer && bossEncounterActive) {
-                    console.log('[PLAYER DRAW DEBUG]', {
-                        size: this.size,
-                        sizeMultiplier: sizeMultiplier,
-                        segments: this.segments.length,
-                        position: { x: this.x, y: this.y },
-                        alive: this.alive,
-                        cameraZoom: cameraZoom
-                    });
-                }
+                // Ensure size multiplier is always at least 1 to prevent invisibility
+                const sizeMultiplier = Math.max(1, this.size || 1);
                 
                 // Early viewport check for the whole snake
                 // Skip rendering if snake is completely off-screen (performance optimization)
@@ -6317,6 +6488,12 @@
                         }
                         if (!anyInViewport) return;
                     }
+                }
+                
+                // Explicit player visibility protection - AFTER viewport check to avoid dangling ctx.save()
+                if (this.isPlayer) {
+                    ctx.save();
+                    ctx.globalAlpha = 1; // Force full opacity for player
                 }
                 
                 // Draw boost trail effect (desktop only)
@@ -6394,21 +6571,25 @@
                     
                     ctx.fillRect(segmentX, segmentY, segmentSize, segmentSize);
                     
-                    // Draw invincibility glow outline for player
+                    // Spawn invincibility sparkle particles for player
                     if (this.invincibilityTimer > 0 && this.isPlayer) {
-                        ctx.save();
-                        // Pulsing glow effect
-                        const glowIntensity = Math.abs(Math.sin(this.invincibilityTimer * 0.005)) * 0.8 + 0.2;
-                        ctx.globalAlpha = glowIntensity;
-                        ctx.strokeStyle = '#FFD700';
-                        ctx.lineWidth = pixelSize * 2;
-                        ctx.strokeRect(
-                            segmentX - pixelSize,
-                            segmentY - pixelSize,
-                            segmentSize + pixelSize * 2,
-                            segmentSize + pixelSize * 2
-                        );
-                        ctx.restore();
+                        // Spawn subtle sparkle particles occasionally
+                        if (Math.random() < 0.08) { // 8% chance per segment per frame
+                            const sparkleAngle = Math.random() * Math.PI * 2;
+                            const sparkleSpeed = 0.5 + Math.random() * 1.5;
+                            
+                            // Convert segment screen position to world position
+                            const worldSegX = segment.x;
+                            const worldSegY = segment.y;
+                            
+                            particlePool.spawn(
+                                worldSegX,
+                                worldSegY,
+                                Math.cos(sparkleAngle) * sparkleSpeed,
+                                Math.sin(sparkleAngle) * sparkleSpeed,
+                                '#FFD700' // Golden sparkles
+                            );
+                        }
                     }
                 }
                 
@@ -6465,17 +6646,28 @@
                         }
                     }
                     
-                    // Draw invincibility glow around head for player
+                    // Spawn invincibility sparkle particles around head for player
                     if (this.invincibilityTimer > 0 && this.isPlayer) {
-                        ctx.save();
-                        const glowIntensity = Math.abs(Math.sin(this.invincibilityTimer * 0.005)) * 0.8 + 0.2;
-                        ctx.globalAlpha = glowIntensity;
-                        ctx.strokeStyle = '#FFD700';
-                        ctx.lineWidth = 4 * cameraZoom;
-                        ctx.beginPath();
-                        ctx.arc(screenX, screenY, SEGMENT_SIZE * sizeMultiplier * 2 * cameraZoom, 0, Math.PI * 2);
-                        ctx.stroke();
-                        ctx.restore();
+                        // More frequent particles around the head
+                        if (Math.random() < 0.2) { // 20% chance per frame for head
+                            // Create a ring of particles around the head
+                            const numParticles = 2 + Math.floor(Math.random() * 2);
+                            for (let i = 0; i < numParticles; i++) {
+                                const angle = Math.random() * Math.PI * 2;
+                                const distance = SEGMENT_SIZE * sizeMultiplier * 1.5;
+                                const particleX = headX + Math.cos(angle) * distance;
+                                const particleY = headY + Math.sin(angle) * distance;
+                                const speed = 1 + Math.random() * 2;
+                                
+                                particlePool.spawn(
+                                    particleX,
+                                    particleY,
+                                    Math.cos(angle) * speed,
+                                    Math.sin(angle) * speed,
+                                    '#FFD700' // Golden sparkles
+                                );
+                            }
+                        }
                     }
                     
                     // Draw skin image
@@ -6534,12 +6726,19 @@
                         ctx.fillStyle = 'white';
                         ctx.fillText(actualName, startX + personalityWidth + actualNameWidth / 2, nameY);
                     } else {
-                        // Player name or fallback - draw normally
+                        // Player name, boss name, or fallback - draw normally
                         ctx.strokeStyle = 'black';
                         ctx.lineWidth = 3;
                         ctx.fillStyle = 'white';
-                        ctx.strokeText(this.name, screenX, nameY);
-                        ctx.fillText(this.name, screenX, nameY);
+                        // For bosses, show only skull emoji
+                        let displayName;
+                        if (this.isBoss) {
+                            displayName = '💀';
+                        } else {
+                            displayName = this.name;
+                        }
+                        ctx.strokeText(displayName, screenX, nameY);
+                        ctx.fillText(displayName, screenX, nameY);
                     }
                     
                     // Draw crown if leader
@@ -6548,9 +6747,15 @@
                         const crownCanvas = getCachedEmoji('👑', crownSize);
                         ctx.save();
                         ctx.globalAlpha = 1;
-                        ctx.drawImage(crownCanvas, screenX - crownCanvas.width / 2, screenY - SEGMENT_SIZE * cameraZoom - 30 - crownCanvas.height / 2);
+                        // Increased offset from 30 to 45 to move crown higher
+                        ctx.drawImage(crownCanvas, screenX - crownCanvas.width / 2, screenY - SEGMENT_SIZE * cameraZoom - 45 - crownCanvas.height / 2);
                         ctx.restore();
                     }
+                }
+                
+                // Restore context state for player
+                if (this.isPlayer) {
+                    ctx.restore();
                 }
             }
             
@@ -7686,6 +7891,7 @@
                 const screenX = screen.x;
                 const screenY = screen.y;
                 
+                ctx.save();
                 ctx.fillStyle = this.color;
                 ctx.globalAlpha = this.life;
                 
@@ -7697,7 +7903,7 @@
                     this.size
                 );
                 
-                ctx.globalAlpha = 1;
+                ctx.restore();
             }
         }
         
@@ -7994,6 +8200,10 @@
                 this.chasePhaseDuration = 240; // 4 seconds
                 this.phaseTimer = this.chasePhaseDuration; // Start in chase phase
                 
+                // Laugh sound management
+                this.laughCooldown = 0;
+                this.nextLaughDelay = 15000 + Math.random() * 10000; // 15-25 seconds
+                
                 // Special attack counter for Zephyrus vacuum
                 this.specialAttackCounter = 0;
                 this.vacuumAttackInterval = 4; // Use vacuum every 4th attack
@@ -8071,6 +8281,23 @@
                 
                 // Update attack timer
                 this.attackTimer += deltaTime * 16; // Convert to milliseconds
+                
+                // Update laugh cooldown and play periodic laugh sounds
+                if (this.laughCooldown > 0) {
+                    this.laughCooldown -= deltaTime * 16;
+                } else if (this.laughCooldown <= 0 && bossEncounterActive) {
+                    // Check if it's time to laugh
+                    if (Math.random() < 0.3) { // 30% chance when cooldown expires
+                        const bossData = BOSS_TYPES[this.bossType];
+                        if (!musicMuted && bossData.laughSound) {
+                            const laughSound = new Audio(bossData.laughSound);
+                            laughSound.volume = 0.5; // Quieter than initial laugh
+                            laughSound.play().catch(e => {});
+                        }
+                    }
+                    // Reset cooldown with random delay
+                    this.laughCooldown = 15000 + Math.random() * 10000; // 15-25 seconds
+                }
                 
                 // Boss AI - Strategic hunting behavior
                 if (playerSnake && playerSnake.alive && !this.attackPhase) {
@@ -8275,10 +8502,10 @@
             
             waterWaveAttack() {
                 // Shoot water orbs in all directions
-                const orbs = 16; // Number of orbs to shoot
+                const orbs = 12; // Reduced from 16 for easier dodging
                 for (let i = 0; i < orbs; i++) {
                     const angle = (Math.PI * 2 * i) / orbs;
-                    const speed = 6;
+                    const speed = 5; // Reduced from 6 for more reaction time
                     
                     bossProjectiles.push({
                         x: this.x,
@@ -8295,49 +8522,48 @@
             }
             
             rockFallAttack() {
-                // Screen shake + rocks fall from top
-                bossScreenShakeTimer = 30;
-                bossScreenShakeIntensity = 10;
+                // Create ground fissures attack
+                bossScreenShakeTimer = 60; // Longer shake for ground splitting
+                bossScreenShakeIntensity = 12;
                 
-                // Create falling rocks across the entire visible screen width
-                const screenBounds = {
-                    left: camera.x - canvas.width / (2 * cameraZoom),
-                    right: camera.x + canvas.width / (2 * cameraZoom),
-                    top: camera.y - canvas.height / (2 * cameraZoom),
-                    bottom: camera.y + canvas.height / (2 * cameraZoom)
-                };
+                // Clear existing fissures
+                bossFissures = [];
                 
-                // Create waves of rocks with gaps for dodging
-                const rocksPerWave = 12;
-                const gapSize = 100; // Size of safe gaps between rocks
-                const screenWidth = screenBounds.right - screenBounds.left;
+                // Create multiple fissures around the map
+                const fissureCount = 8 + Math.floor(Math.random() * 5); // 8-12 fissures
                 
-                for (let wave = 0; wave < 3; wave++) {
-                    // Random gap position for each wave
-                    const gapPosition = Math.random() * (screenWidth - gapSize * 2) + gapSize;
+                for (let i = 0; i < fissureCount; i++) {
+                    // Random position within reasonable range of player
+                    const angle = Math.random() * Math.PI * 2;
+                    const distance = 100 + Math.random() * 400; // 100-500 pixels from boss
                     
-                    for (let i = 0; i < rocksPerWave; i++) {
-                        const xPos = screenBounds.left + (screenWidth / rocksPerWave) * i;
-                        
-                        // Skip rocks in the gap area
-                        if (Math.abs(xPos - (screenBounds.left + gapPosition)) < gapSize) continue;
-                        
-                        const targetY = screenBounds.bottom - 50; // Near bottom of screen
-                        
-                        bossProjectiles.push({
-                            x: xPos,
-                            y: screenBounds.top - 100 - (wave * 150), // Stagger waves
-                            targetY: targetY,
-                            type: 'rock',
-                            size: 30,
-                            damage: 0.25,
-                            elementId: 0, // Earth element
-                            falling: true,
-                            shadowY: targetY,
-                            fallSpeed: 8 + wave * 2 // Later waves fall faster
-                        });
-                    }
+                    // Center fissures around the boss position
+                    const x = this.x + Math.cos(angle) * distance;
+                    const y = this.y + Math.sin(angle) * distance;
+                    
+                    // Vary fissure sizes
+                    const size = 60 + Math.random() * 80; // 60-140 pixel radius
+                    
+                    bossFissures.push({
+                        x: x,
+                        y: y,
+                        radius: 0, // Start small and grow
+                        targetRadius: size,
+                        growthSpeed: 3, // How fast fissure opens
+                        life: 240, // 4 seconds at 60fps
+                        maxLife: 240,
+                        state: 'opening' // 'opening', 'open', 'closing'
+                    });
                 }
+                
+                // Play rumbling sound
+                if (!musicMuted) {
+                    const rumbleSound = new Audio('sounds/boom-explosion.mp3');
+                    rumbleSound.volume = 0.6;
+                    rumbleSound.play().catch(e => {});
+                }
+                
+                showMessage("The ground splits open!", 'brown', 2000);
             }
             
             elementVacuumAttack() {
@@ -8360,27 +8586,32 @@
             shootVoidProjectiles() {
                 if (!playerSnake || !playerSnake.alive) return;
                 
-                // Shoot void energy directly at player
-                const angle = Math.atan2(playerSnake.y - this.y, playerSnake.x - this.x);
-                const speed = 10;
+                // Shoot tornados at the player
+                const baseAngle = Math.atan2(playerSnake.y - this.y, playerSnake.x - this.x);
                 
-                // Create a burst of 3 void projectiles
-                for (let i = -1; i <= 1; i++) {
-                    const spreadAngle = angle + (i * 0.1); // Slight spread
+                // Create 2 tornados with slightly different paths
+                for (let i = -1; i <= 1; i += 2) { // -1 and 1 only
+                    const angle = baseAngle + (i * 0.2); // Wider spread
+                    const speed = 4; // Slower than void projectiles
                     
                     bossProjectiles.push({
                         x: this.x,
                         y: this.y,
-                        vx: Math.cos(spreadAngle) * speed,
-                        vy: Math.sin(spreadAngle) * speed,
-                        type: 'void',
-                        size: 35,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed,
+                        type: 'tornado',
+                        size: 40, // Larger than void projectiles
                         damage: 0.3,
                         elementId: 2, // Air element
-                        life: 300,
-                        color: '#9b59b6' // Purple void energy
+                        life: 600, // Longer lasting
+                        rotation: 0, // For spinning effect
+                        rotationSpeed: 0.2, // Spinning speed
+                        wanderAngle: angle, // For erratic movement
+                        wanderTimer: 0
                     });
                 }
+                
+                showMessage("Zephyrus unleashes twisters!", 'purple', 2000);
             }
             
             takeDamage(source = 'unknown') {
@@ -8527,8 +8758,24 @@
                     }, delay);
                 }
                 
-                // Play explosion shockwave sound
+                // Play boss defeat sounds
                 if (!musicMuted) {
+                    // Play boss laugh sound immediately (as they're banished)
+                    const bossData = BOSS_TYPES[this.bossType];
+                    if (bossData.laughSound) {
+                        const laughSound = new Audio(bossData.laughSound);
+                        laughSound.volume = 0.7;
+                        laughSound.play().catch(e => {});
+                    }
+                    
+                    // Play success tone after a delay
+                    setTimeout(() => {
+                        const successSound = new Audio('sounds/success-tone.mp3');
+                        successSound.volume = 0.6;
+                        successSound.play().catch(e => {});
+                    }, 800);
+                    
+                    // Play explosion shockwave sound
                     const shockwaveSound = new Audio('sounds/explosion-shockwave.mp3');
                     shockwaveSound.volume = 0.8;
                     shockwaveSound.play().catch(e => {});
@@ -8569,47 +8816,32 @@
                 // Award points
                 if (playerSnake) {
                     playerSnake.score += 10000;
-                    showMessage(`+10,000 Boss Victory!`, 'gold');
                 }
                 
-                // Unlock boss skin
+                // Track skin unlock status
                 const bossData = BOSS_TYPES[this.bossType];
                 const bossSkinName = bossData.skin;
+                let skinUnlocked = false;
+                
                 if (!unlockedSkins.has(bossSkinName)) {
                     unlockedSkins.add(bossSkinName);
                     if (skinMetadata[bossSkinName]) {
                         skinMetadata[bossSkinName].unlocked = true;
                     }
                     saveSkinData();
-                    
-                    // Show creative defeat message based on boss type
-                    let defeatMessage = '';
-                    switch(this.bossType) {
-                        case 'PYRAXIS':
-                            defeatMessage = "Pyraxis has been extinguished! The Flame Lord's skin is now yours!";
-                            break;
-                        case 'ABYSSOS':
-                            defeatMessage = "Abyssos returns to the depths! The Void Serpent's skin unlocked!";
-                            break;
-                        case 'ZEPHYRUS':
-                            defeatMessage = "Zephyrus dissipates into the winds! The Storm Wyrm's skin claimed!";
-                            break;
-                        case 'OSSEUS':
-                            defeatMessage = "Osseus crumbles to dust! The Bone Dragon's skin acquired!";
-                            break;
-                        default:
-                            defeatMessage = `${this.name} has been banished to the void! ${this.name} Skin Unlocked!`;
-                    }
-                    
-                    showMessage(defeatMessage, 'gold', 5000);
+                    skinUnlocked = true;
                 }
                 
-                // Expand element bank
+                // Track element bank expansion
+                let elementBankExpanded = false;
                 if (elementBankSlots < 12) {
                     elementBankSlots++;
                     updateElementBankUI();
-                    showMessage(`Element Bank Expanded! (${elementBankSlots} slots)`, 'cyan');
+                    elementBankExpanded = true;
                 }
+                
+                // Show the epic boss victory message
+                showBossVictoryMessage(this, skinUnlocked, elementBankExpanded);
                 
                 // Remove boss from snakes array
                 const bossIndex = snakes.indexOf(this);
@@ -8641,6 +8873,7 @@
                 }
                 
                 currentBoss = null;
+                bossFissures = []; // Clear all fissures when boss is defeated
             }
             
             // Override die method to prevent normal death
@@ -8826,6 +9059,13 @@
             snakes.push(currentBoss);
             bossEncounterActive = true;
             
+            // Play boss laugh sound on spawn
+            if (!musicMuted && BOSS_TYPES[selectedBoss].laughSound) {
+                const laughSound = new Audio(BOSS_TYPES[selectedBoss].laughSound);
+                laughSound.volume = 0.7;
+                laughSound.play().catch(e => {});
+            }
+            
             // Make AI snakes flee
             snakes.forEach(snake => {
                 if (!snake.isPlayer && !snake.isBoss && snake.alive) {
@@ -8850,7 +9090,7 @@
             bossHealthBarContainer.style.top = '50px';
             bossHealthBarContainer.style.left = '50%';
             bossHealthBarContainer.style.transform = 'translateX(-50%)';
-            bossHealthBarContainer.style.width = '500px'; // Increased width to prevent name overflow
+            bossHealthBarContainer.style.width = '600px'; // Increased width to prevent name overflow
             bossHealthBarContainer.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
             bossHealthBarContainer.style.border = '3px solid #fff';
             bossHealthBarContainer.style.borderRadius = '10px';
@@ -8881,6 +9121,8 @@
             bossNameDisplay.style.fontWeight = 'bold';
             bossNameDisplay.style.marginTop = '5px';
             bossNameDisplay.style.whiteSpace = 'nowrap'; // Ensure single line display
+            bossNameDisplay.style.overflow = 'hidden';
+            bossNameDisplay.style.textOverflow = 'ellipsis';
             bossNameDisplay.textContent = `💀 ${currentBoss.name}`;
             
             bossHealthBarContainer.appendChild(healthBarBg);
@@ -8980,43 +9222,110 @@
                             const fallSpeed = projectile.fallSpeed || 10;
                             projectile.y += fallSpeed * deltaTime;
                             
-                            if (projectile.y >= projectile.shadowY) {
-                                projectile.falling = false;
+                            // Check collision while falling
+                            if (playerSnake && playerSnake.alive) {
+                                const dx = playerSnake.x - projectile.x;
+                                const dy = playerSnake.y - projectile.y;
+                                const distSq = dx * dx + dy * dy;
                                 
-                                // Check collision with player
-                                if (playerSnake && playerSnake.alive) {
-                                    const dx = playerSnake.x - projectile.x;
-                                    const dy = playerSnake.y - projectile.targetY;
-                                    if (dx * dx + dy * dy < projectile.size * projectile.size) {
-                                        // Check invincibility before dealing damage
-                                        if (playerSnake.invincibilityTimer <= 0) {
-                                            // Create rock debris particles before death
-                                            for (let i = 0; i < 30; i++) {
-                                                const angle = Math.random() * Math.PI * 2;
-                                                const speed = 2 + Math.random() * 5;
-                                                particlePool.spawn(
-                                                    playerSnake.x,
-                                                    playerSnake.y,
-                                                    Math.cos(angle) * speed,
-                                                    Math.sin(angle) * speed,
-                                                    '#8b6914'
-                                                );
-                                            }
-                                            // Boss elemental attacks are insta-death
-                                            playerSnake.die(true);
-                                            showMessage('Crushed by Osseus!', 'red');
+                                // Collision radius is larger while falling (40 pixels)
+                                if (distSq < 40 * 40) {
+                                    if (playerSnake.invincibilityTimer <= 0) {
+                                        // Create debris particles
+                                        for (let i = 0; i < 20; i++) {
+                                            const angle = Math.random() * Math.PI * 2;
+                                            const speed = 3 + Math.random() * 4;
+                                            particlePool.spawn(
+                                                playerSnake.x,
+                                                playerSnake.y,
+                                                Math.cos(angle) * speed,
+                                                Math.sin(angle) * speed,
+                                                '#8b6914'
+                                            );
                                         }
-                                        bossScreenShakeTimer = 30;
-                                        bossScreenShakeIntensity = 10;
+                                        playerSnake.die(true);
+                                        showMessage('Crushed by falling rock!', 'red');
                                     }
                                 }
+                            }
+                            
+                            if (projectile.y >= projectile.shadowY) {
+                                projectile.falling = false;
+                                projectile.y = projectile.shadowY;
                                 
-                                // Create earth element
-                                spawnElement(projectile.elementId, projectile.x, projectile.targetY);
+                                // Create impact crater when rock lands
+                                if (!projectile.impactCrater) {
+                                    projectile.impactCrater = {
+                                        x: projectile.x,
+                                        y: projectile.y,
+                                        radius: 50, // 50 pixel radius crater
+                                        life: 180 // 3 seconds
+                                    };
+                                    
+                                    // Screen shake on impact
+                                    bossScreenShakeTimer = 15;
+                                    bossScreenShakeIntensity = 8;
+                                    
+                                    // Create impact particles
+                                    for (let i = 0; i < 15; i++) {
+                                        const angle = Math.random() * Math.PI * 2;
+                                        const speed = 2 + Math.random() * 3;
+                                        particlePool.spawn(
+                                            projectile.x,
+                                            projectile.y,
+                                            Math.cos(angle) * speed,
+                                            Math.sin(angle) * speed,
+                                            '#8b6914'
+                                        );
+                                    }
+                                }
                             }
                         }
                         
-                        return projectile.falling;
+                        // Check collision with impact crater
+                        if (projectile.impactCrater && playerSnake && playerSnake.alive) {
+                            const crater = projectile.impactCrater;
+                            const dx = playerSnake.x - crater.x;
+                            const dy = playerSnake.y - crater.y;
+                            
+                            if (dx * dx + dy * dy < crater.radius * crater.radius) {
+                                if (playerSnake.invincibilityTimer <= 0) {
+                                    // Create debris particles
+                                    for (let i = 0; i < 25; i++) {
+                                        const angle = Math.random() * Math.PI * 2;
+                                        const speed = 2 + Math.random() * 5;
+                                        particlePool.spawn(
+                                            playerSnake.x,
+                                            playerSnake.y,
+                                            Math.cos(angle) * speed,
+                                            Math.sin(angle) * speed,
+                                            '#8b6914'
+                                        );
+                                    }
+                                    playerSnake.die(true);
+                                    showMessage('Crushed in impact crater!', 'red');
+                                }
+                            }
+                            
+                            // Update crater life
+                            crater.life -= deltaTime;
+                            if (crater.life <= 0) {
+                                projectile.impactCrater = null;
+                            }
+                        }
+                        
+                        // Rocks and craters stay for a while
+                        if (!projectile.falling) {
+                            if (!projectile.groundTimer) {
+                                projectile.groundTimer = 180; // 3 seconds on ground
+                                spawnElement(projectile.elementId, projectile.x, projectile.y);
+                            }
+                            projectile.groundTimer -= deltaTime;
+                            
+                            return projectile.groundTimer > 0 || projectile.impactCrater;
+                        }
+                        
+                        return true; // Keep falling rocks active
                         
                 case 'waterorb':
                     // Update water orb position
@@ -9089,7 +9398,52 @@
                         }
                     }
                     
-                    return projectile.life <= 0;
+                    return projectile.life > 0;
+                    
+                case 'tornado':
+                    // Update tornado position with wandering movement
+                    projectile.wanderTimer += deltaTime;
+                    if (projectile.wanderTimer > 30) { // Change direction every 0.5 seconds
+                        projectile.wanderAngle += (Math.random() - 0.5) * 0.5;
+                        projectile.wanderTimer = 0;
+                    }
+                    
+                    // Update velocity based on wander angle
+                    const tornadoSpeed = 4;
+                    projectile.vx = Math.cos(projectile.wanderAngle) * tornadoSpeed;
+                    projectile.vy = Math.sin(projectile.wanderAngle) * tornadoSpeed;
+                    
+                    projectile.x += projectile.vx * deltaTime;
+                    projectile.y += projectile.vy * deltaTime;
+                    projectile.life -= deltaTime;
+                    projectile.rotation += projectile.rotationSpeed * deltaTime;
+                    
+                    // Check collision with player
+                    if (playerSnake && playerSnake.alive) {
+                        const dx = projectile.x - playerSnake.x;
+                        const dy = projectile.y - playerSnake.y;
+                        if (Math.sqrt(dx * dx + dy * dy) < projectile.size + SEGMENT_SIZE) {
+                            if (playerSnake.invincibilityTimer <= 0) {
+                                // Create wind particles before death
+                                for (let i = 0; i < 40; i++) {
+                                    const angle = Math.random() * Math.PI * 2;
+                                    const speed = 3 + Math.random() * 6;
+                                    particlePool.spawn(
+                                        playerSnake.x,
+                                        playerSnake.y,
+                                        Math.cos(angle) * speed,
+                                        Math.sin(angle) * speed,
+                                        '#87ceeb'
+                                    );
+                                }
+                                playerSnake.die(true);
+                                showMessage('Swept away by the tornado!', 'red');
+                            }
+                            return false; // Remove projectile
+                        }
+                    }
+                    
+                    return projectile.life > 0;
                 }
                 
                 return false;
@@ -9097,10 +9451,12 @@
         }
         
         function updateElementVacuum(deltaTime) {
-            // Make all elements move toward boss
+            // Make all elements move toward boss and consume them
             if (!currentBoss || !currentBoss.alive) return;
             
-            vacuumedElements.forEach(({element, originalX, originalY}) => {
+            vacuumedElements = vacuumedElements.filter(({element, originalX, originalY}) => {
+                if (!element.active) return false; // Already deactivated
+                
                 const dx = currentBoss.x - element.x;
                 const dy = currentBoss.y - element.y;
                 const dist = Math.sqrt(dx * dx + dy * dy);
@@ -9109,6 +9465,25 @@
                     const speed = 5 * deltaTime;
                     element.x += (dx / dist) * speed;
                     element.y += (dy / dist) * speed;
+                    return true; // Keep in array
+                } else {
+                    // Element reached the boss - consume it into the void
+                    element.deactivate();
+                    
+                    // Create void consumption particles
+                    for (let i = 0; i < 10; i++) {
+                        const angle = Math.random() * Math.PI * 2;
+                        const speed = 2 + Math.random() * 3;
+                        particlePool.spawn(
+                            element.x,
+                            element.y,
+                            Math.cos(angle) * speed,
+                            Math.sin(angle) * speed,
+                            '#9b59b6' // Purple void color
+                        );
+                    }
+                    
+                    return false; // Remove from array
                 }
             });
         }
@@ -9116,20 +9491,22 @@
         function endElementVacuum() {
             elementVacuumActive = false;
             
-            // Return elements to original positions with extra wind elements
-            vacuumedElements.forEach(({element, originalX, originalY}) => {
-                element.x = originalX;
-                element.y = originalY;
-            });
+            // Elements have been consumed into the void - don't restore them
+            // The map will naturally repopulate through the normal spawn system
             
-            // Add extra wind elements
-            for (let i = 0; i < 10; i++) {
-                const angle = Math.random() * Math.PI * 2;
-                const dist = 100 + Math.random() * 200;
-                spawnElement(2, // Air element
-                    currentBoss.x + Math.cos(angle) * dist,
-                    currentBoss.y + Math.sin(angle) * dist
-                );
+            // Create a burst of void energy particles when vacuum ends
+            if (currentBoss && currentBoss.alive) {
+                for (let i = 0; i < 30; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = 3 + Math.random() * 5;
+                    particlePool.spawn(
+                        currentBoss.x,
+                        currentBoss.y,
+                        Math.cos(angle) * speed,
+                        Math.sin(angle) * speed,
+                        '#9b59b6' // Purple void color
+                    );
+                }
             }
             
             vacuumedElements = [];
@@ -9267,19 +9644,74 @@
                 
                 // Check if player has ANY combination containing the boss's element
                 const bossElementId = currentBoss.elementId;
+                let comboFound = null;
+                let otherElementId = null;
                 
-                // Check if player has the boss's element
-                if (allPlayerElements.includes(bossElementId)) {
-                    // Check if player has at least 2 different elements (a combination)
+                // First check for boss elements on the map near the player
+                let mapBossElement = null;
+                const elements = elementPool.getActiveElements();
+                for (let i = 0; i < elements.length; i++) {
+                    const element = elements[i];
+                    if (!element.active || element.id !== bossElementId) continue;
+                    
+                    // Check if this boss element is near the player
+                    const elemDx = element.x - playerSnake.x;
+                    const elemDy = element.y - playerSnake.y;
+                    const elemDist = Math.sqrt(elemDx * elemDx + elemDy * elemDy);
+                    
+                    if (elemDist < 150) { // Close enough to interact
+                        mapBossElement = element;
+                        break;
+                    }
+                }
+                
+                // Check if we can form a combination
+                if (mapBossElement && allPlayerElements.length > 0) {
+                    // Player has elements and there's a boss element on the map nearby
+                    canDamage = true;
+                    // Find any element in player's bank to combine with
+                    otherElementId = allPlayerElements[0];
+                    const comboKey = `${Math.min(bossElementId, otherElementId)}+${Math.max(bossElementId, otherElementId)}`;
+                    if (window.elementLoader && window.elementLoader.combinations[comboKey]) {
+                        comboFound = window.elementLoader.combinations[comboKey];
+                    }
+                } else if (allPlayerElements.includes(bossElementId)) {
+                    // Check if player has the boss's element in their bank
                     const uniqueElements = [...new Set(allPlayerElements)];
                     if (uniqueElements.length >= 2) {
                         canDamage = true;
+                        // Find the other element that isn't the boss element
+                        for (let elemId of uniqueElements) {
+                            if (elemId !== bossElementId) {
+                                otherElementId = elemId;
+                                // Check what this combination creates
+                                const comboKey = `${Math.min(bossElementId, elemId)}+${Math.max(bossElementId, elemId)}`;
+                                if (window.elementLoader && window.elementLoader.combinations[comboKey]) {
+                                    comboFound = window.elementLoader.combinations[comboKey];
+                                }
+                                break;
+                            }
+                        }
                     }
                 }
                 
                 if (canDamage) {
                     currentBoss.takeDamage('player_elemental');
-                    showMessage('Elemental Resonance!', 'gold');
+                    
+                    // Show combo message
+                    if (comboFound && otherElementId !== null) {
+                        const bossElement = window.elementLoader.elementsById[bossElementId];
+                        const otherElement = window.elementLoader.elementsById[otherElementId];
+                        const resultElement = window.elementLoader.elementsById[comboFound];
+                        if (bossElement && otherElement && resultElement) {
+                            showMessage(`${bossElement.name} + ${otherElement.name} = ${resultElement.name}!`, 'gold', 5000);
+                        } else {
+                            showMessage('Elemental Resonance!', 'gold', 5000);
+                        }
+                    } else {
+                        showMessage('Elemental Resonance!', 'gold', 5000);
+                    }
+                    
                     bossDamageCooldown = 120; // 2 second cooldown
                     
                     // Create shockwave effect
@@ -9300,14 +9732,34 @@
                     shockwaves.push({
                         x: playerSnake.x,
                         y: playerSnake.y,
-                        targetX: currentBoss.x,
-                        targetY: currentBoss.y,
                         radius: 0,
-                        maxRadius: dist,
-                        speed: 15,
+                        maxRadius: 600, // Fixed max radius for omnidirectional wave
+                        speed: 10, // Slower expansion for visibility
                         color: shockwaveColor,
-                        life: 1.0
+                        life: 1.0,
+                        type: 'omnidirectional',
+                        owner: 'player' // Mark this as a player shockwave
                     });
+                    
+                    // Create spawn effect - energy gathering particles
+                    for (let i = 0; i < 20; i++) {
+                        const angle = (Math.PI * 2 * i) / 20;
+                        const startRadius = 50;
+                        particlePool.spawn(
+                            playerSnake.x + Math.cos(angle) * startRadius,
+                            playerSnake.y + Math.sin(angle) * startRadius,
+                            -Math.cos(angle) * 3, // Particles move inward
+                            -Math.sin(angle) * 3,
+                            shockwaveColor
+                        );
+                    }
+                    
+                    // Play energy blast sound
+                    if (!musicMuted) {
+                        const blastSound = new Audio('sounds/magic-energy-whoosh.mp3');
+                        blastSound.volume = 0.7;
+                        blastSound.play().catch(e => {});
+                    }
                 }
             }
         }
@@ -9339,6 +9791,68 @@
             shockwaves = shockwaves.filter(shockwave => {
                 shockwave.radius += shockwave.speed * deltaTime;
                 shockwave.life = 1.0 - (shockwave.radius / shockwave.maxRadius);
+                
+                // For omnidirectional shockwaves, check if it hits the boss
+                if (shockwave.type === 'omnidirectional' && currentBoss && currentBoss.alive && !shockwave.hasHitBoss) {
+                    const dx = currentBoss.x - shockwave.x;
+                    const dy = currentBoss.y - shockwave.y;
+                    const distToBoss = Math.sqrt(dx * dx + dy * dy);
+                    
+                    // Check if the expanding ring has reached the boss
+                    const ringThickness = 20; // How thick the shockwave ring is
+                    if (distToBoss >= shockwave.radius - ringThickness && distToBoss <= shockwave.radius + ringThickness) {
+                        shockwave.hasHitBoss = true;
+                        
+                        // Deal damage to the boss only if this is a player shockwave
+                        if (shockwave.owner === 'player') {
+                            currentBoss.takeDamage('player_elemental');
+                        }
+                        
+                        // Create impact particles at boss location
+                        const impactParticles = 30;
+                        for (let i = 0; i < impactParticles; i++) {
+                            const angle = (Math.PI * 2 * i) / impactParticles;
+                            const speed = 3 + Math.random() * 5;
+                            const particleColor = i % 2 === 0 ? shockwave.color : '#ffffff';
+                            
+                            particlePool.spawn(
+                                currentBoss.x,
+                                currentBoss.y,
+                                Math.cos(angle) * speed,
+                                Math.sin(angle) * speed,
+                                particleColor
+                            );
+                        }
+                        
+                        // Add screen shake for impact
+                        if (bossScreenShakeTimer < 10) {
+                            bossScreenShakeTimer = 10;
+                            bossScreenShakeIntensity = 5;
+                        }
+                    }
+                } else if (!shockwave.type) {
+                    // Old directional shockwave logic (kept for compatibility)
+                    if (shockwave.life <= 0 && !shockwave.exploded) {
+                        shockwave.exploded = true;
+                        
+                        // Create explosion particles at target location
+                        const explosionParticles = 50;
+                        for (let i = 0; i < explosionParticles; i++) {
+                            const angle = (Math.PI * 2 * i) / explosionParticles;
+                            const speed = 5 + Math.random() * 7;
+                            const particleColor = i % 2 === 0 ? shockwave.color : '#ffffff';
+                            
+                            particlePool.spawn(
+                                shockwave.targetX,
+                                shockwave.targetY,
+                                Math.cos(angle) * speed,
+                                Math.sin(angle) * speed,
+                                particleColor
+                            );
+                        }
+                    }
+                }
+                
                 return shockwave.life > 0;
             });
         }
@@ -9347,38 +9861,203 @@
             shockwaves.forEach(shockwave => {
                 ctx.save();
                 
-                // Calculate angle from source to target
-                const angle = Math.atan2(
-                    shockwave.targetY - shockwave.y,
-                    shockwave.targetX - shockwave.x
+                const centerScreen = worldToScreen(shockwave.x, shockwave.y);
+                
+                if (shockwave.type === 'omnidirectional') {
+                    // Draw expanding ring shockwave
+                    const ringRadius = shockwave.radius * cameraZoom;
+                    const progress = shockwave.radius / shockwave.maxRadius;
+                    
+                    // Outer ring
+                    ctx.strokeStyle = shockwave.color;
+                    ctx.lineWidth = 4 * cameraZoom;
+                    ctx.globalAlpha = shockwave.life * 0.8;
+                    ctx.beginPath();
+                    ctx.arc(centerScreen.x, centerScreen.y, ringRadius, 0, Math.PI * 2);
+                    ctx.stroke();
+                    
+                    // Inner bright ring
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.lineWidth = 2 * cameraZoom;
+                    ctx.globalAlpha = shockwave.life;
+                    ctx.beginPath();
+                    ctx.arc(centerScreen.x, centerScreen.y, ringRadius - 2 * cameraZoom, 0, Math.PI * 2);
+                    ctx.stroke();
+                    
+                    // Energy glow
+                    const glowGradient = ctx.createRadialGradient(
+                        centerScreen.x, centerScreen.y, ringRadius - 20 * cameraZoom,
+                        centerScreen.x, centerScreen.y, ringRadius + 20 * cameraZoom
+                    );
+                    glowGradient.addColorStop(0, shockwave.color + '00');
+                    glowGradient.addColorStop(0.5, shockwave.color + '66');
+                    glowGradient.addColorStop(1, shockwave.color + '00');
+                    
+                    ctx.fillStyle = glowGradient;
+                    ctx.globalAlpha = shockwave.life * 0.5;
+                    ctx.beginPath();
+                    ctx.arc(centerScreen.x, centerScreen.y, ringRadius, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Add energy particles along the ring
+                    const particleCount = 16;
+                    for (let i = 0; i < particleCount; i++) {
+                        const angle = (Math.PI * 2 * i) / particleCount + Date.now() * 0.001;
+                        const particleX = centerScreen.x + Math.cos(angle) * ringRadius;
+                        const particleY = centerScreen.y + Math.sin(angle) * ringRadius;
+                        
+                        ctx.fillStyle = i % 2 === 0 ? shockwave.color : '#ffffff';
+                        ctx.globalAlpha = shockwave.life;
+                        ctx.beginPath();
+                        ctx.arc(particleX, particleY, 3 * cameraZoom, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                } else {
+                    // Old directional blast rendering (kept for compatibility)
+                    const angle = Math.atan2(
+                        shockwave.targetY - shockwave.y,
+                        shockwave.targetX - shockwave.x
+                    );
+                    
+                    const currentX = shockwave.x + Math.cos(angle) * shockwave.radius;
+                    const currentY = shockwave.y + Math.sin(angle) * shockwave.radius;
+                    
+                    const screen = worldToScreen(currentX, currentY);
+                    
+                    const progress = shockwave.radius / shockwave.maxRadius;
+                    const pulseScale = 1 + Math.sin(Date.now() * 0.01) * 0.2 + progress * 0.5;
+                    const blastSize = 40 * cameraZoom * pulseScale;
+                    
+                    const gradient = ctx.createRadialGradient(screen.x, screen.y, 0, screen.x, screen.y, blastSize);
+                    gradient.addColorStop(0, shockwave.color);
+                    gradient.addColorStop(0.3, shockwave.color);
+                    gradient.addColorStop(0.6, shockwave.color + '88');
+                    gradient.addColorStop(1, shockwave.color + '00');
+                    
+                    ctx.globalAlpha = shockwave.life;
+                    ctx.fillStyle = gradient;
+                    ctx.beginPath();
+                    ctx.arc(screen.x, screen.y, blastSize, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                
+                ctx.restore();
+            });
+        }
+        
+        function updateBossFissures(deltaTime) {
+            bossFissures = bossFissures.filter(fissure => {
+                // Update fissure state
+                if (fissure.state === 'opening') {
+                    fissure.radius += fissure.growthSpeed * deltaTime;
+                    if (fissure.radius >= fissure.targetRadius) {
+                        fissure.radius = fissure.targetRadius;
+                        fissure.state = 'open';
+                    }
+                } else if (fissure.state === 'open') {
+                    fissure.life -= deltaTime;
+                    if (fissure.life <= 60) { // Start closing in last second
+                        fissure.state = 'closing';
+                    }
+                } else if (fissure.state === 'closing') {
+                    fissure.radius -= fissure.growthSpeed * 2 * deltaTime; // Close faster
+                    fissure.life -= deltaTime;
+                    if (fissure.radius <= 0 || fissure.life <= 0) {
+                        return false; // Remove fissure
+                    }
+                }
+                
+                // Check collision with player when fissure is open
+                if (fissure.radius > 20 && playerSnake && playerSnake.alive) {
+                    const dx = playerSnake.x - fissure.x;
+                    const dy = playerSnake.y - fissure.y;
+                    const distSq = dx * dx + dy * dy;
+                    
+                    if (distSq < fissure.radius * fissure.radius) {
+                        if (playerSnake.invincibilityTimer <= 0) {
+                            // Create earth particles before death
+                            for (let i = 0; i < 30; i++) {
+                                const angle = Math.random() * Math.PI * 2;
+                                const speed = 2 + Math.random() * 5;
+                                particlePool.spawn(
+                                    playerSnake.x,
+                                    playerSnake.y,
+                                    Math.cos(angle) * speed,
+                                    Math.sin(angle) * speed,
+                                    '#8b6914'
+                                );
+                            }
+                            playerSnake.die(true);
+                            showMessage('Swallowed by the earth!', 'red');
+                        }
+                    }
+                }
+                
+                return true;
+            });
+        }
+        
+        function drawBossFissures() {
+            bossFissures.forEach(fissure => {
+                const screen = worldToScreen(fissure.x, fissure.y);
+                const radius = fissure.radius * cameraZoom;
+                
+                ctx.save();
+                
+                // Draw dark fissure hole
+                const gradient = ctx.createRadialGradient(
+                    screen.x, screen.y, 0,
+                    screen.x, screen.y, radius
                 );
                 
-                // Calculate current position along the path
-                const currentX = shockwave.x + Math.cos(angle) * shockwave.radius;
-                const currentY = shockwave.y + Math.sin(angle) * shockwave.radius;
+                // Animate the colors based on state
+                if (fissure.state === 'opening') {
+                    gradient.addColorStop(0, 'rgba(20, 10, 0, 0.9)');
+                    gradient.addColorStop(0.5, 'rgba(50, 25, 10, 0.7)');
+                    gradient.addColorStop(0.8, 'rgba(80, 40, 20, 0.5)');
+                    gradient.addColorStop(1, 'rgba(100, 50, 25, 0.2)');
+                } else if (fissure.state === 'closing') {
+                    const alpha = fissure.life / 60; // Fade out
+                    gradient.addColorStop(0, `rgba(20, 10, 0, ${0.9 * alpha})`);
+                    gradient.addColorStop(0.5, `rgba(50, 25, 10, ${0.7 * alpha})`);
+                    gradient.addColorStop(0.8, `rgba(80, 40, 20, ${0.5 * alpha})`);
+                    gradient.addColorStop(1, `rgba(100, 50, 25, ${0.2 * alpha})`);
+                } else {
+                    gradient.addColorStop(0, 'rgba(10, 5, 0, 1)'); // Very dark center
+                    gradient.addColorStop(0.3, 'rgba(30, 15, 5, 0.9)');
+                    gradient.addColorStop(0.6, 'rgba(60, 30, 15, 0.6)');
+                    gradient.addColorStop(1, 'rgba(90, 45, 20, 0.3)');
+                }
                 
-                const screen = worldToScreen(currentX, currentY);
-                
-                // Draw expanding ring
-                ctx.globalAlpha = shockwave.life * 0.8;
-                ctx.strokeStyle = shockwave.color;
-                ctx.lineWidth = 4 * cameraZoom;
+                ctx.fillStyle = gradient;
                 ctx.beginPath();
-                ctx.arc(screen.x, screen.y, 20 * cameraZoom * (1 + shockwave.radius / shockwave.maxRadius), 0, Math.PI * 2);
-                ctx.stroke();
-                
-                // Draw inner glow
-                ctx.globalAlpha = shockwave.life * 0.5;
-                ctx.strokeStyle = shockwave.color;
-                ctx.lineWidth = 8 * cameraZoom;
-                ctx.stroke();
-                
-                // Draw center bright spot
-                ctx.globalAlpha = shockwave.life;
-                ctx.fillStyle = shockwave.color;
-                ctx.beginPath();
-                ctx.arc(screen.x, screen.y, 5 * cameraZoom, 0, Math.PI * 2);
+                ctx.arc(screen.x, screen.y, radius, 0, Math.PI * 2);
                 ctx.fill();
+                
+                // Draw danger edge
+                if (fissure.state === 'open') {
+                    ctx.strokeStyle = 'rgba(255, 100, 0, 0.5)';
+                    ctx.lineWidth = 3 * cameraZoom;
+                    ctx.stroke();
+                }
+                
+                // Draw cracks around the edge
+                ctx.strokeStyle = 'rgba(50, 25, 10, 0.8)';
+                ctx.lineWidth = 2 * cameraZoom;
+                for (let i = 0; i < 8; i++) {
+                    const angle = (i / 8) * Math.PI * 2;
+                    const crackLength = radius * 0.3;
+                    ctx.beginPath();
+                    ctx.moveTo(
+                        screen.x + Math.cos(angle) * radius,
+                        screen.y + Math.sin(angle) * radius
+                    );
+                    ctx.lineTo(
+                        screen.x + Math.cos(angle) * (radius + crackLength),
+                        screen.y + Math.sin(angle) * (radius + crackLength)
+                    );
+                    ctx.stroke();
+                }
                 
                 ctx.restore();
             });
@@ -9464,6 +10143,40 @@
                         // Add rock emoji
                         const rockCanvas = getCachedEmoji('🪨', Math.round(projectile.size * 1.5 * cameraZoom));
                         ctx.drawImage(rockCanvas, screen.x - rockCanvas.width / 2, screen.y - rockCanvas.height / 2);
+                        
+                        // Draw impact crater if it exists
+                        if (projectile.impactCrater) {
+                            const crater = projectile.impactCrater;
+                            const craterScreen = worldToScreen(crater.x, crater.y);
+                            
+                            // Draw crater with fading effect
+                            const craterAlpha = crater.life / 180; // Fade out over time
+                            ctx.globalAlpha = craterAlpha * 0.6;
+                            
+                            // Crater gradient
+                            const craterGradient = ctx.createRadialGradient(
+                                craterScreen.x, craterScreen.y, 0,
+                                craterScreen.x, craterScreen.y, crater.radius * cameraZoom
+                            );
+                            craterGradient.addColorStop(0, 'rgba(50, 30, 10, 0.8)');
+                            craterGradient.addColorStop(0.5, 'rgba(80, 50, 20, 0.5)');
+                            craterGradient.addColorStop(1, 'rgba(100, 70, 30, 0)');
+                            
+                            ctx.fillStyle = craterGradient;
+                            ctx.beginPath();
+                            ctx.arc(craterScreen.x, craterScreen.y, crater.radius * cameraZoom, 0, Math.PI * 2);
+                            ctx.fill();
+                            
+                            // Danger zone indicator
+                            ctx.globalAlpha = craterAlpha * 0.3;
+                            ctx.strokeStyle = '#ff4444';
+                            ctx.lineWidth = 2 * cameraZoom;
+                            ctx.setLineDash([5, 5]);
+                            ctx.beginPath();
+                            ctx.arc(craterScreen.x, craterScreen.y, crater.radius * cameraZoom, 0, Math.PI * 2);
+                            ctx.stroke();
+                            ctx.setLineDash([]);
+                        }
                         break;
                         
                     case 'waterorb':
@@ -9503,6 +10216,47 @@
                         // Add void emoji or symbol
                         const voidCanvas = getCachedEmoji('🌀', Math.round(projectile.size * 1.3 * cameraZoom));
                         ctx.drawImage(voidCanvas, screen.x - voidCanvas.width / 2, screen.y - voidCanvas.height / 2);
+                        break;
+                        
+                    case 'tornado':
+                        // Save context for rotation
+                        ctx.save();
+                        ctx.translate(screen.x, screen.y);
+                        ctx.rotate(projectile.rotation);
+                        
+                        // Draw swirling tornado effect
+                        const tornadoGradient = ctx.createRadialGradient(0, 0, projectile.size * 0.2 * cameraZoom, 0, 0, projectile.size * cameraZoom);
+                        tornadoGradient.addColorStop(0, 'rgba(135, 206, 235, 0.9)'); // Light blue center
+                        tornadoGradient.addColorStop(0.3, 'rgba(100, 150, 200, 0.7)');
+                        tornadoGradient.addColorStop(0.6, 'rgba(70, 130, 180, 0.5)');
+                        tornadoGradient.addColorStop(1, 'rgba(50, 100, 150, 0.2)');
+                        
+                        ctx.fillStyle = tornadoGradient;
+                        ctx.beginPath();
+                        ctx.arc(0, 0, projectile.size * cameraZoom, 0, Math.PI * 2);
+                        ctx.fill();
+                        
+                        // Draw spiral lines
+                        ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+                        ctx.lineWidth = 2 * cameraZoom;
+                        for (let i = 0; i < 3; i++) {
+                            ctx.beginPath();
+                            const startAngle = (i * Math.PI * 2 / 3);
+                            ctx.moveTo(0, 0);
+                            const endX = Math.cos(startAngle) * projectile.size * cameraZoom;
+                            const endY = Math.sin(startAngle) * projectile.size * cameraZoom;
+                            ctx.quadraticCurveTo(
+                                endX * 0.5, endY * 0.5 + 10 * cameraZoom,
+                                endX, endY
+                            );
+                            ctx.stroke();
+                        }
+                        
+                        ctx.restore();
+                        
+                        // Add tornado emoji
+                        const tornadoCanvas = getCachedEmoji('🌪️', Math.round(projectile.size * 1.5 * cameraZoom));
+                        ctx.drawImage(tornadoCanvas, screen.x - tornadoCanvas.width / 2, screen.y - tornadoCanvas.height / 2);
                         break;
                 }
                 
@@ -10014,7 +10768,7 @@
                 message = `Combo! ${message}`;
             }
             
-            showMessage(message, isNew);
+            showMessage(message, isNew, 5000);
         }
         
         function showMessage(text, isDiscovery, timeout = 3000) {
@@ -10052,6 +10806,75 @@
                 popup.style.opacity = '0';
                 popup.className = '';
             }, timeout);
+        }
+        
+        // Boss Victory Message function
+        function showBossVictoryMessage(boss, skinUnlocked, elementBankExpanded) {
+            const victoryBox = document.getElementById('bossVictoryMessage');
+            
+            // Build the message content
+            let html = '<h2>BOSS VANQUISHED!</h2>';
+            html += `<div class="boss-name">${boss.name}</div>`;
+            
+            // Add defeat flavor text based on boss type
+            let defeatText = '';
+            switch(boss.bossType) {
+                case 'PYRAXIS':
+                    defeatText = "The Molten Lord's flames are extinguished! Banished to the eternal void!";
+                    break;
+                case 'ABYSSOS':
+                    defeatText = "The Deep One sinks into the abyss! Cast into the void's embrace!";
+                    break;
+                case 'ZEPHYRUS':
+                    defeatText = "The Storm Caller's winds are silenced! Scattered to the void!";
+                    break;
+                case 'OSSEUS':
+                    defeatText = "The Bone Sovereign crumbles to dust! Entombed in the void!";
+                    break;
+                default:
+                    defeatText = `${boss.name} has been banished to the void!`;
+            }
+            html += `<div class="defeat-text">${defeatText}</div>`;
+            
+            // Add rewards section
+            html += '<div class="rewards">';
+            html += '<div class="reward-item highlight">✨ +10,000 Points!</div>';
+            html += '<div class="reward-item">💎 4x Catalyst Gems</div>';
+            html += '<div class="reward-item">🌀 2x Void Orbs</div>';
+            html += '<div class="reward-item">🔥 16x Boss Elements</div>';
+            
+            // Only show skin unlock if it's new
+            if (skinUnlocked) {
+                const skinName = BOSS_TYPES[boss.bossType].skin;
+                html += `<div class="reward-item highlight">🎨 ${boss.name} Skin Unlocked!</div>`;
+            }
+            
+            // Show element bank expansion if applicable
+            if (elementBankExpanded) {
+                html += `<div class="reward-item highlight">📦 Element Bank Expanded!</div>`;
+            }
+            
+            html += '</div>';
+            
+            // Set the content and show the message
+            victoryBox.innerHTML = html;
+            victoryBox.className = 'show';
+            victoryBox.style.display = 'block';
+            
+            // Clear any existing timeout
+            if (victoryBox.hideTimeout) {
+                clearTimeout(victoryBox.hideTimeout);
+            }
+            
+            // Hide after 8 seconds
+            victoryBox.hideTimeout = setTimeout(() => {
+                victoryBox.style.opacity = '0';
+                setTimeout(() => {
+                    victoryBox.style.display = 'none';
+                    victoryBox.className = '';
+                    victoryBox.style.opacity = '1';
+                }, 300);
+            }, 8000);
         }
         
         // Victory popup function
@@ -12333,7 +13156,25 @@
             const allSkins = Object.keys(skinMetadata).filter(skin => skin !== 'snake-default-green');
             allSkins.unshift('snake-default-green'); // Put default first
             
+            // Ensure all 4 boss skins are included
+            const bossSkins = ['pyraxis', 'abyssos', 'osseus', 'zephyrus'];
+            bossSkins.forEach(bossSkin => {
+                if (!allSkins.includes(bossSkin)) {
+                    console.warn(`Boss skin ${bossSkin} was missing from allSkins, adding it`);
+                    allSkins.push(bossSkin);
+                }
+            });
+            
+            // Debug: Count boss skins
+            const bossSkinsInList = allSkins.filter(skinId => skinMetadata[skinId] && skinMetadata[skinId].isBoss);
+            console.log(`Displaying ${bossSkinsInList.length} boss skins:`, bossSkinsInList);
+            
             allSkins.forEach(skinId => {
+                // Skip if skin doesn't exist in metadata
+                if (!skinMetadata[skinId]) {
+                    console.error(`Skin ${skinId} not found in skinMetadata`);
+                    return;
+                }
                 const skinData = skinMetadata[skinId];
                 const div = document.createElement('div');
                 div.className = 'skin-item';
@@ -12360,7 +13201,7 @@
                     if (skinData.unlocked) {
                         img.src = `assets/boss-skins/${skinId}.png`;
                     } else {
-                        // Show a lock icon or placeholder for locked boss skins
+                        // Show a question mark for locked boss skins
                         img.style.display = 'none';
                         const placeholder = document.createElement('div');
                         placeholder.style.width = '100%';
@@ -12370,7 +13211,8 @@
                         placeholder.style.justifyContent = 'center';
                         placeholder.style.fontSize = '48px';
                         placeholder.style.backgroundColor = 'rgba(0,0,0,0.3)';
-                        placeholder.textContent = '🔒';
+                        placeholder.style.borderRadius = '8px';
+                        placeholder.textContent = '❓';
                         div.appendChild(placeholder);
                     }
                 } else {
@@ -12668,7 +13510,15 @@
                 
                 // Spawn new elements to maintain target count (increased during boss battles)
                 const currentElementCount = elementPool.getActiveCount();
-                const bossSpawnMultiplier = bossEncounterActive ? 3 : 1; // 3x spawn rate during boss battles
+                // Special case for Osseus - limit to 2x spawn rate
+                let bossSpawnMultiplier = 1;
+                if (bossEncounterActive) {
+                    if (currentBoss && currentBoss.elementId === 0) { // Osseus (Earth element)
+                        bossSpawnMultiplier = 2; // Cap at 2x for Osseus
+                    } else {
+                        bossSpawnMultiplier = 3; // 3x for other bosses
+                    }
+                }
                 
                 if (currentElementCount < TARGET_ELEMENT_COUNT - 20) {
                     // Only spawn if significantly below target
@@ -12778,6 +13628,7 @@
                     // Update boss projectiles
                     updateBossProjectiles(1.0);
                     updateShockwaves(1.0);
+                    updateBossFissures(1.0);
                     
                     // Update damage numbers
                     updateDamageNumbers(1.0);
@@ -12864,7 +13715,7 @@
                             score: playerSnake.score,
                             discoveries: playerSnake.discoveries,
                             kills: playerSnake.kills,
-                            length: playerSnake.body.length,
+                            length: playerSnake.segments.length,
                             play_time: gameSessionStartTime ? Math.floor((Date.now() - gameSessionStartTime) / 1000) : 0
                         });
                     }
@@ -12970,6 +13821,17 @@
                 if (!isFinite(camera.y)) camera.y = WORLD_SIZE / 2;
             }
             
+            // Apply screen shake if active
+            let screenShakeActive = false;
+            if (bossScreenShakeTimer > 0) {
+                screenShakeActive = true;
+                ctx.save();
+                const shakeX = (Math.random() - 0.5) * bossScreenShakeIntensity;
+                const shakeY = (Math.random() - 0.5) * bossScreenShakeIntensity;
+                ctx.translate(shakeX, shakeY);
+                bossScreenShakeTimer--;
+            }
+            
             // Draw everything
             drawBackground();
             
@@ -13002,6 +13864,7 @@
             
             // Draw boss projectiles
             if (bossEncounterActive) {
+                drawBossFissures(); // Draw fissures first (under everything else)
                 drawBossProjectiles();
                 drawShockwaves();
                 drawDamageNumbers();
@@ -13023,15 +13886,6 @@
             // Draw particles (particle pool handles viewport culling)
             particlePool.draw();
             
-            // Apply screen shake if active
-            if (bossScreenShakeTimer > 0) {
-                ctx.save();
-                const shakeX = (Math.random() - 0.5) * bossScreenShakeIntensity;
-                const shakeY = (Math.random() - 0.5) * bossScreenShakeIntensity;
-                ctx.translate(shakeX, shakeY);
-                ctx.restore();
-            }
-            
             // Draw boss damage flash
             if (bossDamageFlashTimer > 0) {
                 ctx.save();
@@ -13040,11 +13894,25 @@
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ctx.restore();
                 bossDamageFlashTimer--;
+                
+                // Redraw player on top of the damage flash to ensure visibility
+                if (playerSnake && playerSnake.alive) {
+                    // Save context state before redrawing to ensure clean state
+                    ctx.save();
+                    ctx.globalAlpha = 1; // Ensure full opacity
+                    playerSnake.draw(interpolation);
+                    ctx.restore();
+                }
             }
             
             // Update boss damage cooldown
             if (bossDamageCooldown > 0) {
                 bossDamageCooldown--;
+            }
+            
+            // Restore context if screen shake was active
+            if (screenShakeActive) {
+                ctx.restore();
             }
         }
         
