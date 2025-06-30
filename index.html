@@ -4469,6 +4469,13 @@
         let comboStreak = 0; // Track consecutive combinations
         let animationFrameId = null; // Track the animation frame to prevent multiple loops
         
+        // Enhanced mobile detection including iPads
+        function isTabletOrMobile() {
+            return window.matchMedia("(max-width: 1024px)").matches || 
+                   window.matchMedia("(pointer: coarse)").matches ||
+                   /iPad|iPhone|iPod|Android/i.test(navigator.userAgent);
+        }
+        
         // Show rotate device message for mobile users
         function showRotateDeviceMessage() {
             const rotateMsg = document.createElement('div');
@@ -14773,12 +14780,6 @@
         
         // Enhanced mobile experience JavaScript
         document.addEventListener('DOMContentLoaded', function() {
-            // Enhanced mobile detection including iPads
-            function isTabletOrMobile() {
-                return window.matchMedia("(max-width: 1024px)").matches || 
-                       window.matchMedia("(pointer: coarse)").matches ||
-                       /iPad|iPhone|iPod|Android/i.test(navigator.userAgent);
-            }
             
             // Apply mobile class more accurately
             if (isTabletOrMobile()) {
