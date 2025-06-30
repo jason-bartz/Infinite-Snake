@@ -13,6 +13,15 @@ let tierFilter = '';
 
 const ELEMENTS_PER_PAGE = 100;
 
+// Navigation state preservation - make it global so admin.js can access it
+window.navigationState = {
+    scrollPosition: 0,
+    currentPage: 1,
+    currentLetter: 'all',
+    searchQuery: '',
+    tierFilter: ''
+};
+
 document.addEventListener('DOMContentLoaded', async function() {
     if (window.elementsGridInitialized) {
         return;
@@ -211,6 +220,13 @@ function displayPage() {
         const card = document.createElement('div');
         card.className = 'element-card';
         card.onclick = () => {
+            // Save current navigation state
+            window.navigationState.scrollPosition = window.scrollY;
+            window.navigationState.currentPage = currentPage;
+            window.navigationState.currentLetter = currentLetter;
+            window.navigationState.searchQuery = searchQuery;
+            window.navigationState.tierFilter = tierFilter;
+            
             document.getElementById('elements-grid').style.display = 'none';
             document.getElementById('pagination').style.display = 'none';
             if (typeof showElement === 'function') {

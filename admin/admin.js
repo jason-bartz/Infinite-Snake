@@ -878,6 +878,41 @@ function hideResults() {
     const pagination = document.getElementById('pagination');
     if (grid) grid.style.display = 'grid';
     if (pagination) pagination.style.display = 'flex';
+    
+    // Restore saved navigation state
+    if (window.navigationState && window.navigationState.scrollPosition !== undefined) {
+        // Restore variables
+        if (typeof currentPage !== 'undefined') currentPage = window.navigationState.currentPage;
+        if (typeof currentLetter !== 'undefined') currentLetter = window.navigationState.currentLetter;
+        if (typeof searchQuery !== 'undefined') searchQuery = window.navigationState.searchQuery;
+        if (typeof tierFilter !== 'undefined') tierFilter = window.navigationState.tierFilter;
+        
+        // Restore UI values
+        const searchBox = document.getElementById('search-box');
+        const tierFilterEl = document.getElementById('tier-filter');
+        
+        if (searchBox) searchBox.value = window.navigationState.searchQuery;
+        if (tierFilterEl) tierFilterEl.value = window.navigationState.tierFilter;
+        
+        // Update letter filter buttons
+        const letterBtns = document.querySelectorAll('.letter-btn');
+        letterBtns.forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.dataset.letter === window.navigationState.currentLetter) {
+                btn.classList.add('active');
+            }
+        });
+        
+        // Re-apply filters and display
+        if (typeof filterAndDisplay === 'function') {
+            filterAndDisplay();
+        }
+        
+        // Restore scroll position after a brief delay to ensure content is rendered
+        setTimeout(() => {
+            window.scrollTo(0, window.navigationState.scrollPosition);
+        }, 50);
+    }
 }
 
 function showMessage(text, type) {

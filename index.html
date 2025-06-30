@@ -3456,7 +3456,7 @@
                         <div style="margin-bottom: 15px;">
                             <h5 style="color: #4ecdc4; margin-bottom: 5px;">✨ Power-ups</h5>
                             <p><strong>🌀 Void Orb:</strong> Clear your element inventory and convert to points (may produce a random element!)</p>
-                            <p><strong>💎 Catalyst Gem:</strong> Summons 2 random compatible elements for combining</p>
+                            <p><strong>💎 Catalyst Gem:</strong> Summons 3 rare undiscovered elements not in the current spawn pool</p>
                         </div>
                         
                         <div style="margin-bottom: 15px;">
@@ -5983,7 +5983,7 @@
                             playerDiscoveredElements.add(resultId);
                         }
                         
-                        this.score += 1000; // 1000 points for new discovery
+                        this.score += 500; // 500 points for new discovery
                         this.discoveries++; // Increment discovery count
                         
                         // Additional effects for player
@@ -6066,7 +6066,7 @@
                                 x: this.segments[0].x,
                                 y: this.segments[0].y,
                                 radius: 0,
-                                maxRadius: 600, // Fixed max radius for omnidirectional wave
+                                maxRadius: 400, // Reduced radius for increased difficulty
                                 speed: 10, // Slower expansion for visibility
                                 color: shockwaveColor,
                                 life: 1.0,
@@ -6159,7 +6159,7 @@
                                 // Check if it's a new discovery
                                 if (!this.discoveredElements.has(resultId)) {
                                     this.discoveredElements.add(resultId);
-                                this.score += 1000; // Discovery bonus
+                                this.score += 500; // Discovery bonus
                                 this.discoveries++;
                                 
                                 if (this.isPlayer && this === playerSnake) {
@@ -6701,7 +6701,10 @@
                     ctx.textBaseline = 'bottom';
                     const nameY = screenY - SEGMENT_SIZE * cameraZoom - 10;
                     
-                    if (!this.isPlayer && this.personality) {
+                    // Check for boss first, before checking personality
+                    if (this.isBoss) {
+                        // Bosses don't show their name, only the skull emoji below
+                    } else if (!this.isPlayer && this.personality) {
                         // Split name into personality and actual name parts
                         const personalityName = this.personality.name + ' ';
                         const actualName = this.name.substring(personalityName.length);
@@ -6726,19 +6729,12 @@
                         ctx.fillStyle = 'white';
                         ctx.fillText(actualName, startX + personalityWidth + actualNameWidth / 2, nameY);
                     } else {
-                        // Player name, boss name, or fallback - draw normally
+                        // Player name or AI without personality - draw normally
                         ctx.strokeStyle = 'black';
                         ctx.lineWidth = 3;
                         ctx.fillStyle = 'white';
-                        // For bosses, show only skull emoji
-                        let displayName;
-                        if (this.isBoss) {
-                            displayName = '💀';
-                        } else {
-                            displayName = this.name;
-                        }
-                        ctx.strokeText(displayName, screenX, nameY);
-                        ctx.fillText(displayName, screenX, nameY);
+                        ctx.strokeText(this.name, screenX, nameY);
+                        ctx.fillText(this.name, screenX, nameY);
                     }
                     
                     // Draw crown if leader
@@ -6749,6 +6745,17 @@
                         ctx.globalAlpha = 1;
                         // Increased offset from 30 to 45 to move crown higher
                         ctx.drawImage(crownCanvas, screenX - crownCanvas.width / 2, screenY - SEGMENT_SIZE * cameraZoom - 45 - crownCanvas.height / 2);
+                        ctx.restore();
+                    }
+                    
+                    // Draw skull if boss
+                    if (this.isBoss) {
+                        const skullSize = 32; // Larger than crown
+                        const skullCanvas = getCachedEmoji('💀', skullSize);
+                        ctx.save();
+                        ctx.globalAlpha = 1;
+                        // Position skull above head, similar to crown but larger
+                        ctx.drawImage(skullCanvas, screenX - skullCanvas.width / 2, screenY - SEGMENT_SIZE * cameraZoom - 50 - skullCanvas.height / 2);
                         ctx.restore();
                     }
                 }
@@ -8192,6 +8199,7 @@
                 this.introAnimationTimer = 120; // 2 seconds of intro animation
                 this.damageFlashTimer = 0;
                 this.stunTimer = 0;
+                this.invulnerabilityTimer = 0; // Post-stun invulnerability
                 
                 // Stationary attack phase management
                 this.attackPhase = false;
@@ -8242,7 +8250,16 @@
                 
                 if (this.stunTimer > 0) {
                     this.stunTimer -= deltaTime;
+                    if (this.stunTimer <= 0) {
+                        // When stun ends, start invulnerability period
+                        this.invulnerabilityTimer = 180; // 3 seconds of invulnerability
+                    }
                     return; // Don't move or attack while stunned
+                }
+                
+                // Update invulnerability timer
+                if (this.invulnerabilityTimer > 0) {
+                    this.invulnerabilityTimer -= deltaTime;
                 }
                 
                 // Update phase timer
@@ -8433,7 +8450,11 @@
                 }
                 
                 // Execute attack pattern only during attack phase
-                if (this.attackPhase && this.attackTimer >= this.attackCooldown) {
+                // Double attack speed when desperate (health <= 25%)
+                const healthPercent = this.health / this.maxHealth;
+                const effectiveCooldown = healthPercent <= 0.25 ? this.attackCooldown / 2 : this.attackCooldown;
+                
+                if (this.attackPhase && this.attackTimer >= effectiveCooldown) {
                     this.executeAttack();
                     this.attackTimer = 0;
                 }
@@ -8478,11 +8499,11 @@
             }
             
             fireballAttack() {
-                // Shoot 3 fireballs in spread pattern toward player
+                // Shoot 4 fireballs in spread pattern toward player
                 const baseAngle = Math.atan2(playerSnake.y - this.y, playerSnake.x - this.x);
-                const spreadAngle = Math.PI / 6; // 30 degree spread
+                const spreadAngle = Math.PI / 8; // Slightly tighter spread for 4 fireballs
                 
-                for (let i = -1; i <= 1; i++) {
+                for (let i = -1.5; i <= 1.5; i++) {
                     const angle = baseAngle + (i * spreadAngle);
                     const speed = 8;
                     
@@ -8533,13 +8554,19 @@
                 const fissureCount = 8 + Math.floor(Math.random() * 5); // 8-12 fissures
                 
                 for (let i = 0; i < fissureCount; i++) {
-                    // Random position within reasonable range of player
-                    const angle = Math.random() * Math.PI * 2;
-                    const distance = 100 + Math.random() * 400; // 100-500 pixels from boss
+                    // Random position anywhere on the visible game board
+                    // Get the visible world bounds based on camera
+                    const worldBounds = {
+                        left: camera.x - (canvas.width / 2) / cameraZoom,
+                        right: camera.x + (canvas.width / 2) / cameraZoom,
+                        top: camera.y - (canvas.height / 2) / cameraZoom,
+                        bottom: camera.y + (canvas.height / 2) / cameraZoom
+                    };
                     
-                    // Center fissures around the boss position
-                    const x = this.x + Math.cos(angle) * distance;
-                    const y = this.y + Math.sin(angle) * distance;
+                    // Add some padding to ensure fissures can appear at screen edges
+                    const padding = 100;
+                    const x = worldBounds.left - padding + Math.random() * (worldBounds.right - worldBounds.left + padding * 2);
+                    const y = worldBounds.top - padding + Math.random() * (worldBounds.bottom - worldBounds.top + padding * 2);
                     
                     // Vary fissure sizes
                     const size = 60 + Math.random() * 80; // 60-140 pixel radius
@@ -8589,9 +8616,9 @@
                 // Shoot tornados at the player
                 const baseAngle = Math.atan2(playerSnake.y - this.y, playerSnake.x - this.x);
                 
-                // Create 2 tornados with slightly different paths
-                for (let i = -1; i <= 1; i += 2) { // -1 and 1 only
-                    const angle = baseAngle + (i * 0.2); // Wider spread
+                // Create 3 tornados with slightly different paths
+                for (let i = -1; i <= 1; i++) { // -1, 0, and 1 for 3 tornados
+                    const angle = baseAngle + (i * 0.25); // Spread pattern for 3 tornados
                     const speed = 4; // Slower than void projectiles
                     
                     bossProjectiles.push({
@@ -8623,6 +8650,17 @@
                     return;
                 }
                 
+                // Make boss invincible during stun period and post-stun invulnerability
+                if (this.stunTimer > 0) {
+                    console.log('[BOSS] Damage blocked - boss is stunned');
+                    return;
+                }
+                
+                if (this.invulnerabilityTimer > 0) {
+                    console.log('[BOSS] Damage blocked - boss is invulnerable');
+                    return;
+                }
+                
                 // Make Zephyrus invincible during element vacuum
                 if (this.bossType === 'ZEPHYRUS' && elementVacuumActive) {
                     return;
@@ -8630,7 +8668,7 @@
                 
                 this.health--;
                 this.damageFlashTimer = 30;
-                this.stunTimer = 120; // 2 second stun
+                this.stunTimer = 60; // 1 second stun (reduced from 2 seconds)
                 bossDamageFlashTimer = 20;
                 
                 // Create damage number
@@ -8744,9 +8782,9 @@
                     vy: -2
                 });
                 
-                // Elemental burst - spawn elements in a spiral
-                for (let i = 0; i < 16; i++) {
-                    const angle = (Math.PI * 2 / 16) * i;
+                // Elemental burst - spawn fewer elements in a spiral (reduced from 16 to 8)
+                for (let i = 0; i < 8; i++) {
+                    const angle = (Math.PI * 2 / 8) * i;
                     const delay = i * 50; // Stagger the spawns
                     
                     setTimeout(() => {
@@ -8920,6 +8958,32 @@
                 }
                 
                 // No need to restore SEGMENT_SIZE since we didn't change it
+                
+                // Add invulnerability shield effect
+                if (this.invulnerabilityTimer > 0) {
+                    ctx.save();
+                    const screen = worldToScreen(this.x, this.y);
+                    
+                    // Pulsing blue shield effect
+                    const shieldPulse = Math.sin(Date.now() * 0.01) * 0.2 + 0.3;
+                    ctx.globalAlpha = shieldPulse;
+                    ctx.strokeStyle = '#00ffff';
+                    ctx.lineWidth = 8 * cameraZoom;
+                    
+                    // Draw shield ring
+                    ctx.beginPath();
+                    ctx.arc(screen.x, screen.y, 90 * cameraZoom, 0, Math.PI * 2);
+                    ctx.stroke();
+                    
+                    // Add inner shield effect
+                    ctx.globalAlpha = shieldPulse * 0.5;
+                    ctx.fillStyle = '#00ffff';
+                    ctx.beginPath();
+                    ctx.arc(screen.x, screen.y, 85 * cameraZoom, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.restore();
+                }
                 
                 // Add boss glow effect
                 if (glowIntensity > 0 || phaseGlow) {
@@ -9143,7 +9207,9 @@
                         if (playerSnake && playerSnake.alive) {
                             const dx = playerSnake.x - projectile.x;
                             const dy = playerSnake.y - projectile.y;
-                            if (dx * dx + dy * dy < projectile.size * projectile.size) {
+                            const distance = Math.sqrt(dx * dx + dy * dy);
+                            const playerRadius = SEGMENT_SIZE * (playerSnake.size || 1);
+                            if (distance < projectile.size + playerRadius) {
                                 // Check invincibility before dealing damage
                                 if (playerSnake.invincibilityTimer <= 0) {
                                     // Create explosion particles before death
@@ -9163,8 +9229,8 @@
                                     showMessage('Incinerated by Pyraxis!', 'red');
                                 }
                                 
-                                // Sometimes leave fire element
-                                if (Math.random() < 0.3) {
+                                // Rarely leave fire element (reduced from 30% to 10%)
+                                if (Math.random() < 0.1) {
                                     spawnElement(projectile.elementId, projectile.x, projectile.y);
                                 }
                                 
@@ -9207,7 +9273,7 @@
                         }
                         
                         // Spawn water elements occasionally
-                        if (Math.random() < 0.05) {
+                        if (Math.random() < 0.02) { // Reduced from 5% to 2%
                             const angle = Math.random() * Math.PI * 2;
                             spawnElement(projectile.elementId,
                                 projectile.x + Math.cos(angle) * projectile.radius,
@@ -9318,7 +9384,8 @@
                         if (!projectile.falling) {
                             if (!projectile.groundTimer) {
                                 projectile.groundTimer = 180; // 3 seconds on ground
-                                spawnElement(projectile.elementId, projectile.x, projectile.y);
+                                // Disabled element spawning from bone projectiles to reduce boss element abundance
+                                // spawnElement(projectile.elementId, projectile.x, projectile.y);
                             }
                             projectile.groundTimer -= deltaTime;
                             
@@ -9335,9 +9402,11 @@
                     
                     // Check collision with player
                     if (playerSnake && playerSnake.alive) {
-                        const dx = projectile.x - playerSnake.x;
-                        const dy = projectile.y - playerSnake.y;
-                        if (Math.sqrt(dx * dx + dy * dy) < projectile.size + SEGMENT_SIZE) {
+                        const dx = playerSnake.x - projectile.x;
+                        const dy = playerSnake.y - projectile.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        const playerRadius = SEGMENT_SIZE * (playerSnake.size || 1);
+                        if (distance < projectile.size + playerRadius) {
                             if (playerSnake.invincibilityTimer <= 0) {
                                 // Create water splash particles before death
                                 for (let i = 0; i < 30; i++) {
@@ -9356,8 +9425,8 @@
                                 showMessage('Swept away by Abyssos!', 'red');
                             }
                             
-                            // Sometimes leave water element
-                            if (Math.random() < 0.3) {
+                            // Rarely leave water element (reduced from 30% to 10%)
+                            if (Math.random() < 0.1) {
                                 spawnElement(projectile.elementId, projectile.x, projectile.y);
                             }
                             
@@ -9971,9 +10040,10 @@
                 if (fissure.radius > 20 && playerSnake && playerSnake.alive) {
                     const dx = playerSnake.x - fissure.x;
                     const dy = playerSnake.y - fissure.y;
-                    const distSq = dx * dx + dy * dy;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    const playerRadius = SEGMENT_SIZE * (playerSnake.size || 1);
                     
-                    if (distSq < fissure.radius * fissure.radius) {
+                    if (distance < fissure.radius + playerRadius) {
                         if (playerSnake.invincibilityTimer <= 0) {
                             // Create earth particles before death
                             for (let i = 0; i < 30; i++) {
@@ -10279,7 +10349,7 @@
                 
                 ctx.save();
                 ctx.globalAlpha = num.life / 60; // Fade out
-                ctx.font = `bold ${40 * cameraZoom}px ${FONT_FAMILY}`;
+                ctx.font = `bold ${40 * cameraZoom}px Arial`;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 
@@ -11769,6 +11839,8 @@
                 } else {
                     // Empty slot
                     div.classList.add('empty');
+                    // Clear any stale element ID to prevent phantom elements
+                    delete div.dataset.elementId;
                 }
                 
                 elementBar.appendChild(div);
@@ -11990,47 +12062,30 @@
                     if (dx * dx + dy * dy < collisionDistSq) {
                         // Only activate if catalyst gem logic is ready
                         if (snake.isPlayer && window.elementLoader && window.elementLoader.isLoaded && window.elementLoader.isLoaded()) {
-                            // NEW CATALYST LOGIC: Find combinations that produce undiscovered elements
-                            const undiscoveredCombinations = [];
-                            const allCombinations = window.elementLoader.combinations || {};
+                            // NEW CATALYST LOGIC: Spawn 3 random elements NOT in the current spawn pool
+                            // These are elements the player hasn't discovered yet
+                            const allElements = window.elementLoader.elements;
+                            const undiscoveredElements = [];
                             
-                            // Find all combinations that result in undiscovered elements
-                            for (const [combo, resultId] of Object.entries(allCombinations)) {
-                                if (!discoveredElements.has(resultId)) {
-                                    const [elem1, elem2] = combo.split('+');
-                                    const elem1Id = parseInt(elem1);
-                                    const elem2Id = parseInt(elem2);
-                                    
-                                    // Check if both elements are discovered or base elements
-                                    const element1 = window.elementLoader.elements.get(elem1Id);
-                                    const element2 = window.elementLoader.elements.get(elem2Id);
-                                    
-                                    if (element1 && element2) {
-                                        const elem1Discovered = element1.t === 0 || discoveredElements.has(elem1Id);
-                                        const elem2Discovered = element2.t === 0 || discoveredElements.has(elem2Id);
-                                        
-                                        if (elem1Discovered && elem2Discovered) {
-                                            undiscoveredCombinations.push({
-                                                element1: elem1Id,
-                                                element2: elem2Id,
-                                                result: resultId,
-                                                combo: combo
-                                            });
-                                        }
-                                    }
+                            // Find all elements that are NOT in the spawn pool (not discovered by player)
+                            for (const [elemId, element] of allElements) {
+                                const elemIdNum = typeof elemId === 'string' ? parseInt(elemId) : elemId;
+                                const isBaseElement = elemIdNum >= 0 && elemIdNum <= 3;
+                                
+                                // Skip base elements and already discovered elements
+                                if (!isBaseElement && !playerDiscoveredElements.has(elemIdNum)) {
+                                    undiscoveredElements.push(elemIdNum);
                                 }
                             }
                             
-                            
-                            if (undiscoveredCombinations.length > 0) {
-                                // Randomly select one combination
-                                const selectedCombo = undiscoveredCombinations[Math.floor(Math.random() * undiscoveredCombinations.length)];
-                                const elementsToSpawn = [selectedCombo.element1, selectedCombo.element2];
+                            if (undiscoveredElements.length >= 3) {
+                                // Randomly select 3 undiscovered elements
+                                const shuffled = [...undiscoveredElements].sort(() => Math.random() - 0.5);
+                                const elementsToSpawn = shuffled.slice(0, 3);
                                 
-                                
-                                // Spawn the two elements around the player
+                                // Spawn the three elements around the player in a triangle pattern
                                 for (let j = 0; j < elementsToSpawn.length; j++) {
-                                    const angle = (j / elementsToSpawn.length) * Math.PI * 2;
+                                    const angle = (j / 3) * Math.PI * 2;
                                     const distance = 100 + Math.random() * 100;
                                     const spawnX = snake.x + Math.cos(angle) * distance;
                                     const spawnY = snake.y + Math.sin(angle) * distance;
@@ -12039,32 +12094,39 @@
                                     elementPool.spawn(elementsToSpawn[j], spawnX, spawnY, true);
                                 }
                                 
-                                // Get the result element info for the message
-                                const resultElement = window.elementLoader.elements.get(selectedCombo.result);
-                                const resultName = resultElement ? resultElement.n : 'Unknown';
+                                showMessage(`💎 Catalyst Gem: 3 Rare Elements Materialized!`, 'gold');
+                            } else if (undiscoveredElements.length > 0) {
+                                // Spawn whatever undiscovered elements are left
+                                const elementsToSpawn = undiscoveredElements;
                                 
-                                showMessage(`💎 Catalyst Gem Activated: New Elements Have Resonated Into Existence`, 'success');
-                            } else {
-                                // Fallback: No undiscovered combinations available
-                                // Spawn random discovered elements
-                                const discoveredElementsList = Array.from(discoveredElements);
-                                if (discoveredElementsList.length >= 2) {
-                                    const shuffled = [...discoveredElementsList].sort(() => Math.random() - 0.5);
-                                    const elementsToSpawn = shuffled.slice(0, 2);
+                                // Spawn the elements
+                                for (let j = 0; j < elementsToSpawn.length; j++) {
+                                    const angle = (j / elementsToSpawn.length) * Math.PI * 2;
+                                    const distance = 100 + Math.random() * 100;
+                                    const spawnX = snake.x + Math.cos(angle) * distance;
+                                    const spawnY = snake.y + Math.sin(angle) * distance;
                                     
-                                    
-                                    // Spawn the elements
-                                    for (let j = 0; j < elementsToSpawn.length; j++) {
-                                        const angle = (j / elementsToSpawn.length) * Math.PI * 2;
-                                        const distance = 100 + Math.random() * 100;
-                                        const spawnX = snake.x + Math.cos(angle) * distance;
-                                        const spawnY = snake.y + Math.sin(angle) * distance;
-                                        
-                                        elementPool.spawn(elementsToSpawn[j], spawnX, spawnY, true);
-                                    }
-                                    
-                                    showMessage(`💎 Catalyst Gem Activated: New Elements Have Resonated Into Existence`, 'success');
+                                    elementPool.spawn(elementsToSpawn[j], spawnX, spawnY, true);
                                 }
+                                
+                                showMessage(`💎 Catalyst Gem: ${elementsToSpawn.length} Rare Elements Materialized!`, 'gold');
+                            } else {
+                                // Fallback: All elements discovered, spawn random elements
+                                const allElementsList = Array.from(allElements.keys());
+                                const shuffled = [...allElementsList].sort(() => Math.random() - 0.5);
+                                const elementsToSpawn = shuffled.slice(0, 3);
+                                
+                                // Spawn the elements
+                                for (let j = 0; j < elementsToSpawn.length; j++) {
+                                    const angle = (j / elementsToSpawn.length) * Math.PI * 2;
+                                    const distance = 100 + Math.random() * 100;
+                                    const spawnX = snake.x + Math.cos(angle) * distance;
+                                    const spawnY = snake.y + Math.sin(angle) * distance;
+                                    
+                                    elementPool.spawn(elementsToSpawn[j], spawnX, spawnY, true);
+                                }
+                                
+                                showMessage(`💎 Catalyst Gem: 3 Elements Materialized!`, 'gold');
                             }
                             
                             // Play catalyst gem sound at appropriate volume
@@ -12107,6 +12169,9 @@
                 for (const otherSnake of snakes) {
                     if (snake === otherSnake || !otherSnake.alive || !snake.alive || diedThisFrame.has(otherSnake)) continue;
                     
+                    // Skip collision if boss is stunned or invulnerable
+                    if (otherSnake.isBoss && (otherSnake.stunTimer > 0 || otherSnake.invulnerabilityTimer > 0)) continue;
+                    
                     // Skip collision check if snakes are too far apart (optimization for mobile)
                     const maxCollisionDistance = 500; // Maximum distance for collision checks
                     const dx = otherSnake.x - snake.x;
@@ -12115,13 +12180,21 @@
                     
                     // Check head collision with other snake's body
                     let collisionOccurred = false;
-                    const segmentSizeSq = SEGMENT_SIZE * SEGMENT_SIZE;
-                    for (let i = 3; i < otherSnake.segments.length; i++) {
+                    
+                    // Calculate proper collision radius based on both snakes' sizes
+                    const snakeSize = snake.size || 1;
+                    const otherSnakeSize = otherSnake.size || 1;
+                    const collisionRadius = SEGMENT_SIZE * (snakeSize + otherSnakeSize) / 2;
+                    const collisionRadiusSq = collisionRadius * collisionRadius;
+                    
+                    // For body segments, check collision with all segments (including head and tail for bosses)
+                    const startIndex = otherSnake.isBoss ? 0 : 3; // Boss collision includes all segments
+                    for (let i = startIndex; i < otherSnake.segments.length; i++) {
                         const segment = otherSnake.segments[i];
                         // Performance optimization: Use squared distance
                         const dx = segment.x - snake.x;
                         const dy = segment.y - snake.y;
-                        if (dx * dx + dy * dy < segmentSizeSq) {
+                        if (dx * dx + dy * dy < collisionRadiusSq) {
                             // Track collision for near-miss prevention
                             if (snake.isPlayer) {
                                 snake.recentCollisions.add(otherSnake);
@@ -12144,7 +12217,7 @@
                         // Performance optimization: Use squared distance
                         const hdx = otherSnake.x - snake.x;
                         const hdy = otherSnake.y - snake.y;
-                        if (hdx * hdx + hdy * hdy < segmentSizeSq) {
+                        if (hdx * hdx + hdy * hdy < collisionRadiusSq) {
                             // Smaller snake explodes, or both if same size
                             if (snake.length < otherSnake.length) {
                                 snake.explode(otherSnake);
@@ -12213,19 +12286,24 @@
                     // Update minimum distance seen
                     trackingData.minDistance = Math.min(trackingData.minDistance, closestDistance);
                     
-                    // Define near-miss zone
-                    const isClose = closestDistance <= SEGMENT_SIZE + 30; // Within 45 pixels
-                    const isSafe = closestDistance > SEGMENT_SIZE + 10; // At least 25 pixels away (no collision)
+                    // Calculate collision radius based on sizes
+                    const playerSize = playerSnake.size || 1;
+                    const otherSize = otherSnake.size || 1;
+                    const collisionRadius = SEGMENT_SIZE * (playerSize + otherSize) / 2;
+                    
+                    // Define near-miss zone accounting for snake sizes
+                    const isClose = closestDistance <= collisionRadius + 30; // Within collision radius + 30 pixels
+                    const isSafe = closestDistance > collisionRadius + 10; // At least collision radius + 10 pixels away (no collision)
                     
                     // Detect near miss: was close, now moving away, and didn't collide
                     if (trackingData.wasClose && !isClose && isSafe && 
-                        trackingData.minDistance > SEGMENT_SIZE && // Never got closer than collision distance
-                        trackingData.minDistance <= SEGMENT_SIZE + 20 && // But got pretty close
+                        trackingData.minDistance > collisionRadius && // Never got closer than collision distance
+                        trackingData.minDistance <= collisionRadius + 20 && // But got pretty close
                         now - trackingData.lastAwardTime > 3000) { // 3 second cooldown per snake
                         
                         // Award near miss points
-                        playerSnake.score += 50;
-                        showMessage('Phew, Near Miss! +50', 'info');
+                        playerSnake.score += 250;
+                        showMessage('Phew, Near Miss! +250', 'info');
                         trackingData.lastAwardTime = now;
                         trackingData.minDistance = Infinity; // Reset for next near miss
                     }
@@ -13525,8 +13603,8 @@
                     const elementsToSpawn = Math.min(2 * bossSpawnMultiplier, Math.floor((TARGET_ELEMENT_COUNT - currentElementCount) / 10));
                     for (let i = 0; i < elementsToSpawn; i++) {
                         if (Math.random() < 0.8) { // 80% chance per spawn
-                            if (bossEncounterActive && currentBoss && Math.random() < 0.5) {
-                                // 50% chance to spawn boss's element type during boss battles
+                            if (bossEncounterActive && currentBoss && Math.random() < 0.15) {
+                                // Reduced from 50% to 15% chance to spawn boss's element type during boss battles
                                 spawnElement(currentBoss.elementId);
                             } else {
                                 spawnElementWithGridDistribution();
@@ -13535,8 +13613,8 @@
                     }
                 } else if (Math.random() < (0.05 * bossSpawnMultiplier) && currentElementCount < TARGET_ELEMENT_COUNT) {
                     // Occasional spawns to replace consumed elements (increased during boss battles)
-                    if (bossEncounterActive && currentBoss && Math.random() < 0.5) {
-                        // 50% chance to spawn boss's element type during boss battles
+                    if (bossEncounterActive && currentBoss && Math.random() < 0.15) {
+                        // Reduced from 50% to 15% chance to spawn boss's element type during boss battles
                         spawnElement(currentBoss.elementId);
                     } else {
                         spawnElementWithGridDistribution();
@@ -13680,7 +13758,10 @@
                         newAISnake.kills = snakeData.kills;
                         newAISnake.discoveries = snakeData.discoveries;
                         newAISnake.elementCapacity = snakeData.elementCapacity;
-                        newAISnake.personality = snakeData.personality;
+                        // Only restore personality if not a boss (safety check)
+                        if (!newAISnake.isBoss && snakeData.personality) {
+                            newAISnake.personality = snakeData.personality;
+                        }
                         newAISnake.name = snakeData.name;
                         newAISnake.skin = snakeData.skin;
                         
