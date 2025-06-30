@@ -6576,10 +6576,24 @@
                     // Always use normal colors
                     ctx.fillStyle = colors[i % colors.length];
                     
-                    // Draw pixelated square segment
+                    // Draw pixelated square segment with tapered tail
                     const pixelSize = 4;
                     const baseSegmentSize = SEGMENT_SIZE * sizeMultiplier;
-                    const segmentRadius = Math.max(1, baseSegmentSize - Math.min(i * 0.05, baseSegmentSize - 1)) * cameraZoom;
+                    
+                    // Calculate taper for tail segments
+                    const tailStart = Math.max(0, this.segments.length - 5); // Last 5 segments form the tail
+                    let segmentRadius;
+                    
+                    if (i >= tailStart) {
+                        // Taper the tail segments
+                        const tailProgress = (i - tailStart) / (this.segments.length - tailStart);
+                        const minSize = baseSegmentSize * 0.3; // Minimum 30% of full size
+                        segmentRadius = (baseSegmentSize - (baseSegmentSize - minSize) * tailProgress) * cameraZoom;
+                    } else {
+                        // Normal body segments with slight taper
+                        segmentRadius = Math.max(1, baseSegmentSize - Math.min(i * 0.05, baseSegmentSize - 1)) * cameraZoom;
+                    }
+                    
                     const segmentPixels = Math.max(1, Math.floor(segmentRadius * 2 / pixelSize)); // Ensure at least 1 pixel
                     
                     // Draw main square segment
@@ -6587,7 +6601,20 @@
                     const segmentY = Math.floor(screenY / pixelSize) * pixelSize - segmentPixels * pixelSize / 2;
                     const segmentSize = segmentPixels * pixelSize;
                     
-                    ctx.fillRect(segmentX, segmentY, segmentSize, segmentSize);
+                    // For the very last segment (tail tip), draw a rounded/pointed shape
+                    if (i === this.segments.length - 1 && segmentPixels >= 2) {
+                        // Draw a diamond/triangle shape for the tail tip
+                        ctx.beginPath();
+                        ctx.moveTo(screenX, segmentY); // Top point
+                        ctx.lineTo(segmentX + segmentSize, screenY); // Right point
+                        ctx.lineTo(screenX, segmentY + segmentSize); // Bottom point
+                        ctx.lineTo(segmentX, screenY); // Left point
+                        ctx.closePath();
+                        ctx.fill();
+                    } else {
+                        // Normal square segment
+                        ctx.fillRect(segmentX, segmentY, segmentSize, segmentSize);
+                    }
                     
                     // Spawn invincibility sparkle particles for player
                     if (this.invincibilityTimer > 0 && this.isPlayer) {
