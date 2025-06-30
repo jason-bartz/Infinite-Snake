@@ -156,6 +156,8 @@
     <link rel="alternate" hreflang="en" href="https://infinitesnake.io" />
     <link rel="alternate" hreflang="x-default" href="https://infinitesnake.io" />
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/skin-selection.css">
+    <link rel="stylesheet" href="css/unlock-notifications.css">
     <style>
         /* SNES-Era UI Theme with Cosmic Colors */
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
@@ -3146,6 +3148,9 @@
     
     <!-- Splash Screen -->
     <div id="splashScreen">
+        <div style="position: absolute; top: 20px; left: 20px; z-index: 10;">
+            <a href="https://discord.gg/a6X4W7QbkG" target="_blank" style="color: #4ecdc4; text-decoration: none; font-family: monospace; font-size: 16px;">💬 Join the Discord Server</a>
+        </div>
         <div style="position: absolute; top: 20px; right: 20px; z-index: 10;">
             <a href="/how-to-play.html" style="color: #4ecdc4; text-decoration: none; font-family: monospace; font-size: 16px; margin-right: 20px;">📖 How to Play</a>
             <a href="/leaderboard.html" style="color: #4ecdc4; text-decoration: none; font-family: monospace; font-size: 16px;">🏆 Leaderboard</a>
@@ -3153,9 +3158,10 @@
         <div id="splashContent">
             <img src="assets/word-logo.webp" alt="Infinite Snake" id="splashLogo" style="width: 400px; max-width: 80%; margin-bottom: 30px;" onerror="this.style.display='none'; document.getElementById('splashTitle').style.display='block';">
             <h1 id="splashTitle">Infinite Snake</h1>
-            <p>Reality has shattered. The elements of creation are scattered across the void.<br><br>
-            You are the Infinite Snake - an ancient being born from chaos. Consume these fragments. Combine them within your endless serpentine coils. Forge new existence.<br><br>
-            From fire and water to stars and civilizations, rebuild the Cosmos itself. The universe awaits.</p>
+            <p>Welcome to what's left.<br><br>
+            The Universe collapsed, scattered its contents across infinite coils of nothing. You're the Infinite Snake - part cleanup crew, part living library.<br><br>
+            Collect fragments of reality. Merge them. See what happens. Rebuild the Cosmos one combination at a time. Maybe you'll figure out what we forgot.<br><br>
+            Just remember: you're not the only thing moving in the dark…</p>
             <button id="startButton">Begin Your Journey</button>
         </div>
     </div>
@@ -3418,7 +3424,19 @@
                 <div id="skinSelection">
                     <h4>Snake Skins</h4>
                     <div id="availableUnlocks">Available Unlocks: 0</div>
-                    <div id="skinGrid"></div>
+                    
+                    <!-- Rarity Tabs -->
+                    <div class="rarity-tabs">
+                        <button class="rarity-tab active" data-rarity="common">Common</button>
+                        <button class="rarity-tab" data-rarity="uncommon">Uncommon</button>
+                        <button class="rarity-tab" data-rarity="rare">Rare</button>
+                        <button class="rarity-tab" data-rarity="legendary">Legendary</button>
+                        <button class="rarity-tab" data-rarity="exotic">Exotic</button>
+                        <button class="rarity-tab" data-rarity="secret">Secret</button>
+                    </div>
+                    
+                    <!-- Skin Grid Container -->
+                    <div id="skinGrid" class="skin-grid-new"></div>
                 </div>
             </div>
             
@@ -3534,10 +3552,41 @@
             
             <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(138, 43, 226, 0.3);">
                 <button onclick="resumeGame()" style="margin: 10px; padding: 10px 30px; font-size: 18px; background: #4ecdc4; color: white; border: none; border-radius: 10px; cursor: pointer;">Resume</button>
-                <button onclick="location.reload()" style="margin: 10px; padding: 10px 30px; font-size: 18px; background: #ff6b6b; color: white; border: none; border-radius: 10px; cursor: pointer;">New Game</button>
+                <button onclick="playUISound(); location.reload()" style="margin: 10px; padding: 10px 30px; font-size: 18px; background: #ff6b6b; color: white; border: none; border-radius: 10px; cursor: pointer;">New Game</button>
             </div>
         </div>
     </div>
+    
+    <!-- Skin Preview Modal -->
+    <div id="skinPreviewModal" class="skin-preview-modal" style="display: none;">
+        <div class="modal-content">
+            <button class="modal-close">&times;</button>
+            <div class="preview-container">
+                <canvas id="skinPreviewCanvas" width="300" height="300"></canvas>
+                <div class="preview-info">
+                    <h2 id="previewSkinName">Skin Name</h2>
+                    <div class="rarity-badge" id="previewRarity">
+                        <span class="rarity-stars"></span>
+                        <span class="rarity-text">Common</span>
+                    </div>
+                    <p id="previewBio" class="skin-bio">Skin description goes here...</p>
+                    <div class="unlock-criteria" id="previewUnlockCriteria">
+                        <h3>How to Unlock:</h3>
+                        <p id="unlockText">Complete specific challenge</p>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="unlockProgress"></div>
+                        </div>
+                        <p class="progress-text" id="progressText">0/100</p>
+                    </div>
+                    <button id="equipButton" class="equip-button">Equip</button>
+                    <button id="unlockButton" class="unlock-button" style="display: none;">Unlock (1 Token)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Unlock Notification Container -->
+    <div id="unlockNotificationContainer" class="unlock-notification-container"></div>
     
     <!-- Leaderboard Modal -->
     <div id="leaderboardModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 100;">
@@ -4766,8 +4815,8 @@
         let damageNumbers = []; // Floating damage numbers
         let bossFissures = []; // Ground fissures for Osseus
         
-        // Skin system
-        const skinMetadata = {
+        // Skin system - merge old system with new data from skinData.js
+        let skinMetadata = {
             'snake-default-green': { name: 'Basic Boy', unlocked: true, colors: ['#75d18e', '#6abf81'] },
             'neko': { name: 'Lil Beans (Beta Perk)', unlocked: true, colors: ['#c6c6cb', '#c3c3e7'] },
             '35mm': { name: 'Ansel 35', unlocked: false, colors: ['#2c3e50', '#1a1a1a'] },
@@ -4821,7 +4870,48 @@
             'zephyrus': { name: 'Zephyrus the Storm Caller', unlocked: false, colors: ['#87ceeb', '#5f9ea0'], isBoss: true }
         };
         
-        const aiSkins = Object.keys(skinMetadata).filter(skin => !skinMetadata[skin].isBoss); // All non-boss skins available for AI
+        // Merge with new skin data if available
+        if (window.SKIN_DATA && window.skinIdConverter) {
+            // Create a merged metadata object
+            const mergedMetadata = {};
+            
+            // First, convert all old IDs to maintain compatibility
+            Object.keys(skinMetadata).forEach(oldId => {
+                mergedMetadata[oldId] = { ...skinMetadata[oldId] };
+                
+                // Try to find corresponding new data
+                const newId = window.skinIdConverter.toNewId(oldId);
+                if (newId && window.SKIN_DATA[newId]) {
+                    // Merge in new properties while keeping old ones
+                    mergedMetadata[oldId] = {
+                        ...mergedMetadata[oldId],
+                        ...window.SKIN_DATA[newId],
+                        // Keep the original colors as they're used for rendering
+                        colors: skinMetadata[oldId].colors,
+                        // Keep the original unlocked state
+                        unlocked: skinMetadata[oldId].unlocked
+                    };
+                }
+            });
+            
+            // Add any skins that only exist in the new system (like boss skins with new IDs)
+            Object.keys(window.SKIN_DATA).forEach(newId => {
+                const oldId = window.skinIdConverter.toOldId(newId);
+                if (!oldId || !mergedMetadata[oldId]) {
+                    // This is a new skin not in the old system
+                    mergedMetadata[newId] = {
+                        ...window.SKIN_DATA[newId],
+                        unlocked: false,
+                        // Generate default colors if not provided
+                        colors: window.SKIN_DATA[newId].colors || ['#888888', '#666666']
+                    };
+                }
+            });
+            
+            skinMetadata = mergedMetadata;
+        }
+        
+        const aiSkins = Object.keys(skinMetadata).filter(skin => skinMetadata[skin] && !skinMetadata[skin].isBoss); // All non-boss skins available for AI
         let currentPlayerSkin = 'snake-default-green';
         let unlockedSkins = new Set(['snake-default-green']);
         let availableUnlocks = 0;
@@ -5034,6 +5124,7 @@
         
         // Splash screen
         document.getElementById('startButton').addEventListener('click', () => {
+            playUISound();
             document.getElementById('splashScreen').style.opacity = '0';
             setTimeout(() => {
                 document.getElementById('splashScreen').style.display = 'none';
@@ -5047,6 +5138,7 @@
         
         // Game mode selection
         function selectVictoryMode(mode, target) {
+            playUISound();
             gameMode = mode;
             gameTarget = target;
             
@@ -6006,6 +6098,14 @@
                         
                         // Additional effects for player
                         if (this.isPlayer && this === playerSnake) {
+                            // Dispatch element discovered event
+                            dispatchGameEvent('elementDiscovered', {
+                                element1: chosen.elem1,
+                                element2: chosen.elem2,
+                                result: chosen.result,
+                                totalDiscoveries: this.discoveries,
+                                score: this.score
+                            });
                             
                             // Save to all-time discoveries with recipe
                             const elem1Data = window.elementLoader.elements.get(chosen.elem1);
@@ -6462,14 +6562,25 @@
                     killer.kills++; // Increment kill count
                     
                     // Track kill event if player is the killer
-                    if (killer.isPlayer && supabaseModule && supabaseModule.addGameEvent) {
-                        supabaseModule.addGameEvent('kill', {
-                            victim_name: this.name,
-                            victim_score: this.score,
-                            victim_length: this.segments.length,
-                            killer_score: killer.score,
-                            total_kills: killer.kills
+                    if (killer.isPlayer) {
+                        // Dispatch enemy killed event
+                        dispatchGameEvent('enemyKilled', {
+                            victimName: this.name,
+                            victimScore: this.score,
+                            victimLength: this.segments.length,
+                            killerScore: killer.score,
+                            totalKills: killer.kills
                         });
+                        
+                        if (supabaseModule && supabaseModule.addGameEvent) {
+                            supabaseModule.addGameEvent('kill', {
+                                victim_name: this.name,
+                                victim_score: this.score,
+                                victim_length: this.segments.length,
+                                killer_score: killer.score,
+                                total_kills: killer.kills
+                            });
+                        }
                     }
                     
                     // Check for new high score if player
@@ -8773,6 +8884,13 @@
                 bossEncounterActive = false;
                 defeatedBosses.add(this.bossType);
                 bossesDefeatedThisCycle++;
+                
+                // Dispatch boss defeated event
+                dispatchGameEvent('bossDefeated', {
+                    bossType: this.bossType,
+                    bossName: this.baseName,
+                    totalBossesDefeated: bossesDefeatedThisCycle
+                });
                 
                 // Epic victory explosion sequence
                 // First wave - main explosion
@@ -11305,6 +11423,7 @@
         
         // Submit score to leaderboard
         window.submitToLeaderboard = async function() {
+            playUISound();
             
             // Visual feedback
             const submitBtn = document.getElementById('submitScoreBtn');
@@ -11509,6 +11628,7 @@
         
         // Force immediate respawn
         window.forceRespawn = function() {
+            playUISound();
             console.log('forceRespawn called');
             if (playerRespawnTimer > 0) {
                 playerRespawnTimer = 100; // Set to almost 0 to trigger respawn
@@ -11751,6 +11871,18 @@
                 localStorage.setItem('highScore', Math.floor(highScore).toString());
             }
             
+            // Dispatch periodic score update event (every 5 seconds)
+            if (!window.lastScoreUpdateTime) window.lastScoreUpdateTime = 0;
+            if (Date.now() - window.lastScoreUpdateTime > 5000) {
+                window.lastScoreUpdateTime = Date.now();
+                dispatchGameEvent('scoreUpdate', {
+                    score: Math.floor(playerSnake.score),
+                    highScore: Math.floor(highScore),
+                    discoveries: discoveryCount,
+                    kills: playerSnake.kills
+                });
+            }
+            
             // Update game time
             const gameTime = Date.now() - gameStartTime;
             const minutes = Math.floor(gameTime / 60000);
@@ -11764,6 +11896,17 @@
                 if (playerRank > 0 && (bestRank === 0 || playerRank < bestRank)) {
                     bestRank = playerRank;
                     bestRankElement.textContent = `#${bestRank}`;
+                }
+                
+                // Dispatch first place achievement if applicable (only once per game)
+                if (playerRank === 1 && snakes.filter(s => s.alive).length > 1) {
+                    if (!window.firstPlaceAchievedThisGame) {
+                        window.firstPlaceAchievedThisGame = true;
+                        dispatchGameEvent('firstPlace', {
+                            alivePlayers: snakes.filter(s => s.alive).length,
+                            score: playerSnake.score
+                        });
+                    }
                 }
             } else {
                 // Show placeholder before 60 seconds
@@ -11970,6 +12113,12 @@
                             // Remove collected power-up
                             alchemyVisionPowerUps.splice(i, 1);
                             
+                            // Dispatch power-up collected event
+                            dispatchGameEvent('powerupCollected', {
+                                type: 'alchemyVision',
+                                duration: 30000
+                            });
+                            
                             // Play alchemy vision sound (always player since only player can collect)
                             playAlchemyVisionSound(true);
                             
@@ -11997,6 +12146,13 @@
                             
                             // Visual feedback
                             if (snake.isPlayer) {
+                                // Dispatch void orb collected event
+                                dispatchGameEvent('powerupCollected', {
+                                    type: 'voidOrb',
+                                    elementsPurged: elementCount,
+                                    pointsGained: points
+                                });
+                                
                                 showMessage(`🌀 Void Orb consumed! +${points} points<br><small style="opacity: 0.8">Your elements have been purged to the void</small>`, 'info');
                             }
                             
@@ -13053,6 +13209,12 @@
             gameStarted = true;
             gameStartTime = Date.now();
             
+            // Reset session flags
+            window.firstPlaceAchievedThisGame = false;
+            
+            // Dispatch game start event
+            dispatchGameEvent('gameStart', { timestamp: gameStartTime });
+            
             // Create player snake
             console.log('[GAME START] Creating player snake...');
             playerSnake = new Snake(WORLD_SIZE / 2, WORLD_SIZE / 2, true);
@@ -13224,7 +13386,17 @@
             }
         }
         
+        // Helper function to play UI sound
+        function playUISound() {
+            try {
+                const beepSound = new Audio('sounds/retro-arcade-beep.mp3');
+                beepSound.volume = 0.3;
+                beepSound.play().catch(() => {});
+            } catch (e) {}
+        }
+        
         window.resumeGame = function() {
+            playUISound();
             paused = false;
             document.getElementById('pauseOverlay').style.display = 'none';
         }
@@ -13264,119 +13436,128 @@
             }
         }
         
-        // Build skin selection UI
+        // Build skin selection UI with rarity-based tabs
+        let currentRarityFilter = 'common';
+        
         function buildSkinGrid() {
             const grid = document.getElementById('skinGrid');
             if (!grid) {
                 console.error('Skin grid element not found!');
                 return;
             }
+            
+            // Update the unlock count display for current rarity
+            updateUnlockCountForRarity(currentRarityFilter);
             grid.innerHTML = '';
             
-            const allSkins = Object.keys(skinMetadata).filter(skin => skin !== 'snake-default-green');
-            allSkins.unshift('snake-default-green'); // Put default first
-            
-            // Ensure all 4 boss skins are included
-            const bossSkins = ['pyraxis', 'abyssos', 'osseus', 'zephyrus'];
-            bossSkins.forEach(bossSkin => {
-                if (!allSkins.includes(bossSkin)) {
-                    console.warn(`Boss skin ${bossSkin} was missing from allSkins, adding it`);
-                    allSkins.push(bossSkin);
-                }
+            // Get all skins and filter by rarity
+            let skinsToDisplay = Object.keys(skinMetadata).filter(skinId => {
+                const skin = skinMetadata[skinId];
+                return skin && skin.rarity === currentRarityFilter;
             });
             
-            // Debug: Count boss skins
-            const bossSkinsInList = allSkins.filter(skinId => skinMetadata[skinId] && skinMetadata[skinId].isBoss);
-            console.log(`Displaying ${bossSkinsInList.length} boss skins:`, bossSkinsInList);
+            // Sort skins by rarity order and then by name
+            const rarityOrder = ['common', 'uncommon', 'rare', 'legendary', 'exotic', 'secret'];
+            skinsToDisplay.sort((a, b) => {
+                const skinA = skinMetadata[a];
+                const skinB = skinMetadata[b];
+                if (!skinA || !skinB) return 0;
+                
+                const rarityIndexA = rarityOrder.indexOf(skinA.rarity);
+                const rarityIndexB = rarityOrder.indexOf(skinB.rarity);
+                
+                if (rarityIndexA !== rarityIndexB) {
+                    return rarityIndexA - rarityIndexB;
+                }
+                return skinA.name.localeCompare(skinB.name);
+            });
             
-            allSkins.forEach(skinId => {
-                // Skip if skin doesn't exist in metadata
-                if (!skinMetadata[skinId]) {
-                    console.error(`Skin ${skinId} not found in skinMetadata`);
+            skinsToDisplay.forEach(skinId => {
+                const skinData = skinMetadata[skinId];
+                if (!skinData) return;
+                
+                // Skip secret skins unless on secret tab or unlocked
+                if (skinData.rarity === 'secret' && !skinData.unlocked && currentRarityFilter !== 'secret') {
                     return;
                 }
-                const skinData = skinMetadata[skinId];
+                
                 const div = document.createElement('div');
                 div.className = 'skin-item';
+                div.setAttribute('data-skin-id', skinId);
+                div.setAttribute('data-rarity', skinData.rarity);
                 
-                // Add appropriate classes
+                // Add state classes
                 if (skinId === currentPlayerSkin) {
-                    div.classList.add('current');
+                    div.classList.add('equipped');
                 }
                 
                 if (!skinData.unlocked) {
-                    if (availableUnlocks > 0) {
+                    div.classList.add('locked');
+                    if (availableUnlocks > 0 && !skinData.isBoss) {
                         div.classList.add('unlockable');
-                    } else {
-                        div.classList.add('locked');
                     }
                 }
                 
-                // Build content
-                const img = document.createElement('img');
-                img.className = 'skin-image';
-                // Boss skins are in a different directory
-                if (skinMetadata[skinId].isBoss) {
-                    // Hide boss skin images until unlocked
-                    if (skinData.unlocked) {
-                        img.src = `assets/boss-skins/${skinId}.png`;
-                    } else {
-                        // Show a question mark for locked boss skins
-                        img.style.display = 'none';
-                        const placeholder = document.createElement('div');
-                        placeholder.style.width = '100%';
-                        placeholder.style.height = '100%';
-                        placeholder.style.display = 'flex';
-                        placeholder.style.alignItems = 'center';
-                        placeholder.style.justifyContent = 'center';
-                        placeholder.style.fontSize = '48px';
-                        placeholder.style.backgroundColor = 'rgba(0,0,0,0.3)';
-                        placeholder.style.borderRadius = '8px';
-                        placeholder.textContent = '❓';
-                        div.appendChild(placeholder);
-                    }
+                // Create inner container
+                const innerContainer = document.createElement('div');
+                innerContainer.className = 'skin-item-inner';
+                
+                // Create image or placeholder
+                if (skinData.isBoss && !skinData.unlocked) {
+                    // Mystery placeholder for locked boss skins
+                    const placeholder = document.createElement('div');
+                    placeholder.className = 'skin-mystery';
+                    placeholder.innerHTML = '❓';
+                    innerContainer.appendChild(placeholder);
                 } else {
-                    img.src = `skins/${skinId}.png`;
-                }
-                img.alt = skinData.name;
-                // Only set onerror for visible images
-                if (!skinMetadata[skinId].isBoss || skinData.unlocked) {
+                    const img = document.createElement('img');
+                    img.className = 'skin-image';
+                    img.src = skinData.isBoss ? `assets/boss-skins/${skinId}.png` : `skins/${skinId}.png`;
+                    img.alt = skinData.name;
                     img.onerror = function() {
-                        const isBoss = skinMetadata[skinId].isBoss;
-                        const originalPath = isBoss ? `assets/boss-skins/${skinId}.png` : `skins/${skinId}.png`;
-                        console.error(`Failed to load skin image: ${originalPath}`);
-                        // Try with .webp extension as fallback
-                        if (isBoss) {
-                            this.src = `assets/boss-skins/${skinId}.webp`;
-                        } else {
-                            this.src = `skins/${skinId}.webp`;
-                        }
-                        this.onerror = function() {
-                            console.error(`Failed to load skin image with both .png and .webp: ${skinId}`);
-                        };
+                        // Try webp fallback
+                        const basePath = skinData.isBoss ? `assets/boss-skins/${skinId}` : `skins/${skinId}`;
+                        this.src = `${basePath}.webp`;
+                        this.onerror = null;
                     };
+                    innerContainer.appendChild(img);
                 }
                 
+                // Add rarity indicator
+                const rarityIndicator = document.createElement('div');
+                rarityIndicator.className = 'rarity-indicator';
+                rarityIndicator.setAttribute('data-rarity', skinData.rarity);
+                innerContainer.appendChild(rarityIndicator);
+                
+                // Add name (hidden for locked boss skins)
                 const name = document.createElement('div');
                 name.className = 'skin-name';
-                name.textContent = skinData.name;
+                name.textContent = (skinData.isBoss && !skinData.unlocked) ? '???' : skinData.name;
+                innerContainer.appendChild(name);
                 
-                // Only append image if it's not a locked boss skin
-                if (!skinMetadata[skinId].isBoss || skinData.unlocked) {
-                    div.appendChild(img);
-                }
-                div.appendChild(name);
-                
-                // Add unlock icon if applicable
+                // Add lock overlay if locked
                 if (!skinData.unlocked) {
-                    const icon = document.createElement('div');
-                    icon.className = 'skin-unlock-icon';
-                    icon.textContent = availableUnlocks > 0 ? '🔓' : '🔒';
-                    div.appendChild(icon);
+                    const lockOverlay = document.createElement('div');
+                    lockOverlay.className = 'lock-overlay';
+                    const lockIcon = document.createElement('div');
+                    lockIcon.className = 'lock-icon';
+                    lockIcon.innerHTML = '🔒';
+                    lockOverlay.appendChild(lockIcon);
+                    innerContainer.appendChild(lockOverlay);
                 }
                 
-                // Click handler
-                div.onclick = () => selectSkin(skinId);
+                // Add equipped indicator
+                if (skinId === currentPlayerSkin) {
+                    const equippedBadge = document.createElement('div');
+                    equippedBadge.className = 'equipped-badge';
+                    equippedBadge.textContent = 'EQUIPPED';
+                    innerContainer.appendChild(equippedBadge);
+                }
+                
+                div.appendChild(innerContainer);
+                
+                // Click handler - open preview modal
+                div.onclick = () => openSkinPreview(skinId);
                 
                 grid.appendChild(div);
             });
@@ -13437,15 +13618,328 @@
         
         // Update unlock display
         function updateUnlockDisplay() {
-            const display = document.getElementById('availableUnlocks');
-            if (display) {
-                display.textContent = `Available Unlocks: ${availableUnlocks}`;
-                if (availableUnlocks > 0) {
-                    display.style.color = '#4ecdc4';
-                } else {
-                    display.style.color = '#AAA';
+            // Update based on current rarity filter
+            if (currentRarityFilter) {
+                updateUnlockCountForRarity(currentRarityFilter);
+            } else {
+                const display = document.getElementById('availableUnlocks');
+                if (display) {
+                    display.textContent = `Available Unlocks: ${availableUnlocks}`;
+                    if (availableUnlocks > 0) {
+                        display.style.color = '#4ecdc4';
+                    } else {
+                        display.style.color = '#AAA';
+                    }
                 }
             }
+        }
+        
+        // Update unlock count for specific rarity
+        function updateUnlockCountForRarity(rarity) {
+            const display = document.getElementById('availableUnlocks');
+            if (!display) return;
+            
+            // Count unlocked and total skins for this rarity
+            let unlockedCount = 0;
+            let totalCount = 0;
+            
+            Object.entries(skinMetadata).forEach(([skinId, skinData]) => {
+                if (skinData.rarity === rarity) {
+                    totalCount++;
+                    if (skinData.unlocked) {
+                        unlockedCount++;
+                    }
+                }
+            });
+            
+            // Format rarity name
+            const rarityName = rarity.charAt(0).toUpperCase() + rarity.slice(1);
+            display.textContent = `${rarityName} Skins: ${unlockedCount}/${totalCount} Unlocked`;
+            display.style.color = '#4ecdc4';
+        }
+        
+        // Custom event dispatching helper
+        function dispatchGameEvent(eventName, detail = {}) {
+            const event = new CustomEvent(eventName, { detail });
+            window.dispatchEvent(event);
+            console.log(`[Game Event] ${eventName}`, detail);
+        }
+        
+        // Rarity tab functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Re-merge skin data after all scripts are loaded
+            if (window.SKIN_DATA && window.skinIdConverter) {
+                const mergedMetadata = {};
+                
+                Object.keys(skinMetadata).forEach(oldId => {
+                    mergedMetadata[oldId] = { ...skinMetadata[oldId] };
+                    const newId = window.skinIdConverter.toNewId(oldId);
+                    if (newId && window.SKIN_DATA[newId]) {
+                        mergedMetadata[oldId] = {
+                            ...mergedMetadata[oldId],
+                            ...window.SKIN_DATA[newId],
+                            colors: skinMetadata[oldId].colors,
+                            unlocked: skinMetadata[oldId].unlocked
+                        };
+                    }
+                });
+                
+                Object.keys(window.SKIN_DATA).forEach(newId => {
+                    const oldId = window.skinIdConverter.toOldId(newId);
+                    if (!oldId || !mergedMetadata[oldId]) {
+                        mergedMetadata[newId] = {
+                            ...window.SKIN_DATA[newId],
+                            unlocked: false,
+                            colors: window.SKIN_DATA[newId].colors || ['#888888', '#666666']
+                        };
+                    }
+                });
+                
+                skinMetadata = mergedMetadata;
+            }
+            
+            const rarityTabs = document.querySelectorAll('.rarity-tab');
+            rarityTabs.forEach(tab => {
+                // Add rarity-specific class for styling
+                const rarity = tab.getAttribute('data-rarity');
+                tab.classList.add(rarity);
+                
+                tab.addEventListener('click', function() {
+                    playUISound();
+                    // Update active tab
+                    rarityTabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Update filter and rebuild grid
+                    currentRarityFilter = this.getAttribute('data-rarity');
+                    buildSkinGrid();
+                    
+                    // Update unlock count display
+                    updateUnlockCountForRarity(currentRarityFilter);
+                });
+            });
+            
+            // Initialize player stats and unlock manager
+            if (window.PlayerStats) {
+                window.PlayerStats.initialize();
+            }
+            if (window.unlockManager) {
+                window.unlockManager.initialize();
+            }
+        });
+        
+        // Open skin preview modal
+        function openSkinPreview(skinId) {
+            const skinData = skinMetadata[skinId];
+            if (!skinData) return;
+            
+            // Play beep sound when opening modal
+            try {
+                const beepSound = new Audio('sounds/retro-arcade-beep.mp3');
+                beepSound.volume = 0.3;
+                beepSound.play().catch(() => {});
+            } catch (e) {}
+            
+            const modal = document.getElementById('skinPreviewModal');
+            const nameEl = document.getElementById('previewSkinName');
+            const rarityEl = document.getElementById('previewRarity');
+            const bioEl = document.getElementById('previewBio');
+            const unlockCriteriaEl = document.getElementById('previewUnlockCriteria');
+            const unlockTextEl = document.getElementById('unlockText');
+            const progressBarEl = document.getElementById('unlockProgress');
+            const progressTextEl = document.getElementById('progressText');
+            const equipButton = document.getElementById('equipButton');
+            const unlockButton = document.getElementById('unlockButton');
+            
+            // Update modal content
+            nameEl.textContent = (skinData.isBoss && !skinData.unlocked) ? '???' : skinData.name;
+            
+            // Update rarity badge
+            const rarityBadge = rarityEl.querySelector('.rarity-text');
+            const rarityStars = rarityEl.querySelector('.rarity-stars');
+            if (skinData.rarity && window.RARITY_CONFIG) {
+                const rarityConfig = window.RARITY_CONFIG[skinData.rarity];
+                rarityBadge.textContent = skinData.rarity.charAt(0).toUpperCase() + skinData.rarity.slice(1);
+                rarityEl.style.backgroundColor = rarityConfig.color;
+                rarityStars.textContent = '★'.repeat(rarityConfig.stars);
+            }
+            
+            bioEl.textContent = (skinData.isBoss && !skinData.unlocked) ? 'Defeat this boss to unlock their skin!' : skinData.bio;
+            
+            // Handle unlock criteria display
+            if (skinData.unlocked) {
+                unlockCriteriaEl.style.display = 'none';
+                equipButton.style.display = 'block';
+                unlockButton.style.display = 'none';
+                
+                if (skinId === currentPlayerSkin) {
+                    equipButton.textContent = 'Equipped';
+                    equipButton.disabled = true;
+                } else {
+                    equipButton.textContent = 'Equip';
+                    equipButton.disabled = false;
+                    equipButton.onclick = () => {
+                        // Play beep sound when equipping
+                        try {
+                            const beepSound = new Audio('sounds/retro-arcade-beep.mp3');
+                            beepSound.volume = 0.3;
+                            beepSound.play().catch(() => {});
+                        } catch (e) {}
+                        
+                        selectSkin(skinId);
+                        equipButton.textContent = 'Equipped';
+                        equipButton.disabled = true;
+                        buildSkinGrid();
+                    };
+                }
+            } else {
+                unlockCriteriaEl.style.display = 'block';
+                
+                if (window.unlockManager) {
+                    // Try to get unlock criteria description
+                    let unlockDescription = 'Complete challenge to unlock';
+                    if (skinData.unlockCriteria && skinData.unlockCriteria.description) {
+                        unlockDescription = skinData.unlockCriteria.description;
+                    }
+                    
+                    unlockTextEl.textContent = unlockDescription;
+                    
+                    const progress = window.unlockManager.getUnlockProgress(skinId);
+                    
+                    if (progress && progress.max > 0) {
+                        progressBarEl.style.width = `${(progress.current / progress.max) * 100}%`;
+                        progressTextEl.textContent = `${progress.current}/${progress.max}`;
+                    } else {
+                        progressBarEl.style.width = '0%';
+                        progressTextEl.textContent = '0/0';
+                    }
+                } else {
+                    unlockTextEl.textContent = 'Unlock system not available';
+                }
+                
+                equipButton.style.display = 'none';
+                
+                // Show unlock button if we have tokens and it's not a boss skin
+                if (availableUnlocks > 0 && !skinData.isBoss) {
+                    unlockButton.style.display = 'block';
+                    unlockButton.onclick = () => {
+                        selectSkin(skinId);
+                        modal.style.display = 'none';
+                    };
+                } else {
+                    unlockButton.style.display = 'none';
+                }
+            }
+            
+            // Draw skin preview
+            drawSkinPreview(skinId);
+            
+            // Show modal
+            modal.style.display = 'flex';
+            
+            // Close modal handlers
+            const closeBtn = modal.querySelector('.modal-close');
+            closeBtn.onclick = () => modal.style.display = 'none';
+            
+            modal.onclick = (e) => {
+                if (e.target === modal) {
+                    modal.style.display = 'none';
+                }
+            };
+        }
+        
+        // Show unlock notification
+        function showUnlockNotification(skinId) {
+            const skinData = skinMetadata[skinId];
+            if (!skinData) return;
+            
+            const container = document.getElementById('unlockNotificationContainer');
+            const notification = document.createElement('div');
+            notification.className = `unlock-notification ${skinData.rarity}`;
+            
+            notification.innerHTML = `
+                <div class="unlock-content">
+                    <div class="unlock-header">
+                        <span class="unlock-icon">🔓</span>
+                        <span class="unlock-title">NEW SKIN UNLOCKED!</span>
+                    </div>
+                    <div class="unlock-skin-info">
+                        <img src="${skinData.isBoss ? `assets/boss-skins/${skinId}.png` : `skins/${skinId}.png`}" 
+                             alt="${skinData.name}" class="unlock-skin-image">
+                        <div class="unlock-details">
+                            <h3 class="unlock-skin-name">${skinData.name}</h3>
+                            <div class="unlock-rarity ${skinData.rarity}">
+                                <span class="rarity-stars">${'★'.repeat(window.RARITY_CONFIG[skinData.rarity].stars)}</span>
+                                <span class="rarity-text">${skinData.rarity.toUpperCase()}</span>
+                            </div>
+                            <p class="unlock-bio">${skinData.bio}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            container.appendChild(notification);
+            
+            // Auto-remove after animation
+            setTimeout(() => {
+                notification.classList.add('fade-out');
+                setTimeout(() => notification.remove(), 500);
+            }, 5000);
+            
+            // Play unlock sound based on rarity
+            if (window.playUnlockSound) {
+                window.playUnlockSound(skinData.rarity);
+            }
+        }
+        
+        // Listen for unlock events from UnlockManager
+        window.addEventListener('skinUnlocked', (event) => {
+            showUnlockNotification(event.detail.skinId);
+        });
+        
+        // Draw animated skin preview
+        function drawSkinPreview(skinId) {
+            const canvas = document.getElementById('skinPreviewCanvas');
+            const ctx = canvas.getContext('2d');
+            const skinData = skinMetadata[skinId];
+            
+            if (!skinData || (skinData.isBoss && !skinData.unlocked)) {
+                // Draw mystery placeholder for locked boss skins
+                ctx.fillStyle = '#1a1a2e';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#fff';
+                ctx.font = '48px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('❓', canvas.width / 2, canvas.height / 2);
+                return;
+            }
+            
+            // Load and draw the skin image with rotation animation
+            const img = new Image();
+            img.src = skinData.isBoss ? `assets/boss-skins/${skinId}.png` : `skins/${skinId}.png`;
+            
+            let rotation = 0;
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.save();
+                ctx.translate(canvas.width / 2, canvas.height / 2);
+                ctx.rotate(rotation);
+                
+                if (img.complete && img.naturalHeight !== 0) {
+                    const size = Math.min(canvas.width, canvas.height) * 0.8;
+                    ctx.drawImage(img, -size / 2, -size / 2, size, size);
+                }
+                
+                ctx.restore();
+                rotation += 0.01;
+                
+                if (document.getElementById('skinPreviewModal').style.display === 'flex') {
+                    requestAnimationFrame(animate);
+                }
+            }
+            
+            animate();
         }
         
         // Populate discovery journal with discovered elements
@@ -13831,6 +14325,24 @@
                     // Start respawn timer
                     playerRespawnTimer = 10000; // 10 seconds
                     comboStreak = 0; // Reset combo streak on death
+                    
+                    // Dispatch player death event
+                    dispatchGameEvent('playerDeath', {
+                        score: playerSnake.score,
+                        discoveries: playerSnake.discoveries,
+                        kills: playerSnake.kills,
+                        length: playerSnake.segments.length,
+                        playTime: gameSessionStartTime ? Math.floor((Date.now() - gameSessionStartTime) / 1000) : 0
+                    });
+                    
+                    // Also dispatch game end event
+                    dispatchGameEvent('gameEnd', {
+                        score: playerSnake.score,
+                        discoveries: playerSnake.discoveries,
+                        kills: playerSnake.kills,
+                        playTime: gameSessionStartTime ? Math.floor((Date.now() - gameSessionStartTime) / 1000) : 0,
+                        finalRank: snakes.filter(s => s.alive).length + 1
+                    });
                     
                     // Track death event
                     if (supabaseModule && supabaseModule.addGameEvent) {
@@ -14394,5 +14906,11 @@
             }
         }, { once: true });
     </script>
+    
+    <!-- Skin Unlock System Scripts -->
+    <script src="js/skinData.js"></script>
+    <script src="js/skinIdMapping.js"></script>
+    <script src="js/playerStats.js"></script>
+    <script src="js/unlockManager.js"></script>
 </body>
 </html>

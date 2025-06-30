@@ -1,0 +1,255 @@
+/* Unlock Notification Styles */
+.unlock-notification {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 0;
+    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    z-index: 10000;
+    pointer-events: none;
+}
+
+.unlock-notification.show {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+}
+
+.unlock-content {
+    background: #1a1a1a;
+    border-radius: 20px;
+    padding: 30px;
+    text-align: center;
+    min-width: 300px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+    position: relative;
+    overflow: hidden;
+}
+
+.unlock-header {
+    font-size: 24px;
+    font-weight: bold;
+    color: #fff;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    animation: pulse 1s ease-in-out infinite;
+}
+
+.unlock-skin-preview {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 15px;
+    position: relative;
+}
+
+.unlock-skin-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
+}
+
+.unlock-skin-name {
+    font-size: 20px;
+    font-weight: bold;
+    color: #fff;
+    margin-bottom: 10px;
+}
+
+.unlock-skin-rarity {
+    font-size: 16px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 15px;
+}
+
+.unlock-skin-bio {
+    font-size: 14px;
+    color: #ccc;
+    line-height: 1.4;
+    font-style: italic;
+    padding: 0 10px;
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+/* Rarity-specific styles */
+.rarity-common .unlock-content {
+    border: 3px solid #808080;
+}
+
+.rarity-common .unlock-skin-rarity {
+    color: #808080;
+}
+
+.rarity-uncommon .unlock-content {
+    border: 3px solid #2ecc71;
+    animation: uncommon-glow 2s ease-in-out infinite;
+}
+
+.rarity-uncommon .unlock-skin-rarity {
+    color: #2ecc71;
+}
+
+.rarity-rare .unlock-content {
+    border: 3px solid #3498db;
+    animation: rare-glow 2s ease-in-out infinite;
+}
+
+.rarity-rare .unlock-skin-rarity {
+    color: #3498db;
+}
+
+.rarity-rare::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(52, 152, 219, 0.2) 0%, transparent 70%);
+    animation: rotate 3s linear infinite;
+}
+
+.rarity-legendary .unlock-content {
+    border: 3px solid #9b59b6;
+    animation: legendary-glow 2s ease-in-out infinite;
+}
+
+.rarity-legendary .unlock-skin-rarity {
+    color: #9b59b6;
+}
+
+.rarity-legendary::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: conic-gradient(from 0deg, transparent, #9b59b6, transparent);
+    animation: rotate 2s linear infinite;
+}
+
+.rarity-exotic .unlock-content {
+    border: 3px solid #ff8c00;
+    animation: exotic-glow 1.5s ease-in-out infinite;
+}
+
+.rarity-exotic .unlock-skin-rarity {
+    color: #ff8c00;
+}
+
+.rarity-exotic::before,
+.rarity-exotic::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background: radial-gradient(circle at 20% 80%, #ff8c00 0%, transparent 50%);
+    animation: flame 1s ease-in-out infinite alternate;
+}
+
+.rarity-exotic::after {
+    background: radial-gradient(circle at 80% 80%, #ff4500 0%, transparent 50%);
+    animation-delay: 0.5s;
+}
+
+.rarity-secret .unlock-content {
+    border: 3px solid #e74c3c;
+    animation: secret-glow 1s ease-in-out infinite;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2c1810 100%);
+}
+
+.rarity-secret .unlock-skin-rarity {
+    color: #e74c3c;
+    text-shadow: 0 0 10px #e74c3c;
+}
+
+.rarity-secret::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 10% 20%, rgba(231, 76, 60, 0.3) 0%, transparent 40%),
+        radial-gradient(circle at 80% 80%, rgba(192, 57, 43, 0.3) 0%, transparent 40%),
+        radial-gradient(circle at 40% 40%, rgba(231, 76, 60, 0.2) 0%, transparent 40%);
+    animation: secret-pulse 2s ease-in-out infinite;
+}
+
+/* Animations */
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes uncommon-glow {
+    0%, 100% { box-shadow: 0 0 20px rgba(46, 204, 113, 0.5); }
+    50% { box-shadow: 0 0 30px rgba(46, 204, 113, 0.8); }
+}
+
+@keyframes rare-glow {
+    0%, 100% { box-shadow: 0 0 30px rgba(52, 152, 219, 0.5); }
+    50% { box-shadow: 0 0 40px rgba(52, 152, 219, 0.8); }
+}
+
+@keyframes legendary-glow {
+    0%, 100% { box-shadow: 0 0 40px rgba(155, 89, 182, 0.5); }
+    50% { box-shadow: 0 0 50px rgba(155, 89, 182, 0.8); }
+}
+
+@keyframes exotic-glow {
+    0%, 100% { box-shadow: 0 0 50px rgba(255, 140, 0, 0.5); }
+    50% { box-shadow: 0 0 60px rgba(255, 140, 0, 0.8); }
+}
+
+@keyframes secret-glow {
+    0%, 100% { box-shadow: 0 0 60px rgba(231, 76, 60, 0.5); }
+    50% { box-shadow: 0 0 80px rgba(231, 76, 60, 0.8); }
+}
+
+@keyframes flame {
+    0% { transform: translateY(0) scale(1); opacity: 0.8; }
+    100% { transform: translateY(-10px) scale(1.1); opacity: 0.6; }
+}
+
+@keyframes secret-pulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 0.8; }
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+    .unlock-content {
+        padding: 20px;
+        min-width: 250px;
+    }
+    
+    .unlock-header {
+        font-size: 20px;
+    }
+    
+    .unlock-skin-preview {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .unlock-skin-name {
+        font-size: 18px;
+    }
+    
+    .unlock-skin-rarity {
+        font-size: 14px;
+    }
+}

@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infinite Snake - Skin Selection UI Mockup</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --snes-black: #060608;
+            --snes-dark-blue: #181850;
+            --snes-primary-blue: #2038ec;
+            --snes-light-blue: #5888fc;
+            --snes-dark-purple: #3c2068;
+            --snes-white: #fcfcfc;
+            --snes-gold: #FFD700;
+            --snes-cosmic-teal: #4ecdc4;
+            
+            /* Rarity Colors */
+            --rarity-common: #808080;
+            --rarity-uncommon: #2ecc71;
+            --rarity-rare: #3498db;
+            --rarity-legendary: #9b59b6;
+            --rarity-exotic: #ff8c00;
+            --rarity-secret: #e74c3c;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Press Start 2P', monospace;
+            background: #000;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Main Container */
+        .pause-menu-mockup {
+            background: var(--snes-dark-blue);
+            width: 900px;
+            height: 700px;
+            border: 8px solid;
+            border-color: var(--snes-white) var(--snes-black) var(--snes-black) var(--snes-white);
+            box-shadow: 8px 8px 0 rgba(0,0,0,0.8);
+            outline: 2px solid var(--snes-gold);
+            outline-offset: -12px;
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h2 {
+            text-align: center;
+            color: var(--snes-gold);
+            font-size: 24px;
+            margin-bottom: 24px;
+            text-shadow: 3px 3px 0 var(--snes-black);
+            letter-spacing: 2px;
+        }
+
+        /* Rarity Tabs */
+        .rarity-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .rarity-tab {
+            padding: 12px 20px;
+            background: var(--snes-primary-blue);
+            border: 3px solid;
+            border-color: var(--snes-light-blue) var(--snes-black) var(--snes-black) var(--snes-light-blue);
+            color: var(--snes-white);
+            font-size: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            position: relative;
+            box-shadow: 4px 4px 0 rgba(0,0,0,0.5);
+        }
+
+        .rarity-tab:hover {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+        }
+
+        .rarity-tab.active {
+            background: var(--snes-gold);
+            color: var(--snes-black);
+            border-color: #FFF #A88800 #A88800 #FFF;
+            transform: translate(4px, 4px);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .rarity-tab::before {
+            content: '◆';
+            margin-right: 8px;
+            font-size: 12px;
+        }
+
+        .rarity-tab.common::before { color: var(--rarity-common); }
+        .rarity-tab.uncommon::before { color: var(--rarity-uncommon); }
+        .rarity-tab.rare::before { color: var(--rarity-rare); }
+        .rarity-tab.legendary::before { color: var(--rarity-legendary); }
+        .rarity-tab.exotic::before { color: var(--rarity-exotic); }
+        .rarity-tab.secret::before { color: var(--rarity-secret); }
+
+        /* Skin Grid Container */
+        .skin-grid-container {
+            flex: 1;
+            background: rgba(0,0,0,0.3);
+            border: 4px solid;
+            border-color: var(--snes-black) var(--snes-light-blue) var(--snes-light-blue) var(--snes-black);
+            padding: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .skin-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 12px;
+            max-height: 100%;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        /* Custom Scrollbar */
+        .skin-grid::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        .skin-grid::-webkit-scrollbar-track {
+            background: var(--snes-black);
+            border: 2px solid var(--snes-dark-blue);
+        }
+
+        .skin-grid::-webkit-scrollbar-thumb {
+            background: var(--snes-primary-blue);
+            border: 2px solid var(--snes-light-blue);
+        }
+
+        /* Skin Tiles */
+        .skin-tile {
+            aspect-ratio: 1;
+            background: rgba(0,0,0,0.5);
+            border: 3px solid;
+            border-radius: 8px;
+            padding: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Rarity-based borders */
+        .skin-tile.common { border-color: var(--rarity-common); }
+        .skin-tile.uncommon { border-color: var(--rarity-uncommon); }
+        .skin-tile.rare { border-color: var(--rarity-rare); }
+        .skin-tile.legendary { border-color: var(--rarity-legendary); }
+        .skin-tile.exotic { border-color: var(--rarity-exotic); }
+        .skin-tile.secret { border-color: var(--rarity-secret); }
+
+        /* Hover effects */
+        .skin-tile:hover {
+            transform: scale(1.1);
+            z-index: 10;
+            filter: brightness(1.3);
+            box-shadow: 0 0 20px rgba(255,255,255,0.3);
+        }
+
+        .skin-tile.uncommon:hover {
+            box-shadow: 0 0 20px var(--rarity-uncommon);
+        }
+
+        .skin-tile.rare:hover {
+            box-shadow: 0 0 20px var(--rarity-rare);
+            animation: pulse 2s infinite;
+        }
+
+        .skin-tile.legendary:hover {
+            box-shadow: 0 0 30px var(--rarity-legendary);
+        }
+
+        .skin-tile.exotic:hover {
+            box-shadow: 0 0 30px var(--rarity-exotic);
+            animation: shimmer 1s infinite;
+        }
+
+        .skin-tile.secret:hover {
+            box-shadow: 0 0 30px var(--rarity-secret);
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 20px var(--rarity-rare); }
+            50% { box-shadow: 0 0 40px var(--rarity-rare), 0 0 60px var(--rarity-rare); }
+        }
+
+        @keyframes shimmer {
+            0% { filter: brightness(1.3) hue-rotate(0deg); }
+            50% { filter: brightness(1.5) hue-rotate(10deg); }
+            100% { filter: brightness(1.3) hue-rotate(0deg); }
+        }
+
+        /* Skin states */
+        .skin-tile.locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .skin-tile.locked:hover {
+            transform: none;
+            filter: none;
+            box-shadow: none;
+        }
+
+        .skin-tile.equipped {
+            border-color: var(--snes-gold);
+            background: rgba(255, 215, 0, 0.1);
+        }
+
+        .skin-tile.equipped::after {
+            content: 'EQUIPPED';
+            position: absolute;
+            bottom: -18px;
+            font-size: 8px;
+            color: var(--snes-gold);
+            background: rgba(0,0,0,0.9);
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid var(--snes-gold);
+        }
+
+        /* Skin content */
+        .skin-image {
+            width: 60px;
+            height: 60px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            image-rendering: pixelated;
+        }
+
+        .skin-name {
+            font-size: 8px;
+            color: #CCC;
+            text-align: center;
+            line-height: 1.2;
+            max-width: 100%;
+            word-break: break-word;
+        }
+
+        .lock-icon {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            font-size: 16px;
+        }
+
+        /* Progress bar */
+        .progress-bar {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 10px;
+            color: var(--snes-cosmic-teal);
+        }
+
+        /* Modal Mockup */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-backdrop.active {
+            display: flex;
+        }
+
+        .skin-modal {
+            background: var(--snes-dark-blue);
+            width: 500px;
+            border: 8px solid;
+            border-color: var(--snes-white) var(--snes-black) var(--snes-black) var(--snes-white);
+            box-shadow: 8px 8px 0 rgba(0,0,0,0.8);
+            outline: 2px solid var(--snes-gold);
+            outline-offset: -12px;
+            padding: 32px;
+            position: relative;
+            animation: modalZoomIn 0.3s ease;
+        }
+
+        @keyframes modalZoomIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: var(--snes-primary-blue);
+            border: 3px solid;
+            border-color: var(--snes-light-blue) var(--snes-black) var(--snes-black) var(--snes-light-blue);
+            color: white;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .modal-close:hover {
+            background: var(--snes-light-blue);
+        }
+
+        .skin-preview {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 20px;
+            background: rgba(0,0,0,0.3);
+            border: 4px solid var(--snes-dark-purple);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 80px;
+            animation: rotate360 4s linear infinite;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @keyframes rotate360 {
+            from { transform: rotateY(0deg); }
+            to { transform: rotateY(360deg); }
+        }
+
+        .modal-rarity {
+            text-align: center;
+            font-size: 12px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .modal-title {
+            text-align: center;
+            font-size: 16px;
+            color: var(--snes-gold);
+            margin-bottom: 16px;
+            text-shadow: 2px 2px 0 var(--snes-black);
+        }
+
+        .modal-bio {
+            background: rgba(0,0,0,0.3);
+            border: 2px solid var(--snes-dark-purple);
+            padding: 16px;
+            margin-bottom: 24px;
+            font-size: 10px;
+            line-height: 1.6;
+            color: #DDD;
+            text-align: center;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+        }
+
+        .modal-button {
+            padding: 12px 32px;
+            background: var(--snes-primary-blue);
+            border: 4px solid;
+            border-color: var(--snes-light-blue) var(--snes-black) var(--snes-black) var(--snes-light-blue);
+            color: white;
+            font-size: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            box-shadow: 4px 4px 0 rgba(0,0,0,0.5);
+        }
+
+        .modal-button:hover {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+        }
+
+        .modal-button.equip {
+            background: var(--rarity-uncommon);
+            border-color: #3ADB7A var(--snes-black) var(--snes-black) #3ADB7A;
+        }
+
+        .modal-button.locked {
+            background: #666;
+            border-color: #888 #444 #444 #888;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .modal-unlock {
+            text-align: center;
+            font-size: 10px;
+            color: var(--snes-cosmic-teal);
+            margin-top: 16px;
+        }
+
+        /* Particle effects for legendary/exotic */
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--rarity-legendary);
+            border-radius: 50%;
+            opacity: 0;
+            animation: floatUp 3s ease-out infinite;
+        }
+
+        .particle:nth-child(1) { left: 20%; animation-delay: 0s; }
+        .particle:nth-child(2) { left: 40%; animation-delay: 0.5s; }
+        .particle:nth-child(3) { left: 60%; animation-delay: 1s; }
+        .particle:nth-child(4) { left: 80%; animation-delay: 1.5s; }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(100%) scale(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-20px) scale(1);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Main Skin Selection Screen -->
+    <div class="pause-menu-mockup">
+        <h2>SNAKE SKINS</h2>
+        
+        <!-- Rarity Tabs -->
+        <div class="rarity-tabs">
+            <button class="rarity-tab common active">Common</button>
+            <button class="rarity-tab uncommon">Uncommon</button>
+            <button class="rarity-tab rare">Rare</button>
+            <button class="rarity-tab legendary">Legendary</button>
+            <button class="rarity-tab exotic">Exotic</button>
+            <button class="rarity-tab secret">Secret</button>
+        </div>
+        
+        <!-- Skin Grid -->
+        <div class="skin-grid-container">
+            <div class="skin-grid">
+                <!-- Common Skins -->
+                <div class="skin-tile common equipped">
+                    <div class="skin-image">🐍</div>
+                    <div class="skin-name">Basic Boy</div>
+                </div>
+                <div class="skin-tile common">
+                    <div class="skin-image">☕</div>
+                    <div class="skin-name">Caffeine Fiend</div>
+                </div>
+                <div class="skin-tile common">
+                    <div class="skin-image">🐕</div>
+                    <div class="skin-name">Good Boy</div>
+                </div>
+                <div class="skin-tile common">
+                    <div class="skin-image">🥔</div>
+                    <div class="skin-name">Spud Bud</div>
+                </div>
+                <div class="skin-tile common">
+                    <div class="skin-image">🕐</div>
+                    <div class="skin-name">Time-Out</div>
+                </div>
+                <div class="skin-tile common locked">
+                    <div class="skin-image">🏈</div>
+                    <div class="skin-name">MVP</div>
+                    <span class="lock-icon">🔒</span>
+                </div>
+                <div class="skin-tile common locked">
+                    <div class="skin-image">🍟</div>
+                    <div class="skin-name">Sir Dips-a-lot</div>
+                    <span class="lock-icon">🔒</span>
+                </div>
+                <div class="skin-tile common locked">
+                    <div class="skin-image">🌭</div>
+                    <div class="skin-name">Big Dawg</div>
+                    <span class="lock-icon">🔒</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="progress-bar">
+            Progress: 12/48 Skins Unlocked
+        </div>
+    </div>
+
+    <!-- Modal Example -->
+    <div class="modal-backdrop" id="modalBackdrop">
+        <div class="skin-modal">
+            <button class="modal-close" onclick="closeModal()">X</button>
+            
+            <div class="skin-preview">
+                🌈🐱
+                <div class="particles">
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                </div>
+            </div>
+            
+            <div class="modal-rarity" style="color: var(--rarity-legendary);">◆ LEGENDARY SKIN ◆</div>
+            <div class="modal-title">Nyan Pastry Cat</div>
+            
+            <div class="modal-bio">
+                A mystical feline that leaves a rainbow trail in its wake. Legend says it was baked in the ovens of the internet gods and gained sentience through the power of memes.
+            </div>
+            
+            <div class="modal-actions">
+                <button class="modal-button equip">EQUIP</button>
+                <button class="modal-button" onclick="closeModal()">CLOSE</button>
+            </div>
+            
+            <div class="modal-unlock">
+                Unlock: Complete 50 element discoveries
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching
+        document.querySelectorAll('.rarity-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.rarity-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                
+                // In real implementation, this would load different skins
+                updateGridForRarity(this.classList[1]);
+            });
+        });
+
+        // Skin tile clicks
+        document.querySelectorAll('.skin-tile').forEach(tile => {
+            tile.addEventListener('click', function() {
+                if (!this.classList.contains('locked')) {
+                    document.getElementById('modalBackdrop').classList.add('active');
+                }
+            });
+        });
+
+        function closeModal() {
+            document.getElementById('modalBackdrop').classList.remove('active');
+        }
+
+        function updateGridForRarity(rarity) {
+            // Placeholder for updating grid based on rarity
+            console.log('Switching to', rarity, 'skins');
+        }
+
+        // Demo: Add hover sound effect placeholder
+        document.querySelectorAll('.skin-tile').forEach(tile => {
+            tile.addEventListener('mouseenter', function() {
+                // In real implementation, play hover sound
+                console.log('Hover sound');
+            });
+        });
+    </script>
+</body>
+</html>

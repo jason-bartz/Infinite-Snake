@@ -1,0 +1,724 @@
+/* Skin Selection UI Styles */
+.skin-selection-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* Rarity Tabs */
+.rarity-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.rarity-tab {
+    padding: 10px 20px;
+    border: 2px solid;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    cursor: pointer;
+    font-weight: bold;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.rarity-tab:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.rarity-tab.active {
+    transform: scale(1.05);
+}
+
+/* Rarity-specific tab colors */
+.rarity-tab.common {
+    border-color: #808080;
+    color: #808080;
+}
+
+.rarity-tab.common.active {
+    background: rgba(128, 128, 128, 0.2);
+    box-shadow: 0 0 20px rgba(128, 128, 128, 0.5);
+}
+
+.rarity-tab.uncommon {
+    border-color: #2ecc71;
+    color: #2ecc71;
+}
+
+.rarity-tab.uncommon.active {
+    background: rgba(46, 204, 113, 0.2);
+    box-shadow: 0 0 20px rgba(46, 204, 113, 0.5);
+}
+
+.rarity-tab.rare {
+    border-color: #3498db;
+    color: #3498db;
+}
+
+.rarity-tab.rare.active {
+    background: rgba(52, 152, 219, 0.2);
+    box-shadow: 0 0 20px rgba(52, 152, 219, 0.5);
+}
+
+.rarity-tab.legendary {
+    border-color: #9b59b6;
+    color: #9b59b6;
+}
+
+.rarity-tab.legendary.active {
+    background: rgba(155, 89, 182, 0.2);
+    box-shadow: 0 0 20px rgba(155, 89, 182, 0.5);
+}
+
+.rarity-tab.exotic {
+    border-color: #ff8c00;
+    color: #ff8c00;
+}
+
+.rarity-tab.exotic.active {
+    background: rgba(255, 140, 0, 0.2);
+    box-shadow: 0 0 20px rgba(255, 140, 0, 0.5);
+}
+
+.rarity-tab.secret {
+    border-color: #e74c3c;
+    color: #e74c3c;
+}
+
+.rarity-tab.secret.active {
+    background: rgba(231, 76, 60, 0.2);
+    box-shadow: 0 0 20px rgba(231, 76, 60, 0.5);
+}
+
+/* Skin Grid */
+.skin-grid-container {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.skin-grid,
+.skin-grid-new {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 15px;
+    padding: 10px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Override the old #skinGrid styles */
+#skinGrid.skin-grid-new {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)) !important;
+    gap: 15px !important;
+    max-width: 100% !important;
+}
+
+/* Skin Item */
+.skin-item {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.5);
+    border: 3px solid rgba(255, 255, 255, 0.2);
+}
+
+.skin-item:hover {
+    transform: scale(1.05);
+}
+
+.skin-item.locked {
+    opacity: 0.6;
+}
+
+.skin-item.equipped {
+    border-color: #ffd700;
+    border-width: 4px;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+}
+
+.skin-item.unlockable {
+    border-color: #f39c12;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(243, 156, 18, 0.7); }
+    50% { box-shadow: 0 0 0 10px rgba(243, 156, 18, 0); }
+}
+
+/* Skin Item Inner Container */
+.skin-item-inner {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 10px;
+}
+
+.skin-preview {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.skin-preview img,
+.skin-image {
+    width: 80%;
+    height: 80%;
+    object-fit: contain;
+}
+
+/* Mystery placeholder for locked boss skins */
+.skin-mystery {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+}
+
+/* Rarity indicator bar */
+.rarity-indicator {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: currentColor;
+}
+
+.rarity-indicator[data-rarity="common"] { background: #808080; }
+.rarity-indicator[data-rarity="uncommon"] { background: #2ecc71; }
+.rarity-indicator[data-rarity="rare"] { background: #3498db; }
+.rarity-indicator[data-rarity="legendary"] { background: #9b59b6; }
+.rarity-indicator[data-rarity="exotic"] { background: #ff8c00; }
+.rarity-indicator[data-rarity="secret"] { background: #e74c3c; }
+
+.skin-lock-icon {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    font-size: 20px;
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
+}
+
+.skin-current-indicator {
+    position: absolute;
+    bottom: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 215, 0, 0.9);
+    color: #000;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: bold;
+}
+
+.skin-name {
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    padding: 5px;
+    font-size: 12px;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+    margin-top: auto;
+}
+
+/* Lock overlay for locked skins */
+.lock-overlay {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: auto;
+    height: auto;
+    background: none;
+    display: block;
+}
+
+.lock-icon {
+    font-size: 24px;
+    opacity: 0.9;
+    text-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
+}
+
+/* Equipped badge */
+.equipped-badge {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: #ffd700;
+    color: #000;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+/* Secret skin question mark */
+.skin-item.secret.locked .skin-preview::after {
+    content: '❓';
+    position: absolute;
+    font-size: 40px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.skin-item.secret.locked img {
+    display: none;
+}
+
+/* Rarity-specific borders */
+.skin-item.common {
+    border-color: #808080;
+}
+
+.skin-item.uncommon {
+    border-color: #2ecc71;
+}
+
+.skin-item.rare {
+    border-color: #3498db;
+}
+
+.skin-item.legendary {
+    border-color: #9b59b6;
+}
+
+.skin-item.exotic {
+    border-color: #ff8c00;
+}
+
+.skin-item.secret {
+    border-color: #e74c3c;
+}
+
+/* Data-rarity attribute styling */
+.skin-item[data-rarity="common"] { border-color: #808080; }
+.skin-item[data-rarity="uncommon"] { border-color: #2ecc71; }
+.skin-item[data-rarity="rare"] { border-color: #3498db; }
+.skin-item[data-rarity="legendary"] { border-color: #9b59b6; }
+.skin-item[data-rarity="exotic"] { border-color: #ff8c00; }
+.skin-item[data-rarity="secret"] { border-color: #e74c3c; }
+
+/* Skin Preview Modal - matches HTML structure */
+.skin-preview-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 150; /* Higher than pause menu (100) */
+    justify-content: center;
+    align-items: center;
+}
+
+.skin-preview-modal .modal-content {
+    background: #1a1a1a;
+    border-radius: 20px;
+    padding: 30px;
+    max-width: 800px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    border: 3px solid #4ecdc4;
+    box-shadow: 0 0 30px rgba(78, 205, 196, 0.5);
+}
+
+.skin-preview-modal .modal-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 30px;
+    color: #fff;
+    background: none;
+    border: none;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.3s;
+}
+
+.skin-preview-modal .modal-close:hover {
+    opacity: 1;
+}
+
+.skin-preview-modal .preview-container {
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+}
+
+.skin-preview-modal #skinPreviewCanvas {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    width: 225px;
+    height: 225px;
+}
+
+.skin-preview-modal .preview-info {
+    flex: 1;
+    min-width: 300px;
+}
+
+.skin-preview-modal .rarity-badge {
+    display: inline-block;
+    padding: 5px 15px;
+    border-radius: 20px;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+.skin-preview-modal .equip-button,
+.skin-preview-modal .unlock-button {
+    width: 100%;
+    padding: 15px;
+    margin-top: 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.skin-preview-modal .equip-button {
+    background: #2ecc71;
+    color: #fff;
+}
+
+.skin-preview-modal .equip-button:hover:not(:disabled) {
+    background: #27ae60;
+    transform: translateY(-2px);
+}
+
+.skin-preview-modal .equip-button:disabled {
+    background: #555;
+    cursor: not-allowed;
+}
+
+.skin-preview-modal .unlock-button {
+    background: #f39c12;
+    color: #fff;
+}
+
+.skin-preview-modal .unlock-button:hover {
+    background: #e67e22;
+    transform: translateY(-2px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .skin-preview-modal .preview-container {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .skin-preview-modal #skinPreviewCanvas {
+        width: 150px;
+        height: 150px;
+    }
+}
+
+/* Skin Modal */
+.skin-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.skin-modal-overlay.show {
+    opacity: 1;
+}
+
+.skin-modal {
+    background: #1a1a1a;
+    border-radius: 20px;
+    padding: 30px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+    border: 3px solid;
+    position: relative;
+}
+
+.skin-modal-overlay.show .skin-modal {
+    transform: scale(1);
+}
+
+.skin-modal-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+}
+
+.skin-modal-close:hover {
+    opacity: 1;
+}
+
+.skin-modal-preview {
+    width: 200px;
+    height: 200px;
+    margin: 0 auto 20px;
+    position: relative;
+}
+
+.skin-modal-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.skin-modal-name {
+    font-size: 28px;
+    font-weight: bold;
+    color: #fff;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.skin-modal-rarity {
+    font-size: 16px;
+    text-transform: uppercase;
+    text-align: center;
+    margin-bottom: 20px;
+    letter-spacing: 2px;
+}
+
+.skin-modal-bio {
+    color: #ccc;
+    line-height: 1.6;
+    margin-bottom: 20px;
+    text-align: center;
+    font-style: italic;
+    padding: 0 20px;
+}
+
+.skin-modal-unlock-info {
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.skin-modal-unlock-info h4 {
+    margin: 0 0 10px 0;
+    color: #fff;
+}
+
+.skin-modal-unlock-criteria {
+    color: #ffa500;
+    font-weight: bold;
+}
+
+.skin-modal-progress {
+    margin-top: 10px;
+}
+
+.progress-bar {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+    height: 30px;
+    overflow: hidden;
+    position: relative;
+    margin-top: 10px;
+}
+
+.progress-fill {
+    background: linear-gradient(90deg, #2ecc71, #27ae60);
+    height: 100%;
+    transition: width 0.5s ease;
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+.progress-text {
+    color: #fff;
+    font-size: 12px;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 8px;
+}
+
+/* Additional styling for unlock criteria */
+.unlock-criteria {
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 10px;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.unlock-criteria h3 {
+    color: #4ecdc4;
+    margin-bottom: 10px;
+    font-size: 18px;
+}
+
+.unlock-criteria #unlockText {
+    color: #fff;
+    font-weight: normal;
+    margin-bottom: 15px;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.skin-modal-action {
+    background: #2ecc71;
+    color: #fff;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.skin-modal-action:hover:not(:disabled) {
+    background: #27ae60;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.skin-modal-action:disabled {
+    background: #555;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* Additional fixes for unlock criteria display */
+.skin-preview-modal .unlock-criteria h3 {
+    color: #4ecdc4 !important;
+    font-size: 16px !important;
+}
+
+.skin-preview-modal #unlockText {
+    color: #ffffff !important;
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+    font-weight: normal !important;
+}
+
+.skin-preview-modal .progress-bar {
+    position: relative;
+}
+
+.skin-preview-modal .progress-text {
+    color: #fff !important;
+    font-size: 12px !important;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 8px;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .skin-selection-container {
+        padding: 10px;
+    }
+    
+    .rarity-tabs {
+        gap: 5px;
+    }
+    
+    .rarity-tab {
+        padding: 8px 15px;
+        font-size: 12px;
+    }
+    
+    .skin-grid {
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+        gap: 10px;
+    }
+    
+    .skin-modal {
+        padding: 20px;
+    }
+    
+    .skin-modal-preview {
+        width: 150px;
+        height: 150px;
+    }
+    
+    .skin-modal-name {
+        font-size: 24px;
+    }
+}
+
+@media (max-width: 480px) {
+    .skin-grid {
+        grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+        gap: 8px;
+    }
+    
+    .skin-name {
+        font-size: 10px;
+        padding: 3px;
+    }
+    
+    .skin-lock-icon {
+        font-size: 16px;
+    }
+}
