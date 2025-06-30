@@ -1701,7 +1701,7 @@
             padding-bottom: 20px;
             padding-top: 20px;
             border-top: none;
-            border-bottom: 2px solid rgba(138, 43, 226, 0.3);
+            border-bottom: none;
             box-shadow: 0 10px 30px rgba(138, 43, 226, 0.2);
             background: linear-gradient(to top, 
                 rgba(0, 0, 0, 0) 0%,
@@ -1743,7 +1743,7 @@
         @media (max-width: 800px) and (orientation: landscape) {
             body.mobile .player-info-box {
                 position: absolute !important;
-                top: 25px !important;
+                top: 60px !important;
                 bottom: auto !important;
                 left: 10px !important;
                 width: 180px !important;
@@ -1754,7 +1754,7 @@
             
             body.mobile .leaderboard-box {
                 position: absolute !important;
-                top: 25px !important;
+                top: 60px !important;
                 bottom: auto !important;
                 right: 10px !important;
                 left: auto !important;
@@ -1770,7 +1770,9 @@
             }
             
             body.mobile .boost-bar-frame {
-                height: 16px !important;
+                height: 14px !important;
+                border: 2px solid #333;
+                border-bottom: none;
             }
             
             body.mobile .element-collection-bar {
@@ -1893,7 +1895,7 @@
         
         body.mobile .message-popup {
             top: auto;
-            bottom: 100px; /* Moved further down from 220px */
+            bottom: 50px; /* Positioned just above pause/mute buttons */
             font-size: 14px;
             padding: 8px 16px;
             border-radius: 6px;
@@ -1912,6 +1914,20 @@
             -webkit-touch-callout: none;
             -webkit-user-select: none;
             user-select: none;
+        }
+        
+        /* GPU acceleration for mobile UI elements */
+        body.mobile .bottom-ui,
+        body.mobile .player-info-box,
+        body.mobile .leaderboard-box,
+        body.mobile .boost-bar-container,
+        body.mobile .virtual-joystick,
+        body.mobile .boost-button {
+            will-change: transform;
+            transform: translateZ(0);
+            -webkit-transform: translateZ(0);
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
         }
         
         body.mobile .desktop-only {
@@ -4017,9 +4033,10 @@
             
             /* Fix skin grid for mobile */
             #skinGrid {
-                grid-template-columns: repeat(4, 1fr) !important;
+                grid-template-columns: repeat(3, 1fr) !important;
                 gap: 8px !important;
                 padding-right: 5px !important;
+                overflow-x: hidden !important;
             }
             
             .skin-item {
@@ -4154,8 +4171,9 @@
             /* Even smaller grids in landscape */
             #skinGrid,
             .discovery-grid {
-                grid-template-columns: repeat(5, 1fr) !important;
+                grid-template-columns: repeat(4, 1fr) !important;
                 gap: 6px !important;
+                overflow-x: hidden !important;
             }
             
             .skin-preview {
@@ -4180,7 +4198,7 @@
         @media (max-width: 375px) and (orientation: portrait) {
             #skinGrid,
             .discovery-grid {
-                grid-template-columns: repeat(3, 1fr) !important;
+                grid-template-columns: repeat(2, 1fr) !important;
             }
             
             .tab-button {
@@ -9151,20 +9169,20 @@
             // Create health bar container
             bossHealthBarContainer = document.createElement('div');
             bossHealthBarContainer.style.position = 'fixed';
-            bossHealthBarContainer.style.top = '50px';
+            bossHealthBarContainer.style.top = isMobile ? '80px' : '50px'; // Lower on mobile to avoid UI overlap
             bossHealthBarContainer.style.left = '50%';
             bossHealthBarContainer.style.transform = 'translateX(-50%)';
-            bossHealthBarContainer.style.width = '600px'; // Increased width to prevent name overflow
+            bossHealthBarContainer.style.width = isMobile ? '300px' : '600px'; // Smaller on mobile
             bossHealthBarContainer.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
             bossHealthBarContainer.style.border = '3px solid #fff';
             bossHealthBarContainer.style.borderRadius = '10px';
             bossHealthBarContainer.style.padding = '10px';
-            bossHealthBarContainer.style.zIndex = '1000';
+            bossHealthBarContainer.style.zIndex = '50'; // Below pause menu (z-index 100)
             
             // Create health bar
             const healthBarBg = document.createElement('div');
             healthBarBg.style.width = '100%';
-            healthBarBg.style.height = '30px';
+            healthBarBg.style.height = isMobile ? '20px' : '30px';
             healthBarBg.style.backgroundColor = '#333';
             healthBarBg.style.borderRadius = '5px';
             healthBarBg.style.overflow = 'hidden';
@@ -9181,7 +9199,7 @@
             bossNameDisplay = document.createElement('div');
             bossNameDisplay.style.textAlign = 'center';
             bossNameDisplay.style.color = '#fff';
-            bossNameDisplay.style.fontSize = '18px';
+            bossNameDisplay.style.fontSize = isMobile ? '14px' : '18px';
             bossNameDisplay.style.fontWeight = 'bold';
             bossNameDisplay.style.marginTop = '5px';
             bossNameDisplay.style.whiteSpace = 'nowrap'; // Ensure single line display
@@ -12449,11 +12467,11 @@
             // Left border barrier
             if (leftBorder > -borderThickness) {
                 if (isMobile) {
-                    // Solid gradient for mobile
+                    // Solid gradient for mobile with increased opacity
                     const gradient = ctx.createLinearGradient(0, 0, Math.min(borderThickness, leftBorder), 0);
-                    gradient.addColorStop(0, 'rgba(128, 64, 255, 0.8)');
-                    gradient.addColorStop(0.7, 'rgba(128, 64, 255, 0.4)');
-                    gradient.addColorStop(1, 'rgba(128, 64, 255, 0)');
+                    gradient.addColorStop(0, 'rgba(128, 64, 255, 0.9)');
+                    gradient.addColorStop(0.7, 'rgba(128, 64, 255, 0.6)');
+                    gradient.addColorStop(1, 'rgba(128, 64, 255, 0.1)');
                     ctx.fillStyle = gradient;
                     ctx.fillRect(0, 0, Math.min(borderThickness, leftBorder), canvas.height);
                     
@@ -12486,9 +12504,9 @@
                     // Solid gradient for mobile
                     const startX = Math.max(0, rightBorder - borderThickness);
                     const gradient = ctx.createLinearGradient(startX, 0, canvas.width, 0);
-                    gradient.addColorStop(0, 'rgba(128, 64, 255, 0)');
-                    gradient.addColorStop(0.3, 'rgba(128, 64, 255, 0.4)');
-                    gradient.addColorStop(1, 'rgba(128, 64, 255, 0.8)');
+                    gradient.addColorStop(0, 'rgba(128, 64, 255, 0.1)');
+                    gradient.addColorStop(0.3, 'rgba(128, 64, 255, 0.6)');
+                    gradient.addColorStop(1, 'rgba(128, 64, 255, 0.9)');
                     ctx.fillStyle = gradient;
                     ctx.fillRect(startX, 0, canvas.width - startX, canvas.height);
                     
@@ -12519,9 +12537,9 @@
                 if (isMobile) {
                     // Solid gradient for mobile
                     const gradient = ctx.createLinearGradient(0, 0, 0, Math.min(borderThickness, topBorder));
-                    gradient.addColorStop(0, 'rgba(128, 64, 255, 0.8)');
-                    gradient.addColorStop(0.7, 'rgba(128, 64, 255, 0.4)');
-                    gradient.addColorStop(1, 'rgba(128, 64, 255, 0)');
+                    gradient.addColorStop(0, 'rgba(128, 64, 255, 0.9)');
+                    gradient.addColorStop(0.7, 'rgba(128, 64, 255, 0.6)');
+                    gradient.addColorStop(1, 'rgba(128, 64, 255, 0.1)');
                     ctx.fillStyle = gradient;
                     ctx.fillRect(0, 0, canvas.width, Math.min(borderThickness, topBorder));
                     
@@ -12554,9 +12572,9 @@
                     // Solid gradient for mobile
                     const startY = Math.max(0, bottomBorder - borderThickness);
                     const gradient = ctx.createLinearGradient(0, startY, 0, canvas.height);
-                    gradient.addColorStop(0, 'rgba(128, 64, 255, 0)');
-                    gradient.addColorStop(0.3, 'rgba(128, 64, 255, 0.4)');
-                    gradient.addColorStop(1, 'rgba(128, 64, 255, 0.8)');
+                    gradient.addColorStop(0, 'rgba(128, 64, 255, 0.1)');
+                    gradient.addColorStop(0.3, 'rgba(128, 64, 255, 0.6)');
+                    gradient.addColorStop(1, 'rgba(128, 64, 255, 0.9)');
                     ctx.fillStyle = gradient;
                     ctx.fillRect(0, startY, canvas.width, canvas.height - startY);
                     
