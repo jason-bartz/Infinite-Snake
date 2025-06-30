@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         await new Promise(resolve => setTimeout(resolve, 100));
         
         if (window.combinations && Object.keys(window.combinations).length > 0) {
-            elementsList = Object.values(elements);
+            elementsList = Object.values(window.elements);
             elementsList.sort((a, b) => a.name.localeCompare(b.name));
             document.getElementById('total-elements').textContent = elementsList.length;
             setupEventListeners();
@@ -54,8 +54,8 @@ async function loadData() {
     try {
         elementsList = [];
         
-        if (typeof elements !== 'undefined' && Object.keys(elements).length > 0) {
-            elementsList = Object.values(elements);
+        if (typeof window.elements !== 'undefined' && Object.keys(window.elements).length > 0) {
+            elementsList = Object.values(window.elements);
         } else {
             const elementsResponse = await fetch('/elements/data/elements.json');
             const elementsData = await elementsResponse.json();
@@ -71,7 +71,7 @@ async function loadData() {
                     tier: elem.t,
                     emojiIndex: elem.e
                 };
-                elements[elem.i] = element;
+                window.elements[elem.i] = element;
                 elementsList.push(element);
             });
         }
@@ -79,13 +79,22 @@ async function loadData() {
         elementsList.sort((a, b) => a.name.localeCompare(b.name));
         
         
-        if (typeof emojis === 'undefined' || Object.keys(emojis).length === 0) {
+        if (typeof window.emojis === 'undefined' || Object.keys(window.emojis).length === 0) {
             try {
                 if (typeof emojis === 'undefined') {
                     window.emojis = {};
                 }
-                const emojiResponse = await fetch('/elements/data/emojis.json');
-                emojis = await emojiResponse.json();
+                const timestamp = Date.now();
+                const emojiResponse = await fetch(`/elements/data/emojis.json?t=${timestamp}&cb=${Math.random()}`, {
+                    cache: 'no-store',
+                    headers: {
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    }
+                });
+                window.emojis = await emojiResponse.json();
+                console.log('[Elements Cache Debug] Loaded', Object.keys(window.emojis).length, 'emoji mappings');
             } catch (err) {
                 console.warn('Failed to load emojis:', err);
             }

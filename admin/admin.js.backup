@@ -63,20 +63,16 @@ document.addEventListener('DOMContentLoaded', async function() {
 
 async function loadData() {
     try {
-        // Generate unique timestamp for cache busting
-        const timestamp = Date.now();
-        console.log('[Cache Debug] Loading data with timestamp:', timestamp);
         
         if (typeof combinations === 'undefined') {
             window.combinations = {};
         }
         try {
-            const response = await fetch(`/elements/data/elements.json?t=${timestamp}&cb=${Math.random()}`, {
+            const response = await fetch('/elements/data/elements.json', {
                 cache: 'no-store',
                 headers: {
                     'Cache-Control': 'no-cache, no-store, must-revalidate',
-                    'Pragma': 'no-cache',
-                    'Expires': '0'
+                    'Pragma': 'no-cache'
                 }
             });
             if (!response.ok) {
@@ -84,8 +80,9 @@ async function loadData() {
             }
             const data = await response.json();
             
-            // Clear and rebuild elements object completely
-            window.elements = {};
+            if (typeof elements === 'undefined') {
+                window.elements = {};
+            }
             
             data.forEach(elem => {
                 elements[elem.i] = {
@@ -96,20 +93,17 @@ async function loadData() {
                 };
             });
             
-            console.log('[Cache Debug] Loaded', Object.keys(elements).length, 'elements');
-            
         } catch (err) {
             console.error('Failed to load elements:', err);
             throw err;
         }
         
         try {
-            const comboResponse = await fetch(`/elements/data/combinations.json?t=${timestamp}&cb=${Math.random()}`, {
+            const comboResponse = await fetch('/elements/data/combinations.json', {
                 cache: 'no-store',
                 headers: {
                     'Cache-Control': 'no-cache, no-store, must-revalidate',
-                    'Pragma': 'no-cache',
-                    'Expires': '0'
+                    'Pragma': 'no-cache'
                 }
             });
             if (!comboResponse.ok) {
@@ -118,7 +112,8 @@ async function loadData() {
             
             const comboData = await comboResponse.json();
             
-            window.combinations = {};
+            combinations = {};
+            window.combinations = combinations;
             
             let validCombos = 0;
             Object.entries(comboData).forEach(([key, result]) => {
@@ -141,17 +136,9 @@ async function loadData() {
         
         
         try {
-            const emojiResponse = await fetch(`/elements/data/emojis.json?t=${timestamp}&cb=${Math.random()}`, {
-                cache: 'no-store',
-                headers: {
-                    'Cache-Control': 'no-cache, no-store, must-revalidate',
-                    'Pragma': 'no-cache',
-                    'Expires': '0'
-                }
-            });
+            const emojiResponse = await fetch('/elements/data/emojis.json');
             if (emojiResponse.ok) {
-                window.emojis = await emojiResponse.json();
-                console.log('[Cache Debug] Loaded', Object.keys(window.emojis).length, 'emoji mappings');
+                emojis = await emojiResponse.json();
             }
         } catch (err) {
             console.warn('Failed to load emojis:', err);
@@ -191,38 +178,9 @@ async function loadData() {
 }
 
 /**
- * Force reload all data with cache busting
- */
-async function forceReload() {
-    console.log('[Cache Debug] Force reloading all data...');
-    window.adminDataLoading = true;
-    
-    try {
-        await loadData();
-        console.log('[Cache Debug] Force reload completed successfully');
-        
-        // Update elements grid if elements.js is loaded
-        if (typeof filterAndDisplay === 'function') {
-            // Update the elements list and redisplay
-            if (typeof elementsList !== 'undefined') {
-                elementsList = Object.values(window.elements);
-                elementsList.sort((a, b) => a.name.localeCompare(b.name));
-                document.getElementById('total-elements').textContent = elementsList.length;
-                filterAndDisplay();
-            }
-        }
-    } catch (error) {
-        console.error('[Cache Debug] Force reload failed:', error);
-        showMessage('Failed to reload data: ' + error.message, 'error');
-    } finally {
-        window.adminDataLoading = false;
-    }
-}
-
-/**
  * Search for elements by ID, name, or emoji
  */
-async function searchElement(query) {
+function searchElement(query) {
     const results = document.getElementById('results');
     if (!results) return;
     
@@ -233,10 +191,6 @@ async function searchElement(query) {
     
     results.innerHTML = '<div class="loading">Searching...</div>';
     results.classList.add('active');
-    
-    // Force reload data first to ensure we have the latest elements
-    console.log('[Cache Debug] Searching for:', query, '- ensuring fresh data...');
-    await forceReload();
     
     if (elements[query]) {
         showElement(query);
@@ -251,7 +205,7 @@ async function searchElement(query) {
     }
     
     const queryLower = query.toLowerCase();
-    for (const [id, elem] of Object.entries(window.elements)) {
+    for (const [id, elem] of Object.entries(elements)) {
         if (elem.name.toLowerCase() === queryLower) {
             showElement(id);
             return;
@@ -259,7 +213,7 @@ async function searchElement(query) {
     }
     
     const matches = [];
-    for (const [id, elem] of Object.entries(window.elements)) {
+    for (const [id, elem] of Object.entries(elements)) {
         if (elem.name.toLowerCase().includes(queryLower)) {
             matches.push({ id, ...elem });
         }
@@ -282,7 +236,7 @@ function searchByEmoji(emojiQuery) {
     const matches = [];
     
     // Search through all elements to find ones with matching emoji
-    for (const [id, elem] of Object.entries(window.elements)) {
+    for (const [id, elem] of Object.entries(elements)) {
         const elemEmoji = emojis[elem.id] || emojis[elem.emojiIndex];
         if (elemEmoji === emojiQuery) {
             matches.push({ id, ...elem });
@@ -609,7 +563,7 @@ window.deleteCombinationFromElement = async function(elem1, elem2, result) {
     try {
         // Send deletion request
         const response = await fetch('/api/delete-combination', {
-            method: 'POST',
+            method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -666,7 +620,7 @@ window.deleteCombination = async function(elem1, elem2, result, itemIndex) {
     try {
         // Send deletion request
         const response = await fetch('/api/delete-combination', {
-            method: 'POST',
+            method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -777,7 +731,7 @@ function setupRecipeSearch(inputId, hiddenId, resultsId, previewId) {
             const matches = [];
             const queryLower = query.toLowerCase();
             
-            for (const [id, elem] of Object.entries(window.elements)) {
+            for (const [id, elem] of Object.entries(elements)) {
                 if (elem.name.toLowerCase().includes(queryLower) || id.toString().includes(query)) {
                     matches.push({ id, ...elem });
                     if (matches.length >= 100) break;
@@ -888,31 +842,19 @@ window.saveElement = async function() {
     const newEmoji = document.getElementById('edit-emoji').value.trim();
     
     if (newEmoji) {
-        // Update local emoji immediately
-        window.emojis[currentElement.id] = newEmoji;
+        emojis[currentElement.id] = newEmoji;
         
         const newEmojis = {};
         newEmojis[currentElement.id] = newEmoji;
-        
-        console.log('[Cache Debug] Saving emoji update for element', currentElement.id, ':', newEmoji);
         
         const saved = await saveToServer(null, null, newEmojis);
         
         if (saved) {
             showMessage('Element emoji updated and saved!', 'success');
             
-            // Force a complete data reload to ensure persistence
-            console.log('[Cache Debug] Forcing reload after emoji save...');
-            await forceReload();
-            
-            // Re-show the element with fresh data
             setTimeout(() => {
                 showElement(currentElement.id);
-            }, 100);
-        } else {
-            // Revert local change if save failed
-            delete window.emojis[currentElement.id];
-            showMessage('Failed to save emoji update', 'error');
+            }, 500);
         }
     }
 };
@@ -983,9 +925,7 @@ function showMessage(text, type) {
     }, 4000);
 }
 
-// Make functions globally available
 window.showElement = showElement;
-window.forceReload = forceReload;
 
 async function saveToServer(element, newCombinations, newEmojis) {
     try {
@@ -1340,23 +1280,19 @@ window.saveNewElement = async function() {
         
         showMessage(successMsg, 'success');
         
-        // Force reload to ensure new element is searchable
-        console.log('[Cache Debug] Forcing reload after element creation...');
-        await forceReload();
-        
         // Show the new element
         setTimeout(() => {
             showElement(id);
-        }, 100);
+        }, 500);
     }
 };
 
 // Save and create another
-window.saveAndCreateAnother = async function() {
+window.saveAndCreateAnother = function() {
     // First save the current element
     const name = document.getElementById('new-name').value.trim();
     if (name) {
-        await saveNewElement();
+        saveNewElement();
         
         // Then show a new create form
         setTimeout(() => {
@@ -1388,7 +1324,7 @@ function setupRecipeSearchWithCreate(inputId, hiddenId, resultsId) {
             const queryLower = query.toLowerCase();
             
             // Search existing elements
-            for (const [id, elem] of Object.entries(window.elements)) {
+            for (const [id, elem] of Object.entries(elements)) {
                 if (elem.name.toLowerCase().includes(queryLower) || id.toString().includes(query)) {
                     matches.push({ id, ...elem });
                     if (matches.length >= 100) break;
@@ -1537,14 +1473,10 @@ window.saveNewRecipe = async function(resultId) {
         window.combinations[`${elem1Id}+${elem2Id}`] = parseInt(resultId);
         window.combinations[`${elem2Id}+${elem1Id}`] = parseInt(resultId);
         
-        // Force reload to ensure data consistency
-        console.log('[Cache Debug] Forcing reload after recipe save...');
-        await forceReload();
-        
         // Return to element view
         setTimeout(() => {
             showElement(resultId);
-        }, 100);
+        }, 500);
     } else {
         // Revert if save failed
         delete combinations[`${elem1Id}+${elem2Id}`];
@@ -1586,7 +1518,7 @@ window.deleteRecipe = async function(elem1, elem2, result) {
     // Delete from server
     try {
         const response = await fetch('/api/delete-combination', {
-            method: 'POST',
+            method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -1624,7 +1556,7 @@ function analyzeElementDeletion(elementId) {
     };
     
     // Find recipes that create this element
-    Object.entries(window.combinations).forEach(([combo, result]) => {
+    Object.entries(combinations).forEach(([combo, result]) => {
         if (parseInt(result) === numericElementId) {
             const [a, b] = combo.split('+');
             // Avoid duplicates
@@ -1635,7 +1567,7 @@ function analyzeElementDeletion(elementId) {
     });
     
     // Find combinations where this element is used
-    Object.entries(window.combinations).forEach(([combo, result]) => {
+    Object.entries(combinations).forEach(([combo, result]) => {
         if (!combo || !combo.includes('+')) return; // Skip invalid combinations
         
         const parts = combo.split('+');
@@ -1664,7 +1596,7 @@ function analyzeElementDeletion(elementId) {
             if (item.result != elemId) {
                 // Check if this result element has any other recipes
                 const otherRecipes = [];
-                Object.entries(window.combinations).forEach(([combo, result]) => {
+                Object.entries(combinations).forEach(([combo, result]) => {
                     if (parseInt(result) === parseInt(item.result) && combo.split('+').every(id => parseInt(id) !== parseInt(elemId))) {
                         otherRecipes.push(combo);
                     }
@@ -1969,7 +1901,7 @@ window.confirmDeleteElement = async function(elementId) {
         
         // Send deletion request to server
         const response = await fetch('/api/delete-element', {
-            method: 'POST',
+            method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -2211,11 +2143,11 @@ window.debugCombinations = function(elementId) {
     console.log('Total combinations:', Object.keys(combinations).length);
     
     // Find recipes
-    const recipes = Object.entries(window.combinations).filter(([k, v]) => String(v) === elementId);
+    const recipes = Object.entries(combinations).filter(([k, v]) => String(v) === elementId);
     console.log(`Recipes creating element ${elementId}:`, recipes);
     
     // Find uses
-    const uses = Object.entries(window.combinations).filter(([k, v]) => {
+    const uses = Object.entries(combinations).filter(([k, v]) => {
         const [a, b] = k.split('+');
         return String(a) === elementId || String(b) === elementId;
     });
@@ -2267,13 +2199,13 @@ window.runCleanup = async function() {
             cleanupBtn.disabled = true;
             
             // Reload combinations data
-            window.combinations = {};
+            combinations = {};
             const comboResponse = await fetch('/elements/data/combinations.json');
             const comboData = await comboResponse.json();
             Object.entries(comboData).forEach(([key, result]) => {
-                window.combinations[key] = result;
+                combinations[key] = result;
                 const [a, b] = key.split('+');
-                window.combinations[`${b}+${a}`] = result;
+                combinations[`${b}+${a}`] = result;
             });
             
             // Clear deleted combinations from memory

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile UI Test - Infinite Snake</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: monospace;
+            background: #111;
+            color: #fff;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 10px;
+            border: 1px solid #333;
+        }
+        .status {
+            color: #0f0;
+        }
+        .error {
+            color: #f00;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            background: #333;
+            color: #fff;
+            border: 1px solid #666;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #444;
+        }
+    </style>
+</head>
+<body>
+    <h1>Mobile UI Test Suite</h1>
+    
+    <div class="test-section">
+        <h2>Device Info</h2>
+        <div id="device-info"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>CSS Variables</h2>
+        <div id="css-vars"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Orientation Tests</h2>
+        <button onclick="testOrientationLock()">Test Landscape Lock</button>
+        <button onclick="testOrientationUnlock()">Test Unlock</button>
+        <div id="orientation-status"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>UI Position Tests</h2>
+        <button onclick="testUIPositions('landscape')">Test Landscape Positions</button>
+        <button onclick="testUIPositions('portrait')">Test Portrait Positions</button>
+        <div id="position-status"></div>
+    </div>
+    
+    <script>
+        // Display device info
+        function updateDeviceInfo() {
+            const info = document.getElementById('device-info');
+            info.innerHTML = `
+                <p>User Agent: ${navigator.userAgent}</p>
+                <p>Screen: ${screen.width}x${screen.height}</p>
+                <p>Window: ${window.innerWidth}x${window.innerHeight}</p>
+                <p>Orientation: ${window.innerWidth > window.innerHeight ? 'landscape' : 'portrait'}</p>
+                <p>Touch Support: ${('ontouchstart' in window) ? 'Yes' : 'No'}</p>
+                <p>Screen Orientation API: ${screen.orientation ? 'Supported' : 'Not Supported'}</p>
+            `;
+        }
+        
+        // Display CSS variables
+        function updateCSSVars() {
+            const vars = document.getElementById('css-vars');
+            const root = document.documentElement;
+            const varNames = [
+                '--mobile-scorecard-top',
+                '--mobile-scorecard-left',
+                '--mobile-leaderboard-top',
+                '--mobile-leaderboard-right',
+                '--mobile-discovery-opacity',
+                '--mobile-discovery-scale',
+                '--mobile-joystick-opacity',
+                '--mobile-boost-opacity',
+                '--mobile-boost-bar-height'
+            ];
+            
+            let html = '<h3>Current CSS Variable Values:</h3>';
+            varNames.forEach(varName => {
+                const value = getComputedStyle(root).getPropertyValue(varName);
+                html += `<p>${varName}: ${value || 'not set'}</p>`;
+            });
+            vars.innerHTML = html;
+        }
+        
+        // Test orientation lock
+        async function testOrientationLock() {
+            const status = document.getElementById('orientation-status');
+            try {
+                if (screen.orientation && screen.orientation.lock) {
+                    await screen.orientation.lock('landscape');
+                    status.innerHTML = '<p class="status">✓ Successfully locked to landscape</p>';
+                } else {
+                    status.innerHTML = '<p class="error">✗ Screen Orientation API not supported</p>';
+                }
+            } catch (err) {
+                status.innerHTML = `<p class="error">✗ Lock failed: ${err.message}</p>`;
+            }
+        }
+        
+        // Test orientation unlock
+        function testOrientationUnlock() {
+            const status = document.getElementById('orientation-status');
+            try {
+                if (screen.orientation && screen.orientation.unlock) {
+                    screen.orientation.unlock();
+                    status.innerHTML = '<p class="status">✓ Successfully unlocked orientation</p>';
+                } else {
+                    status.innerHTML = '<p class="error">✗ Screen Orientation API not supported</p>';
+                }
+            } catch (err) {
+                status.innerHTML = `<p class="error">✗ Unlock failed: ${err.message}</p>`;
+            }
+        }
+        
+        // Test UI positions
+        function testUIPositions(orientation) {
+            const status = document.getElementById('position-status');
+            const root = document.documentElement;
+            
+            // Simulate the mobileUIManager behavior
+            if (orientation === 'landscape') {
+                root.style.setProperty('--mobile-scorecard-top', '10px');
+                root.style.setProperty('--mobile-scorecard-left', '10px');
+                root.style.setProperty('--mobile-leaderboard-top', '10px');
+                root.style.setProperty('--mobile-leaderboard-right', '10px');
+                root.style.setProperty('--mobile-boost-bar-height', '20px');
+                root.style.setProperty('--mobile-discovery-scale', '0.75');
+                root.style.setProperty('--mobile-discovery-opacity', '0.6');
+            } else {
+                root.style.setProperty('--mobile-scorecard-top', '50px');
+                root.style.setProperty('--mobile-scorecard-left', '10px');
+                root.style.setProperty('--mobile-leaderboard-top', '50px');
+                root.style.setProperty('--mobile-leaderboard-right', '10px');
+                root.style.setProperty('--mobile-boost-bar-height', '18px');
+                root.style.setProperty('--mobile-discovery-scale', '0.7');
+                root.style.setProperty('--mobile-discovery-opacity', '0.5');
+            }
+            
+            root.style.setProperty('--mobile-joystick-opacity', '0.3');
+            root.style.setProperty('--mobile-boost-opacity', '0.6');
+            
+            status.innerHTML = `<p class="status">✓ Applied ${orientation} positions</p>`;
+            updateCSSVars();
+        }
+        
+        // Initialize
+        updateDeviceInfo();
+        updateCSSVars();
+        
+        // Update on resize/orientation change
+        window.addEventListener('resize', updateDeviceInfo);
+        window.addEventListener('orientationchange', updateDeviceInfo);
+    </script>
+</body>
+</html>

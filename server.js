@@ -273,8 +273,8 @@ const server = http.createServer((req, res) => {
     return;
   }
   
-  if (req.method === 'DELETE' && req.url.startsWith('/api/delete-combination')) {
-    console.log('[DELETE] Handling delete-combination request');
+  if ((req.method === 'DELETE' || req.method === 'POST') && req.url.startsWith('/api/delete-combination')) {
+    console.log(`[${req.method}] Handling delete-combination request`);
     let body = '';
     req.on('data', chunk => {
       body += chunk.toString();
@@ -329,8 +329,8 @@ const server = http.createServer((req, res) => {
     return;
   }
   
-  if (req.method === 'DELETE' && req.url === '/api/delete-element') {
-    console.log('[DELETE] Handling delete-element request');
+  if ((req.method === 'DELETE' || req.method === 'POST') && req.url === '/api/delete-element') {
+    console.log(`[${req.method}] Handling delete-element request`);
     let body = '';
     req.on('data', chunk => {
       body += chunk.toString();

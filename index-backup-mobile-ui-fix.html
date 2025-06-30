@@ -187,26 +187,6 @@
             --snes-gray: #A8A8A8;
             --snes-dark-purple: #4800A8;
             --snes-cosmic-teal: #00F8F8;
-            
-            /* Mobile UI Positioning Variables */
-            --mobile-scorecard-top: 10px;
-            --mobile-scorecard-left: 10px;
-            --mobile-scorecard-bottom: auto;
-            --mobile-scorecard-right: auto;
-            
-            --mobile-leaderboard-top: 10px;
-            --mobile-leaderboard-right: 10px;
-            --mobile-leaderboard-bottom: auto;
-            --mobile-leaderboard-left: auto;
-            
-            --mobile-discovery-opacity: 0.7;
-            --mobile-discovery-scale: 0.8;
-            
-            --mobile-joystick-opacity: 0.3;
-            --mobile-boost-opacity: 0.7;
-            
-            --mobile-boost-bar-height: 20px;
-            --mobile-landscape-ui-spacing: 15px;
         }
         
         body {
@@ -3750,56 +3730,54 @@
 
         /* ===== LANDSCAPE ORIENTATION (iPad Mini and larger tablets) ===== */
         @media screen and (orientation: landscape) and (max-width: 1024px) {
-            /* Player Card - Top Left */
+            /* Player Card - Top Left - FIXED POSITIONING */
             body.mobile .player-info-box {
-                position: fixed;
-                top: var(--mobile-scorecard-top);
-                left: var(--mobile-scorecard-left);
-                bottom: var(--mobile-scorecard-bottom);
-                right: var(--mobile-scorecard-right);
-                width: 200px;
+                position: fixed !important;
+                top: 25px !important; /* Move to top */
+                left: 20px !important;
+                bottom: auto !important;
+                right: auto !important;
+                width: 200px !important;
             }
             
-            /* Leaderboard - Top Right */
+            /* Leaderboard - Top Right - FIXED POSITIONING */
             body.mobile .leaderboard-box {
-                position: fixed;
-                top: var(--mobile-leaderboard-top);
-                right: var(--mobile-leaderboard-right);
-                bottom: var(--mobile-leaderboard-bottom);
-                left: var(--mobile-leaderboard-left);
-                width: 240px;
+                position: fixed !important;
+                top: 25px !important; /* Move to top */
+                right: 20px !important;
+                bottom: auto !important;
+                left: auto !important;
+                width: 240px !important; /* Slightly wider for comfortable text */
             }
             
-            /* Discovery Feed - Left Middle - Smaller and translucent */
+            /* Discovery Feed - Left Middle */
             body.mobile .discovery-feed {
-                left: 20px;
-                top: 50%;
-                transform: translateY(-50%) scale(var(--mobile-discovery-scale));
-                bottom: auto;
-                width: 200px;
-                max-height: 30vh;
-                opacity: var(--mobile-discovery-opacity);
-                backdrop-filter: blur(5px);
+                left: 20px !important;
+                top: 50% !important;
+                transform: translateY(-50%) !important;
+                bottom: auto !important;
+                width: 250px !important;
+                max-height: 40vh !important;
             }
             
-            /* Boost Bar & Element Bank - Top Center (compact) */
+            /* Boost Bar & Element Bank - Top Center (shrink width) */
             body.mobile .bottom-ui {
-                top: 5px;
-                bottom: auto;
-                padding: 5px 15px;
-                left: 220px; /* Clear player card */
-                right: 250px; /* Clear leaderboard */
-                width: auto;
+                top: 10px !important;
+                bottom: auto !important;
+                padding: 10px 20px !important;
+                left: 230px !important; /* Clear player card */
+                right: 260px !important; /* Clear leaderboard */
+                width: auto !important;
             }
             
-            /* Compact boost bar for landscape */
+            /* Shrink boost bar for landscape */
             body.mobile .boost-bar-container {
-                height: var(--mobile-boost-bar-height);
-                margin-bottom: 5px;
+                height: 30px !important;
+                margin-bottom: 10px !important;
             }
             
             body.mobile .boost-bar-frame {
-                height: var(--mobile-boost-bar-height);
+                height: 30px !important;
             }
             
             /* Joystick - Bottom Left Corner */
@@ -3844,53 +3822,50 @@
 
         /* ===== PORTRAIT ORIENTATION ===== */
         @media (orientation: portrait) and (max-width: 1024px) {
-            /* Player Card - Top Left */
+            /* Player Card - Top Left with increased margin */
             body.mobile .player-info-box {
-                top: 60px;
-                left: 10px;
-                bottom: auto;
-                width: 160px;
-                font-size: 7px;
+                top: 80px !important; /* Moved up slightly */
+                left: 10px !important;
+                bottom: auto !important;
+                width: 160px !important;
+                font-size: 7px !important;
             }
             
-            /* Leaderboard - Top Right */
+            /* Leaderboard - Top Right with increased margin */
             body.mobile .leaderboard-box {
-                top: 60px;
-                right: 10px;
-                left: auto;
-                bottom: auto;
-                width: 180px;
-                font-size: 9px;
+                top: 80px !important; /* Moved up slightly */
+                right: 10px !important;
+                left: auto !important;
+                bottom: auto !important;
+                width: 180px !important; /* Widened for comfortable text */
+                font-size: 9px !important;
             }
             
-            /* Discovery Feed - Left side, smaller and translucent */
+            /* Discovery Feed - Left side, below player card */
             body.mobile .discovery-feed {
-                left: 10px;
-                top: 180px;
-                transform: scale(var(--mobile-discovery-scale));
-                transform-origin: top left;
-                bottom: auto;
-                width: 180px;
-                max-height: 25vh;
-                opacity: var(--mobile-discovery-opacity);
-                backdrop-filter: blur(5px);
+                left: 10px !important;
+                top: 200px !important; /* Below player card */
+                transform: none !important;
+                bottom: auto !important;
+                width: 200px !important;
+                max-height: 30vh !important;
             }
             
             /* Boost Bar & Element Bank - Top */
             body.mobile .bottom-ui {
-                top: 0;
-                bottom: auto;
-                padding: 5px 10px;
+                top: 0 !important;
+                bottom: auto !important;
+                padding: 8px 15px !important;
             }
             
-            /* Compact boost bar for portrait */
+            /* Shrink boost bar for portrait */
             body.mobile .boost-bar-container {
-                height: var(--mobile-boost-bar-height);
-                margin-bottom: 5px;
+                height: 25px !important;
+                margin-bottom: 8px !important;
             }
             
             body.mobile .boost-bar-frame {
-                height: var(--mobile-boost-bar-height);
+                height: 25px !important;
             }
             
             body.mobile .element-collection-bar {
@@ -3960,31 +3935,31 @@
         
         /* ===== ENHANCED MOBILE CONTROLS ===== */
         .virtual-joystick {
-            background: rgba(0, 0, 0, var(--mobile-joystick-opacity));
-            border: 3px solid rgba(78, 205, 196, 0.4);
-            backdrop-filter: blur(5px);
+            background: rgba(0, 0, 0, 0.6) !important;
+            border: 3px solid rgba(78, 205, 196, 0.6) !important;
+            backdrop-filter: blur(5px) !important;
         }
 
         .joystick-base {
-            background: radial-gradient(circle, rgba(78, 205, 196, 0.15) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(78, 205, 196, 0.2) 0%, transparent 70%) !important;
         }
 
         .joystick-knob {
-            background: radial-gradient(circle, rgba(78, 205, 196, 0.6) 0%, rgba(42, 117, 113, 0.6) 100%);
-            box-shadow: 0 0 20px rgba(78, 205, 196, 0.5);
+            background: radial-gradient(circle, #4ecdc4 0%, #2a7571 100%) !important;
+            box-shadow: 0 0 20px rgba(78, 205, 196, 0.8) !important;
         }
 
         .boost-button {
-            background: radial-gradient(circle, rgba(248, 56, 248, var(--mobile-boost-opacity)) 0%, rgba(120, 40, 248, var(--mobile-boost-opacity)) 100%);
-            border: 3px solid rgba(248, 216, 0, 0.6);
-            font-family: 'Press Start 2P', monospace;
-            font-size: 14px;
-            color: var(--snes-white);
-            text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(5px);
+            background: radial-gradient(circle, rgba(248, 56, 248, 0.8) 0%, rgba(120, 40, 248, 0.8) 100%) !important;
+            border: 3px solid rgba(248, 216, 0, 0.8) !important;
+            font-family: 'Press Start 2P', monospace !important;
+            font-size: 14px !important;
+            color: var(--snes-white) !important;
+            text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.8) !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            backdrop-filter: blur(5px) !important;
         }
 
         .boost-button:active {
@@ -4055,22 +4030,30 @@
             color: rgba(255, 255, 255, 0.5) !important;
         }
         
-        /* ===== UNIFIED LANDSCAPE POSITIONING ===== */
+        /* ===== FINAL LANDSCAPE OVERRIDES - MUST BE LAST ===== */
         @media screen and (orientation: landscape) and (max-width: 1024px) {
-            /* Ensure consistent positioning without conflicts */
-            body.mobile .player-info-box,
+            /* Force landscape positions to override all other mobile rules */
+            body.mobile .player-info-box {
+                position: fixed !important;
+                top: 25px !important;
+                left: 20px !important;
+                bottom: auto !important;
+                right: auto !important;
+            }
+            
             body.mobile .leaderboard-box {
-                z-index: 21; /* Above game elements but below controls */
+                position: fixed !important;
+                top: 25px !important;
+                right: 20px !important;
+                bottom: auto !important;
+                left: auto !important;
             }
             
-            /* Adjust element collection slots for landscape */
-            body.mobile .element-slot {
-                width: 32px;
-                height: 32px;
-            }
-            
-            body.mobile .element-slot .emoji {
-                font-size: 18px;
+            body.mobile .pause-button-mobile,
+            body.mobile .mute-button-mobile {
+                position: fixed !important;
+                top: auto !important;
+                bottom: 20px !important;
             }
         }
         
@@ -4468,46 +4451,6 @@
         let playerRespawnTimer = 0; // Player respawn countdown
         let comboStreak = 0; // Track consecutive combinations
         let animationFrameId = null; // Track the animation frame to prevent multiple loops
-        
-        // Show rotate device message for mobile users
-        function showRotateDeviceMessage() {
-            const rotateMsg = document.createElement('div');
-            rotateMsg.id = 'rotate-device-message';
-            rotateMsg.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100vw;
-                height: 100vh;
-                background: rgba(0, 0, 0, 0.9);
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                z-index: 10000;
-                font-family: 'Press Start 2P', monospace;
-                color: #fff;
-                text-align: center;
-                padding: 20px;
-            `;
-            rotateMsg.innerHTML = `
-                <div style="font-size: 24px; margin-bottom: 20px;">📱</div>
-                <div style="font-size: 12px; line-height: 1.5;">Please rotate your device</div>
-                <div style="font-size: 10px; margin-top: 10px; color: #888;">For the best experience</div>
-            `;
-            document.body.appendChild(rotateMsg);
-            
-            // Remove message when device is rotated
-            const checkOrientation = () => {
-                if (window.innerWidth > window.innerHeight) {
-                    rotateMsg.remove();
-                    window.removeEventListener('orientationchange', checkOrientation);
-                    window.removeEventListener('resize', checkOrientation);
-                }
-            };
-            window.addEventListener('orientationchange', checkOrientation);
-            window.addEventListener('resize', checkOrientation);
-        }
         
         // Alchemy Vision power-up
         let alchemyVisionPowerUps = [];
@@ -13221,19 +13164,6 @@
                 return;
             }
             
-            // Force landscape mode on mobile devices
-            if (isTabletOrMobile() && screen.orientation && screen.orientation.lock) {
-                screen.orientation.lock('landscape').then(() => {
-                    console.log('Locked to landscape mode');
-                }).catch((err) => {
-                    console.log('Could not lock orientation:', err);
-                    // Fallback: show a message to rotate device
-                    if (window.innerHeight > window.innerWidth) {
-                        showRotateDeviceMessage();
-                    }
-                });
-            }
-            
             // Clear all game state to ensure fresh start
             snakes = [];
             elements = [];
@@ -13421,12 +13351,6 @@
             // Reset game state
             gameStarted = false;
             paused = false;
-            
-            // Unlock orientation when returning to title screen
-            if (isTabletOrMobile() && screen.orientation && screen.orientation.unlock) {
-                screen.orientation.unlock();
-                console.log('Unlocked screen orientation');
-            }
             
             // Clear ALL game objects
             snakes = [];
@@ -14795,63 +14719,11 @@
                     document.querySelector('meta[name="viewport"]').setAttribute('content', 
                         'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
                 }
-                
-                // Update UI positions using the UI Manager
-                if (window.mobileUIManager) {
-                    window.mobileUIManager.updatePositions(orientation);
-                }
-            }
-            
-            // Mobile UI Manager for dynamic positioning
-            window.mobileUIManager = {
-                updatePositions: function(orientation) {
-                    if (!isTabletOrMobile()) return;
-                    
-                    const root = document.documentElement;
-                    
-                    if (orientation === 'landscape') {
-                        // Landscape positions - UI at top
-                        root.style.setProperty('--mobile-scorecard-top', '10px');
-                        root.style.setProperty('--mobile-scorecard-left', '10px');
-                        root.style.setProperty('--mobile-leaderboard-top', '10px');
-                        root.style.setProperty('--mobile-leaderboard-right', '10px');
-                        root.style.setProperty('--mobile-boost-bar-height', '20px');
-                        root.style.setProperty('--mobile-discovery-scale', '0.75');
-                        root.style.setProperty('--mobile-discovery-opacity', '0.6');
-                    } else {
-                        // Portrait positions - UI at top with more spacing
-                        root.style.setProperty('--mobile-scorecard-top', '50px');
-                        root.style.setProperty('--mobile-scorecard-left', '10px');
-                        root.style.setProperty('--mobile-leaderboard-top', '50px');
-                        root.style.setProperty('--mobile-leaderboard-right', '10px');
-                        root.style.setProperty('--mobile-boost-bar-height', '18px');
-                        root.style.setProperty('--mobile-discovery-scale', '0.7');
-                        root.style.setProperty('--mobile-discovery-opacity', '0.5');
-                    }
-                    
-                    // Update control translucency
-                    root.style.setProperty('--mobile-joystick-opacity', '0.3');
-                    root.style.setProperty('--mobile-boost-opacity', '0.6');
-                },
-                
-                applyMobileOptimizations: function() {
-                    // Apply additional mobile-specific optimizations
-                    const discoveryFeed = document.querySelector('.discovery-feed');
-                    if (discoveryFeed && isTabletOrMobile()) {
-                        discoveryFeed.style.pointerEvents = 'none'; // Make it non-interactive
-                        discoveryFeed.style.userSelect = 'none';
-                    }
-                }
             }
             
             window.addEventListener('orientationchange', handleOrientationChange);
             window.addEventListener('resize', handleOrientationChange);
             handleOrientationChange(); // Initial check
-            
-            // Apply mobile optimizations
-            if (isTabletOrMobile() && window.mobileUIManager) {
-                window.mobileUIManager.applyMobileOptimizations();
-            }
             
             // Ensure leaderboard is tappable on mobile
             const leaderboardBox = document.querySelector('.leaderboard-box');
