@@ -173,14 +173,17 @@ class PlayerStats {
     recordPowerupCollected(type) {
         switch(type) {
             case 'void':
+            case 'voidOrb':
                 this.sessionStats.voidOrbs++;
                 this.stats.stats.powerups.voidOrbs++;
                 break;
             case 'catalyst':
+            case 'catalystGem':
                 this.sessionStats.catalystGems++;
                 this.stats.stats.powerups.catalystGems++;
                 break;
             case 'alchemy':
+            case 'alchemyVision':
                 this.stats.stats.powerups.alchemyVisions++;
                 break;
         }
@@ -326,7 +329,12 @@ class PlayerStats {
         window.addEventListener('gameEnd', (e) => this.recordGameEnd(e.detail?.score));
         window.addEventListener('playerDeath', () => this.recordDeath());
         window.addEventListener('enemyKilled', () => this.recordKill());
-        window.addEventListener('elementDiscovered', (e) => this.recordDiscovery(e.detail.element));
+        window.addEventListener('elementDiscovered', (e) => {
+            // Handle the result element from the discovery
+            if (e.detail.result) {
+                this.recordDiscovery(e.detail.result);
+            }
+        });
         window.addEventListener('powerupCollected', (e) => this.recordPowerupCollected(e.detail.type));
         window.addEventListener('scoreUpdate', (e) => this.updateScore(e.detail.score));
         window.addEventListener('firstPlace', () => this.recordFirstPlace());
@@ -336,6 +344,13 @@ class PlayerStats {
     debugStats() {
         console.log('Player Stats:', this.stats);
         console.log('Session Stats:', this.sessionStats);
+        console.log('=== Score Debug ===');
+        console.log('Total Score:', this.getTotalScore());
+        console.log('High Score:', this.getHighScore());
+        console.log('Session Score:', this.sessionStats.score);
+        console.log('=== Discovery Debug ===');
+        console.log('Total Discoveries:', this.getTotalDiscoveries());
+        console.log('Discovered Elements:', Array.from(this.stats.stats.lifetime.elementsDiscovered));
     }
     
     // Reset all stats

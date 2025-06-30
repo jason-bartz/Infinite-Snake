@@ -1,7 +1,7 @@
 /* Unlock Notification Styles */
 .unlock-notification {
     position: fixed;
-    top: 50%;
+    top: 70%;
     left: 50%;
     transform: translate(-50%, -50%) scale(0.8);
     opacity: 0;
@@ -17,28 +17,28 @@
 
 .unlock-content {
     background: #1a1a1a;
-    border-radius: 20px;
-    padding: 30px;
+    border-radius: 15px;
+    padding: 20px;
     text-align: center;
-    min-width: 300px;
+    min-width: 250px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
     position: relative;
     overflow: hidden;
 }
 
 .unlock-header {
-    font-size: 24px;
+    font-size: 18px;
     font-weight: bold;
     color: #fff;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
     animation: pulse 1s ease-in-out infinite;
 }
 
 .unlock-skin-preview {
-    width: 120px;
-    height: 120px;
-    margin: 0 auto 15px;
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 10px;
     position: relative;
 }
 
@@ -50,27 +50,27 @@
 }
 
 .unlock-skin-name {
-    font-size: 20px;
+    font-size: 16px;
     font-weight: bold;
     color: #fff;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 
 .unlock-skin-rarity {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 2px;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
 }
 
 .unlock-skin-bio {
-    font-size: 14px;
+    font-size: 12px;
     color: #ccc;
     line-height: 1.4;
     font-style: italic;
     padding: 0 10px;
-    max-width: 300px;
+    max-width: 250px;
     margin: 0 auto;
 }
 
@@ -231,25 +231,33 @@
 
 /* Mobile adjustments */
 @media (max-width: 768px) {
+    .unlock-notification {
+        top: 75%;
+    }
+    
     .unlock-content {
-        padding: 20px;
-        min-width: 250px;
+        padding: 15px;
+        min-width: 200px;
     }
     
     .unlock-header {
-        font-size: 20px;
+        font-size: 16px;
     }
     
     .unlock-skin-preview {
-        width: 80px;
-        height: 80px;
+        width: 60px;
+        height: 60px;
     }
     
     .unlock-skin-name {
-        font-size: 18px;
+        font-size: 14px;
     }
     
     .unlock-skin-rarity {
-        font-size: 14px;
+        font-size: 12px;
+    }
+    
+    .unlock-skin-bio {
+        font-size: 11px;
     }
 }

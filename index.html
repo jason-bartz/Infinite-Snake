@@ -4939,10 +4939,22 @@
                 }
             }
             
-            // Update metadata
+            // Update metadata with ID conversion support
             for (const skin of unlockedSkins) {
+                // Try direct match first
                 if (skinMetadata[skin]) {
                     skinMetadata[skin].unlocked = true;
+                } else if (window.skinIdConverter) {
+                    // Try converting from new ID to old ID
+                    const oldId = window.skinIdConverter.toOldId(skin);
+                    if (oldId && skinMetadata[oldId]) {
+                        skinMetadata[oldId].unlocked = true;
+                    }
+                    // Also try converting from old ID to new ID
+                    const newId = window.skinIdConverter.toNewId(skin);
+                    if (newId && skinMetadata[newId]) {
+                        skinMetadata[newId].unlocked = true;
+                    }
                 }
             }
         }
@@ -12330,6 +12342,12 @@
                             // Play catalyst gem sound at appropriate volume
                             playCatalystGemSound(true);
                             
+                            // Dispatch catalyst gem collected event
+                            dispatchGameEvent('powerupCollected', {
+                                type: 'catalyst',
+                                elementsSpawned: 3
+                            });
+                            
                             // Create particle effect
                             for (let j = 0; j < 20; j++) {
                                 const angle = (j / 20) * Math.PI * 2;
@@ -13895,6 +13913,15 @@
         // Listen for unlock events from UnlockManager
         window.addEventListener('skinUnlocked', (event) => {
             showUnlockNotification(event.detail.skinId);
+            
+            // Refresh the skin grid if the pause menu is open
+            const pauseMenu = document.getElementById('pauseMenu');
+            if (pauseMenu && pauseMenu.style.display !== 'none') {
+                // Reload skin data to sync with UnlockManager
+                loadSkinData();
+                // Rebuild the skin grid to show newly unlocked skin
+                buildSkinGrid();
+            }
         });
         
         // Draw animated skin preview
@@ -14743,6 +14770,33 @@
             // Load skin data
             loadSkinData();
             preloadSkins();
+            
+            // Expose skin functions to window for UnlockManager access
+            window.loadSkinData = loadSkinData;
+            window.saveSkinData = saveSkinData;
+            window.skinMetadata = skinMetadata;
+            window.unlockedSkins = unlockedSkins;
+            
+            // Sync with UnlockManager's unlocked skins
+            if (window.unlockManager) {
+                const unlockManagerSkins = window.unlockManager.getUnlockedSkins();
+                for (const skinId of unlockManagerSkins) {
+                    // Add to main game's unlockedSkins set
+                    unlockedSkins.add(skinId);
+                    
+                    // Also add the old ID if it exists
+                    if (window.skinIdConverter) {
+                        const oldId = window.skinIdConverter.toOldId(skinId);
+                        if (oldId && oldId !== skinId) {
+                            unlockedSkins.add(oldId);
+                        }
+                    }
+                }
+                
+                // Save and reload to ensure consistency
+                saveSkinData();
+                loadSkinData();
+            }
             
             // Load all-time discoveries
             loadAllTimeDiscoveries();

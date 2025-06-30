@@ -154,11 +154,30 @@ class UnlockManager {
         const mainGameUnlocks = localStorage.getItem('unlockedSkins');
         let unlockedSet = mainGameUnlocks ? new Set(JSON.parse(mainGameUnlocks)) : new Set(['basic-boy']);
         unlockedSet.add(skinId);
+        
+        // Also add the old ID if it exists (for compatibility)
+        if (window.skinIdConverter) {
+            const oldId = window.skinIdConverter.toOldId(skinId);
+            if (oldId && oldId !== skinId) {
+                unlockedSet.add(oldId);
+            }
+        }
+        
         localStorage.setItem('unlockedSkins', JSON.stringify(Array.from(unlockedSet)));
         
-        // Update skin metadata
-        if (window.skinMetadata && window.skinMetadata[skinId]) {
-            window.skinMetadata[skinId].unlocked = true;
+        // Update skin metadata for both new and old IDs
+        if (window.skinMetadata) {
+            if (window.skinMetadata[skinId]) {
+                window.skinMetadata[skinId].unlocked = true;
+            }
+            
+            // Also update the old ID in skinMetadata if it exists
+            if (window.skinIdConverter) {
+                const oldId = window.skinIdConverter.toOldId(skinId);
+                if (oldId && window.skinMetadata[oldId]) {
+                    window.skinMetadata[oldId].unlocked = true;
+                }
+            }
         }
         
         // Dispatch event for UI updates
@@ -193,9 +212,24 @@ class UnlockManager {
         const notification = document.createElement('div');
         notification.className = `unlock-notification rarity-${skinData.rarity}`;
         
+        // Convert new skin ID to old ID for image path
+        let imageId = skinId;
+        if (window.skinIdConverter && window.skinIdConverter.toOldId) {
+            const oldId = window.skinIdConverter.toOldId(skinId);
+            if (oldId && oldId !== skinId) {
+                imageId = oldId;
+            }
+        }
+        
+        // Determine the correct image path
+        const imagePath = skinData.isBoss ? `assets/boss-skins/${imageId}.png` : `skins/${imageId}.png`;
+        
         notification.innerHTML = `
             <div class="unlock-content">
                 <div class="unlock-header">NEW SKIN UNLOCKED!</div>
+                <div class="unlock-skin-preview">
+                    <img src="${imagePath}" alt="${skinData.name}" onerror="this.style.display='none'">
+                </div>
                 <div class="unlock-skin-name">${skinData.name}</div>
                 <div class="unlock-skin-rarity">${skinData.rarity.toUpperCase()}</div>
                 <div class="unlock-skin-bio">${skinData.bio || 'A mysterious new skin!'}</div>
@@ -211,7 +245,7 @@ class UnlockManager {
         setTimeout(() => {
             notification.classList.remove('show');
             setTimeout(() => notification.remove(), 500);
-        }, 2500);
+        }, 3500); // Increased duration to 3.5 seconds
         
         // Play sound effect based on rarity
         this.playUnlockSound(skinData.rarity);
@@ -354,11 +388,26 @@ class UnlockManager {
                     current = 0; // Not in the right months
                 }
                 break;
+            case 'collectExotics':
+                // Count other exotic skins that are unlocked
+                let exoticCount = 0;
+                for (const [id, data] of Object.entries(window.SKIN_DATA)) {
+                    if (data.rarity === 'exotic' && id !== skinId && this.unlockedSkins.has(id)) {
+                        exoticCount++;
+                    }
+                }
+                current = exoticCount;
+                break;
             case 'timeWindow':
             case 'monthWindow':
             case 'defeatBoss':
-                // These are binary checks
-                return this.checkUnlockCriteria(skinId, criteria) ? 1 : 0;
+                // These are binary checks - return proper progress object
+                const isUnlocked = this.checkUnlockCriteria(skinId, criteria);
+                return {
+                    current: isUnlocked ? 1 : 0,
+                    max: 1,
+                    percentage: isUnlocked ? 100 : 0
+                };
             default:
                 return null;
         }
@@ -386,6 +435,11 @@ class UnlockManager {
                 }
             });
         }
+    }
+    
+    // Get unlocked skins
+    getUnlockedSkins() {
+        return this.unlockedSkins;
     }
     
     // Debug method
