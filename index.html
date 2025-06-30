@@ -6580,41 +6580,35 @@
                     const pixelSize = 4;
                     const baseSegmentSize = SEGMENT_SIZE * sizeMultiplier;
                     
-                    // Calculate taper for tail segments
-                    const tailStart = Math.max(0, this.segments.length - 5); // Last 5 segments form the tail
+                    // Calculate segment size with smooth tapering
                     let segmentRadius;
+                    const totalSegments = this.segments.length;
                     
-                    if (i >= tailStart) {
-                        // Taper the tail segments
-                        const tailProgress = (i - tailStart) / (this.segments.length - tailStart);
-                        const minSize = baseSegmentSize * 0.3; // Minimum 30% of full size
-                        segmentRadius = (baseSegmentSize - (baseSegmentSize - minSize) * tailProgress) * cameraZoom;
+                    // Progressive tapering throughout the snake, more aggressive at the tail
+                    if (i < totalSegments * 0.7) {
+                        // First 70% of snake maintains mostly full size with very slight taper
+                        segmentRadius = baseSegmentSize * (1 - i * 0.001) * cameraZoom;
                     } else {
-                        // Normal body segments with slight taper
-                        segmentRadius = Math.max(1, baseSegmentSize - Math.min(i * 0.05, baseSegmentSize - 1)) * cameraZoom;
+                        // Last 30% tapers more aggressively
+                        const tailPosition = (i - totalSegments * 0.7) / (totalSegments * 0.3);
+                        // Use exponential curve for smoother taper
+                        const taperFactor = Math.pow(1 - tailPosition, 1.5);
+                        segmentRadius = baseSegmentSize * (0.8 * taperFactor + 0.2) * cameraZoom;
                     }
                     
-                    const segmentPixels = Math.max(1, Math.floor(segmentRadius * 2 / pixelSize)); // Ensure at least 1 pixel
+                    // Ensure minimum size but allow very small tail tip
+                    const segmentPixels = Math.max(1, Math.floor(segmentRadius * 2 / pixelSize));
+                    
+                    // Skip drawing if segment would be invisible (less than 1 pixel)
+                    if (segmentPixels < 1) continue;
                     
                     // Draw main square segment
                     const segmentX = Math.floor(screenX / pixelSize) * pixelSize - segmentPixels * pixelSize / 2;
                     const segmentY = Math.floor(screenY / pixelSize) * pixelSize - segmentPixels * pixelSize / 2;
                     const segmentSize = segmentPixels * pixelSize;
                     
-                    // For the very last segment (tail tip), draw a rounded/pointed shape
-                    if (i === this.segments.length - 1 && segmentPixels >= 2) {
-                        // Draw a diamond/triangle shape for the tail tip
-                        ctx.beginPath();
-                        ctx.moveTo(screenX, segmentY); // Top point
-                        ctx.lineTo(segmentX + segmentSize, screenY); // Right point
-                        ctx.lineTo(screenX, segmentY + segmentSize); // Bottom point
-                        ctx.lineTo(segmentX, screenY); // Left point
-                        ctx.closePath();
-                        ctx.fill();
-                    } else {
-                        // Normal square segment
-                        ctx.fillRect(segmentX, segmentY, segmentSize, segmentSize);
-                    }
+                    // Normal square segment for all (removed diamond shape as it was causing the lump)
+                    ctx.fillRect(segmentX, segmentY, segmentSize, segmentSize);
                     
                     // Spawn invincibility sparkle particles for player
                     if (this.invincibilityTimer > 0 && this.isPlayer) {
