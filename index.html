@@ -3460,12 +3460,18 @@
             <div style="margin: 20px 0;">
                 <input type="text" id="playerNameInput" placeholder="Enter your name" 
                        style="width: 300px; max-width: 80%; padding: 12px 20px; 
-                              font-family: monospace; font-size: 16px; 
+                              font-family: 'Press Start 2P', monospace; font-size: 12px; 
                               background: rgba(0, 0, 0, 0.8); 
-                              border: 2px solid #4ecdc4; 
+                              border: 4px solid #fff; 
                               color: #4ecdc4; text-align: center; 
-                              border-radius: 25px; outline: none;
-                              transition: all 0.3s ease;"
+                              border-radius: 0; outline: none;
+                              box-shadow: 
+                                inset 2px 2px 0 #2a2a4a,
+                                inset -2px -2px 0 #000,
+                                4px 4px 0 rgba(0,0,0,0.5);
+                              transition: none;
+                              display: block;
+                              margin: 0 auto;"
                        maxlength="30">
             </div>
             <button id="startButton">Begin Your Journey</button>
