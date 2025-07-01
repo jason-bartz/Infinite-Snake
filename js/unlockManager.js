@@ -2,7 +2,7 @@
 class UnlockManager {
     constructor() {
         this.STORAGE_KEY = 'infiniteSnakeUnlocks';
-        this.unlockedSkins = new Set(['basic-boy']); // Initialize with default first
+        this.unlockedSkins = new Set(['snake-default-green']); // Initialize with default first
         this.pendingUnlocks = [];
         this.loadUnlockedSkins(); // Load will update the set
         this.initializeEventListeners();
@@ -12,7 +12,7 @@ class UnlockManager {
         try {
             // Try to load from unlock manager storage
             const stored = localStorage.getItem(this.STORAGE_KEY);
-            let unlocks = stored ? new Set(JSON.parse(stored)) : new Set(['basic-boy']);
+            let unlocks = stored ? new Set(JSON.parse(stored)) : new Set(['snake-default-green']);
             
             // Also merge with main game storage
             const mainGameUnlocks = localStorage.getItem('unlockedSkins');
@@ -20,6 +20,9 @@ class UnlockManager {
                 const mainUnlocks = JSON.parse(mainGameUnlocks);
                 mainUnlocks.forEach(skin => unlocks.add(skin));
             }
+            
+            // Always ensure default skin is unlocked
+            unlocks.add('snake-default-green');
             
             // Update the instance property
             this.unlockedSkins = unlocks;
@@ -30,7 +33,7 @@ class UnlockManager {
             }
         } catch (error) {
             console.error('Failed to load unlocked skins:', error);
-            this.unlockedSkins = new Set(['basic-boy']);
+            this.unlockedSkins = new Set(['snake-default-green']);
         }
     }
 
@@ -52,6 +55,9 @@ class UnlockManager {
         if (!stats) return false;
 
         switch (criteria.type) {
+            case 'default':
+                return true; // Default skin is always unlocked
+                
             case 'deaths':
                 return stats.getTotalDeaths() >= criteria.value;
             

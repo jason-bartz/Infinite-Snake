@@ -3452,6 +3452,17 @@
             The Universe collapsed, scattered its contents across infinite coils of nothing. You're the Infinite Snake - part cleanup crew, part living library.<br><br>
             Collect fragments of reality. Merge them. See what happens. Rebuild the Cosmos one combination at a time. Maybe you'll figure out what we forgot.<br><br>
             Just remember: you're not the only thing moving in the dark…</p>
+            <div style="margin: 20px 0;">
+                <input type="text" id="playerNameInput" placeholder="Enter your name" 
+                       style="width: 300px; max-width: 80%; padding: 12px 20px; 
+                              font-family: monospace; font-size: 16px; 
+                              background: rgba(0, 0, 0, 0.8); 
+                              border: 2px solid #4ecdc4; 
+                              color: #4ecdc4; text-align: center; 
+                              border-radius: 25px; outline: none;
+                              transition: all 0.3s ease;"
+                       maxlength="30">
+            </div>
             <button id="startButton">Begin Your Journey</button>
         </div>
     </div>
@@ -3655,83 +3666,91 @@
                         padding: 30px 40px;
                         box-shadow: 0 0 30px rgba(255, 68, 68, 0.3);
                         pointer-events: auto;">
-                <h2 style="color: #ff4444; margin: 0 0 20px 0; font-size: 32px; text-shadow: 0 0 10px rgba(255, 68, 68, 0.5);">Your Form Dissolves Into The Void!</h2>
+                <h2 id="deathMessage" style="color: #ff4444; margin: 0 0 20px 0; font-size: 32px; text-shadow: 0 0 10px rgba(255, 68, 68, 0.5);">Your Form Dissolves Into The Void!</h2>
                 
-                <!-- Stats Summary -->
-                <div style="margin-bottom: 25px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                    <div style="background: rgba(0, 0, 0, 0.3); padding: 10px; border-radius: 8px;">
-                        <div style="color: #AAA; font-size: 14px;">Score</div>
-                        <div id="respawnScore" style="color: #4ecdc4; font-size: 24px; font-weight: bold;">0</div>
-                    </div>
-                    <div style="background: rgba(0, 0, 0, 0.3); padding: 10px; border-radius: 8px;">
-                        <div style="color: #AAA; font-size: 14px;">Discoveries</div>
-                        <div id="respawnDiscoveries" style="color: #FFD700; font-size: 24px; font-weight: bold;">0</div>
-                    </div>
-                    <div style="background: rgba(0, 0, 0, 0.3); padding: 10px; border-radius: 8px;">
-                        <div style="color: #AAA; font-size: 14px;">Best Rank</div>
-                        <div id="respawnRank" style="color: #9c88ff; font-size: 24px; font-weight: bold;">#1</div>
-                    </div>
-                    <div style="background: rgba(0, 0, 0, 0.3); padding: 10px; border-radius: 8px;">
-                        <div style="color: #AAA; font-size: 14px;">Kills</div>
-                        <div id="respawnKills" style="color: #ff6b6b; font-size: 24px; font-weight: bold;">0</div>
-                    </div>
-                </div>
-                
-                <!-- Leaderboard Submission for Infinite Mode -->
-                <div id="leaderboardSubmission" style="display: none; margin: 20px 0;">
-                    <div style="margin-bottom: 15px;">
-                        <div style="color: #4ecdc4; font-size: 16px; margin-bottom: 10px;">Submit to Global Leaderboard</div>
-                        <div id="playTimeWarning" style="display: none; color: #ff4444; font-size: 14px; margin-bottom: 10px;">
-                            ⚠️ Minimum 10 seconds play time required
-                        </div>
-                        <input type="text" id="usernameInput" placeholder="Enter username..." maxlength="20" 
-                               onkeypress="if(event.key === 'Enter') submitToLeaderboard()"
-                               style="background: rgba(0, 0, 0, 0.5); 
-                                      border: 2px solid #4ecdc4; 
-                                      color: white; 
-                                      padding: 10px; 
-                                      font-size: 16px; 
-                                      font-family: monospace;
-                                      width: 250px;
-                                      text-align: center;
-                                      image-rendering: pixelated;">
-                        <div style="margin-top: 10px;">
-                            <button type="button" id="submitScoreBtn" onclick="submitToLeaderboard()" style="background: #4ecdc4; color: white; border: none; padding: 10px 20px; font-size: 16px; font-family: monospace; cursor: pointer; image-rendering: pixelated; border: 2px solid #4ecdc4; position: relative; z-index: 100;">
-                                SUBMIT SCORE
-                            </button>
-                            <button type="button" id="skipScoreBtn" onclick="skipLeaderboard()" style="background: transparent; color: #AAA; border: 2px solid #666; padding: 10px 20px; font-size: 16px; font-family: monospace; cursor: pointer; margin-left: 10px; image-rendering: pixelated; position: relative; z-index: 100;">
-                                SKIP
-                            </button>
+                <!-- Stats Summary - Two Column Layout -->
+                <div style="margin-bottom: 25px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <!-- This Game Column -->
+                    <div>
+                        <div style="color: #4ecdc4; font-size: 18px; margin-bottom: 10px; text-align: center;">THIS GAME</div>
+                        <div style="background: rgba(0, 0, 0, 0.3); padding: 15px; border-radius: 8px;">
+                            <div style="margin-bottom: 10px;">
+                                <div style="color: #AAA; font-size: 14px;">Score</div>
+                                <div id="respawnScore" style="color: #4ecdc4; font-size: 24px; font-weight: bold;">0</div>
+                            </div>
+                            <div style="margin-bottom: 10px;">
+                                <div style="color: #AAA; font-size: 14px;">Discoveries</div>
+                                <div id="respawnDiscoveries" style="color: #FFD700; font-size: 24px; font-weight: bold;">0</div>
+                            </div>
+                            <div>
+                                <div style="color: #AAA; font-size: 14px;">Kills</div>
+                                <div id="respawnKills" style="color: #ff6b6b; font-size: 24px; font-weight: bold;">0</div>
+                            </div>
                         </div>
                     </div>
-                    <div id="submissionStatus" style="margin-top: 10px; font-size: 14px;"></div>
+                    
+                    <!-- All Time Best Column -->
+                    <div>
+                        <div style="color: #9c88ff; font-size: 18px; margin-bottom: 10px; text-align: center;">ALL TIME BEST</div>
+                        <div style="background: rgba(0, 0, 0, 0.3); padding: 15px; border-radius: 8px;">
+                            <div style="margin-bottom: 10px;">
+                                <div style="color: #AAA; font-size: 14px;">Score</div>
+                                <div id="bestScore" style="color: #4ecdc4; font-size: 24px; font-weight: bold;">0</div>
+                            </div>
+                            <div style="margin-bottom: 10px;">
+                                <div style="color: #AAA; font-size: 14px;">Discoveries</div>
+                                <div id="bestDiscoveries" style="color: #FFD700; font-size: 24px; font-weight: bold;">0</div>
+                            </div>
+                            <div>
+                                <div style="color: #AAA; font-size: 14px;">Kills</div>
+                                <div id="bestKills" style="color: #ff6b6b; font-size: 24px; font-weight: bold;">0</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
-                <!-- Respawn Timer -->
-                <div id="respawnTimerDiv" style="font-size: 28px; color: #ff4444; font-weight: bold;">
-                    Respawn in <span id="respawnTimer">3</span>s
+                <!-- Global Rank Display -->
+                <div style="margin-bottom: 20px; text-align: center;">
+                    <div style="color: #AAA; font-size: 14px;">Today's Global Rank</div>
+                    <div id="globalRank" style="color: #9c88ff; font-size: 28px; font-weight: bold;">#--</div>
                 </div>
                 
-                <div style="margin-top: 15px; font-size: 14px; color: #AAA;">
-                    You will keep 75% of your score
-                </div>
-                
-                <!-- Quick Respawn Button -->
-                <div id="quickRespawnDiv" style="display: none; margin-top: 20px;">
-                    <button onclick="forceRespawn()" 
-                            style="background: #9c88ff; 
-                                   color: white; 
-                                   border: none; 
+                <!-- Action Buttons -->
+                <div style="display: flex; gap: 15px; justify-content: center; margin-top: 25px;">
+                    <button id="newGameBtn" onclick="returnToMainMenu()" 
+                            style="background: transparent; 
+                                   color: #AAA; 
+                                   border: 2px solid #666; 
                                    padding: 12px 25px; 
                                    font-size: 16px; 
                                    font-family: monospace;
                                    cursor: pointer;
-                                   border: 2px solid #9c88ff;">
-                        RESPAWN NOW
+                                   border-radius: 5px;
+                                   transition: all 0.3s ease;">
+                        NEW GAME
                     </button>
-                    <div style="margin-top: 10px; font-size: 12px; color: #AAA;">
-                        or press SPACE / tap screen
-                    </div>
+                    <button id="reviveBtn" onclick="handleReviveOrRespawn()" 
+                            style="background: #4ecdc4; 
+                                   color: #000; 
+                                   border: 2px solid #4ecdc4; 
+                                   padding: 12px 25px; 
+                                   font-size: 16px; 
+                                   font-family: monospace;
+                                   cursor: pointer;
+                                   border-radius: 5px;
+                                   font-weight: bold;
+                                   transition: all 0.3s ease;
+                                   box-shadow: 0 0 20px rgba(78, 205, 196, 0.5);">
+                        REVIVE (<span id="revivesLeft">3</span>)
+                    </button>
+                </div>
+                
+                <div style="margin-top: 10px; font-size: 12px; color: #AAA; text-align: center;">
+                    Press SPACE / tap screen to <span id="actionText">revive</span>
+                </div>
+                
+                <div id="respawnPenaltyText" style="margin-top: 8px; font-size: 12px; color: #ff9999; text-align: center; display: none;">
+                    You will keep 75% of your score
                 </div>
             </div>
         </div>
@@ -4862,6 +4881,9 @@
         let gameStartTime = Date.now();
         let bestRank = 0;
         let playerRespawnTimer = 0; // Player respawn countdown
+        let revivesRemaining = 3; // Number of revives left in current game
+        let savedSnakeLength = 0; // Store snake length for revive
+        let savedSnakeScore = 0; // Store snake score for revive
         let comboStreak = 0; // Track consecutive combinations
         let animationFrameId = null; // Track the animation frame to prevent multiple loops
         
@@ -5530,6 +5552,7 @@
         let currentTrack = null;
         let musicVolume = 0.3;
         let musicMuted = false;
+        let musicShouldBePlaying = false; // Track whether music is intended to play
         const musicTracks = [
             'bright-white-lights.mp3',
             'last-ones-standing.mp3', 
@@ -5572,12 +5595,12 @@
                 toggleMusic();
             }
             
-            // Quick respawn with Space key
+            // Quick respawn/revive with Space key
             if (e.key === ' ' && playerSnake && !playerSnake.alive && playerRespawnTimer > 0) {
-                const quickRespawnDiv = document.getElementById('quickRespawnDiv');
-                if (quickRespawnDiv && quickRespawnDiv.style.display !== 'none') {
+                const respawnOverlay = document.getElementById('respawnOverlay');
+                if (respawnOverlay && respawnOverlay.style.display !== 'none') {
                     e.preventDefault(); // Prevent page scroll
-                    forceRespawn();
+                    handleReviveOrRespawn();
                 }
             }
             
@@ -5636,9 +5659,82 @@
             }
         });
         
+        // Touch event for mobile audio resume
+        window.addEventListener('touchstart', (e) => {
+            // Resume pending music on first touch interaction
+            if (window.pendingMusicTrack && !musicMuted) {
+                console.log('[AUDIO] Attempting to resume pending music on touch');
+                window.pendingMusicTrack.play().then(() => {
+                    console.log('[AUDIO] Pending music resumed on touch');
+                    currentTrack = window.pendingMusicTrack;
+                    window.pendingMusicTrack = null;
+                }).catch(err => {
+                    console.error('[AUDIO] Failed to resume music on touch:', err);
+                });
+            }
+            
+            // Also try to resume if music should be playing but isn't
+            if (musicShouldBePlaying && !musicMuted && gameStarted && !currentTrack) {
+                console.log('[AUDIO] Music should be playing but no current track, starting new track on touch');
+                playRandomTrack();
+            }
+        }, { passive: true });
+        
+        // Initialize player name input when DOM is ready
+        function initializePlayerNameInput() {
+            const playerNameInput = document.getElementById('playerNameInput');
+            let playerName = localStorage.getItem('playerName');
+            let isGeneratedName = false;
+            
+            // Generate random name if none exists
+            if (!playerName) {
+                if (window.nameGenerator) {
+                    playerName = window.nameGenerator.generateRandomName();
+                    isGeneratedName = true;
+                } else {
+                    // Fallback if nameGenerator not loaded yet
+                    playerName = 'Player' + Math.floor(Math.random() * 10000);
+                    isGeneratedName = true;
+                }
+            }
+            
+            // Set the input value
+            if (playerNameInput && playerName) {
+                playerNameInput.value = playerName;
+            }
+            
+            // Clear input on focus if it's a generated name
+            if (playerNameInput) {
+                playerNameInput.addEventListener('focus', function() {
+                    if (isGeneratedName && this.value === playerName) {
+                        this.value = '';
+                    }
+                });
+                
+                // Save name on blur
+                playerNameInput.addEventListener('blur', function() {
+                    if (this.value.trim()) {
+                        localStorage.setItem('playerName', this.value.trim());
+                        isGeneratedName = false;
+                    }
+                });
+            }
+        }
+        
+        // Call initialization after a small delay to ensure nameGenerator is loaded
+        setTimeout(initializePlayerNameInput, 100);
+        
         // Splash screen
         document.getElementById('startButton').addEventListener('click', async () => {
             playUISound();
+            
+            // Save player name
+            const nameInput = document.getElementById('playerNameInput');
+            if (nameInput) {
+                const name = nameInput.value.trim() || window.nameGenerator.generateRandomName();
+                localStorage.setItem('playerName', name);
+                window.currentPlayerName = name;
+            }
             
             // Check if mobile and initialize renderers
             if (isTabletOrMobile()) {
@@ -5977,6 +6073,9 @@
             }
             isPlayingNext = true;
             
+            // Set flag that music should be playing
+            musicShouldBePlaying = true;
+            
             // Refill available tracks if empty
             if (availableTracks.length === 0) {
                 availableTracks = [...musicTracks];
@@ -6080,6 +6179,8 @@
             }
             
             if (musicMuted) {
+                // Clear music should be playing flag when muting
+                musicShouldBePlaying = false;
                 if (currentTrack) {
                     currentTrack.pause();
                 }
@@ -6091,6 +6192,8 @@
                     bossBattleMusic.pause();
                 }
             } else {
+                // Set music should be playing flag when unmuting
+                musicShouldBePlaying = true;
                 if (currentTrack && gameStarted) {
                     currentTrack.volume = musicVolume;
                     currentTrack.play().catch(() => {});
@@ -6182,19 +6285,25 @@
         function resumeAudio() {
             console.log('[AUDIO] Resume audio called', {
                 audioWasPlaying,
+                musicShouldBePlaying,
                 currentTrack: currentTrack ? 'exists' : 'null',
                 musicMuted,
-                gameStarted
+                gameStarted,
+                pendingMusicTrack: window.pendingMusicTrack ? 'exists' : 'null'
             });
             
-            // Only proceed if we have tracked audio state
-            if (!audioWasPlaying.music && !audioWasPlaying.bossIntro && !audioWasPlaying.bossBattle) {
-                console.log('[AUDIO] No audio was playing before pause');
+            // Check if music should be playing even if it wasn't actively playing
+            const shouldAttemptResume = (audioWasPlaying.music || musicShouldBePlaying) || 
+                                       audioWasPlaying.bossIntro || 
+                                       audioWasPlaying.bossBattle;
+            
+            if (!shouldAttemptResume) {
+                console.log('[AUDIO] No audio needs to be resumed');
                 return;
             }
             
-            // Resume background music if it was playing and audio is not muted
-            if (audioWasPlaying.music && !musicMuted && gameStarted) {
+            // Resume background music if it should be playing and audio is not muted
+            if ((audioWasPlaying.music || musicShouldBePlaying) && !musicMuted && gameStarted) {
                 if (currentTrack) {
                     console.log('[AUDIO] Attempting to resume background music');
                     const playPromise = currentTrack.play();
@@ -6226,10 +6335,28 @@
                             }
                         });
                     }
+                } else if (window.pendingMusicTrack && !musicMuted) {
+                    console.log('[AUDIO] Found pending music track, attempting to play');
+                    // Try to play the pending track
+                    const playPromise = window.pendingMusicTrack.play();
+                    if (playPromise !== undefined) {
+                        playPromise.then(() => {
+                            console.log('[AUDIO] Pending music track started successfully');
+                            currentTrack = window.pendingMusicTrack;
+                            window.pendingMusicTrack = null;
+                        }).catch(error => {
+                            console.error('[AUDIO] Failed to play pending music track:', error);
+                            // Try starting a new track instead
+                            if (gameStarted && !musicMuted) {
+                                playRandomTrack();
+                            }
+                        });
+                    }
+                    audioWasPlaying.music = false;
                 } else {
                     console.log('[AUDIO] No current track to resume, attempting to start new track');
-                    // If no current track but music was playing, start a new one
-                    if (gameStarted && !musicMuted) {
+                    // If no current track but music should be playing, start a new one
+                    if (gameStarted && !musicMuted && musicShouldBePlaying) {
                         playRandomTrack();
                     }
                     audioWasPlaying.music = false;
@@ -6262,6 +6389,9 @@
         
         // Stop all audio completely
         function stopAllAudio() {
+            // Clear music should be playing flag
+            musicShouldBePlaying = false;
+            
             // Stop and clear current track
             if (currentTrack) {
                 currentTrack.pause();
@@ -12458,6 +12588,50 @@
             }
         }
         
+        // Handle revive or respawn button click
+        window.handleReviveOrRespawn = function() {
+            playUISound();
+            
+            if (revivesRemaining > 0) {
+                // Use a revive
+                revivesRemaining--;
+                
+                // Update button text
+                const reviveBtn = document.getElementById('reviveBtn');
+                if (reviveBtn) {
+                    if (revivesRemaining > 0) {
+                        reviveBtn.innerHTML = `REVIVE (<span id="revivesLeft">${revivesRemaining}</span>)`;
+                    } else {
+                        reviveBtn.innerHTML = 'RESPAWN';
+                        reviveBtn.style.background = '#9c88ff';
+                        reviveBtn.style.borderColor = '#9c88ff';
+                        reviveBtn.style.boxShadow = '0 0 20px rgba(156, 136, 255, 0.5)';
+                        document.getElementById('actionText').textContent = 'respawn';
+                        const respawnPenaltyText = document.getElementById('respawnPenaltyText');
+                        if (respawnPenaltyText) respawnPenaltyText.style.display = 'block';
+                    }
+                }
+                
+                // Set flag for revive (will be handled in respawn logic)
+                window.isReviving = true;
+            } else {
+                // Normal respawn
+                window.isReviving = false;
+            }
+            
+            // Hide overlay and trigger respawn
+            document.getElementById('respawnOverlay').style.display = 'none';
+            playerRespawnTimer = 100; // Trigger respawn
+        }
+        
+        // Return to main menu
+        window.returnToMainMenu = function() {
+            playUISound();
+            
+            // Reset game state
+            location.reload(); // Simple reload to return to main menu
+        }
+        
         // Country code to flag emoji mapping
         const countryFlags = {
             'US': '🇺🇸', 'CA': '🇨🇦', 'GB': '🇬🇧', 'DE': '🇩🇪', 'FR': '🇫🇷',
@@ -12622,44 +12796,80 @@
                     document.getElementById('respawnScore').textContent = Math.floor(playerSnake.score).toLocaleString();
                     // Use player discovery count
                     document.getElementById('respawnDiscoveries').textContent = playerDiscoveredElements.size;
-                    document.getElementById('respawnRank').textContent = '#' + (bestRank || 1);
                     document.getElementById('respawnKills').textContent = playerSnake.kills;
-                    document.getElementById('respawnTimer').textContent = respawnSeconds;
                     
-                    // Show leaderboard submission for infinite mode if not already submitted
+                    // Load and display all-time best stats
+                    const bestScore = parseInt(localStorage.getItem('bestScore') || '0');
+                    const bestDiscoveries = parseInt(localStorage.getItem('bestDiscoveries') || '0');
+                    const bestKills = parseInt(localStorage.getItem('bestKills') || '0');
+                    
+                    document.getElementById('bestScore').textContent = bestScore.toLocaleString();
+                    document.getElementById('bestDiscoveries').textContent = bestDiscoveries;
+                    document.getElementById('bestKills').textContent = bestKills;
+                    
+                    // Update best stats if current game is better
+                    if (Math.floor(playerSnake.score) > bestScore) {
+                        localStorage.setItem('bestScore', Math.floor(playerSnake.score));
+                    }
+                    if (playerDiscoveredElements.size > bestDiscoveries) {
+                        localStorage.setItem('bestDiscoveries', playerDiscoveredElements.size);
+                    }
+                    if (playerSnake.kills > bestKills) {
+                        localStorage.setItem('bestKills', playerSnake.kills);
+                    }
+                    
+                    // Update revive button state
+                    const reviveBtn = document.getElementById('reviveBtn');
+                    const respawnPenaltyText = document.getElementById('respawnPenaltyText');
+                    if (reviveBtn) {
+                        if (revivesRemaining > 0) {
+                            reviveBtn.innerHTML = `REVIVE (<span id="revivesLeft">${revivesRemaining}</span>)`;
+                            reviveBtn.style.background = '#4ecdc4';
+                            reviveBtn.style.borderColor = '#4ecdc4';
+                            reviveBtn.style.boxShadow = '0 0 20px rgba(78, 205, 196, 0.5)';
+                            document.getElementById('actionText').textContent = 'revive';
+                            if (respawnPenaltyText) respawnPenaltyText.style.display = 'none';
+                        } else {
+                            reviveBtn.innerHTML = 'RESPAWN';
+                            reviveBtn.style.background = '#9c88ff';
+                            reviveBtn.style.borderColor = '#9c88ff';
+                            reviveBtn.style.boxShadow = '0 0 20px rgba(156, 136, 255, 0.5)';
+                            document.getElementById('actionText').textContent = 'respawn';
+                            if (respawnPenaltyText) respawnPenaltyText.style.display = 'block';
+                        }
+                    }
+                    
+                    // Automatic leaderboard submission for infinite mode
                     if (gameMode === 'infinite' && !leaderboardSubmitted && playerSnake.score > 0) {
-                        document.getElementById('leaderboardSubmission').style.display = 'block';
-                        document.getElementById('respawnTimerDiv').style.display = 'none';
-                        
-                        // Check play time and show warning if needed
                         const playTime = gameSessionStartTime ? 
                             Math.floor((Date.now() - gameSessionStartTime) / 1000) : 0;
-                        const playTimeWarning = document.getElementById('playTimeWarning');
-                        if (playTime < 10) {
-                            playTimeWarning.style.display = 'block';
-                            playTimeWarning.innerHTML = `⚠️ Minimum 10 seconds play time required (played: ${playTime}s)`;
-                        } else {
-                            playTimeWarning.style.display = 'none';
-                        }
                         
-                        // Pre-fill username if available
-                        const lastUsername = localStorage.getItem('lastUsername');
-                        if (lastUsername) {
-                            document.getElementById('usernameInput').value = lastUsername;
-                        }
-                        
-                        // Focus username input and setup listeners
-                        setTimeout(() => {
-                            document.getElementById('usernameInput').focus();
-                            // Setup button listeners after elements are visible
-                            window.setupLeaderboardListeners();
-                        }, 100);
-                    } else {
-                        document.getElementById('leaderboardSubmission').style.display = 'none';
-                        document.getElementById('respawnTimerDiv').style.display = 'block';
-                        // Show quick respawn if already submitted or no score
-                        if (leaderboardSubmitted || playerSnake.score === 0) {
-                            document.getElementById('quickRespawnDiv').style.display = 'block';
+                        // Only submit if played for at least 10 seconds
+                        if (playTime >= 10) {
+                            // Get player name
+                            const playerName = localStorage.getItem('playerName') || window.nameGenerator.generateRandomName();
+                            
+                            // Submit score automatically
+                            if (window.supabaseModule && window.supabaseModule.submitScore) {
+                                window.supabaseModule.submitScore(
+                                    playerName,
+                                    Math.floor(playerSnake.score),
+                                    playerDiscoveredElements.size,
+                                    playerSnake.kills
+                                ).then(result => {
+                                    if (result.success && result.rank) {
+                                        // Update global rank display
+                                        const globalRankEl = document.getElementById('globalRank');
+                                        if (globalRankEl) {
+                                            globalRankEl.textContent = `#${result.rank}`;
+                                        }
+                                    }
+                                }).catch(error => {
+                                    console.error('Failed to submit score:', error);
+                                });
+                            }
+                            
+                            leaderboardSubmitted = true;
                         }
                     }
                 }
@@ -14013,6 +14223,7 @@
             elements = [];
             gameWon = false; // Reset victory flag
             particles = [];
+            revivesRemaining = 3; // Reset revives for new game
             voidOrbs = [];
             catalystGems = [];
             alchemyVisionPowerUps = [];
@@ -14080,6 +14291,11 @@
             // Create player snake
             console.log('[GAME START] Creating player snake...');
             playerSnake = new Snake(WORLD_SIZE / 2, WORLD_SIZE / 2, true);
+            
+            // Set player name
+            const playerName = localStorage.getItem('playerName') || window.nameGenerator.generateRandomName();
+            playerSnake.name = playerName;
+            
             snakes.push(playerSnake);
             console.log('[GAME START] Player snake created. Total snakes:', snakes.length);
             
@@ -14632,9 +14848,21 @@
             
             // Handle unlock criteria display
             if (skinData.unlocked) {
-                unlockCriteriaEl.style.display = 'none';
+                // Show unlock criteria even for unlocked skins, but hide progress bar
+                unlockCriteriaEl.style.display = 'block';
                 equipButton.style.display = 'block';
                 unlockButton.style.display = 'none';
+                
+                // Show unlock description without progress
+                if (skinData.unlockCriteria && skinData.unlockCriteria.description) {
+                    unlockTextEl.textContent = skinData.unlockCriteria.description;
+                }
+                
+                // Hide progress bar and text for unlocked skins
+                const progressContainer = unlockCriteriaEl.querySelector('.progress-bar');
+                const progressText = document.getElementById('progressText');
+                if (progressContainer) progressContainer.style.display = 'none';
+                if (progressText) progressText.style.display = 'none';
                 
                 if (skinId === currentPlayerSkin) {
                     equipButton.textContent = 'Equipped';
@@ -14658,6 +14886,12 @@
                 }
             } else {
                 unlockCriteriaEl.style.display = 'block';
+                
+                // Show progress bar and text for locked skins
+                const progressContainer = unlockCriteriaEl.querySelector('.progress-bar');
+                const progressText = document.getElementById('progressText');
+                if (progressContainer) progressContainer.style.display = 'block';
+                if (progressText) progressText.style.display = 'block';
                 
                 if (window.unlockManager) {
                     // Try to get unlock criteria description
@@ -15199,6 +15433,16 @@
                     playerRespawnTimer = 10000; // 10 seconds
                     comboStreak = 0; // Reset combo streak on death
                     
+                    // Save snake state for potential revive
+                    savedSnakeLength = playerSnake.segments.length;
+                    savedSnakeScore = playerSnake.score;
+                    
+                    // Set random death message (only once on death)
+                    const deathMessageEl = document.getElementById('deathMessage');
+                    if (deathMessageEl && window.nameGenerator) {
+                        deathMessageEl.textContent = window.nameGenerator.getRandomDeathMessage();
+                    }
+                    
                     // Dispatch player death event
                     dispatchGameEvent('playerDeath', {
                         score: playerSnake.score,
@@ -15255,13 +15499,38 @@
                     // Respawn player at center
                     playerSnake = new Snake(WORLD_SIZE / 2, WORLD_SIZE / 2, true);
                     
-                    // Keep 75% of score (25% penalty)
-                    playerSnake.score = Math.floor(previousScore * 0.75);
+                    // Set player name
+                    const playerName = localStorage.getItem('playerName') || window.nameGenerator.generateRandomName();
+                    playerSnake.name = playerName;
                     
-                    // Restore some game state
-                    playerSnake.elementCapacity = Math.max(4, Math.floor(previousCapacity * 0.5));
-                    playerSnake.discoveries = Math.floor(previousDiscoveries * 0.5);
-                    playerSnake.kills = Math.floor(previousKills * 0.5);
+                    // Check if this is a revive or respawn
+                    if (window.isReviving && revivesRemaining >= 0) {
+                        // Revive: restore full score and length
+                        playerSnake.score = savedSnakeScore;
+                        
+                        // Restore snake to saved length
+                        const targetLength = Math.max(5, savedSnakeLength); // Minimum 5 segments
+                        while (playerSnake.segments.length < targetLength) {
+                            const tail = playerSnake.segments[playerSnake.segments.length - 1];
+                            playerSnake.segments.push({
+                                x: tail.x,
+                                y: tail.y
+                            });
+                        }
+                        
+                        // Restore full game state
+                        playerSnake.elementCapacity = previousCapacity;
+                        playerSnake.discoveries = previousDiscoveries;
+                        playerSnake.kills = previousKills;
+                        
+                        window.isReviving = false;
+                    } else {
+                        // Normal respawn: apply penalties
+                        playerSnake.score = Math.floor(previousScore * 0.75);
+                        playerSnake.elementCapacity = Math.max(4, Math.floor(previousCapacity * 0.5));
+                        playerSnake.discoveries = Math.floor(previousDiscoveries * 0.5);
+                        playerSnake.kills = Math.floor(previousKills * 0.5);
+                    }
                     
                     // Grant 3 seconds of invincibility on respawn
                     playerSnake.invincibilityTimer = 3000;
@@ -15927,5 +16196,6 @@
     <script src="js/skinIdMapping.js"></script>
     <script src="js/playerStats.js"></script>
     <script src="js/unlockManager.js"></script>
+    <script src="js/nameGenerator.js"></script>
 </body>
 </html>

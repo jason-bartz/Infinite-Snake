@@ -1,6 +1,16 @@
 // Skin Data Structure with Rarity Tiers and Unlock Criteria
 const skinData = {
-    // COMMON (12 skins)
+    // COMMON (13 skins including default)
+    'snake-default-green': {
+        name: 'Basic Boy',
+        rarity: 'common',
+        bio: 'Factory settings personified, living proof that sometimes vanilla is a choice, not a personality. Still waiting for that custom update that everyone else already got.',
+        unlockCriteria: {
+            type: 'default',
+            value: 0,
+            description: 'Default skin - always unlocked'
+        }
+    },
     'hot-head': {
         name: 'Hot Head',
         rarity: 'common',
