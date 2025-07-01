@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infinite Snake - Admin Panel</title>
+    <style>
+        body {
+            background-color: #0a0a0a;
+            color: #ffffff;
+            font-family: monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .admin-panel {
+            background-color: #1a1a1a;
+            border: 2px solid #4ecdc4;
+            border-radius: 10px;
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 0 30px rgba(78, 205, 196, 0.3);
+        }
+        
+        h1 {
+            color: #4ecdc4;
+            text-align: center;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            color: #aaa;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            font-size: 12px;
+        }
+        
+        input {
+            width: 100%;
+            padding: 10px;
+            background-color: #2a2a2a;
+            border: 1px solid #4ecdc4;
+            color: #fff;
+            border-radius: 5px;
+            font-family: monospace;
+            box-sizing: border-box;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #9c88ff;
+            box-shadow: 0 0 10px rgba(156, 136, 255, 0.3);
+        }
+        
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 30px;
+        }
+        
+        button {
+            padding: 12px 20px;
+            background-color: #4ecdc4;
+            color: #000;
+            border: none;
+            border-radius: 5px;
+            font-family: monospace;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            background-color: #3cbbb1;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(78, 205, 196, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button.danger {
+            background-color: #ff4444;
+            grid-column: 1 / -1;
+        }
+        
+        button.danger:hover {
+            background-color: #ff3333;
+            box-shadow: 0 5px 15px rgba(255, 68, 68, 0.4);
+        }
+        
+        #status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            display: none;
+        }
+        
+        #status.success {
+            background-color: rgba(78, 205, 196, 0.2);
+            border: 1px solid #4ecdc4;
+            color: #4ecdc4;
+        }
+        
+        #status.error {
+            background-color: rgba(255, 68, 68, 0.2);
+            border: 1px solid #ff4444;
+            color: #ff4444;
+        }
+        
+        .warning {
+            background-color: rgba(255, 193, 7, 0.1);
+            border: 1px solid #ffc107;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            color: #ffc107;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-panel">
+        <h1>Leaderboard Admin</h1>
+        
+        <div class="warning">
+            ⚠️ WARNING: These actions cannot be undone!
+        </div>
+        
+        <div class="input-group">
+            <label for="adminKey">Admin Key</label>
+            <input type="password" id="adminKey" placeholder="Enter admin key">
+        </div>
+        
+        <div class="input-group">
+            <label>API Endpoint</label>
+            <input type="text" id="apiEndpoint" value="/api/leaderboard" readonly>
+        </div>
+        
+        <div class="button-group">
+            <button onclick="clearLeaderboard('daily')">Clear Daily</button>
+            <button onclick="clearLeaderboard('weekly')">Clear Weekly</button>
+            <button onclick="clearLeaderboard('monthly')">Clear Monthly</button>
+            <button onclick="clearLeaderboard('all-time')">Clear All-Time</button>
+            <button class="danger" onclick="clearLeaderboard('all')">🗑️ Clear ALL Leaderboards</button>
+        </div>
+        
+        <div id="status"></div>
+    </div>
+    
+    <script>
+        async function clearLeaderboard(period) {
+            const adminKey = document.getElementById('adminKey').value;
+            const statusEl = document.getElementById('status');
+            
+            if (!adminKey) {
+                showStatus('Please enter admin key', 'error');
+                return;
+            }
+            
+            // Confirmation for destructive actions
+            const confirmMsg = period === 'all' 
+                ? 'Are you sure you want to clear ALL leaderboards? This will delete all player scores!'
+                : `Are you sure you want to clear the ${period} leaderboard?`;
+                
+            if (!confirm(confirmMsg)) {
+                return;
+            }
+            
+            // Map 'all-time' to 'all' for the API
+            const apiPeriod = period === 'all-time' ? 'all' : period;
+            
+            try {
+                showStatus('Clearing leaderboard...', 'success');
+                
+                const response = await fetch(`/api/leaderboard?period=${apiPeriod}&adminKey=${encodeURIComponent(adminKey)}`, {
+                    method: 'DELETE'
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    if (period === 'all') {
+                        showStatus(`Success! Cleared all leaderboards. Total deleted: ${data.totalDeleted || 0}`, 'success');
+                    } else {
+                        showStatus(`Success! ${data.message}. Deleted: ${data.deleted || 0} entries`, 'success');
+                    }
+                } else {
+                    showStatus(`Error: ${data.error || 'Failed to clear leaderboard'}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+            }
+        }
+        
+        function showStatus(message, type) {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = message;
+            statusEl.className = type;
+            statusEl.style.display = 'block';
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                statusEl.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Load admin key from localStorage if available
+        window.onload = function() {
+            const savedKey = localStorage.getItem('infiniteSnakeAdminKey');
+            if (savedKey) {
+                document.getElementById('adminKey').value = savedKey;
+            }
+        };
+        
+        // Save admin key to localStorage when changed
+        document.getElementById('adminKey').addEventListener('change', function() {
+            if (this.value) {
+                localStorage.setItem('infiniteSnakeAdminKey', this.value);
+            }
+        });
+    </script>
+</body>
+</html>

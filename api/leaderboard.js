@@ -414,17 +414,63 @@ export default async function handler(req, res) {
       }
       
       const keys = getLeaderboardKeys();
-      const key = keys[period];
       
+      // Handle clearing all leaderboards
+      if (period === 'all') {
+        const deleted = {};
+        let totalDeleted = 0;
+        
+        // Delete all period leaderboards
+        for (const [periodName, keyPattern] of Object.entries(keys)) {
+          try {
+            const result = await redis.del(keyPattern);
+            deleted[periodName] = result;
+            totalDeleted += result;
+          } catch (err) {
+            console.error(`Failed to delete ${periodName}:`, err);
+            deleted[periodName] = 0;
+          }
+        }
+        
+        // Also delete any old daily/weekly/monthly keys using pattern matching
+        try {
+          // Get all leaderboard keys
+          const allKeys = await redis.keys('lb:*');
+          console.log(`Found ${allKeys.length} total leaderboard keys`);
+          
+          // Delete them in batches
+          const batchSize = 10;
+          for (let i = 0; i < allKeys.length; i += batchSize) {
+            const batch = allKeys.slice(i, i + batchSize);
+            if (batch.length > 0) {
+              await redis.del(...batch);
+              totalDeleted += batch.length;
+            }
+          }
+        } catch (err) {
+          console.error('Failed to delete old keys:', err);
+        }
+        
+        return res.status(200).json({ 
+          success: true, 
+          message: 'Cleared all leaderboards',
+          deleted,
+          totalDeleted
+        });
+      }
+      
+      // Handle clearing specific period
+      const key = keys[period];
       if (!key) {
         return res.status(400).json({ error: 'Invalid period specified' });
       }
       
-      await redis.del(key);
+      const result = await redis.del(key);
       
       return res.status(200).json({ 
         success: true, 
-        message: `Cleared ${period} leaderboard` 
+        message: `Cleared ${period} leaderboard`,
+        deleted: result
       });
     }
     
