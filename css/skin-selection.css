@@ -688,9 +688,12 @@
         font-size: 12px;
     }
     
-    .skin-grid {
+    .skin-grid,
+    .skin-grid-new,
+    #skinGrid.skin-grid-new {
         grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-        gap: 10px;
+        gap: 10px !important;
+        row-gap: 15px !important; /* Add extra row spacing */
     }
     
     .skin-modal {
@@ -708,9 +711,12 @@
 }
 
 @media (max-width: 480px) {
-    .skin-grid {
+    .skin-grid,
+    .skin-grid-new,
+    #skinGrid.skin-grid-new {
         grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
-        gap: 8px;
+        gap: 8px !important;
+        row-gap: 12px !important; /* Add extra row spacing for smaller screens */
     }
     
     .skin-name {

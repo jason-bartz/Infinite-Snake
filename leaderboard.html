@@ -17,15 +17,36 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="manifest" href="/site.webmanifest">
     
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    
     <style>
+        :root {
+            --snes-primary-blue: #2038EC;
+            --snes-dark-blue: #000080;
+            --snes-light-blue: #5878F8;
+            --snes-cosmic-purple: #7828F8;
+            --snes-cosmic-pink: #F828F8;
+            --snes-gold: #F8D800;
+            --snes-red: #F83800;
+            --snes-green: #00E800;
+            --snes-white: #F8F8F8;
+            --snes-black: #000000;
+            --snes-gray: #A8A8A8;
+            --snes-dark-purple: #4800A8;
+            --snes-cosmic-teal: #00F8F8;
+        }
+        
         body {
             margin: 0;
             padding: 0;
-            background: #0a0a0a;
-            color: white;
-            font-family: monospace;
+            background: #000011;
+            color: var(--snes-white);
+            font-family: 'Press Start 2P', monospace;
             overflow-x: hidden;
             image-rendering: pixelated;
+            -webkit-font-smoothing: none;
+            -moz-osx-font-smoothing: none;
         }
         
         /* Animated starfield background */
@@ -50,42 +71,55 @@
             text-align: center;
             margin-bottom: 40px;
             padding: 20px;
-            background: linear-gradient(135deg, rgba(20, 20, 40, 0.9) 0%, rgba(30, 30, 50, 0.8) 100%);
-            border: 3px solid #4ecdc4;
-            box-shadow: 0 0 20px rgba(78, 205, 196, 0.5);
+            background: var(--snes-black);
+            border: 4px solid var(--snes-cosmic-teal);
+            box-shadow: 4px 4px 0 rgba(0,0,0,0.5);
+            position: relative;
         }
         
         h1 {
-            font-size: 48px;
-            color: #4ecdc4;
-            margin: 0 0 10px 0;
-            text-shadow: 0 0 20px rgba(78, 205, 196, 0.5);
+            font-size: 24px;
+            color: var(--snes-gold);
+            margin: 0 0 15px 0;
+            text-shadow: 2px 2px 0 var(--snes-black);
+            letter-spacing: 2px;
+            text-transform: uppercase;
         }
         
         .subtitle {
-            color: #AAA;
-            font-size: 18px;
+            color: var(--snes-gray);
+            font-size: 10px;
+            letter-spacing: 1px;
         }
         
         .back-button {
             position: absolute;
             top: 20px;
             left: 20px;
-            background: linear-gradient(135deg, #4B0082, #2E0549);
-            border: 2px solid #8B00FF;
-            color: white;
+            background: var(--snes-cosmic-purple);
+            border: 4px solid var(--snes-white);
+            box-shadow: 
+                inset 2px 2px 0 var(--snes-cosmic-pink),
+                inset -2px -2px 0 var(--snes-dark-purple),
+                4px 4px 0 rgba(0,0,0,0.5);
+            color: var(--snes-white);
             padding: 10px 20px;
-            font-size: 16px;
+            font-size: 10px;
             cursor: pointer;
             text-decoration: none;
             display: inline-block;
-            transition: all 0.3s;
+            transition: all 0.1s;
+            text-transform: uppercase;
+            z-index: 10;
         }
         
         .back-button:hover {
-            background: linear-gradient(135deg, #6B0082, #4E0569);
-            box-shadow: 0 0 15px rgba(139, 0, 255, 0.6);
-            transform: scale(1.05);
+            background: var(--snes-cosmic-pink);
+            transform: translate(-1px, -1px);
+            box-shadow: 
+                inset 2px 2px 0 var(--snes-light-blue),
+                inset -2px -2px 0 var(--snes-dark-purple),
+                5px 5px 0 rgba(0,0,0,0.5);
         }
         
         /* Tab navigation */
@@ -93,8 +127,9 @@
             display: flex;
             justify-content: center;
             margin-bottom: 30px;
-            background: rgba(0, 0, 0, 0.5);
-            border: 2px solid #333;
+            background: var(--snes-black);
+            border: 4px solid var(--snes-gray);
+            box-shadow: 4px 4px 0 rgba(0,0,0,0.5);
         }
         
         .tab {
@@ -103,12 +138,13 @@
             padding: 15px;
             background: transparent;
             border: none;
-            color: #888;
-            font-size: 18px;
+            color: var(--snes-gray);
+            font-size: 10px;
             cursor: pointer;
-            font-family: monospace;
-            transition: all 0.3s;
-            border-right: 2px solid #333;
+            font-family: 'Press Start 2P', monospace;
+            transition: all 0.1s;
+            border-right: 4px solid var(--snes-gray);
+            text-transform: uppercase;
         }
         
         .tab:last-child {
@@ -116,21 +152,22 @@
         }
         
         .tab.active {
-            color: #4ecdc4;
-            background: rgba(78, 205, 196, 0.1);
-            border-bottom: 3px solid #4ecdc4;
+            color: var(--snes-cosmic-teal);
+            background: rgba(0, 248, 248, 0.1);
+            border-bottom: 4px solid var(--snes-cosmic-teal);
         }
         
         .tab:hover {
-            background: rgba(78, 205, 196, 0.05);
+            background: rgba(0, 248, 248, 0.05);
+            color: var(--snes-white);
         }
         
         /* Leaderboard table */
         .leaderboard-container {
-            background: linear-gradient(135deg, rgba(20, 20, 40, 0.95) 0%, rgba(30, 30, 50, 0.9) 100%);
-            border: 3px solid #333;
+            background: rgba(0, 0, 17, 0.95);
+            border: 4px solid var(--snes-gray);
             padding: 20px;
-            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+            box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.5);
         }
         
         .leaderboard-header {
@@ -138,11 +175,14 @@
             grid-template-columns: 80px 80px 200px 150px 120px 120px 100px;
             gap: 15px;
             padding: 15px;
-            background: rgba(0, 0, 0, 0.5);
-            border: 2px solid #555;
+            background: var(--snes-black);
+            border: 4px solid var(--snes-dark-blue);
             margin-bottom: 10px;
-            font-weight: bold;
-            color: #AAA;
+            font-weight: normal;
+            color: var(--snes-cosmic-teal);
+            font-size: 10px;
+            text-transform: uppercase;
+            box-shadow: inset 2px 2px 0 rgba(0,0,0,0.5);
         }
         
         .leaderboard-entry {
@@ -153,63 +193,90 @@
             margin-bottom: 5px;
             background: rgba(0, 0, 0, 0.3);
             border: 2px solid transparent;
-            transition: all 0.2s;
+            transition: all 0.1s;
+            font-size: 10px;
         }
         
         .leaderboard-entry:hover {
-            background: rgba(78, 205, 196, 0.1);
-            border-color: rgba(78, 205, 196, 0.3);
-            transform: translateX(5px);
+            background: rgba(0, 248, 248, 0.1);
+            border-color: var(--snes-cosmic-teal);
+            transform: translateX(2px);
         }
         
         .leaderboard-entry.player-entry {
-            background: rgba(78, 205, 196, 0.2);
-            border-color: #4ecdc4;
-            animation: glow 2s ease-in-out infinite;
+            background: rgba(0, 248, 248, 0.2);
+            border-color: var(--snes-cosmic-teal);
+            border-width: 2px;
+            box-shadow: inset 2px 2px 0 rgba(0, 248, 248, 0.3);
         }
         
-        @keyframes glow {
-            0%, 100% { box-shadow: 0 0 10px rgba(78, 205, 196, 0.5); }
-            50% { box-shadow: 0 0 20px rgba(78, 205, 196, 0.8); }
-        }
+        /* Removed glow animation for pixel aesthetic */
         
-        .rank-1 { color: #FFD700; font-size: 20px; }
-        .rank-2 { color: #C0C0C0; font-size: 18px; }
-        .rank-3 { color: #CD7F32; font-size: 18px; }
+        .rank-1 { color: var(--snes-gold); font-size: 12px; font-weight: bold; }
+        .rank-2 { color: #C0C0C0; font-size: 11px; }
+        .rank-3 { color: #CD7F32; font-size: 11px; }
         
         .country-flag {
-            font-size: 20px;
+            font-size: 16px;
             margin-right: 5px;
+            image-rendering: pixelated;
         }
         
         .country-code {
-            font-size: 14px;
-            color: #888;
+            font-size: 8px;
+            color: var(--snes-gray);
+            text-transform: uppercase;
         }
         
         .loading {
             text-align: center;
             padding: 60px;
-            color: #888;
-            font-size: 20px;
+            color: var(--snes-gray);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         
         .error {
             text-align: center;
             padding: 60px;
-            color: #ff4444;
-            font-size: 18px;
+            color: var(--snes-red);
+            font-size: 10px;
+            text-transform: uppercase;
         }
         
         @media (max-width: 768px) {
-            h1 { font-size: 32px; }
-            .tabs { flex-wrap: wrap; }
-            .tab { max-width: none; }
+            h1 { font-size: 16px; }
+            
+            header {
+                padding: 60px 20px 20px 20px; /* Extra top padding for back button */
+            }
+            
+            .back-button {
+                font-size: 8px;
+                padding: 8px 12px;
+            }
+            
+            .tabs { 
+                flex-wrap: wrap;
+                border-width: 2px;
+            }
+            
+            .tab { 
+                max-width: none;
+                font-size: 8px;
+                padding: 10px;
+                border-width: 2px;
+            }
+            
             .leaderboard-header,
             .leaderboard-entry {
                 grid-template-columns: 50px 60px 1fr 80px;
                 gap: 10px;
+                font-size: 8px;
+                padding: 10px;
             }
+            
             .leaderboard-header > div:nth-child(5),
             .leaderboard-header > div:nth-child(6),
             .leaderboard-header > div:nth-child(7),
@@ -218,6 +285,10 @@
             .leaderboard-entry > div:nth-child(7) {
                 display: none;
             }
+            
+            .subtitle { font-size: 8px; }
+            .country-flag { font-size: 14px; }
+            .country-code { font-size: 6px; }
         }
     </style>
 </head>
@@ -408,12 +479,15 @@
         }
         
         function animateStars() {
-            ctx.fillStyle = 'rgba(10, 10, 10, 0.1)';
+            ctx.fillStyle = 'rgba(0, 0, 17, 0.1)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            ctx.fillStyle = '#FFF';
+            ctx.fillStyle = '#F8F8F8';
+            ctx.imageSmoothingEnabled = false;
             stars.forEach(star => {
-                ctx.fillRect(star.x, star.y, star.size, star.size);
+                // Make stars more pixelated
+                const pixelSize = Math.ceil(star.size);
+                ctx.fillRect(Math.floor(star.x), Math.floor(star.y), pixelSize, pixelSize);
                 
                 star.y += star.speed;
                 if (star.y > canvas.height) {
