@@ -12877,12 +12877,20 @@
                             playerSnake.kills
                         ).then(result => {
                             console.log('[UI-FAILSAFE] Score submission result:', result);
-                            // submitScore returns the rank directly as a number
-                            if (result && typeof result === 'number') {
-                                console.log('[UI-FAILSAFE] ✅ Score submitted! Daily rank:', result);
-                                const rankEl = document.getElementById('globalRank');
-                                if (rankEl) {
-                                    rankEl.textContent = `#${result}`;
+                            // submitScore returns the rank as a number or 'Submitted' if rank is null
+                            if (result !== null && result !== undefined) {
+                                if (typeof result === 'number') {
+                                    console.log('[UI-FAILSAFE] ✅ Score submitted! Daily rank:', result);
+                                    const rankEl = document.getElementById('globalRank');
+                                    if (rankEl) {
+                                        rankEl.textContent = `#${result}`;
+                                    }
+                                } else if (result === 'Submitted') {
+                                    console.log('[UI-FAILSAFE] ✅ Score submitted! (No rank available)');
+                                    const rankEl = document.getElementById('globalRank');
+                                    if (rankEl) {
+                                        rankEl.textContent = 'Submitted';
+                                    }
                                 }
                                 leaderboardSubmitted = true;
                             } else {
@@ -12994,15 +13002,22 @@
                                     console.log('[LEADERBOARD] Submission result:', result);
                                     console.log('[LEADERBOARD] Result type:', typeof result);
                                     
-                                    // submitScore returns the rank directly as a number
-                                    if (result && typeof result === 'number') {
-                                        console.log('[LEADERBOARD] ✅ Score submitted successfully! Daily rank:', result);
-                                        
-                                        // Update global rank display
-                                        const globalRankEl = document.getElementById('globalRank');
-                                        if (globalRankEl) {
-                                            globalRankEl.textContent = `#${result}`;
-                                            console.log('[LEADERBOARD] Updated rank display to:', result);
+                                    // submitScore returns the rank as a number or 'Submitted' if rank is null
+                                    if (result !== null && result !== undefined) {
+                                        if (typeof result === 'number') {
+                                            console.log('[LEADERBOARD] ✅ Score submitted successfully! Daily rank:', result);
+                                            const globalRankEl = document.getElementById('globalRank');
+                                            if (globalRankEl) {
+                                                globalRankEl.textContent = `#${result}`;
+                                                console.log('[LEADERBOARD] Updated rank display to:', result);
+                                            }
+                                        } else if (result === 'Submitted') {
+                                            console.log('[LEADERBOARD] ✅ Score submitted successfully! (No rank available)');
+                                            const globalRankEl = document.getElementById('globalRank');
+                                            if (globalRankEl) {
+                                                globalRankEl.textContent = 'Submitted';
+                                                console.log('[LEADERBOARD] Updated rank display to: Submitted');
+                                            }
                                         }
                                         
                                         // Mark as submitted
@@ -13010,7 +13025,6 @@
                                         console.log('[LEADERBOARD] Marked leaderboardSubmitted = true');
                                     } else {
                                         console.error('[LEADERBOARD] ❌ Submission failed or returned invalid data:', result);
-                                        console.error('[LEADERBOARD] Expected number but got:', typeof result, result);
                                         // Don't mark as submitted so it can retry
                                     }
                                 }).catch(error => {
@@ -15656,23 +15670,40 @@
                                 playerSnake.kills
                                 ).then(result => {
                                     console.log('[DEATH] Score submission result:', result);
-                                    if (result) {
-                                        // submitScore returns the rank directly as a number
-                                        const rank = result;
-                                        console.log('[DEATH] Received rank:', rank);
+                                    console.log('[DEATH] Result type:', typeof result);
+                                    console.log('[DEATH] Result value:', result);
+                                    
+                                    // submitScore returns the rank as a number or 'Submitted' if rank is null
+                                    if (result !== null && result !== undefined) {
+                                        console.log('[DEATH] Valid result received:', result);
                                         
-                                        if (rank && typeof rank === 'number') {
-                                            const rankEl = document.getElementById('globalRank');
-                                            if (rankEl) {
-                                                rankEl.textContent = `#${rank}`;
-                                                console.log('[DEATH] Updated rank display to:', `#${rank}`);
-                                            } else {
-                                                console.error('[DEATH] Could not find globalRank element!');
+                                        // Update rank display immediately
+                                        const rankEl = document.getElementById('globalRank');
+                                        console.log('[DEATH] Found rank element:', !!rankEl);
+                                        
+                                        if (rankEl) {
+                                            if (typeof result === 'number') {
+                                                rankEl.textContent = `#${result}`;
+                                                console.log('[DEATH] ✅ Updated rank display to:', `#${result}`);
+                                            } else if (result === 'Submitted') {
+                                                rankEl.textContent = 'Submitted';
+                                                console.log('[DEATH] ✅ Score submitted (no rank available)');
                                             }
+                                            
+                                            // Double-check the update
+                                            console.log('[DEATH] Rank element now shows:', rankEl.textContent);
                                         } else {
-                                            console.warn('[DEATH] Invalid rank value:', rank);
+                                            console.error('[DEATH] ❌ Could not find globalRank element!');
+                                            // Try to find it by searching all elements
+                                            const allElements = document.querySelectorAll('[id*="rank"]');
+                                            console.log('[DEATH] Found elements with "rank" in ID:', allElements.length);
+                                            allElements.forEach(el => console.log('[DEATH] -', el.id, el.textContent));
                                         }
+                                        
                                         leaderboardSubmitted = true;
+                                        console.log('[DEATH] Set leaderboardSubmitted = true');
+                                    } else {
+                                        console.error('[DEATH] ❌ Result is null or undefined:', result);
                                     }
                                 }).catch(err => {
                                     console.error('[DEATH] Submission failed:', err);
@@ -15694,15 +15725,20 @@
                                         playerSnake.kills
                                     ).then(result => {
                                         console.log('[DEATH] Score submitted on retry!', result);
-                                        if (result && typeof result === 'number') {
+                                        if (result !== null && result !== undefined) {
                                             const rankEl = document.getElementById('globalRank');
                                             if (rankEl) {
-                                                rankEl.textContent = `#${result}`;
-                                                console.log('[DEATH] Retry: Updated rank display to:', `#${result}`);
+                                                if (typeof result === 'number') {
+                                                    rankEl.textContent = `#${result}`;
+                                                    console.log('[DEATH] Retry: Updated rank display to:', `#${result}`);
+                                                } else if (result === 'Submitted') {
+                                                    rankEl.textContent = 'Submitted';
+                                                    console.log('[DEATH] Retry: Score submitted (no rank available)');
+                                                }
                                             }
+                                            leaderboardSubmitted = true;
+                                            clearInterval(retryInterval);
                                         }
-                                        leaderboardSubmitted = true;
-                                        clearInterval(retryInterval);
                                     }).catch(err => {
                                         console.error('[DEATH] Retry failed:', err);
                                     });

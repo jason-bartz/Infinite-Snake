@@ -82,9 +82,17 @@ export async function submitScore(username, score, elementsDiscovered, playTime,
       throw new Error(responseData.error || 'Failed to submit score');
     }
     
-    console.log('✅ Score submitted successfully! Daily rank:', responseData.daily_rank);
+    console.log('✅ Score submitted successfully! Response:', responseData);
+    console.log('📊 Daily rank:', responseData.daily_rank);
     
-    // Return the daily rank for the UI
+    // Return the daily rank for the UI, or a special value if null
+    // If daily_rank is null, it means the score was submitted but rank couldn't be determined
+    // (possibly because leaderboard is still calculating or score is outside top ranks)
+    if (responseData.daily_rank === null) {
+      console.log('⚠️ Score submitted but rank is null (score may be outside leaderboard range)');
+      return 'Submitted'; // Return a string to indicate successful submission without rank
+    }
+    
     return responseData.daily_rank;
     
   } catch (error) {
