@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Death Animation Test - Infinite Snake</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #1a1a2e;
+            color: white;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+        
+        #canvas {
+            display: block;
+            background: #0f0f23;
+            border: 2px solid #444;
+        }
+        
+        #controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.7);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #444;
+        }
+        
+        button {
+            display: block;
+            margin: 10px 0;
+            padding: 10px 20px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        
+        button:hover {
+            background: #45a049;
+        }
+        
+        #info {
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        
+        .particle-count {
+            color: #FFD700;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    
+    <div id="controls">
+        <h2>Death Animation Test</h2>
+        <button onclick="testBasicDeath()">Test Basic Death</button>
+        <button onclick="testLargeSnakeDeath()">Test Large Snake Death</button>
+        <button onclick="testElementDeath()">Test Death with Elements</button>
+        <button onclick="testBossDeath()">Test Boss Death</button>
+        <button onclick="testMultipleDeath()">Test Multiple Deaths</button>
+        <button onclick="clearParticles()">Clear All Particles</button>
+        
+        <div id="info">
+            <p>Active Particles: <span class="particle-count" id="particleCount">0</span></p>
+            <p>FPS: <span id="fps">60</span></p>
+        </div>
+    </div>
+    
+    <script>
+        // Canvas setup
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        // Particle system (simplified version from main game)
+        class Particle {
+            constructor(x, y, vx, vy, color, size = 4, type = 'square', options = {}) {
+                this.x = x;
+                this.y = y;
+                this.vx = vx;
+                this.vy = vy;
+                this.color = color;
+                this.size = size;
+                this.life = 1;
+                this.active = true;
+                this.type = type;
+                
+                // Additional options
+                this.gravity = options.gravity || 0;
+                this.rotation = options.rotation || 0;
+                this.rotationSpeed = options.rotationSpeed || 0;
+                this.fadeRate = options.fadeRate || 0.02;
+                this.growthRate = options.growthRate || 0;
+                this.trail = options.trail || false;
+                this.trailLength = options.trailLength || 5;
+                this.trailHistory = [];
+                this.pulse = options.pulse || false;
+                this.pulseSpeed = options.pulseSpeed || 0.1;
+                this.pulsePhase = 0;
+            }
+            
+            update(deltaTime = 1) {
+                if (!this.active) return false;
+                
+                // Store trail history
+                if (this.trail && this.life > 0.1) {
+                    this.trailHistory.push({ x: this.x, y: this.y, life: this.life });
+                    if (this.trailHistory.length > this.trailLength) {
+                        this.trailHistory.shift();
+                    }
+                }
+                
+                // Update position
+                this.x += this.vx * deltaTime;
+                this.y += this.vy * deltaTime;
+                
+                // Apply gravity
+                this.vy += this.gravity * deltaTime;
+                
+                // Update life
+                this.life -= this.fadeRate * deltaTime;
+                
+                // Apply friction
+                this.vx *= Math.pow(0.98, deltaTime);
+                this.vy *= Math.pow(0.98, deltaTime);
+                
+                // Update rotation
+                this.rotation += this.rotationSpeed * deltaTime;
+                
+                // Update size
+                this.size += this.growthRate * deltaTime;
+                
+                // Update pulse
+                if (this.pulse) {
+                    this.pulsePhase += this.pulseSpeed * deltaTime;
+                }
+                
+                if (this.life <= 0) {
+                    this.active = false;
+                    this.trailHistory = [];
+                    return false;
+                }
+                return true;
+            }
+            
+            draw() {
+                if (!this.active) return;
+                
+                ctx.save();
+                
+                // Draw trail if enabled
+                if (this.trail && this.trailHistory.length > 0) {
+                    this.trailHistory.forEach((point, index) => {
+                        const alpha = (index / this.trailHistory.length) * this.life * 0.5;
+                        ctx.globalAlpha = alpha;
+                        ctx.fillStyle = this.color;
+                        
+                        const trailSize = this.size * (index / this.trailHistory.length);
+                        ctx.fillRect(point.x - trailSize/2, point.y - trailSize/2, trailSize, trailSize);
+                    });
+                }
+                
+                // Set main particle properties
+                ctx.fillStyle = this.color;
+                ctx.globalAlpha = this.life;
+                
+                // Apply pulse effect
+                let actualSize = this.size;
+                if (this.pulse) {
+                    actualSize = this.size * (1 + Math.sin(this.pulsePhase) * 0.3);
+                }
+                
+                // Draw based on type
+                switch(this.type) {
+                    case 'circle':
+                        ctx.beginPath();
+                        ctx.arc(this.x, this.y, actualSize / 2, 0, Math.PI * 2);
+                        ctx.fill();
+                        break;
+                        
+                    case 'star':
+                        ctx.save();
+                        ctx.translate(this.x, this.y);
+                        ctx.rotate(this.rotation);
+                        
+                        const spikes = 5;
+                        const outerRadius = actualSize / 2;
+                        const innerRadius = outerRadius * 0.5;
+                        
+                        ctx.beginPath();
+                        for (let i = 0; i < spikes * 2; i++) {
+                            const radius = i % 2 === 0 ? outerRadius : innerRadius;
+                            const angle = (i * Math.PI) / spikes;
+                            const x = Math.cos(angle) * radius;
+                            const y = Math.sin(angle) * radius;
+                            
+                            if (i === 0) {
+                                ctx.moveTo(x, y);
+                            } else {
+                                ctx.lineTo(x, y);
+                            }
+                        }
+                        ctx.closePath();
+                        ctx.fill();
+                        ctx.restore();
+                        break;
+                        
+                    case 'square':
+                    default:
+                        ctx.fillRect(this.x - actualSize/2, this.y - actualSize/2, actualSize, actualSize);
+                        break;
+                }
+                
+                ctx.restore();
+            }
+        }
+        
+        // Particle pool
+        let particles = [];
+        
+        function spawnParticle(x, y, vx, vy, color, size = 4, type = 'square', options = {}) {
+            particles.push(new Particle(x, y, vx, vy, color, size, type, options));
+        }
+        
+        // Enhanced death particle function from main game
+        function createDeathParticles(x, y, snakeLength = 5, snakeColor = null, elementsCarried = []) {
+            const pixelSize = 4;
+            const baseParticles = 20;
+            const particleCount = Math.min(baseParticles + Math.floor(snakeLength / 2), 120);
+            const speedMultiplier = 1 + (snakeLength / 50);
+            
+            // Phase 1: Core explosion - red/orange burst
+            const coreParticles = Math.floor(particleCount * 0.4);
+            for (let i = 0; i < coreParticles; i++) {
+                const angle = (Math.PI * 2 * i) / coreParticles;
+                const speed = (Math.random() * 3 + 4) * speedMultiplier;
+                const color = Math.random() > 0.5 ? '#ff0000' : '#ff6600';
+                
+                spawnParticle(
+                    x,
+                    y,
+                    Math.cos(angle) * speed,
+                    Math.sin(angle) * speed,
+                    color,
+                    pixelSize * (Math.random() > 0.7 ? 2 : 1),
+                    'square',
+                    { fadeRate: 0.025 }
+                );
+            }
+            
+            // Phase 2: Snake segment particles
+            const segmentParticles = Math.floor(particleCount * 0.3);
+            const segmentColors = snakeColor ? [snakeColor] : ['#ff4444', '#ff6666', '#ff8888'];
+            
+            for (let i = 0; i < segmentParticles; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = (Math.random() * 6 + 2) * speedMultiplier;
+                const color = segmentColors[Math.floor(Math.random() * segmentColors.length)];
+                
+                spawnParticle(
+                    x + (Math.random() - 0.5) * 20,
+                    y + (Math.random() - 0.5) * 20,
+                    Math.cos(angle) * speed,
+                    Math.sin(angle) * speed,
+                    color,
+                    pixelSize * (1 + Math.random() * 2),
+                    Math.random() > 0.7 ? 'circle' : 'square',
+                    { 
+                        gravity: Math.random() * 0.2,
+                        fadeRate: 0.02,
+                        trail: Math.random() > 0.8
+                    }
+                );
+            }
+            
+            // Phase 3: Sparkle particles
+            const sparkleCount = Math.floor(particleCount * 0.2);
+            const sparkleColors = ['#ffff00', '#ffffff', '#ffaa00', '#ff00ff'];
+            
+            for (let i = 0; i < sparkleCount; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = (Math.random() * 8 + 3) * speedMultiplier;
+                const color = sparkleColors[Math.floor(Math.random() * sparkleColors.length)];
+                
+                spawnParticle(
+                    x,
+                    y,
+                    Math.cos(angle) * speed,
+                    Math.sin(angle) * speed,
+                    color,
+                    pixelSize * 0.75,
+                    'star',
+                    {
+                        fadeRate: 0.03,
+                        rotationSpeed: Math.random() * 0.2 - 0.1,
+                        pulse: true,
+                        pulseSpeed: 0.2
+                    }
+                );
+            }
+            
+            // Phase 4: Element particles
+            if (elementsCarried.length > 0) {
+                const elementParticleCount = Math.min(elementsCarried.length * 3, 15);
+                const elementColors = ['#4CAF50', '#2196F3', '#9C27B0', '#FF9800', '#F44336', '#FFD700'];
+                
+                for (let i = 0; i < elementParticleCount; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = (Math.random() * 4 + 2) * speedMultiplier;
+                    const color = elementColors[Math.floor(Math.random() * elementColors.length)];
+                    
+                    spawnParticle(
+                        x,
+                        y,
+                        Math.cos(angle) * speed,
+                        Math.sin(angle) * speed,
+                        color,
+                        pixelSize * 1.5,
+                        'circle',
+                        {
+                            fadeRate: 0.015,
+                            trail: true,
+                            trailLength: 8,
+                            growthRate: -0.05
+                        }
+                    );
+                }
+            }
+            
+            // Large impact particles for big snakes
+            if (snakeLength > 30) {
+                const impactCount = Math.min(Math.floor(snakeLength / 15), 10);
+                for (let i = 0; i < impactCount; i++) {
+                    const angle = (Math.PI * 2 * i) / impactCount;
+                    const speed = 2 * speedMultiplier;
+                    
+                    spawnParticle(
+                        x,
+                        y,
+                        Math.cos(angle) * speed,
+                        Math.sin(angle) * speed,
+                        '#ff0000',
+                        pixelSize * 4,
+                        'square',
+                        {
+                            fadeRate: 0.01,
+                            growthRate: 0.2
+                        }
+                    );
+                }
+            }
+        }
+        
+        // Test functions
+        function testBasicDeath() {
+            createDeathParticles(canvas.width / 2, canvas.height / 2, 10);
+        }
+        
+        function testLargeSnakeDeath() {
+            createDeathParticles(canvas.width / 2, canvas.height / 2, 50, '#4ecdc4');
+        }
+        
+        function testElementDeath() {
+            createDeathParticles(canvas.width / 2, canvas.height / 2, 20, '#9C27B0', [1, 2, 3, 4]);
+        }
+        
+        function testBossDeath() {
+            // Simulate boss death with massive explosion
+            const x = canvas.width / 2;
+            const y = canvas.height / 2;
+            
+            // Extra large explosion
+            for (let i = 0; i < 50; i++) {
+                const angle = (Math.PI * 2 * i) / 50;
+                const speed = 5 + Math.random() * 10;
+                const color = ['#ff0000', '#ff6600', '#ffaa00', '#ffff00'][Math.floor(Math.random() * 4)];
+                const size = 10 + Math.random() * 15;
+                
+                spawnParticle(
+                    x,
+                    y,
+                    Math.cos(angle) * speed,
+                    Math.sin(angle) * speed,
+                    color,
+                    size,
+                    Math.random() > 0.5 ? 'circle' : 'square',
+                    {
+                        fadeRate: 0.015,
+                        gravity: 0.1
+                    }
+                );
+            }
+            
+            // Regular death particles
+            createDeathParticles(x, y, 100, '#ff0000');
+        }
+        
+        function testMultipleDeath() {
+            const positions = [
+                { x: canvas.width * 0.3, y: canvas.height * 0.3 },
+                { x: canvas.width * 0.7, y: canvas.height * 0.3 },
+                { x: canvas.width * 0.5, y: canvas.height * 0.7 }
+            ];
+            
+            positions.forEach((pos, i) => {
+                setTimeout(() => {
+                    createDeathParticles(pos.x, pos.y, 15 + i * 10, ['#4ecdc4', '#ff6666', '#9C27B0'][i]);
+                }, i * 200);
+            });
+        }
+        
+        function clearParticles() {
+            particles = [];
+        }
+        
+        // Animation loop
+        let lastTime = 0;
+        let frameCount = 0;
+        let fps = 60;
+        
+        function animate(currentTime) {
+            const deltaTime = (currentTime - lastTime) / 16.67; // Normalize to 60fps
+            lastTime = currentTime;
+            
+            // Clear canvas
+            ctx.fillStyle = 'rgba(15, 15, 35, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Update and draw particles
+            particles = particles.filter(particle => {
+                particle.update(deltaTime);
+                if (particle.active) {
+                    particle.draw();
+                    return true;
+                }
+                return false;
+            });
+            
+            // Update UI
+            document.getElementById('particleCount').textContent = particles.length;
+            
+            // Calculate FPS
+            frameCount++;
+            if (frameCount % 60 === 0) {
+                fps = Math.round(1000 / ((currentTime - lastTime) || 16.67));
+                document.getElementById('fps').textContent = fps;
+            }
+            
+            requestAnimationFrame(animate);
+        }
+        
+        // Start animation
+        requestAnimationFrame(animate);
+        
+        // Handle resize
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>

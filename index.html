@@ -934,6 +934,11 @@
             75% { transform: rotate(3deg) scale(1.05); }
         }
         
+        @keyframes deathFlash {
+            0% { opacity: 0.8; }
+            100% { opacity: 0; }
+        }
+        
         .element-slot.glow-wobble {
             animation: elementGlow 1s ease-in-out infinite,
                       elementWobble 0.8s ease-in-out infinite;
@@ -4887,6 +4892,20 @@
         let comboStreak = 0; // Track consecutive combinations
         let animationFrameId = null; // Track the animation frame to prevent multiple loops
         
+        // Death sequence animation state
+        let deathSequenceActive = false;
+        let deathSequenceTimer = 0;
+        let deathProcessed = false; // Flag to ensure death is only processed once
+        let isRespawning = false; // Flag to prevent death sequence during respawn
+        const DEATH_SEQUENCE_DURATION = 2000; // 2 seconds total
+        let deathCameraAnimation = {
+            active: false,
+            startZoom: 1.0,
+            targetZoom: 0.7,
+            currentZoom: 1.0,
+            progress: 0
+        };
+        
         // Enhanced mobile detection including iPads
         function isTabletOrMobile() {
             return window.matchMedia("(max-width: 1024px)").matches || 
@@ -6626,6 +6645,13 @@
                 this.invincibilityTimer = 0;
                 this.size = 1; // Default size for normal snakes
                 
+                // Death animation properties
+                this.deathAnimationTimer = 0;
+                this.deathAnimationDuration = 1000; // 1 second death animation
+                this.deathFlashPhase = 0;
+                this.deathSegmentPhase = 0;
+                this.isDying = false;
+                
                 // Validate size to prevent invisibility
                 if (!this.size || this.size <= 0) {
                     this.size = 1;
@@ -6710,6 +6736,12 @@
             }
             
             update(deltaTime = 1) {
+                // Handle death animation
+                if (this.isDying && !this.alive) {
+                    this.updateDeathAnimation(deltaTime);
+                    return;
+                }
+                
                 if (!this.alive) return;
                 
                 // Store previous positions for interpolation
@@ -7379,8 +7411,31 @@
             }
             
             die(isBossDeath = false) {
-                console.error('Snake dying!', 'isPlayer:', this.isPlayer, 'position:', this.x || 'undefined', this.y || 'undefined');
-                console.trace();
+                console.log('[SNAKE DEATH] die() called', {
+                    isPlayer: this.isPlayer,
+                    isDying: this.isDying,
+                    alive: this.alive,
+                    deathAnimationTimer: this.deathAnimationTimer
+                });
+                
+                // Start death animation if not already dying
+                if (!this.isDying) {
+                    console.log('[SNAKE DEATH] Starting snake death animation');
+                    this.isDying = true;
+                    this.deathAnimationTimer = 0;
+                    this.speed = 0; // Stop movement during death
+                    
+                    // Sound will play with pixel explosion at 600ms
+                    
+                    // For instant death (like boss kills), skip animation
+                    if (isBossDeath && this.isPlayer) {
+                        this.deathAnimationTimer = this.deathAnimationDuration;
+                    }
+                    
+                    return; // Don't process death yet, let animation play
+                }
+                
+                console.log('[SNAKE DEATH] Processing actual death (alive = false)');
                 this.alive = false;
                 
                 // Drop all elements with scatter effect
@@ -7420,8 +7475,47 @@
                     spawnElement(this.elements[i], finalX, finalY);
                 }
                 
-                // Create death particles scaled to snake size
-                createDeathParticles(this.x, this.y, this.length);
+                // Only create death particles if not already created during animation
+                if (!this.finalExplosionTriggered) {
+                    const snakeColor = this.color || '#ff0000';
+                    createDeathParticles(this.x, this.y, this.length, snakeColor, this.elements);
+                }
+                
+                // Additional dramatic effects for player death
+                if (this.isPlayer && !isBossDeath) {
+                    // Flash effect
+                    const flashOverlay = document.createElement('div');
+                    flashOverlay.style.cssText = `
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100vw;
+                        height: 100vh;
+                        background: white;
+                        opacity: 0.8;
+                        z-index: 100;
+                        pointer-events: none;
+                        animation: deathFlash 0.2s ease-out;
+                    `;
+                    document.body.appendChild(flashOverlay);
+                    setTimeout(() => flashOverlay.remove(), 200);
+                    
+                    // Extra particle burst for player
+                    for (let i = 0; i < 20; i++) {
+                        const angle = (Math.PI * 2 * i) / 20;
+                        const speed = 8 + Math.random() * 4;
+                        particlePool.spawn(
+                            this.x,
+                            this.y,
+                            Math.cos(angle) * speed,
+                            Math.sin(angle) * speed,
+                            '#fff',
+                            6 + Math.random() * 4,
+                            'circle',
+                            { fadeRate: 0.02, glow: true }
+                        );
+                    }
+                }
                 
                 // Special effects for boss deaths
                 if (this.isPlayer && isBossDeath) {
@@ -7457,6 +7551,81 @@
                 if (this.isPlayer) {
                     // Player respawn is now handled in the main game loop
                     // This prevents duplicate player snakes from being created
+                }
+            }
+            
+            updateDeathAnimation(deltaTime) {
+                this.deathAnimationTimer += deltaTime * 16; // Convert to milliseconds
+                
+                const progress = Math.min(this.deathAnimationTimer / this.deathAnimationDuration, 1);
+                
+                // Phase 1: Flash effect (0-200ms)
+                if (this.deathAnimationTimer < 200) {
+                    this.deathFlashPhase = Math.sin(this.deathAnimationTimer * 0.1) * 0.5 + 0.5;
+                }
+                
+                // Phase 2: Segment explosion (200-600ms)
+                if (this.deathAnimationTimer >= 200 && this.deathAnimationTimer < 600) {
+                    const explosionProgress = (this.deathAnimationTimer - 200) / 400;
+                    this.deathSegmentPhase = explosionProgress;
+                    
+                    // Create particles at segment positions
+                    if (Math.random() < 0.3) { // 30% chance per frame
+                        const segmentIndex = Math.floor(Math.random() * this.segments.length);
+                        const segment = this.segments[segmentIndex];
+                        if (segment) {
+                            // Create burst particles from segments
+                            for (let i = 0; i < 3; i++) {
+                                const angle = Math.random() * Math.PI * 2;
+                                const speed = Math.random() * 4 + 2;
+                                const color = ['#ff0000', '#ff6600', '#ffaa00'][Math.floor(Math.random() * 3)];
+                                
+                                particlePool.spawn(
+                                    segment.x,
+                                    segment.y,
+                                    Math.cos(angle) * speed,
+                                    Math.sin(angle) * speed,
+                                    color,
+                                    4 + Math.random() * 4,
+                                    Math.random() > 0.5 ? 'circle' : 'square',
+                                    {
+                                        fadeRate: 0.03,
+                                        gravity: 0.1
+                                    }
+                                );
+                            }
+                        }
+                    }
+                }
+                
+                // Phase 3: Final explosion (600ms)
+                if (this.deathAnimationTimer >= 600 && !this.finalExplosionTriggered) {
+                    this.finalExplosionTriggered = true;
+                    
+                    // Trigger the main death particles
+                    const snakeColor = this.color || '#ff0000';
+                    createDeathParticles(this.x, this.y, this.length, snakeColor, this.elements);
+                    
+                    // Play retro explosion sound for player death
+                    if (this.isPlayer && !musicMuted) {
+                        const retroExplosion = new Audio('sounds/retro-explode-boom.mp3');
+                        retroExplosion.volume = 0.7;
+                        retroExplosion.play().catch(e => {});
+                    }
+                    
+                    // Screen shake for player death
+                    if (this.isPlayer) {
+                        screenShakeTimer = 20;
+                        screenShakeIntensity = 10;
+                    }
+                }
+                
+                // Complete death sequence
+                if (progress >= 1 && !this.deathComplete) {
+                    console.log('[SNAKE DEATH] Snake death animation complete, processing actual death');
+                    this.deathComplete = true;
+                    this.alive = false;
+                    this.die(this.isBossDeath); // Call die again to complete the death process
                 }
             }
             
@@ -7516,7 +7685,27 @@
             }
             
             draw(interpolation = 0) {
-                if (!this.alive) return;
+                if (!this.alive && !this.isDying) return;
+                
+                // Apply death animation effects
+                if (this.isDying) {
+                    ctx.save();
+                    
+                    // Flash effect during death
+                    if (this.deathFlashPhase > 0) {
+                        ctx.globalAlpha = 0.5 + this.deathFlashPhase * 0.5;
+                    }
+                    
+                    // Segment dispersal effect
+                    if (this.deathSegmentPhase > 0) {
+                        // Make segments gradually disappear from tail to head
+                        const visibleSegments = Math.floor(this.segments.length * (1 - this.deathSegmentPhase));
+                        if (visibleSegments <= 0) {
+                            ctx.restore();
+                            return; // Don't draw if all segments are gone
+                        }
+                    }
+                }
                 
                 // Get size multiplier (bosses have size = 3, normal snakes have size = 1)
                 // Ensure size multiplier is always at least 1 to prevent invisibility
@@ -7584,8 +7773,20 @@
                 }
                 
                 // Draw segments
-                for (let i = this.segments.length - 1; i >= 0; i--) {
+                let segmentsToDraw = this.segments.length;
+                if (this.isDying && this.deathSegmentPhase > 0) {
+                    // Reduce visible segments during death animation
+                    segmentsToDraw = Math.floor(this.segments.length * (1 - this.deathSegmentPhase));
+                }
+                
+                for (let i = segmentsToDraw - 1; i >= 0; i--) {
                     const segment = this.segments[i];
+                    
+                    // Skip segments that have exploded during death
+                    if (this.isDying && this.deathSegmentPhase > 0) {
+                        // Random chance to skip drawing this segment (creates dissolving effect)
+                        if (Math.random() < this.deathSegmentPhase * 0.3) continue;
+                    }
                     
                     // Interpolate position if previous position exists
                     let x = segment.x;
@@ -7834,6 +8035,11 @@
                         ctx.drawImage(skullCanvas, screenX - skullCanvas.width / 2, screenY - SEGMENT_SIZE * cameraZoom - 50 - skullCanvas.height / 2);
                         ctx.restore();
                     }
+                }
+                
+                // Restore death animation context
+                if (this.isDying) {
+                    ctx.restore();
                 }
                 
                 // Restore context state for player
@@ -8933,13 +9139,13 @@
             }
         }
         
-        // Particle class
+        // Enhanced Particle class with more visual options
         class Particle {
-            constructor(x, y, vx, vy, color, size = 4) {
-                this.reset(x, y, vx, vy, color, size);
+            constructor(x, y, vx, vy, color, size = 4, type = 'square') {
+                this.reset(x, y, vx, vy, color, size, type);
             }
             
-            reset(x, y, vx, vy, color, size = 4) {
+            reset(x, y, vx, vy, color, size = 4, type = 'square', options = {}) {
                 this.x = x;
                 this.y = y;
                 this.vx = vx;
@@ -8948,19 +9154,61 @@
                 this.size = size;
                 this.life = 1;
                 this.active = true;
+                this.type = type; // 'square', 'circle', 'star', 'trail'
+                
+                // Additional options
+                this.gravity = options.gravity || 0;
+                this.rotation = options.rotation || 0;
+                this.rotationSpeed = options.rotationSpeed || 0;
+                this.fadeRate = options.fadeRate || 0.02;
+                this.growthRate = options.growthRate || 0;
+                this.trail = options.trail || false;
+                this.trailLength = options.trailLength || 5;
+                this.trailHistory = [];
+                this.pulse = options.pulse || false;
+                this.pulseSpeed = options.pulseSpeed || 0.1;
+                this.pulsePhase = 0;
             }
             
             update(deltaTime = 1) {
                 if (!this.active) return false;
                 
+                // Store trail history
+                if (this.trail && this.life > 0.1) {
+                    this.trailHistory.push({ x: this.x, y: this.y, life: this.life });
+                    if (this.trailHistory.length > this.trailLength) {
+                        this.trailHistory.shift();
+                    }
+                }
+                
+                // Update position
                 this.x += this.vx * deltaTime;
                 this.y += this.vy * deltaTime;
-                this.life -= 0.02 * deltaTime;
+                
+                // Apply gravity
+                this.vy += this.gravity * deltaTime;
+                
+                // Update life
+                this.life -= this.fadeRate * deltaTime;
+                
+                // Apply friction
                 this.vx *= Math.pow(0.98, deltaTime);
                 this.vy *= Math.pow(0.98, deltaTime);
                 
+                // Update rotation
+                this.rotation += this.rotationSpeed * deltaTime;
+                
+                // Update size
+                this.size += this.growthRate * deltaTime;
+                
+                // Update pulse
+                if (this.pulse) {
+                    this.pulsePhase += this.pulseSpeed * deltaTime;
+                }
+                
                 if (this.life <= 0) {
                     this.active = false;
+                    this.trailHistory = [];
                     return false;
                 }
                 return true;
@@ -8975,16 +9223,81 @@
                 const screenY = screen.y;
                 
                 ctx.save();
+                
+                // Draw trail if enabled
+                if (this.trail && this.trailHistory.length > 0) {
+                    this.trailHistory.forEach((point, index) => {
+                        const trailScreen = worldToScreen(point.x, point.y);
+                        const alpha = (index / this.trailHistory.length) * this.life * 0.5;
+                        ctx.globalAlpha = alpha;
+                        ctx.fillStyle = this.color;
+                        
+                        const trailSize = this.size * (index / this.trailHistory.length);
+                        ctx.fillRect(
+                            Math.floor(trailScreen.x / pixelSize) * pixelSize,
+                            Math.floor(trailScreen.y / pixelSize) * pixelSize,
+                            trailSize,
+                            trailSize
+                        );
+                    });
+                }
+                
+                // Set main particle properties
                 ctx.fillStyle = this.color;
                 ctx.globalAlpha = this.life;
                 
-                // Draw as pixel square
-                ctx.fillRect(
-                    Math.floor(screenX / pixelSize) * pixelSize,
-                    Math.floor(screenY / pixelSize) * pixelSize,
-                    this.size,
-                    this.size
-                );
+                // Apply pulse effect
+                let actualSize = this.size;
+                if (this.pulse) {
+                    actualSize = this.size * (1 + Math.sin(this.pulsePhase) * 0.3);
+                }
+                
+                // Draw based on type
+                switch(this.type) {
+                    case 'circle':
+                        ctx.beginPath();
+                        ctx.arc(screenX, screenY, actualSize / 2, 0, Math.PI * 2);
+                        ctx.fill();
+                        break;
+                        
+                    case 'star':
+                        ctx.save();
+                        ctx.translate(screenX, screenY);
+                        ctx.rotate(this.rotation);
+                        
+                        const spikes = 5;
+                        const outerRadius = actualSize / 2;
+                        const innerRadius = outerRadius * 0.5;
+                        
+                        ctx.beginPath();
+                        for (let i = 0; i < spikes * 2; i++) {
+                            const radius = i % 2 === 0 ? outerRadius : innerRadius;
+                            const angle = (i * Math.PI) / spikes;
+                            const x = Math.cos(angle) * radius;
+                            const y = Math.sin(angle) * radius;
+                            
+                            if (i === 0) {
+                                ctx.moveTo(x, y);
+                            } else {
+                                ctx.lineTo(x, y);
+                            }
+                        }
+                        ctx.closePath();
+                        ctx.fill();
+                        ctx.restore();
+                        break;
+                        
+                    case 'square':
+                    default:
+                        // Pixelated square (original behavior)
+                        ctx.fillRect(
+                            Math.floor(screenX / pixelSize) * pixelSize,
+                            Math.floor(screenY / pixelSize) * pixelSize,
+                            actualSize,
+                            actualSize
+                        );
+                        break;
+                }
                 
                 ctx.restore();
             }
@@ -9021,13 +9334,13 @@
                 this.update();
             }
             
-            spawn(x, y, vx, vy, color, size = 4) {
+            spawn(x, y, vx, vy, color, size = 4, type = 'square', options = {}) {
                 let particle = this.pool.pop();
                 if (!particle) {
                     // Pool is empty, create new particle
-                    particle = new Particle(x, y, vx, vy, color, size);
+                    particle = new Particle(x, y, vx, vy, color, size, type);
                 } else {
-                    particle.reset(x, y, vx, vy, color, size);
+                    particle.reset(x, y, vx, vy, color, size, type, options);
                 }
                 this.activeParticles.push(particle);
                 return particle;
@@ -11847,40 +12160,139 @@
             }
         }
         
-        function createDeathParticles(x, y, snakeLength = 5) {
-            // Scale particle count and speed based on snake size
-            const baseParticles = isMobile ? 10 : 20;
-            const particleCount = Math.min(baseParticles + Math.floor(snakeLength / (isMobile ? 4 : 2)), isMobile ? 30 : 100);
-            const speedMultiplier = 1 + (snakeLength / 50);
+        function createDeathParticles(x, y, snakeLength = 5, snakeColor = null, elementsCarried = []) {
+            // Enhanced death particle system with multiple phases
             const pixelSize = 4;
+            const baseParticles = isMobile ? 10 : 20;
+            const particleCount = Math.min(baseParticles + Math.floor(snakeLength / (isMobile ? 4 : 2)), isMobile ? 40 : 120);
+            const speedMultiplier = 1 + (snakeLength / 50);
             
-            for (let i = 0; i < particleCount; i++) {
-                const angle = Math.random() * Math.PI * 2;
-                const speed = (Math.random() * 5 + 2) * speedMultiplier;
-                const size = Math.random() > 0.5 ? pixelSize : pixelSize * 2;
+            // Phase 1: Core explosion - red/orange burst
+            const coreParticles = Math.floor(particleCount * 0.4);
+            for (let i = 0; i < coreParticles; i++) {
+                const angle = (Math.PI * 2 * i) / coreParticles;
+                const speed = (Math.random() * 3 + 4) * speedMultiplier;
+                const color = Math.random() > 0.5 ? '#ff0000' : '#ff6600';
+                
                 particlePool.spawn(
                     Math.floor(x / pixelSize) * pixelSize,
                     Math.floor(y / pixelSize) * pixelSize,
                     Math.cos(angle) * speed,
                     Math.sin(angle) * speed,
-                    '#ff0000',
-                    size
+                    color,
+                    pixelSize * (Math.random() > 0.7 ? 2 : 1),
+                    'square',
+                    { fadeRate: 0.025 }
                 );
             }
             
-            // Add some larger pixel blocks for bigger snakes
-            if (snakeLength > 20) {
-                const largeParticleCount = Math.min(Math.floor(snakeLength / 10), 20);
-                for (let i = 0; i < largeParticleCount; i++) {
+            // Phase 2: Snake segment particles - match snake color if available
+            const segmentParticles = Math.floor(particleCount * 0.3);
+            const segmentColors = snakeColor ? [snakeColor] : ['#ff4444', '#ff6666', '#ff8888'];
+            
+            for (let i = 0; i < segmentParticles; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = (Math.random() * 6 + 2) * speedMultiplier;
+                const color = segmentColors[Math.floor(Math.random() * segmentColors.length)];
+                
+                particlePool.spawn(
+                    x + (Math.random() - 0.5) * 20,
+                    y + (Math.random() - 0.5) * 20,
+                    Math.cos(angle) * speed,
+                    Math.sin(angle) * speed,
+                    color,
+                    pixelSize * (1 + Math.random() * 2),
+                    Math.random() > 0.7 ? 'circle' : 'square',
+                    { 
+                        gravity: Math.random() * 0.2,
+                        fadeRate: 0.02,
+                        trail: Math.random() > 0.8
+                    }
+                );
+            }
+            
+            // Phase 3: Sparkle particles - glowing effects
+            const sparkleCount = Math.floor(particleCount * 0.2);
+            const sparkleColors = ['#ffff00', '#ffffff', '#ffaa00', '#ff00ff'];
+            
+            for (let i = 0; i < sparkleCount; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = (Math.random() * 8 + 3) * speedMultiplier;
+                const color = sparkleColors[Math.floor(Math.random() * sparkleColors.length)];
+                
+                particlePool.spawn(
+                    x,
+                    y,
+                    Math.cos(angle) * speed,
+                    Math.sin(angle) * speed,
+                    color,
+                    pixelSize * 0.75,
+                    'star',
+                    {
+                        fadeRate: 0.03,
+                        rotationSpeed: Math.random() * 0.2 - 0.1,
+                        pulse: true,
+                        pulseSpeed: 0.2
+                    }
+                );
+            }
+            
+            // Phase 4: Element particles - if snake was carrying elements
+            if (elementsCarried.length > 0 && !isMobile) {
+                const elementParticleCount = Math.min(elementsCarried.length * 3, 15);
+                for (let i = 0; i < elementParticleCount; i++) {
+                    const element = elementsCarried[i % elementsCarried.length];
+                    if (!element) continue;
+                    
+                    // Get element color based on tier or type
+                    let elementColor = '#00ff00'; // Default green
+                    const elemData = window.elementLoader?.elements.get(element);
+                    if (elemData) {
+                        // Color based on tier
+                        const tierColors = ['#4CAF50', '#2196F3', '#9C27B0', '#FF9800', '#F44336', '#FFD700'];
+                        elementColor = tierColors[Math.min(elemData.t || 0, tierColors.length - 1)];
+                    }
+                    
                     const angle = Math.random() * Math.PI * 2;
-                    const speed = (Math.random() * 3 + 1) * speedMultiplier;
+                    const speed = (Math.random() * 4 + 2) * speedMultiplier;
+                    
+                    particlePool.spawn(
+                        x,
+                        y,
+                        Math.cos(angle) * speed,
+                        Math.sin(angle) * speed,
+                        elementColor,
+                        pixelSize * 1.5,
+                        'circle',
+                        {
+                            fadeRate: 0.015,
+                            trail: true,
+                            trailLength: 8,
+                            growthRate: -0.05
+                        }
+                    );
+                }
+            }
+            
+            // Large impact particles for big snakes
+            if (snakeLength > 30) {
+                const impactCount = Math.min(Math.floor(snakeLength / 15), 10);
+                for (let i = 0; i < impactCount; i++) {
+                    const angle = (Math.PI * 2 * i) / impactCount;
+                    const speed = 2 * speedMultiplier;
+                    
                     particlePool.spawn(
                         Math.floor(x / pixelSize) * pixelSize,
                         Math.floor(y / pixelSize) * pixelSize,
                         Math.cos(angle) * speed,
                         Math.sin(angle) * speed,
-                        '#ff6600',
-                        pixelSize * 3
+                        '#ff0000',
+                        pixelSize * 4,
+                        'square',
+                        {
+                            fadeRate: 0.01,
+                            growthRate: 0.2
+                        }
                     );
                 }
             }
@@ -12705,7 +13117,21 @@
             
             // Hide overlay and trigger respawn
             document.getElementById('respawnOverlay').style.display = 'none';
-            playerRespawnTimer = 100; // Trigger respawn
+            
+            // Force end death sequence if still active
+            if (deathSequenceActive) {
+                console.log('[RESPAWN] Forcing end of death sequence');
+                deathSequenceActive = false;
+                deathCameraAnimation.active = false;
+                cameraZoom = isMobile ? 0.5 : 1.0;
+            }
+            
+            // Reset death processed flag
+            deathProcessed = false;
+            isRespawning = true; // Set respawning flag
+            
+            console.log('[RESPAWN BUTTON] Setting timer to -1, isRespawning=true');
+            playerRespawnTimer = -1; // Trigger immediate respawn
             
             // Reset leaderboard submission flag for next game
             leaderboardSubmitted = false;
@@ -12873,7 +13299,7 @@
             if (!playerSnake) return;
             
             // Handle dead player with respawn timer
-            if (!playerSnake.alive && playerRespawnTimer > 0) {
+            if (!playerSnake.alive && playerRespawnTimer > 0 && !deathSequenceActive) {
                 const respawnSeconds = Math.ceil(playerRespawnTimer / 1000);
                 console.log('[DEATH] Player is dead, respawn timer:', respawnSeconds, 'seconds');
                 
@@ -12975,8 +13401,11 @@
                     }
                     
                     // Automatic leaderboard submission for infinite mode
-                    console.log('[LEADERBOARD] ⚡ AUTO-SUBMISSION CHECK ⚡');
-                    console.log('[LEADERBOARD] Checking submission conditions:', {
+                    // Only check once per death (not every frame!)
+                    if (!window.deathLeaderboardChecked) {
+                        window.deathLeaderboardChecked = true;
+                        console.log('[LEADERBOARD] ⚡ AUTO-SUBMISSION CHECK ⚡');
+                        console.log('[LEADERBOARD] Checking submission conditions:', {
                         gameMode: gameMode,
                         isInfinite: gameMode === 'infinite',
                         leaderboardSubmitted: leaderboardSubmitted,
@@ -13096,10 +13525,14 @@
                             }
                         }
                     }
+                    } // Close the deathLeaderboardChecked if statement
                 }
                 
                 return; // Don't update other UI elements while dead
             } else {
+                // Reset death leaderboard check flag when alive
+                window.deathLeaderboardChecked = false;
+                
                 // Hide respawn overlay when alive
                 const respawnOverlay = document.getElementById('respawnOverlay');
                 if (respawnOverlay) {
@@ -15408,7 +15841,7 @@
                 // Update all snakes - staggering removed due to complexity
                 for (let i = 0; i < snakes.length; i++) {
                     const snake = snakes[i];
-                    if (snake.alive) {
+                    if (snake.alive || snake.isDying) {
                         snake.update(1.0);
                     }
                 }
@@ -15451,8 +15884,8 @@
                     }
                 });
                 
-                // Remove dead snakes
-                snakes = snakes.filter(snake => snake.alive);
+                // Remove dead snakes (but keep dying ones for animation)
+                snakes = snakes.filter(snake => snake.alive || snake.isDying);
                 
                 // Spawn new elements to maintain target count (increased during boss battles)
                 const currentElementCount = elementPool.getActiveCount();
@@ -15651,25 +16084,76 @@
                 }
             }
             
-            // Handle player respawn
-            if (playerSnake && !playerSnake.alive) {
-                if (playerRespawnTimer <= 0) {
-                    // Start respawn timer
-                    playerRespawnTimer = 10000; // 10 seconds
-                    comboStreak = 0; // Reset combo streak on death
+            // Handle player death and respawn
+            if (playerSnake && (playerSnake.isDying || !playerSnake.alive) && !isRespawning) {
+                // Start death sequence when player starts dying or is already dead
+                // Don't start if we're about to respawn or respawn is in progress
+                if (!deathSequenceActive && (playerSnake.isDying || !playerSnake.alive) && playerRespawnTimer <= 0 && !deathProcessed && !isRespawning) {
+                    console.log('[DEATH SEQUENCE] Starting death animation');
+                    deathSequenceActive = true;
+                    deathSequenceTimer = 0;
                     
-                    // Save snake state for potential revive
-                    savedSnakeLength = playerSnake.segments.length;
-                    savedSnakeScore = playerSnake.score;
+                    // Initialize camera animation
+                    deathCameraAnimation.active = true;
+                    deathCameraAnimation.startZoom = cameraZoom;
+                    deathCameraAnimation.targetZoom = cameraZoom * 0.7; // Zoom out by 30%
+                    deathCameraAnimation.currentZoom = cameraZoom;
+                    deathCameraAnimation.progress = 0;
                     
-                    // Set random death message (only once on death)
-                    const deathMessageEl = document.getElementById('deathMessage');
-                    if (deathMessageEl && window.nameGenerator) {
-                        deathMessageEl.textContent = window.nameGenerator.getRandomDeathMessage();
+                    console.log('[DEATH SEQUENCE] Camera animation initialized:', {
+                        startZoom: deathCameraAnimation.startZoom,
+                        targetZoom: deathCameraAnimation.targetZoom
+                    });
+                }
+                
+                // Update death sequence
+                if (deathSequenceActive && !deathProcessed) {
+                    deathSequenceTimer += frameTime;
+                    
+                    // Update camera zoom animation (200ms to 1200ms)
+                    if (deathSequenceTimer >= 200 && deathSequenceTimer <= 1200) {
+                        const animProgress = (deathSequenceTimer - 200) / 1000; // 0 to 1 over 1 second
+                        deathCameraAnimation.progress = Math.min(1, animProgress);
+                        
+                        // Smooth easing function
+                        const easedProgress = 1 - Math.pow(1 - deathCameraAnimation.progress, 3);
+                        deathCameraAnimation.currentZoom = deathCameraAnimation.startZoom + 
+                            (deathCameraAnimation.targetZoom - deathCameraAnimation.startZoom) * easedProgress;
+                        cameraZoom = deathCameraAnimation.currentZoom;
+                        
+                        console.log('[DEATH SEQUENCE] Camera zoom progress:', {
+                            timer: deathSequenceTimer,
+                            progress: deathCameraAnimation.progress,
+                            currentZoom: cameraZoom
+                        });
                     }
                     
-                    // FORCE AUTO-SUBMIT IMMEDIATELY ON DEATH
-                    console.log('🎮💀 [DEATH] Player died, attempting auto-submit...');
+                    // Complete death sequence
+                    if (deathSequenceTimer >= DEATH_SEQUENCE_DURATION && !deathProcessed) {
+                        console.log('[DEATH SEQUENCE] Death sequence complete, starting respawn timer');
+                        deathSequenceActive = false;
+                        deathCameraAnimation.active = false;
+                        deathProcessed = true; // Mark as processed
+                        
+                        // Reset camera zoom
+                        cameraZoom = isMobile ? 0.5 : 1.0;
+                        
+                        // Now start the respawn timer and do all the death processing
+                        playerRespawnTimer = 10000; // 10 seconds
+                        comboStreak = 0; // Reset combo streak on death
+                        
+                        // Save snake state for potential revive
+                        savedSnakeLength = playerSnake.segments.length;
+                        savedSnakeScore = playerSnake.score;
+                        
+                        // Set random death message (only once on death)
+                        const deathMessageEl = document.getElementById('deathMessage');
+                        if (deathMessageEl && window.nameGenerator) {
+                            deathMessageEl.textContent = window.nameGenerator.getRandomDeathMessage();
+                        }
+                        
+                        // FORCE AUTO-SUBMIT IMMEDIATELY ON DEATH
+                        console.log('🎮💀 [DEATH] Player died, attempting auto-submit...');
                     console.log('🎮💀 [DEATH] Current state:', {
                         leaderboardSubmitted,
                         playerScore: playerSnake.score,
@@ -15858,12 +16342,35 @@
                             play_time: gameSessionStartTime ? Math.floor((Date.now() - gameSessionStartTime) / 1000) : 0
                         });
                     }
-                }
-                
-                // Update respawn timer
+                    } // End of death sequence completion
+                } // End of deathSequenceActive check
+            } // End of player death check - MOVED HERE
+            
+            // Update respawn timer (NOW OUTSIDE death check)
+            if (playerRespawnTimer > 0) {
                 playerRespawnTimer -= frameTime;
                 
-                if (playerRespawnTimer <= 0) {
+                // Debug why respawn might be failing
+                if (playerRespawnTimer <= 100 && playerRespawnTimer > 0) {
+                        console.log('[RESPAWN DEBUG]', {
+                            playerRespawnTimer,
+                            deathSequenceActive,
+                            playerAlive: playerSnake.alive,
+                            playerDying: playerSnake.isDying,
+                            isRespawning
+                        });
+                    }
+                }
+                
+                // Also check negative timer values
+                if (playerRespawnTimer < 0) {
+                    console.log('[RESPAWN] Timer is negative:', playerRespawnTimer);
+                }
+                
+            // Handle respawn when timer reaches zero
+            // Check isRespawning to allow forced respawn to proceed
+            if (playerSnake && playerRespawnTimer <= 0 && (!deathSequenceActive || isRespawning) && !playerSnake.alive) {
+                    console.log('[RESPAWN] Starting respawn process');
                     // Store previous score before creating new snake
                     const previousScore = playerSnake.score;
                     const previousCapacity = playerSnake.elementCapacity;
@@ -15933,8 +16440,13 @@
                     // Reset respawn timer
                     playerRespawnTimer = 0;
                     
-                    // Reset leaderboard submission flag for next death
+                    // Reset death flags for next death
+                    deathProcessed = false;
+                    deathSequenceActive = false;
+                    isRespawning = false; // Reset respawning flag
+                    deathSequenceTimer = 0;
                     leaderboardSubmitted = false;
+                    window.deathLeaderboardChecked = false;
                     
                     // Only reset game session start time if it's null (first spawn)
                     if (!gameSessionStartTime) {
@@ -15948,7 +16460,6 @@
                         });
                     }
                 }
-            }
             
             // Update UI
             updateUI();
