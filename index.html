@@ -7210,8 +7210,8 @@
                                     const resultData = window.elementLoader.elements.get(resultId);
                                     
                                     // Track discovery event
-                                    if (supabaseModule && supabaseModule.addGameEvent) {
-                                        supabaseModule.addGameEvent('discovery', {
+                                    if (window.supabaseModule && window.supabaseModule.addGameEvent) {
+                                        window.supabaseModule.addGameEvent('discovery', {
                                             element_id: resultId,
                                             element_name: resultData?.n || 'Unknown',
                                             recipe: [newElementId, existingId],
@@ -7495,8 +7495,8 @@
                             totalKills: killer.kills
                         });
                         
-                        if (supabaseModule && supabaseModule.addGameEvent) {
-                            supabaseModule.addGameEvent('kill', {
+                        if (window.supabaseModule && window.supabaseModule.addGameEvent) {
+                            window.supabaseModule.addGameEvent('kill', {
                                 victim_name: this.name,
                                 victim_score: this.score,
                                 victim_length: this.segments.length,
@@ -12317,7 +12317,8 @@
         }
         
         // Leaderboard Integration Variables
-        let supabaseModule = null;
+        // Make supabaseModule globally accessible
+        window.supabaseModule = null;
         let leaderboardSubmitted = false;
         let currentGameSessionId = null;
         let gameSessionStartTime = null;
@@ -12326,7 +12327,7 @@
         window.testLeaderboard = function() {
             console.log('=== LEADERBOARD DEBUG INFO ===');
             console.log('supabaseModule loaded:', !!supabaseModule);
-            console.log('submitScore function exists:', !!(supabaseModule && supabaseModule.submitScore));
+            console.log('submitScore function exists:', !!(window.supabaseModule && window.supabaseModule.submitScore));
             console.log('leaderboardSubmitted:', leaderboardSubmitted);
             console.log('gameMode:', typeof gameMode !== 'undefined' ? gameMode : 'undefined');
             console.log('playerSnake:', playerSnake ? { alive: playerSnake.alive, score: playerSnake.score } : 'null');
@@ -12337,7 +12338,7 @@
         // Test automatic submission manually
         window.testAutoSubmit = async function() {
             console.log('Testing automatic submission...');
-            if (!supabaseModule || !supabaseModule.submitScore) {
+            if (!window.supabaseModule || !window.supabaseModule.submitScore) {
                 console.error('Supabase module not loaded!');
                 return;
             }
@@ -12353,7 +12354,7 @@
             console.log('Submitting test data:', testData);
             
             try {
-                const result = await supabaseModule.submitScore(
+                const result = await window.supabaseModule.submitScore(
                     testData.username,
                     testData.score,
                     testData.elements,
@@ -12372,11 +12373,11 @@
         async function initSupabase() {
             try {
                 console.log('[SUPABASE] Starting initialization...');
-                supabaseModule = await import('./js/supabase.js');
-                console.log('[SUPABASE] Module loaded:', supabaseModule);
+                window.supabaseModule = await import('./js/supabase.js');
+                console.log('[SUPABASE] Module loaded:', window.supabaseModule);
                 
-                if (supabaseModule && supabaseModule.initializeAuth) {
-                    await supabaseModule.initializeAuth();
+                if (window.supabaseModule && window.supabaseModule.initializeAuth) {
+                    await window.supabaseModule.initializeAuth();
                     console.log('[SUPABASE] Successfully initialized!');
                     
                     // Update any waiting submission forms
@@ -12512,7 +12513,7 @@
                 
                 let result;
                 try {
-                    result = await supabaseModule.submitScore(
+                    result = await window.supabaseModule.submitScore(
                         username,
                         Math.floor(playerSnake.score),
                         playerDiscoveredElements.size,
@@ -12769,7 +12770,7 @@
             entriesDiv.innerHTML = '<div style="color: #888; text-align: center; padding: 20px;">Loading...</div>';
             
             try {
-                const data = await supabaseModule.getLeaderboard(period, 10); // Top 10 only
+                const data = await window.supabaseModule.getLeaderboard(period, 10); // Top 10 only
                 
                 if (!data || data.length === 0) {
                     entriesDiv.innerHTML = '<div style="color: #888; text-align: center; padding: 20px;">No scores yet. Be the first!</div>';
@@ -12806,7 +12807,7 @@
             entriesDiv.innerHTML = '<div style="color: #888; text-align: center; padding: 40px; font-family: monospace;">Loading leaderboard...</div>';
             
             try {
-                leaderboardData = await supabaseModule.getLeaderboard(period, 100);
+                leaderboardData = await window.supabaseModule.getLeaderboard(period, 100);
                 
                 if (!leaderboardData || leaderboardData.length === 0) {
                     entriesDiv.innerHTML = '<div style="color: #888; text-align: center; padding: 40px; font-family: monospace;">No scores yet. Be the first!</div>';
@@ -14507,8 +14508,8 @@
                 leaderboardSubmitted = false;
                 gameSessionStartTime = Date.now();
                 
-                if (supabaseModule) {
-                    supabaseModule.startGameSession().then(sessionId => {
+                if (window.supabaseModule) {
+                    window.supabaseModule.startGameSession().then(sessionId => {
                         currentGameSessionId = sessionId;
                     });
                 }
