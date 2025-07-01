@@ -799,6 +799,12 @@
                 document.getElementById('adminKey').value = savedKey;
                 authenticate();
             }
+            
+            // Test if manage API is available
+            fetch('/api/leaderboard-manage?test=true')
+                .then(r => r.json())
+                .then(data => console.log('Manage API test:', data))
+                .catch(err => console.error('Manage API not available:', err));
         };
         
         // Auto-refresh every 30 seconds when authenticated

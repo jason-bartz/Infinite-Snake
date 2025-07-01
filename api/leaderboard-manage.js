@@ -37,10 +37,19 @@ export default async function handler(req, res) {
   // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Admin-Key');
   
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
+  }
+  
+  // Test endpoint
+  if (req.method === 'GET' && req.query.test === 'true') {
+    return res.status(200).json({ 
+      success: true, 
+      message: 'Leaderboard manage API is working',
+      timestamp: new Date().toISOString()
+    });
   }
   
   // Check admin authentication
