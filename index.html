@@ -191,12 +191,12 @@
             /* Mobile UI Positioning Variables */
             --mobile-scorecard-top: 10px;
             --mobile-scorecard-left: 10px;
-            --mobile-scorecard-bottom: auto;
+            --mobile-scorecard-bottom: unset;
             --mobile-scorecard-right: auto;
             
             --mobile-leaderboard-top: 10px;
             --mobile-leaderboard-right: 10px;
-            --mobile-leaderboard-bottom: auto;
+            --mobile-leaderboard-bottom: unset;
             --mobile-leaderboard-left: auto;
             
             --mobile-discovery-opacity: 0.7;
@@ -1738,19 +1738,21 @@
         /* Portrait mode mobile */
         @media (max-width: 800px) and (orientation: portrait) {
             body.mobile .player-info-box {
-                top: 20px;
-                bottom: auto;
-                left: 10px;
+                position: fixed !important;
+                top: 20px !important;
+                bottom: unset !important;
+                left: 10px !important;
                 width: 45%;
                 font-size: 7px !important;
                 padding: 6px;
             }
             
             body.mobile .leaderboard-box {
-                top: 20px;
-                bottom: auto;
-                right: 10px;
-                left: auto;
+                position: fixed !important;
+                top: 20px !important;
+                bottom: unset !important;
+                right: 10px !important;
+                left: auto !important;
                 width: 45%;
                 font-size: 9px !important;
             }
@@ -1764,10 +1766,11 @@
         /* Landscape mode mobile */
         @media (max-width: 800px) and (orientation: landscape) {
             body.mobile .player-info-box {
-                position: absolute !important;
+                position: fixed !important;
                 top: 60px !important;
-                bottom: auto !important;
+                bottom: unset !important;
                 left: 10px !important;
+                right: auto !important;
                 width: 180px !important;
                 font-size: 6px !important;
                 padding: 4px !important;
@@ -1775,9 +1778,9 @@
             }
             
             body.mobile .leaderboard-box {
-                position: absolute !important;
+                position: fixed !important;
                 top: 60px !important;
-                bottom: auto !important;
+                bottom: unset !important;
                 right: 10px !important;
                 left: auto !important;
                 width: 200px !important;
@@ -2005,7 +2008,7 @@
                 padding: 15px 50px !important;
                 font-size: 20px !important;
                 position: relative !important;
-                bottom: auto !important;
+                bottom: unset !important;
                 display: block !important;
                 visibility: visible !important;
             }
@@ -2062,7 +2065,7 @@
         @media (max-width: 800px) {
             .player-info-box,
             .leaderboard-box {
-                bottom: 100px;
+                /* Removed bottom positioning - will use orientation-specific rules */
                 width: 200px;
             }
             
@@ -2856,6 +2859,15 @@
         .player-info-box {
             width: 280px !important; /* Increased from 240px */
             font-size: 8px !important; /* Base font size */
+        }
+        
+        /* Mobile positioning fix - ensure top positioning takes precedence */
+        body.mobile .player-info-box {
+            bottom: unset !important;
+        }
+        
+        body.mobile .leaderboard-box {
+            bottom: unset !important;
         }
 
         .player-portrait {
@@ -3752,21 +3764,21 @@
         @media screen and (orientation: landscape) and (max-width: 1024px) {
             /* Player Card - Top Left */
             body.mobile .player-info-box {
-                position: fixed;
-                top: var(--mobile-scorecard-top);
-                left: var(--mobile-scorecard-left);
-                bottom: var(--mobile-scorecard-bottom);
-                right: var(--mobile-scorecard-right);
+                position: fixed !important;
+                top: var(--mobile-scorecard-top) !important;
+                left: var(--mobile-scorecard-left) !important;
+                bottom: var(--mobile-scorecard-bottom) !important;
+                right: var(--mobile-scorecard-right) !important;
                 width: 200px;
             }
             
             /* Leaderboard - Top Right */
             body.mobile .leaderboard-box {
-                position: fixed;
-                top: var(--mobile-leaderboard-top);
-                right: var(--mobile-leaderboard-right);
-                bottom: var(--mobile-leaderboard-bottom);
-                left: var(--mobile-leaderboard-left);
+                position: fixed !important;
+                top: var(--mobile-leaderboard-top) !important;
+                right: var(--mobile-leaderboard-right) !important;
+                bottom: var(--mobile-leaderboard-bottom) !important;
+                left: var(--mobile-leaderboard-left) !important;
                 width: 240px;
             }
             
@@ -3846,19 +3858,22 @@
         @media (orientation: portrait) and (max-width: 1024px) {
             /* Player Card - Top Left */
             body.mobile .player-info-box {
-                top: 60px;
-                left: 10px;
-                bottom: auto;
+                position: fixed !important;
+                top: 60px !important;
+                left: 10px !important;
+                bottom: unset !important;
+                right: auto !important;
                 width: 160px;
                 font-size: 7px;
             }
             
             /* Leaderboard - Top Right */
             body.mobile .leaderboard-box {
-                top: 60px;
-                right: 10px;
-                left: auto;
-                bottom: auto;
+                position: fixed !important;
+                top: 60px !important;
+                right: 10px !important;
+                left: auto !important;
+                bottom: unset !important;
                 width: 180px;
                 font-size: 9px;
             }
@@ -4270,6 +4285,37 @@
             .tab-button {
                 padding: 6px 8px !important;
                 font-size: 7px !important;
+            }
+        }
+        
+        /* ===== CRITICAL MOBILE POSITIONING FIX ===== */
+        /* Ensure scorecard and leaderboard ALWAYS appear at TOP on mobile */
+        @media (max-width: 1024px) {
+            body.mobile .player-info-box {
+                position: fixed !important;
+                top: 20px !important;
+                bottom: unset !important;
+                left: 10px !important;
+                right: auto !important;
+            }
+            
+            body.mobile .leaderboard-box {
+                position: fixed !important;
+                top: 20px !important;
+                bottom: unset !important;
+                right: 10px !important;
+                left: auto !important;
+            }
+        }
+        
+        /* Landscape adjustments */
+        @media (max-width: 1024px) and (orientation: landscape) {
+            body.mobile .player-info-box {
+                top: 60px !important;
+            }
+            
+            body.mobile .leaderboard-box {
+                top: 60px !important;
             }
         }
     </style>
