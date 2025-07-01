@@ -3488,18 +3488,18 @@
         
         <div class="modeSection">
             <h4>Choose Your Mode</h4>
-            <div id="victoryButtons" style="display: flex; flex-direction: column; gap: 20px; align-items: center; margin-top: 30px;">
-                <div style="text-align: center;">
-                    <button class="btn-classic" onclick="selectGameMode('classic')" style="width: 300px; padding: 20px; font-size: 20px; background: #e74c3c; border: 2px solid #c0392b;">
+            <div id="victoryButtons" style="display: flex; flex-direction: row; gap: 30px; justify-content: center; align-items: stretch; margin-top: 30px; flex-wrap: wrap;">
+                <div style="text-align: center; width: 280px;">
+                    <button class="btn-classic" onclick="selectGameMode('classic')" style="width: 100%; height: 80px; padding: 20px; font-size: 18px; background: #e74c3c; border: 2px solid #c0392b; display: flex; align-items: center; justify-content: center;">
                         🏆 Classic Mode
                     </button>
-                    <p style="color: #ccc; margin-top: 10px; font-size: 14px;">Challenge yourself to discover elements while surviving as long as possible</p>
+                    <p style="color: #ccc; margin-top: 10px; font-size: 14px;">Test your survival skills and compete for your spot on the leaderboard</p>
                 </div>
-                <div style="text-align: center;">
-                    <button class="btn-infinite" onclick="selectGameMode('infinite')" style="width: 300px; padding: 20px; font-size: 20px;">
+                <div style="text-align: center; width: 280px;">
+                    <button class="btn-infinite" onclick="selectGameMode('infinite')" style="width: 100%; height: 80px; padding: 20px; font-size: 20px; display: flex; align-items: center; justify-content: center;">
                         ∞ Infinite Mode
                     </button>
-                    <p style="color: #ccc; margin-top: 10px; font-size: 14px;">Practice and explore without pressure - no scores recorded</p>
+                    <p style="color: #ccc; margin-top: 10px; font-size: 14px;">Unlimited respawns to experiment freely and discover new combinations</p>
                 </div>
             </div>
         </div>
@@ -3831,7 +3831,7 @@
                         
                         <div style="margin-bottom: 15px;">
                             <h5 style="color: #4ecdc4; margin-bottom: 5px;">🎯 Goal</h5>
-                            <p>Grow your snake by collecting elements and discovering new combinations! Climb the global leaderboard in Infinite Mode, unlock new skins, and build your Discovery Journal.</p>
+                            <p>Grow your snake by collecting elements and discovering new combinations! In Classic Mode, survive as long as possible with 3 lives to compete on the leaderboard. In Infinite Mode, practice freely with unlimited respawns.</p>
                         </div>
                         
                         <div style="margin-bottom: 15px;">
@@ -3865,11 +3865,15 @@
                         </div>
                         
                         <div style="margin-bottom: 15px;">
-                            <h5 style="color: #4ecdc4; margin-bottom: 5px;">🏆 Competitive Play</h5>
-                            <p>• Play Infinite Mode to compete on the global leaderboard</p>
+                            <h5 style="color: #4ecdc4; margin-bottom: 5px;">🏆 Game Modes</h5>
+                            <p><strong>Classic Mode:</strong> Competitive survival with 3 lives</p>
+                            <p>• Scores submitted to leaderboard on permadeath (4th death)</p>
+                            <p>• Defeat bosses to earn extra lives</p>
                             <p>• Daily, Weekly, Monthly, and All-Time rankings</p>
-                            <p>• Submit your best scores and climb the ranks</p>
-                            <p>• Track your personal best and improvement</p>
+                            <p><strong>Infinite Mode:</strong> Practice and exploration</p>
+                            <p>• Unlimited respawns after using 3 revives</p>
+                            <p>• No leaderboard submission</p>
+                            <p>• Perfect for learning combinations and strategies</p>
                         </div>
                         
                         <div style="margin-bottom: 15px;">
@@ -10000,9 +10004,10 @@
                         radius: 0, // Start small and grow
                         targetRadius: size,
                         growthSpeed: 3, // How fast fissure opens
-                        life: 240, // 4 seconds at 60fps
-                        maxLife: 240,
-                        state: 'opening' // 'opening', 'open', 'closing'
+                        life: 270, // 4.5 seconds total (0.5s warning + 4s active)
+                        maxLife: 270,
+                        state: 'warning', // Start with warning state
+                        warningDuration: 30 // 0.5 seconds of warning
                     });
                 }
                 
@@ -10915,14 +10920,39 @@
                     return projectile.life > 0;
                     
                 case 'tornado':
-                    // Update tornado position with wandering movement
-                    projectile.wanderTimer += deltaTime;
-                    if (projectile.wanderTimer > 30) { // Change direction every 0.5 seconds
-                        projectile.wanderAngle += (Math.random() - 0.5) * 0.5;
-                        projectile.wanderTimer = 0;
+                    // Initialize homing timer if not set
+                    if (projectile.homingTimer === undefined) {
+                        projectile.homingTimer = 180; // 3 seconds of homing
                     }
                     
-                    // Update velocity based on wander angle
+                    // Apply homing behavior for first 3 seconds
+                    if (projectile.homingTimer > 0 && playerSnake && playerSnake.alive) {
+                        projectile.homingTimer -= deltaTime;
+                        
+                        // Calculate angle to player
+                        const targetAngle = Math.atan2(
+                            playerSnake.y - projectile.y,
+                            playerSnake.x - projectile.x
+                        );
+                        
+                        // Smooth angle adjustment (gentle homing)
+                        let angleDiff = targetAngle - projectile.wanderAngle;
+                        // Normalize angle difference to [-PI, PI]
+                        while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
+                        while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
+                        
+                        // Apply gentle turning (0.02 = turning rate)
+                        projectile.wanderAngle += angleDiff * 0.02;
+                    } else {
+                        // After homing period, use wandering movement
+                        projectile.wanderTimer += deltaTime;
+                        if (projectile.wanderTimer > 30) { // Change direction every 0.5 seconds
+                            projectile.wanderAngle += (Math.random() - 0.5) * 0.5;
+                            projectile.wanderTimer = 0;
+                        }
+                    }
+                    
+                    // Update velocity based on current angle
                     const tornadoSpeed = 4;
                     projectile.vx = Math.cos(projectile.wanderAngle) * tornadoSpeed;
                     projectile.vy = Math.sin(projectile.wanderAngle) * tornadoSpeed;
@@ -11212,6 +11242,31 @@
                 if (canDamage) {
                     currentBoss.takeDamage('player_elemental');
                     
+                    // Consume elements from player's bank
+                    if (playerSnake && playerSnake.elements.length > 0) {
+                        // Remove one boss element and one other element
+                        let bossElementRemoved = false;
+                        let otherElementRemoved = false;
+                        
+                        // Create new array without the consumed elements
+                        playerSnake.elements = playerSnake.elements.filter(elemId => {
+                            if (!bossElementRemoved && elemId === bossElementId) {
+                                bossElementRemoved = true;
+                                return false; // Remove this element
+                            }
+                            if (!otherElementRemoved && elemId === otherElementId) {
+                                otherElementRemoved = true;
+                                return false; // Remove this element
+                            }
+                            return true; // Keep this element
+                        });
+                        
+                        // Update element bank display
+                        if (typeof updateElementBank !== 'undefined') {
+                            updateElementBank();
+                        }
+                    }
+                    
                     // Show combo message
                     if (comboFound && otherElementId !== null) {
                         const bossElement = window.elementLoader.elementsById[bossElementId];
@@ -11226,7 +11281,7 @@
                         showMessage('Elemental Resonance!', 'gold', 5000);
                     }
                     
-                    bossDamageCooldown = 120; // 2 second cooldown
+                    bossDamageCooldown = 180; // 3 second cooldown
                     
                     // Create shockwave effect
                     const elementColors = {
@@ -11462,7 +11517,12 @@
         function updateBossFissures(deltaTime) {
             bossFissures = bossFissures.filter(fissure => {
                 // Update fissure state
-                if (fissure.state === 'opening') {
+                if (fissure.state === 'warning') {
+                    fissure.warningDuration -= deltaTime;
+                    if (fissure.warningDuration <= 0) {
+                        fissure.state = 'opening';
+                    }
+                } else if (fissure.state === 'opening') {
                     fissure.radius += fissure.growthSpeed * deltaTime;
                     if (fissure.radius >= fissure.targetRadius) {
                         fissure.radius = fissure.targetRadius;
@@ -11481,8 +11541,8 @@
                     }
                 }
                 
-                // Check collision with player when fissure is open
-                if (fissure.radius > 20 && playerSnake && playerSnake.alive) {
+                // Check collision with player when fissure is open (not during warning)
+                if (fissure.state !== 'warning' && fissure.radius > 20 && playerSnake && playerSnake.alive) {
                     const dx = playerSnake.x - fissure.x;
                     const dy = playerSnake.y - fissure.y;
                     const distance = Math.sqrt(dx * dx + dy * dy);
@@ -11515,9 +11575,24 @@
         function drawBossFissures() {
             bossFissures.forEach(fissure => {
                 const screen = worldToScreen(fissure.x, fissure.y);
-                const radius = fissure.radius * cameraZoom;
                 
                 ctx.save();
+                
+                // Handle warning state - draw dotted circle
+                if (fissure.state === 'warning') {
+                    const warningRadius = fissure.targetRadius * cameraZoom;
+                    ctx.strokeStyle = 'rgba(255, 100, 0, 0.8)';
+                    ctx.lineWidth = 3 * cameraZoom;
+                    ctx.setLineDash([10 * cameraZoom, 10 * cameraZoom]);
+                    ctx.beginPath();
+                    ctx.arc(screen.x, screen.y, warningRadius, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.setLineDash([]); // Reset line dash
+                    ctx.restore();
+                    return; // Skip normal fissure drawing
+                }
+                
+                const radius = fissure.radius * cameraZoom;
                 
                 // Draw dark fissure hole
                 const gradient = ctx.createRadialGradient(
@@ -12453,6 +12528,12 @@
             // Add rewards section
             html += '<div class="rewards">';
             html += '<div class="reward-item highlight">✨ +10,000 Points!</div>';
+            
+            // Add revive earned message for Classic mode
+            if (gameMode === 'classic' && revivesRemaining < 3) {
+                html += '<div class="reward-item highlight">❤️ +1 Revive Earned!</div>';
+            }
+            
             html += '<div class="reward-item">💎 4x Catalyst Gems</div>';
             html += '<div class="reward-item">🌀 2x Void Orbs</div>';
             html += '<div class="reward-item">🔥 16x Boss Elements</div>';
@@ -13137,15 +13218,48 @@
         function handlePermadeath() {
             console.log('[PERMADEATH] Game over in Classic mode');
             
-            // Submit score to leaderboard
+            // Variables for leaderboard rank
+            let dailyRank = null;
+            let isSubmitting = true;
+            
+            // Submit score to leaderboard and get rank
             if (playerSnake && playerSnake.score > 0 && canSubmitScore()) {
-                submitScore();
+                // Submit score and wait for rank
+                const playerName = localStorage.getItem('playerName') || 'Anonymous';
+                const playTime = gameSessionStartTime ? Math.floor((Date.now() - gameSessionStartTime) / 1000) : 0;
+                
+                if (window.supabaseModule && window.supabaseModule.submitScore) {
+                    window.supabaseModule.submitScore(
+                        playerName,
+                        Math.floor(playerSnake.score),
+                        playerDiscoveredElements.size,
+                        playTime,
+                        playerSnake.kills || 0
+                    ).then(result => {
+                        dailyRank = result;
+                        isSubmitting = false;
+                        updateGameOverScreen();
+                    }).catch(() => {
+                        isSubmitting = false;
+                        updateGameOverScreen();
+                    });
+                } else {
+                    isSubmitting = false;
+                }
+            } else {
+                isSubmitting = false;
             }
             
             // Hide respawn overlay
             document.getElementById('respawnOverlay').style.display = 'none';
             
-            // Show game over screen
+            // Calculate time in minutes and seconds
+            const totalSeconds = Math.floor((Date.now() - gameStartTime) / 1000);
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            const timeString = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Show game over screen with SNES style
             const gameOverScreen = document.createElement('div');
             gameOverScreen.id = 'permaDeathScreen';
             gameOverScreen.style.cssText = `
@@ -13154,27 +13268,122 @@
                 left: 0;
                 width: 100%;
                 height: 100%;
-                background: rgba(0, 0, 0, 0.95);
+                background: #000;
                 display: flex;
-                flex-direction: column;
                 justify-content: center;
                 align-items: center;
                 z-index: 10000;
                 font-family: monospace;
-                color: #fff;
+                image-rendering: pixelated;
             `;
             
-            gameOverScreen.innerHTML = `
-                <h1 style="font-size: 48px; color: #e74c3c; margin-bottom: 20px;">GAME OVER</h1>
-                <p style="font-size: 24px; margin-bottom: 10px;">Final Score: ${playerSnake ? playerSnake.score.toLocaleString() : 0}</p>
-                <p style="font-size: 20px; margin-bottom: 10px;">Elements Discovered: ${discoveries.size}</p>
-                <p style="font-size: 20px; margin-bottom: 30px;">Time Survived: ${Math.floor((Date.now() - gameStartTime) / 1000)}s</p>
-                <p style="font-size: 16px; color: #4ecdc4; margin-bottom: 30px;">Score submitted to Classic Mode leaderboard!</p>
-                <button onclick="location.reload()" style="padding: 15px 30px; font-size: 20px; background: #4ecdc4; color: #000; border: none; border-radius: 10px; cursor: pointer;">
-                    New Game
-                </button>
-            `;
+            function updateGameOverScreen() {
+                gameOverScreen.innerHTML = `
+                    <div style="
+                        background: linear-gradient(135deg, rgba(20, 20, 40, 0.98) 0%, rgba(30, 30, 50, 0.95) 100%);
+                        border: 4px solid #4ecdc4;
+                        border-radius: 0;
+                        padding: 40px 50px;
+                        box-shadow: 
+                            0 0 0 2px #000,
+                            0 0 0 6px #2a2a4a,
+                            0 0 30px rgba(78, 205, 196, 0.5);
+                        text-align: center;
+                        position: relative;
+                    ">
+                        <!-- Corner decorations -->
+                        <div style="position: absolute; top: -2px; left: -2px; width: 20px; height: 20px; border-top: 4px solid #FFD700; border-left: 4px solid #FFD700;"></div>
+                        <div style="position: absolute; top: -2px; right: -2px; width: 20px; height: 20px; border-top: 4px solid #FFD700; border-right: 4px solid #FFD700;"></div>
+                        <div style="position: absolute; bottom: -2px; left: -2px; width: 20px; height: 20px; border-bottom: 4px solid #FFD700; border-left: 4px solid #FFD700;"></div>
+                        <div style="position: absolute; bottom: -2px; right: -2px; width: 20px; height: 20px; border-bottom: 4px solid #FFD700; border-right: 4px solid #FFD700;"></div>
+                        
+                        <h1 style="
+                            font-size: 48px; 
+                            color: #e74c3c; 
+                            margin-bottom: 30px; 
+                            text-shadow: 
+                                2px 2px 0 #8b0000,
+                                4px 4px 0 #000,
+                                4px 4px 10px rgba(231, 76, 60, 0.5);
+                            letter-spacing: 4px;
+                        ">GAME OVER</h1>
+                        
+                        <div style="
+                            background: rgba(0, 0, 0, 0.5);
+                            border: 2px solid #4ecdc4;
+                            padding: 20px;
+                            margin-bottom: 25px;
+                            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+                        ">
+                            <div style="margin-bottom: 15px;">
+                                <span style="color: #888; font-size: 14px; text-transform: uppercase;">Final Score</span>
+                                <div style="font-size: 32px; color: #FFD700; text-shadow: 2px 2px 0 #000;">
+                                    ${playerSnake ? playerSnake.score.toLocaleString() : 0}
+                                </div>
+                            </div>
+                            
+                            <div style="display: flex; justify-content: space-around; margin-top: 20px;">
+                                <div>
+                                    <span style="color: #888; font-size: 12px; text-transform: uppercase;">Elements</span>
+                                    <div style="font-size: 20px; color: #4ecdc4;">
+                                        ${playerDiscoveredElements ? playerDiscoveredElements.size : 0}
+                                    </div>
+                                </div>
+                                <div>
+                                    <span style="color: #888; font-size: 12px; text-transform: uppercase;">Time</span>
+                                    <div style="font-size: 20px; color: #4ecdc4;">
+                                        ${timeString}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="
+                            font-size: 16px; 
+                            color: #4ecdc4; 
+                            margin-bottom: 30px;
+                            padding: 10px;
+                            background: rgba(78, 205, 196, 0.1);
+                            border: 1px solid rgba(78, 205, 196, 0.3);
+                        ">
+                            ${isSubmitting ? 
+                                'Submitting score...' : 
+                                (dailyRank ? 
+                                    `🏆 Daily Leaderboard Rank: #${dailyRank}` : 
+                                    'Score submitted to leaderboard!'
+                                )
+                            }
+                        </div>
+                        
+                        <button onclick="location.reload()" style="
+                            padding: 15px 40px;
+                            font-size: 20px;
+                            background: #4ecdc4;
+                            color: #000;
+                            border: 3px solid #2a8a86;
+                            box-shadow: 
+                                0 4px 0 #2a8a86,
+                                0 8px 10px rgba(0, 0, 0, 0.3);
+                            cursor: pointer;
+                            text-transform: uppercase;
+                            letter-spacing: 2px;
+                            font-weight: bold;
+                            transition: all 0.1s;
+                            position: relative;
+                            top: 0;
+                        "
+                        onmousedown="this.style.top='4px'; this.style.boxShadow='0 0 0 #2a8a86, 0 4px 10px rgba(0, 0, 0, 0.3)';"
+                        onmouseup="this.style.top='0'; this.style.boxShadow='0 4px 0 #2a8a86, 0 8px 10px rgba(0, 0, 0, 0.3)';"
+                        onmouseleave="this.style.top='0'; this.style.boxShadow='0 4px 0 #2a8a86, 0 8px 10px rgba(0, 0, 0, 0.3)';"
+                        >
+                            New Game
+                        </button>
+                    </div>
+                `;
+            }
             
+            // Initial render
+            updateGameOverScreen();
             document.body.appendChild(gameOverScreen);
             
             // Stop the game
