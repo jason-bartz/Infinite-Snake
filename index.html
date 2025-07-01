@@ -1321,7 +1321,7 @@
             }
         }
         
-        /* Player Info Box (Bottom Left) - SNES Style */
+        /* Player Info Box (Bottom Left for Desktop, Top for Mobile) - SNES Style */
         .player-info-box {
             position: absolute;
             bottom: 20px;
@@ -1394,7 +1394,7 @@
             font-size: 7px;
         }
         
-        /* Leaderboard (Bottom Right) - SNES Style */
+        /* Leaderboard (Bottom Right for Desktop, Top for Mobile) - SNES Style */
         .leaderboard-box {
             position: absolute;
             bottom: 20px;
@@ -2072,6 +2072,7 @@
             body.mobile .player-info-box,
             body.mobile .leaderboard-box {
                 /* Default mobile position - will be overridden by orientation-specific rules */
+                bottom: unset !important; /* Ensure desktop bottom positioning is removed */
             }
             
             .discovery-feed {
@@ -4308,16 +4309,7 @@
             }
         }
         
-        /* Landscape adjustments */
-        @media (max-width: 1024px) and (orientation: landscape) {
-            body.mobile .player-info-box {
-                top: 60px !important;
-            }
-            
-            body.mobile .leaderboard-box {
-                top: 60px !important;
-            }
-        }
+        /* Landscape adjustments - removed hardcoded positions that were overriding CSS variables */
     </style>
     
     <script>
@@ -14860,8 +14852,12 @@
                         // Landscape positions - UI at top
                         root.style.setProperty('--mobile-scorecard-top', '10px');
                         root.style.setProperty('--mobile-scorecard-left', '10px');
+                        root.style.setProperty('--mobile-scorecard-bottom', 'unset');
+                        root.style.setProperty('--mobile-scorecard-right', 'auto');
                         root.style.setProperty('--mobile-leaderboard-top', '10px');
                         root.style.setProperty('--mobile-leaderboard-right', '10px');
+                        root.style.setProperty('--mobile-leaderboard-bottom', 'unset');
+                        root.style.setProperty('--mobile-leaderboard-left', 'auto');
                         root.style.setProperty('--mobile-boost-bar-height', '20px');
                         root.style.setProperty('--mobile-discovery-scale', '0.75');
                         root.style.setProperty('--mobile-discovery-opacity', '0.6');
@@ -14869,8 +14865,12 @@
                         // Portrait positions - UI at top with more spacing
                         root.style.setProperty('--mobile-scorecard-top', '50px');
                         root.style.setProperty('--mobile-scorecard-left', '10px');
+                        root.style.setProperty('--mobile-scorecard-bottom', 'unset');
+                        root.style.setProperty('--mobile-scorecard-right', 'auto');
                         root.style.setProperty('--mobile-leaderboard-top', '50px');
                         root.style.setProperty('--mobile-leaderboard-right', '10px');
+                        root.style.setProperty('--mobile-leaderboard-bottom', 'unset');
+                        root.style.setProperty('--mobile-leaderboard-left', 'auto');
                         root.style.setProperty('--mobile-boost-bar-height', '18px');
                         root.style.setProperty('--mobile-discovery-scale', '0.7');
                         root.style.setProperty('--mobile-discovery-opacity', '0.5');
