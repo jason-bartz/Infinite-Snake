@@ -12690,10 +12690,184 @@
             }
         }
         
+        function drawBorders() {
+            // Save context state
+            ctx.save();
+            
+            // Ensure borders are fully opaque
+            ctx.globalAlpha = 1;
+            
+            // Draw world borders with subtle pixel grid
+            const borderThickness = isMobile ? 120 : 60; // Much thicker on mobile
+            const leftBorder = (-camera.x) * cameraZoom + canvas.width / 2;
+            const rightBorder = (WORLD_SIZE - camera.x) * cameraZoom + canvas.width / 2;
+            const topBorder = (-camera.y) * cameraZoom + canvas.height / 2;
+            const bottomBorder = (WORLD_SIZE - camera.y) * cameraZoom + canvas.height / 2;
+            
+            // Pulsating effect for barriers
+            const pulsePhase = Math.floor((animationTime * 2) % 4);
+            const pixelSize = isMobile ? 16 : 8; // Larger pixels on mobile for visibility
+            const warningLineThickness = isMobile ? 12 : 6; // Thicker warning lines on mobile
+            
+            // Left border barrier
+            if (leftBorder > -borderThickness) {
+                const borderWidth = Math.min(borderThickness, leftBorder);
+                if (borderWidth > 0) {
+                    if (isMobile) {
+                        // Solid gradient for mobile with increased opacity
+                        const gradient = ctx.createLinearGradient(0, 0, borderWidth, 0);
+                        gradient.addColorStop(0, 'rgba(128, 64, 255, 0.9)');
+                        gradient.addColorStop(0.7, 'rgba(128, 64, 255, 0.6)');
+                        gradient.addColorStop(1, 'rgba(128, 64, 255, 0.1)');
+                        ctx.fillStyle = gradient;
+                        ctx.fillRect(0, 0, borderWidth, canvas.height);
+                        
+                        // Solid warning line
+                        ctx.fillStyle = '#8844FF';
+                        ctx.fillRect(Math.max(2, leftBorder - warningLineThickness/2), 0, warningLineThickness, canvas.height);
+                    } else {
+                        // Draw subtle grid pattern for desktop
+                        for (let y = 0; y < canvas.height; y += pixelSize * 2) {
+                            for (let x = 0; x < borderWidth; x += pixelSize * 2) {
+                                const fadeAlpha = 1 - (x / borderThickness);
+                                const pulse = (pulsePhase === 0 || pulsePhase === 2) ? 0.8 : 0.4;
+                                ctx.fillStyle = `rgba(64, 32, 128, ${fadeAlpha * pulse})`;
+                                ctx.fillRect(x, y, pixelSize, pixelSize);
+                            }
+                        }
+                        
+                        // Warning line
+                        ctx.fillStyle = '#6633CC';
+                        const lineX = Math.max(10, leftBorder);
+                        for (let y = 0; y < canvas.height; y += pixelSize * 4) {
+                            ctx.fillRect(lineX - 2, y, 4, pixelSize * 2);
+                        }
+                    }
+                }
+            }
+            
+            // Right border barrier
+            if (rightBorder < canvas.width + borderThickness) {
+                const startX = Math.max(0, rightBorder - borderThickness);
+                const borderWidth = canvas.width - startX;
+                if (borderWidth > 0) {
+                    if (isMobile) {
+                        // Solid gradient for mobile
+                        const gradient = ctx.createLinearGradient(startX, 0, canvas.width, 0);
+                        gradient.addColorStop(0, 'rgba(128, 64, 255, 0.1)');
+                        gradient.addColorStop(0.3, 'rgba(128, 64, 255, 0.6)');
+                        gradient.addColorStop(1, 'rgba(128, 64, 255, 0.9)');
+                        ctx.fillStyle = gradient;
+                        ctx.fillRect(startX, 0, borderWidth, canvas.height);
+                        
+                        // Solid warning line
+                        ctx.fillStyle = '#8844FF';
+                        ctx.fillRect(Math.min(canvas.width - warningLineThickness - 2, rightBorder - warningLineThickness/2), 0, warningLineThickness, canvas.height);
+                    } else {
+                        // Draw subtle grid pattern for desktop
+                        for (let y = 0; y < canvas.height; y += pixelSize * 2) {
+                            for (let x = Math.max(rightBorder - borderThickness, rightBorder); x < canvas.width; x += pixelSize * 2) {
+                                const fadeAlpha = 1 - ((canvas.width - x) / borderThickness);
+                                const pulse = (pulsePhase === 0 || pulsePhase === 2) ? 0.8 : 0.4;
+                                ctx.fillStyle = `rgba(64, 32, 128, ${fadeAlpha * pulse})`;
+                                ctx.fillRect(x, y, pixelSize, pixelSize);
+                            }
+                        }
+                        
+                        // Warning line
+                        ctx.fillStyle = '#6633CC';
+                        for (let y = 0; y < canvas.height; y += pixelSize * 4) {
+                            ctx.fillRect(rightBorder - 2, y, 4, pixelSize * 2);
+                        }
+                    }
+                }
+            }
+            
+            // Top border barrier
+            if (topBorder > -borderThickness) {
+                const borderHeight = Math.min(borderThickness, topBorder);
+                if (borderHeight > 0) {
+                    if (isMobile) {
+                        // Solid gradient for mobile
+                        const gradient = ctx.createLinearGradient(0, 0, 0, borderHeight);
+                        gradient.addColorStop(0, 'rgba(128, 64, 255, 0.9)');
+                        gradient.addColorStop(0.7, 'rgba(128, 64, 255, 0.6)');
+                        gradient.addColorStop(1, 'rgba(128, 64, 255, 0.1)');
+                        ctx.fillStyle = gradient;
+                        ctx.fillRect(0, 0, canvas.width, borderHeight);
+                        
+                        // Solid warning line
+                        ctx.fillStyle = '#8844FF';
+                        ctx.fillRect(0, Math.max(2, topBorder - warningLineThickness/2), canvas.width, warningLineThickness);
+                    } else {
+                        // Draw subtle grid pattern for desktop
+                        for (let y = 0; y < borderHeight; y += pixelSize * 2) {
+                            for (let x = 0; x < canvas.width; x += pixelSize * 2) {
+                                const fadeAlpha = 1 - (y / borderThickness);
+                                const pulse = (pulsePhase === 0 || pulsePhase === 2) ? 0.8 : 0.4;
+                                ctx.fillStyle = `rgba(64, 32, 128, ${fadeAlpha * pulse})`;
+                                ctx.fillRect(x, y, pixelSize, pixelSize);
+                            }
+                        }
+                        
+                        // Warning line
+                        ctx.fillStyle = '#6633CC';
+                        const lineY = Math.max(10, topBorder);
+                        for (let x = 0; x < canvas.width; x += pixelSize * 4) {
+                            ctx.fillRect(x, lineY - 2, pixelSize * 2, 4);
+                        }
+                    }
+                }
+            }
+            
+            // Bottom border barrier
+            if (bottomBorder < canvas.height + borderThickness) {
+                const startY = Math.max(0, bottomBorder - borderThickness);
+                const borderHeight = canvas.height - startY;
+                if (borderHeight > 0) {
+                    if (isMobile) {
+                        // Solid gradient for mobile
+                        const gradient = ctx.createLinearGradient(0, startY, 0, canvas.height);
+                        gradient.addColorStop(0, 'rgba(128, 64, 255, 0.1)');
+                        gradient.addColorStop(0.3, 'rgba(128, 64, 255, 0.6)');
+                        gradient.addColorStop(1, 'rgba(128, 64, 255, 0.9)');
+                        ctx.fillStyle = gradient;
+                        ctx.fillRect(0, startY, canvas.width, borderHeight);
+                        
+                        // Solid warning line
+                        ctx.fillStyle = '#8844FF';
+                        ctx.fillRect(0, Math.min(canvas.height - warningLineThickness - 2, bottomBorder - warningLineThickness/2), canvas.width, warningLineThickness);
+                    } else {
+                        // Draw subtle grid pattern for desktop
+                        for (let y = Math.max(bottomBorder - borderThickness, bottomBorder); y < canvas.height; y += pixelSize * 2) {
+                            for (let x = 0; x < canvas.width; x += pixelSize * 2) {
+                                const fadeAlpha = 1 - ((canvas.height - y) / borderThickness);
+                                const pulse = (pulsePhase === 0 || pulsePhase === 2) ? 0.8 : 0.4;
+                                ctx.fillStyle = `rgba(64, 32, 128, ${fadeAlpha * pulse})`;
+                                ctx.fillRect(x, y, pixelSize, pixelSize);
+                            }
+                        }
+                        
+                        // Warning line
+                        ctx.fillStyle = '#6633CC';
+                        for (let x = 0; x < canvas.width; x += pixelSize * 4) {
+                            ctx.fillRect(x, bottomBorder - 2, pixelSize * 2, 4);
+                        }
+                    }
+                }
+            }
+            
+            // Restore context state
+            ctx.restore();
+        }
+        
         function drawBackground() {
             // Deep space background
             ctx.fillStyle = '#000011';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // ALWAYS draw borders first (for both mobile and desktop)
+            drawBorders();
             
             // Skip complex background on mobile for better performance
             if (isMobile) {
@@ -12796,154 +12970,6 @@
             // Draw shooting stars (desktop only)
             if (!isMobile) {
                 shootingStars.forEach(star => star.draw());
-            }
-            
-            // Draw world borders with subtle pixel grid
-            const borderThickness = isMobile ? 120 : 60; // Much thicker on mobile
-            const leftBorder = (-camera.x) * cameraZoom + canvas.width / 2;
-            const rightBorder = (WORLD_SIZE - camera.x) * cameraZoom + canvas.width / 2;
-            const topBorder = (-camera.y) * cameraZoom + canvas.height / 2;
-            const bottomBorder = (WORLD_SIZE - camera.y) * cameraZoom + canvas.height / 2;
-            
-            
-            // Pulsating effect for barriers
-            const pulsePhase = Math.floor((animationTime * 2) % 4);
-            const pixelSize = isMobile ? 16 : 8; // Larger pixels on mobile for visibility
-            
-            // Left border barrier
-            if (leftBorder > -borderThickness) {
-                if (isMobile) {
-                    // Solid gradient for mobile with increased opacity
-                    const gradient = ctx.createLinearGradient(0, 0, Math.min(borderThickness, leftBorder), 0);
-                    gradient.addColorStop(0, 'rgba(128, 64, 255, 0.9)');
-                    gradient.addColorStop(0.7, 'rgba(128, 64, 255, 0.6)');
-                    gradient.addColorStop(1, 'rgba(128, 64, 255, 0.1)');
-                    ctx.fillStyle = gradient;
-                    ctx.fillRect(0, 0, Math.min(borderThickness, leftBorder), canvas.height);
-                    
-                    // Solid warning line
-                    ctx.fillStyle = '#8844FF';
-                    ctx.fillRect(Math.max(2, leftBorder - 3), 0, 6, canvas.height);
-                } else {
-                    // Draw subtle grid pattern for desktop
-                    for (let y = 0; y < canvas.height; y += pixelSize * 2) {
-                        for (let x = 0; x < Math.min(borderThickness, leftBorder); x += pixelSize * 2) {
-                            const fadeAlpha = 1 - (x / borderThickness);
-                            const pulse = (pulsePhase === 0 || pulsePhase === 2) ? 0.8 : 0.4;
-                            ctx.fillStyle = `rgba(64, 32, 128, ${fadeAlpha * pulse})`;
-                            ctx.fillRect(x, y, pixelSize, pixelSize);
-                        }
-                    }
-                    
-                    // Warning line
-                    ctx.fillStyle = '#6633CC';
-                    const lineX = Math.max(10, leftBorder);
-                    for (let y = 0; y < canvas.height; y += pixelSize * 4) {
-                        ctx.fillRect(lineX - 2, y, 4, pixelSize * 2);
-                    }
-                }
-            }
-            
-            // Right border barrier
-            if (rightBorder < canvas.width + borderThickness) {
-                if (isMobile) {
-                    // Solid gradient for mobile
-                    const startX = Math.max(0, rightBorder - borderThickness);
-                    const gradient = ctx.createLinearGradient(startX, 0, canvas.width, 0);
-                    gradient.addColorStop(0, 'rgba(128, 64, 255, 0.1)');
-                    gradient.addColorStop(0.3, 'rgba(128, 64, 255, 0.6)');
-                    gradient.addColorStop(1, 'rgba(128, 64, 255, 0.9)');
-                    ctx.fillStyle = gradient;
-                    ctx.fillRect(startX, 0, canvas.width - startX, canvas.height);
-                    
-                    // Solid warning line
-                    ctx.fillStyle = '#8844FF';
-                    ctx.fillRect(Math.min(canvas.width - 8, rightBorder), 0, 6, canvas.height);
-                } else {
-                    // Draw subtle grid pattern for desktop
-                    for (let y = 0; y < canvas.height; y += pixelSize * 2) {
-                        for (let x = Math.max(rightBorder - borderThickness, rightBorder); x < canvas.width; x += pixelSize * 2) {
-                            const fadeAlpha = 1 - ((canvas.width - x) / borderThickness);
-                            const pulse = (pulsePhase === 0 || pulsePhase === 2) ? 0.8 : 0.4;
-                            ctx.fillStyle = `rgba(64, 32, 128, ${fadeAlpha * pulse})`;
-                            ctx.fillRect(x, y, pixelSize, pixelSize);
-                        }
-                    }
-                    
-                    // Warning line
-                    ctx.fillStyle = '#6633CC';
-                    for (let y = 0; y < canvas.height; y += pixelSize * 4) {
-                        ctx.fillRect(rightBorder - 2, y, 4, pixelSize * 2);
-                    }
-                }
-            }
-            
-            // Top border barrier
-            if (topBorder > -borderThickness) {
-                if (isMobile) {
-                    // Solid gradient for mobile
-                    const gradient = ctx.createLinearGradient(0, 0, 0, Math.min(borderThickness, topBorder));
-                    gradient.addColorStop(0, 'rgba(128, 64, 255, 0.9)');
-                    gradient.addColorStop(0.7, 'rgba(128, 64, 255, 0.6)');
-                    gradient.addColorStop(1, 'rgba(128, 64, 255, 0.1)');
-                    ctx.fillStyle = gradient;
-                    ctx.fillRect(0, 0, canvas.width, Math.min(borderThickness, topBorder));
-                    
-                    // Solid warning line
-                    ctx.fillStyle = '#8844FF';
-                    ctx.fillRect(0, Math.max(2, topBorder - 3), canvas.width, 6);
-                } else {
-                    // Draw subtle grid pattern for desktop
-                    for (let y = 0; y < Math.min(borderThickness, topBorder); y += pixelSize * 2) {
-                        for (let x = 0; x < canvas.width; x += pixelSize * 2) {
-                            const fadeAlpha = 1 - (y / borderThickness);
-                            const pulse = (pulsePhase === 0 || pulsePhase === 2) ? 0.8 : 0.4;
-                            ctx.fillStyle = `rgba(64, 32, 128, ${fadeAlpha * pulse})`;
-                            ctx.fillRect(x, y, pixelSize, pixelSize);
-                        }
-                    }
-                    
-                    // Warning line
-                    ctx.fillStyle = '#6633CC';
-                    const lineY = Math.max(10, topBorder);
-                    for (let x = 0; x < canvas.width; x += pixelSize * 4) {
-                        ctx.fillRect(x, lineY - 2, pixelSize * 2, 4);
-                    }
-                }
-            }
-            
-            // Bottom border barrier
-            if (bottomBorder < canvas.height + borderThickness) {
-                if (isMobile) {
-                    // Solid gradient for mobile
-                    const startY = Math.max(0, bottomBorder - borderThickness);
-                    const gradient = ctx.createLinearGradient(0, startY, 0, canvas.height);
-                    gradient.addColorStop(0, 'rgba(128, 64, 255, 0.1)');
-                    gradient.addColorStop(0.3, 'rgba(128, 64, 255, 0.6)');
-                    gradient.addColorStop(1, 'rgba(128, 64, 255, 0.9)');
-                    ctx.fillStyle = gradient;
-                    ctx.fillRect(0, startY, canvas.width, canvas.height - startY);
-                    
-                    // Solid warning line
-                    ctx.fillStyle = '#8844FF';
-                    ctx.fillRect(0, Math.min(canvas.height - 8, bottomBorder), canvas.width, 6);
-                } else {
-                    // Draw subtle grid pattern for desktop
-                    for (let y = Math.max(bottomBorder - borderThickness, bottomBorder); y < canvas.height; y += pixelSize * 2) {
-                        for (let x = 0; x < canvas.width; x += pixelSize * 2) {
-                            const fadeAlpha = 1 - ((canvas.height - y) / borderThickness);
-                            const pulse = (pulsePhase === 0 || pulsePhase === 2) ? 0.8 : 0.4;
-                            ctx.fillStyle = `rgba(64, 32, 128, ${fadeAlpha * pulse})`;
-                            ctx.fillRect(x, y, pixelSize, pixelSize);
-                        }
-                    }
-                    
-                    // Warning line
-                    ctx.fillStyle = '#6633CC';
-                    for (let x = 0; x < canvas.width; x += pixelSize * 4) {
-                        ctx.fillRect(x, bottomBorder - 2, pixelSize * 2, 4);
-                    }
-                }
             }
             
             // Add scanline effect for retro monitor feel (desktop only)
