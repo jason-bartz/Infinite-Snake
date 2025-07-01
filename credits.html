@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <title>Credits - Infinite Snake | Music & Sound Attribution</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Credits and attribution for music and sound effects used in Infinite Snake." />
+    <meta property="og:title" content="Credits - Infinite Snake" />
+    <meta property="og:description" content="Credits and attribution for music and sound effects used in Infinite Snake." />
+    <meta property="og:image" content="https://infinitesnake.io/assets/snake-logo.png" />
+    <meta property="og:url" content="https://infinitesnake.io/credits" />
+    
+    <!-- Favicons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --snes-primary-blue: #2038EC;
+            --snes-dark-blue: #000080;
+            --snes-light-blue: #5878F8;
+            --snes-cosmic-purple: #7828F8;
+            --snes-cosmic-pink: #F828F8;
+            --snes-gold: #F8D800;
+            --snes-red: #F83800;
+            --snes-green: #00E800;
+            --snes-white: #F8F8F8;
+            --snes-black: #000000;
+            --snes-gray: #A8A8A8;
+            --snes-dark-purple: #4800A8;
+            --snes-cosmic-teal: #00F8F8;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000011;
+            color: var(--snes-white);
+            font-family: 'Press Start 2P', monospace;
+            overflow-x: hidden;
+            image-rendering: pixelated;
+            -webkit-font-smoothing: none;
+            -moz-osx-font-smoothing: none;
+        }
+        
+        /* Animated starfield background */
+        #stars-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+        
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            margin: 60px auto 0;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            background: var(--snes-black);
+            border: 4px solid var(--snes-gold);
+            box-shadow: 4px 4px 0 rgba(0,0,0,0.5);
+            position: relative;
+        }
+        
+        h1 {
+            font-size: 24px;
+            color: var(--snes-gold);
+            margin: 0 0 15px 0;
+            text-shadow: 2px 2px 0 var(--snes-black);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        
+        .subtitle {
+            color: var(--snes-gray);
+            font-size: 10px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        
+        .back-button {
+            display: inline-block;
+            background: var(--snes-cosmic-purple);
+            border: 4px solid var(--snes-white);
+            color: var(--snes-white);
+            padding: 10px 20px;
+            font-size: 10px;
+            text-decoration: none;
+            box-shadow: 
+                inset 2px 2px 0 var(--snes-cosmic-pink),
+                inset -2px -2px 0 var(--snes-dark-purple),
+                4px 4px 0 rgba(0,0,0,0.5);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: none;
+            margin-bottom: 20px;
+        }
+        
+        .back-button:hover {
+            background: var(--snes-cosmic-pink);
+            transform: translate(2px, 2px);
+            box-shadow: 
+                inset 2px 2px 0 #FFA8FF,
+                inset -2px -2px 0 var(--snes-dark-purple),
+                2px 2px 0 rgba(0,0,0,0.5);
+        }
+        
+        .back-button:active {
+            transform: translate(4px, 4px);
+            box-shadow: none;
+        }
+        
+        .section {
+            background: rgba(0, 0, 0, 0.8);
+            border: 4px solid var(--snes-cosmic-purple);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 
+                inset -2px -2px 0 rgba(120, 40, 248, 0.5),
+                inset 2px 2px 0 rgba(0, 0, 0, 0.8),
+                4px 4px 0 rgba(0,0,0,0.5);
+        }
+        
+        h2 {
+            font-size: 16px;
+            color: var(--snes-cosmic-teal);
+            margin: 0 0 20px 0;
+            text-shadow: 2px 2px 0 var(--snes-black);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        
+        h3 {
+            font-size: 12px;
+            color: var(--snes-gold);
+            margin: 20px 0 15px 0;
+            text-shadow: 1px 1px 0 var(--snes-black);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        
+        h4 {
+            font-size: 10px;
+            color: var(--snes-green);
+            margin: 15px 0 10px 0;
+            text-transform: uppercase;
+        }
+        
+        p, li {
+            font-size: 8px;
+            line-height: 16px;
+            color: var(--snes-white);
+            margin: 10px 0;
+        }
+        
+        ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        li {
+            margin-bottom: 15px;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        li:before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: var(--snes-cosmic-teal);
+        }
+        
+        a {
+            color: var(--snes-cosmic-teal);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        
+        a:hover {
+            color: var(--snes-light-blue);
+            text-decoration: underline;
+        }
+        
+        .track-info {
+            background: rgba(40, 40, 60, 0.5);
+            border: 2px solid var(--snes-dark-purple);
+            padding: 10px;
+            margin: 10px 0;
+        }
+        
+        .producer {
+            color: var(--snes-gray);
+            font-size: 8px;
+        }
+        
+        .license {
+            color: var(--snes-cosmic-pink);
+            font-size: 8px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 18px;
+            }
+            
+            h2 {
+                font-size: 14px;
+            }
+            
+            .back-button {
+                padding: 8px 16px;
+                font-size: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="stars-canvas"></canvas>
+    
+    <!-- Navigation Bar -->
+    <div style="position: absolute; top: 20px; left: 20px; z-index: 10;">
+        <a href="https://discord.gg/a6X4W7QbkG" target="_blank" style="color: #4ecdc4; text-decoration: none; font-family: 'Press Start 2P', monospace; font-size: 10px;">💬 Join the Discord Server</a>
+    </div>
+    <div style="position: absolute; top: 20px; right: 20px; z-index: 10;">
+        <a href="/how-to-play.html" style="color: #4ecdc4; text-decoration: none; font-family: 'Press Start 2P', monospace; font-size: 10px; margin-right: 20px;">📖 How to Play</a>
+        <a href="/leaderboard.html" style="color: #4ecdc4; text-decoration: none; font-family: 'Press Start 2P', monospace; font-size: 10px;">🏆 Leaderboard</a>
+    </div>
+    
+    <div class="container">
+        <a href="/" class="back-button">← Back to Game</a>
+        
+        <header>
+            <h1>Credits</h1>
+            <p class="subtitle">Music & Sound Attribution</p>
+        </header>
+        
+        <div class="section">
+            <h2>Background Music</h2>
+            <p>All music tracks produced by <strong>ZapSplat</strong> and licensed under the <span class="license">ZapSplat Standard License</span>.</p>
+            
+            <h3>Track List</h3>
+            
+            <div class="track-info">
+                <h4>1. Bright White Lights</h4>
+                <p>A driving, pumping tech house track with bright electronic melodies and pumping synths</p>
+                <p class="producer">Producer: ZapSplat</p>
+                <p><a href="https://www.zapsplat.com/music/bright-white-lights-a-driving-pumping-tech-house-track-with-bright-electronic-melodies-and-pumping-synths/" target="_blank">Source →</a></p>
+            </div>
+            
+            <div class="track-info">
+                <h4>2. Last Ones Standing</h4>
+                <p>Atmospheric tech house music with synth melody, electronic drums and warm chords</p>
+                <p class="producer">Producer: ZapSplat</p>
+                <p><a href="https://www.zapsplat.com/music/last-ones-standing-atmospheric-tech-house-music-with-synth-melody-electronic-drums-and-warm-chords/" target="_blank">Source →</a></p>
+            </div>
+            
+            <div class="track-info">
+                <h4>3. Good Times</h4>
+                <p>Uplifting, positive house with a pumping 4/4 beat, electric piano chords, warm synth pads and a happy, bright piano melody</p>
+                <p class="producer">Producer: ZapSplat</p>
+                <p><a href="https://www.zapsplat.com/music/good-times-uplifting-positive-house-with-a-pumping-4-4-beat-electric-piano-chords-warm-synth-pads-and-a-happy-bright-piano-melody/" target="_blank">Source →</a></p>
+            </div>
+            
+            <div class="track-info">
+                <h4>4. Summer Haze</h4>
+                <p>Slow, chill-out house track with a modern, pop feel, warm piano chords underpin the track with warm pads and a repetitive synth arpeggio</p>
+                <p class="producer">Producer: ZapSplat</p>
+                <p><a href="https://www.zapsplat.com/music/summer-haze-slow-chill-out-house-track-with-a-modern-pop-feel-warm-piano-chords-underpin-the-track-with-warm-pads-and-a-repetitive-synth-arpeggio/" target="_blank">Source →</a></p>
+            </div>
+            
+            <div class="track-info">
+                <h4>5. On The Up</h4>
+                <p>Positive, uplifting, warm and funky pop driven by bright, fun piano, warm pads, funky bass and a bright synth lead</p>
+                <p class="producer">Producer: ZapSplat</p>
+                <p><a href="https://www.zapsplat.com/music/on-the-up-positive-uplifting-warm-and-funky-pop-driven-by-bright-fun-piano-warm-pads-funky-bass-and-a-bright-synth-lead/" target="_blank">Source →</a></p>
+            </div>
+            
+            <div class="track-info">
+                <h4>6. Headliner</h4>
+                <p>Euphoric trance, house, bright synth arpeggio loop and drums lead into an uplifting euphoric chorus</p>
+                <p class="producer">Producer: ZapSplat</p>
+                <p><a href="https://www.zapsplat.com/music/headliner-euphoric-trance-house-bright-synth-arpeggio-loop-and-drums-lead-into-an-uplifting-euphoric-chorus/" target="_blank">Source →</a></p>
+            </div>
+            
+            <h3>Boss Battle Music</h3>
+            
+            <div class="track-info">
+                <h4>Boss Game Music Track</h4>
+                <p>Game music – repetitive dark dramatic action music bed, pounding drums and a chugging bass</p>
+                <p class="producer">Producer: ZapSplat</p>
+                <p><a href="https://www.zapsplat.com/music/game-music-repetitive-dark-dramatic-action-music-bed-pounding-drums-and-a-chugging-bass/" target="_blank">Source →</a></p>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>Sound Effects</h2>
+            <p>All sound effects licensed under the <span class="license">ZapSplat Standard License</span>.</p>
+            
+            <h3>Game Sound Effects</h3>
+            
+            <div class="track-info">
+                <h4>Snake Death - Explosion</h4>
+                <p>Cinematic fire impact, burst, flame ignite, magic fire hit</p>
+                <p class="producer">Producer: PMSFX</p>
+                <p><a href="https://www.zapsplat.com/music/cinematic-fire-impact-burst-flame-ignite-magic-fire-hit-version-2/" target="_blank">Source →</a></p>
+            </div>
+            
+            <div class="track-info">
+                <h4>Void Orb</h4>
+                <p>Spell effect</p>
+                <p class="producer">Producer: ZapSplat</p>
+                <p><a href="https://www.zapsplat.com/page/9/?s=spell" target="_blank">Source →</a></p>
+            </div>
+            
+            <div class="track-info">
+                <h4>Alchemy Eye</h4>
+                <p>Magic fantasy spell magical sci-fi fiction flames magma fire</p>
+                <p class="producer">Producer: Sound Spark LLC</p>
+                <p><a href="https://www.zapsplat.com/music/magic-fantasy-spell-magical-sci-fi-fiction-flames-magma-fire-11/" target="_blank">Source →</a></p>
+            </div>
+            
+            <div class="track-info">
+                <h4>Speed Boost</h4>
+                <p>Magic burst effect</p>
+                <p class="producer">Producer: ZapSplat</p>
+                <p><a href="https://www.zapsplat.com/page/2/?s=magic+burst" target="_blank">Source →</a></p>
+            </div>
+            
+            <div class="track-info">
+                <h4>Catalyst Gem</h4>
+                <p>Energy effect</p>
+                <p class="producer">Producer: ZapSplat</p>
+                <p><a href="https://www.zapsplat.com/page/3/?s=energy" target="_blank">Source →</a></p>
+            </div>
+            
+            <div class="track-info">
+                <h4>Snake Eat</h4>
+                <p>Game sound, 8-bit blip, very short beep</p>
+                <p class="producer">Producer: ZapSplat</p>
+                <p><a href="https://www.zapsplat.com/?s=beep" target="_blank">Source →</a></p>
+            </div>
+            
+            <h3>Boss & Combat Sounds</h3>
+            
+            <div class="track-info">
+                <h4>Boss Intro Tone</h4>
+                <p>Retro 8-bit arcade style game sound, low pitched melody</p>
+                <p class="producer">Producer: ZapSplat</p>
+                <p><a href="https://www.zapsplat.com/music/retro-8-bit-arcade-style-game-sound-low-pitched-melody-1/" target="_blank">Source →</a></p>
+            </div>
+            
+            <div class="track-info">
+                <h4>Boss Death</h4>
+                <p>Designed explosion with shockwave</p>
+                <p class="producer">Producer: ZapSplat</p>
+                <p><a href="https://www.zapsplat.com/music/designed-explosion-with-shockwave-2/" target="_blank">Source →</a></p>
+            </div>
+            
+            <div class="track-info">
+                <h4>Snake Death</h4>
+                <p>Science fiction, big powerful explosion</p>
+                <p class="producer">Producer: ZapSplat</p>
+                <p><a href="https://www.zapsplat.com/music/science-fiction-big-powerful-explosion-1/" target="_blank">Source →</a></p>
+            </div>
+            
+            <div class="track-info">
+                <h4>Player Death</h4>
+                <p>Game sound, retro explode, boom, short</p>
+                <p class="producer">Producer: ZapSplat</p>
+                <p><a href="https://www.zapsplat.com/music/game-sound-retro-explode-boom-short/" target="_blank">Source →</a></p>
+            </div>
+            
+            <h3>Boss Voice Effects</h3>
+            
+            <div class="track-info">
+                <h4>Ossesus Laugh</h4>
+                <p>Demon or evil monster, laugh</p>
+                <p class="producer">Producer: ZapSplat</p>
+                <p><a href="https://www.zapsplat.com/music/demon-or-evil-monster-laugh-version-3/" target="_blank">Source →</a></p>
+            </div>
+            
+            <div class="track-info">
+                <h4>Abyssos Laugh</h4>
+                <p>Demon or evil monster, long medium growl</p>
+                <p class="producer">Producer: ZapSplat</p>
+                <p><a href="https://www.zapsplat.com/music/demon-or-evil-monster-long-medium-growl/" target="_blank">Source →</a></p>
+            </div>
+            
+            <div class="track-info">
+                <h4>Pyraxis Laugh</h4>
+                <p>Demon or evil monster, short snore</p>
+                <p class="producer">Producer: ZapSplat</p>
+                <p><a href="https://www.zapsplat.com/music/demon-or-evil-monster-short-snore-version-3/" target="_blank">Source →</a></p>
+            </div>
+            
+            <div class="track-info">
+                <h4>Zephyrs Laugh</h4>
+                <p>Monster, ogre, single growl</p>
+                <p class="producer">Producer: ZapSplat</p>
+                <p><a href="https://www.zapsplat.com/music/monster-ogre-single-growl-1/" target="_blank">Source →</a></p>
+            </div>
+            
+            <h3>UI/Game Sounds</h3>
+            
+            <div class="track-info">
+                <h4>Menu Selection Tone</h4>
+                <p>Retro arcade game sound, beep</p>
+                <p class="producer">Producer: ZapSplat</p>
+                <p><a href="https://www.zapsplat.com/music/retro-arcade-game-sound-beep-1/" target="_blank">Source →</a></p>
+            </div>
+            
+            <div class="track-info">
+                <h4>Boss Victory Tone</h4>
+                <p>Game sound, electric piano style, win or success tone</p>
+                <p class="producer">Producer: ZapSplat</p>
+                <p><a href="https://www.zapsplat.com/music/game-sound-electric-piano-style-win-or-success-tone/" target="_blank">Source →</a></p>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>License Information</h2>
+            <p>All music tracks and sound effects are used under the <a href="https://www.zapsplat.com/license-type/standard-license/" target="_blank">ZapSplat Standard License</a>, which permits use in personal and commercial projects with attribution.</p>
+        </div>
+        
+        <div class="section" style="text-align: center;">
+            <h2>Attribution</h2>
+            <p>Music and Sound Effects from <a href="https://www.zapsplat.com" target="_blank">ZapSplat.com</a></p>
+        </div>
+    </div>
+    
+    <script>
+        // Animated starfield background
+        const canvas = document.getElementById('stars-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        const stars = [];
+        const numStars = 200;
+        
+        for (let i = 0; i < numStars; i++) {
+            stars.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                radius: Math.random() * 1.5,
+                opacity: Math.random() * 0.8 + 0.2,
+                speed: Math.random() * 0.5 + 0.1
+            });
+        }
+        
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            stars.forEach(star => {
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(248, 248, 248, ${star.opacity})`;
+                ctx.fill();
+                
+                star.y += star.speed;
+                
+                if (star.y > canvas.height) {
+                    star.y = -10;
+                    star.x = Math.random() * canvas.width;
+                }
+            });
+            
+            requestAnimationFrame(animate);
+        }
+        
+        animate();
+        
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>
