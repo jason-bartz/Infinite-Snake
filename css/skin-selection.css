@@ -284,6 +284,26 @@
     text-transform: uppercase;
 }
 
+/* New badge */
+.new-badge {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    background: #e74c3c;
+    color: #fff;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    animation: newBadgePulse 2s ease-in-out infinite;
+}
+
+@keyframes newBadgePulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
 /* Secret skin question mark */
 .skin-item.secret.locked .skin-preview::after {
     content: '❓';

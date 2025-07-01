@@ -236,9 +236,11 @@ class UnlockManager {
                 <div class="unlock-skin-preview">
                     <img src="${imagePath}" alt="${skinData.name}" onerror="this.style.display='none'">
                 </div>
-                <div class="unlock-skin-name">${skinData.name}</div>
-                <div class="unlock-skin-rarity">${skinData.rarity.toUpperCase()}</div>
-                <div class="unlock-skin-bio">${skinData.bio || 'A mysterious new skin!'}</div>
+                <div class="unlock-info">
+                    <div class="unlock-skin-name">${skinData.name}</div>
+                    <div class="unlock-skin-rarity">${skinData.rarity.toUpperCase()}</div>
+                    <div class="unlock-skin-bio">${skinData.bio || 'A mysterious new skin!'}</div>
+                </div>
             </div>
         `;
         

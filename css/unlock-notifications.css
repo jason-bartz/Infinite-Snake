@@ -1,7 +1,7 @@
 /* Unlock Notification Styles */
 .unlock-notification {
     position: fixed;
-    top: 70%;
+    top: 30%;
     left: 50%;
     transform: translate(-50%, -50%) scale(0.8);
     opacity: 0;
@@ -20,28 +20,37 @@
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border-radius: 15px;
-    padding: 20px;
-    text-align: center;
-    min-width: 250px;
+    padding: 15px;
+    min-width: 400px;
+    max-width: 500px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
     position: relative;
     overflow: hidden;
+    display: flex;
+    align-items: center;
+    gap: 20px;
 }
 
 .unlock-header {
-    font-size: 18px;
+    font-size: 14px;
     font-weight: bold;
     color: #fff;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    text-align: center;
+    width: 100%;
+    position: absolute;
+    top: 15px;
+    left: 0;
     animation: pulse 1s ease-in-out infinite;
 }
 
 .unlock-skin-preview {
-    width: 80px;
-    height: 80px;
-    margin: 0 auto 10px;
+    width: 70px;
+    height: 70px;
+    flex-shrink: 0;
     position: relative;
+    margin-top: 25px;
 }
 
 .unlock-skin-preview img {
@@ -51,29 +60,33 @@
     filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
 }
 
+.unlock-info {
+    flex: 1;
+    text-align: left;
+    margin-top: 25px;
+}
+
 .unlock-skin-name {
     font-size: 16px;
     font-weight: bold;
     color: #fff;
-    margin-bottom: 8px;
+    margin-bottom: 5px;
 }
 
 .unlock-skin-rarity {
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 500;
     text-transform: uppercase;
-    letter-spacing: 2px;
-    margin-bottom: 10px;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
 }
 
 .unlock-skin-bio {
-    font-size: 12px;
+    font-size: 11px;
     color: #ccc;
-    line-height: 1.4;
+    line-height: 1.3;
     font-style: italic;
-    padding: 0 10px;
-    max-width: 250px;
-    margin: 0 auto;
+    max-width: 300px;
 }
 
 /* Rarity-specific styles */
@@ -234,21 +247,29 @@
 /* Mobile adjustments */
 @media (max-width: 768px) {
     .unlock-notification {
-        top: 75%;
+        top: 30%;
     }
     
     .unlock-content {
-        padding: 15px;
-        min-width: 200px;
+        padding: 12px;
+        min-width: 320px;
+        max-width: 90vw;
+        gap: 15px;
     }
     
     .unlock-header {
-        font-size: 16px;
+        font-size: 12px;
+        top: 12px;
     }
     
     .unlock-skin-preview {
-        width: 60px;
-        height: 60px;
+        width: 50px;
+        height: 50px;
+        margin-top: 20px;
+    }
+    
+    .unlock-info {
+        margin-top: 20px;
     }
     
     .unlock-skin-name {
@@ -256,10 +277,10 @@
     }
     
     .unlock-skin-rarity {
-        font-size: 12px;
+        font-size: 11px;
     }
     
     .unlock-skin-bio {
-        font-size: 11px;
+        font-size: 10px;
     }
 }

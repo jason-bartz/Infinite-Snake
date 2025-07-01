@@ -3474,24 +3474,32 @@
     
     <!-- Game Mode Selection -->
     <div id="gameModeSelect">
+        <!-- Navigation Bar -->
+        <div style="position: absolute; top: 20px; left: 20px; z-index: 10;">
+            <a href="https://discord.gg/a6X4W7QbkG" target="_blank" style="color: #4ecdc4; text-decoration: none; font-family: monospace; font-size: 16px;">💬 Join the Discord Server</a>
+        </div>
+        <div style="position: absolute; top: 20px; right: 20px; z-index: 10;">
+            <a href="/how-to-play.html" style="color: #4ecdc4; text-decoration: none; font-family: monospace; font-size: 16px; margin-right: 20px;">📖 How to Play</a>
+            <a href="/leaderboard.html" style="color: #4ecdc4; text-decoration: none; font-family: monospace; font-size: 16px;">🏆 Leaderboard</a>
+        </div>
+        
         <div id="gameModeContent">
             <h3>Game Setup</h3>
         
         <div class="modeSection">
-            <h4>Victory Condition</h4>
-            <div id="victoryButtons">
-                <div class="victory-column">
-                    <h5>🧪 Discovery Race</h5>
-                    <button class="btn-discovery" onclick="selectVictoryMode('discovery', 50)">Discover 50 Elements</button>
-                    <button class="btn-discovery" onclick="selectVictoryMode('discovery', 250)">Discover 250 Elements</button>
+            <h4>Choose Your Mode</h4>
+            <div id="victoryButtons" style="display: flex; flex-direction: column; gap: 20px; align-items: center; margin-top: 30px;">
+                <div style="text-align: center;">
+                    <button class="btn-classic" onclick="selectGameMode('classic')" style="width: 300px; padding: 20px; font-size: 20px; background: #e74c3c; border: 2px solid #c0392b;">
+                        🏆 Classic Mode
+                    </button>
+                    <p style="color: #ccc; margin-top: 10px; font-size: 14px;">Challenge yourself to discover elements while surviving as long as possible</p>
                 </div>
-                <div class="victory-column">
-                    <h5>⭐ Points Race</h5>
-                    <button class="btn-points" onclick="selectVictoryMode('points', 50000)">Score 50,000 Points</button>
-                    <button class="btn-points" onclick="selectVictoryMode('points', 250000)">Score 250,000 Points</button>
-                </div>
-                <div class="victory-infinite">
-                    <button class="btn-infinite" onclick="selectVictoryMode('infinite', 0)">∞ Infinite Mode</button>
+                <div style="text-align: center;">
+                    <button class="btn-infinite" onclick="selectGameMode('infinite')" style="width: 300px; padding: 20px; font-size: 20px;">
+                        ∞ Infinite Mode
+                    </button>
+                    <p style="color: #ccc; margin-top: 10px; font-size: 14px;">Practice and explore without pressure - no scores recorded</p>
                 </div>
             </div>
         </div>
@@ -3878,7 +3886,7 @@
             <!-- Leaderboard Tab -->
             <div id="leaderboardTab" class="tab-content">
                 <div style="padding: 20px; max-height: 400px; overflow-y: auto;">
-                    <h4 style="color: #4ecdc4; margin-bottom: 15px; text-align: center;">Global Leaderboard - Infinite Mode</h4>
+                    <h4 style="color: #4ecdc4; margin-bottom: 15px; text-align: center;">Classic Mode Leaderboard</h4>
                     
                     <!-- Mini leaderboard tabs -->
                     <div style="display: flex; margin-bottom: 15px; border-bottom: 2px solid #333;">
@@ -3957,7 +3965,7 @@
             <!-- Header -->
             <div style="background: rgba(0, 0, 0, 0.5); padding: 20px; border-bottom: 2px solid #4ecdc4;">
                 <h2 style="color: #4ecdc4; margin: 0; font-family: monospace; font-size: 28px; text-align: center;">
-                    GLOBAL LEADERBOARD
+                    CLASSIC MODE LEADERBOARD
                 </h2>
                 <button onclick="closeLeaderboard()" 
                         style="position: absolute; top: 15px; right: 15px; 
@@ -4867,9 +4875,10 @@
         let gameStarted = false;
         let paused = false;
         let controlScheme = 'arrows';
-        let gameMode = 'infinite'; // 'discovery', 'points', or 'infinite'
+        let gameMode = 'infinite'; // 'classic' or 'infinite'
         let gameWon = false; // Track if victory has been achieved
         let gameTarget = 0; // Target value for victory
+        let deathCount = 0; // Track total deaths in current game
         let camera = { x: WORLD_SIZE / 2, y: WORLD_SIZE / 2 };
         let cameraZoom = isMobile ? 0.5 : 1.0; // 0.5 = zoom out by 100% (double visible area) for mobile
         
@@ -5329,14 +5338,24 @@
         // Boss state management
         let currentBoss = null;
         let bossEncounterActive = false;
-        let bossSpawnRanges = [
-            { min: 50000, max: 75000 },
-            { min: 125000, max: 175000 },
-            { min: 225000, max: 300000 },
-            { min: 500000, max: 600000 }
-        ];
-        let nextBossSpawnIndex = 0;
+        let nextBossSpawnScore = 0; // Dynamic spawn point
+        let lastBossDefeatScore = 0; // Track score when boss was defeated
+        let bossSpawnCount = 0; // Track number of bosses spawned
         let defeatedBosses = new Set();
+        
+        // Calculate next boss spawn point with randomization
+        function calculateNextBossSpawn() {
+            if (bossSpawnCount === 0) {
+                // First boss: 50k-75k range
+                nextBossSpawnScore = 50000 + Math.floor(Math.random() * 25000);
+            } else {
+                // Subsequent bosses: spawn 200k-250k points after the last boss defeat
+                const baseInterval = 200000;
+                const randomRange = 50000;
+                nextBossSpawnScore = lastBossDefeatScore + baseInterval + Math.floor(Math.random() * randomRange);
+            }
+            console.log(`[BOSS] Next boss will spawn at ${nextBossSpawnScore.toLocaleString()} points`);
+        }
         let bossesDefeatedThisCycle = 0;
         let bossIsUndead = false;
         let bossIntroMusic = null;
@@ -5457,6 +5476,7 @@
         const aiSkins = Object.keys(skinMetadata).filter(skin => skinMetadata[skin] && !skinMetadata[skin].isBoss); // All non-boss skins available for AI
         let currentPlayerSkin = 'snake-default-green';
         let unlockedSkins = new Set(['snake-default-green']);
+        let viewedSkins = new Set(['snake-default-green']); // Track which skins have been viewed
         let availableUnlocks = 0;
         let skinImages = {}; // Cache for loaded skin images
         
@@ -5465,6 +5485,11 @@
             const saved = localStorage.getItem('unlockedSkins');
             if (saved) {
                 unlockedSkins = new Set(JSON.parse(saved));
+            }
+            
+            const savedViewed = localStorage.getItem('viewedSkins');
+            if (savedViewed) {
+                viewedSkins = new Set(JSON.parse(savedViewed));
             }
             
             const savedCurrent = localStorage.getItem('currentSkin');
@@ -5505,6 +5530,7 @@
         // Save skin data
         function saveSkinData() {
             localStorage.setItem('unlockedSkins', JSON.stringify(Array.from(unlockedSkins)));
+            localStorage.setItem('viewedSkins', JSON.stringify(Array.from(viewedSkins)));
             localStorage.setItem('currentSkin', currentPlayerSkin);
         }
         
@@ -5777,16 +5803,24 @@
         });
         
         // Game mode selection
-        function selectVictoryMode(mode, target) {
+        function selectGameMode(mode) {
             playUISound();
             gameMode = mode;
-            gameTarget = target;
+            
+            // Classic mode has no target, ends on permadeath
+            // Infinite mode has no target, continues forever
+            gameTarget = 0;
             
             // Set default control scheme to mouse
             controlScheme = 'mouse';
             
             // Start the game immediately
             startGameTransition();
+        }
+        
+        // Keep old function for compatibility but redirect to new one
+        function selectVictoryMode(mode, target) {
+            selectGameMode('infinite');
         }
         
         function startGameTransition() {
@@ -7075,7 +7109,7 @@
                             
                             showCombinationMessage(chosen.elem1, chosen.elem2, chosen.result, true); // Show new discovery
                             // Grant invincibility on new discovery
-                            this.invincibilityTimer = 3000; // 3 seconds
+                            this.invincibilityTimer = 2000; // 2 seconds
                             
                             // Check for new high score
                             if (this.score > highScore) {
@@ -7264,7 +7298,7 @@
                                     }
                                     
                                     showCombinationMessage(newElementId, existingId, resultId, true);
-                                    this.invincibilityTimer = 3000;
+                                    this.invincibilityTimer = 2000;
                                 }
                             } else {
                                 // Existing combination
@@ -10120,6 +10154,21 @@
                 bossEncounterActive = false;
                 defeatedBosses.add(this.bossType);
                 bossesDefeatedThisCycle++;
+                
+                // Track score at boss defeat and calculate next spawn
+                if (playerSnake) {
+                    lastBossDefeatScore = playerSnake.score;
+                    calculateNextBossSpawn();
+                }
+                
+                // Award extra revive for defeating boss
+                if (gameMode === 'classic' && revivesRemaining < 3) {
+                    revivesRemaining++;
+                    console.log('[BOSS] Extra revive awarded! Revives remaining:', revivesRemaining);
+                    
+                    // Show revive award message
+                    showCombinationMessage('', '', `+1 REVIVE! Boss defeated!`, false, 3000);
+                }
                 
                 // Dispatch boss defeated event
                 dispatchGameEvent('bossDefeated', {
@@ -13084,9 +13133,67 @@
             console.log('[RESPAWN] Reset leaderboardSubmitted flag and timestamp in forceRespawn');
         }
         
+        // Handle permadeath in Classic mode
+        function handlePermadeath() {
+            console.log('[PERMADEATH] Game over in Classic mode');
+            
+            // Submit score to leaderboard
+            if (playerSnake && playerSnake.score > 0 && canSubmitScore()) {
+                submitScore();
+            }
+            
+            // Hide respawn overlay
+            document.getElementById('respawnOverlay').style.display = 'none';
+            
+            // Show game over screen
+            const gameOverScreen = document.createElement('div');
+            gameOverScreen.id = 'permaDeathScreen';
+            gameOverScreen.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.95);
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                z-index: 10000;
+                font-family: monospace;
+                color: #fff;
+            `;
+            
+            gameOverScreen.innerHTML = `
+                <h1 style="font-size: 48px; color: #e74c3c; margin-bottom: 20px;">GAME OVER</h1>
+                <p style="font-size: 24px; margin-bottom: 10px;">Final Score: ${playerSnake ? playerSnake.score.toLocaleString() : 0}</p>
+                <p style="font-size: 20px; margin-bottom: 10px;">Elements Discovered: ${discoveries.size}</p>
+                <p style="font-size: 20px; margin-bottom: 30px;">Time Survived: ${Math.floor((Date.now() - gameStartTime) / 1000)}s</p>
+                <p style="font-size: 16px; color: #4ecdc4; margin-bottom: 30px;">Score submitted to Classic Mode leaderboard!</p>
+                <button onclick="location.reload()" style="padding: 15px 30px; font-size: 20px; background: #4ecdc4; color: #000; border: none; border-radius: 10px; cursor: pointer;">
+                    New Game
+                </button>
+            `;
+            
+            document.body.appendChild(gameOverScreen);
+            
+            // Stop the game
+            stopGame();
+        }
+        
         // Handle revive or respawn button click
         window.handleReviveOrRespawn = function() {
             playUISound();
+            
+            // Increment death count
+            deathCount++;
+            
+            // Check for permadeath in Classic mode
+            if (gameMode === 'classic' && deathCount >= 4) {
+                // Permadeath - submit score and show game over
+                handlePermadeath();
+                return;
+            }
             
             if (revivesRemaining > 0) {
                 // Use a revive
@@ -13098,11 +13205,20 @@
                     if (revivesRemaining > 0) {
                         reviveBtn.innerHTML = `REVIVE (<span id="revivesLeft">${revivesRemaining}</span>)`;
                     } else {
-                        reviveBtn.innerHTML = 'RESPAWN';
-                        reviveBtn.style.background = '#9c88ff';
-                        reviveBtn.style.borderColor = '#9c88ff';
-                        reviveBtn.style.boxShadow = '0 0 20px rgba(156, 136, 255, 0.5)';
-                        document.getElementById('actionText').textContent = 'respawn';
+                        // In Classic mode, show different text for last life
+                        if (gameMode === 'classic') {
+                            reviveBtn.innerHTML = 'FINAL LIFE';
+                            reviveBtn.style.background = '#e74c3c';
+                            reviveBtn.style.borderColor = '#c0392b';
+                            reviveBtn.style.boxShadow = '0 0 20px rgba(231, 76, 60, 0.5)';
+                            document.getElementById('actionText').textContent = 'continue on final life';
+                        } else {
+                            reviveBtn.innerHTML = 'RESPAWN';
+                            reviveBtn.style.background = '#9c88ff';
+                            reviveBtn.style.borderColor = '#9c88ff';
+                            reviveBtn.style.boxShadow = '0 0 20px rgba(156, 136, 255, 0.5)';
+                            document.getElementById('actionText').textContent = 'respawn';
+                        }
                         const respawnPenaltyText = document.getElementById('respawnPenaltyText');
                         if (respawnPenaltyText) respawnPenaltyText.style.display = 'block';
                     }
@@ -13111,7 +13227,7 @@
                 // Set flag for revive (will be handled in respawn logic)
                 window.isReviving = true;
             } else {
-                // Normal respawn
+                // Normal respawn (only in Infinite mode)
                 window.isReviving = false;
             }
             
@@ -13304,7 +13420,7 @@
                 console.log('[DEATH] Player is dead, respawn timer:', respawnSeconds, 'seconds');
                 
                 // FAILSAFE: Ensure score is submitted when showing death screen
-                if (playerSnake.score > 0 && gameMode === 'infinite' && canSubmitScore()) {
+                if (playerSnake.score > 0 && gameMode === 'classic' && canSubmitScore()) {
                     console.log('[UI-FAILSAFE] Death screen shown, proceeding with submission...');
                     const playerName = localStorage.getItem('playerName') || 'Anonymous';
                     const playTime = gameSessionStartTime ? Math.floor((Date.now() - gameSessionStartTime) / 1000) : 0;
@@ -14881,11 +14997,17 @@
             gameWon = false; // Reset victory flag
             particles = [];
             revivesRemaining = 3; // Reset revives for new game
+            deathCount = 0; // Reset death count
             voidOrbs = [];
             catalystGems = [];
             alchemyVisionPowerUps = [];
             aiRespawnQueue = [];
             usedAISkins.clear();
+            
+            // Reset boss spawn tracking
+            bossSpawnCount = 0;
+            lastBossDefeatScore = 0;
+            calculateNextBossSpawn(); // Set first boss spawn point
             
             // ALWAYS start fresh - no saved discoveries affect spawning
             discoveredElements = new Set([0, 1, 2, 3]); // Only base elements in global pool
@@ -15292,6 +15414,14 @@
                     innerContainer.appendChild(equippedBadge);
                 }
                 
+                // Add new indicator for unlocked but not viewed skins
+                if (skinData.unlocked && !viewedSkins.has(skinId) && skinId !== currentPlayerSkin) {
+                    const newBadge = document.createElement('div');
+                    newBadge.className = 'new-badge';
+                    newBadge.textContent = 'NEW';
+                    innerContainer.appendChild(newBadge);
+                }
+                
                 div.appendChild(innerContainer);
                 
                 // Click handler - open preview modal
@@ -15470,6 +15600,14 @@
         function openSkinPreview(skinId) {
             const skinData = skinMetadata[skinId];
             if (!skinData) return;
+            
+            // Mark skin as viewed if unlocked
+            if (skinData.unlocked && !viewedSkins.has(skinId)) {
+                viewedSkins.add(skinId);
+                saveSkinData();
+                // Rebuild grid to remove "NEW" badge
+                buildSkinGrid();
+            }
             
             // Play beep sound when opening modal
             try {
@@ -15984,21 +16122,12 @@
                 catalystGems.forEach(gem => gem.update(1.0));
                 
                 // Boss spawn check (infinite mode only)
-                if (gameMode === 'infinite' && !bossEncounterActive && playerSnake && playerSnake.alive) {
-                    // Check if player score is in boss spawn range
-                    if (nextBossSpawnIndex < bossSpawnRanges.length) {
-                        const range = bossSpawnRanges[nextBossSpawnIndex];
-                        if (playerSnake.score >= range.min && playerSnake.score <= range.max) {
-                            spawnBoss();
-                            nextBossSpawnIndex++;
-                        }
-                    } else {
-                        // After 600k, spawn at 100k intervals
-                        const nextMilestone = 600000 + ((nextBossSpawnIndex - bossSpawnRanges.length + 1) * 100000);
-                        if (playerSnake.score >= nextMilestone && playerSnake.score <= nextMilestone + 100000) {
-                            spawnBoss();
-                            nextBossSpawnIndex++;
-                        }
+                // Boss spawning for both Classic and Infinite modes
+                if ((gameMode === 'classic' || gameMode === 'infinite') && !bossEncounterActive && playerSnake && playerSnake.alive) {
+                    // Check if player has reached the next boss spawn score
+                    if (playerSnake.score >= nextBossSpawnScore && nextBossSpawnScore > 0) {
+                        spawnBoss();
+                        bossSpawnCount++;
                     }
                 }
                 
@@ -16277,7 +16406,7 @@
                     
                     // AUTO-SUBMIT SCORE ON DEATH
                     setTimeout(() => {
-                        if (gameMode === 'infinite' && playerSnake.score > 0 && canSubmitScore()) {
+                        if (gameMode === 'classic' && playerSnake.score > 0 && canSubmitScore()) {
                             const playerName = localStorage.getItem('playerName') || 'Anonymous';
                             const playTime = gameSessionStartTime ? Math.floor((Date.now() - gameSessionStartTime) / 1000) : 0;
                             
@@ -16427,7 +16556,7 @@
                     }
                     
                     // Grant 3 seconds of invincibility on respawn
-                    playerSnake.invincibilityTimer = 3000;
+                    playerSnake.invincibilityTimer = 2000;
                     
                     // Add back to snakes array
                     snakes.push(playerSnake);

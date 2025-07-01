@@ -42,49 +42,117 @@ All music tracks used in this project are produced by **ZapSplat** and licensed 
 - **License**: ZapSplat Standard License  
 - **Source**: [ZapSplat.com](https://www.zapsplat.com/music/headliner-euphoric-trance-house-bright-synth-arpeggio-loop-and-drums-lead-into-an-uplifting-euphoric-chorus/)
 
+### Boss Battle Music
+
+#### Boss Game Music Track
+- **Description**: Game music – repetitive dark dramatic action music bed, pounding drums and a chugging bass  
+- **Producer**: ZapSplat  
+- **License**: ZapSplat Standard License  
+- **Source**: [ZapSplat.com](https://www.zapsplat.com/music/game-music-repetitive-dark-dramatic-action-music-bed-pounding-drums-and-a-chugging-bass/)
+
 ---
 
 # 🔊 Sound Effects Credits
 
 All sound effects used in this project are licensed under the **ZapSplat Standard License** or by other listed producers.
 
-## Fire & Magic Effects
-
-### Fire Impact
+### Snake Death - Explosion
 - **Description**: Cinematic fire impact, burst, flame ignite, magic fire hit, version 2  
 - **Producer**: PMSFX  
 - **License**: ZapSplat Standard License  
 - **Source**: [ZapSplat.com](https://www.zapsplat.com/music/cinematic-fire-impact-burst-flame-ignite-magic-fire-hit-version-2/)
 
-### Dark Magic Spell, Powerful Electric Energy Whoosh, Pass By 20  
+### Void Orb  
 - **Producer**: ZapSplat  
 - **License**: ZapSplat Standard License  
 - **Source**: [ZapSplat.com](https://www.zapsplat.com/page/9/?s=spell)
 
-### Magic, Fantasy, Spell, Magical, Sci-Fi, Fiction, Flames, Magma, Fire  
+### Alchemy Eye  
 - **Producer**: Sound Spark LLC  
 - **License**: ZapSplat Standard License  
 - **Source**: [ZapSplat.com](https://www.zapsplat.com/music/magic-fantasy-spell-magical-sci-fi-fiction-flames-magma-fire-11/)
 
-### Magic Wand Whoosh, Burst 5  
+### Speed Boost  
 - **Producer**: ZapSplat  
 - **License**: ZapSplat Standard License  
 - **Source**: [ZapSplat.com](https://www.zapsplat.com/page/2/?s=magic+burst)
 
-## Sci-Fi & Energy Effects
-
-### Science Fiction Power Surge, Energy Source, Pass By, Buzzing, Humming Movement 2  
+### Catalyst Gem  
 - **Producer**: ZapSplat  
 - **License**: ZapSplat Standard License  
 - **Source**: [ZapSplat.com](https://www.zapsplat.com/page/3/?s=energy)
 
-## UI/Game Sounds
-
-### Beep Sound
+### Snake Eat
 - **Description**: Game sound, 8-bit blip, very short beep  
 - **Producer**: ZapSplat  
 - **License**: ZapSplat Standard License  
 - **Source**: [ZapSplat.com](https://www.zapsplat.com/?s=beep)
+
+## Boss & Combat Sounds
+
+### Boss Intro Tone
+- **Description**: Retro 8-bit arcade style game sound, low pitched melody 1  
+- **Producer**: ZapSplat  
+- **License**: Standard License
+- **Source**: [ZapSplat.com](https://www.zapsplat.com/music/retro-8-bit-arcade-style-game-sound-low-pitched-melody-1/)
+
+### Boss Death
+- **Description**: Designed explosion with shockwave 2  
+- **Producer**: ZapSplat  
+- **License**: Standard License
+- **Source**: [ZapSplat.com](https://www.zapsplat.com/music/designed-explosion-with-shockwave-2/)
+
+### Snake Death
+- **Description**: Science fiction, big powerful explosion 1  
+- **Producer**: ZapSplat  
+- **License**: Standard License
+- **Source**: [ZapSplat.com](https://www.zapsplat.com/music/science-fiction-big-powerful-explosion-1/)
+
+### Player Death
+- **Description**: Game sound, retro explode, boom, short  
+- **Producer**: ZapSplat  
+- **License**: Standard License
+- **Source**: [ZapSplat.com](https://www.zapsplat.com/music/game-sound-retro-explode-boom-short/)
+
+## Boss Voice Effects
+
+### Ossesus Laugh
+- **Description**: Demon or evil monster, laugh, version 3  
+- **Producer**: ZapSplat  
+- **License**: Standard License
+- **Source**: [ZapSplat.com](https://www.zapsplat.com/music/demon-or-evil-monster-laugh-version-3/)
+
+### Abyssos Laugh
+- **Description**: Demon or evil monster, long medium growl  
+- **Producer**: ZapSplat  
+- **License**: Standard License
+- **Source**: [ZapSplat.com](https://www.zapsplat.com/music/demon-or-evil-monster-long-medium-growl/)
+
+### Pyraxis Laugh
+- **Description**: Demon or evil monster, short snore, version 3  
+- **Producer**: ZapSplat  
+- **License**: Standard License
+- **Source**: [ZapSplat.com](https://www.zapsplat.com/music/demon-or-evil-monster-short-snore-version-3/)
+
+### Zephyrs Laugh
+- **Description**: Monster, ogre, single growl 1  
+- **Producer**: ZapSplat  
+- **License**: Standard License
+- **Source**: [ZapSplat.com](https://www.zapsplat.com/music/monster-ogre-single-growl-1/)
+
+## UI/Game Sounds
+
+### Menu Selection Tone
+- **Description**: Retro arcade game sound, beep 1  
+- **Producer**: ZapSplat  
+- **License**: Standard License
+- **Source**: [ZapSplat.com](https://www.zapsplat.com/music/retro-arcade-game-sound-beep-1/)
+
+### Boss Victory Tone
+- **Description**: Game sound, electric piano style, win or success tone  
+- **Producer**: ZapSplat  
+- **License**: Standard License
+- **Source**: [ZapSplat.com](https://www.zapsplat.com/music/game-sound-electric-piano-style-win-or-success-tone/)
 
 ---
 
