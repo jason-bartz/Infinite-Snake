@@ -494,7 +494,8 @@
                     throw new Error(data.error || 'Failed to load leaderboard');
                 }
                 
-                currentData = data.scores || [];
+                // The API returns data in 'leaderboard' property
+                currentData = data.leaderboard || data.scores || [];
                 
                 // Update stats
                 updateStats(currentData);
