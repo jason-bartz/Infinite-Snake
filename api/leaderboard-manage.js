@@ -56,10 +56,10 @@ export default async function handler(req, res) {
   try {
     // DELETE - Remove specific entry
     if (req.method === 'DELETE') {
-      const { entryId, period = 'all' } = req.body || req.query;
+      const { entryId, username, timestamp, period = 'all' } = req.body || req.query;
       
-      if (!entryId) {
-        return res.status(400).json({ error: 'Entry ID required' });
+      if (!entryId && (!username || !timestamp)) {
+        return res.status(400).json({ error: 'Entry ID or username/timestamp required' });
       }
       
       const keys = getLeaderboardKeys();
@@ -82,10 +82,16 @@ export default async function handler(req, res) {
             
             try {
               const data = JSON.parse(member);
-              if (data.id === entryId) {
+              // Match by ID or by username/timestamp combination
+              const matchById = entryId && data.id === entryId;
+              const matchByData = !entryId && username && timestamp && 
+                                data.username === username && 
+                                data.timestamp === timestamp;
+              
+              if (matchById || matchByData) {
                 await redis.zrem(key, member);
                 totalDeleted++;
-                console.log(`Deleted entry ${entryId} from ${p} leaderboard`);
+                console.log(`Deleted entry from ${p} leaderboard:`, data.username);
               }
             } catch (e) {
               console.error('Error parsing entry:', e);

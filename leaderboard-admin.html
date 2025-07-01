@@ -547,6 +547,14 @@
             tbody.innerHTML = '';
             
             data.forEach((entry, index) => {
+                // Generate a fallback ID if none exists
+                const entryId = entry.id || `generated-${entry.timestamp}-${index}`;
+                
+                // Debug log to check entry structure
+                if (index === 0) {
+                    console.log('First entry structure:', entry);
+                }
+                
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td class="rank">#${index + 1}</td>
@@ -554,15 +562,15 @@
                         <span class="flag">${countryFlags[entry.country_code] || '🌐'}</span>
                         <span>${entry.country_code}</span>
                     </td>
-                    <td id="name-${entry.id}">${escapeHtml(entry.username)}</td>
-                    <td class="score" id="score-${entry.id}">${entry.score.toLocaleString()}</td>
+                    <td id="name-${entryId}">${escapeHtml(entry.username)}</td>
+                    <td class="score" id="score-${entryId}">${entry.score.toLocaleString()}</td>
                     <td>${entry.elements_discovered || 0}</td>
                     <td>${formatTime(entry.play_time)}</td>
                     <td>${entry.kills || 0}</td>
                     <td class="timestamp">${formatTimestamp(entry.timestamp)}</td>
                     <td class="actions">
-                        <button class="btn-small" onclick="editEntry('${entry.id}')">Edit</button>
-                        <button class="btn-small danger" onclick="deleteEntry('${entry.id}', '${escapeHtml(entry.username)}')">Delete</button>
+                        <button class="btn-small" onclick="editEntry('${entryId}')">Edit</button>
+                        <button class="btn-small danger" onclick="deleteEntry('${entryId}', '${escapeHtml(entry.username)}')">Delete</button>
                     </td>
                 `;
                 tbody.appendChild(row);
@@ -662,6 +670,28 @@
         async function deleteEntry(id, username) {
             if (!confirm(`Delete entry for ${username}?`)) return;
             
+            console.log('Attempting to delete entry:', { id, username });
+            
+            // If it's a generated ID, we need to find the entry by matching data
+            let entryToDelete = null;
+            if (id.startsWith('generated-')) {
+                // Extract timestamp from generated ID
+                const parts = id.split('-');
+                const timestamp = parseInt(parts[1]);
+                
+                // Find the matching entry
+                entryToDelete = currentData.find(entry => 
+                    entry.timestamp === timestamp && entry.username === username
+                );
+                
+                if (!entryToDelete) {
+                    showStatus('Could not find entry to delete', 'error');
+                    return;
+                }
+                
+                console.log('Found entry to delete by matching:', entryToDelete);
+            }
+            
             try {
                 const response = await fetch('/api/leaderboard-manage', {
                     method: 'DELETE',
@@ -670,7 +700,10 @@
                         'X-Admin-Key': adminKeyValue
                     },
                     body: JSON.stringify({
-                        entryId: id,
+                        entryId: entryToDelete ? entryToDelete.id : id,
+                        // If no ID, pass additional matching criteria
+                        username: username,
+                        timestamp: entryToDelete ? entryToDelete.timestamp : null,
                         period: document.getElementById('periodSelect').value
                     })
                 });

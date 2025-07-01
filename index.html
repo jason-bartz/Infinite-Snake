@@ -12327,8 +12327,8 @@
         // Helper function to check if we should submit
         function canSubmitScore() {
             const now = Date.now();
-            // Prevent submissions within 1 second of each other
-            if (now - lastSubmissionTime < 1000) {
+            // Prevent submissions within 3 seconds of each other (increased from 1 second)
+            if (now - lastSubmissionTime < 3000) {
                 console.log('[SUBMISSION] Blocked - too soon after last submission', now - lastSubmissionTime, 'ms');
                 return false;
             }
