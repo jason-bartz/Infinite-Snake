@@ -12871,27 +12871,36 @@
                             
                             // Submit score automatically
                             if (window.supabaseModule && window.supabaseModule.submitScore) {
+                                console.log('[LEADERBOARD] Supabase module found, submitting...');
                                 window.supabaseModule.submitScore(
                                     playerName,
                                     Math.floor(playerSnake.score),
                                     playerDiscoveredElements.size,
                                     playerSnake.kills
                                 ).then(result => {
-                                    if (result.success && result.rank) {
+                                    console.log('[LEADERBOARD] Submission result:', result);
+                                    if (result && result.success && result.rank) {
                                         // Update global rank display
                                         const globalRankEl = document.getElementById('globalRank');
                                         if (globalRankEl) {
                                             globalRankEl.textContent = `#${result.rank}`;
                                         }
+                                        console.log('[LEADERBOARD] Score submitted successfully! Rank:', result.rank);
+                                        // Only mark as submitted on success
+                                        leaderboardSubmitted = true;
+                                    } else {
+                                        console.error('[LEADERBOARD] Submission returned but was not successful:', result);
                                     }
                                 }).catch(error => {
                                     console.error('[LEADERBOARD] Failed to submit score:', error);
-                                    // Still mark as submitted to prevent spam
-                                    leaderboardSubmitted = true;
+                                    // Don't mark as submitted on failure so it can retry
+                                });
+                            } else {
+                                console.error('[LEADERBOARD] Supabase module not available!', {
+                                    module: window.supabaseModule,
+                                    submitScore: window.supabaseModule?.submitScore
                                 });
                             }
-                            
-                            leaderboardSubmitted = true;
                         }
                     }
                 }
