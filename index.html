@@ -6116,6 +6116,141 @@
             }
         };
         
+        // Audio Lifecycle Management - Fix iOS background audio issue
+        let audioWasPlaying = {
+            music: false,
+            bossIntro: false,
+            bossBattle: false
+        };
+        
+        // Pause all audio sources
+        function pauseAllAudio() {
+            // Track what was playing
+            audioWasPlaying.music = currentTrack && !currentTrack.paused;
+            audioWasPlaying.bossIntro = bossIntroMusic && !bossIntroMusic.paused;
+            audioWasPlaying.bossBattle = bossBattleMusic && !bossBattleMusic.paused;
+            
+            // Pause everything
+            if (currentTrack) {
+                currentTrack.pause();
+            }
+            if (bossIntroMusic) {
+                bossIntroMusic.pause();
+            }
+            if (bossBattleMusic) {
+                bossBattleMusic.pause();
+            }
+            
+            // Also pause any sound effects
+            if (window.eatSounds) {
+                eatSounds.forEach(sound => {
+                    if (sound && !sound.paused) {
+                        sound.pause();
+                    }
+                });
+            }
+        }
+        
+        // Resume audio that was playing before
+        function resumeAudio() {
+            if (musicMuted || !gameStarted) return;
+            
+            // Resume background music
+            if (audioWasPlaying.music && currentTrack) {
+                currentTrack.play().catch(() => {});
+            }
+            
+            // Resume boss music if in boss encounter
+            if (bossEncounterActive) {
+                if (audioWasPlaying.bossIntro && bossIntroMusic && !bossIntroMusic.ended) {
+                    bossIntroMusic.play().catch(() => {});
+                } else if (audioWasPlaying.bossBattle && bossBattleMusic) {
+                    bossBattleMusic.play().catch(() => {});
+                }
+            }
+        }
+        
+        // Stop all audio completely
+        function stopAllAudio() {
+            // Stop and clear current track
+            if (currentTrack) {
+                currentTrack.pause();
+                currentTrack.currentTime = 0;
+                if (currentTrack.endedHandler) {
+                    currentTrack.removeEventListener('ended', currentTrack.endedHandler);
+                }
+                if (currentTrack.errorHandler) {
+                    currentTrack.removeEventListener('error', currentTrack.errorHandler);
+                }
+                currentTrack = null;
+            }
+            
+            // Stop boss music
+            if (bossIntroMusic) {
+                bossIntroMusic.pause();
+                bossIntroMusic.currentTime = 0;
+                bossIntroMusic = null;
+            }
+            if (bossBattleMusic) {
+                bossBattleMusic.pause();
+                bossBattleMusic.currentTime = 0;
+                bossBattleMusic = null;
+            }
+            
+            // Stop all sound effects
+            if (window.eatSounds) {
+                eatSounds.forEach(sound => {
+                    if (sound) {
+                        sound.pause();
+                        sound.currentTime = 0;
+                    }
+                });
+            }
+        }
+        
+        // Visibility API handlers
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                pauseAllAudio();
+            } else {
+                resumeAudio();
+            }
+        });
+        
+        // iOS-specific handlers (fallback for Safari)
+        window.addEventListener('blur', () => {
+            pauseAllAudio();
+        });
+        
+        window.addEventListener('focus', () => {
+            // Small delay to ensure proper state
+            setTimeout(() => {
+                resumeAudio();
+            }, 100);
+        });
+        
+        // Page hide/show events (iOS Safari specific)
+        window.addEventListener('pagehide', () => {
+            pauseAllAudio();
+        });
+        
+        window.addEventListener('pageshow', (event) => {
+            // Check if page is being restored from cache
+            if (!event.persisted) {
+                resumeAudio();
+            }
+        });
+        
+        // Clean up on page unload
+        window.addEventListener('beforeunload', () => {
+            stopAllAudio();
+        });
+        
+        // Also handle unload event as fallback
+        window.addEventListener('unload', () => {
+            stopAllAudio();
+        });
+        
         // Debug function to reset discoveries
         window.resetDiscoveries = function() {
             // Clear from localStorage

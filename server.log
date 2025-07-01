@@ -1936,3 +1936,118 @@ Loaded 20889 deleted combinations
 [DEBUG] Falling through to static file handler for: GET /sounds/retro-arcade-beep.mp3
 [DEBUG] Falling through to static file handler for: GET /sounds/unlock-common.mp3
 [DEBUG] Falling through to static file handler for: GET /music/good-times.mp3
+[DEBUG] Falling through to static file handler for: GET /music/summer-haze.mp3
+[DEBUG] Falling through to static file handler for: GET /elements/data/elements.json?t=1751341072946
+[DEBUG] Falling through to static file handler for: GET /elements/data/combinations.json?t=1751341072946
+[DEBUG] Falling through to static file handler for: GET /elements/deleted-combinations.json?t=1751341072946
+[Admin Access] IP: ::1, Forwarded: undefined, Is Localhost: true
+[Save] Updated 1 emoji mappings in main file
+[DEBUG] Falling through to static file handler for: GET /elements/data/elements.json?t=1751341097291
+[DEBUG] Falling through to static file handler for: GET /elements/data/combinations.json?t=1751341097291
+[DEBUG] Falling through to static file handler for: GET /elements/deleted-combinations.json?t=1751341097291
+[Admin Access] IP: ::1, Forwarded: undefined, Is Localhost: true
+[Save] Added 2 combinations to main file
+[DEBUG] Falling through to static file handler for: GET /elements/data/elements.json?t=1751341111224
+[DEBUG] Falling through to static file handler for: GET /elements/data/combinations.json?t=1751341111224
+[DEBUG] Falling through to static file handler for: GET /elements/deleted-combinations.json?t=1751341111224
+[Admin Access] IP: ::1, Forwarded: undefined, Is Localhost: true
+[Save] Added 2 combinations to main file
+[DEBUG] Falling through to static file handler for: GET /elements/data/elements.json?t=1751341120401
+[DEBUG] Falling through to static file handler for: GET /elements/data/combinations.json?t=1751341120401
+[DEBUG] Falling through to static file handler for: GET /elements/deleted-combinations.json?t=1751341120401
+[Admin Access] IP: ::1, Forwarded: undefined, Is Localhost: true
+[Save] Added 2 combinations to main file
+[DEBUG] Falling through to static file handler for: GET /elements/data/elements.json?t=1751341133911
+[DEBUG] Falling through to static file handler for: GET /elements/data/combinations.json?t=1751341133911
+[DEBUG] Falling through to static file handler for: GET /elements/deleted-combinations.json?t=1751341133911
+[Admin Access] IP: ::1, Forwarded: undefined, Is Localhost: true
+[Save] Added 2 combinations to main file
+[DEBUG] Falling through to static file handler for: GET /elements/data/elements.json?t=1751341144796
+[DEBUG] Falling through to static file handler for: GET /elements/data/combinations.json?t=1751341144796
+[DEBUG] Falling through to static file handler for: GET /elements/deleted-combinations.json?t=1751341144796
+[DEBUG] Falling through to static file handler for: GET /elements/data/elements.json?t=1751341147321
+[DEBUG] Falling through to static file handler for: GET /elements/data/combinations.json?t=1751341147321
+[DEBUG] Falling through to static file handler for: GET /elements/deleted-combinations.json?t=1751341147321
+[Admin Access] IP: ::1, Forwarded: undefined, Is Localhost: true
+[DELETE] Handling delete-combination request
+[DEBUG] Falling through to static file handler for: GET /elements/data/elements.json?t=1751341158625
+[DEBUG] Falling through to static file handler for: GET /elements/data/combinations.json?t=1751341158625
+[DEBUG] Falling through to static file handler for: GET /elements/deleted-combinations.json?t=1751341158625
+[Admin Access] IP: ::1, Forwarded: undefined, Is Localhost: true
+[DELETE] Handling delete-combination request
+[DEBUG] Falling through to static file handler for: GET /elements/data/elements.json?t=1751341160781
+[DEBUG] Falling through to static file handler for: GET /elements/data/combinations.json?t=1751341160781
+[DEBUG] Falling through to static file handler for: GET /elements/deleted-combinations.json?t=1751341160781
+[Admin Access] IP: ::1, Forwarded: undefined, Is Localhost: true
+[DELETE] Handling delete-combination request
+[DEBUG] Falling through to static file handler for: GET /elements/data/elements.json?t=1751341162290
+[DEBUG] Falling through to static file handler for: GET /elements/data/combinations.json?t=1751341162290
+[DEBUG] Falling through to static file handler for: GET /elements/deleted-combinations.json?t=1751341162290
+[Admin Access] IP: ::1, Forwarded: undefined, Is Localhost: true
+[DELETE] Handling delete-combination request
+[DEBUG] Falling through to static file handler for: GET /elements/data/elements.json?t=1751341164726
+[DEBUG] Falling through to static file handler for: GET /elements/data/combinations.json?t=1751341164726
+[DEBUG] Falling through to static file handler for: GET /elements/deleted-combinations.json?t=1751341164726
+[Admin Access] IP: ::1, Forwarded: undefined, Is Localhost: true
+[DELETE] Handling delete-combination request
+[DEBUG] Falling through to static file handler for: GET /elements/data/elements.json?t=1751341165647
+[DEBUG] Falling through to static file handler for: GET /elements/data/combinations.json?t=1751341165647
+[DEBUG] Falling through to static file handler for: GET /elements/deleted-combinations.json?t=1751341165647
+[Admin Access] IP: ::1, Forwarded: undefined, Is Localhost: true
+[DELETE] Handling delete-combination request
+[DEBUG] Falling through to static file handler for: GET /elements/data/elements.json?t=1751341166816
+[DEBUG] Falling through to static file handler for: GET /elements/data/combinations.json?t=1751341166816
+[DEBUG] Falling through to static file handler for: GET /elements/deleted-combinations.json?t=1751341166816
+[Admin Access] IP: ::1, Forwarded: undefined, Is Localhost: true
+[Save] Added 2 combinations to main file
+[DEBUG] Falling through to static file handler for: GET /elements/data/elements.json?t=1751341176077
+[DEBUG] Falling through to static file handler for: GET /elements/data/combinations.json?t=1751341176077
+[DEBUG] Falling through to static file handler for: GET /elements/deleted-combinations.json?t=1751341176077
+[Admin Access] IP: ::1, Forwarded: undefined, Is Localhost: true
+[Save] Added 2 combinations to main file
+[DEBUG] Falling through to static file handler for: GET /elements/data/elements.json?t=1751341183441
+[DEBUG] Falling through to static file handler for: GET /elements/data/combinations.json?t=1751341183441
+[DEBUG] Falling through to static file handler for: GET /elements/deleted-combinations.json?t=1751341183441
+[DEBUG] Falling through to static file handler for: GET /music/bright-white-lights.mp3
+[Admin Access] IP: ::1, Forwarded: undefined, Is Localhost: true
+[Save] Added 2 combinations to main file
+[DEBUG] Falling through to static file handler for: GET /elements/data/elements.json?t=1751341198371
+[DEBUG] Falling through to static file handler for: GET /elements/data/combinations.json?t=1751341198371
+[DEBUG] Falling through to static file handler for: GET /elements/deleted-combinations.json?t=1751341198371
+[Admin Access] IP: ::1, Forwarded: undefined, Is Localhost: true
+[Save] Added 2 combinations to main file
+[DEBUG] Falling through to static file handler for: GET /elements/data/elements.json?t=1751341221717
+[DEBUG] Falling through to static file handler for: GET /elements/data/combinations.json?t=1751341221717
+[DEBUG] Falling through to static file handler for: GET /elements/deleted-combinations.json?t=1751341221717
+[Admin Access] IP: ::1, Forwarded: undefined, Is Localhost: true
+[Save] Added 2 combinations to main file
+[DEBUG] Falling through to static file handler for: GET /elements/data/elements.json?t=1751341235913
+[DEBUG] Falling through to static file handler for: GET /elements/data/combinations.json?t=1751341235913
+[DEBUG] Falling through to static file handler for: GET /elements/deleted-combinations.json?t=1751341235913
+[DEBUG] Falling through to static file handler for: GET /elements/data/elements.json?t=1751341272306
+[DEBUG] Falling through to static file handler for: GET /elements/data/combinations.json?t=1751341272306
+[DEBUG] Falling through to static file handler for: GET /elements/deleted-combinations.json?t=1751341272306
+[Admin Access] IP: ::1, Forwarded: undefined, Is Localhost: true
+[Save] Updated 1 emoji mappings in main file
+[DEBUG] Falling through to static file handler for: GET /elements/data/elements.json?t=1751341303223
+[DEBUG] Falling through to static file handler for: GET /elements/data/combinations.json?t=1751341303223
+[DEBUG] Falling through to static file handler for: GET /elements/deleted-combinations.json?t=1751341303223
+[Admin Access] IP: ::1, Forwarded: undefined, Is Localhost: true
+[Save] Added 2 combinations to main file
+[DEBUG] Falling through to static file handler for: GET /elements/data/elements.json?t=1751341319019
+[DEBUG] Falling through to static file handler for: GET /elements/data/combinations.json?t=1751341319019
+[DEBUG] Falling through to static file handler for: GET /elements/deleted-combinations.json?t=1751341319019
+[DEBUG] Falling through to static file handler for: GET /elements/data/elements.json?t=1751341321122
+[DEBUG] Falling through to static file handler for: GET /elements/data/combinations.json?t=1751341321122
+[DEBUG] Falling through to static file handler for: GET /elements/deleted-combinations.json?t=1751341321122
+[Admin Access] IP: ::1, Forwarded: undefined, Is Localhost: true
+[DELETE] Handling delete-combination request
+[DEBUG] Falling through to static file handler for: GET /elements/data/elements.json?t=1751341327829
+[DEBUG] Falling through to static file handler for: GET /elements/data/combinations.json?t=1751341327829
+[DEBUG] Falling through to static file handler for: GET /elements/deleted-combinations.json?t=1751341327829
+[Admin Access] IP: ::1, Forwarded: undefined, Is Localhost: true
+[Save] Added 1 combinations to main file
+[DEBUG] Falling through to static file handler for: GET /elements/data/elements.json?t=1751341352398
+[DEBUG] Falling through to static file handler for: GET /elements/data/combinations.json?t=1751341352398
+[DEBUG] Falling through to static file handler for: GET /elements/deleted-combinations.json?t=1751341352398
+[DEBUG] Falling through to static file handler for: GET /music/on-the-up.mp3
