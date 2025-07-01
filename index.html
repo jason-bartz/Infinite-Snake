@@ -15519,22 +15519,37 @@
                         // Try to submit right away if module is loaded
                         if (window.supabaseModule && window.supabaseModule.submitScore) {
                             console.log('[DEATH] Submitting score NOW...');
-                            window.supabaseModule.submitScore(
+                            try {
+                                window.supabaseModule.submitScore(
                                 submitName,
                                 Math.floor(playerSnake.score),
                                 playerDiscoveredElements.size,
                                 submitTime,
                                 playerSnake.kills
-                            ).then(result => {
-                                console.log('[DEATH] Score submitted successfully!', result);
-                                if (result && result.rank) {
-                                    const rankEl = document.getElementById('globalRank');
-                                    if (rankEl) rankEl.textContent = `#${result.rank}`;
-                                }
-                                leaderboardSubmitted = true;
-                            }).catch(err => {
-                                console.error('[DEATH] Submission failed:', err);
-                            });
+                                ).then(result => {
+                                    console.log('[DEATH] Score submission result:', result);
+                                    if (result) {
+                                        // Try different possible rank field names
+                                        const rank = result.rank || result.daily_rank || result.position || result.globalRank;
+                                        console.log('[DEATH] Extracted rank:', rank);
+                                        
+                                        if (rank) {
+                                            const rankEl = document.getElementById('globalRank');
+                                            if (rankEl) {
+                                                rankEl.textContent = `#${rank}`;
+                                                console.log('[DEATH] Updated rank display to:', `#${rank}`);
+                                            } else {
+                                                console.error('[DEATH] Could not find globalRank element!');
+                                            }
+                                        }
+                                        leaderboardSubmitted = true;
+                                    }
+                                }).catch(err => {
+                                    console.error('[DEATH] Submission failed:', err);
+                                });
+                            } catch (error) {
+                                console.error('[DEATH] Error calling submitScore:', error);
+                            }
                         } else {
                             console.error('[DEATH] Supabase not loaded, will retry...');
                             // Keep trying every 500ms until it works
