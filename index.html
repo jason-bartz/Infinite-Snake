@@ -13273,23 +13273,26 @@
                 justify-content: center;
                 align-items: center;
                 z-index: 10000;
-                font-family: monospace;
+                font-family: 'Press Start 2P', monospace;
                 image-rendering: pixelated;
+                image-rendering: -moz-crisp-edges;
+                image-rendering: crisp-edges;
             `;
             
             function updateGameOverScreen() {
                 gameOverScreen.innerHTML = `
                     <div style="
-                        background: linear-gradient(135deg, rgba(20, 20, 40, 0.98) 0%, rgba(30, 30, 50, 0.95) 100%);
-                        border: 4px solid #4ecdc4;
+                        background: #1a1a2e;
+                        border: 4px solid #fff;
                         border-radius: 0;
-                        padding: 40px 50px;
+                        padding: 32px 48px;
                         box-shadow: 
-                            0 0 0 2px #000,
-                            0 0 0 6px #2a2a4a,
-                            0 0 30px rgba(78, 205, 196, 0.5);
+                            inset -4px -4px 0 #0f0f1e,
+                            inset 4px 4px 0 #2a2a4a,
+                            0 0 0 4px #000;
                         text-align: center;
                         position: relative;
+                        min-width: 400px;
                     ">
                         <!-- Corner decorations -->
                         <div style="position: absolute; top: -2px; left: -2px; width: 20px; height: 20px; border-top: 4px solid #FFD700; border-left: 4px solid #FFD700;"></div>
@@ -13298,40 +13301,42 @@
                         <div style="position: absolute; bottom: -2px; right: -2px; width: 20px; height: 20px; border-bottom: 4px solid #FFD700; border-right: 4px solid #FFD700;"></div>
                         
                         <h1 style="
-                            font-size: 48px; 
-                            color: #e74c3c; 
-                            margin-bottom: 30px; 
+                            font-size: 24px; 
+                            color: #ff0000; 
+                            margin-bottom: 24px; 
                             text-shadow: 
-                                2px 2px 0 #8b0000,
-                                4px 4px 0 #000,
-                                4px 4px 10px rgba(231, 76, 60, 0.5);
-                            letter-spacing: 4px;
+                                2px 2px 0 #800000,
+                                3px 3px 0 #000;
+                            letter-spacing: 2px;
+                            font-family: 'Press Start 2P', monospace;
                         ">GAME OVER</h1>
                         
                         <div style="
-                            background: rgba(0, 0, 0, 0.5);
-                            border: 2px solid #4ecdc4;
-                            padding: 20px;
-                            margin-bottom: 25px;
-                            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+                            background: #0f0f1e;
+                            border: 2px solid #fff;
+                            padding: 16px;
+                            margin-bottom: 20px;
+                            box-shadow: 
+                                inset -2px -2px 0 #2a2a4a,
+                                inset 2px 2px 0 #000;
                         ">
-                            <div style="margin-bottom: 15px;">
-                                <span style="color: #888; font-size: 14px; text-transform: uppercase;">Final Score</span>
-                                <div style="font-size: 32px; color: #FFD700; text-shadow: 2px 2px 0 #000;">
+                            <div style="margin-bottom: 16px;">
+                                <span style="color: #888; font-size: 10px; text-transform: uppercase; font-family: 'Press Start 2P', monospace;">Final Score</span>
+                                <div style="font-size: 16px; color: #FFD700; text-shadow: 2px 2px 0 #000; margin-top: 8px; font-family: 'Press Start 2P', monospace;">
                                     ${playerSnake ? playerSnake.score.toLocaleString() : 0}
                                 </div>
                             </div>
                             
-                            <div style="display: flex; justify-content: space-around; margin-top: 20px;">
+                            <div style="display: flex; justify-content: space-around; margin-top: 16px;">
                                 <div>
-                                    <span style="color: #888; font-size: 12px; text-transform: uppercase;">Elements</span>
-                                    <div style="font-size: 20px; color: #4ecdc4;">
+                                    <span style="color: #888; font-size: 8px; text-transform: uppercase; font-family: 'Press Start 2P', monospace;">Elements</span>
+                                    <div style="font-size: 12px; color: #4ecdc4; margin-top: 4px; font-family: 'Press Start 2P', monospace;">
                                         ${playerDiscoveredElements ? playerDiscoveredElements.size : 0}
                                     </div>
                                 </div>
                                 <div>
-                                    <span style="color: #888; font-size: 12px; text-transform: uppercase;">Time</span>
-                                    <div style="font-size: 20px; color: #4ecdc4;">
+                                    <span style="color: #888; font-size: 8px; text-transform: uppercase; font-family: 'Press Start 2P', monospace;">Time</span>
+                                    <div style="font-size: 12px; color: #4ecdc4; margin-top: 4px; font-family: 'Press Start 2P', monospace;">
                                         ${timeString}
                                     </div>
                                 </div>
@@ -13339,42 +13344,47 @@
                         </div>
                         
                         <div style="
-                            font-size: 16px; 
+                            font-size: 10px; 
                             color: #4ecdc4; 
-                            margin-bottom: 30px;
-                            padding: 10px;
-                            background: rgba(78, 205, 196, 0.1);
-                            border: 1px solid rgba(78, 205, 196, 0.3);
+                            margin-bottom: 24px;
+                            padding: 8px;
+                            background: #0f0f1e;
+                            border: 2px solid #4ecdc4;
+                            font-family: 'Press Start 2P', monospace;
+                            box-shadow: 
+                                inset -2px -2px 0 #2a2a4a,
+                                inset 2px 2px 0 #000;
                         ">
                             ${isSubmitting ? 
                                 'Submitting score...' : 
                                 (dailyRank ? 
-                                    `🏆 Daily Leaderboard Rank: #${dailyRank}` : 
+                                    `Daily Leaderboard Rank: #${dailyRank}` : 
                                     'Score submitted to leaderboard!'
                                 )
                             }
                         </div>
                         
                         <button onclick="location.reload()" style="
-                            padding: 15px 40px;
-                            font-size: 20px;
+                            padding: 12px 32px;
+                            font-size: 10pt;
                             background: #4ecdc4;
                             color: #000;
-                            border: 3px solid #2a8a86;
+                            border: 4px solid #fff;
                             box-shadow: 
-                                0 4px 0 #2a8a86,
-                                0 8px 10px rgba(0, 0, 0, 0.3);
+                                inset -2px -2px 0 #2a8a86,
+                                inset 2px 2px 0 #6eedea,
+                                0 0 0 2px #000;
                             cursor: pointer;
                             text-transform: uppercase;
-                            letter-spacing: 2px;
-                            font-weight: bold;
-                            transition: all 0.1s;
+                            letter-spacing: 1px;
+                            font-family: 'Press Start 2P', monospace;
+                            transition: none;
                             position: relative;
                             top: 0;
                         "
-                        onmousedown="this.style.top='4px'; this.style.boxShadow='0 0 0 #2a8a86, 0 4px 10px rgba(0, 0, 0, 0.3)';"
-                        onmouseup="this.style.top='0'; this.style.boxShadow='0 4px 0 #2a8a86, 0 8px 10px rgba(0, 0, 0, 0.3)';"
-                        onmouseleave="this.style.top='0'; this.style.boxShadow='0 4px 0 #2a8a86, 0 8px 10px rgba(0, 0, 0, 0.3)';"
+                        onmousedown="this.style.top='2px'; this.style.boxShadow='inset -2px -2px 0 #2a8a86, inset 2px 2px 0 #6eedea, 0 0 0 2px #000';"
+                        onmouseup="this.style.top='0'; this.style.boxShadow='inset -2px -2px 0 #2a8a86, inset 2px 2px 0 #6eedea, 0 0 0 2px #000';"
+                        onmouseleave="this.style.top='0'; this.style.boxShadow='inset -2px -2px 0 #2a8a86, inset 2px 2px 0 #6eedea, 0 0 0 2px #000';"
                         >
                             New Game
                         </button>
