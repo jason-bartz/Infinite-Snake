@@ -3424,7 +3424,7 @@
     <!-- New Element System Scripts -->
     <script src="elements/data/loader.js"></script>
     <!-- Supabase Integration -->
-    <script type="module" src="js/supabase.js"></script>
+    <!-- Supabase module loaded dynamically via import() -->
     
     <!-- Mobile Optimization Scripts -->
     <script src="js/asset-preloader.js"></script>
@@ -12329,16 +12329,26 @@
         // Initialize Supabase when the module loads
         async function initSupabase() {
             try {
+                console.log('[SUPABASE] Starting initialization...');
                 supabaseModule = await import('./js/supabase.js');
-                await supabaseModule.initializeAuth();
+                console.log('[SUPABASE] Module loaded:', supabaseModule);
                 
-                // Update any waiting submission forms
-                const statusEl = document.getElementById('submissionStatus');
-                if (statusEl && statusEl.textContent.includes('not ready')) {
-                    statusEl.innerHTML = '';
+                if (supabaseModule && supabaseModule.initializeAuth) {
+                    await supabaseModule.initializeAuth();
+                    console.log('[SUPABASE] Successfully initialized!');
+                    
+                    // Update any waiting submission forms
+                    const statusEl = document.getElementById('submissionStatus');
+                    if (statusEl && statusEl.textContent.includes('not ready')) {
+                        statusEl.innerHTML = '';
+                    }
+                } else {
+                    console.error('[SUPABASE] Module loaded but functions not found');
                 }
             } catch (error) {
-                console.error('Failed to initialize Supabase:', error);
+                console.error('[SUPABASE] Failed to initialize:', error);
+                console.error('[SUPABASE] Error details:', error.message, error.stack);
+                
                 // Show error in submission status if visible
                 const statusEl = document.getElementById('submissionStatus');
                 if (statusEl) {
