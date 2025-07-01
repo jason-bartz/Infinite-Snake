@@ -12563,20 +12563,8 @@
         
         // Skip leaderboard submission
         window.skipLeaderboard = function() {
-            console.log('skipLeaderboard called - Skip button clicked!');
-            
-            // Visual feedback
-            const skipBtn = document.getElementById('skipScoreBtn');
-            if (skipBtn) {
-                skipBtn.style.opacity = '0.7';
-            }
-            
-            leaderboardSubmitted = true;
-            document.getElementById('leaderboardSubmission').style.display = 'none';
-            document.getElementById('respawnTimerDiv').style.display = 'block';
-            document.getElementById('quickRespawnDiv').style.display = 'block';
-            
-            console.log('Skip successful - showing respawn timer');
+            console.log('[DEPRECATED] skipLeaderboard called - this function should not be used anymore');
+            // Removed - auto-submit only now
         }
         
         // Force immediate respawn
