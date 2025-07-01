@@ -12840,14 +12840,34 @@
                     }
                     
                     // Automatic leaderboard submission for infinite mode
+                    console.log('[LEADERBOARD] Checking submission conditions:', {
+                        gameMode: gameMode,
+                        isInfinite: gameMode === 'infinite',
+                        leaderboardSubmitted: leaderboardSubmitted,
+                        playerScore: playerSnake.score,
+                        hasScore: playerSnake.score > 0,
+                        gameSessionStartTime: gameSessionStartTime,
+                        currentTime: Date.now()
+                    });
+                    
                     if (gameMode === 'infinite' && !leaderboardSubmitted && playerSnake.score > 0) {
                         const playTime = gameSessionStartTime ? 
                             Math.floor((Date.now() - gameSessionStartTime) / 1000) : 0;
                         
-                        // Only submit if played for at least 10 seconds
-                        if (playTime >= 10) {
+                        console.log('[LEADERBOARD] Play time:', playTime, 'seconds');
+                        
+                        // Only submit if played for at least 5 seconds (reduced from 10)
+                        if (playTime >= 5) {
                             // Get player name
                             const playerName = localStorage.getItem('playerName') || window.nameGenerator.generateRandomName();
+                            
+                            console.log('[LEADERBOARD] Submitting score automatically:', {
+                                name: playerName,
+                                score: Math.floor(playerSnake.score),
+                                discoveries: playerDiscoveredElements.size,
+                                kills: playerSnake.kills,
+                                playTime: playTime
+                            });
                             
                             // Submit score automatically
                             if (window.supabaseModule && window.supabaseModule.submitScore) {
@@ -12865,7 +12885,9 @@
                                         }
                                     }
                                 }).catch(error => {
-                                    console.error('Failed to submit score:', error);
+                                    console.error('[LEADERBOARD] Failed to submit score:', error);
+                                    // Still mark as submitted to prevent spam
+                                    leaderboardSubmitted = true;
                                 });
                             }
                             
@@ -15549,8 +15571,10 @@
                     // Reset leaderboard submission flag for next death
                     leaderboardSubmitted = false;
                     
-                    // Reset game session start time for proper validation on next death
-                    gameSessionStartTime = Date.now();
+                    // Only reset game session start time if it's null (first spawn)
+                    if (!gameSessionStartTime) {
+                        gameSessionStartTime = Date.now();
+                    }
                     
                     // Start a new game session for proper server-side validation
                     if (gameMode === 'infinite' && supabaseModule) {
