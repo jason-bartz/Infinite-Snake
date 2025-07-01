@@ -12347,8 +12347,16 @@
             }
         }
         
-        // Call this when the game starts
+        // Initialize Supabase immediately on page load
         initSupabase();
+        
+        // Also try to init again after a delay in case it failed
+        setTimeout(() => {
+            if (!supabaseModule) {
+                console.log('[SUPABASE] Retrying initialization...');
+                initSupabase();
+            }
+        }, 2000);
         
         // Add event listeners when elements become visible
         function setupLeaderboardListeners() {
@@ -12860,10 +12868,13 @@
                             // Submit score automatically
                             if (window.supabaseModule && window.supabaseModule.submitScore) {
                                 console.log('[LEADERBOARD] Supabase module found, submitting...');
+                                
+                                // Call the working submitScore function with ALL required parameters
                                 window.supabaseModule.submitScore(
                                     playerName,
                                     Math.floor(playerSnake.score),
                                     playerDiscoveredElements.size,
+                                    playTime,  // Add playTime parameter that was missing!
                                     playerSnake.kills
                                 ).then(result => {
                                     console.log('[LEADERBOARD] Submission result:', result);
@@ -15470,6 +15481,39 @@
                         length: playerSnake.segments.length,
                         playTime: gameSessionStartTime ? Math.floor((Date.now() - gameSessionStartTime) / 1000) : 0
                     });
+                    
+                    // AUTO-SUBMIT SCORE ON DEATH
+                    setTimeout(() => {
+                        if (gameMode === 'infinite' && !leaderboardSubmitted && playerSnake.score > 0) {
+                            const playerName = localStorage.getItem('playerName') || 'Anonymous';
+                            const playTime = gameSessionStartTime ? Math.floor((Date.now() - gameSessionStartTime) / 1000) : 0;
+                            
+                            console.log('[AUTO-SUBMIT] Attempting automatic score submission...');
+                            
+                            if (window.supabaseModule && window.supabaseModule.submitScore) {
+                                window.supabaseModule.submitScore(
+                                    playerName,
+                                    Math.floor(playerSnake.score),
+                                    playerDiscoveredElements.size,
+                                    playTime,
+                                    playerSnake.kills
+                                ).then(result => {
+                                    console.log('[AUTO-SUBMIT] Score submitted!', result);
+                                    if (result && result.rank) {
+                                        const globalRankEl = document.getElementById('globalRank');
+                                        if (globalRankEl) {
+                                            globalRankEl.textContent = `#${result.rank}`;
+                                        }
+                                        leaderboardSubmitted = true;
+                                    }
+                                }).catch(err => {
+                                    console.error('[AUTO-SUBMIT] Failed:', err);
+                                });
+                            } else {
+                                console.error('[AUTO-SUBMIT] Supabase module not loaded!');
+                            }
+                        }
+                    }, 100); // Small delay to ensure UI is ready
                     
                     // Also dispatch game end event
                     dispatchGameEvent('gameEnd', {
