@@ -148,9 +148,13 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="mobile-web-app-capable" content="yes">
     
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    
     <!-- Mobile optimization tags -->
     <meta name="HandheldFriendly" content="true">
     <meta name="format-detection" content="telephone=no">
+    <meta name="screen-orientation" content="landscape">
     
     <!-- Alternate language versions -->
     <link rel="alternate" hreflang="en" href="https://infinitesnake.io" />
@@ -4516,6 +4520,9 @@
         
         // Show rotate device message for mobile users
         function showRotateDeviceMessage() {
+            // Check if message already exists
+            if (document.getElementById('rotate-device-message')) return;
+            
             const rotateMsg = document.createElement('div');
             rotateMsg.id = 'rotate-device-message';
             rotateMsg.style.cssText = `
@@ -4524,7 +4531,7 @@
                 left: 0;
                 width: 100vw;
                 height: 100vh;
-                background: rgba(0, 0, 0, 0.9);
+                background: rgba(0, 0, 0, 0.95);
                 display: flex;
                 flex-direction: column;
                 align-items: center;
@@ -4536,22 +4543,61 @@
                 padding: 20px;
             `;
             rotateMsg.innerHTML = `
-                <div style="font-size: 24px; margin-bottom: 20px;">📱</div>
-                <div style="font-size: 12px; line-height: 1.5;">Please rotate your device</div>
-                <div style="font-size: 10px; margin-top: 10px; color: #888;">For the best experience</div>
+                <div style="font-size: 48px; margin-bottom: 30px; animation: rotate 2s ease-in-out infinite;">📱</div>
+                <div style="font-size: 14px; line-height: 1.8; margin-bottom: 10px;">Please rotate your device</div>
+                <div style="font-size: 11px; margin-top: 10px; color: #4ecdc4;">Infinite Snake is best in landscape</div>
             `;
+            
+            // Add rotation animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes rotate {
+                    0% { transform: rotate(0deg); }
+                    25% { transform: rotate(-90deg); }
+                    50% { transform: rotate(-90deg); }
+                    75% { transform: rotate(0deg); }
+                    100% { transform: rotate(0deg); }
+                }
+            `;
+            rotateMsg.appendChild(style);
+            
             document.body.appendChild(rotateMsg);
             
             // Remove message when device is rotated
             const checkOrientation = () => {
                 if (window.innerWidth > window.innerHeight) {
-                    rotateMsg.remove();
+                    const msg = document.getElementById('rotate-device-message');
+                    if (msg) msg.remove();
                     window.removeEventListener('orientationchange', checkOrientation);
                     window.removeEventListener('resize', checkOrientation);
                 }
             };
             window.addEventListener('orientationchange', checkOrientation);
             window.addEventListener('resize', checkOrientation);
+        }
+        
+        // Force landscape orientation for mobile devices
+        function lockToLandscape() {
+            if (screen.orientation && screen.orientation.lock) {
+                screen.orientation.lock('landscape').then(() => {
+                    console.log('Successfully locked to landscape mode');
+                }).catch((err) => {
+                    console.log('Could not lock orientation:', err);
+                    // Still check and show rotate message if needed
+                    checkAndShowRotateMessage();
+                });
+            } else {
+                // Fallback for browsers without orientation API
+                console.log('Screen orientation API not supported');
+                checkAndShowRotateMessage();
+            }
+        }
+        
+        // Check orientation and show rotate message if needed
+        function checkAndShowRotateMessage() {
+            if (window.innerHeight > window.innerWidth) {
+                showRotateDeviceMessage();
+            }
         }
         
         // Alchemy Vision power-up
@@ -13266,18 +13312,7 @@
                 return;
             }
             
-            // Force landscape mode on mobile devices
-            if (isTabletOrMobile() && screen.orientation && screen.orientation.lock) {
-                screen.orientation.lock('landscape').then(() => {
-                    console.log('Locked to landscape mode');
-                }).catch((err) => {
-                    console.log('Could not lock orientation:', err);
-                    // Fallback: show a message to rotate device
-                    if (window.innerHeight > window.innerWidth) {
-                        showRotateDeviceMessage();
-                    }
-                });
-            }
+            // No need to lock orientation here - already locked on page load for mobile
             
             // Clear all game state to ensure fresh start
             snakes = [];
@@ -13467,11 +13502,7 @@
             gameStarted = false;
             paused = false;
             
-            // Unlock orientation when returning to title screen
-            if (isTabletOrMobile() && screen.orientation && screen.orientation.unlock) {
-                screen.orientation.unlock();
-                console.log('Unlocked screen orientation');
-            }
+            // Keep orientation locked on mobile - no unlocking
             
             // Clear ALL game objects
             snakes = [];
@@ -14822,6 +14853,16 @@
             // Apply mobile class more accurately
             if (isTabletOrMobile()) {
                 document.body.classList.add('mobile');
+                
+                // Force landscape orientation immediately on mobile
+                lockToLandscape();
+                
+                // Monitor orientation changes
+                window.addEventListener('orientationchange', checkAndShowRotateMessage);
+                window.addEventListener('resize', checkAndShowRotateMessage);
+                
+                // Initial check
+                checkAndShowRotateMessage();
             }
             
             // Handle orientation changes

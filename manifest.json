@@ -1,0 +1,25 @@
+{
+  "name": "Infinite Snake",
+  "short_name": "Infinite Snake",
+  "description": "Snake meets Little Alchemy - Consume elements and discover new combinations!",
+  "start_url": "/",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#000011",
+  "theme_color": "#4ecdc4",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["games", "entertainment"],
+  "lang": "en-US"
+}
