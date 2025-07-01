@@ -5983,6 +5983,7 @@
             }
             
             // Stop current track if playing
+            let oldTrack = null;
             if (currentTrack && currentTrack.stopRequested !== true) {
                 // Mark that we're stopping this track intentionally
                 currentTrack.stopRequested = true;
@@ -5991,7 +5992,7 @@
                 currentTrack.removeEventListener('error', currentTrack.errorHandler);
                 currentTrack.pause();
                 // Don't clear src as it can trigger ended event
-                currentTrack = null; // Clear reference
+                oldTrack = currentTrack; // Keep reference to old track
             }
             
             // Pick random track
@@ -6044,13 +6045,22 @@
             if (playPromise !== undefined) {
                 playPromise.then(() => {
                     isPlayingNext = false; // Reset flag on success
+                    // Clear old track reference now that new one is playing
+                    if (oldTrack) {
+                        oldTrack = null;
+                    }
                 }).catch(e => {
+                    console.error('[AUDIO] Failed to play track:', trackName, e);
                     // Store track to retry on user interaction
                     window.pendingMusicTrack = currentTrack;
                     isPlayingNext = false; // Reset flag on error
                 });
             } else {
                 isPlayingNext = false; // Reset flag if no promise
+                // Clear old track reference
+                if (oldTrack) {
+                    oldTrack = null;
+                }
             }
         }
         
@@ -6125,20 +6135,34 @@
         
         // Pause all audio sources
         function pauseAllAudio() {
+            console.log('[AUDIO] Pausing all audio');
+            
             // Track what was playing
             audioWasPlaying.music = currentTrack && !currentTrack.paused;
             audioWasPlaying.bossIntro = bossIntroMusic && !bossIntroMusic.paused;
             audioWasPlaying.bossBattle = bossBattleMusic && !bossBattleMusic.paused;
             
+            console.log('[AUDIO] Audio state before pause:', {
+                music: audioWasPlaying.music,
+                bossIntro: audioWasPlaying.bossIntro,
+                bossBattle: audioWasPlaying.bossBattle,
+                currentTrack: currentTrack ? 'exists' : 'null',
+                gameStarted,
+                musicMuted
+            });
+            
             // Pause everything
             if (currentTrack) {
                 currentTrack.pause();
+                console.log('[AUDIO] Paused background music');
             }
             if (bossIntroMusic) {
                 bossIntroMusic.pause();
+                console.log('[AUDIO] Paused boss intro music');
             }
             if (bossBattleMusic) {
                 bossBattleMusic.pause();
+                console.log('[AUDIO] Paused boss battle music');
             }
             
             // Also pause any sound effects
@@ -6152,20 +6176,86 @@
         }
         
         // Resume audio that was playing before
+        let resumeAttempts = 0;
+        const MAX_RESUME_ATTEMPTS = 3;
+        
         function resumeAudio() {
-            if (musicMuted || !gameStarted) return;
+            console.log('[AUDIO] Resume audio called', {
+                audioWasPlaying,
+                currentTrack: currentTrack ? 'exists' : 'null',
+                musicMuted,
+                gameStarted
+            });
             
-            // Resume background music
-            if (audioWasPlaying.music && currentTrack) {
-                currentTrack.play().catch(() => {});
+            // Only proceed if we have tracked audio state
+            if (!audioWasPlaying.music && !audioWasPlaying.bossIntro && !audioWasPlaying.bossBattle) {
+                console.log('[AUDIO] No audio was playing before pause');
+                return;
             }
             
-            // Resume boss music if in boss encounter
-            if (bossEncounterActive) {
+            // Resume background music if it was playing and audio is not muted
+            if (audioWasPlaying.music && !musicMuted && gameStarted) {
+                if (currentTrack) {
+                    console.log('[AUDIO] Attempting to resume background music');
+                    const playPromise = currentTrack.play();
+                    
+                    if (playPromise !== undefined) {
+                        playPromise.then(() => {
+                            console.log('[AUDIO] Background music resumed successfully');
+                            audioWasPlaying.music = false;
+                            resumeAttempts = 0;
+                        }).catch(error => {
+                            console.error('[AUDIO] Failed to resume background music:', error);
+                            
+                            // Retry with exponential backoff
+                            if (resumeAttempts < MAX_RESUME_ATTEMPTS) {
+                                resumeAttempts++;
+                                const delay = Math.pow(2, resumeAttempts) * 500; // 500ms, 1s, 2s
+                                console.log(`[AUDIO] Retrying resume in ${delay}ms (attempt ${resumeAttempts}/${MAX_RESUME_ATTEMPTS})`);
+                                
+                                setTimeout(() => {
+                                    // Check if conditions still valid before retry
+                                    if (audioWasPlaying.music && currentTrack && !musicMuted && gameStarted) {
+                                        resumeAudio();
+                                    }
+                                }, delay);
+                            } else {
+                                console.log('[AUDIO] Max resume attempts reached, giving up');
+                                audioWasPlaying.music = false;
+                                resumeAttempts = 0;
+                            }
+                        });
+                    }
+                } else {
+                    console.log('[AUDIO] No current track to resume, attempting to start new track');
+                    // If no current track but music was playing, start a new one
+                    if (gameStarted && !musicMuted) {
+                        playRandomTrack();
+                    }
+                    audioWasPlaying.music = false;
+                }
+            }
+            
+            // Resume boss music if in boss encounter and audio is not muted
+            if (bossEncounterActive && !musicMuted) {
                 if (audioWasPlaying.bossIntro && bossIntroMusic && !bossIntroMusic.ended) {
-                    bossIntroMusic.play().catch(() => {});
+                    console.log('[AUDIO] Attempting to resume boss intro music');
+                    bossIntroMusic.play().then(() => {
+                        console.log('[AUDIO] Boss intro music resumed successfully');
+                        audioWasPlaying.bossIntro = false;
+                    }).catch(error => {
+                        console.error('[AUDIO] Failed to resume boss intro music:', error);
+                        audioWasPlaying.bossIntro = false;
+                    });
                 } else if (audioWasPlaying.bossBattle && bossBattleMusic) {
-                    bossBattleMusic.play().catch(() => {});
+                    console.log('[AUDIO] Attempting to resume boss battle music');
+                    bossBattleMusic.play().then(() => {
+                        console.log('[AUDIO] Boss battle music resumed successfully');
+                        audioWasPlaying.bossBattle = false;
+                    }).catch(error => {
+                        console.error('[AUDIO] Failed to resume boss battle music:', error);
+                        audioWasPlaying.bossBattle = false;
+                    });
                 }
             }
         }
@@ -6208,25 +6298,68 @@
             }
         }
         
-        // Visibility API handlers
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                pauseAllAudio();
-            } else {
-                resumeAudio();
+        // Debounce mechanism for visibility changes
+        let visibilityChangeTimeout = null;
+        let lastVisibilityState = document.hidden;
+        
+        function handleVisibilityChange() {
+            // Clear any pending visibility change
+            if (visibilityChangeTimeout) {
+                clearTimeout(visibilityChangeTimeout);
             }
-        });
+            
+            const isHidden = document.hidden;
+            
+            // Only act if state actually changed
+            if (isHidden !== lastVisibilityState) {
+                lastVisibilityState = isHidden;
+                
+                if (isHidden) {
+                    console.log('[AUDIO] Tab becoming hidden, pausing audio');
+                    pauseAllAudio();
+                } else {
+                    // Debounce the resume to avoid rapid pause/resume cycles
+                    visibilityChangeTimeout = setTimeout(() => {
+                        console.log('[AUDIO] Tab becoming visible, resuming audio');
+                        resumeAudio();
+                    }, 300);
+                }
+            }
+        }
+        
+        // Visibility API handlers
+        document.addEventListener('visibilitychange', handleVisibilityChange);
         
         // iOS-specific handlers (fallback for Safari)
+        let blurTimeout = null;
+        
         window.addEventListener('blur', () => {
-            pauseAllAudio();
+            console.log('[AUDIO] Window blur event');
+            // Only pause if document is actually hidden
+            // This prevents false positives from dev tools, etc
+            blurTimeout = setTimeout(() => {
+                if (document.hidden) {
+                    console.log('[AUDIO] Window blurred and document hidden, pausing audio');
+                    pauseAllAudio();
+                }
+            }, 200);
         });
         
         window.addEventListener('focus', () => {
+            console.log('[AUDIO] Window focus event');
+            // Clear any pending blur timeout
+            if (blurTimeout) {
+                clearTimeout(blurTimeout);
+                blurTimeout = null;
+            }
+            
             // Small delay to ensure proper state
             setTimeout(() => {
-                resumeAudio();
-            }, 100);
+                if (!document.hidden) {
+                    console.log('[AUDIO] Window focused and document visible, resuming audio');
+                    resumeAudio();
+                }
+            }, 300);
         });
         
         // Page hide/show events (iOS Safari specific)
@@ -15764,8 +15897,27 @@
         
         // Try to play music on first user interaction
         document.addEventListener('click', function playMusicOnInteraction() {
-            if (currentTrack && currentTrack.paused && gameStarted) {
-                currentTrack.play().catch(() => {});
+            console.log('[AUDIO] First user interaction detected');
+            
+            // Try to play current track if paused
+            if (currentTrack && currentTrack.paused && gameStarted && !musicMuted) {
+                console.log('[AUDIO] Attempting to play music on first interaction');
+                currentTrack.play().then(() => {
+                    console.log('[AUDIO] Music started successfully on user interaction');
+                }).catch(error => {
+                    console.error('[AUDIO] Failed to start music on user interaction:', error);
+                });
+            }
+            
+            // Also try pending music track if any
+            if (window.pendingMusicTrack && gameStarted && !musicMuted) {
+                console.log('[AUDIO] Attempting to play pending music track');
+                window.pendingMusicTrack.play().then(() => {
+                    console.log('[AUDIO] Pending music started successfully');
+                    window.pendingMusicTrack = null;
+                }).catch(error => {
+                    console.error('[AUDIO] Failed to start pending music:', error);
+                });
             }
         }, { once: true });
     </script>
