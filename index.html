@@ -12783,6 +12783,33 @@
             if (!playerSnake.alive && playerRespawnTimer > 0) {
                 const respawnSeconds = Math.ceil(playerRespawnTimer / 1000);
                 
+                // FAILSAFE: Ensure score is submitted when showing death screen
+                if (!leaderboardSubmitted && playerSnake.score > 0 && gameMode === 'infinite') {
+                    console.log('[UI-FAILSAFE] Death screen shown, checking submission...');
+                    const playerName = localStorage.getItem('playerName') || 'Anonymous';
+                    const playTime = gameSessionStartTime ? Math.floor((Date.now() - gameSessionStartTime) / 1000) : 0;
+                    
+                    if (window.supabaseModule && window.supabaseModule.submitScore) {
+                        console.log('[UI-FAILSAFE] Submitting score from UI update...');
+                        window.supabaseModule.submitScore(
+                            playerName,
+                            Math.floor(playerSnake.score),
+                            playerDiscoveredElements.size,
+                            playTime,
+                            playerSnake.kills
+                        ).then(result => {
+                            console.log('[UI-FAILSAFE] Score submitted!', result);
+                            if (result && result.rank) {
+                                const rankEl = document.getElementById('globalRank');
+                                if (rankEl) rankEl.textContent = `#${result.rank}`;
+                            }
+                            leaderboardSubmitted = true;
+                        }).catch(err => {
+                            console.error('[UI-FAILSAFE] Failed:', err);
+                        });
+                    }
+                }
+                
                 // Show respawn overlay
                 const respawnOverlay = document.getElementById('respawnOverlay');
                 if (respawnOverlay) {
@@ -15471,6 +15498,61 @@
                     const deathMessageEl = document.getElementById('deathMessage');
                     if (deathMessageEl && window.nameGenerator) {
                         deathMessageEl.textContent = window.nameGenerator.getRandomDeathMessage();
+                    }
+                    
+                    // FORCE AUTO-SUBMIT IMMEDIATELY ON DEATH
+                    console.log('[DEATH] Player died, attempting auto-submit...');
+                    if (!leaderboardSubmitted && playerSnake.score > 0) {
+                        const submitName = localStorage.getItem('playerName') || 'Anonymous';
+                        const submitTime = gameSessionStartTime ? Math.floor((Date.now() - gameSessionStartTime) / 1000) : 0;
+                        
+                        // Try to submit right away if module is loaded
+                        if (window.supabaseModule && window.supabaseModule.submitScore) {
+                            console.log('[DEATH] Submitting score NOW...');
+                            window.supabaseModule.submitScore(
+                                submitName,
+                                Math.floor(playerSnake.score),
+                                playerDiscoveredElements.size,
+                                submitTime,
+                                playerSnake.kills
+                            ).then(result => {
+                                console.log('[DEATH] Score submitted successfully!', result);
+                                if (result && result.rank) {
+                                    const rankEl = document.getElementById('globalRank');
+                                    if (rankEl) rankEl.textContent = `#${result.rank}`;
+                                }
+                                leaderboardSubmitted = true;
+                            }).catch(err => {
+                                console.error('[DEATH] Submission failed:', err);
+                            });
+                        } else {
+                            console.error('[DEATH] Supabase not loaded, will retry...');
+                            // Keep trying every 500ms until it works
+                            const retryInterval = setInterval(() => {
+                                if (window.supabaseModule && window.supabaseModule.submitScore && !leaderboardSubmitted) {
+                                    console.log('[DEATH] Retrying submission...');
+                                    window.supabaseModule.submitScore(
+                                        submitName,
+                                        Math.floor(playerSnake.score),
+                                        playerDiscoveredElements.size,
+                                        submitTime,
+                                        playerSnake.kills
+                                    ).then(result => {
+                                        console.log('[DEATH] Score submitted on retry!', result);
+                                        if (result && result.rank) {
+                                            const rankEl = document.getElementById('globalRank');
+                                            if (rankEl) rankEl.textContent = `#${result.rank}`;
+                                        }
+                                        leaderboardSubmitted = true;
+                                        clearInterval(retryInterval);
+                                    }).catch(err => {
+                                        console.error('[DEATH] Retry failed:', err);
+                                    });
+                                } else if (leaderboardSubmitted) {
+                                    clearInterval(retryInterval);
+                                }
+                            }, 500);
+                        }
                     }
                     
                     // Dispatch player death event
