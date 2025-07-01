@@ -47,25 +47,38 @@ export async function submitScore(username, score, elementsDiscovered, playTime,
       leaderboardCache[key] = { data: null, timestamp: 0 };
     });
     
-    console.log('Submitting score:', { username, score, elementsDiscovered, playTime, kills });
+    console.log('📤 Submitting score:', { username, score, elementsDiscovered, playTime, kills });
+    console.log('📍 API Endpoint:', API_ENDPOINT);
+    
+    const requestBody = {
+      username,
+      score,
+      elements_discovered: elementsDiscovered,
+      play_time: playTime,
+      kills
+    };
+    console.log('📦 Request body:', requestBody);
     
     const response = await fetch(API_ENDPOINT, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        username,
-        score,
-        elements_discovered: elementsDiscovered,
-        play_time: playTime,
-        kills
-      })
+      body: JSON.stringify(requestBody)
     });
     
+    console.log('📨 Response status:', response.status, response.statusText);
+    
     const responseData = await response.json();
+    console.log('📊 Response data:', responseData);
     
     if (!response.ok) {
+      console.error('❌ API Error:', {
+        status: response.status,
+        statusText: response.statusText,
+        error: responseData.error,
+        details: responseData
+      });
       throw new Error(responseData.error || 'Failed to submit score');
     }
     

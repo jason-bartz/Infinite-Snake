@@ -12324,6 +12324,48 @@
         
         // Test function to verify script is working
         window.testLeaderboard = function() {
+            console.log('=== LEADERBOARD DEBUG INFO ===');
+            console.log('supabaseModule loaded:', !!supabaseModule);
+            console.log('submitScore function exists:', !!(supabaseModule && supabaseModule.submitScore));
+            console.log('leaderboardSubmitted:', leaderboardSubmitted);
+            console.log('gameMode:', typeof gameMode !== 'undefined' ? gameMode : 'undefined');
+            console.log('playerSnake:', playerSnake ? { alive: playerSnake.alive, score: playerSnake.score } : 'null');
+            console.log('gameSessionStartTime:', gameSessionStartTime);
+            console.log('==============================');
+        }
+        
+        // Test automatic submission manually
+        window.testAutoSubmit = async function() {
+            console.log('Testing automatic submission...');
+            if (!supabaseModule || !supabaseModule.submitScore) {
+                console.error('Supabase module not loaded!');
+                return;
+            }
+            
+            const testData = {
+                username: 'TestUser_' + Date.now(),
+                score: 1234,
+                elements: 10,
+                playTime: 60,
+                kills: 5
+            };
+            
+            console.log('Submitting test data:', testData);
+            
+            try {
+                const result = await supabaseModule.submitScore(
+                    testData.username,
+                    testData.score,
+                    testData.elements,
+                    testData.playTime,
+                    testData.kills
+                );
+                console.log('Test submission result:', result);
+                console.log('Result type:', typeof result);
+                console.log('Result keys:', result ? Object.keys(result) : 'null');
+            } catch (error) {
+                console.error('Test submission failed:', error);
+            }
         }
         
         // Initialize Supabase when the module loads
@@ -12358,15 +12400,26 @@
         }
         
         // Initialize Supabase immediately on page load
+        console.log('[SUPABASE] Initial load - starting initialization');
         initSupabase();
         
         // Also try to init again after a delay in case it failed
         setTimeout(() => {
             if (!supabaseModule) {
-                console.log('[SUPABASE] Retrying initialization...');
+                console.log('[SUPABASE] Retrying initialization (2s delay)...');
                 initSupabase();
+            } else {
+                console.log('[SUPABASE] Module already loaded, no retry needed');
             }
         }, 2000);
+        
+        // Add another retry after 5 seconds if still not loaded
+        setTimeout(() => {
+            if (!supabaseModule) {
+                console.log('[SUPABASE] Retrying initialization (5s delay)...');
+                initSupabase();
+            }
+        }, 5000);
         
         // Add event listeners when elements become visible
         function setupLeaderboardListeners() {
@@ -12592,6 +12645,9 @@
             if (playerRespawnTimer > 0) {
                 playerRespawnTimer = 100; // Set to almost 0 to trigger respawn
             }
+            // Reset leaderboard submission flag for next game
+            leaderboardSubmitted = false;
+            console.log('[RESPAWN] Reset leaderboardSubmitted flag in forceRespawn');
         }
         
         // Handle revive or respawn button click
@@ -12796,6 +12852,7 @@
             // Handle dead player with respawn timer
             if (!playerSnake.alive && playerRespawnTimer > 0) {
                 const respawnSeconds = Math.ceil(playerRespawnTimer / 1000);
+                console.log('[DEATH] Player is dead, respawn timer:', respawnSeconds, 'seconds');
                 
                 // FAILSAFE: Ensure score is submitted when showing death screen
                 if (!leaderboardSubmitted && playerSnake.score > 0 && gameMode === 'infinite') {
@@ -12820,13 +12877,12 @@
                             playerSnake.kills
                         ).then(result => {
                             console.log('[UI-FAILSAFE] Score submission result:', result);
-                            // Check for successful submission - API returns daily_rank directly
-                            if (result && (result.daily_rank !== null || result.rank !== null)) {
-                                const rank = result.daily_rank || result.rank || result;
-                                console.log('[UI-FAILSAFE] ✅ Score submitted! Daily rank:', rank);
+                            // submitScore returns the rank directly as a number
+                            if (result && typeof result === 'number') {
+                                console.log('[UI-FAILSAFE] ✅ Score submitted! Daily rank:', result);
                                 const rankEl = document.getElementById('globalRank');
                                 if (rankEl) {
-                                    rankEl.textContent = `#${rank}`;
+                                    rankEl.textContent = `#${result}`;
                                 }
                                 leaderboardSubmitted = true;
                             } else {
@@ -12891,6 +12947,7 @@
                     }
                     
                     // Automatic leaderboard submission for infinite mode
+                    console.log('[LEADERBOARD] ⚡ AUTO-SUBMISSION CHECK ⚡');
                     console.log('[LEADERBOARD] Checking submission conditions:', {
                         gameMode: gameMode,
                         isInfinite: gameMode === 'infinite',
@@ -12898,7 +12955,9 @@
                         playerScore: playerSnake.score,
                         hasScore: playerSnake.score > 0,
                         gameSessionStartTime: gameSessionStartTime,
-                        currentTime: Date.now()
+                        currentTime: Date.now(),
+                        supabaseModuleLoaded: !!window.supabaseModule,
+                        submitScoreFunctionExists: !!(window.supabaseModule && window.supabaseModule.submitScore)
                     });
                     
                     if (gameMode === 'infinite' && !leaderboardSubmitted && playerSnake.score > 0) {
@@ -12934,18 +12993,16 @@
                                 ).then(result => {
                                     console.log('[LEADERBOARD] Submission result:', result);
                                     console.log('[LEADERBOARD] Result type:', typeof result);
-                                    console.log('[LEADERBOARD] Result keys:', result ? Object.keys(result) : 'null');
                                     
-                                    // Check for successful submission - API returns daily_rank directly
-                                    if (result && (result.daily_rank !== null || result.rank !== null)) {
-                                        const rank = result.daily_rank || result.rank || result;
-                                        console.log('[LEADERBOARD] ✅ Score submitted successfully! Daily rank:', rank);
+                                    // submitScore returns the rank directly as a number
+                                    if (result && typeof result === 'number') {
+                                        console.log('[LEADERBOARD] ✅ Score submitted successfully! Daily rank:', result);
                                         
                                         // Update global rank display
                                         const globalRankEl = document.getElementById('globalRank');
                                         if (globalRankEl) {
-                                            globalRankEl.textContent = `#${rank}`;
-                                            console.log('[LEADERBOARD] Updated rank display to:', rank);
+                                            globalRankEl.textContent = `#${result}`;
+                                            console.log('[LEADERBOARD] Updated rank display to:', result);
                                         }
                                         
                                         // Mark as submitted
@@ -12953,7 +13010,7 @@
                                         console.log('[LEADERBOARD] Marked leaderboardSubmitted = true');
                                     } else {
                                         console.error('[LEADERBOARD] ❌ Submission failed or returned invalid data:', result);
-                                        console.error('[LEADERBOARD] Expected daily_rank field but got:', result);
+                                        console.error('[LEADERBOARD] Expected number but got:', typeof result, result);
                                         // Don't mark as submitted so it can retry
                                     }
                                 }).catch(error => {
@@ -12971,6 +13028,36 @@
                                     module: window.supabaseModule,
                                     submitScore: window.supabaseModule?.submitScore
                                 });
+                                
+                                // Try to initialize it now if not loaded
+                                if (!window.supabaseModule) {
+                                    console.log('[LEADERBOARD] Attempting to initialize Supabase module now...');
+                                    initSupabase().then(() => {
+                                        if (window.supabaseModule && window.supabaseModule.submitScore) {
+                                            console.log('[LEADERBOARD] Module loaded! Retrying submission...');
+                                            // Retry the submission
+                                            window.supabaseModule.submitScore(
+                                                playerName,
+                                                Math.floor(playerSnake.score),
+                                                playerDiscoveredElements.size,
+                                                playTime,
+                                                playerSnake.kills
+                                            ).then(result => {
+                                                console.log('[LEADERBOARD] Retry submission result:', result);
+                                                if (result && typeof result === 'number') {
+                                                    console.log('[LEADERBOARD] ✅ Retry successful! Daily rank:', result);
+                                                    const globalRankEl = document.getElementById('globalRank');
+                                                    if (globalRankEl) {
+                                                        globalRankEl.textContent = `#${result}`;
+                                                    }
+                                                    leaderboardSubmitted = true;
+                                                }
+                                            }).catch(err => {
+                                                console.error('[LEADERBOARD] Retry failed:', err);
+                                            });
+                                        }
+                                    });
+                                }
                             }
                         }
                     }
@@ -15546,7 +15633,13 @@
                     }
                     
                     // FORCE AUTO-SUBMIT IMMEDIATELY ON DEATH
-                    console.log('[DEATH] Player died, attempting auto-submit...');
+                    console.log('🎮💀 [DEATH] Player died, attempting auto-submit...');
+                    console.log('🎮💀 [DEATH] Current state:', {
+                        leaderboardSubmitted,
+                        playerScore: playerSnake.score,
+                        hasScore: playerSnake.score > 0,
+                        moduleLoaded: !!(window.supabaseModule && window.supabaseModule.submitScore)
+                    });
                     if (!leaderboardSubmitted && playerSnake.score > 0) {
                         const submitName = localStorage.getItem('playerName') || 'Anonymous';
                         const submitTime = gameSessionStartTime ? Math.floor((Date.now() - gameSessionStartTime) / 1000) : 0;
