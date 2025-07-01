@@ -12320,8 +12320,28 @@
         // Make supabaseModule globally accessible
         window.supabaseModule = null;
         let leaderboardSubmitted = false;
+        let lastSubmissionTime = 0; // Track when last submission started
         let currentGameSessionId = null;
         let gameSessionStartTime = null;
+        
+        // Helper function to check if we should submit
+        function canSubmitScore() {
+            const now = Date.now();
+            // Prevent submissions within 1 second of each other
+            if (now - lastSubmissionTime < 1000) {
+                console.log('[SUBMISSION] Blocked - too soon after last submission', now - lastSubmissionTime, 'ms');
+                return false;
+            }
+            if (leaderboardSubmitted) {
+                console.log('[SUBMISSION] Blocked - already submitted');
+                return false;
+            }
+            // Mark as submitted and record time
+            leaderboardSubmitted = true;
+            lastSubmissionTime = now;
+            console.log('[SUBMISSION] Allowed - marking as submitted at', now);
+            return true;
+        }
         
         // Test function to verify script is working
         window.testLeaderboard = function() {
@@ -12648,7 +12668,8 @@
             }
             // Reset leaderboard submission flag for next game
             leaderboardSubmitted = false;
-            console.log('[RESPAWN] Reset leaderboardSubmitted flag in forceRespawn');
+            lastSubmissionTime = 0;
+            console.log('[RESPAWN] Reset leaderboardSubmitted flag and timestamp in forceRespawn');
         }
         
         // Handle revive or respawn button click
@@ -12688,7 +12709,8 @@
             
             // Reset leaderboard submission flag for next game
             leaderboardSubmitted = false;
-            console.log('[RESPAWN] Reset leaderboardSubmitted flag for new game');
+            lastSubmissionTime = 0;
+            console.log('[RESPAWN] Reset leaderboardSubmitted flag and timestamp for new game');
         }
         
         // Return to main menu
@@ -12856,22 +12878,12 @@
                 console.log('[DEATH] Player is dead, respawn timer:', respawnSeconds, 'seconds');
                 
                 // FAILSAFE: Ensure score is submitted when showing death screen
-                if (!leaderboardSubmitted && playerSnake.score > 0 && gameMode === 'infinite') {
-                    console.log('[UI-FAILSAFE] Death screen shown, checking submission...');
-                    console.log('[UI-FAILSAFE] Current state:', {
-                        leaderboardSubmitted,
-                        score: playerSnake.score,
-                        gameMode,
-                        supabaseModuleExists: !!window.supabaseModule,
-                        submitScoreExists: !!(window.supabaseModule && window.supabaseModule.submitScore)
-                    });
+                if (playerSnake.score > 0 && gameMode === 'infinite' && canSubmitScore()) {
+                    console.log('[UI-FAILSAFE] Death screen shown, proceeding with submission...');
                     const playerName = localStorage.getItem('playerName') || 'Anonymous';
                     const playTime = gameSessionStartTime ? Math.floor((Date.now() - gameSessionStartTime) / 1000) : 0;
                     
                     if (window.supabaseModule && window.supabaseModule.submitScore) {
-                        // Set flag immediately to prevent duplicate submissions
-                        leaderboardSubmitted = true;
-                        console.log('[UI-FAILSAFE] Set leaderboardSubmitted = true to prevent duplicates');
                         console.log('[UI-FAILSAFE] Submitting score from UI failsafe...');
                         window.supabaseModule.submitScore(
                             playerName,
@@ -12976,14 +12988,14 @@
                         submitScoreFunctionExists: !!(window.supabaseModule && window.supabaseModule.submitScore)
                     });
                     
-                    if (gameMode === 'infinite' && !leaderboardSubmitted && playerSnake.score > 0) {
+                    if (gameMode === 'infinite' && playerSnake.score > 0) {
                         const playTime = gameSessionStartTime ? 
                             Math.floor((Date.now() - gameSessionStartTime) / 1000) : 0;
                         
                         console.log('[LEADERBOARD] Play time:', playTime, 'seconds');
                         
                         // Only submit if played for at least 5 seconds (reduced from 10)
-                        if (playTime >= 5) {
+                        if (playTime >= 5 && canSubmitScore()) {
                             // Get player name
                             const playerName = localStorage.getItem('playerName') || window.nameGenerator.generateRandomName();
                             
@@ -12997,9 +13009,6 @@
                             
                             // Submit score automatically
                             if (window.supabaseModule && window.supabaseModule.submitScore) {
-                                // Set flag immediately to prevent duplicate submissions
-                                leaderboardSubmitted = true;
-                                console.log('[LEADERBOARD] Set leaderboardSubmitted = true to prevent duplicates');
                                 console.log('[LEADERBOARD] Supabase module found, submitting...');
                                 
                                 // Call the working submitScore function with ALL required parameters
@@ -14517,6 +14526,7 @@
             // Initialize leaderboard session for infinite mode
             if (gameMode === 'infinite') {
                 leaderboardSubmitted = false;
+                lastSubmissionTime = 0; // Reset submission timestamp
                 gameSessionStartTime = Date.now();
                 
                 if (window.supabaseModule) {
@@ -15666,15 +15676,12 @@
                         hasScore: playerSnake.score > 0,
                         moduleLoaded: !!(window.supabaseModule && window.supabaseModule.submitScore)
                     });
-                    if (!leaderboardSubmitted && playerSnake.score > 0) {
+                    if (playerSnake.score > 0 && canSubmitScore()) {
                         const submitName = localStorage.getItem('playerName') || 'Anonymous';
                         const submitTime = gameSessionStartTime ? Math.floor((Date.now() - gameSessionStartTime) / 1000) : 0;
                         
                         // Try to submit right away if module is loaded
                         if (window.supabaseModule && window.supabaseModule.submitScore) {
-                            // Set flag immediately to prevent duplicate submissions
-                            leaderboardSubmitted = true;
-                            console.log('[DEATH] Set leaderboardSubmitted = true to prevent duplicates');
                             console.log('[DEATH] Submitting score NOW...');
                             try {
                                 window.supabaseModule.submitScore(
@@ -15736,10 +15743,7 @@
                             console.error('[DEATH] Supabase not loaded, will retry...');
                             // Keep trying every 500ms until it works
                             const retryInterval = setInterval(() => {
-                                if (window.supabaseModule && window.supabaseModule.submitScore && !leaderboardSubmitted) {
-                                    // Set flag immediately to prevent duplicate submissions
-                                    leaderboardSubmitted = true;
-                                    console.log('[DEATH] Retry: Set leaderboardSubmitted = true to prevent duplicates');
+                                if (window.supabaseModule && window.supabaseModule.submitScore && canSubmitScore()) {
                                     console.log('[DEATH] Retrying submission...');
                                     window.supabaseModule.submitScore(
                                         submitName,
@@ -15789,16 +15793,13 @@
                     
                     // AUTO-SUBMIT SCORE ON DEATH
                     setTimeout(() => {
-                        if (gameMode === 'infinite' && !leaderboardSubmitted && playerSnake.score > 0) {
+                        if (gameMode === 'infinite' && playerSnake.score > 0 && canSubmitScore()) {
                             const playerName = localStorage.getItem('playerName') || 'Anonymous';
                             const playTime = gameSessionStartTime ? Math.floor((Date.now() - gameSessionStartTime) / 1000) : 0;
                             
                             console.log('[AUTO-SUBMIT] Attempting automatic score submission...');
                             
                             if (window.supabaseModule && window.supabaseModule.submitScore) {
-                                // Set flag immediately to prevent duplicate submissions
-                                leaderboardSubmitted = true;
-                                console.log('[AUTO-SUBMIT] Set leaderboardSubmitted = true to prevent duplicates');
                                 window.supabaseModule.submitScore(
                                     playerName,
                                     Math.floor(playerSnake.score),
