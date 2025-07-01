@@ -162,6 +162,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/skin-selection.css">
     <link rel="stylesheet" href="css/unlock-notifications.css">
+    <link rel="stylesheet" href="css/discovery-feed-gradients.css">
     <style>
         /* SNES-Era UI Theme with Cosmic Colors */
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
@@ -191,6 +192,13 @@
             --snes-gray: #A8A8A8;
             --snes-dark-purple: #4800A8;
             --snes-cosmic-teal: #00F8F8;
+            
+            /* Gradient control variables */
+            --discovery-gradient-start: rgba(0, 0, 0, 0.8);
+            --discovery-gradient-mid: rgba(0, 0, 0, 0.6);
+            --discovery-gradient-end: rgba(0, 0, 0, 0);
+            --discovery-blur-amount: 8px;
+            --discovery-message-opacity: 0.95;
             
             /* Mobile UI Positioning Variables */
             --mobile-scorecard-top: 10px;
@@ -1211,7 +1219,9 @@
             top: 120px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(10, 0, 30, 0.98);
+            background: rgba(10, 0, 30, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             color: var(--snes-gold);
             font-size: 14px;
             font-weight: bold;
@@ -2283,7 +2293,9 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
             display: none;
             justify-content: center;
             align-items: center;
@@ -2292,7 +2304,9 @@
         
         #victoryPopup {
             position: relative;
-            background: var(--snes-dark-blue);
+            background: rgba(0, 0, 128, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             padding: 48px;
             border-radius: 0;
             text-align: center;
@@ -2300,7 +2314,7 @@
             width: 90%;
             border: 8px solid;
             border-color: var(--snes-gold) #805800 #805800 var(--snes-gold);
-            box-shadow: 8px 8px 0 rgba(0,0,0,0.8);
+            box-shadow: 8px 8px 0 rgba(0,0,0,0.5);
             animation: flash 0.5s steps(2) infinite alternate;
             font-family: 'Press Start 2P';
         }
@@ -3894,6 +3908,43 @@
                 max-height: 25vh;
                 opacity: var(--mobile-discovery-opacity);
                 backdrop-filter: blur(5px);
+                /* Mobile gradient - lighter for better visibility */
+                background: linear-gradient(
+                    to right,
+                    rgba(0, 0, 0, 0.4) 0%,
+                    rgba(0, 0, 0, 0.2) 70%,
+                    rgba(0, 0, 0, 0) 100%
+                );
+                backdrop-filter: blur(3px); /* Lighter blur on mobile */
+            }
+            
+            /* Add top fade mask for mobile discovery feed */
+            body.mobile .discovery-feed-inner {
+                mask-image: linear-gradient(
+                    to bottom,
+                    transparent 0%,
+                    black 15%,
+                    black 85%,
+                    transparent 100%
+                );
+                -webkit-mask-image: linear-gradient(
+                    to bottom,
+                    transparent 0%,
+                    black 15%,
+                    black 85%,
+                    transparent 100%
+                );
+            }
+            
+            /* Disable hover effects on mobile */
+            body.mobile .discovery-message:hover {
+                transform: none;
+                background: linear-gradient(
+                    135deg,
+                    var(--snes-dark-blue) 0%,
+                    rgba(16, 32, 64, 0.95) 50%,
+                    rgba(16, 32, 64, 0.85) 100%
+                );
             }
             
             /* Boost Bar & Element Bank - Top */
@@ -11150,7 +11201,7 @@
                 
                 // Add to discovery feed
                 const recipeText = `${emoji1} ${elem1Data.n} + ${emoji2} ${elem2Data.n}`;
-                addDiscoveryToFeed({
+                throttledAddDiscovery({
                     emoji: emojiResult,
                     name: resultData.n
                 }, recipeText);
@@ -11334,7 +11385,7 @@
             }
             
             const message = document.createElement('div');
-            message.className = 'discovery-message';
+            message.className = 'discovery-message new-message';
             
             // Recipe is passed as parameter now
             let recipeText = recipe || '';
@@ -11352,11 +11403,41 @@
             // Auto-scroll to bottom
             feed.scrollTop = feed.scrollHeight;
             
-            // Limit messages to prevent memory issues
-            while (feed.children.length > 20) {
+            // Add fade animation timeout
+            setTimeout(() => {
+                message.classList.remove('new-message');
+                message.classList.add('faded-message');
+            }, 3000);
+            
+            // Update message opacity based on position
+            const updateMessageOpacity = () => {
+                const messages = feed.querySelectorAll('.discovery-message');
+                messages.forEach((msg, index) => {
+                    const opacity = Math.max(0.4, 1 - (messages.length - index - 1) * 0.15);
+                    msg.style.opacity = opacity;
+                });
+            };
+            updateMessageOpacity();
+            
+            // Limit messages to prevent memory issues (reduce for mobile)
+            const maxMessages = isTabletOrMobile() ? 10 : 20;
+            while (feed.children.length > maxMessages) {
                 feed.removeChild(feed.firstChild);
             }
             
+        }
+        
+        // Throttled version for mobile performance
+        let messageUpdateTimeout;
+        function throttledAddDiscovery(element, recipe) {
+            if (isTabletOrMobile()) {
+                clearTimeout(messageUpdateTimeout);
+                messageUpdateTimeout = setTimeout(() => {
+                    addDiscoveryToFeed(element, recipe);
+                }, 100);
+            } else {
+                addDiscoveryToFeed(element, recipe);
+            }
         }
         
         function updateLeaderboard() {
@@ -14961,6 +15042,38 @@
             window.addEventListener('orientationchange', handleOrientationChange);
             window.addEventListener('resize', handleOrientationChange);
             handleOrientationChange(); // Initial check
+            
+            // Initialize discovery feed gradients
+            function initDiscoveryFeedGradients() {
+                const discoveryFeed = document.querySelector('.discovery-feed');
+                if (!discoveryFeed) return;
+                
+                if (isTabletOrMobile()) {
+                    // Lighter gradients for mobile
+                    discoveryFeed.classList.add('mobile-gradient');
+                } else {
+                    // Desktop gradients with hover effects
+                    discoveryFeed.classList.add('desktop-gradient');
+                    
+                    // Add interactive fade on mouse proximity
+                    document.addEventListener('mousemove', (e) => {
+                        const rect = discoveryFeed.getBoundingClientRect();
+                        const distance = Math.sqrt(
+                            Math.pow(e.clientX - rect.left, 2) + 
+                            Math.pow(e.clientY - (rect.top + rect.height/2), 2)
+                        );
+                        
+                        if (distance < 300) {
+                            discoveryFeed.classList.add('fading');
+                        } else {
+                            discoveryFeed.classList.remove('fading');
+                        }
+                    });
+                }
+            }
+            
+            // Call gradient initialization
+            initDiscoveryFeedGradients();
             
             // Apply mobile optimizations
             if (isTabletOrMobile() && window.mobileUIManager) {
