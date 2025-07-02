@@ -118,10 +118,18 @@
             
             playerBox.appendChild(playerTab);
             
-            // Add click handler
+            // Add click and touch handlers
             playerTab.addEventListener('click', function(e) {
                 e.stopPropagation();
+                e.preventDefault();
                 console.log('Player tab clicked');
+                playerBox.classList.toggle('expanded');
+            });
+            
+            playerTab.addEventListener('touchstart', function(e) {
+                e.stopPropagation();
+                e.preventDefault();
+                console.log('Player tab touched');
                 playerBox.classList.toggle('expanded');
             });
         }
@@ -135,14 +143,14 @@
             leaderTab.innerHTML = '🏆';
             leaderTab.style.cssText = `
                 position: absolute;
-                right: -50px;
+                left: -50px;
                 top: 10px;
                 width: 50px;
                 height: 70px;
                 background: rgba(0, 0, 0, 0.9);
                 border: 2px solid #F8F8F8;
-                border-left: none;
-                border-radius: 0 8px 8px 0;
+                border-right: none;
+                border-radius: 8px 0 0 8px;
                 cursor: pointer;
                 z-index: 102;
                 display: flex;
@@ -153,10 +161,18 @@
             
             leaderboard.appendChild(leaderTab);
             
-            // Add click handler
+            // Add click and touch handlers
             leaderTab.addEventListener('click', function(e) {
                 e.stopPropagation();
+                e.preventDefault();
                 console.log('Leaderboard tab clicked');
+                leaderboard.classList.toggle('expanded');
+            });
+            
+            leaderTab.addEventListener('touchstart', function(e) {
+                e.stopPropagation();
+                e.preventDefault();
+                console.log('Leaderboard tab touched');
                 leaderboard.classList.toggle('expanded');
             });
         }

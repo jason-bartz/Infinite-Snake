@@ -27,9 +27,11 @@ body.mobile .player-info-box {
     opacity: 1 !important;
     position: fixed !important;
     top: 10px !important;
-    left: 0 !important;
-    transform: translateX(-240px) !important; /* Start collapsed */
-    transition: transform 0.3s ease-out !important;
+    left: -240px !important; /* Position off-screen but tab visible */
+    bottom: auto !important;
+    right: auto !important;
+    transform: none !important;
+    transition: left 0.3s ease-out !important;
     z-index: 100 !important;
     width: 280px !important;
     max-width: 80vw !important;
@@ -37,7 +39,7 @@ body.mobile .player-info-box {
 }
 
 body.mobile .player-info-box.expanded {
-    transform: translateX(0) !important;
+    left: 0 !important;
 }
 
 /* CRITICAL FIX: Force visibility and positioning of leaderboard */
@@ -46,10 +48,12 @@ body.mobile .leaderboard-box {
     visibility: visible !important;
     opacity: 1 !important;
     position: fixed !important;
-    top: 80px !important;
-    left: 0 !important;
-    transform: translateX(-240px) !important; /* Start collapsed */
-    transition: transform 0.3s ease-out !important;
+    top: 10px !important;
+    right: -240px !important; /* Position off-screen but tab visible */
+    bottom: auto !important;
+    left: auto !important;
+    transform: none !important;
+    transition: right 0.3s ease-out !important;
     z-index: 100 !important;
     width: 280px !important;
     max-width: 80vw !important;
@@ -57,7 +61,7 @@ body.mobile .leaderboard-box {
 }
 
 body.mobile .leaderboard-box.expanded {
-    transform: translateX(0) !important;
+    right: 0 !important;
 }
 
 /* Ensure discovery feed is visible */
@@ -118,14 +122,14 @@ body.mobile .leaderboard-box::after {
     align-items: center !important;
     justify-content: center !important;
     position: absolute !important;
-    right: -50px !important;
+    left: -50px !important;
     top: 10px !important;
     width: 50px !important;
     height: 70px !important;
     background: rgba(0, 0, 0, 0.9) !important;
     border: 2px solid var(--snes-white) !important;
-    border-left: none !important;
-    border-radius: 0 8px 8px 0 !important;
+    border-right: none !important;
+    border-radius: 8px 0 0 8px !important;
     cursor: pointer !important;
     font-size: 24px !important;
     z-index: 102 !important;
