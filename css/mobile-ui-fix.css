@@ -20,18 +20,44 @@ body.mobile .virtual-joystick {
     z-index: 100 !important;
 }
 
-/* CRITICAL FIX: Force visibility of player info box */
+/* CRITICAL FIX: Force visibility and positioning of player info box */
 body.mobile .player-info-box {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
+    position: fixed !important;
+    top: 10px !important;
+    left: 0 !important;
+    transform: translateX(-240px) !important; /* Start collapsed */
+    transition: transform 0.3s ease-out !important;
+    z-index: 100 !important;
+    width: 280px !important;
+    max-width: 80vw !important;
+    overflow: visible !important; /* Allow tab to show */
 }
 
-/* CRITICAL FIX: Force visibility of leaderboard */
+body.mobile .player-info-box.expanded {
+    transform: translateX(0) !important;
+}
+
+/* CRITICAL FIX: Force visibility and positioning of leaderboard */
 body.mobile .leaderboard-box {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
+    position: fixed !important;
+    top: 80px !important;
+    left: 0 !important;
+    transform: translateX(-240px) !important; /* Start collapsed */
+    transition: transform 0.3s ease-out !important;
+    z-index: 100 !important;
+    width: 280px !important;
+    max-width: 80vw !important;
+    overflow: visible !important; /* Allow tab to show */
+}
+
+body.mobile .leaderboard-box.expanded {
+    transform: translateX(0) !important;
 }
 
 /* Ensure discovery feed is visible */
@@ -50,11 +76,58 @@ body.mobile .boost-bar-fill {
     opacity: 0 !important;
 }
 
-/* Debug styles to verify elements exist */
-body.mobile .player-info-box {
-    border: 3px solid red !important; /* Temporary - remove after testing */
+/* Remove debug borders - elements confirmed to exist */
+
+/* CRITICAL: Force the tab handles to appear */
+body.mobile .player-info-box::after {
+    content: '' !important;
+    display: block !important;
+    position: absolute !important;
+    right: -50px !important;
+    top: 10px !important;
+    width: 50px !important;
+    height: 70px !important;
+    background: rgba(16, 16, 64, 0.9) !important;
+    border: 2px solid var(--snes-light-blue) !important;
+    border-left: none !important;
+    border-radius: 0 8px 8px 0 !important;
+    cursor: pointer !important;
+    z-index: 102 !important;
+    pointer-events: auto !important;
 }
 
-body.mobile .leaderboard-box {
-    border: 3px solid blue !important; /* Temporary - remove after testing */
+body.mobile .player-info-box::before {
+    content: '' !important;
+    display: block !important;
+    position: absolute !important;
+    right: -40px !important;
+    top: 18px !important;
+    width: 44px !important;
+    height: 44px !important;
+    background-image: var(--player-skin-url, url('../skins/snake-default-green.png')) !important;
+    background-size: contain !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    pointer-events: none !important;
+    z-index: 103 !important;
+}
+
+body.mobile .leaderboard-box::after {
+    content: '🏆' !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    position: absolute !important;
+    right: -50px !important;
+    top: 10px !important;
+    width: 50px !important;
+    height: 70px !important;
+    background: rgba(0, 0, 0, 0.9) !important;
+    border: 2px solid var(--snes-white) !important;
+    border-left: none !important;
+    border-radius: 0 8px 8px 0 !important;
+    cursor: pointer !important;
+    font-size: 24px !important;
+    z-index: 102 !important;
+    pointer-events: auto !important;
 }

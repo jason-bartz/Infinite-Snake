@@ -72,7 +72,94 @@
             boostBar.style.height = '0';
         }
         
+        // Add click handlers for the panels
+        addPanelClickHandlers();
+        
         console.log('Emergency Mobile UI Fix: Complete');
+    }
+    
+    function addPanelClickHandlers() {
+        console.log('Emergency Mobile UI Fix: Adding panel click handlers');
+        
+        // For player info box
+        const playerBox = document.querySelector('.player-info-box');
+        if (playerBox && !playerBox.querySelector('.mobile-tab-handle')) {
+            // Create clickable tab
+            const playerTab = document.createElement('div');
+            playerTab.className = 'mobile-tab-handle player-tab';
+            playerTab.style.cssText = `
+                position: absolute;
+                right: -50px;
+                top: 10px;
+                width: 50px;
+                height: 70px;
+                background: rgba(16, 16, 64, 0.9);
+                border: 2px solid #5878F8;
+                border-left: none;
+                border-radius: 0 8px 8px 0;
+                cursor: pointer;
+                z-index: 102;
+            `;
+            
+            // Add skin preview
+            const skinPreview = document.createElement('img');
+            const portrait = document.querySelector('.player-portrait img');
+            skinPreview.src = portrait ? portrait.src : 'skins/snake-default-green.png';
+            skinPreview.style.cssText = `
+                width: 36px;
+                height: 36px;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                image-rendering: pixelated;
+            `;
+            playerTab.appendChild(skinPreview);
+            
+            playerBox.appendChild(playerTab);
+            
+            // Add click handler
+            playerTab.addEventListener('click', function(e) {
+                e.stopPropagation();
+                console.log('Player tab clicked');
+                playerBox.classList.toggle('expanded');
+            });
+        }
+        
+        // For leaderboard box
+        const leaderboard = document.querySelector('.leaderboard-box');
+        if (leaderboard && !leaderboard.querySelector('.mobile-tab-handle')) {
+            // Create clickable tab
+            const leaderTab = document.createElement('div');
+            leaderTab.className = 'mobile-tab-handle leaderboard-tab';
+            leaderTab.innerHTML = '🏆';
+            leaderTab.style.cssText = `
+                position: absolute;
+                right: -50px;
+                top: 10px;
+                width: 50px;
+                height: 70px;
+                background: rgba(0, 0, 0, 0.9);
+                border: 2px solid #F8F8F8;
+                border-left: none;
+                border-radius: 0 8px 8px 0;
+                cursor: pointer;
+                z-index: 102;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 24px;
+            `;
+            
+            leaderboard.appendChild(leaderTab);
+            
+            // Add click handler
+            leaderTab.addEventListener('click', function(e) {
+                e.stopPropagation();
+                console.log('Leaderboard tab clicked');
+                leaderboard.classList.toggle('expanded');
+            });
+        }
     }
     
     // Run on DOM ready
