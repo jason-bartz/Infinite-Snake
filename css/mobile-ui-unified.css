@@ -27,25 +27,26 @@ body.mobile .mobile-controls {
 }
 
 body.mobile .virtual-joystick {
-    position: absolute;
-    bottom: 40px;
-    left: 40px;
-    z-index: 95;
+    position: fixed !important;
+    bottom: 40px !important;
+    left: 40px !important;
+    right: auto !important;
+    z-index: 95 !important;
 }
 
 body.mobile .boost-button {
-    position: absolute;
-    bottom: 40px;
-    right: 40px;
-    width: 100px;
-    height: 100px;
-    z-index: 95;
-    
-    /* Boost fill effect */
-    position: relative;
+    position: fixed !important; /* Changed to fixed to ensure it stays in viewport */
+    bottom: 40px !important;
+    right: 40px !important;
+    left: auto !important;
+    top: auto !important;
+    width: 100px !important;
+    height: 100px !important;
+    z-index: 95 !important;
     overflow: hidden;
     background: rgba(78, 205, 196, 0.1);
     border: 3px solid rgba(78, 205, 196, 0.4);
+    border-radius: 50%;
 }
 
 /* Boost fill effect inside button */
@@ -98,7 +99,8 @@ body.mobile .player-info-box {
     /* Positioning - Fixed on left side */
     position: fixed !important;
     top: 10px !important;
-    left: calc(-1 * var(--mobile-panel-width) + 10px) !important; /* Show 10px of panel edge */
+    left: -270px !important; /* Show 10px of panel edge (280px - 10px) */
+    left: calc(-1 * var(--mobile-panel-width) + 10px) !important; /* Fallback with calc */
     bottom: auto !important;
     right: auto !important;
     
@@ -128,21 +130,23 @@ body.mobile .player-info-box.expanded {
 /* Tab handle for stats panel */
 body.mobile .player-info-box .mobile-tab-handle {
     position: absolute;
+    right: -50px;
     right: calc(-1 * var(--mobile-tab-width));
-    top: 0;
+    top: 10px;
     width: var(--mobile-tab-width);
     height: var(--mobile-tab-height);
-    background: rgba(16, 16, 64, 0.9);
+    background: rgba(16, 16, 64, 0.95);
     border: 3px solid;
     border-color: var(--snes-light-blue) var(--snes-dark-blue) var(--snes-dark-blue) transparent;
     border-left: none;
     border-radius: 0 8px 8px 0;
     cursor: pointer;
-    z-index: 101;
+    z-index: 102;
     box-shadow: 4px 0 10px rgba(0, 0, 0, 0.3);
     display: flex;
     align-items: center;
     justify-content: center;
+    pointer-events: auto;
 }
 
 /* Snake skin preview in stats tab */
@@ -163,7 +167,8 @@ body.mobile .leaderboard-box {
     /* Positioning - Fixed on right side */
     position: fixed !important;
     top: 10px !important;
-    right: calc(-1 * var(--mobile-panel-width) + 10px) !important; /* Show 10px of panel edge */
+    right: -270px !important; /* Show 10px of panel edge (280px - 10px) */
+    right: calc(-1 * var(--mobile-panel-width) + 10px) !important; /* Fallback with calc */
     bottom: auto !important;
     left: auto !important;
     
@@ -193,22 +198,24 @@ body.mobile .leaderboard-box.expanded {
 /* Tab handle for leaderboard */
 body.mobile .leaderboard-box .mobile-tab-handle {
     position: absolute;
+    left: -50px;
     left: calc(-1 * var(--mobile-tab-width));
-    top: 0;
+    top: 10px;
     width: var(--mobile-tab-width);
     height: var(--mobile-tab-height);
-    background: rgba(0, 0, 0, 0.9);
+    background: rgba(0, 0, 0, 0.95);
     border: 3px solid;
     border-color: var(--snes-white) transparent #505050 var(--snes-white);
     border-right: none;
     border-radius: 8px 0 0 8px;
     cursor: pointer;
-    z-index: 101;
+    z-index: 102;
     box-shadow: -4px 0 10px rgba(0, 0, 0, 0.3);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 24px;
+    pointer-events: auto;
 }
 
 /* Hide default leaderboard header text on mobile */
@@ -381,7 +388,7 @@ body.mobile .leaderboard-box {
 }
 
 body.mobile .mobile-tab-handle {
-    z-index: 101;
+    z-index: 102;
 }
 
 /* Pause menu should be on top of everything */

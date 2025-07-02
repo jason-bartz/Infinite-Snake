@@ -325,6 +325,27 @@ class UnifiedMobileUI {
     refreshSkin() {
         this.updateTabSkin();
     }
+    
+    handleOrientationChange(orientation) {
+        // Handle orientation changes
+        console.log('Unified Mobile UI: Handling orientation change:', orientation);
+        
+        // You can add orientation-specific adjustments here if needed
+        if (orientation === 'landscape') {
+            // Landscape adjustments
+        } else {
+            // Portrait adjustments
+        }
+    }
+    
+    applyMobileOptimizations() {
+        // Apply mobile-specific optimizations
+        const discoveryFeed = document.querySelector('.discovery-feed');
+        if (discoveryFeed && this.isMobile()) {
+            discoveryFeed.style.pointerEvents = 'none';
+            discoveryFeed.style.userSelect = 'none';
+        }
+    }
 }
 
 // Initialize unified mobile UI

@@ -12884,9 +12884,9 @@
             }
             
             // Update mobile boost button fill
-            if (window.mobileUIOverhaul) {
-                window.mobileUIOverhaul.setBoostAmount(staminaPercent);
-                window.mobileUIOverhaul.setBoostActive(playerSnake.isBoosting);
+            if (window.unifiedMobileUI) {
+                window.unifiedMobileUI.updateBoost(staminaPercent);
+                window.unifiedMobileUI.activateBoost(playerSnake.isBoosting);
             }
         }
         
@@ -17125,61 +17125,13 @@
                         'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
                 }
                 
-                // Update UI positions using the UI Manager
-                if (window.mobileUIManager) {
-                    window.mobileUIManager.updatePositions(orientation);
+                // Update UI positions using the unified mobile UI
+                if (window.unifiedMobileUI) {
+                    window.unifiedMobileUI.handleOrientationChange(orientation);
                 }
             }
             
-            // Mobile UI Manager for dynamic positioning
-            window.mobileUIManager = {
-                updatePositions: function(orientation) {
-                    if (!isTabletOrMobile()) return;
-                    
-                    const root = document.documentElement;
-                    
-                    if (orientation === 'landscape') {
-                        // Landscape positions - UI at top
-                        root.style.setProperty('--mobile-scorecard-top', '10px');
-                        root.style.setProperty('--mobile-scorecard-left', '10px');
-                        root.style.setProperty('--mobile-scorecard-bottom', 'unset');
-                        root.style.setProperty('--mobile-scorecard-right', 'auto');
-                        root.style.setProperty('--mobile-leaderboard-top', '10px');
-                        root.style.setProperty('--mobile-leaderboard-right', '10px');
-                        root.style.setProperty('--mobile-leaderboard-bottom', 'unset');
-                        root.style.setProperty('--mobile-leaderboard-left', 'auto');
-                        root.style.setProperty('--mobile-boost-bar-height', '20px');
-                        root.style.setProperty('--mobile-discovery-scale', '0.75');
-                        root.style.setProperty('--mobile-discovery-opacity', '0.6');
-                    } else {
-                        // Portrait positions - UI at top with more spacing
-                        root.style.setProperty('--mobile-scorecard-top', '50px');
-                        root.style.setProperty('--mobile-scorecard-left', '10px');
-                        root.style.setProperty('--mobile-scorecard-bottom', 'unset');
-                        root.style.setProperty('--mobile-scorecard-right', 'auto');
-                        root.style.setProperty('--mobile-leaderboard-top', '50px');
-                        root.style.setProperty('--mobile-leaderboard-right', '10px');
-                        root.style.setProperty('--mobile-leaderboard-bottom', 'unset');
-                        root.style.setProperty('--mobile-leaderboard-left', 'auto');
-                        root.style.setProperty('--mobile-boost-bar-height', '18px');
-                        root.style.setProperty('--mobile-discovery-scale', '0.7');
-                        root.style.setProperty('--mobile-discovery-opacity', '0.5');
-                    }
-                    
-                    // Update control translucency
-                    root.style.setProperty('--mobile-joystick-opacity', '0.3');
-                    root.style.setProperty('--mobile-boost-opacity', '0.6');
-                },
-                
-                applyMobileOptimizations: function() {
-                    // Apply additional mobile-specific optimizations
-                    const discoveryFeed = document.querySelector('.discovery-feed');
-                    if (discoveryFeed && isTabletOrMobile()) {
-                        discoveryFeed.style.pointerEvents = 'none'; // Make it non-interactive
-                        discoveryFeed.style.userSelect = 'none';
-                    }
-                }
-            }
+            // Removed duplicate mobileUIManager - using unifiedMobileUI instead
             
             window.addEventListener('orientationchange', handleOrientationChange);
             window.addEventListener('resize', handleOrientationChange);
@@ -17218,35 +17170,11 @@
             initDiscoveryFeedGradients();
             
             // Apply mobile optimizations
-            if (isTabletOrMobile() && window.mobileUIManager) {
-                window.mobileUIManager.applyMobileOptimizations();
+            if (isTabletOrMobile() && window.unifiedMobileUI) {
+                window.unifiedMobileUI.applyMobileOptimizations();
             }
             
-            // Ensure leaderboard is tappable on mobile
-            const leaderboardBox = document.querySelector('.leaderboard-box');
-            if (leaderboardBox && isTabletOrMobile()) {
-                leaderboardBox.style.cursor = 'pointer';
-                
-                // Use touch events for better mobile response
-                let touchStartTime;
-                leaderboardBox.addEventListener('touchstart', function(e) {
-                    touchStartTime = Date.now();
-                });
-                
-                leaderboardBox.addEventListener('touchend', function(e) {
-                    const touchDuration = Date.now() - touchStartTime;
-                    if (touchDuration < 200) { // Quick tap
-                        e.preventDefault();
-                        this.classList.toggle('collapsed');
-                        localStorage.setItem('leaderboardCollapsed', this.classList.contains('collapsed'));
-                    }
-                });
-                
-                // Restore collapsed state from localStorage
-                if (localStorage.getItem('leaderboardCollapsed') === 'true') {
-                    leaderboardBox.classList.add('collapsed');
-                }
-            }
+            // Removed duplicate leaderboard touch handlers - handled by unifiedMobileUI
         });
         
         // Initialize
