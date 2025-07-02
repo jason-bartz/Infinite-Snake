@@ -163,6 +163,7 @@
     <link rel="stylesheet" href="css/skin-selection.css">
     <link rel="stylesheet" href="css/unlock-notifications.css">
     <link rel="stylesheet" href="css/discovery-feed-gradients.css">
+    <link rel="stylesheet" href="css/mobile-ui-overhaul.css">
     <style>
         /* SNES-Era UI Theme with Cosmic Colors */
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
@@ -3436,6 +3437,7 @@
     <script src="js/mobile-star-renderer.js"></script>
     <script src="js/mobile-background-optimizer.js"></script>
     <script src="js/mobile-background-integration.js"></script>
+    <script src="js/mobile-ui-overhaul.js"></script>
 </head>
 <body>
     <!-- Persistent Star Background -->
@@ -12870,6 +12872,12 @@
                 boostFill.className = 'boost-bar-fill boosting';
             } else {
                 boostFill.className = 'boost-bar-fill';
+            }
+            
+            // Update mobile boost button fill
+            if (window.mobileUIOverhaul) {
+                window.mobileUIOverhaul.setBoostAmount(staminaPercent);
+                window.mobileUIOverhaul.setBoostActive(playerSnake.isBoosting);
             }
         }
         
