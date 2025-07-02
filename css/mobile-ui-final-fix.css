@@ -1,0 +1,197 @@
+/* FINAL Mobile UI Fix - SNES Style with Proper Positioning */
+
+/* Reset and hide all previous attempts */
+body.mobile .player-info-box::after,
+body.mobile .player-info-box::before,
+body.mobile .leaderboard-box::after {
+    display: none !important;
+}
+
+/* =============== PLAYER STATS PANEL - LEFT SIDE =============== */
+body.mobile .player-info-box {
+    position: fixed !important;
+    top: 10px !important;
+    left: -260px !important; /* Hide panel but show 20px for tab */
+    right: auto !important;
+    bottom: auto !important;
+    width: 280px !important;
+    height: auto !important;
+    z-index: 200 !important;
+    transition: left 0.3s ease-out !important;
+    transform: none !important;
+    
+    /* SNES Style */
+    background: var(--snes-dark-blue) !important;
+    border: 4px solid !important;
+    border-color: var(--snes-light-blue) var(--snes-black) var(--snes-black) var(--snes-light-blue) !important;
+    border-radius: 0 !important;
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.8) !important;
+    overflow: visible !important;
+}
+
+body.mobile .player-info-box.expanded {
+    left: 0 !important;
+}
+
+/* Player Stats Tab - SNES Style */
+body.mobile .player-info-box .mobile-tab-handle {
+    position: absolute !important;
+    right: -50px !important;
+    top: 0 !important;
+    width: 50px !important;
+    height: 80px !important;
+    
+    /* SNES Style matching */
+    background: var(--snes-dark-blue) !important;
+    border: 4px solid !important;
+    border-color: var(--snes-light-blue) var(--snes-black) var(--snes-black) var(--snes-light-blue) !important;
+    border-left: none !important;
+    border-radius: 0 !important;
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.8) !important;
+    
+    cursor: pointer !important;
+    z-index: 201 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* =============== LEADERBOARD PANEL - RIGHT SIDE =============== */
+body.mobile .leaderboard-box {
+    position: fixed !important;
+    top: 10px !important;
+    right: -260px !important; /* Hide panel but show 20px for tab */
+    left: auto !important;
+    bottom: auto !important;
+    width: 280px !important;
+    height: auto !important;
+    z-index: 200 !important;
+    transition: right 0.3s ease-out !important;
+    transform: none !important;
+    
+    /* SNES Style */
+    background: var(--snes-black) !important;
+    border: 4px solid !important;
+    border-color: var(--snes-white) #505050 #505050 var(--snes-white) !important;
+    border-radius: 0 !important;
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.8) !important;
+    overflow: visible !important;
+}
+
+body.mobile .leaderboard-box.expanded {
+    right: 0 !important;
+}
+
+/* Leaderboard Tab - SNES Style */
+body.mobile .leaderboard-box .mobile-tab-handle {
+    position: absolute !important;
+    left: -50px !important;
+    top: 0 !important;
+    width: 50px !important;
+    height: 80px !important;
+    
+    /* SNES Style matching */
+    background: var(--snes-black) !important;
+    border: 4px solid !important;
+    border-color: var(--snes-white) #505050 #505050 var(--snes-white) !important;
+    border-right: none !important;
+    border-radius: 0 !important;
+    box-shadow: -4px 4px 0 rgba(0,0,0,0.8) !important;
+    
+    cursor: pointer !important;
+    z-index: 201 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 24px !important;
+}
+
+/* Fix leaderboard header */
+body.mobile .leaderboard-header {
+    display: block !important;
+    background: var(--snes-primary-blue) !important;
+    color: var(--snes-white) !important;
+    text-transform: uppercase !important;
+    font-size: 12px !important;
+    padding: 8px !important;
+    text-align: center !important;
+    border-bottom: 2px solid var(--snes-black) !important;
+    font-family: 'Press Start 2P' !important;
+    letter-spacing: 0 !important;
+}
+
+/* Remove any ::before content */
+body.mobile .leaderboard-box::before {
+    display: none !important;
+}
+
+/* =============== DISCOVERY FEED - PROPER POSITIONING =============== */
+body.mobile .discovery-feed {
+    position: fixed !important;
+    top: 50% !important;
+    left: 20px !important; /* Back to original position */
+    transform: translateY(-50%) !important;
+    width: 250px !important;
+    max-height: 40vh !important;
+    z-index: 10 !important;
+    display: flex !important;
+    opacity: 0.7 !important;
+}
+
+/* =============== ENSURE OTHER ELEMENTS ARE CORRECT =============== */
+/* Hide boost bar completely */
+body.mobile .boost-bar-container,
+body.mobile .boost-bar-frame,
+body.mobile .boost-bar-fill,
+body.mobile .boost-bar-text {
+    display: none !important;
+    height: 0 !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    position: absolute !important;
+    left: -9999px !important;
+}
+
+/* Boost button position */
+body.mobile .boost-button {
+    position: fixed !important;
+    bottom: 40px !important;
+    right: 40px !important;
+    left: auto !important;
+    top: auto !important;
+    width: 100px !important;
+    height: 100px !important;
+    z-index: 150 !important;
+}
+
+/* Joystick position */
+body.mobile .virtual-joystick {
+    position: fixed !important;
+    bottom: 40px !important;
+    left: 40px !important;
+    right: auto !important;
+    top: auto !important;
+    z-index: 150 !important;
+}
+
+/* Touch feedback with SNES style */
+body.mobile .mobile-tab-handle:active {
+    transform: translate(2px, 2px) !important;
+    box-shadow: 2px 2px 0 rgba(0,0,0,0.8) !important;
+}
+
+/* Ensure proper layering */
+body.mobile #gameCanvas {
+    z-index: 1 !important;
+}
+
+body.mobile .mobile-controls {
+    z-index: 150 !important;
+}
+
+/* Override any conflicting styles */
+body.mobile .player-info-box,
+body.mobile .leaderboard-box {
+    border-radius: 0 !important;
+    transition-duration: 0.3s !important;
+}
