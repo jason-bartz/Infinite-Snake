@@ -65,9 +65,9 @@
         // Apply inline styles to stats tab
         statsTab.style.cssText = `
             position: absolute !important;
-            right: -40px !important;
+            right: -43px !important;
             top: 10px !important;
-            width: 40px !important;
+            width: 43px !important;
             height: 60px !important;
             background: #101040 !important;
             border: 3px solid !important;
@@ -118,9 +118,9 @@
         // Apply inline styles to leaderboard tab
         leaderTab.style.cssText = `
             position: absolute !important;
-            left: -40px !important;
+            left: -43px !important;
             top: 10px !important;
-            width: 40px !important;
+            width: 43px !important;
             height: 60px !important;
             background: #000000 !important;
             border: 3px solid !important;
