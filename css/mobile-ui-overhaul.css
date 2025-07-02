@@ -11,12 +11,15 @@ body.mobile .leaderboard-box .leaderboard-header {
 }
 
 /* Force hide the boost bar on mobile */
-body.mobile .boost-bar-container {
+body.mobile .boost-bar-container,
+body.mobile .bottom-ui .boost-bar-container {
     display: none !important;
     visibility: hidden !important;
     opacity: 0 !important;
     height: 0 !important;
     overflow: hidden !important;
+    position: absolute !important;
+    left: -9999px !important;
 }
 
 /* =============== COLLAPSIBLE STATS PANEL =============== */

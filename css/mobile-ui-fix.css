@@ -1,0 +1,60 @@
+/* Emergency Mobile UI Fix - Force correct positioning and visibility */
+
+/* Ensure boost button is on the right side */
+body.mobile .boost-button {
+    position: absolute !important;
+    bottom: 40px !important;
+    right: 40px !important;
+    left: auto !important;
+    width: 100px !important;
+    height: 100px !important;
+    z-index: 100 !important;
+}
+
+/* Force joystick to stay on left */
+body.mobile .virtual-joystick {
+    position: absolute !important;
+    bottom: 40px !important;
+    left: 40px !important;
+    right: auto !important;
+    z-index: 100 !important;
+}
+
+/* CRITICAL FIX: Force visibility of player info box */
+body.mobile .player-info-box {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* CRITICAL FIX: Force visibility of leaderboard */
+body.mobile .leaderboard-box {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Ensure discovery feed is visible */
+body.mobile .discovery-feed {
+    display: flex !important;
+    visibility: visible !important;
+}
+
+/* Force hide the old boost bar */
+body.mobile .boost-bar-container,
+body.mobile .boost-bar-frame,
+body.mobile .boost-bar-fill {
+    display: none !important;
+    height: 0 !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+}
+
+/* Debug styles to verify elements exist */
+body.mobile .player-info-box {
+    border: 3px solid red !important; /* Temporary - remove after testing */
+}
+
+body.mobile .leaderboard-box {
+    border: 3px solid blue !important; /* Temporary - remove after testing */
+}
