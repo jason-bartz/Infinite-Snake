@@ -9,6 +9,12 @@ class MobileUIOverhaul {
     }
 
     init() {
+        console.log('Mobile UI Overhaul: Initializing...', {
+            isMobile: this.isMobile(),
+            hasBodyClass: document.body.classList.contains('mobile'),
+            isInitialized: this.isInitialized
+        });
+        
         if (!this.isMobile() || this.isInitialized) return;
         
         this.isInitialized = true;
@@ -17,6 +23,12 @@ class MobileUIOverhaul {
         this.statsPanel = document.querySelector('.player-info-box');
         this.leaderboardPanel = document.querySelector('.leaderboard-box');
         this.boostButton = document.querySelector('.boost-button');
+        
+        console.log('Mobile UI Overhaul: Elements found', {
+            statsPanel: !!this.statsPanel,
+            leaderboardPanel: !!this.leaderboardPanel,
+            boostButton: !!this.boostButton
+        });
         
         if (!this.statsPanel || !this.leaderboardPanel) {
             console.warn('Mobile UI elements not found, retrying...');
@@ -39,12 +51,23 @@ class MobileUIOverhaul {
     }
 
     isMobile() {
+        // More comprehensive mobile detection
         return document.body.classList.contains('mobile') || 
                window.innerWidth <= 800 || 
-               'ontouchstart' in window;
+               'ontouchstart' in window ||
+               /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+               window.matchMedia("(pointer: coarse)").matches;
     }
 
     setupCollapsiblePanels() {
+        // Remove existing click handlers to avoid conflicts
+        const existingLeaderboard = this.leaderboardPanel.cloneNode(true);
+        this.leaderboardPanel.parentNode.replaceChild(existingLeaderboard, this.leaderboardPanel);
+        this.leaderboardPanel = existingLeaderboard;
+        
+        // Remove collapsed class added by existing code
+        this.leaderboardPanel.classList.remove('collapsed');
+        
         // Stats panel click handler
         this.createClickHandler(this.statsPanel);
         
@@ -127,10 +150,14 @@ class MobileUIOverhaul {
         // Add span for text if not present
         if (!this.boostButton.querySelector('span')) {
             const span = document.createElement('span');
-            span.textContent = this.boostButton.textContent;
+            span.textContent = this.boostButton.textContent || 'BOOST';
             this.boostButton.textContent = '';
             this.boostButton.appendChild(span);
         }
+        
+        // Force initial styles
+        this.boostButton.style.position = 'relative';
+        this.boostButton.style.overflow = 'hidden';
         
         // Update boost fill based on game state
         this.updateBoostFill();
@@ -227,12 +254,22 @@ class MobileUIOverhaul {
 // Initialize mobile UI overhaul
 const mobileUIOverhaul = new MobileUIOverhaul();
 
+// Force mobile class early if needed
+if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+    window.matchMedia("(pointer: coarse)").matches ||
+    window.innerWidth <= 800) {
+    document.body.classList.add('mobile');
+}
+
 // Wait for DOM and game to be ready
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => mobileUIOverhaul.init());
+    document.addEventListener('DOMContentLoaded', () => {
+        // Wait for other mobile initialization to complete
+        setTimeout(() => mobileUIOverhaul.init(), 500);
+    });
 } else {
     // DOM already loaded, wait a bit for game elements
-    setTimeout(() => mobileUIOverhaul.init(), 100);
+    setTimeout(() => mobileUIOverhaul.init(), 500);
 }
 
 // Export for game integration

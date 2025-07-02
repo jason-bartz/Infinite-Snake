@@ -1,9 +1,26 @@
 /* Mobile UI Overhaul - Modern Collapsible Interface */
 
-/* Mobile-specific styles - only apply when on mobile devices */
-@media (max-width: 800px) {
-    /* =============== COLLAPSIBLE STATS PANEL =============== */
-    body.mobile .player-info-box {
+/* Override existing mobile styles with higher specificity */
+body.mobile .leaderboard-box.collapsed .leaderboard-header::after {
+    display: none !important;
+}
+
+/* Hide existing leaderboard header text when our UI is active */
+body.mobile .leaderboard-box .leaderboard-header {
+    font-size: 0 !important; /* Hide text but keep element */
+}
+
+/* Force hide the boost bar on mobile */
+body.mobile .boost-bar-container {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+}
+
+/* =============== COLLAPSIBLE STATS PANEL =============== */
+body.mobile .player-info-box {
         /* Positioning */
         position: fixed !important;
         top: 10px !important;
@@ -68,8 +85,8 @@
         z-index: 1;
     }
     
-    /* =============== COLLAPSIBLE LEADERBOARD =============== */
-    body.mobile .leaderboard-box {
+/* =============== COLLAPSIBLE LEADERBOARD =============== */
+body.mobile .leaderboard-box {
         /* Positioning */
         position: fixed !important;
         top: 80px !important;
@@ -118,8 +135,8 @@
         box-shadow: 4px 0 10px rgba(0, 0, 0, 0.3);
     }
     
-    /* =============== BOOST BUTTON WITH FILL EFFECT =============== */
-    body.mobile .boost-bar-container {
+/* =============== BOOST BUTTON WITH FILL EFFECT =============== */
+body.mobile .boost-bar-container {
         display: none !important; /* Hide the visual boost bar */
     }
     
@@ -164,8 +181,8 @@
         50% { transform: scale(1.05); }
     }
     
-    /* =============== DISCOVERY FEED OPACITY FADE =============== */
-    body.mobile .discovery-feed {
+/* =============== DISCOVERY FEED OPACITY FADE =============== */
+body.mobile .discovery-feed {
         display: flex !important; /* Show on mobile */
         position: fixed !important;
         top: 50% !important;
@@ -207,10 +224,10 @@
         z-index: 1;
     }
     
-    /* =============== CONSISTENT BORDERS AND COLORS =============== */
-    /* Ensure all mobile UI elements have consistent SNES-style borders */
-    body.mobile .player-info-box,
-    body.mobile .leaderboard-box {
+/* =============== CONSISTENT BORDERS AND COLORS =============== */
+/* Ensure all mobile UI elements have consistent SNES-style borders */
+body.mobile .player-info-box,
+body.mobile .leaderboard-box {
         border-width: 3px !important;
         border-style: solid !important;
     }
@@ -223,8 +240,8 @@
         border-color: var(--snes-white) #505050 #505050 var(--snes-white) !important;
     }
     
-    /* =============== LANDSCAPE ADJUSTMENTS =============== */
-    @media (orientation: landscape) {
+/* =============== LANDSCAPE ADJUSTMENTS =============== */
+@media (orientation: landscape) {
         body.mobile .player-info-box,
         body.mobile .leaderboard-box {
             max-height: 80vh !important;
@@ -236,19 +253,18 @@
         }
     }
     
-    /* =============== TOUCH INTERACTIONS =============== */
-    /* Tap target improvements */
-    body.mobile .player-info-box::after,
-    body.mobile .leaderboard-box::after {
+/* =============== TOUCH INTERACTIONS =============== */
+/* Tap target improvements */
+body.mobile .player-info-box::after,
+body.mobile .leaderboard-box::after {
         min-width: 50px;
         min-height: 70px;
     }
     
-    /* Prevent accidental taps */
-    body.mobile .player-info-box.expanded,
-    body.mobile .leaderboard-box.expanded {
-        box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.3) !important;
-    }
+/* Prevent accidental taps */
+body.mobile .player-info-box.expanded,
+body.mobile .leaderboard-box.expanded {
+    box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.3) !important;
 }
 
 /* CSS variable for player skin (set via JavaScript) */
