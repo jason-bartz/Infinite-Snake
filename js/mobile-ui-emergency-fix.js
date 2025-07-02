@@ -27,6 +27,8 @@
             playerBox.style.display = 'block';
             playerBox.style.visibility = 'visible';
             playerBox.style.opacity = '1';
+            // Ensure it starts collapsed
+            playerBox.classList.remove('expanded');
         }
         
         // Check for leaderboard box
@@ -39,6 +41,9 @@
             leaderboard.style.display = 'block';
             leaderboard.style.visibility = 'visible';
             leaderboard.style.opacity = '1';
+            // Ensure it starts collapsed
+            leaderboard.classList.remove('expanded');
+            leaderboard.classList.remove('collapsed'); // Remove old collapsed class
         }
         
         // Fix boost button position
@@ -89,16 +94,17 @@
             playerTab.className = 'mobile-tab-handle player-tab';
             playerTab.style.cssText = `
                 position: absolute;
-                right: -50px;
+                right: -60px;
                 top: 10px;
-                width: 50px;
-                height: 70px;
-                background: rgba(16, 16, 64, 0.9);
-                border: 2px solid #5878F8;
+                width: 60px;
+                height: 80px;
+                background: rgba(16, 16, 64, 0.95);
+                border: 3px solid #5878F8;
                 border-left: none;
-                border-radius: 0 8px 8px 0;
+                border-radius: 0 12px 12px 0;
                 cursor: pointer;
-                z-index: 102;
+                z-index: 201;
+                box-shadow: 4px 0 10px rgba(0, 0, 0, 0.5);
             `;
             
             // Add skin preview
@@ -143,20 +149,21 @@
             leaderTab.innerHTML = '🏆';
             leaderTab.style.cssText = `
                 position: absolute;
-                left: -50px;
+                left: -60px;
                 top: 10px;
-                width: 50px;
-                height: 70px;
-                background: rgba(0, 0, 0, 0.9);
-                border: 2px solid #F8F8F8;
+                width: 60px;
+                height: 80px;
+                background: rgba(0, 0, 0, 0.95);
+                border: 3px solid #F8F8F8;
                 border-right: none;
-                border-radius: 8px 0 0 8px;
+                border-radius: 12px 0 0 12px;
                 cursor: pointer;
-                z-index: 102;
+                z-index: 201;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                font-size: 24px;
+                font-size: 28px;
+                box-shadow: -4px 0 10px rgba(0, 0, 0, 0.5);
             `;
             
             leaderboard.appendChild(leaderTab);
