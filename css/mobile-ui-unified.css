@@ -1,0 +1,394 @@
+/* Unified Mobile UI - Consolidated and optimized mobile interface */
+
+/* =============== CSS VARIABLES =============== */
+:root {
+    --player-skin-url: url('../skins/snake-default-green.png');
+    --mobile-panel-width: 280px;
+    --mobile-tab-width: 50px;
+    --mobile-tab-height: 80px;
+    --mobile-transition: 0.3s ease-out;
+}
+
+/* =============== BASE MOBILE STYLES =============== */
+/* Hide boost bar on mobile */
+body.mobile .boost-bar-container,
+body.mobile .boost-bar-frame,
+body.mobile .boost-bar-fill,
+body.mobile .bottom-ui .boost-bar-container {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    overflow: hidden !important;
+}
+
+/* Mobile controls positioning */
+body.mobile .mobile-controls {
+    z-index: 90;
+}
+
+body.mobile .virtual-joystick {
+    position: absolute;
+    bottom: 40px;
+    left: 40px;
+    z-index: 95;
+}
+
+body.mobile .boost-button {
+    position: absolute;
+    bottom: 40px;
+    right: 40px;
+    width: 100px;
+    height: 100px;
+    z-index: 95;
+    
+    /* Boost fill effect */
+    position: relative;
+    overflow: hidden;
+    background: rgba(78, 205, 196, 0.1);
+    border: 3px solid rgba(78, 205, 196, 0.4);
+}
+
+/* Boost fill effect inside button */
+body.mobile .boost-button::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: var(--boost-fill, 100%);
+    background: linear-gradient(to top, 
+        rgba(78, 205, 196, 0.6) 0%, 
+        rgba(78, 205, 196, 0.3) 100%);
+    transition: height 0.1s linear;
+    pointer-events: none;
+}
+
+/* Boost text on top of fill */
+body.mobile .boost-button span {
+    position: relative;
+    z-index: 1;
+}
+
+/* Active boost state */
+body.mobile .boost-button.active {
+    background: rgba(78, 205, 196, 0.2);
+    border-color: rgba(78, 205, 196, 0.8);
+    animation: boostPulse 0.5s ease-in-out infinite;
+}
+
+/* Low boost state */
+body.mobile .boost-button.low-boost {
+    border-color: rgba(255, 68, 68, 0.5);
+    background: rgba(255, 68, 68, 0.1);
+}
+
+body.mobile .boost-button.low-boost::before {
+    background: linear-gradient(to top, 
+        rgba(255, 68, 68, 0.6) 0%, 
+        rgba(255, 68, 68, 0.3) 100%);
+}
+
+@keyframes boostPulse {
+    0%, 100% { transform: scale(0.95); }
+    50% { transform: scale(1.05); }
+}
+
+/* =============== PLAYER STATS PANEL =============== */
+body.mobile .player-info-box {
+    /* Positioning - Fixed on left side */
+    position: fixed !important;
+    top: 10px !important;
+    left: calc(-1 * var(--mobile-panel-width) + 10px) !important; /* Show 10px of panel edge */
+    bottom: auto !important;
+    right: auto !important;
+    
+    /* Dimensions */
+    width: var(--mobile-panel-width) !important;
+    max-width: 80vw !important;
+    
+    /* Visual styles */
+    background: rgba(16, 16, 64, 0.95) !important;
+    border: 3px solid;
+    border-color: var(--snes-light-blue) var(--snes-dark-blue) var(--snes-dark-blue) var(--snes-light-blue);
+    border-left: none;
+    border-radius: 0 8px 8px 0;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
+    
+    /* Behavior */
+    transition: left var(--mobile-transition);
+    z-index: 100;
+    overflow: visible; /* Important for tab visibility */
+}
+
+/* Stats panel expanded state */
+body.mobile .player-info-box.expanded {
+    left: 0 !important;
+}
+
+/* Tab handle for stats panel */
+body.mobile .player-info-box .mobile-tab-handle {
+    position: absolute;
+    right: calc(-1 * var(--mobile-tab-width));
+    top: 0;
+    width: var(--mobile-tab-width);
+    height: var(--mobile-tab-height);
+    background: rgba(16, 16, 64, 0.9);
+    border: 3px solid;
+    border-color: var(--snes-light-blue) var(--snes-dark-blue) var(--snes-dark-blue) transparent;
+    border-left: none;
+    border-radius: 0 8px 8px 0;
+    cursor: pointer;
+    z-index: 101;
+    box-shadow: 4px 0 10px rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Snake skin preview in stats tab */
+body.mobile .player-info-box .mobile-tab-skin {
+    width: 32px;
+    height: 32px;
+    background-image: var(--player-skin-url);
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+}
+
+/* =============== LEADERBOARD PANEL =============== */
+body.mobile .leaderboard-box {
+    /* Positioning - Fixed on right side */
+    position: fixed !important;
+    top: 10px !important;
+    right: calc(-1 * var(--mobile-panel-width) + 10px) !important; /* Show 10px of panel edge */
+    bottom: auto !important;
+    left: auto !important;
+    
+    /* Dimensions */
+    width: var(--mobile-panel-width) !important;
+    max-width: 80vw !important;
+    
+    /* Visual styles */
+    background: rgba(0, 0, 0, 0.95) !important;
+    border: 3px solid;
+    border-color: var(--snes-white) #505050 #505050 var(--snes-white);
+    border-right: none;
+    border-radius: 8px 0 0 8px;
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.5);
+    
+    /* Behavior */
+    transition: right var(--mobile-transition);
+    z-index: 100;
+    overflow: visible; /* Important for tab visibility */
+}
+
+/* Leaderboard expanded state */
+body.mobile .leaderboard-box.expanded {
+    right: 0 !important;
+}
+
+/* Tab handle for leaderboard */
+body.mobile .leaderboard-box .mobile-tab-handle {
+    position: absolute;
+    left: calc(-1 * var(--mobile-tab-width));
+    top: 0;
+    width: var(--mobile-tab-width);
+    height: var(--mobile-tab-height);
+    background: rgba(0, 0, 0, 0.9);
+    border: 3px solid;
+    border-color: var(--snes-white) transparent #505050 var(--snes-white);
+    border-right: none;
+    border-radius: 8px 0 0 8px;
+    cursor: pointer;
+    z-index: 101;
+    box-shadow: -4px 0 10px rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+/* Hide default leaderboard header text on mobile */
+body.mobile .leaderboard-box.collapsed .leaderboard-header::after {
+    display: none;
+}
+
+body.mobile .leaderboard-box .leaderboard-header {
+    font-size: 0;
+}
+
+/* =============== DISCOVERY FEED =============== */
+body.mobile .discovery-feed {
+    display: flex !important;
+    position: fixed;
+    top: 50%;
+    left: 10px;
+    transform: translateY(-50%);
+    width: 250px;
+    max-height: 40vh;
+    
+    /* Opacity fade from left to right */
+    mask-image: linear-gradient(to right, 
+        rgba(0, 0, 0, 0.8) 0%, 
+        rgba(0, 0, 0, 0.4) 70%, 
+        rgba(0, 0, 0, 0) 100%);
+    -webkit-mask-image: linear-gradient(to right, 
+        rgba(0, 0, 0, 0.8) 0%, 
+        rgba(0, 0, 0, 0.4) 70%, 
+        rgba(0, 0, 0, 0) 100%);
+    
+    opacity: 0.7;
+    z-index: 10;
+    pointer-events: none;
+}
+
+/* Individual messages fade */
+body.mobile .discovery-message {
+    background: linear-gradient(to right,
+        rgba(16, 32, 64, 0.9) 0%,
+        rgba(16, 32, 64, 0.6) 70%,
+        rgba(16, 32, 64, 0) 100%);
+    border-right: none;
+    padding-right: 20px;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    pointer-events: auto;
+}
+
+/* =============== PAUSE MENU Z-INDEX FIX =============== */
+body.mobile #pauseOverlay {
+    z-index: 9999 !important;
+}
+
+body.mobile #pauseMenu {
+    z-index: 10000 !important;
+}
+
+/* =============== SKIN SELECTION RESPONSIVE FIX =============== */
+/* Prevent skin overlap on small screens */
+@media (max-width: 600px) {
+    body.mobile .skin-grid,
+    body.mobile .skins-grid {
+        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+        gap: 10px;
+        padding: 10px;
+    }
+    
+    body.mobile .skin-card {
+        width: 100%;
+        min-width: 80px;
+        max-width: 120px;
+        margin: 0 auto;
+    }
+    
+    body.mobile .skin-preview {
+        width: 60px;
+        height: 60px;
+    }
+    
+    body.mobile .skin-name {
+        font-size: 10px;
+    }
+}
+
+/* =============== LANDSCAPE ADJUSTMENTS =============== */
+@media (orientation: landscape) {
+    body.mobile .player-info-box,
+    body.mobile .leaderboard-box {
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+    
+    body.mobile .discovery-feed {
+        max-height: 60vh;
+    }
+}
+
+/* =============== PORTRAIT ADJUSTMENTS =============== */
+@media (orientation: portrait) {
+    body.mobile .discovery-feed {
+        font-size: 0.9em;
+        width: 200px;
+    }
+    
+    body.mobile .discovery-message {
+        padding: 6px 10px;
+        margin: 2px 0;
+    }
+}
+
+/* =============== TOUCH INTERACTION IMPROVEMENTS =============== */
+/* Ensure adequate touch targets */
+body.mobile .mobile-tab-handle {
+    min-width: 50px;
+    min-height: 70px;
+}
+
+/* Touch feedback */
+body.mobile .mobile-tab-handle:active {
+    transform: scale(0.95);
+}
+
+/* Prevent accidental taps - dim background when panels open */
+body.mobile .player-info-box.expanded::before,
+body.mobile .leaderboard-box.expanded::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: -1;
+}
+
+/* =============== SMOOTH ANIMATIONS =============== */
+body.mobile .player-info-box,
+body.mobile .leaderboard-box {
+    will-change: transform;
+    -webkit-transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+/* =============== Z-INDEX HIERARCHY =============== */
+body.mobile #gameContainer {
+    z-index: 1;
+}
+
+body.mobile .bottom-ui {
+    z-index: 20;
+}
+
+body.mobile .discovery-feed {
+    z-index: 10;
+}
+
+body.mobile .mobile-controls {
+    z-index: 90;
+}
+
+body.mobile .virtual-joystick,
+body.mobile .boost-button {
+    z-index: 95;
+}
+
+body.mobile .player-info-box,
+body.mobile .leaderboard-box {
+    z-index: 100;
+}
+
+body.mobile .mobile-tab-handle {
+    z-index: 101;
+}
+
+/* Pause menu should be on top of everything */
+body.mobile #pauseOverlay {
+    z-index: 9999 !important;
+}
+
+body.mobile #pauseMenu {
+    z-index: 10000 !important;
+}
