@@ -41,6 +41,13 @@ class UnifiedMobileUI {
             this.leaderboardPanel = document.querySelector('.leaderboard-box');
             this.boostButton = document.querySelector('.boost-button');
             
+            console.log('Unified Mobile UI: Element check:', {
+                statsPanel: this.statsPanel ? 'found' : 'not found',
+                leaderboardPanel: this.leaderboardPanel ? 'found' : 'not found',
+                boostButton: this.boostButton ? 'found' : 'not found',
+                bodyHasMobileClass: document.body.classList.contains('mobile')
+            });
+            
             if (!this.statsPanel || !this.leaderboardPanel) {
                 console.log('Unified Mobile UI: Waiting for elements...');
                 setTimeout(checkElements, 100);
@@ -94,6 +101,13 @@ class UnifiedMobileUI {
     }
 
     createStatsTab() {
+        console.log('Creating stats tab...');
+        
+        if (!this.statsPanel) {
+            console.error('Stats panel not found when creating tab!');
+            return;
+        }
+        
         const tab = document.createElement('div');
         tab.className = 'mobile-tab-handle stats-tab';
         
@@ -103,6 +117,7 @@ class UnifiedMobileUI {
         tab.appendChild(skinPreview);
         
         this.statsPanel.appendChild(tab);
+        console.log('Stats tab appended to panel');
         
         // Add event handlers
         tab.addEventListener('click', (e) => {
@@ -118,14 +133,26 @@ class UnifiedMobileUI {
         
         // Update skin preview
         this.updateTabSkin();
+        
+        // Verify tab was created
+        const verifyTab = document.querySelector('.player-info-box .mobile-tab-handle');
+        console.log('Stats tab verification:', verifyTab ? 'SUCCESS' : 'FAILED');
     }
 
     createLeaderboardTab() {
+        console.log('Creating leaderboard tab...');
+        
+        if (!this.leaderboardPanel) {
+            console.error('Leaderboard panel not found when creating tab!');
+            return;
+        }
+        
         const tab = document.createElement('div');
         tab.className = 'mobile-tab-handle leaderboard-tab';
         tab.innerHTML = '🏆';
         
         this.leaderboardPanel.appendChild(tab);
+        console.log('Leaderboard tab appended to panel');
         
         // Add event handlers
         tab.addEventListener('click', (e) => {
@@ -138,6 +165,10 @@ class UnifiedMobileUI {
             e.preventDefault();
             this.togglePanel(this.leaderboardPanel);
         });
+        
+        // Verify tab was created
+        const verifyTab = document.querySelector('.leaderboard-box .mobile-tab-handle');
+        console.log('Leaderboard tab verification:', verifyTab ? 'SUCCESS' : 'FAILED');
     }
 
     togglePanel(panel) {
@@ -351,19 +382,29 @@ class UnifiedMobileUI {
 // Initialize unified mobile UI
 const unifiedMobileUI = new UnifiedMobileUI();
 
-// Auto-detect and add mobile class
-if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-    window.matchMedia("(pointer: coarse)").matches ||
-    window.innerWidth <= 800) {
-    document.body.classList.add('mobile');
+// Function to detect and set mobile class
+function detectAndSetMobile() {
+    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+        window.matchMedia("(pointer: coarse)").matches ||
+        window.innerWidth <= 800) {
+        if (document.body) {
+            document.body.classList.add('mobile');
+            console.log('Mobile class added to body');
+        }
+        return true;
+    }
+    return false;
 }
 
 // Initialize when DOM is ready
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
+        detectAndSetMobile();
         setTimeout(() => unifiedMobileUI.init(), 300);
     });
 } else {
+    // DOM is already loaded
+    detectAndSetMobile();
     setTimeout(() => unifiedMobileUI.init(), 300);
 }
 
@@ -377,3 +418,11 @@ window.unifiedMobileUI = unifiedMobileUI;
 
 // Compatibility with existing code
 window.mobileUIOverhaul = unifiedMobileUI;
+
+// Force initialization function for debugging
+window.forceMobileUIInit = function() {
+    console.log('Force initializing mobile UI...');
+    document.body.classList.add('mobile');
+    unifiedMobileUI.isInitialized = false; // Reset flag
+    unifiedMobileUI.init();
+};

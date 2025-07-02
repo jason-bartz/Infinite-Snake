@@ -100,26 +100,31 @@ body.mobile .player-info-box {
     position: fixed !important;
     top: 10px !important;
     left: -270px !important; /* Show 10px of panel edge (280px - 10px) */
-    left: calc(-1 * var(--mobile-panel-width) + 10px) !important; /* Fallback with calc */
     bottom: auto !important;
     right: auto !important;
     
     /* Dimensions */
     width: var(--mobile-panel-width) !important;
     max-width: 80vw !important;
+    height: auto !important;
+    max-height: 90vh !important;
     
     /* Visual styles */
     background: rgba(16, 16, 64, 0.95) !important;
-    border: 3px solid;
-    border-color: var(--snes-light-blue) var(--snes-dark-blue) var(--snes-dark-blue) var(--snes-light-blue);
-    border-left: none;
-    border-radius: 0 8px 8px 0;
-    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
+    border: 3px solid !important;
+    border-color: var(--snes-light-blue) var(--snes-dark-blue) var(--snes-dark-blue) var(--snes-light-blue) !important;
+    border-left: none !important;
+    border-radius: 0 8px 8px 0 !important;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5) !important;
     
     /* Behavior */
-    transition: left var(--mobile-transition);
-    z-index: 100;
-    overflow: visible; /* Important for tab visibility */
+    transition: left var(--mobile-transition) !important;
+    z-index: 100 !important;
+    overflow: visible !important; /* Important for tab visibility */
+    
+    /* Override any conflicting styles */
+    margin: 0 !important;
+    padding: 8px !important;
 }
 
 /* Stats panel expanded state */
@@ -129,24 +134,25 @@ body.mobile .player-info-box.expanded {
 
 /* Tab handle for stats panel */
 body.mobile .player-info-box .mobile-tab-handle {
-    position: absolute;
-    right: -50px;
-    right: calc(-1 * var(--mobile-tab-width));
-    top: 10px;
-    width: var(--mobile-tab-width);
-    height: var(--mobile-tab-height);
-    background: rgba(16, 16, 64, 0.95);
-    border: 3px solid;
-    border-color: var(--snes-light-blue) var(--snes-dark-blue) var(--snes-dark-blue) transparent;
-    border-left: none;
-    border-radius: 0 8px 8px 0;
-    cursor: pointer;
-    z-index: 102;
-    box-shadow: 4px 0 10px rgba(0, 0, 0, 0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    pointer-events: auto;
+    position: absolute !important;
+    right: -50px !important;
+    top: 10px !important;
+    width: 50px !important;
+    height: 80px !important;
+    background: rgba(16, 16, 64, 0.95) !important;
+    border: 3px solid !important;
+    border-color: var(--snes-light-blue) var(--snes-dark-blue) var(--snes-dark-blue) transparent !important;
+    border-left: none !important;
+    border-radius: 0 8px 8px 0 !important;
+    cursor: pointer !important;
+    z-index: 102 !important;
+    box-shadow: 4px 0 10px rgba(0, 0, 0, 0.3) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    pointer-events: auto !important;
+    visibility: visible !important;
+    opacity: 1 !important;
 }
 
 /* Snake skin preview in stats tab */
@@ -168,26 +174,31 @@ body.mobile .leaderboard-box {
     position: fixed !important;
     top: 10px !important;
     right: -270px !important; /* Show 10px of panel edge (280px - 10px) */
-    right: calc(-1 * var(--mobile-panel-width) + 10px) !important; /* Fallback with calc */
     bottom: auto !important;
     left: auto !important;
     
     /* Dimensions */
     width: var(--mobile-panel-width) !important;
     max-width: 80vw !important;
+    height: auto !important;
+    max-height: 90vh !important;
     
     /* Visual styles */
     background: rgba(0, 0, 0, 0.95) !important;
-    border: 3px solid;
-    border-color: var(--snes-white) #505050 #505050 var(--snes-white);
-    border-right: none;
-    border-radius: 8px 0 0 8px;
-    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.5);
+    border: 3px solid !important;
+    border-color: var(--snes-white) #505050 #505050 var(--snes-white) !important;
+    border-right: none !important;
+    border-radius: 8px 0 0 8px !important;
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.5) !important;
     
     /* Behavior */
-    transition: right var(--mobile-transition);
-    z-index: 100;
-    overflow: visible; /* Important for tab visibility */
+    transition: right var(--mobile-transition) !important;
+    z-index: 100 !important;
+    overflow: visible !important; /* Important for tab visibility */
+    
+    /* Override any conflicting styles */
+    margin: 0 !important;
+    padding: 8px !important;
 }
 
 /* Leaderboard expanded state */
@@ -197,25 +208,26 @@ body.mobile .leaderboard-box.expanded {
 
 /* Tab handle for leaderboard */
 body.mobile .leaderboard-box .mobile-tab-handle {
-    position: absolute;
-    left: -50px;
-    left: calc(-1 * var(--mobile-tab-width));
-    top: 10px;
-    width: var(--mobile-tab-width);
-    height: var(--mobile-tab-height);
-    background: rgba(0, 0, 0, 0.95);
-    border: 3px solid;
-    border-color: var(--snes-white) transparent #505050 var(--snes-white);
-    border-right: none;
-    border-radius: 8px 0 0 8px;
-    cursor: pointer;
-    z-index: 102;
-    box-shadow: -4px 0 10px rgba(0, 0, 0, 0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    pointer-events: auto;
+    position: absolute !important;
+    left: -50px !important;
+    top: 10px !important;
+    width: 50px !important;
+    height: 80px !important;
+    background: rgba(0, 0, 0, 0.95) !important;
+    border: 3px solid !important;
+    border-color: var(--snes-white) transparent #505050 var(--snes-white) !important;
+    border-right: none !important;
+    border-radius: 8px 0 0 8px !important;
+    cursor: pointer !important;
+    z-index: 102 !important;
+    box-shadow: -4px 0 10px rgba(0, 0, 0, 0.3) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 24px !important;
+    pointer-events: auto !important;
+    visibility: visible !important;
+    opacity: 1 !important;
 }
 
 /* Hide default leaderboard header text on mobile */
@@ -398,4 +410,21 @@ body.mobile #pauseOverlay {
 
 body.mobile #pauseMenu {
     z-index: 10000 !important;
+}
+
+/* =============== FORCE TAB VISIBILITY =============== */
+/* Ensure tabs are always visible on mobile */
+body.mobile .mobile-tab-handle {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Force panels to initially show tabs */
+body.mobile .player-info-box:not(.expanded) {
+    left: -270px !important;
+}
+
+body.mobile .leaderboard-box:not(.expanded) {
+    right: -270px !important;
 }
