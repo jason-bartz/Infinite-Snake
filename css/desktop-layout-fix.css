@@ -27,8 +27,7 @@
         border-color: #5878F8 #000000 #000000 #5878F8 !important;
         box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.8) !important;
         
-        /* Consistent background */
-        background: #101040 !important;
+        /* Padding only - background handled by unified color scheme */
         padding: 8px !important;
         
         /* Typography */
@@ -58,8 +57,7 @@
         border-color: #F8F8F8 #505050 #505050 #F8F8F8 !important;
         box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.8) !important;
         
-        /* Consistent background */
-        background: #000000 !important;
+        /* Padding only - background handled by unified color scheme */
         padding: 0 !important;
         
         /* Typography */

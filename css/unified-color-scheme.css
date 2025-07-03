@@ -1,0 +1,216 @@
+/* Unified Color Scheme for All UI Components */
+
+/* Define consistent color variables */
+:root {
+    /* Primary UI colors */
+    --ui-bg-primary: #0a0a0a;        /* Main background - very dark */
+    --ui-bg-secondary: #1a1a1a;      /* Secondary panels - dark gray */
+    --ui-bg-accent: #101040;          /* Accent panels - dark blue */
+    
+    /* Border colors for SNES-style 3D effect */
+    --ui-border-light: #505050;       /* Light edge (top/left) */
+    --ui-border-dark: #000000;        /* Dark edge (bottom/right) */
+    --ui-border-accent: #5878F8;      /* Blue accent for special elements */
+    
+    /* Text colors */
+    --ui-text-primary: #F8F8F8;       /* Primary text - nearly white */
+    --ui-text-secondary: #AAA;        /* Secondary text - light gray */
+    --ui-text-accent: #5878F8;        /* Accent text - blue */
+    
+    /* Special colors */
+    --ui-gold: #FFD700;               /* Gold for achievements/scores */
+    --ui-green: #00FF00;              /* Green for positive values */
+    --ui-red: #FF4444;                /* Red for negative values */
+}
+
+/* Apply unified color scheme to all components */
+
+/* Player Stats Box */
+body .player-info-box {
+    background: var(--ui-bg-secondary) !important;
+    border-color: var(--ui-border-light) var(--ui-border-dark) var(--ui-border-dark) var(--ui-border-light) !important;
+}
+
+body .player-info-box .stat-label {
+    color: var(--ui-text-secondary) !important;
+}
+
+body .player-info-box .stat-value {
+    color: var(--ui-text-primary) !important;
+}
+
+/* Leaderboard */
+body .leaderboard-box {
+    background: var(--ui-bg-secondary) !important;
+    border-color: var(--ui-border-light) var(--ui-border-dark) var(--ui-border-dark) var(--ui-border-light) !important;
+}
+
+body .leaderboard-header {
+    background: var(--ui-bg-primary) !important;
+    border-bottom: 2px solid var(--ui-border-light) !important;
+    color: var(--ui-text-primary) !important;
+}
+
+body .leaderboard-entry {
+    background: var(--ui-bg-secondary) !important;
+    border-bottom: 1px solid #333 !important;
+    color: var(--ui-text-primary) !important;
+}
+
+body .leaderboard-entry.highlight {
+    background: var(--ui-bg-accent) !important;
+}
+
+body .leaderboard-rank {
+    color: var(--ui-gold) !important;
+}
+
+/* Discovery Feed */
+body .discovery-feed {
+    background: transparent !important;
+}
+
+body .discovery-message {
+    background: var(--ui-bg-secondary) !important;
+    border: 3px solid !important;
+    border-color: var(--ui-border-light) var(--ui-border-dark) var(--ui-border-dark) var(--ui-border-light) !important;
+    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.8) !important;
+}
+
+body .discovery-name {
+    color: var(--ui-text-primary) !important;
+}
+
+body .discovery-combo {
+    color: var(--ui-text-secondary) !important;
+}
+
+/* Element Bank / Recipe Book */
+body .element-bank,
+body .recipe-book {
+    background: var(--ui-bg-secondary) !important;
+    border: 3px solid !important;
+    border-color: var(--ui-border-light) var(--ui-border-dark) var(--ui-border-dark) var(--ui-border-light) !important;
+}
+
+body .element-bank-header,
+body .recipe-header {
+    background: var(--ui-bg-primary) !important;
+    border-bottom: 2px solid var(--ui-border-light) !important;
+    color: var(--ui-text-primary) !important;
+}
+
+body .element-entry,
+body .recipe-entry {
+    background: var(--ui-bg-secondary) !important;
+    border-bottom: 1px solid #333 !important;
+}
+
+body .element-name,
+body .recipe-name {
+    color: var(--ui-text-primary) !important;
+}
+
+/* Pause Menu */
+#pauseOverlay {
+    background: rgba(0, 0, 0, 0.85) !important;
+}
+
+#pauseMenu {
+    background: var(--ui-bg-secondary) !important;
+    border: 3px solid !important;
+    border-color: var(--ui-border-light) var(--ui-border-dark) var(--ui-border-dark) var(--ui-border-light) !important;
+    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.8) !important;
+}
+
+/* Buttons - consistent styling */
+button,
+.button,
+.snes-button {
+    background: var(--ui-bg-secondary) !important;
+    border: 3px solid !important;
+    border-color: var(--ui-border-light) var(--ui-border-dark) var(--ui-border-dark) var(--ui-border-light) !important;
+    color: var(--ui-text-primary) !important;
+    border-radius: 0 !important;
+    box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.8) !important;
+}
+
+button:hover,
+.button:hover,
+.snes-button:hover {
+    background: var(--ui-bg-accent) !important;
+    border-color: var(--ui-border-accent) var(--ui-border-dark) var(--ui-border-dark) var(--ui-border-accent) !important;
+}
+
+button:active,
+.button:active,
+.snes-button:active {
+    transform: translate(2px, 2px);
+    box-shadow: none !important;
+}
+
+/* Ensure all text uses consistent font */
+body .player-info-box,
+body .leaderboard-box,
+body .discovery-feed,
+body .element-bank,
+body .recipe-book,
+#pauseMenu {
+    font-family: 'Press Start 2P', monospace !important;
+    image-rendering: pixelated !important;
+    image-rendering: -moz-crisp-edges !important;
+    image-rendering: crisp-edges !important;
+}
+
+/* Mobile specific overrides to maintain consistency */
+body.mobile .player-info-box {
+    background: var(--ui-bg-secondary) !important;
+    border-color: var(--ui-border-light) var(--ui-border-dark) var(--ui-border-dark) var(--ui-border-light) !important;
+}
+
+body.mobile .leaderboard-box {
+    background: var(--ui-bg-secondary) !important;
+    border-color: var(--ui-border-light) var(--ui-border-dark) var(--ui-border-dark) var(--ui-border-light) !important;
+}
+
+/* Mobile tabs */
+body.mobile .mobile-tab-handle {
+    background: var(--ui-bg-secondary) !important;
+    border-color: var(--ui-border-light) var(--ui-border-dark) var(--ui-border-dark) transparent !important;
+}
+
+body.mobile .leaderboard-box .mobile-tab-handle {
+    border-color: var(--ui-border-light) transparent var(--ui-border-dark) var(--ui-border-light) !important;
+}
+
+/* Score and special text colors */
+.score-value,
+.high-score {
+    color: var(--ui-gold) !important;
+}
+
+.positive-value,
+.health-full {
+    color: var(--ui-green) !important;
+}
+
+.negative-value,
+.health-low {
+    color: var(--ui-red) !important;
+}
+
+/* Ensure discovery feed messages match */
+body .discovery-message {
+    background: linear-gradient(to right,
+        var(--ui-bg-secondary) 0%,
+        var(--ui-bg-secondary) 70%,
+        transparent 100%) !important;
+}
+
+/* Element colors in discovery feed */
+.discovery-element {
+    padding: 2px 6px !important;
+    background: var(--ui-bg-primary) !important;
+    border: 1px solid var(--ui-border-light) !important;
+    color: var(--ui-text-primary) !important;
+}
