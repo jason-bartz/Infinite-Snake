@@ -6,6 +6,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
     initializeMobileLeaderboard();
     removeSlideOutHandlers();
+    forceFixedPositioning();
+    
+    // Apply fixes again after a short delay to override any late-loading styles
+    setTimeout(forceFixedPositioning, 100);
+    setTimeout(forceFixedPositioning, 500);
+    setTimeout(forceFixedPositioning, 1000);
 });
 
 // Initialize leaderboard collapse functionality
@@ -108,8 +114,71 @@ function ensurePanelsVisible() {
 // Check visibility periodically
 setInterval(ensurePanelsVisible, 1000);
 
+// Force fixed positioning on panels
+function forceFixedPositioning() {
+    if (!isMobile) return;
+    
+    const statsPanel = document.querySelector('.player-info-box');
+    const leaderboardPanel = document.querySelector('.leaderboard-box');
+    const discoveryFeed = document.querySelector('.discovery-feed');
+    
+    if (statsPanel) {
+        // Force remove any conflicting styles
+        statsPanel.style.cssText = `
+            position: fixed !important;
+            top: 10px !important;
+            left: 10px !important;
+            right: auto !important;
+            bottom: auto !important;
+            width: 140px !important;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            z-index: 100 !important;
+            transform: none !important;
+        `;
+        statsPanel.classList.remove('expanded');
+    }
+    
+    if (leaderboardPanel) {
+        // Force remove any conflicting styles
+        const isCollapsed = leaderboardPanel.classList.contains('collapsed');
+        leaderboardPanel.style.cssText = `
+            position: fixed !important;
+            top: 10px !important;
+            right: 10px !important;
+            left: auto !important;
+            bottom: auto !important;
+            width: 180px !important;
+            height: ${isCollapsed ? '30px' : 'auto'} !important;
+            max-height: 250px !important;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            z-index: 100 !important;
+            transform: none !important;
+        `;
+        leaderboardPanel.classList.remove('expanded');
+    }
+    
+    if (discoveryFeed) {
+        discoveryFeed.style.cssText = `
+            position: fixed !important;
+            top: 120px !important;
+            left: 10px !important;
+            right: auto !important;
+            bottom: auto !important;
+            width: 180px !important;
+            max-height: 200px !important;
+            opacity: 0.6 !important;
+            z-index: 80 !important;
+        `;
+    }
+}
+
 // Export functions for use in other scripts
 window.mobileUIFixed = {
     toggleLeaderboard: toggleLeaderboard,
-    ensurePanelsVisible: ensurePanelsVisible
+    ensurePanelsVisible: ensurePanelsVisible,
+    forceFixedPositioning: forceFixedPositioning
 };

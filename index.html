@@ -3575,6 +3575,39 @@
     <script src="js/mobile-ui-unified.js"></script>
     <script src="js/mobile-ui-inline-fix.js"></script>
     <script src="js/mobile-ui-fixed.js"></script>
+    
+    <!-- Mobile UI Fixed Override Styles - Must be last -->
+    <style id="mobile-ui-fixed-override">
+        @media screen and (max-width: 1024px) {
+            /* Force override slide-out positioning */
+            body.mobile .player-info-box {
+                position: fixed !important;
+                top: 10px !important;
+                left: 10px !important;
+                width: 140px !important;
+                transform: none !important;
+            }
+            
+            body.mobile .leaderboard-box {
+                position: fixed !important;
+                top: 10px !important;
+                right: 10px !important;
+                width: 180px !important;
+                transform: none !important;
+            }
+            
+            body.mobile .discovery-feed {
+                position: fixed !important;
+                top: 120px !important;
+                left: 10px !important;
+            }
+            
+            /* Hide all tab handles */
+            body.mobile .mobile-tab-handle {
+                display: none !important;
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- Persistent Star Background -->
