@@ -25,6 +25,8 @@
     // Exit early if not mobile
     if (!isMobile()) {
         console.log('Mobile UI Inline Style Fix: Not a mobile device, skipping...');
+        // Remove mobile class if incorrectly set
+        document.body.classList.remove('mobile');
         return;
     }
     

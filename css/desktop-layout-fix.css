@@ -1,0 +1,103 @@
+/* Desktop Layout Fix - Restore proper desktop positioning */
+
+/* Desktop only - using precise media query */
+@media (min-width: 801px) and (hover: hover) and (pointer: fine) {
+    /* Force hide mobile tabs on desktop */
+    .mobile-tab-handle {
+        display: none !important;
+        visibility: hidden !important;
+    }
+    
+    /* Player stats box - bottom left corner */
+    body:not(.mobile) .player-info-box,
+    body .player-info-box {
+        position: absolute !important;
+        bottom: 20px !important;
+        left: 20px !important;
+        top: auto !important;
+        right: auto !important;
+        width: auto !important;
+        min-width: 200px !important;
+        transform: none !important;
+        transition: none !important;
+        border-radius: 8px !important;
+        border: 3px solid !important;
+        border-color: var(--snes-light-blue) var(--snes-dark-blue) var(--snes-dark-blue) var(--snes-light-blue) !important;
+        overflow: visible !important;
+    }
+    
+    /* Leaderboard - bottom right corner (collapsed by default) */
+    body:not(.mobile) .leaderboard-box,
+    body .leaderboard-box {
+        position: absolute !important;
+        bottom: 20px !important;
+        right: 20px !important;
+        top: auto !important;
+        left: auto !important;
+        width: 250px !important;
+        transform: none !important;
+        transition: height 0.3s ease-out !important;
+        border-radius: 8px !important;
+        border: 3px solid !important;
+        border-color: var(--snes-white) #505050 #505050 var(--snes-white) !important;
+        overflow: hidden !important;
+    }
+    
+    /* Leaderboard collapsed state on desktop */
+    body:not(.mobile) .leaderboard-box.collapsed,
+    body .leaderboard-box.collapsed {
+        height: 40px !important;
+    }
+    
+    /* Leaderboard expanded state on desktop */
+    body:not(.mobile) .leaderboard-box:not(.collapsed),
+    body .leaderboard-box:not(.collapsed) {
+        height: auto !important;
+        max-height: 400px !important;
+        overflow-y: auto !important;
+    }
+    
+    /* Ensure desktop panels are not affected by mobile styles */
+    body .player-info-box.expanded,
+    body .leaderboard-box.expanded {
+        /* Remove mobile slide behavior */
+        left: 20px !important;
+        right: 20px !important;
+    }
+}
+
+/* Also apply desktop styles when body doesn't have mobile class */
+body:not(.mobile) .player-info-box {
+    position: absolute !important;
+    bottom: 20px !important;
+    left: 20px !important;
+    top: auto !important;
+    right: auto !important;
+    transform: none !important;
+}
+
+body:not(.mobile) .leaderboard-box {
+    position: absolute !important;
+    bottom: 20px !important;
+    right: 20px !important;
+    top: auto !important;
+    left: auto !important;
+    transform: none !important;
+}
+
+/* Remove any mobile-specific inline styles on desktop */
+@media (min-width: 801px) {
+    body:not(.mobile) .player-info-box[style*="left: -"],
+    body:not(.mobile) .leaderboard-box[style*="right: -"] {
+        position: absolute !important;
+        bottom: 20px !important;
+    }
+    
+    body:not(.mobile) .player-info-box[style*="left: -"] {
+        left: 20px !important;
+    }
+    
+    body:not(.mobile) .leaderboard-box[style*="right: -"] {
+        right: 20px !important;
+    }
+}
