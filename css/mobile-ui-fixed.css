@@ -57,11 +57,52 @@
         left: 10px !important; /* Stay in fixed position */
     }
 
+    /* Player info box header and portrait */
+    body.mobile .player-info-box .player-info-header {
+        display: flex !important;
+        gap: 8px !important;
+        align-items: flex-start !important;
+        margin-bottom: 4px !important;
+    }
+    
+    body.mobile .player-info-box .player-portrait {
+        width: 32px !important;
+        height: 32px !important;
+        border: 2px solid var(--snes-light-blue) !important;
+        background: rgba(0, 0, 0, 0.5) !important;
+        padding: 2px !important;
+        flex-shrink: 0 !important;
+    }
+    
+    body.mobile .player-info-box .player-portrait img {
+        width: 100% !important;
+        height: 100% !important;
+        image-rendering: pixelated !important;
+    }
+    
+    body.mobile .player-info-box .player-stats {
+        flex: 1 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 2px !important;
+    }
+
     /* Smaller text for mobile stat box */
     body.mobile .player-info-box .stat-line {
         font-size: 6px !important;
         margin: 1px 0 !important;
         gap: 4px !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        font-family: 'Press Start 2P', monospace !important;
+    }
+    
+    body.mobile .player-info-box .stat-label {
+        color: var(--snes-gray) !important;
+    }
+    
+    body.mobile .player-info-box .stat-value {
+        color: var(--snes-white) !important;
     }
 
     body.mobile .player-info-box .player-name {
@@ -168,11 +209,32 @@
     body.mobile .leaderboard-entry {
         font-size: 7px !important;
         padding: 3px 6px !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+        font-family: 'Press Start 2P', monospace !important;
+    }
+    
+    body.mobile .leaderboard-entry:hover {
+        background: rgba(78, 205, 196, 0.2) !important;
+    }
+    
+    body.mobile .leaderboard-entry.leader {
+        background: rgba(248, 216, 0, 0.2) !important;
+        font-weight: bold !important;
+    }
+    
+    body.mobile .leaderboard-entry.player {
+        background: rgba(78, 205, 196, 0.3) !important;
+        border: 1px solid var(--snes-cosmic-teal) !important;
     }
 
+    body.mobile #leaderboardList,
     body.mobile .leaderboard-list {
         max-height: 180px !important;
         overflow-y: auto !important;
+        padding: 4px !important;
     }
 
     /* =============== DISCOVERY FEED - SMALLER AND REPOSITIONED =============== */
@@ -238,6 +300,73 @@ body.mobile * {
 body.mobile .player-info-box,
 body.mobile .leaderboard-box {
     will-change: auto !important;
+}
+
+/* =============== BOOST BUTTON WITH METER =============== */
+body.mobile .boost-button {
+    position: fixed !important;
+    bottom: 40px !important;
+    right: 40px !important;
+    width: 100px !important;
+    height: 100px !important;
+    background: rgba(16, 16, 64, 0.95) !important;
+    border: 3px solid !important;
+    border-color: var(--snes-cosmic-teal) var(--snes-dark-purple) var(--snes-dark-purple) var(--snes-cosmic-teal) !important;
+    border-radius: 0 !important;
+    overflow: hidden !important;
+    z-index: 95 !important;
+    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.5) !important;
+    font-family: 'Press Start 2P', monospace !important;
+}
+
+/* Boost meter fill */
+body.mobile .boost-button::before,
+body.mobile .boost-button .boost-meter-fill {
+    content: '';
+    position: absolute !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: var(--boost-fill, 100%) !important;
+    background: linear-gradient(to top, 
+        var(--snes-cosmic-teal) 0%, 
+        var(--snes-cosmic-purple) 100%) !important;
+    transition: height 0.1s linear !important;
+    pointer-events: none !important;
+    z-index: 0 !important;
+}
+
+/* Boost text */
+body.mobile .boost-button span {
+    position: relative !important;
+    z-index: 1 !important;
+    color: #F8F8F8 !important;
+    font-family: 'Press Start 2P', monospace !important;
+    font-size: 10px !important;
+}
+
+/* Low boost state */
+body.mobile .boost-button.low-boost {
+    border-color: var(--snes-red) var(--snes-dark-purple) var(--snes-dark-purple) var(--snes-red) !important;
+    animation: pulse-red 1s infinite !important;
+}
+
+/* Active boost state */
+body.mobile .boost-button.active,
+body.mobile .boost-button:active {
+    transform: translate(2px, 2px) !important;
+    box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5) !important;
+}
+
+@keyframes pulse-red {
+    0%, 100% { 
+        border-color: var(--snes-red) var(--snes-dark-purple) var(--snes-dark-purple) var(--snes-red);
+        box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.5);
+    }
+    50% { 
+        border-color: var(--snes-cosmic-pink) var(--snes-red) var(--snes-red) var(--snes-cosmic-pink);
+        box-shadow: 0 0 10px var(--snes-red);
+    }
 }
 
 /* =============== RESPONSIVE ADJUSTMENTS =============== */

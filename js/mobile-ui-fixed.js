@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
         initializeMobileLeaderboard();
         removeSlideOutHandlers();
         forceFixedPositioning();
+        restoreBoostMeter();
         
         // Apply fixes again after delays to override any late-loading styles
         setTimeout(forceFixedPositioning, 100);
@@ -23,7 +24,10 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(forceFixedPositioning, 1000);
         
         // Keep applying periodically to combat other scripts
-        setInterval(forceFixedPositioning, 2000);
+        setInterval(() => {
+            forceFixedPositioning();
+            ensurePanelsVisible();
+        }, 2000);
     }, 200);
 });
 
@@ -158,16 +162,20 @@ function forceFixedPositioning() {
         statsPanel.style.left = '10px';
         statsPanel.style.right = 'auto';
         statsPanel.style.bottom = 'auto';
-        statsPanel.style.width = '140px';
+        statsPanel.style.width = '160px';
+        statsPanel.style.height = 'auto';
         statsPanel.style.display = 'block';
         statsPanel.style.visibility = 'visible';
         statsPanel.style.opacity = '1';
         statsPanel.style.zIndex = '100';
         statsPanel.style.transform = 'none';
         statsPanel.style.transition = 'none';
-        statsPanel.style.background = '#1a1a1a';
+        statsPanel.style.background = 'rgba(16, 16, 64, 0.95)';
         statsPanel.style.border = '3px solid';
-        statsPanel.style.borderColor = '#505050 #000000 #000000 #505050';
+        statsPanel.style.borderColor = '#5878F8 #000080 #000080 #5878F8';
+        statsPanel.style.borderRadius = '0';
+        statsPanel.style.padding = '6px';
+        statsPanel.style.boxShadow = '4px 4px 0 rgba(0, 0, 0, 0.5)';
         
         statsPanel.classList.remove('expanded');
     }
@@ -230,9 +238,70 @@ function forceFixedPositioning() {
     }
 }
 
+// Restore boost button meter functionality
+function restoreBoostMeter() {
+    const boostButton = document.querySelector('.boost-button');
+    if (!boostButton) return;
+    
+    // Ensure boost meter CSS is applied
+    boostButton.style.overflow = 'hidden';
+    boostButton.style.position = 'relative';
+    
+    // Create meter fill element if it doesn't exist
+    let meterFill = boostButton.querySelector('.boost-meter-fill');
+    if (!meterFill) {
+        meterFill = document.createElement('div');
+        meterFill.className = 'boost-meter-fill';
+        meterFill.style.cssText = `
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: var(--boost-fill, 100%);
+            background: linear-gradient(to top, 
+                rgba(78, 205, 196, 0.6) 0%, 
+                rgba(78, 205, 196, 0.3) 100%);
+            transition: height 0.1s linear;
+            pointer-events: none;
+            z-index: 0;
+        `;
+        boostButton.insertBefore(meterFill, boostButton.firstChild);
+    }
+    
+    // Ensure text is on top
+    const boostText = boostButton.querySelector('span') || boostButton;
+    if (boostText !== boostButton) {
+        boostText.style.position = 'relative';
+        boostText.style.zIndex = '1';
+    }
+    
+    // Monitor boost amount from the game's boost bar
+    setInterval(() => {
+        const boostBar = document.getElementById('boostBarFill');
+        if (boostBar) {
+            const width = boostBar.style.width || '100%';
+            const boostAmount = parseInt(width);
+            boostButton.style.setProperty('--boost-fill', `${boostAmount}%`);
+            
+            // Update meter fill height
+            if (meterFill) {
+                meterFill.style.height = `${boostAmount}%`;
+            }
+            
+            // Add low boost indicator
+            if (boostAmount < 20) {
+                boostButton.classList.add('low-boost');
+            } else {
+                boostButton.classList.remove('low-boost');
+            }
+        }
+    }, 100);
+}
+
 // Export functions for use in other scripts
 window.mobileUIFixed = {
     toggleLeaderboard: toggleLeaderboard,
     ensurePanelsVisible: ensurePanelsVisible,
-    forceFixedPositioning: forceFixedPositioning
+    forceFixedPositioning: forceFixedPositioning,
+    restoreBoostMeter: restoreBoostMeter
 };

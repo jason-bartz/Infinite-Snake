@@ -3910,7 +3910,7 @@
                 </div>
                 
                 <!-- Global Rank Display -->
-                <div style="margin-bottom: 20px; text-align: center;">
+                <div id="globalRankContainer" style="margin-bottom: 20px; text-align: center; display: none;">
                     <div style="color: #AAA; font-size: 14px;">Today's Global Rank</div>
                     <div id="globalRank" style="color: #9c88ff; font-size: 28px; font-weight: bold;">#--</div>
                 </div>
@@ -3953,9 +3953,6 @@
                     </button>
                 </div>
                 
-                <div style="margin-top: 10px; font-size: 12px; color: #AAA; text-align: center;">
-                    Press SPACE / tap screen to <span id="actionText">revive</span>
-                </div>
                 
                 <div id="respawnPenaltyText" style="margin-top: 8px; font-size: 12px; color: #ff9999; text-align: center; display: none;">
                     You will keep 75% of your score
@@ -5084,7 +5081,7 @@
         let gameTarget = 0; // Target value for victory
         let deathCount = 0; // Track total deaths in current game
         let camera = { x: WORLD_SIZE / 2, y: WORLD_SIZE / 2 };
-        let cameraZoom = isMobile ? 0.625 : 1.0; // 0.625 = zoom out by 60% (25% closer than 0.5) for mobile
+        let cameraZoom = isMobile ? 0.75 : 1.0; // 0.75 = 20% more zoomed in than 0.625 for mobile
         
         // Game loop timing variables
         let lastTime = 0;
@@ -5851,14 +5848,6 @@
                 toggleMusic();
             }
             
-            // Quick respawn/revive with Space key
-            if (e.key === ' ' && playerSnake && !playerSnake.alive && playerRespawnTimer > 0) {
-                const respawnOverlay = document.getElementById('respawnOverlay');
-                if (respawnOverlay && respawnOverlay.style.display !== 'none') {
-                    e.preventDefault(); // Prevent page scroll
-                    handleReviveOrRespawn();
-                }
-            }
             
             // Resume pending music on first interaction
             if (window.pendingMusicTrack && !musicMuted) {
@@ -13519,14 +13508,15 @@
                 
                 gameOverScreen.innerHTML = `
                     <div style="
-                        background: linear-gradient(135deg, #1a0033 0%, #2a0055 100%);
-                        border: 4px solid #F828F8;
+                        background: rgba(16, 16, 64, 0.95);
+                        border: 4px solid;
+                        border-color: var(--snes-cosmic-pink) var(--snes-dark-purple) var(--snes-dark-purple) var(--snes-cosmic-pink);
                         border-radius: 0;
                         padding: 32px 48px;
                         box-shadow: 
-                            0 0 30px rgba(248, 40, 248, 0.5),
-                            inset 0 0 20px rgba(120, 40, 248, 0.3),
-                            0 0 0 4px #000;
+                            inset 2px 2px 0 var(--snes-cosmic-teal),
+                            inset -2px -2px 0 var(--snes-dark-blue),
+                            8px 8px 0 rgba(0, 0, 0, 0.8);
                         text-align: center;
                         position: relative;
                         min-width: 400px;
@@ -13538,43 +13528,44 @@
                         <div style="position: absolute; bottom: -2px; right: -2px; width: 20px; height: 20px; border-bottom: 4px solid #F828F8; border-right: 4px solid #F828F8;"></div>
                         
                         <h1 style="
-                            font-size: 24px; 
-                            color: #ff0000; 
+                            font-size: 36px; 
+                            color: var(--snes-white); 
                             margin-bottom: 24px; 
                             text-shadow: 
-                                2px 2px 0 #800000,
-                                3px 3px 0 #000;
-                            letter-spacing: 2px;
+                                2px 2px 0 var(--snes-cosmic-pink),
+                                4px 4px 0 var(--snes-dark-purple),
+                                6px 6px 0 #000;
+                            letter-spacing: 4px;
                             font-family: 'Press Start 2P', monospace;
                         ">GAME OVER</h1>
                         
                         <div style="
-                            background: linear-gradient(135deg, #0a0015 0%, #1a0033 100%);
-                            border: 2px solid #7828F8;
+                            background: rgba(0, 0, 0, 0.8);
+                            border: 3px solid;
+                            border-color: var(--snes-gray) var(--snes-black) var(--snes-black) var(--snes-gray);
                             padding: 16px;
                             margin-bottom: 20px;
                             box-shadow: 
-                                inset -2px -2px 0 #4800A8,
-                                inset 2px 2px 0 #000,
-                                0 0 10px rgba(120, 40, 248, 0.3);
+                                inset 2px 2px 0 rgba(255, 255, 255, 0.1),
+                                inset -2px -2px 0 rgba(0, 0, 0, 0.5);
                         ">
                             <div style="margin-bottom: 16px;">
-                                <span style="color: #888; font-size: 10px; text-transform: uppercase; font-family: 'Press Start 2P', monospace;">Final Score</span>
-                                <div style="font-size: 16px; color: #FFD700; text-shadow: 2px 2px 0 #000; margin-top: 8px; font-family: 'Press Start 2P', monospace;">
+                                <span style="color: var(--snes-gray); font-size: 10px; text-transform: uppercase; font-family: 'Press Start 2P', monospace;">Final Score</span>
+                                <div style="font-size: 16px; color: var(--snes-gold); text-shadow: 2px 2px 0 #000; margin-top: 8px; font-family: 'Press Start 2P', monospace;">
                                     ${playerSnake ? playerSnake.score.toLocaleString() : 0}
                                 </div>
                             </div>
                             
                             <div style="display: flex; justify-content: space-around; margin-top: 16px;">
                                 <div>
-                                    <span style="color: #888; font-size: 8px; text-transform: uppercase; font-family: 'Press Start 2P', monospace;">Elements</span>
-                                    <div style="font-size: 12px; color: #4ecdc4; margin-top: 4px; font-family: 'Press Start 2P', monospace;">
+                                    <span style="color: var(--snes-gray); font-size: 8px; text-transform: uppercase; font-family: 'Press Start 2P', monospace;">Elements</span>
+                                    <div style="font-size: 12px; color: var(--snes-cosmic-teal); margin-top: 4px; font-family: 'Press Start 2P', monospace;">
                                         ${playerDiscoveredElements ? playerDiscoveredElements.size : 0}
                                     </div>
                                 </div>
                                 <div>
-                                    <span style="color: #888; font-size: 8px; text-transform: uppercase; font-family: 'Press Start 2P', monospace;">Time</span>
-                                    <div style="font-size: 12px; color: #4ecdc4; margin-top: 4px; font-family: 'Press Start 2P', monospace;">
+                                    <span style="color: var(--snes-gray); font-size: 8px; text-transform: uppercase; font-family: 'Press Start 2P', monospace;">Time</span>
+                                    <div style="font-size: 12px; color: var(--snes-cosmic-teal); margin-top: 4px; font-family: 'Press Start 2P', monospace;">
                                         ${timeString}
                                     </div>
                                 </div>
@@ -13583,16 +13574,16 @@
                         
                         <div style="
                             font-size: 10px; 
-                            color: #28F8F8; 
+                            color: var(--snes-white); 
                             margin-bottom: 24px;
                             padding: 8px;
-                            background: linear-gradient(135deg, #0a0015 0%, #1a0033 100%);
-                            border: 2px solid #28F8F8;
+                            background: rgba(0, 0, 0, 0.8);
+                            border: 3px solid;
+                            border-color: var(--snes-cosmic-teal) var(--snes-dark-purple) var(--snes-dark-purple) var(--snes-cosmic-teal);
                             font-family: 'Press Start 2P', monospace;
                             box-shadow: 
-                                inset -2px -2px 0 #0048A8,
-                                inset 2px 2px 0 #000,
-                                0 0 10px rgba(40, 248, 248, 0.4);
+                                inset 2px 2px 0 rgba(255, 255, 255, 0.1),
+                                inset -2px -2px 0 rgba(0, 0, 0, 0.5);
                         ">
                             ${isSubmitting ? 
                                 'Submitting score...' : 
@@ -13605,15 +13596,15 @@
                         
                         <button onclick="location.reload()" style="
                             padding: 12px 32px;
-                            font-size: 10pt;
-                            background: linear-gradient(135deg, #7828F8 0%, #F828F8 100%);
-                            color: #FFF;
-                            border: 4px solid #F828F8;
+                            font-size: 10px;
+                            background: var(--snes-cosmic-purple);
+                            color: var(--snes-white);
+                            border: 4px solid;
+                            border-color: var(--snes-cosmic-pink) var(--snes-dark-purple) var(--snes-dark-purple) var(--snes-cosmic-pink);
                             box-shadow: 
-                                0 0 20px rgba(248, 40, 248, 0.6),
-                                inset 2px 2px 0 rgba(255, 255, 255, 0.3),
-                                inset -2px -2px 0 rgba(0, 0, 0, 0.3),
-                                0 0 0 2px #000;
+                                inset 2px 2px 0 var(--snes-cosmic-teal),
+                                inset -2px -2px 0 var(--snes-dark-blue),
+                                4px 4px 0 rgba(0, 0, 0, 0.5);
                             cursor: pointer;
                             text-transform: uppercase;
                             letter-spacing: 1px;
@@ -13724,7 +13715,7 @@
                 console.log('[RESPAWN] Forcing end of death sequence');
                 deathSequenceActive = false;
                 deathCameraAnimation.active = false;
-                cameraZoom = isMobile ? 0.625 : 1.0;
+                cameraZoom = isMobile ? 0.75 : 1.0;
             }
             
             // Reset death processed flag
@@ -13904,49 +13895,16 @@
                 const respawnSeconds = Math.ceil(playerRespawnTimer / 1000);
                 console.log('[DEATH] Player is dead, respawn timer:', respawnSeconds, 'seconds');
                 
-                // FAILSAFE: Ensure score is submitted when showing death screen
-                if (playerSnake.score > 0 && gameMode === 'classic' && canSubmitScore()) {
-                    console.log('[UI-FAILSAFE] Death screen shown, proceeding with submission...');
-                    const playerName = localStorage.getItem('playerName') || 'Anonymous';
-                    const playTime = gameSessionStartTime ? Math.floor((Date.now() - gameSessionStartTime) / 1000) : 0;
-                    
-                    if (window.supabaseModule && window.supabaseModule.submitScore) {
-                        console.log('[UI-FAILSAFE] Submitting score from UI failsafe...');
-                        window.supabaseModule.submitScore(
-                            playerName,
-                            Math.floor(playerSnake.score),
-                            playerDiscoveredElements.size,
-                            playTime,
-                            playerSnake.kills
-                        ).then(result => {
-                            console.log('[UI-FAILSAFE] Score submission result:', result);
-                            // submitScore returns the rank as a number or 'Submitted' if rank is null
-                            if (result !== null && result !== undefined) {
-                                if (typeof result === 'number') {
-                                    console.log('[UI-FAILSAFE] ✅ Score submitted! Daily rank:', result);
-                                    const rankEl = document.getElementById('globalRank');
-                                    if (rankEl) {
-                                        rankEl.textContent = `#${result}`;
-                                    }
-                                } else if (result === 'Submitted') {
-                                    console.log('[UI-FAILSAFE] ✅ Score submitted! (No rank available)');
-                                    const rankEl = document.getElementById('globalRank');
-                                    if (rankEl) {
-                                        rankEl.textContent = 'Submitted';
-                                    }
-                                }
-                                // Already set to true before submission
-                            } else {
-                                console.error('[UI-FAILSAFE] ❌ Invalid response:', result);
-                                // Reset flag on invalid response
-                                leaderboardSubmitted = false;
-                            }
-                        }).catch(err => {
-                            console.error('[UI-FAILSAFE] ❌ Failed:', err);
-                            // Reset flag on error
-                            leaderboardSubmitted = false;
-                        });
+                // Check if this is permadeath in classic mode
+                if (gameMode === 'classic' && deathCount >= 3 && revivesRemaining === 0) {
+                    console.log('[DEATH] Permadeath detected - transitioning to game over');
+                    // Hide respawn overlay and show game over screen directly
+                    const respawnOverlay = document.getElementById('respawnOverlay');
+                    if (respawnOverlay) {
+                        respawnOverlay.style.display = 'none';
                     }
+                    handlePermadeath();
+                    return;
                 }
                 
                 // Show respawn overlay
@@ -13983,6 +13941,13 @@
                     // Update revive button state
                     const reviveBtn = document.getElementById('reviveBtn');
                     const respawnPenaltyText = document.getElementById('respawnPenaltyText');
+                    const globalRankContainer = document.getElementById('globalRankContainer');
+                    
+                    // Hide global rank by default - only show on permadeath
+                    if (globalRankContainer) {
+                        globalRankContainer.style.display = 'none';
+                    }
+                    
                     if (reviveBtn) {
                         if (revivesRemaining > 0) {
                             reviveBtn.innerHTML = `REVIVE (<span id="revivesLeft">${revivesRemaining}</span>)`;
@@ -16762,7 +16727,7 @@
                         deathProcessed = true; // Mark as processed
                         
                         // Reset camera zoom
-                        cameraZoom = isMobile ? 0.625 : 1.0;
+                        cameraZoom = isMobile ? 0.75 : 1.0;
                         
                         // Now start the respawn timer and do all the death processing
                         playerRespawnTimer = 10000; // 10 seconds
