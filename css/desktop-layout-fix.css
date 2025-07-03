@@ -20,13 +20,27 @@
         min-width: 200px !important;
         transform: none !important;
         transition: none !important;
-        border-radius: 8px !important;
+        
+        /* SNES-style borders - no rounded corners */
+        border-radius: 0 !important;
         border: 3px solid !important;
-        border-color: var(--snes-light-blue) var(--snes-dark-blue) var(--snes-dark-blue) var(--snes-light-blue) !important;
+        border-color: #5878F8 #000000 #000000 #5878F8 !important;
+        box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.8) !important;
+        
+        /* Consistent background */
+        background: #101040 !important;
+        padding: 8px !important;
+        
+        /* Typography */
+        font-family: 'Press Start 2P', monospace !important;
+        image-rendering: pixelated !important;
+        image-rendering: -moz-crisp-edges !important;
+        image-rendering: crisp-edges !important;
+        
         overflow: visible !important;
     }
     
-    /* Leaderboard - bottom right corner (collapsed by default) */
+    /* Leaderboard - bottom right corner */
     body:not(.mobile) .leaderboard-box,
     body .leaderboard-box {
         position: absolute !important;
@@ -37,24 +51,70 @@
         width: 250px !important;
         transform: none !important;
         transition: height 0.3s ease-out !important;
-        border-radius: 8px !important;
+        
+        /* SNES-style borders - no rounded corners */
+        border-radius: 0 !important;
         border: 3px solid !important;
-        border-color: var(--snes-white) #505050 #505050 var(--snes-white) !important;
-        overflow: hidden !important;
+        border-color: #F8F8F8 #505050 #505050 #F8F8F8 !important;
+        box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.8) !important;
+        
+        /* Consistent background */
+        background: #000000 !important;
+        padding: 0 !important;
+        
+        /* Typography */
+        font-family: 'Press Start 2P', monospace !important;
+        image-rendering: pixelated !important;
+        image-rendering: -moz-crisp-edges !important;
+        image-rendering: crisp-edges !important;
+        
+        /* No scrollbar - show full leaderboard */
+        overflow: visible !important;
+        height: auto !important;
+        max-height: none !important;
     }
     
     /* Leaderboard collapsed state on desktop */
     body:not(.mobile) .leaderboard-box.collapsed,
     body .leaderboard-box.collapsed {
         height: 40px !important;
+        overflow: hidden !important;
     }
     
-    /* Leaderboard expanded state on desktop */
+    /* Leaderboard expanded state on desktop - show full list, no scroll */
     body:not(.mobile) .leaderboard-box:not(.collapsed),
     body .leaderboard-box:not(.collapsed) {
         height: auto !important;
-        max-height: 400px !important;
-        overflow-y: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+    }
+    
+    /* Ensure leaderboard header has proper styling */
+    body:not(.mobile) .leaderboard-header {
+        background: #1a1a1a !important;
+        border-bottom: 3px solid #505050 !important;
+        padding: 8px !important;
+        font-size: 14px !important;
+        text-align: center !important;
+        cursor: pointer !important;
+    }
+    
+    /* Style leaderboard entries */
+    body:not(.mobile) .leaderboard-entry {
+        padding: 6px 8px !important;
+        border-bottom: 1px solid #333 !important;
+        font-size: 10px !important;
+    }
+    
+    /* Ensure consistent styling for stat elements */
+    body:not(.mobile) .stat-label {
+        color: #AAA !important;
+        font-size: 10px !important;
+    }
+    
+    body:not(.mobile) .stat-value {
+        color: #FFF !important;
+        font-size: 10px !important;
     }
     
     /* Ensure desktop panels are not affected by mobile styles */
@@ -74,6 +134,13 @@ body:not(.mobile) .player-info-box {
     top: auto !important;
     right: auto !important;
     transform: none !important;
+    
+    /* SNES styling */
+    border-radius: 0 !important;
+    border: 3px solid !important;
+    border-color: #5878F8 #000000 #000000 #5878F8 !important;
+    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.8) !important;
+    background: #101040 !important;
 }
 
 body:not(.mobile) .leaderboard-box {
@@ -83,6 +150,15 @@ body:not(.mobile) .leaderboard-box {
     top: auto !important;
     left: auto !important;
     transform: none !important;
+    
+    /* SNES styling */
+    border-radius: 0 !important;
+    border: 3px solid !important;
+    border-color: #F8F8F8 #505050 #505050 #F8F8F8 !important;
+    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.8) !important;
+    background: #000000 !important;
+    overflow: visible !important;
+    height: auto !important;
 }
 
 /* Remove any mobile-specific inline styles on desktop */
