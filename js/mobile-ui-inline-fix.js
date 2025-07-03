@@ -19,7 +19,7 @@
         statsPanel.style.cssText = `
             position: fixed !important;
             top: 10px !important;
-            left: -270px !important;
+            left: -283px !important;
             width: 280px !important;
             height: auto !important;
             background: #101040 !important;
@@ -36,7 +36,7 @@
         leaderPanel.style.cssText = `
             position: fixed !important;
             top: 10px !important;
-            right: -270px !important;
+            right: -283px !important;
             width: 280px !important;
             height: auto !important;
             background: #000000 !important;
@@ -151,11 +151,11 @@
                 // Toggle expanded class instead of inline styles
                 if (statsPanel.classList.contains('expanded')) {
                     statsPanel.classList.remove('expanded');
-                    statsPanel.style.left = '-270px';
+                    statsPanel.style.left = '-283px';
                 } else {
                     // Close other panel first
                     leaderPanel.classList.remove('expanded');
-                    leaderPanel.style.right = '-270px';
+                    leaderPanel.style.right = '-283px';
                     // Open this panel
                     statsPanel.classList.add('expanded');
                     statsPanel.style.left = '0px';
@@ -178,11 +178,11 @@
                 // Toggle expanded class instead of inline styles
                 if (leaderPanel.classList.contains('expanded')) {
                     leaderPanel.classList.remove('expanded');
-                    leaderPanel.style.right = '-270px';
+                    leaderPanel.style.right = '-283px';
                 } else {
                     // Close other panel first
                     statsPanel.classList.remove('expanded');
-                    statsPanel.style.left = '-270px';
+                    statsPanel.style.left = '-283px';
                     // Open this panel
                     leaderPanel.classList.add('expanded');
                     leaderPanel.style.right = '0px';
