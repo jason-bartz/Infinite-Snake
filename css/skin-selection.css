@@ -11,24 +11,32 @@
 /* Rarity Tabs */
 .rarity-tabs {
     display: flex;
-    gap: 10px;
+    gap: 8px;
     margin-bottom: 20px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     justify-content: center;
+    overflow-x: auto;
+    overflow-y: hidden;
+    max-width: 100%;
+    padding: 5px 0;
 }
 
 .rarity-tab {
-    padding: 10px 20px;
+    padding: 8px 12px;
     border: 2px solid;
-    border-radius: 8px;
+    border-radius: 0;
     background: rgba(0, 0, 0, 0.5);
     color: #fff;
     cursor: pointer;
-    font-weight: bold;
+    font-weight: normal;
     text-transform: uppercase;
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
+    font-size: 8px;
+    font-family: 'Press Start 2P';
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .rarity-tab:hover {

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Button Style Test</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --snes-cosmic-purple: #7828F8;
+            --snes-cosmic-pink: #F828F8;
+            --snes-dark-purple: #4800A8;
+            --snes-white: #F8F8F8;
+            --snes-gold: #F8D800;
+        }
+        body {
+            background: #000;
+            padding: 50px;
+            font-family: 'Press Start 2P';
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #444;
+        }
+        h2 {
+            color: white;
+            font-size: 12px;
+            margin-bottom: 20px;
+        }
+    </style>
+    <link rel="stylesheet" href="css/unified-color-scheme.css">
+    <link rel="stylesheet" href="css/cosmic-ui-override.css">
+</head>
+<body>
+    <div class="test-section">
+        <h2>Start Button Test</h2>
+        <button id="startButton">Begin Your Journey</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>Revive Button Test</h2>
+        <button id="reviveBtn">REVIVE (3)</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>Rarity Tab Test</h2>
+        <button class="rarity-tab common">Common</button>
+        <button class="rarity-tab uncommon">Uncommon</button>
+        <button class="rarity-tab rare">Rare</button>
+        <button class="rarity-tab legendary">Legendary</button>
+        <button class="rarity-tab exotic">Exotic</button>
+        <button class="rarity-tab secret">Secret</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>Normal Button Test</h2>
+        <button>Normal Button</button>
+    </div>
+</body>
+</html>

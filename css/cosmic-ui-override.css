@@ -1,0 +1,188 @@
+/* Cosmic UI Override - Ensures special buttons maintain their unique styling */
+
+/* Start Button - Primary Purple */
+#startButton {
+    background: var(--snes-cosmic-purple) !important;
+    color: var(--snes-white) !important;
+    border: 4px solid var(--snes-white) !important;
+    box-shadow: 
+        inset 2px 2px 0 var(--snes-cosmic-pink),
+        inset -2px -2px 0 var(--snes-dark-purple),
+        4px 4px 0 rgba(0,0,0,0.5) !important;
+}
+
+#startButton:hover {
+    background: var(--snes-cosmic-pink) !important;
+    transform: translate(2px, 2px) !important;
+    box-shadow: 
+        inset 2px 2px 0 #FFA8FF,
+        inset -2px -2px 0 var(--snes-dark-purple),
+        2px 2px 0 rgba(0,0,0,0.5) !important;
+}
+
+/* Revive Button - Primary Purple */
+#reviveBtn {
+    background: var(--snes-cosmic-purple) !important;
+    color: var(--snes-white) !important;
+    border: 4px solid var(--snes-white) !important;
+    font-family: 'Press Start 2P' !important;
+    text-transform: uppercase !important;
+    box-shadow: 
+        inset 2px 2px 0 var(--snes-cosmic-pink),
+        inset -2px -2px 0 var(--snes-dark-purple),
+        4px 4px 0 rgba(0,0,0,0.5) !important;
+}
+
+#reviveBtn:hover {
+    background: var(--snes-cosmic-pink) !important;
+    transform: translate(2px, 2px) !important;
+    box-shadow: 
+        inset 2px 2px 0 #FFA8FF,
+        inset -2px -2px 0 var(--snes-dark-purple),
+        2px 2px 0 rgba(0,0,0,0.5) !important;
+}
+
+/* Rarity Tabs - Match tier colors */
+.rarity-tab {
+    font-family: 'Press Start 2P' !important;
+    text-transform: uppercase !important;
+}
+
+.rarity-tab.common {
+    border-color: #F8F8F8 !important;
+    color: #F8F8F8 !important;
+    background: rgba(248, 248, 248, 0.1) !important;
+}
+
+.rarity-tab.common.active {
+    background: rgba(248, 248, 248, 0.3) !important;
+    box-shadow: 0 0 20px rgba(248, 248, 248, 0.5) !important;
+}
+
+.rarity-tab.uncommon {
+    border-color: #00E800 !important;
+    color: #00E800 !important;
+    background: rgba(0, 232, 0, 0.1) !important;
+}
+
+.rarity-tab.uncommon.active {
+    background: rgba(0, 232, 0, 0.3) !important;
+    box-shadow: 0 0 20px rgba(0, 232, 0, 0.5) !important;
+}
+
+.rarity-tab.rare {
+    border-color: #5878F8 !important;
+    color: #5878F8 !important;
+    background: rgba(88, 120, 248, 0.1) !important;
+}
+
+.rarity-tab.rare.active {
+    background: rgba(88, 120, 248, 0.3) !important;
+    box-shadow: 0 0 20px rgba(88, 120, 248, 0.5) !important;
+}
+
+.rarity-tab.legendary {
+    border-color: #7828F8 !important;
+    color: #7828F8 !important;
+    background: rgba(120, 40, 248, 0.1) !important;
+}
+
+.rarity-tab.legendary.active {
+    background: rgba(120, 40, 248, 0.3) !important;
+    box-shadow: 0 0 20px rgba(120, 40, 248, 0.5) !important;
+}
+
+.rarity-tab.exotic {
+    border-color: #F8D800 !important;
+    color: #F8D800 !important;
+    background: rgba(248, 216, 0, 0.1) !important;
+}
+
+.rarity-tab.exotic.active {
+    background: rgba(248, 216, 0, 0.3) !important;
+    box-shadow: 0 0 20px rgba(248, 216, 0, 0.5) !important;
+}
+
+.rarity-tab.secret {
+    border-color: #F83800 !important;
+    color: #F83800 !important;
+    background: rgba(248, 56, 0, 0.1) !important;
+}
+
+.rarity-tab.secret.active {
+    background: rgba(248, 56, 0, 0.3) !important;
+    box-shadow: 0 0 20px rgba(248, 56, 0, 0.5) !important;
+}
+
+/* Game Mode Buttons */
+.btn-infinite {
+    background: var(--snes-cosmic-purple) !important;
+    color: var(--snes-white) !important;
+    border: 4px solid !important;
+    border-color: #A858F8 var(--snes-dark-purple) var(--snes-dark-purple) #A858F8 !important;
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.5) !important;
+}
+
+.btn-infinite:hover {
+    background: var(--snes-cosmic-pink) !important;
+    transform: translate(2px, 2px) !important;
+    box-shadow: 2px 2px 0 rgba(0,0,0,0.5) !important;
+}
+
+/* Update all grey UI backgrounds to cosmic theme */
+#pauseMenu,
+#gameModeContent,
+.modal-content,
+.dialog-box {
+    background: linear-gradient(135deg, #1a1a40 0%, #2a1a50 50%, #181850 100%) !important;
+}
+
+/* Death screen background */
+#deathOverlay > div,
+#permaDeathScreen > div {
+    background: linear-gradient(135deg, #1a1a40 0%, #2a1a50 50%, #181850 100%) !important;
+}
+
+/* Ensure pause menu buttons match */
+#pauseMenu button[onclick*="resumeGame"],
+#pauseMenu button[onclick*="location.reload"] {
+    padding: 12px 30px !important;
+    font-size: 10px !important;
+    font-family: 'Press Start 2P' !important;
+    text-transform: uppercase !important;
+    border-radius: 0 !important;
+    border: 4px solid !important;
+    transition: none !important;
+    cursor: pointer !important;
+}
+
+#pauseMenu button[onclick*="resumeGame"] {
+    background: var(--snes-cosmic-purple) !important;
+    color: var(--snes-white) !important;
+    border-color: var(--snes-white) !important;
+    box-shadow: 
+        inset 2px 2px 0 var(--snes-cosmic-pink),
+        inset -2px -2px 0 var(--snes-dark-purple),
+        4px 4px 0 rgba(0,0,0,0.5) !important;
+}
+
+#pauseMenu button[onclick*="resumeGame"]:hover {
+    background: var(--snes-cosmic-pink) !important;
+    transform: translate(2px, 2px) !important;
+    box-shadow: 
+        inset 2px 2px 0 #FFA8FF,
+        inset -2px -2px 0 var(--snes-dark-purple),
+        2px 2px 0 rgba(0,0,0,0.5) !important;
+}
+
+#pauseMenu button[onclick*="location.reload"] {
+    background: #333 !important;
+    color: var(--snes-white) !important;
+    border-color: #666 !important;
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.5) !important;
+}
+
+#pauseMenu button[onclick*="location.reload"]:hover {
+    transform: translate(2px, 2px) !important;
+    box-shadow: 2px 2px 0 rgba(0,0,0,0.5) !important;
+}

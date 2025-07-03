@@ -2976,6 +2976,31 @@
                 max-height: 200px;
             }
         }
+        
+        /* Ensure revive button maintains unified color scheme */
+        #reviveBtn {
+            background: var(--snes-cosmic-purple) !important;
+            color: var(--snes-white) !important;
+            border: 4px solid var(--snes-white) !important;
+            font-family: 'Press Start 2P' !important;
+            text-transform: uppercase !important;
+            box-shadow: inset 2px 2px 0 var(--snes-cosmic-pink), 
+                       inset -2px -2px 0 var(--snes-dark-purple), 
+                       4px 4px 0 rgba(0,0,0,0.5) !important;
+        }
+        
+        #reviveBtn:hover {
+            background: var(--snes-cosmic-pink) !important;
+            transform: translate(2px, 2px) !important;
+            box-shadow: inset 2px 2px 0 #FFA8FF, 
+                       inset -2px -2px 0 var(--snes-dark-purple), 
+                       2px 2px 0 rgba(0,0,0,0.5) !important;
+        }
+        
+        #reviveBtn:active {
+            transform: translate(4px, 4px) !important;
+            box-shadow: none !important;
+        }
     </style>
 
     <!-- UI Fixes CSS - Added to improve readability and visual appeal -->
@@ -3534,6 +3559,7 @@
     <link rel="stylesheet" href="css/mobile-ui-comprehensive-fix.css">
     <link rel="stylesheet" href="css/desktop-layout-fix.css">
     <link rel="stylesheet" href="css/unified-color-scheme.css">
+    <link rel="stylesheet" href="css/cosmic-ui-override.css">
     
     <!-- New Element System Scripts -->
     <script src="elements/data/loader.js"></script>
@@ -3920,7 +3946,6 @@
             <!-- Skins Tab -->
             <div id="skinsTab" class="tab-content active">
                 <div id="skinSelection">
-                    <h4>Snake Skins</h4>
                     <div id="availableUnlocks">Available Unlocks: 0</div>
                     
                     <!-- Rarity Tabs -->
@@ -4056,7 +4081,9 @@
                 <button onclick="resumeGame()" style="margin: 10px; padding: 12px 30px; font-size: 10px; background: var(--snes-cosmic-purple); color: var(--snes-white); border: 4px solid var(--snes-white); border-radius: 0; cursor: pointer; font-family: 'Press Start 2P'; text-transform: uppercase; box-shadow: inset 2px 2px 0 var(--snes-cosmic-pink), inset -2px -2px 0 var(--snes-dark-purple), 4px 4px 0 rgba(0,0,0,0.5); transition: none;"
                         onmouseover="this.style.background='var(--snes-cosmic-pink)'; this.style.transform='translate(2px, 2px)'; this.style.boxShadow='inset 2px 2px 0 #FFA8FF, inset -2px -2px 0 var(--snes-dark-purple), 2px 2px 0 rgba(0,0,0,0.5)';"
                         onmouseout="this.style.background='var(--snes-cosmic-purple)'; this.style.transform='translate(0, 0)'; this.style.boxShadow='inset 2px 2px 0 var(--snes-cosmic-pink), inset -2px -2px 0 var(--snes-dark-purple), 4px 4px 0 rgba(0,0,0,0.5)';">Resume</button>
-                <button onclick="playUISound(); location.reload()" style="margin: 10px; padding: 10px 30px; font-size: 18px; background: #ff6b6b; color: white; border: none; border-radius: 10px; cursor: pointer;">New Game</button>
+                <button onclick="playUISound(); location.reload()" style="margin: 10px; padding: 12px 30px; font-size: 10px; background: #333; color: var(--snes-white); border: 4px solid #666; border-radius: 0; cursor: pointer; font-family: 'Press Start 2P'; text-transform: uppercase; box-shadow: 4px 4px 0 rgba(0,0,0,0.5); transition: none;"
+                        onmouseover="this.style.transform='translate(2px, 2px)'; this.style.boxShadow='2px 2px 0 rgba(0,0,0,0.5)';"
+                        onmouseout="this.style.transform='translate(0, 0)'; this.style.boxShadow='4px 4px 0 rgba(0,0,0,0.5)';">New Game</button>
             </div>
         </div>
     </div>
@@ -13634,9 +13661,12 @@
                             document.getElementById('actionText').textContent = 'continue on final life';
                         } else {
                             reviveBtn.innerHTML = 'RESPAWN';
-                            reviveBtn.style.background = '#9c88ff';
-                            reviveBtn.style.borderColor = '#9c88ff';
-                            reviveBtn.style.boxShadow = '0 0 20px rgba(156, 136, 255, 0.5)';
+                            reviveBtn.style.background = 'var(--snes-cosmic-purple)';
+                            reviveBtn.style.color = 'var(--snes-white)';
+                            reviveBtn.style.border = '4px solid var(--snes-white)';
+                            reviveBtn.style.boxShadow = 'inset 2px 2px 0 var(--snes-cosmic-pink), inset -2px -2px 0 var(--snes-dark-purple), 4px 4px 0 rgba(0,0,0,0.5)';
+                            reviveBtn.style.fontFamily = "'Press Start 2P'";
+                            reviveBtn.style.textTransform = 'uppercase';
                             document.getElementById('actionText').textContent = 'respawn';
                         }
                         const respawnPenaltyText = document.getElementById('respawnPenaltyText');
@@ -13921,16 +13951,22 @@
                     if (reviveBtn) {
                         if (revivesRemaining > 0) {
                             reviveBtn.innerHTML = `REVIVE (<span id="revivesLeft">${revivesRemaining}</span>)`;
-                            reviveBtn.style.background = '#4ecdc4';
-                            reviveBtn.style.borderColor = '#4ecdc4';
-                            reviveBtn.style.boxShadow = '0 0 20px rgba(78, 205, 196, 0.5)';
+                            reviveBtn.style.background = 'var(--snes-cosmic-purple)';
+                            reviveBtn.style.color = 'var(--snes-white)';
+                            reviveBtn.style.border = '4px solid var(--snes-white)';
+                            reviveBtn.style.boxShadow = 'inset 2px 2px 0 var(--snes-cosmic-pink), inset -2px -2px 0 var(--snes-dark-purple), 4px 4px 0 rgba(0,0,0,0.5)';
+                            reviveBtn.style.fontFamily = "'Press Start 2P'";
+                            reviveBtn.style.textTransform = 'uppercase';
                             document.getElementById('actionText').textContent = 'revive';
                             if (respawnPenaltyText) respawnPenaltyText.style.display = 'none';
                         } else {
                             reviveBtn.innerHTML = 'RESPAWN';
-                            reviveBtn.style.background = '#9c88ff';
-                            reviveBtn.style.borderColor = '#9c88ff';
-                            reviveBtn.style.boxShadow = '0 0 20px rgba(156, 136, 255, 0.5)';
+                            reviveBtn.style.background = 'var(--snes-cosmic-purple)';
+                            reviveBtn.style.color = 'var(--snes-white)';
+                            reviveBtn.style.border = '4px solid var(--snes-white)';
+                            reviveBtn.style.boxShadow = 'inset 2px 2px 0 var(--snes-cosmic-pink), inset -2px -2px 0 var(--snes-dark-purple), 4px 4px 0 rgba(0,0,0,0.5)';
+                            reviveBtn.style.fontFamily = "'Press Start 2P'";
+                            reviveBtn.style.textTransform = 'uppercase';
                             document.getElementById('actionText').textContent = 'respawn';
                             if (respawnPenaltyText) respawnPenaltyText.style.display = 'block';
                         }

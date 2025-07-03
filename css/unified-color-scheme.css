@@ -123,8 +123,8 @@ body .recipe-name {
     box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.8) !important;
 }
 
-/* Buttons - consistent styling */
-button,
+/* Buttons - consistent styling (excluding special buttons) */
+button:not(#startButton):not(#reviveBtn):not(.rarity-tab):not(.tab-button):not(.btn-infinite):not(.btn-classic),
 .button,
 .snes-button {
     background: var(--ui-bg-secondary) !important;
@@ -135,14 +135,14 @@ button,
     box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.8) !important;
 }
 
-button:hover,
+button:not(#startButton):not(#reviveBtn):not(.rarity-tab):not(.tab-button):not(.btn-infinite):not(.btn-classic):hover,
 .button:hover,
 .snes-button:hover {
     background: var(--ui-bg-accent) !important;
     border-color: var(--ui-border-accent) var(--ui-border-dark) var(--ui-border-dark) var(--ui-border-accent) !important;
 }
 
-button:active,
+button:not(#startButton):not(#reviveBtn):not(.rarity-tab):not(.tab-button):not(.btn-infinite):not(.btn-classic):active,
 .button:active,
 .snes-button:active {
     transform: translate(2px, 2px);

@@ -93,9 +93,6 @@
         }
         
         .back-button {
-            position: absolute;
-            top: 20px;
-            left: 20px;
             background: var(--snes-cosmic-purple);
             border: 4px solid var(--snes-white);
             box-shadow: 
@@ -111,6 +108,7 @@
             transition: all 0.1s;
             text-transform: uppercase;
             z-index: 10;
+            margin-bottom: 20px;
         }
         
         .back-button:hover {
@@ -295,9 +293,9 @@
 <body>
     <canvas id="stars-canvas"></canvas>
     
-    <a href="/" class="back-button">← Back to Game</a>
-    
     <div class="container">
+        <a href="/" class="back-button">← Back to Game</a>
+        
         <header>
             <h1>GLOBAL LEADERBOARD</h1>
             <p class="subtitle">Infinite Mode Rankings</p>
