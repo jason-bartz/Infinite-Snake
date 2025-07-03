@@ -2,16 +2,29 @@
 
 // Initialize mobile UI when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    if (!isMobile) return;
+    // Check for mobile using the same method as mobile-ui-unified.js
+    const checkMobile = () => {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+               'ontouchstart' in window ||
+               window.innerWidth < 768;
+    };
     
-    initializeMobileLeaderboard();
-    removeSlideOutHandlers();
-    forceFixedPositioning();
+    if (!checkMobile()) return;
     
-    // Apply fixes again after a short delay to override any late-loading styles
-    setTimeout(forceFixedPositioning, 100);
-    setTimeout(forceFixedPositioning, 500);
-    setTimeout(forceFixedPositioning, 1000);
+    // Wait for mobile-ui-unified to initialize first
+    setTimeout(() => {
+        initializeMobileLeaderboard();
+        removeSlideOutHandlers();
+        forceFixedPositioning();
+        
+        // Apply fixes again after delays to override any late-loading styles
+        setTimeout(forceFixedPositioning, 100);
+        setTimeout(forceFixedPositioning, 500);
+        setTimeout(forceFixedPositioning, 1000);
+        
+        // Keep applying periodically to combat other scripts
+        setInterval(forceFixedPositioning, 2000);
+    }, 200);
 });
 
 // Initialize leaderboard collapse functionality
@@ -86,10 +99,16 @@ function removeSlideOutHandlers() {
     localStorage.removeItem('leaderboardPanelExpanded');
 }
 
-// Override the togglePanel function if it exists
+// Override the togglePanel function to prevent slide-out behavior
 if (typeof window.togglePanel !== 'undefined') {
-    window.togglePanel = function() {
-        // Do nothing - panels are now fixed
+    const originalTogglePanel = window.togglePanel;
+    window.togglePanel = function(panelType) {
+        // Allow boost functionality to continue
+        if (panelType === 'boost') {
+            return originalTogglePanel(panelType);
+        }
+        // Block panel sliding for stats and leaderboard
+        return false;
     };
 }
 
@@ -116,63 +135,98 @@ setInterval(ensurePanelsVisible, 1000);
 
 // Force fixed positioning on panels
 function forceFixedPositioning() {
-    if (!isMobile) return;
+    const checkMobile = () => {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+               'ontouchstart' in window ||
+               window.innerWidth < 768;
+    };
+    
+    if (!checkMobile()) return;
     
     const statsPanel = document.querySelector('.player-info-box');
     const leaderboardPanel = document.querySelector('.leaderboard-box');
     const discoveryFeed = document.querySelector('.discovery-feed');
     
     if (statsPanel) {
-        // Force remove any conflicting styles
-        statsPanel.style.cssText = `
-            position: fixed !important;
-            top: 10px !important;
-            left: 10px !important;
-            right: auto !important;
-            bottom: auto !important;
-            width: 140px !important;
-            display: block !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-            z-index: 100 !important;
-            transform: none !important;
-        `;
+        // Remove any tab handles first
+        const tabHandle = statsPanel.querySelector('.mobile-tab-handle');
+        if (tabHandle) tabHandle.remove();
+        
+        // Force fixed positioning
+        statsPanel.style.position = 'fixed';
+        statsPanel.style.top = '10px';
+        statsPanel.style.left = '10px';
+        statsPanel.style.right = 'auto';
+        statsPanel.style.bottom = 'auto';
+        statsPanel.style.width = '140px';
+        statsPanel.style.display = 'block';
+        statsPanel.style.visibility = 'visible';
+        statsPanel.style.opacity = '1';
+        statsPanel.style.zIndex = '100';
+        statsPanel.style.transform = 'none';
+        statsPanel.style.transition = 'none';
+        statsPanel.style.background = '#1a1a1a';
+        statsPanel.style.border = '3px solid';
+        statsPanel.style.borderColor = '#505050 #000000 #000000 #505050';
+        
         statsPanel.classList.remove('expanded');
     }
     
     if (leaderboardPanel) {
-        // Force remove any conflicting styles
+        // Remove any tab handles first
+        const tabHandle = leaderboardPanel.querySelector('.mobile-tab-handle');
+        if (tabHandle) tabHandle.remove();
+        
+        // Check if header exists, if not create it
+        let header = leaderboardPanel.querySelector('.leaderboard-header');
+        if (!header) {
+            const existingContent = leaderboardPanel.innerHTML;
+            leaderboardPanel.innerHTML = '<div class="leaderboard-header">Leaderboard</div>' + existingContent;
+            header = leaderboardPanel.querySelector('.leaderboard-header');
+        }
+        
+        // Force fixed positioning
         const isCollapsed = leaderboardPanel.classList.contains('collapsed');
-        leaderboardPanel.style.cssText = `
-            position: fixed !important;
-            top: 10px !important;
-            right: 10px !important;
-            left: auto !important;
-            bottom: auto !important;
-            width: 180px !important;
-            height: ${isCollapsed ? '30px' : 'auto'} !important;
-            max-height: 250px !important;
-            display: block !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-            z-index: 100 !important;
-            transform: none !important;
-        `;
+        leaderboardPanel.style.position = 'fixed';
+        leaderboardPanel.style.top = '10px';
+        leaderboardPanel.style.right = '10px';
+        leaderboardPanel.style.left = 'auto';
+        leaderboardPanel.style.bottom = 'auto';
+        leaderboardPanel.style.width = '180px';
+        leaderboardPanel.style.height = isCollapsed ? '30px' : 'auto';
+        leaderboardPanel.style.maxHeight = '250px';
+        leaderboardPanel.style.display = 'block';
+        leaderboardPanel.style.visibility = 'visible';
+        leaderboardPanel.style.opacity = '1';
+        leaderboardPanel.style.zIndex = '100';
+        leaderboardPanel.style.transform = 'none';
+        leaderboardPanel.style.transition = 'height 0.3s ease-out';
+        leaderboardPanel.style.background = '#1a1a1a';
+        leaderboardPanel.style.border = '3px solid';
+        leaderboardPanel.style.borderColor = '#505050 #000000 #000000 #505050';
+        leaderboardPanel.style.overflow = 'hidden';
+        
         leaderboardPanel.classList.remove('expanded');
+        
+        // Re-attach click handler if needed
+        if (header && !header.hasAttribute('data-click-attached')) {
+            header.style.cursor = 'pointer';
+            header.style.pointerEvents = 'auto';
+            header.addEventListener('click', toggleLeaderboard);
+            header.setAttribute('data-click-attached', 'true');
+        }
     }
     
     if (discoveryFeed) {
-        discoveryFeed.style.cssText = `
-            position: fixed !important;
-            top: 120px !important;
-            left: 10px !important;
-            right: auto !important;
-            bottom: auto !important;
-            width: 180px !important;
-            max-height: 200px !important;
-            opacity: 0.6 !important;
-            z-index: 80 !important;
-        `;
+        discoveryFeed.style.position = 'fixed';
+        discoveryFeed.style.top = '120px';
+        discoveryFeed.style.left = '10px';
+        discoveryFeed.style.right = 'auto';
+        discoveryFeed.style.bottom = 'auto';
+        discoveryFeed.style.width = '180px';
+        discoveryFeed.style.maxHeight = '200px';
+        discoveryFeed.style.opacity = '0.6';
+        discoveryFeed.style.zIndex = '80';
     }
 }
 

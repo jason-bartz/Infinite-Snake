@@ -137,11 +137,20 @@
     body.mobile .leaderboard-header::after {
         content: '▼' !important;
         font-size: 10px !important;
+        color: #F8F8F8 !important;
         transition: transform 0.3s ease-out !important;
+        display: inline-block !important;
     }
 
     body.mobile .leaderboard-box.collapsed .leaderboard-header::after {
         transform: rotate(-90deg) !important;
+    }
+    
+    /* Ensure header text is visible */
+    body.mobile .leaderboard-header {
+        font-size: 8px !important;
+        font-family: 'Press Start 2P', monospace !important;
+        color: #F8F8F8 !important;
     }
 
     /* Hide the slide-out tab handle for leaderboard */
