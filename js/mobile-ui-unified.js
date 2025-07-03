@@ -16,7 +16,14 @@ class UnifiedMobileUI {
             isInitialized: this.isInitialized
         });
         
-        if (!this.isMobile() || this.isInitialized) return;
+        if (!this.isMobile()) {
+            console.log('Unified Mobile UI: Not a mobile device, exiting...');
+            // Remove mobile class if it was incorrectly added
+            document.body.classList.remove('mobile');
+            return;
+        }
+        
+        if (this.isInitialized) return;
         
         this.isInitialized = true;
         
@@ -28,11 +35,17 @@ class UnifiedMobileUI {
     }
 
     isMobile() {
-        return document.body.classList.contains('mobile') || 
-               window.innerWidth <= 800 || 
-               'ontouchstart' in window ||
-               /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-               window.matchMedia("(pointer: coarse)").matches;
+        // Check user agent first for definitive mobile detection
+        const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        // Check for touch capability AND coarse pointer (more reliable than just touch)
+        const hasTouchAndCoarsePointer = 'ontouchstart' in window && window.matchMedia("(pointer: coarse)").matches;
+        
+        // Only consider small window size as mobile if other indicators are present
+        const isSmallScreen = window.innerWidth <= 800;
+        
+        // Return true only if we have strong evidence of mobile
+        return isMobileUA || hasTouchAndCoarsePointer || (isSmallScreen && 'ontouchstart' in window);
     }
 
     waitForElements() {
@@ -384,9 +397,17 @@ const unifiedMobileUI = new UnifiedMobileUI();
 
 // Function to detect and set mobile class
 function detectAndSetMobile() {
-    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-        window.matchMedia("(pointer: coarse)").matches ||
-        window.innerWidth <= 800) {
+    // Check user agent first for definitive mobile detection
+    const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    // Check for touch capability AND coarse pointer (more reliable than just touch)
+    const hasTouchAndCoarsePointer = 'ontouchstart' in window && window.matchMedia("(pointer: coarse)").matches;
+    
+    // Only consider small window size as mobile if other indicators are present
+    const isSmallScreen = window.innerWidth <= 800;
+    
+    // Only add mobile class if we have strong evidence of mobile
+    if (isMobileUA || hasTouchAndCoarsePointer || (isSmallScreen && 'ontouchstart' in window)) {
         if (document.body) {
             document.body.classList.add('mobile');
             console.log('Mobile class added to body');

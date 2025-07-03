@@ -1,0 +1,70 @@
+/* Comprehensive Mobile UI Fix - Addresses all identified issues */
+
+/* Only apply to actual mobile devices */
+@media not all and (hover: hover) and (pointer: fine) {
+    /* Fix stats panel padding to prevent tab overlap */
+    body.mobile .player-info-box {
+        padding-right: 20px !important;
+    }
+    
+    /* Ensure stats content doesn't get cut off */
+    body.mobile .player-stats {
+        margin-right: 5px !important;
+    }
+    
+    /* Fix leaderboard to be expanded by default on mobile */
+    body.mobile .leaderboard-box:not(.user-collapsed) {
+        height: auto !important;
+        max-height: 300px !important;
+        overflow-y: auto !important;
+    }
+    
+    /* Hide collapse indicator on mobile */
+    body.mobile .leaderboard-box .leaderboard-header::after {
+        display: none !important;
+    }
+    
+    /* Ensure tabs maintain position */
+    body.mobile .mobile-tab-handle {
+        position: absolute !important;
+        transition: none !important; /* Prevent position shifts */
+    }
+    
+    /* Fix z-index for pause menu interactions */
+    body.mobile #pauseOverlay {
+        z-index: 9998 !important;
+        pointer-events: auto !important;
+    }
+    
+    body.mobile #pauseMenu {
+        z-index: 9999 !important;
+        pointer-events: auto !important;
+    }
+    
+    /* Skin preview modal should be on top */
+    body.mobile .skin-preview-modal,
+    body.mobile .skin-modal-overlay {
+        z-index: 10001 !important;
+        pointer-events: auto !important;
+    }
+    
+    /* Prevent mobile UI event handlers from blocking pause menu */
+    body.mobile.paused .mobile-tab-handle {
+        pointer-events: none !important;
+    }
+}
+
+/* Desktop safety - ensure mobile UI never shows on desktop */
+@media (hover: hover) and (pointer: fine) {
+    .mobile-tab-handle {
+        display: none !important;
+    }
+    
+    .player-info-box,
+    .leaderboard-box {
+        position: static !important;
+        transform: none !important;
+        left: auto !important;
+        right: auto !important;
+    }
+}

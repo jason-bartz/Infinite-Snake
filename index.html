@@ -1363,6 +1363,12 @@
             margin-bottom: 10px;
         }
         
+        /* Mobile-specific player info header adjustments */
+        body.mobile .player-info-header {
+            gap: 8px !important;
+            margin-bottom: 6px !important;
+        }
+        
         .player-portrait {
             width: 48px;
             height: 48px;
@@ -1390,6 +1396,7 @@
             gap: 2px;
             margin-left: 8px;
             overflow: hidden;
+            padding-right: 5px; /* Add padding to prevent content cutoff */
         }
         
         .stat-line {
@@ -1397,6 +1404,7 @@
             justify-content: space-between;
             font-size: 7px;
             margin: 2px 0;
+            padding: 0 2px; /* Add horizontal padding to prevent edge cutoff */
         }
         
         .stat-label {
@@ -1763,7 +1771,8 @@
                 left: 10px !important;
                 width: 45%;
                 font-size: 7px !important;
-                padding: 6px;
+                padding: 8px !important; /* Increased padding */
+                overflow: visible !important; /* Ensure content isn't clipped */
             }
             
             body.mobile .leaderboard-box {
@@ -1790,10 +1799,11 @@
                 bottom: unset !important;
                 left: 10px !important;
                 right: auto !important;
-                width: 180px !important;
+                width: 200px !important; /* Increased width */
                 font-size: 6px !important;
-                padding: 4px !important;
+                padding: 6px !important; /* Increased padding */
                 z-index: 20 !important;
+                overflow: visible !important; /* Ensure content isn't clipped */
             }
             
             body.mobile .leaderboard-box {
@@ -1847,7 +1857,8 @@
             
             body.mobile .stat-line {
                 font-size: 6px !important;
-                margin: 1px 0 !important;
+                margin: 2px 0 !important; /* Increased spacing */
+                padding: 0 2px !important; /* Add horizontal padding */
             }
             
             body.mobile .leaderboard-header {
@@ -1885,11 +1896,22 @@
             transition: all 0.3s ease;
         } */
         
+        /* Add visual feedback for mobile panels */
+        body.mobile .leaderboard-box {
+            transition: all 0.3s ease;
+        }
+        
+        body.mobile .leaderboard-box:active {
+            transform: scale(0.98);
+            opacity: 0.9;
+        }
+        
         body.mobile .leaderboard-box.collapsed {
             width: auto;
-            min-width: 40px;
+            min-width: 80px; /* Increased for better tap target */
             height: 40px;
             overflow: hidden;
+            cursor: pointer;
         }
         
         body.mobile .leaderboard-box.collapsed .leaderboard-entry,
@@ -1908,6 +1930,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 8px; /* Add padding for better tap target */
+            cursor: pointer;
         }
         
         body.mobile .leaderboard-header::after {
@@ -2907,11 +2931,17 @@
         .stat-label {
             font-size: 8px !important; /* Increased from 7px */
             letter-spacing: -0.5px !important; /* Tighten spacing to prevent overflow */
+            flex-shrink: 0; /* Prevent label from shrinking */
+            min-width: 60px; /* Ensure consistent width */
         }
 
         .stat-value {
             font-size: 10px !important; /* Increased from 7px but not too large */
             letter-spacing: -0.5px !important; /* Tighten spacing */
+            text-align: right; /* Align values to the right */
+            flex: 1; /* Take remaining space */
+            overflow: hidden; /* Prevent overflow */
+            text-overflow: ellipsis; /* Add ellipsis for very long numbers */
         }
 
         .stat-line {
@@ -3387,11 +3417,7 @@
                 localStorage.setItem('leaderboardCollapsed', isCollapsed);
             });
             
-            // Restore collapsed state from localStorage
-            const savedState = localStorage.getItem('leaderboardCollapsed');
-            if (savedState === 'true') {
-                leaderboardBox.classList.add('collapsed');
-            }
+            // Collapsed state restoration moved to mobile-specific section above
         }
     });
 
@@ -3428,6 +3454,7 @@
     
     <!-- Mobile UI Overhaul - Load after all other styles for proper override -->
     <link rel="stylesheet" href="css/mobile-ui-unified.css">
+    <link rel="stylesheet" href="css/mobile-ui-comprehensive-fix.css">
     
     <!-- New Element System Scripts -->
     <script src="elements/data/loader.js"></script>
@@ -4105,7 +4132,8 @@
             
             body.mobile .player-stats {
                 margin-left: 0 !important;
-                gap: 1px !important;
+                gap: 2px !important; /* Increased gap for better readability */
+                padding: 4px !important; /* Add padding to prevent content cutoff */
             }
             
             /* Ensure joystick and boost are same size */
@@ -4219,8 +4247,9 @@
                 left: 10px !important;
                 bottom: unset !important;
                 right: auto !important;
-                width: 160px;
+                width: 170px; /* Slightly increased width */
                 font-size: 7px;
+                min-height: auto; /* Ensure height adjusts to content */
             }
             
             /* Leaderboard - Top Right */
@@ -16991,14 +17020,24 @@
             const leaderboardBox = document.querySelector('.leaderboard-box');
             if (leaderboardBox) {
                 leaderboardBox.addEventListener('click', function(e) {
-                    // Only toggle if clicking on the box itself or header, not entries
-                    if (e.target === leaderboardBox || e.target.classList.contains('leaderboard-header')) {
+                    // Only toggle if clicking on the header
+                    if (e.target.classList.contains('leaderboard-header') || 
+                        e.target.parentElement.classList.contains('leaderboard-header')) {
                         this.classList.toggle('collapsed');
+                        
+                        // Save collapsed state
+                        const isCollapsed = this.classList.contains('collapsed');
+                        localStorage.setItem('leaderboardCollapsed', isCollapsed);
                     }
                 });
                 
-                // Start collapsed on mobile
-                leaderboardBox.classList.add('collapsed');
+                // Start expanded on mobile for better visibility
+                // Only collapse if user previously chose to collapse it
+                const savedState = localStorage.getItem('leaderboardCollapsed');
+                if (savedState === 'true') {
+                    leaderboardBox.classList.add('collapsed');
+                }
+                // Remove the automatic collapse on mobile
             }
             
             const joystick = document.getElementById('virtualJoystick');

@@ -2,10 +2,42 @@
 // This script applies inline styles directly to ensure tabs are visible
 
 (function() {
-    console.log('Applying inline style fixes for mobile tabs...');
+    console.log('Mobile UI Inline Style Fix: Checking if mobile...');
+    
+    // Check if this is a mobile device
+    function isMobile() {
+        // Check user agent first for definitive mobile detection
+        const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        // Check for touch capability AND coarse pointer (more reliable than just touch)
+        const hasTouchAndCoarsePointer = 'ontouchstart' in window && window.matchMedia("(pointer: coarse)").matches;
+        
+        // Only consider small window size as mobile if other indicators are present
+        const isSmallScreen = window.innerWidth <= 800;
+        
+        // Also check if body has mobile class (set by other scripts)
+        const hasMobileClass = document.body && document.body.classList.contains('mobile');
+        
+        // Return true only if we have strong evidence of mobile
+        return hasMobileClass || isMobileUA || hasTouchAndCoarsePointer || (isSmallScreen && 'ontouchstart' in window);
+    }
+    
+    // Exit early if not mobile
+    if (!isMobile()) {
+        console.log('Mobile UI Inline Style Fix: Not a mobile device, skipping...');
+        return;
+    }
+    
+    console.log('Mobile UI Inline Style Fix: Mobile device detected, applying fixes...');
     
     // Wait for panels to exist
     function applyFixes() {
+        // Double-check we're still on mobile
+        if (!isMobile()) {
+            console.log('Mobile UI Inline Style Fix: No longer mobile, stopping...');
+            return;
+        }
+        
         const statsPanel = document.querySelector('.player-info-box');
         const leaderPanel = document.querySelector('.leaderboard-box');
         
@@ -19,7 +51,7 @@
         statsPanel.style.cssText = `
             position: fixed !important;
             top: 10px !important;
-            left: -283px !important;
+            left: -270px !important;
             width: 280px !important;
             height: auto !important;
             background: #101040 !important;
@@ -36,7 +68,7 @@
         leaderPanel.style.cssText = `
             position: fixed !important;
             top: 10px !important;
-            right: -283px !important;
+            right: -270px !important;
             width: 280px !important;
             height: auto !important;
             background: #000000 !important;
@@ -65,10 +97,10 @@
         // Apply inline styles to stats tab
         statsTab.style.cssText = `
             position: absolute !important;
-            right: -43px !important;
+            right: -50px !important;
             top: 10px !important;
-            width: 43px !important;
-            height: 60px !important;
+            width: 50px !important;
+            height: 80px !important;
             background: #101040 !important;
             border: 3px solid !important;
             border-color: #5878F8 #000000 #000000 !important;
@@ -118,10 +150,10 @@
         // Apply inline styles to leaderboard tab
         leaderTab.style.cssText = `
             position: absolute !important;
-            left: -43px !important;
+            left: -50px !important;
             top: 10px !important;
-            width: 43px !important;
-            height: 60px !important;
+            width: 50px !important;
+            height: 80px !important;
             background: #000000 !important;
             border: 3px solid !important;
             border-color: #F8F8F8 #505050 #505050 !important;
@@ -146,16 +178,20 @@
         if (!statsTab.hasAttribute('data-click-handler')) {
             statsTab.setAttribute('data-click-handler', 'true');
             statsTab.addEventListener('click', function(e) {
+                // Don't interfere with pause menu events
+                if (document.getElementById('pauseMenu')?.style.display !== 'none') {
+                    return;
+                }
                 e.stopPropagation();
                 e.preventDefault();
                 // Toggle expanded class instead of inline styles
                 if (statsPanel.classList.contains('expanded')) {
                     statsPanel.classList.remove('expanded');
-                    statsPanel.style.left = '-283px';
+                    statsPanel.style.left = '-270px';
                 } else {
                     // Close other panel first
                     leaderPanel.classList.remove('expanded');
-                    leaderPanel.style.right = '-283px';
+                    leaderPanel.style.right = '-270px';
                     // Open this panel
                     statsPanel.classList.add('expanded');
                     statsPanel.style.left = '0px';
@@ -173,16 +209,20 @@
         if (!leaderTab.hasAttribute('data-click-handler')) {
             leaderTab.setAttribute('data-click-handler', 'true');
             leaderTab.addEventListener('click', function(e) {
+                // Don't interfere with pause menu events
+                if (document.getElementById('pauseMenu')?.style.display !== 'none') {
+                    return;
+                }
                 e.stopPropagation();
                 e.preventDefault();
                 // Toggle expanded class instead of inline styles
                 if (leaderPanel.classList.contains('expanded')) {
                     leaderPanel.classList.remove('expanded');
-                    leaderPanel.style.right = '-283px';
+                    leaderPanel.style.right = '-270px';
                 } else {
                     // Close other panel first
                     statsPanel.classList.remove('expanded');
-                    statsPanel.style.left = '-283px';
+                    statsPanel.style.left = '-270px';
                     // Open this panel
                     leaderPanel.classList.add('expanded');
                     leaderPanel.style.right = '0px';
@@ -208,7 +248,24 @@
 
 // Make it globally accessible
 window.applyMobileTabFix = function() {
-    const script = document.createElement('script');
-    script.textContent = '(' + arguments.callee.toString() + ')()';
-    document.head.appendChild(script);
+    // Check user agent first for definitive mobile detection
+    const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    // Check for touch capability AND coarse pointer (more reliable than just touch)
+    const hasTouchAndCoarsePointer = 'ontouchstart' in window && window.matchMedia("(pointer: coarse)").matches;
+    
+    // Only consider small window size as mobile if other indicators are present
+    const isSmallScreen = window.innerWidth <= 800;
+    
+    // Also check if body has mobile class (set by other scripts)
+    const hasMobileClass = document.body && document.body.classList.contains('mobile');
+    
+    // Only apply on mobile devices
+    if (hasMobileClass || isMobileUA || hasTouchAndCoarsePointer || (isSmallScreen && 'ontouchstart' in window)) {
+        const script = document.createElement('script');
+        script.textContent = '(' + arguments.callee.toString() + ')()';
+        document.head.appendChild(script);
+    } else {
+        console.log('applyMobileTabFix: Not a mobile device, skipping...');
+    }
 };

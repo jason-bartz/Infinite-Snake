@@ -9,6 +9,23 @@
     --mobile-transition: 0.3s ease-out;
 }
 
+/* =============== DESKTOP SAFETY RULES =============== */
+/* Ensure mobile tabs are hidden on desktop */
+body:not(.mobile) .mobile-tab-handle {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+/* Ensure panels have normal positioning on desktop */
+body:not(.mobile) .player-info-box,
+body:not(.mobile) .leaderboard-box {
+    position: static !important;
+    left: auto !important;
+    right: auto !important;
+    transition: none !important;
+}
+
 /* =============== BASE MOBILE STYLES =============== */
 /* Hide boost bar on mobile */
 body.mobile .boost-bar-container,
