@@ -163,6 +163,7 @@
     <link rel="stylesheet" href="css/skin-selection.css">
     <link rel="stylesheet" href="css/unlock-notifications.css">
     <link rel="stylesheet" href="css/discovery-feed-gradients.css">
+    <link rel="stylesheet" href="css/cosmic-ui-theme.css">
     <style>
         /* SNES-Era UI Theme with Cosmic Colors */
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
@@ -274,6 +275,26 @@
             overflow: hidden;
             z-index: 1000;
             transition: opacity 0.3s;
+        }
+        
+        /* CRT scanlines for splash screen */
+        #splashScreen::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 0, 0, 0.1) 2px,
+                rgba(0, 0, 0, 0.1) 4px
+            );
+            pointer-events: none;
+            z-index: 9999;
+            mix-blend-mode: multiply;
         }
         
         /* Removed - using persistent star canvas
@@ -398,6 +419,26 @@
             transition: opacity 0.3s;
         }
         
+        /* CRT scanlines for game mode select */
+        #gameModeSelect::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 0, 0, 0.1) 2px,
+                rgba(0, 0, 0, 0.1) 4px
+            );
+            pointer-events: none;
+            z-index: 9999;
+            mix-blend-mode: multiply;
+        }
+        
         /* Removed - using persistent star canvas
         #gameModeStarsCanvas {
             position: absolute;
@@ -412,17 +453,20 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: var(--snes-dark-blue);
+            background: linear-gradient(135deg, #1a1a40 0%, #2a1a50 50%, #181850 100%);
             padding: 32px;
             border-radius: 0;
             text-align: center;
             border: 8px solid;
-            border-color: var(--snes-white) var(--snes-black) var(--snes-black) var(--snes-white);
+            border-color: var(--snes-cosmic-purple) var(--snes-dark-purple) var(--snes-dark-purple) var(--snes-cosmic-purple);
             max-width: 800px;
             width: 90%;
             z-index: 1;
             position: relative;
-            box-shadow: 8px 8px 0 rgba(0,0,0,0.8);
+            box-shadow: 
+                8px 8px 0 rgba(0,0,0,0.8),
+                0 0 40px rgba(120, 40, 248, 0.3),
+                inset 0 0 60px rgba(120, 40, 248, 0.1);
         }
         
         /* Decorative corners */
@@ -1404,7 +1448,8 @@
             justify-content: space-between;
             font-size: 7px;
             margin: 2px 0;
-            padding: 0 2px; /* Add horizontal padding to prevent edge cutoff */
+            padding: 0 4px; /* Increased horizontal padding to prevent edge cutoff */
+            gap: 8px; /* Add gap between label and value */
         }
         
         .stat-label {
@@ -2484,7 +2529,7 @@
         }
         
         #pauseMenu {
-            background: #181850;
+            background: linear-gradient(135deg, #181850 0%, #2a1a50 50%, #1a1a40 100%);
             padding: 32px;
             border-radius: 0;
             text-align: center;
@@ -2496,11 +2541,35 @@
             display: flex;
             flex-direction: column;
             border: 8px solid;
-            border-color: var(--snes-white) var(--snes-black) var(--snes-black) var(--snes-white);
-            box-shadow: 8px 8px 0 rgba(0,0,0,0.8);
+            border-color: var(--snes-cosmic-purple) var(--snes-dark-purple) var(--snes-dark-purple) var(--snes-cosmic-purple);
+            box-shadow: 
+                8px 8px 0 rgba(0,0,0,0.8),
+                0 0 40px rgba(120, 40, 248, 0.3),
+                inset 0 0 80px rgba(120, 40, 248, 0.1);
             outline: 2px solid var(--snes-gold);
             outline-offset: -12px;
             font-family: 'Press Start 2P';
+            position: relative;
+        }
+        
+        /* CRT scanlines for pause menu */
+        #pauseMenu::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 0, 0, 0.1) 2px,
+                rgba(0, 0, 0, 0.1) 4px
+            );
+            pointer-events: none;
+            z-index: 9999;
+            mix-blend-mode: multiply;
         }
         
         /* Tab Navigation - SNES Style */
@@ -2515,9 +2584,9 @@
         
         .tab-button {
             padding: 12px 24px;
-            background: var(--snes-primary-blue);
-            border: 2px solid;
-            border-color: var(--snes-light-blue) var(--snes-dark-blue) var(--snes-dark-blue) var(--snes-light-blue);
+            background: linear-gradient(135deg, var(--snes-dark-purple) 0%, var(--snes-cosmic-purple) 100%);
+            border: 3px solid;
+            border-color: var(--snes-cosmic-purple) var(--snes-dark-purple) var(--snes-dark-purple) var(--snes-cosmic-purple);
             border-radius: 0;
             color: var(--snes-white);
             cursor: pointer;
@@ -2525,20 +2594,28 @@
             font-size: 10px;
             text-transform: uppercase;
             font-family: 'Press Start 2P';
-            box-shadow: 4px 4px 0 rgba(0,0,0,0.5);
+            box-shadow: 
+                4px 4px 0 rgba(0,0,0,0.5),
+                inset 0 0 20px rgba(120, 40, 248, 0.3);
         }
         
         .tab-button:hover {
+            background: linear-gradient(135deg, var(--snes-cosmic-purple) 0%, var(--snes-cosmic-pink) 100%);
             transform: translate(2px, 2px);
-            box-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+            box-shadow: 
+                2px 2px 0 rgba(0,0,0,0.5),
+                0 0 20px rgba(248, 40, 248, 0.4);
         }
         
         .tab-button.active {
-            background: var(--snes-gold);
+            background: linear-gradient(135deg, var(--snes-cosmic-pink) 0%, var(--snes-gold) 100%);
             color: var(--snes-black);
-            border-color: var(--snes-white) #A88800 #A88800 var(--snes-white);
+            border-color: var(--snes-gold) var(--snes-cosmic-pink) var(--snes-cosmic-pink) var(--snes-gold);
             transform: translate(4px, 4px);
-            box-shadow: none;
+            box-shadow: 
+                none,
+                0 0 30px rgba(248, 216, 0, 0.5),
+                inset 0 0 20px rgba(248, 216, 0, 0.3);
         }
         
         .tab-content {
@@ -3539,13 +3616,13 @@
             <h4>Choose Your Mode</h4>
             <div id="victoryButtons" style="display: flex; flex-direction: row; gap: 30px; justify-content: center; align-items: stretch; margin-top: 30px; flex-wrap: wrap;">
                 <div style="text-align: center; width: 280px;">
-                    <button class="btn-classic" onclick="selectGameMode('classic')" style="width: 100%; height: 40px; padding: 10px; font-size: 10pt; background: #e74c3c; border: 2px solid #c0392b; display: flex; align-items: center; justify-content: center;">
+                    <button class="btn-infinite" onclick="selectGameMode('classic')" style="width: 100%; height: 40px; padding: 10px !important; font-size: 10pt !important; display: flex; align-items: center; justify-content: center;">
                         Classic Mode
                     </button>
                     <p style="color: #ccc; margin-top: 10px; font-size: 14px;">Test your survival skills and compete for your spot on the leaderboard</p>
                 </div>
                 <div style="text-align: center; width: 280px;">
-                    <button class="btn-infinite" onclick="selectGameMode('infinite')" style="width: 100%; height: 40px; padding: 10px !important; font-size: 10pt !important; display: flex; align-items: center; justify-content: center;">
+                    <button class="btn-classic" onclick="selectGameMode('infinite')" style="width: 100%; height: 40px; padding: 10px; font-size: 10pt; background: #333; border: 2px solid #222; display: flex; align-items: center; justify-content: center;">
                         Infinite Mode
                     </button>
                     <p style="color: #ccc; margin-top: 10px; font-size: 14px;">Unlimited respawns to experiment freely and discover new combinations</p>
@@ -3779,31 +3856,39 @@
                 
                 <!-- Action Buttons -->
                 <div style="display: flex; gap: 15px; justify-content: center; margin-top: 25px;">
-                    <button id="newGameBtn" onclick="returnToMainMenu()" 
-                            style="background: transparent; 
-                                   color: #AAA; 
-                                   border: 2px solid #666; 
-                                   padding: 12px 25px; 
-                                   font-size: 16px; 
-                                   font-family: monospace;
-                                   cursor: pointer;
-                                   border-radius: 5px;
-                                   transition: all 0.3s ease;">
-                        NEW GAME
-                    </button>
                     <button id="reviveBtn" onclick="handleReviveOrRespawn()" 
-                            style="background: #4ecdc4; 
-                                   color: #000; 
-                                   border: 2px solid #4ecdc4; 
+                            style="background: var(--snes-cosmic-purple); 
+                                   color: var(--snes-white); 
+                                   border: 4px solid var(--snes-white); 
                                    padding: 12px 25px; 
-                                   font-size: 16px; 
-                                   font-family: monospace;
+                                   font-size: 10px; 
+                                   font-family: 'Press Start 2P';
                                    cursor: pointer;
-                                   border-radius: 5px;
-                                   font-weight: bold;
-                                   transition: all 0.3s ease;
-                                   box-shadow: 0 0 20px rgba(78, 205, 196, 0.5);">
+                                   border-radius: 0;
+                                   font-weight: normal;
+                                   text-transform: uppercase;
+                                   transition: none;
+                                   box-shadow: inset 2px 2px 0 var(--snes-cosmic-pink), inset -2px -2px 0 var(--snes-dark-purple), 4px 4px 0 rgba(0,0,0,0.5);"
+                            onmouseover="this.style.background='var(--snes-cosmic-pink)'; this.style.transform='translate(2px, 2px)'; this.style.boxShadow='inset 2px 2px 0 #FFA8FF, inset -2px -2px 0 var(--snes-dark-purple), 2px 2px 0 rgba(0,0,0,0.5)';"
+                            onmouseout="this.style.background='var(--snes-cosmic-purple)'; this.style.transform='translate(0, 0)'; this.style.boxShadow='inset 2px 2px 0 var(--snes-cosmic-pink), inset -2px -2px 0 var(--snes-dark-purple), 4px 4px 0 rgba(0,0,0,0.5)';"
+                            onclick="this.style.transform='translate(4px, 4px)'; this.style.boxShadow='none'; handleReviveOrRespawn();">
                         REVIVE (<span id="revivesLeft">3</span>)
+                    </button>
+                    <button id="newGameBtn" onclick="returnToMainMenu()" 
+                            style="background: #333; 
+                                   color: #fff; 
+                                   border: 4px solid #666; 
+                                   padding: 12px 25px; 
+                                   font-size: 10px; 
+                                   font-family: 'Press Start 2P';
+                                   cursor: pointer;
+                                   border-radius: 0;
+                                   text-transform: uppercase;
+                                   transition: none;
+                                   box-shadow: 4px 4px 0 rgba(0,0,0,0.5);"
+                            onmouseover="this.style.transform='translate(2px, 2px)'; this.style.boxShadow='2px 2px 0 rgba(0,0,0,0.5)';"
+                            onmouseout="this.style.transform='translate(0, 0)'; this.style.boxShadow='4px 4px 0 rgba(0,0,0,0.5)';">
+                        NEW GAME
                     </button>
                 </div>
                 
@@ -3840,12 +3925,12 @@
                     
                     <!-- Rarity Tabs -->
                     <div class="rarity-tabs">
-                        <button class="rarity-tab active" data-rarity="common">Common</button>
-                        <button class="rarity-tab" data-rarity="uncommon">Uncommon</button>
-                        <button class="rarity-tab" data-rarity="rare">Rare</button>
-                        <button class="rarity-tab" data-rarity="legendary">Legendary</button>
-                        <button class="rarity-tab" data-rarity="exotic">Exotic</button>
-                        <button class="rarity-tab" data-rarity="secret">Secret</button>
+                        <button class="rarity-tab common active" data-rarity="common">Common</button>
+                        <button class="rarity-tab uncommon" data-rarity="uncommon">Uncommon</button>
+                        <button class="rarity-tab rare" data-rarity="rare">Rare</button>
+                        <button class="rarity-tab legendary" data-rarity="legendary">Legendary</button>
+                        <button class="rarity-tab exotic" data-rarity="exotic">Exotic</button>
+                        <button class="rarity-tab secret" data-rarity="secret">Secret</button>
                     </div>
                     
                     <!-- Skin Grid Container -->
@@ -3968,7 +4053,9 @@
             </div>
             
             <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(138, 43, 226, 0.3);">
-                <button onclick="resumeGame()" style="margin: 10px; padding: 10px 30px; font-size: 18px; background: #4ecdc4; color: white; border: none; border-radius: 10px; cursor: pointer;">Resume</button>
+                <button onclick="resumeGame()" style="margin: 10px; padding: 12px 30px; font-size: 10px; background: var(--snes-cosmic-purple); color: var(--snes-white); border: 4px solid var(--snes-white); border-radius: 0; cursor: pointer; font-family: 'Press Start 2P'; text-transform: uppercase; box-shadow: inset 2px 2px 0 var(--snes-cosmic-pink), inset -2px -2px 0 var(--snes-dark-purple), 4px 4px 0 rgba(0,0,0,0.5); transition: none;"
+                        onmouseover="this.style.background='var(--snes-cosmic-pink)'; this.style.transform='translate(2px, 2px)'; this.style.boxShadow='inset 2px 2px 0 #FFA8FF, inset -2px -2px 0 var(--snes-dark-purple), 2px 2px 0 rgba(0,0,0,0.5)';"
+                        onmouseout="this.style.background='var(--snes-cosmic-purple)'; this.style.transform='translate(0, 0)'; this.style.boxShadow='inset 2px 2px 0 var(--snes-cosmic-pink), inset -2px -2px 0 var(--snes-dark-purple), 4px 4px 0 rgba(0,0,0,0.5)';">Resume</button>
                 <button onclick="playUISound(); location.reload()" style="margin: 10px; padding: 10px 30px; font-size: 18px; background: #ff6b6b; color: white; border: none; border-radius: 10px; cursor: pointer;">New Game</button>
             </div>
         </div>
@@ -13343,26 +13430,50 @@
                 image-rendering: crisp-edges;
             `;
             
+            // Add CRT scanlines to death screen
+            const deathCRT = document.createElement('div');
+            deathCRT.style.cssText = `
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(0, 0, 0, 0.1) 2px,
+                    rgba(0, 0, 0, 0.1) 4px
+                );
+                pointer-events: none;
+                z-index: 10001;
+                mix-blend-mode: multiply;
+            `;
+            gameOverScreen.appendChild(deathCRT);
+            
             function updateGameOverScreen() {
+                // Preserve CRT effect
+                const existingCRT = gameOverScreen.querySelector('div[style*="repeating-linear-gradient"]');
+                
                 gameOverScreen.innerHTML = `
                     <div style="
-                        background: #1a1a2e;
-                        border: 4px solid #fff;
+                        background: linear-gradient(135deg, #1a0033 0%, #2a0055 100%);
+                        border: 4px solid #F828F8;
                         border-radius: 0;
                         padding: 32px 48px;
                         box-shadow: 
-                            inset -4px -4px 0 #0f0f1e,
-                            inset 4px 4px 0 #2a2a4a,
+                            0 0 30px rgba(248, 40, 248, 0.5),
+                            inset 0 0 20px rgba(120, 40, 248, 0.3),
                             0 0 0 4px #000;
                         text-align: center;
                         position: relative;
                         min-width: 400px;
                     ">
                         <!-- Corner decorations -->
-                        <div style="position: absolute; top: -2px; left: -2px; width: 20px; height: 20px; border-top: 4px solid #FFD700; border-left: 4px solid #FFD700;"></div>
-                        <div style="position: absolute; top: -2px; right: -2px; width: 20px; height: 20px; border-top: 4px solid #FFD700; border-right: 4px solid #FFD700;"></div>
-                        <div style="position: absolute; bottom: -2px; left: -2px; width: 20px; height: 20px; border-bottom: 4px solid #FFD700; border-left: 4px solid #FFD700;"></div>
-                        <div style="position: absolute; bottom: -2px; right: -2px; width: 20px; height: 20px; border-bottom: 4px solid #FFD700; border-right: 4px solid #FFD700;"></div>
+                        <div style="position: absolute; top: -2px; left: -2px; width: 20px; height: 20px; border-top: 4px solid #F828F8; border-left: 4px solid #F828F8;"></div>
+                        <div style="position: absolute; top: -2px; right: -2px; width: 20px; height: 20px; border-top: 4px solid #F828F8; border-right: 4px solid #F828F8;"></div>
+                        <div style="position: absolute; bottom: -2px; left: -2px; width: 20px; height: 20px; border-bottom: 4px solid #F828F8; border-left: 4px solid #F828F8;"></div>
+                        <div style="position: absolute; bottom: -2px; right: -2px; width: 20px; height: 20px; border-bottom: 4px solid #F828F8; border-right: 4px solid #F828F8;"></div>
                         
                         <h1 style="
                             font-size: 24px; 
@@ -13376,13 +13487,14 @@
                         ">GAME OVER</h1>
                         
                         <div style="
-                            background: #0f0f1e;
-                            border: 2px solid #fff;
+                            background: linear-gradient(135deg, #0a0015 0%, #1a0033 100%);
+                            border: 2px solid #7828F8;
                             padding: 16px;
                             margin-bottom: 20px;
                             box-shadow: 
-                                inset -2px -2px 0 #2a2a4a,
-                                inset 2px 2px 0 #000;
+                                inset -2px -2px 0 #4800A8,
+                                inset 2px 2px 0 #000,
+                                0 0 10px rgba(120, 40, 248, 0.3);
                         ">
                             <div style="margin-bottom: 16px;">
                                 <span style="color: #888; font-size: 10px; text-transform: uppercase; font-family: 'Press Start 2P', monospace;">Final Score</span>
@@ -13409,15 +13521,16 @@
                         
                         <div style="
                             font-size: 10px; 
-                            color: #4ecdc4; 
+                            color: #28F8F8; 
                             margin-bottom: 24px;
                             padding: 8px;
-                            background: #0f0f1e;
-                            border: 2px solid #4ecdc4;
+                            background: linear-gradient(135deg, #0a0015 0%, #1a0033 100%);
+                            border: 2px solid #28F8F8;
                             font-family: 'Press Start 2P', monospace;
                             box-shadow: 
-                                inset -2px -2px 0 #2a2a4a,
-                                inset 2px 2px 0 #000;
+                                inset -2px -2px 0 #0048A8,
+                                inset 2px 2px 0 #000,
+                                0 0 10px rgba(40, 248, 248, 0.4);
                         ">
                             ${isSubmitting ? 
                                 'Submitting score...' : 
@@ -13431,12 +13544,13 @@
                         <button onclick="location.reload()" style="
                             padding: 12px 32px;
                             font-size: 10pt;
-                            background: #4ecdc4;
-                            color: #000;
-                            border: 4px solid #fff;
+                            background: linear-gradient(135deg, #7828F8 0%, #F828F8 100%);
+                            color: #FFF;
+                            border: 4px solid #F828F8;
                             box-shadow: 
-                                inset -2px -2px 0 #2a8a86,
-                                inset 2px 2px 0 #6eedea,
+                                0 0 20px rgba(248, 40, 248, 0.6),
+                                inset 2px 2px 0 rgba(255, 255, 255, 0.3),
+                                inset -2px -2px 0 rgba(0, 0, 0, 0.3),
                                 0 0 0 2px #000;
                             cursor: pointer;
                             text-transform: uppercase;
@@ -13446,14 +13560,37 @@
                             position: relative;
                             top: 0;
                         "
-                        onmousedown="this.style.top='2px'; this.style.boxShadow='inset -2px -2px 0 #2a8a86, inset 2px 2px 0 #6eedea, 0 0 0 2px #000';"
-                        onmouseup="this.style.top='0'; this.style.boxShadow='inset -2px -2px 0 #2a8a86, inset 2px 2px 0 #6eedea, 0 0 0 2px #000';"
-                        onmouseleave="this.style.top='0'; this.style.boxShadow='inset -2px -2px 0 #2a8a86, inset 2px 2px 0 #6eedea, 0 0 0 2px #000';"
+                        onmousedown="this.style.top='2px'; this.style.boxShadow='0 0 20px rgba(248, 40, 248, 0.6), inset 2px 2px 0 rgba(255, 255, 255, 0.3), inset -2px -2px 0 rgba(0, 0, 0, 0.3), 0 0 0 2px #000';"
+                        onmouseup="this.style.top='0'; this.style.boxShadow='0 0 20px rgba(248, 40, 248, 0.6), inset 2px 2px 0 rgba(255, 255, 255, 0.3), inset -2px -2px 0 rgba(0, 0, 0, 0.3), 0 0 0 2px #000';"
+                        onmouseleave="this.style.top='0'; this.style.boxShadow='0 0 20px rgba(248, 40, 248, 0.6), inset 2px 2px 0 rgba(255, 255, 255, 0.3), inset -2px -2px 0 rgba(0, 0, 0, 0.3), 0 0 0 2px #000';"
                         >
                             New Game
                         </button>
                     </div>
                 `;
+                
+                // Re-add CRT effect after updating innerHTML
+                if (existingCRT || !gameOverScreen.querySelector('div[style*="repeating-linear-gradient"]')) {
+                    const crtDiv = document.createElement('div');
+                    crtDiv.style.cssText = `
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background: repeating-linear-gradient(
+                            0deg,
+                            transparent,
+                            transparent 2px,
+                            rgba(0, 0, 0, 0.1) 2px,
+                            rgba(0, 0, 0, 0.1) 4px
+                        );
+                        pointer-events: none;
+                        z-index: 10001;
+                        mix-blend-mode: multiply;
+                    `;
+                    gameOverScreen.appendChild(crtDiv);
+                }
             }
             
             // Initial render
