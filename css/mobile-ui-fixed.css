@@ -1,0 +1,227 @@
+/* Mobile UI Fixed Positioning - Replaces slide-out panels with fixed elements */
+
+/* =============== PLAYER STATS PANEL - FIXED TOP LEFT =============== */
+body.mobile .player-info-box {
+    /* Fixed positioning in top-left */
+    position: fixed !important;
+    top: 10px !important;
+    left: 10px !important;
+    bottom: auto !important;
+    right: auto !important;
+    
+    /* Dimensions - smaller for mobile */
+    width: 140px !important;
+    height: auto !important;
+    max-height: none !important;
+    
+    /* Visual styles */
+    background: rgba(16, 16, 64, 0.95) !important;
+    border: 3px solid !important;
+    border-color: var(--snes-light-blue) var(--snes-dark-blue) var(--snes-dark-blue) var(--snes-light-blue) !important;
+    border-radius: 0 !important;
+    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.5) !important;
+    
+    /* Remove transitions and animations */
+    transition: none !important;
+    z-index: 100 !important;
+    overflow: visible !important;
+    
+    /* Padding */
+    padding: 6px !important;
+}
+
+/* Hide the slide-out tab handle */
+body.mobile .player-info-box .mobile-tab-handle {
+    display: none !important;
+}
+
+/* Smaller text for mobile stat box */
+body.mobile .player-info-box .stat-line {
+    font-size: 6px !important;
+    margin: 1px 0 !important;
+    gap: 4px !important;
+}
+
+body.mobile .player-info-box .player-name {
+    font-size: 8px !important;
+    margin-bottom: 4px !important;
+}
+
+/* =============== LEADERBOARD PANEL - FIXED TOP RIGHT WITH COLLAPSE =============== */
+body.mobile .leaderboard-box {
+    /* Fixed positioning in top-right */
+    position: fixed !important;
+    top: 10px !important;
+    right: 10px !important;
+    bottom: auto !important;
+    left: auto !important;
+    
+    /* Dimensions */
+    width: 180px !important;
+    height: auto !important;
+    max-height: 250px !important;
+    
+    /* Visual styles */
+    background: rgba(248, 248, 248, 0.95) !important;
+    border: 3px solid !important;
+    border-color: var(--snes-white) var(--snes-gray) var(--snes-gray) var(--snes-white) !important;
+    border-radius: 0 !important;
+    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.5) !important;
+    
+    /* Behavior */
+    transition: height 0.3s ease-out !important;
+    z-index: 100 !important;
+    overflow: hidden !important;
+    
+    /* Padding */
+    padding: 0 !important;
+}
+
+/* Collapsed state for leaderboard */
+body.mobile .leaderboard-box.collapsed {
+    height: 30px !important;
+    overflow: hidden !important;
+}
+
+/* Leaderboard header with collapse arrow */
+body.mobile .leaderboard-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 6px 8px !important;
+    background: rgba(0, 0, 0, 0.1) !important;
+    border-bottom: 2px solid var(--snes-gray) !important;
+    cursor: pointer !important;
+    user-select: none !important;
+    font-size: 8px !important;
+    height: 30px !important;
+    box-sizing: border-box !important;
+}
+
+/* Collapse arrow indicator */
+body.mobile .leaderboard-header::after {
+    content: '▼' !important;
+    font-size: 10px !important;
+    transition: transform 0.3s ease-out !important;
+}
+
+body.mobile .leaderboard-box.collapsed .leaderboard-header::after {
+    transform: rotate(-90deg) !important;
+}
+
+/* Hide the slide-out tab handle */
+body.mobile .leaderboard-box .mobile-tab-handle {
+    display: none !important;
+}
+
+/* Smaller leaderboard entries */
+body.mobile .leaderboard-entry {
+    font-size: 7px !important;
+    padding: 3px 6px !important;
+}
+
+body.mobile .leaderboard-list {
+    max-height: 180px !important;
+    overflow-y: auto !important;
+}
+
+/* =============== DISCOVERY FEED - SMALLER AND REPOSITIONED =============== */
+body.mobile .discovery-feed {
+    /* Position below stat box */
+    position: fixed !important;
+    top: 80px !important;
+    left: 10px !important;
+    bottom: auto !important;
+    right: auto !important;
+    
+    /* Smaller dimensions */
+    width: 180px !important;
+    max-height: 200px !important;
+    
+    /* Reduced opacity */
+    opacity: 0.6 !important;
+    
+    /* No pointer events to not block gameplay */
+    pointer-events: none !important;
+    
+    /* Higher z-index but below UI */
+    z-index: 80 !important;
+}
+
+/* Smaller discovery messages */
+body.mobile .discovery-message {
+    font-size: 6px !important;
+    padding: 4px 6px !important;
+    margin-bottom: 4px !important;
+    max-width: 170px !important;
+}
+
+body.mobile .discovery-name {
+    font-size: 7px !important;
+}
+
+body.mobile .discovery-combo {
+    font-size: 6px !important;
+}
+
+/* =============== ADJUST MOBILE CONTROLS POSITION =============== */
+/* Move joystick slightly higher to avoid overlap with discovery feed */
+body.mobile .virtual-joystick {
+    bottom: 60px !important;
+    left: 20px !important;
+}
+
+/* Move boost button slightly higher */
+body.mobile .boost-button {
+    bottom: 60px !important;
+    right: 20px !important;
+}
+
+/* =============== HIDE UNUSED SLIDE-OUT ELEMENTS =============== */
+body.mobile .mobile-tab-handle,
+body.mobile .mobile-panel-overlay {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+/* Remove panel expanded class effects */
+body.mobile .player-info-box.expanded,
+body.mobile .leaderboard-box.expanded {
+    /* No special styles needed for expanded state */
+}
+
+/* =============== RESPONSIVE ADJUSTMENTS =============== */
+/* For very small screens */
+@media (max-width: 360px) {
+    body.mobile .player-info-box {
+        width: 120px !important;
+        font-size: 6px !important;
+    }
+    
+    body.mobile .leaderboard-box {
+        width: 150px !important;
+    }
+    
+    body.mobile .discovery-feed {
+        width: 150px !important;
+        top: 70px !important;
+    }
+}
+
+/* For larger mobile screens/tablets */
+@media (min-width: 768px) and (max-width: 1024px) {
+    body.mobile .player-info-box {
+        width: 180px !important;
+    }
+    
+    body.mobile .leaderboard-box {
+        width: 220px !important;
+        max-height: 300px !important;
+    }
+    
+    body.mobile .discovery-feed {
+        width: 220px !important;
+        max-height: 250px !important;
+    }
+}

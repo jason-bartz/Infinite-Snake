@@ -3560,6 +3560,7 @@
     <link rel="stylesheet" href="css/desktop-layout-fix.css">
     <link rel="stylesheet" href="css/unified-color-scheme.css">
     <link rel="stylesheet" href="css/cosmic-ui-override.css">
+    <link rel="stylesheet" href="css/mobile-ui-fixed.css">
     
     <!-- New Element System Scripts -->
     <script src="elements/data/loader.js"></script>
@@ -3573,6 +3574,7 @@
     <script src="js/mobile-background-integration.js"></script>
     <script src="js/mobile-ui-unified.js"></script>
     <script src="js/mobile-ui-inline-fix.js"></script>
+    <script src="js/mobile-ui-fixed.js"></script>
 </head>
 <body>
     <!-- Persistent Star Background -->
@@ -5049,7 +5051,7 @@
         let gameTarget = 0; // Target value for victory
         let deathCount = 0; // Track total deaths in current game
         let camera = { x: WORLD_SIZE / 2, y: WORLD_SIZE / 2 };
-        let cameraZoom = isMobile ? 0.5 : 1.0; // 0.5 = zoom out by 100% (double visible area) for mobile
+        let cameraZoom = isMobile ? 0.625 : 1.0; // 0.625 = zoom out by 60% (25% closer than 0.5) for mobile
         
         // Game loop timing variables
         let lastTime = 0;
@@ -13689,7 +13691,7 @@
                 console.log('[RESPAWN] Forcing end of death sequence');
                 deathSequenceActive = false;
                 deathCameraAnimation.active = false;
-                cameraZoom = isMobile ? 0.5 : 1.0;
+                cameraZoom = isMobile ? 0.625 : 1.0;
             }
             
             // Reset death processed flag
@@ -16727,7 +16729,7 @@
                         deathProcessed = true; // Mark as processed
                         
                         // Reset camera zoom
-                        cameraZoom = isMobile ? 0.5 : 1.0;
+                        cameraZoom = isMobile ? 0.625 : 1.0;
                         
                         // Now start the respawn timer and do all the death processing
                         playerRespawnTimer = 10000; // 10 seconds
