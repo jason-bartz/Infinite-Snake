@@ -6013,7 +6013,7 @@
             }
             
             // Also try to resume if music should be playing but isn't
-            if (musicShouldBePlaying && !musicMuted && gameStarted && !currentTrack) {
+            if (musicShouldBePlaying && !musicMuted && gameStarted && !currentTrack && !bossEncounterActive) {
                 console.log('[AUDIO] Music should be playing but no current track, starting new track on touch');
                 playRandomTrack();
             }
@@ -6062,6 +6062,20 @@
         
         // Call initialization after a small delay to ensure nameGenerator is loaded
         setTimeout(initializePlayerNameInput, 100);
+        
+        // Update placeholder with random names
+        function updateNamePlaceholder() {
+            const playerNameInput = document.getElementById('playerNameInput');
+            if (playerNameInput && window.nameGenerator && !playerNameInput.value) {
+                playerNameInput.placeholder = window.nameGenerator.generateRandomName();
+            }
+        }
+        
+        // Start updating placeholder after nameGenerator loads
+        setTimeout(() => {
+            updateNamePlaceholder();
+            setInterval(updateNamePlaceholder, 3000); // Change every 3 seconds
+        }, 200);
         
         // Splash screen
         document.getElementById('startButton').addEventListener('click', async () => {
@@ -6541,7 +6555,7 @@
             } else {
                 // Set music should be playing flag when unmuting
                 musicShouldBePlaying = true;
-                if (currentTrack && gameStarted) {
+                if (currentTrack && gameStarted && !bossEncounterActive) {
                     currentTrack.volume = musicVolume;
                     currentTrack.play().catch(() => {});
                 }
@@ -6650,7 +6664,7 @@
             }
             
             // Resume background music if it should be playing and audio is not muted
-            if ((audioWasPlaying.music || musicShouldBePlaying) && !musicMuted && gameStarted) {
+            if ((audioWasPlaying.music || musicShouldBePlaying) && !musicMuted && gameStarted && !bossEncounterActive) {
                 if (currentTrack) {
                     console.log('[AUDIO] Attempting to resume background music');
                     const playPromise = currentTrack.play();
@@ -7758,6 +7772,8 @@
                     // For instant death (like boss kills), skip animation
                     if (isBossDeath && this.isPlayer) {
                         this.deathAnimationTimer = this.deathAnimationDuration;
+                        this.alive = false; // Immediately mark as dead for boss kills
+                        this.deathComplete = true; // Mark death as complete
                     }
                     
                     return; // Don't process death yet, let animation play
@@ -10334,25 +10350,32 @@
                 // Shoot tornados at the player
                 const baseAngle = Math.atan2(playerSnake.y - this.y, playerSnake.x - this.x);
                 
-                // Create 3 tornados with slightly different paths
-                for (let i = -1; i <= 1; i++) { // -1, 0, and 1 for 3 tornados
-                    const angle = baseAngle + (i * 0.25); // Spread pattern for 3 tornados
-                    const speed = 4; // Slower than void projectiles
+                // Create 5 tornados in a spread pattern
+                const tornadoCount = 5;
+                for (let i = 0; i < tornadoCount; i++) {
+                    const spreadAngle = (Math.PI * 2 / tornadoCount) * i; // Evenly distribute in circle
+                    const angle = baseAngle + spreadAngle;
+                    const spawnDistance = 50; // Spawn tornados away from boss center
+                    const speed = 6; // Increased from 4
                     
                     bossProjectiles.push({
-                        x: this.x,
-                        y: this.y,
+                        x: this.x + Math.cos(angle) * spawnDistance,
+                        y: this.y + Math.sin(angle) * spawnDistance,
                         vx: Math.cos(angle) * speed,
                         vy: Math.sin(angle) * speed,
                         type: 'tornado',
-                        size: 40, // Larger than void projectiles
+                        size: 40,
                         damage: 0.3,
                         elementId: 2, // Air element
-                        life: 600, // Longer lasting
-                        rotation: 0, // For spinning effect
-                        rotationSpeed: 0.2, // Spinning speed
-                        wanderAngle: angle, // For erratic movement
-                        wanderTimer: 0
+                        life: 900, // Increased from 600
+                        rotation: 0,
+                        rotationSpeed: 0.3, // Increased from 0.2
+                        wanderAngle: angle,
+                        wanderTimer: 0,
+                        homingTimer: 300, // 5 seconds of aggressive homing
+                        baseSpeed: speed,
+                        maxSpeed: 10, // Allow speed boost during tracking
+                        separationForce: 0.5 // Prevent clustering
                     });
                 }
                 
@@ -10463,6 +10486,17 @@
                     
                     // Show revive award message
                     showCombinationMessage('', '', `+1 REVIVE! Boss defeated!`, false, 3000);
+                }
+                
+                // Stop boss battle music and resume normal music
+                if (bossBattleMusic) {
+                    bossBattleMusic.pause();
+                    bossBattleMusic = null;
+                }
+                if (currentTrack && !musicMuted) {
+                    currentTrack.stopRequested = false; // Allow it to continue normally
+                    currentTrack.volume = musicVolume;
+                    currentTrack.play();
                 }
                 
                 // Dispatch boss defeated event
@@ -10591,9 +10625,10 @@
                     );
                 }
                 
-                // Award points
+                // Award points and kill credit
                 if (playerSnake) {
                     playerSnake.score += 10000;
+                    playerSnake.kills++; // Boss defeat counts as a kill
                 }
                 
                 // Track skin unlock status
@@ -10638,6 +10673,7 @@
                     bossBattleMusic = null;
                 }
                 if (currentTrack && !musicMuted) {
+                    currentTrack.stopRequested = false; // Allow it to continue normally
                     currentTrack.volume = musicVolume;
                     currentTrack.play();
                 }
@@ -10816,6 +10852,13 @@
             // Pause normal music completely
             if (currentTrack && !musicMuted) {
                 currentTrack.pause();
+                currentTrack.stopRequested = true; // Prevent it from restarting
+            }
+            
+            // Also clear any pending music track
+            if (window.pendingMusicTrack) {
+                window.pendingMusicTrack.pause();
+                window.pendingMusicTrack = null;
             }
             
             // Play boss intro music
@@ -10934,6 +10977,23 @@
             document.body.appendChild(bossHealthBarContainer);
         }
         
+        // Unified boss projectile collision check
+        function checkBossProjectileCollision(projectile, effectiveRadius = null) {
+            if (!playerSnake || !playerSnake.alive || playerSnake.invincibilityTimer > 0) {
+                return false;
+            }
+            
+            const playerRadius = SEGMENT_SIZE * (playerSnake.size || 1);
+            const projectileRadius = effectiveRadius || projectile.size;
+            const collisionRadius = projectileRadius + playerRadius;
+            
+            const dx = playerSnake.x - projectile.x;
+            const dy = playerSnake.y - projectile.y;
+            const distanceSquared = dx * dx + dy * dy;
+            
+            return distanceSquared < (collisionRadius * collisionRadius);
+        }
+        
         function updateBossProjectiles(deltaTime) {
             // Update and remove expired projectiles
             bossProjectiles = bossProjectiles.filter(projectile => {
@@ -10944,38 +11004,29 @@
                         projectile.life -= deltaTime;
                         
                         // Check collision with player
-                        if (playerSnake && playerSnake.alive) {
-                            const dx = playerSnake.x - projectile.x;
-                            const dy = playerSnake.y - projectile.y;
-                            const distance = Math.sqrt(dx * dx + dy * dy);
-                            const playerRadius = SEGMENT_SIZE * (playerSnake.size || 1);
-                            if (distance < projectile.size + playerRadius) {
-                                // Check invincibility before dealing damage
-                                if (playerSnake.invincibilityTimer <= 0) {
-                                    // Create explosion particles before death
-                                    for (let i = 0; i < 30; i++) {
-                                        const angle = Math.random() * Math.PI * 2;
-                                        const speed = 2 + Math.random() * 5;
-                                        particlePool.spawn(
-                                            playerSnake.x,
-                                            playerSnake.y,
-                                            Math.cos(angle) * speed,
-                                            Math.sin(angle) * speed,
-                                            '#ff6600'
-                                        );
-                                    }
-                                    // Boss elemental attacks are insta-death
-                                    playerSnake.die(true);
-                                    showMessage('Incinerated by Pyraxis!', 'red');
-                                }
-                                
-                                // Rarely leave fire element (reduced from 30% to 10%)
-                                if (Math.random() < 0.1) {
-                                    spawnElement(projectile.elementId, projectile.x, projectile.y);
-                                }
-                                
-                                return false; // Remove projectile
+                        if (checkBossProjectileCollision(projectile)) {
+                            // Create explosion particles before death
+                            for (let i = 0; i < 30; i++) {
+                                const angle = Math.random() * Math.PI * 2;
+                                const speed = 2 + Math.random() * 5;
+                                particlePool.spawn(
+                                    playerSnake.x,
+                                    playerSnake.y,
+                                    Math.cos(angle) * speed,
+                                    Math.sin(angle) * speed,
+                                    '#ff6600'
+                                );
                             }
+                            // Boss elemental attacks are insta-death
+                            playerSnake.die(true);
+                            showMessage('Incinerated by Pyraxis!', 'red');
+                            
+                            // Rarely leave fire element (reduced from 30% to 10%)
+                            if (Math.random() < 0.1) {
+                                spawnElement(projectile.elementId, projectile.x, projectile.y);
+                            }
+                            
+                            return false; // Remove projectile
                         }
                         
                         return projectile.life > 0;
@@ -10984,32 +11035,23 @@
                         projectile.radius += projectile.expandSpeed * deltaTime;
                         
                         // Check collision with player
-                        if (playerSnake && playerSnake.alive) {
-                            const dx = playerSnake.x - projectile.x;
-                            const dy = playerSnake.y - projectile.y;
-                            const dist = Math.sqrt(dx * dx + dy * dy);
-                            
-                            if (dist < projectile.radius && dist > projectile.radius - 20 && !projectile.hasHitPlayer) {
-                                // Check invincibility before dealing damage
-                                if (playerSnake.invincibilityTimer <= 0) {
-                                    // Create water splash particles before death
-                                    for (let i = 0; i < 30; i++) {
-                                        const angle = Math.random() * Math.PI * 2;
-                                        const speed = 2 + Math.random() * 5;
-                                        particlePool.spawn(
-                                            playerSnake.x,
-                                            playerSnake.y,
-                                            Math.cos(angle) * speed,
-                                            Math.sin(angle) * speed,
-                                            '#0066ff'
-                                        );
-                                    }
-                                    // Boss elemental attacks are insta-death
-                                    playerSnake.die(true);
-                                    showMessage('Drowned by Abyssos!', 'red');
-                                }
-                                projectile.hasHitPlayer = true; // Prevent multiple hits from same wave
+                        if (!projectile.hasHitPlayer && checkBossProjectileCollision(projectile, projectile.radius)) {
+                            // Create water splash particles before death
+                            for (let i = 0; i < 30; i++) {
+                                const angle = Math.random() * Math.PI * 2;
+                                const speed = 2 + Math.random() * 5;
+                                particlePool.spawn(
+                                    playerSnake.x,
+                                    playerSnake.y,
+                                    Math.cos(angle) * speed,
+                                    Math.sin(angle) * speed,
+                                    '#0066ff'
+                                );
                             }
+                            // Boss elemental attacks are insta-death
+                            playerSnake.die(true);
+                            projectile.hasHitPlayer = true; // Prevent multiple hits from same wave
+                            showMessage('Drowned by Abyssos!', 'red');
                         }
                         
                         // Spawn water elements occasionally
@@ -11210,42 +11252,84 @@
                     return projectile.life > 0;
                     
                 case 'tornado':
-                    // Initialize homing timer if not set
+                    // Initialize properties
                     if (projectile.homingTimer === undefined) {
-                        projectile.homingTimer = 180; // 3 seconds of homing
+                        projectile.homingTimer = 300; // Use value from spawn
+                    }
+                    if (projectile.currentSpeed === undefined) {
+                        projectile.currentSpeed = projectile.baseSpeed || 6;
                     }
                     
-                    // Apply homing behavior for first 3 seconds
+                    // Separation force to prevent clustering
+                    let separationX = 0;
+                    let separationY = 0;
+                    bossProjectiles.forEach(other => {
+                        if (other !== projectile && other.type === 'tornado') {
+                            const dx = projectile.x - other.x;
+                            const dy = projectile.y - other.y;
+                            const distance = Math.sqrt(dx * dx + dy * dy);
+                            if (distance < 100 && distance > 0) { // Separation radius
+                                const force = (100 - distance) / 100 * 2;
+                                separationX += (dx / distance) * force;
+                                separationY += (dy / distance) * force;
+                            }
+                        }
+                    });
+                    
+                    // Enhanced homing behavior
                     if (projectile.homingTimer > 0 && playerSnake && playerSnake.alive) {
                         projectile.homingTimer -= deltaTime;
                         
-                        // Calculate angle to player
+                        // Predict player position
+                        const playerSpeed = Math.sqrt(playerSnake.vx * playerSnake.vx + playerSnake.vy * playerSnake.vy);
+                        const timeToReach = Math.sqrt(
+                            Math.pow(playerSnake.x - projectile.x, 2) + 
+                            Math.pow(playerSnake.y - projectile.y, 2)
+                        ) / projectile.currentSpeed;
+                        
+                        const predictX = playerSnake.x + playerSnake.vx * timeToReach * 0.5;
+                        const predictY = playerSnake.y + playerSnake.vy * timeToReach * 0.5;
+                        
                         const targetAngle = Math.atan2(
-                            playerSnake.y - projectile.y,
-                            playerSnake.x - projectile.x
+                            predictY - projectile.y,
+                            predictX - projectile.x
                         );
                         
-                        // Smooth angle adjustment (gentle homing)
+                        // Aggressive turning that increases over time
+                        const aggressiveness = 1 - (projectile.homingTimer / 300);
+                        const turnRate = 0.05 + (aggressiveness * 0.1); // 0.05 to 0.15
+                        
                         let angleDiff = targetAngle - projectile.wanderAngle;
-                        // Normalize angle difference to [-PI, PI]
                         while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
                         while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
                         
-                        // Apply gentle turning (0.02 = turning rate)
-                        projectile.wanderAngle += angleDiff * 0.02;
+                        projectile.wanderAngle += angleDiff * turnRate;
+                        
+                        // Speed boost when tracking
+                        projectile.currentSpeed = projectile.baseSpeed + (aggressiveness * 4);
                     } else {
-                        // After homing period, use wandering movement
+                        // Smart wandering - bias towards player
                         projectile.wanderTimer += deltaTime;
-                        if (projectile.wanderTimer > 30) { // Change direction every 0.5 seconds
-                            projectile.wanderAngle += (Math.random() - 0.5) * 0.5;
+                        if (projectile.wanderTimer > 20 && playerSnake && playerSnake.alive) {
+                            const playerAngle = Math.atan2(
+                                playerSnake.y - projectile.y,
+                                playerSnake.x - projectile.x
+                            );
+                            projectile.wanderAngle = playerAngle + (Math.random() - 0.5) * Math.PI/2;
                             projectile.wanderTimer = 0;
                         }
+                        projectile.currentSpeed = projectile.baseSpeed;
                     }
                     
-                    // Update velocity based on current angle
-                    const tornadoSpeed = 4;
-                    projectile.vx = Math.cos(projectile.wanderAngle) * tornadoSpeed;
-                    projectile.vy = Math.sin(projectile.wanderAngle) * tornadoSpeed;
+                    // Apply separation force
+                    projectile.wanderAngle = Math.atan2(
+                        Math.sin(projectile.wanderAngle) + separationY * 0.1,
+                        Math.cos(projectile.wanderAngle) + separationX * 0.1
+                    );
+                    
+                    // Update velocity with current speed
+                    projectile.vx = Math.cos(projectile.wanderAngle) * projectile.currentSpeed;
+                    projectile.vy = Math.sin(projectile.wanderAngle) * projectile.currentSpeed;
                     
                     projectile.x += projectile.vx * deltaTime;
                     projectile.y += projectile.vy * deltaTime;
@@ -13514,12 +13598,17 @@
         function handlePermadeath() {
             console.log('[PERMADEATH] Game over in Classic mode');
             
+            // Save player stats before they get cleared by stopGame()
+            const finalScore = playerSnake ? playerSnake.score : 0;
+            const finalDiscoveries = playerDiscoveredElements ? playerDiscoveredElements.size : 0;
+            const finalKills = playerSnake ? playerSnake.kills : 0;
+            
             // Variables for leaderboard rank
             let dailyRank = null;
             let isSubmitting = true;
             
             // Submit score to leaderboard and get rank
-            if (playerSnake && playerSnake.score > 0 && canSubmitScore()) {
+            if (finalScore > 0 && canSubmitScore()) {
                 // Submit score and wait for rank
                 const playerName = localStorage.getItem('playerName') || 'Anonymous';
                 const playTime = gameSessionStartTime ? Math.floor((Date.now() - gameSessionStartTime) / 1000) : 0;
@@ -13527,10 +13616,10 @@
                 if (window.supabaseModule && window.supabaseModule.submitScore) {
                     window.supabaseModule.submitScore(
                         playerName,
-                        Math.floor(playerSnake.score),
-                        playerDiscoveredElements.size,
+                        Math.floor(finalScore),
+                        finalDiscoveries,
                         playTime,
-                        playerSnake.kills || 0
+                        finalKills
                     ).then(result => {
                         dailyRank = result;
                         isSubmitting = false;
@@ -13548,6 +13637,21 @@
             
             // Hide respawn overlay
             document.getElementById('respawnOverlay').style.display = 'none';
+            
+            // Update best stats if current game is better
+            const bestScore = parseInt(localStorage.getItem('bestScore') || '0');
+            const bestDiscoveries = parseInt(localStorage.getItem('bestDiscoveries') || '0');
+            const bestKills = parseInt(localStorage.getItem('bestKills') || '0');
+            
+            if (finalScore > bestScore) {
+                localStorage.setItem('bestScore', finalScore);
+            }
+            if (finalDiscoveries > bestDiscoveries) {
+                localStorage.setItem('bestDiscoveries', finalDiscoveries);
+            }
+            if (finalKills > bestKills) {
+                localStorage.setItem('bestKills', finalKills);
+            }
             
             // Calculate time in minutes and seconds
             const totalSeconds = Math.floor((Date.now() - gameStartTime) / 1000);
@@ -13651,21 +13755,54 @@
                             <div style="margin-bottom: 16px;">
                                 <span style="color: var(--snes-cosmic-teal); font-size: 10px; text-transform: uppercase; font-family: 'Press Start 2P', monospace; text-shadow: 1px 1px 0 #000;">Final Score</span>
                                 <div style="font-size: 16px; color: var(--snes-gold); text-shadow: 2px 2px 0 #000; margin-top: 8px; font-family: 'Press Start 2P', monospace;">
-                                    ${playerSnake ? playerSnake.score.toLocaleString() : 0}
+                                    ${finalScore.toLocaleString()}
                                 </div>
                             </div>
                             
-                            <div style="display: flex; justify-content: space-around; margin-top: 16px;">
-                                <div>
-                                    <span style="color: var(--snes-cosmic-teal); font-size: 8px; text-transform: uppercase; font-family: 'Press Start 2P', monospace; text-shadow: 1px 1px 0 #000;">Elements</span>
-                                    <div style="font-size: 12px; color: var(--snes-cosmic-teal); margin-top: 4px; font-family: 'Press Start 2P', monospace; text-shadow: 1px 1px 0 #000, 0 0 5px currentColor;">
-                                        ${playerDiscoveredElements ? playerDiscoveredElements.size : 0}
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 20px;">
+                                <!-- Current Game Stats -->
+                                <div style="text-align: center;">
+                                    <div style="color: var(--snes-cosmic-teal); font-size: 10px; margin-bottom: 12px; text-transform: uppercase; font-family: 'Press Start 2P', monospace; text-shadow: 1px 1px 0 #000;">THIS GAME</div>
+                                    <div style="margin-bottom: 10px;">
+                                        <span style="color: #BBB; font-size: 8px; text-transform: uppercase; font-family: 'Press Start 2P', monospace;">Score</span>
+                                        <div style="font-size: 14px; color: var(--snes-gold); margin-top: 4px; font-family: 'Press Start 2P', monospace; text-shadow: 1px 1px 0 #000;">
+                                            ${finalScore.toLocaleString()}
+                                        </div>
+                                    </div>
+                                    <div style="margin-bottom: 10px;">
+                                        <span style="color: #BBB; font-size: 8px; text-transform: uppercase; font-family: 'Press Start 2P', monospace;">Discoveries</span>
+                                        <div style="font-size: 12px; color: var(--snes-cosmic-teal); margin-top: 4px; font-family: 'Press Start 2P', monospace; text-shadow: 1px 1px 0 #000;">
+                                            ${finalDiscoveries}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <span style="color: #BBB; font-size: 8px; text-transform: uppercase; font-family: 'Press Start 2P', monospace;">Kills</span>
+                                        <div style="font-size: 12px; color: #ff6b6b; margin-top: 4px; font-family: 'Press Start 2P', monospace; text-shadow: 1px 1px 0 #000;">
+                                            ${finalKills}
+                                        </div>
                                     </div>
                                 </div>
-                                <div>
-                                    <span style="color: var(--snes-cosmic-teal); font-size: 8px; text-transform: uppercase; font-family: 'Press Start 2P', monospace; text-shadow: 1px 1px 0 #000;">Time</span>
-                                    <div style="font-size: 12px; color: var(--snes-cosmic-teal); margin-top: 4px; font-family: 'Press Start 2P', monospace; text-shadow: 1px 1px 0 #000, 0 0 5px currentColor;">
-                                        ${timeString}
+                                
+                                <!-- All Time Best Stats -->
+                                <div style="text-align: center;">
+                                    <div style="color: var(--snes-cosmic-pink); font-size: 10px; margin-bottom: 12px; text-transform: uppercase; font-family: 'Press Start 2P', monospace; text-shadow: 1px 1px 0 #000;">ALL TIME BEST</div>
+                                    <div style="margin-bottom: 10px;">
+                                        <span style="color: #BBB; font-size: 8px; text-transform: uppercase; font-family: 'Press Start 2P', monospace;">Score</span>
+                                        <div style="font-size: 14px; color: var(--snes-gold); margin-top: 4px; font-family: 'Press Start 2P', monospace; text-shadow: 1px 1px 0 #000;">
+                                            ${parseInt(localStorage.getItem('bestScore') || '0').toLocaleString()}
+                                        </div>
+                                    </div>
+                                    <div style="margin-bottom: 10px;">
+                                        <span style="color: #BBB; font-size: 8px; text-transform: uppercase; font-family: 'Press Start 2P', monospace;">Discoveries</span>
+                                        <div style="font-size: 12px; color: var(--snes-cosmic-teal); margin-top: 4px; font-family: 'Press Start 2P', monospace; text-shadow: 1px 1px 0 #000;">
+                                            ${parseInt(localStorage.getItem('bestDiscoveries') || '0')}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <span style="color: #BBB; font-size: 8px; text-transform: uppercase; font-family: 'Press Start 2P', monospace;">Kills</span>
+                                        <div style="font-size: 12px; color: #ff6b6b; margin-top: 4px; font-family: 'Press Start 2P', monospace; text-shadow: 1px 1px 0 #000;">
+                                            ${parseInt(localStorage.getItem('bestKills') || '0')}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -13760,12 +13897,9 @@
         window.handleReviveOrRespawn = function() {
             playUISound();
             
-            // Increment death count
-            deathCount++;
-            
-            // Check for permadeath in Classic mode
-            if (gameMode === 'classic' && deathCount >= 4) {
-                // Permadeath - submit score and show game over
+            // Check for permadeath in Classic mode (4th death)
+            if (gameMode === 'classic' && deathCount >= 4 && revivesRemaining === 0) {
+                // This should not normally be reached as death screen shouldn't show on 4th death
                 handlePermadeath();
                 return;
             }
@@ -13997,14 +14131,11 @@
                 const respawnSeconds = Math.ceil(playerRespawnTimer / 1000);
                 console.log('[DEATH] Player is dead, respawn timer:', respawnSeconds, 'seconds');
                 
-                // Check if this is permadeath in classic mode
+                // Check if this is the final death in classic mode (4th death)
                 if (gameMode === 'classic' && deathCount >= 4 && revivesRemaining === 0) {
-                    console.log('[DEATH] Permadeath detected - transitioning to game over');
-                    // Hide respawn overlay and show game over screen directly
-                    const respawnOverlay = document.getElementById('respawnOverlay');
-                    if (respawnOverlay) {
-                        respawnOverlay.style.display = 'none';
-                    }
+                    console.log('[DEATH] Final death in Classic mode - skip death screen, go to game over');
+                    // Don't show death screen, go directly to game over
+                    playerRespawnTimer = 0; // Clear respawn timer
                     handlePermadeath();
                     return;
                 }
@@ -14062,15 +14193,28 @@
                             document.getElementById('actionText').textContent = 'revive';
                             if (respawnPenaltyText) respawnPenaltyText.style.display = 'none';
                         } else {
-                            reviveBtn.innerHTML = 'RESPAWN';
-                            reviveBtn.style.background = 'var(--snes-cosmic-purple)';
-                            reviveBtn.style.color = 'var(--snes-white)';
-                            reviveBtn.style.border = '4px solid var(--snes-white)';
-                            reviveBtn.style.boxShadow = 'inset 2px 2px 0 var(--snes-cosmic-pink), inset -2px -2px 0 var(--snes-dark-purple), 4px 4px 0 rgba(0,0,0,0.5)';
-                            reviveBtn.style.fontFamily = "'Press Start 2P'";
-                            reviveBtn.style.textTransform = 'uppercase';
-                            document.getElementById('actionText').textContent = 'respawn';
-                            if (respawnPenaltyText) respawnPenaltyText.style.display = 'block';
+                            // Check if Classic mode for FINAL LIFE
+                            if (gameMode === 'classic') {
+                                reviveBtn.innerHTML = 'FINAL LIFE';
+                                reviveBtn.style.background = '#e74c3c';
+                                reviveBtn.style.borderColor = '#c0392b';
+                                reviveBtn.style.boxShadow = '0 0 20px rgba(231, 76, 60, 0.5)';
+                                reviveBtn.style.color = 'var(--snes-white)';
+                                reviveBtn.style.fontFamily = "'Press Start 2P'";
+                                reviveBtn.style.textTransform = 'uppercase';
+                                document.getElementById('actionText').textContent = 'continue on final life';
+                                if (respawnPenaltyText) respawnPenaltyText.style.display = 'none';
+                            } else {
+                                reviveBtn.innerHTML = 'RESPAWN';
+                                reviveBtn.style.background = 'var(--snes-cosmic-purple)';
+                                reviveBtn.style.color = 'var(--snes-white)';
+                                reviveBtn.style.border = '4px solid var(--snes-white)';
+                                reviveBtn.style.boxShadow = 'inset 2px 2px 0 var(--snes-cosmic-pink), inset -2px -2px 0 var(--snes-dark-purple), 4px 4px 0 rgba(0,0,0,0.5)';
+                                reviveBtn.style.fontFamily = "'Press Start 2P'";
+                                reviveBtn.style.textTransform = 'uppercase';
+                                document.getElementById('actionText').textContent = 'respawn';
+                                if (respawnPenaltyText) respawnPenaltyText.style.display = 'block';
+                            }
                         }
                     }
                     
@@ -16786,6 +16930,20 @@
                     deathSequenceActive = true;
                     deathSequenceTimer = 0;
                     
+                    // Increment death count at death start (Classic mode only)
+                    if (gameMode === 'classic' && !window.deathCountIncremented) {
+                        deathCount++;
+                        window.deathCountIncremented = true;
+                        console.log('[DEATH SYSTEM] State:', {
+                            deathCount,
+                            revivesRemaining,
+                            deathSequenceActive,
+                            deathProcessed,
+                            gameMode,
+                            shouldShowDeathScreen: deathCount < 4 || revivesRemaining > 0
+                        });
+                    }
+                    
                     // Initialize camera animation
                     deathCameraAnimation.active = true;
                     deathCameraAnimation.startZoom = cameraZoom;
@@ -16830,6 +16988,14 @@
                         
                         // Reset camera zoom
                         cameraZoom = isMobile ? 0.75 : 1.0;
+                        
+                        // Check if this is the final death in Classic mode
+                        if (gameMode === 'classic' && deathCount >= 4 && revivesRemaining === 0) {
+                            console.log('[DEATH SEQUENCE] Final death in Classic mode - skip respawn timer');
+                            playerRespawnTimer = 0; // No respawn timer
+                            handlePermadeath();
+                            return;
+                        }
                         
                         // Now start the respawn timer and do all the death processing
                         playerRespawnTimer = 10000; // 10 seconds
@@ -17140,6 +17306,7 @@
                     deathSequenceTimer = 0;
                     leaderboardSubmitted = false;
                     window.deathLeaderboardChecked = false;
+                    window.deathCountIncremented = false; // Reset death count flag
                     
                     // Only reset game session start time if it's null (first spawn)
                     if (!gameSessionStartTime) {
@@ -17700,7 +17867,7 @@
             console.log('[AUDIO] First user interaction detected');
             
             // Try to play current track if paused
-            if (currentTrack && currentTrack.paused && gameStarted && !musicMuted) {
+            if (currentTrack && currentTrack.paused && gameStarted && !musicMuted && !bossEncounterActive) {
                 console.log('[AUDIO] Attempting to play music on first interaction');
                 currentTrack.play().then(() => {
                     console.log('[AUDIO] Music started successfully on user interaction');
