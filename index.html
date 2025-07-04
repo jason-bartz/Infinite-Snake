@@ -3560,6 +3560,7 @@
     <link rel="stylesheet" href="css/desktop-layout-fix.css">
     <link rel="stylesheet" href="css/unified-color-scheme.css">
     <link rel="stylesheet" href="css/cosmic-ui-override.css">
+    <link rel="stylesheet" href="css/game-over-visibility-fix.css">
     <link rel="stylesheet" href="css/mobile-ui-fixed.css">
     
     <!-- New Element System Scripts -->
@@ -3579,13 +3580,22 @@
     <!-- Mobile UI Fixed Override Styles - Must be last -->
     <style id="mobile-ui-fixed-override">
         @media screen and (max-width: 1024px) {
-            /* Force override slide-out positioning */
+            /* CRITICAL: Force panels to be visible on mobile */
             body.mobile .player-info-box {
                 position: fixed !important;
                 top: 10px !important;
                 left: 10px !important;
                 width: 140px !important;
                 transform: none !important;
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                z-index: 100 !important;
+                background: rgba(16, 16, 64, 0.95) !important;
+                border: 3px solid !important;
+                border-color: #5878F8 #000080 #000080 #5878F8 !important;
+                padding: 6px !important;
+                box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.5) !important;
             }
             
             body.mobile .leaderboard-box {
@@ -3594,22 +3604,106 @@
                 right: 10px !important;
                 width: 180px !important;
                 transform: none !important;
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                z-index: 100 !important;
+                background: rgba(248, 248, 248, 0.95) !important;
+                border: 3px solid !important;
+                border-color: #F8F8F8 #808080 #808080 #F8F8F8 !important;
+                box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.5) !important;
             }
             
             body.mobile .discovery-feed {
                 position: fixed !important;
                 top: 120px !important;
                 left: 10px !important;
+                display: block !important;
+                visibility: visible !important;
+                opacity: 0.6 !important;
+                z-index: 80 !important;
             }
             
-            /* Hide all tab handles */
+            /* Hide all tab handles - they're from the old slide-out system */
             body.mobile .mobile-tab-handle {
                 display: none !important;
+                visibility: hidden !important;
+                pointer-events: none !important;
+                width: 0 !important;
+                height: 0 !important;
+            }
+            
+            /* Ensure boost button has proper meter display */
+            body.mobile .boost-button {
+                position: fixed !important;
+                bottom: 40px !important;
+                right: 40px !important;
+                width: 100px !important;
+                height: 100px !important;
+                background: rgba(16, 16, 64, 0.95) !important;
+                border: 3px solid !important;
+                border-color: #4ECDC4 #000080 #000080 #4ECDC4 !important;
+                overflow: hidden !important;
+                z-index: 95 !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+            }
+            
+            /* Boost meter fill */
+            body.mobile .boost-button::before {
+                content: '' !important;
+                position: absolute !important;
+                bottom: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                height: var(--boost-fill, 100%) !important;
+                background: linear-gradient(to top, 
+                    #4ECDC4 0%, 
+                    #44A8B3 100%) !important;
+                transition: height 0.1s linear !important;
+                pointer-events: none !important;
+                z-index: 0 !important;
+            }
+            
+            /* Ensure boost text is visible */
+            body.mobile .boost-button {
+                color: #F8F8F8 !important;
+                font-family: 'Press Start 2P', monospace !important;
+                font-size: 10px !important;
+                text-align: center !important;
             }
         }
     </style>
+    
+    <!-- Emergency Mobile Detection - Must run before body loads -->
+    <script>
+        // Immediate mobile detection to add class before any CSS applies
+        (function() {
+            const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                                 ('ontouchstart' in window && navigator.maxTouchPoints > 0) ||
+                                 window.innerWidth < 768;
+            
+            if (isMobileDevice) {
+                // Add mobile class immediately
+                document.documentElement.classList.add('mobile-device');
+                console.log('[Emergency Mobile Detection] Mobile device detected');
+            }
+        })();
+    </script>
 </head>
 <body>
+<!-- Immediate Mobile Detection -->
+<script>
+(function() {
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                     'ontouchstart' in window ||
+                     window.innerWidth < 768;
+    if (isMobile) {
+        document.body.classList.add('mobile');
+    }
+})();
+</script>
     <!-- Persistent Star Background -->
     <canvas id="persistentStarsCanvas" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none;"></canvas>
     
@@ -13470,7 +13564,7 @@
                 left: 0;
                 width: 100%;
                 height: 100%;
-                background: #000;
+                background: rgba(0, 0, 0, 0.85);
                 display: flex;
                 justify-content: center;
                 align-items: center;
@@ -13498,7 +13592,8 @@
                 );
                 pointer-events: none;
                 z-index: 10001;
-                mix-blend-mode: multiply;
+                mix-blend-mode: overlay;
+                opacity: 0.3;
             `;
             gameOverScreen.appendChild(deathCRT);
             
@@ -13508,7 +13603,7 @@
                 
                 gameOverScreen.innerHTML = `
                     <div style="
-                        background: rgba(16, 16, 64, 0.95);
+                        background: linear-gradient(135deg, rgba(42, 0, 85, 0.95) 0%, rgba(72, 0, 168, 0.95) 50%, rgba(26, 0, 51, 0.95) 100%);
                         border: 4px solid;
                         border-color: var(--snes-cosmic-pink) var(--snes-dark-purple) var(--snes-dark-purple) var(--snes-cosmic-pink);
                         border-radius: 0;
@@ -13516,7 +13611,8 @@
                         box-shadow: 
                             inset 2px 2px 0 var(--snes-cosmic-teal),
                             inset -2px -2px 0 var(--snes-dark-blue),
-                            8px 8px 0 rgba(0, 0, 0, 0.8);
+                            8px 8px 0 rgba(0, 0, 0, 0.8),
+                            0 0 30px rgba(248, 40, 248, 0.4);
                         text-align: center;
                         position: relative;
                         min-width: 400px;
@@ -13534,23 +13630,26 @@
                             text-shadow: 
                                 2px 2px 0 var(--snes-cosmic-pink),
                                 4px 4px 0 var(--snes-dark-purple),
-                                6px 6px 0 #000;
+                                6px 6px 0 #000,
+                                0 0 30px rgba(248, 40, 248, 0.6),
+                                0 0 60px rgba(248, 40, 248, 0.3);
                             letter-spacing: 4px;
                             font-family: 'Press Start 2P', monospace;
                         ">GAME OVER</h1>
                         
                         <div style="
-                            background: rgba(0, 0, 0, 0.8);
+                            background: linear-gradient(135deg, rgba(40, 120, 248, 0.3) 0%, rgba(72, 0, 168, 0.4) 100%);
                             border: 3px solid;
-                            border-color: var(--snes-gray) var(--snes-black) var(--snes-black) var(--snes-gray);
+                            border-color: var(--snes-cosmic-teal) var(--snes-dark-purple) var(--snes-dark-purple) var(--snes-cosmic-teal);
                             padding: 16px;
                             margin-bottom: 20px;
                             box-shadow: 
-                                inset 2px 2px 0 rgba(255, 255, 255, 0.1),
-                                inset -2px -2px 0 rgba(0, 0, 0, 0.5);
+                                inset 2px 2px 0 rgba(255, 255, 255, 0.2),
+                                inset -2px -2px 0 rgba(0, 0, 0, 0.5),
+                                0 0 20px rgba(120, 40, 248, 0.3);
                         ">
                             <div style="margin-bottom: 16px;">
-                                <span style="color: var(--snes-gray); font-size: 10px; text-transform: uppercase; font-family: 'Press Start 2P', monospace;">Final Score</span>
+                                <span style="color: var(--snes-cosmic-teal); font-size: 10px; text-transform: uppercase; font-family: 'Press Start 2P', monospace; text-shadow: 1px 1px 0 #000;">Final Score</span>
                                 <div style="font-size: 16px; color: var(--snes-gold); text-shadow: 2px 2px 0 #000; margin-top: 8px; font-family: 'Press Start 2P', monospace;">
                                     ${playerSnake ? playerSnake.score.toLocaleString() : 0}
                                 </div>
@@ -13558,14 +13657,14 @@
                             
                             <div style="display: flex; justify-content: space-around; margin-top: 16px;">
                                 <div>
-                                    <span style="color: var(--snes-gray); font-size: 8px; text-transform: uppercase; font-family: 'Press Start 2P', monospace;">Elements</span>
-                                    <div style="font-size: 12px; color: var(--snes-cosmic-teal); margin-top: 4px; font-family: 'Press Start 2P', monospace;">
+                                    <span style="color: var(--snes-cosmic-teal); font-size: 8px; text-transform: uppercase; font-family: 'Press Start 2P', monospace; text-shadow: 1px 1px 0 #000;">Elements</span>
+                                    <div style="font-size: 12px; color: var(--snes-cosmic-teal); margin-top: 4px; font-family: 'Press Start 2P', monospace; text-shadow: 1px 1px 0 #000, 0 0 5px currentColor;">
                                         ${playerDiscoveredElements ? playerDiscoveredElements.size : 0}
                                     </div>
                                 </div>
                                 <div>
-                                    <span style="color: var(--snes-gray); font-size: 8px; text-transform: uppercase; font-family: 'Press Start 2P', monospace;">Time</span>
-                                    <div style="font-size: 12px; color: var(--snes-cosmic-teal); margin-top: 4px; font-family: 'Press Start 2P', monospace;">
+                                    <span style="color: var(--snes-cosmic-teal); font-size: 8px; text-transform: uppercase; font-family: 'Press Start 2P', monospace; text-shadow: 1px 1px 0 #000;">Time</span>
+                                    <div style="font-size: 12px; color: var(--snes-cosmic-teal); margin-top: 4px; font-family: 'Press Start 2P', monospace; text-shadow: 1px 1px 0 #000, 0 0 5px currentColor;">
                                         ${timeString}
                                     </div>
                                 </div>
@@ -13577,13 +13676,15 @@
                             color: var(--snes-white); 
                             margin-bottom: 24px;
                             padding: 8px;
-                            background: rgba(0, 0, 0, 0.8);
+                            background: linear-gradient(135deg, rgba(0, 248, 248, 0.2) 0%, rgba(120, 40, 248, 0.3) 100%);
                             border: 3px solid;
                             border-color: var(--snes-cosmic-teal) var(--snes-dark-purple) var(--snes-dark-purple) var(--snes-cosmic-teal);
                             font-family: 'Press Start 2P', monospace;
                             box-shadow: 
-                                inset 2px 2px 0 rgba(255, 255, 255, 0.1),
-                                inset -2px -2px 0 rgba(0, 0, 0, 0.5);
+                                inset 2px 2px 0 rgba(255, 255, 255, 0.2),
+                                inset -2px -2px 0 rgba(0, 0, 0, 0.5),
+                                0 0 15px rgba(0, 248, 248, 0.3);
+                            text-shadow: 1px 1px 0 #000;
                         ">
                             ${isSubmitting ? 
                                 'Submitting score...' : 
@@ -13640,7 +13741,8 @@
                         );
                         pointer-events: none;
                         z-index: 10001;
-                        mix-blend-mode: multiply;
+                        mix-blend-mode: overlay;
+                        opacity: 0.3;
                     `;
                     gameOverScreen.appendChild(crtDiv);
                 }
@@ -13896,7 +13998,7 @@
                 console.log('[DEATH] Player is dead, respawn timer:', respawnSeconds, 'seconds');
                 
                 // Check if this is permadeath in classic mode
-                if (gameMode === 'classic' && deathCount >= 3 && revivesRemaining === 0) {
+                if (gameMode === 'classic' && deathCount >= 4 && revivesRemaining === 0) {
                     console.log('[DEATH] Permadeath detected - transitioning to game over');
                     // Hide respawn overlay and show game over screen directly
                     const respawnOverlay = document.getElementById('respawnOverlay');
@@ -17626,5 +17728,189 @@
     <script src="js/playerStats.js"></script>
     <script src="js/unlockManager.js"></script>
     <script src="js/nameGenerator.js"></script>
+    
+    <!-- Emergency Mobile UI Visibility Fix - Must be last -->
+    <script>
+        // Final mobile UI visibility enforcement
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                if (document.body.classList.contains('mobile') || window.innerWidth < 768) {
+                    console.log('[Emergency Fix] Forcing mobile UI visibility...');
+                    
+                    // Force player stats box to be visible
+                    const statsBox = document.querySelector('.player-info-box');
+                    if (statsBox) {
+                        statsBox.style.cssText = 'position: fixed !important; top: 10px !important; left: 10px !important; display: block !important; visibility: visible !important; opacity: 1 !important; z-index: 100 !important;';
+                        console.log('[Emergency Fix] Player stats box forced visible');
+                    }
+                    
+                    // Force leaderboard to be visible
+                    const leaderboard = document.querySelector('.leaderboard-box');
+                    if (leaderboard) {
+                        leaderboard.style.cssText = 'position: fixed !important; top: 10px !important; right: 10px !important; display: block !important; visibility: visible !important; opacity: 1 !important; z-index: 100 !important;';
+                        console.log('[Emergency Fix] Leaderboard forced visible');
+                    }
+                    
+                    // Force boost button to be visible with meter
+                    const boostBtn = document.querySelector('.boost-button');
+                    if (boostBtn) {
+                        boostBtn.style.cssText = 'position: fixed !important; bottom: 40px !important; right: 40px !important; display: flex !important; visibility: visible !important; opacity: 1 !important; z-index: 95 !important; overflow: hidden !important;';
+                        
+                        // Set initial boost fill
+                        boostBtn.style.setProperty('--boost-fill', '100%');
+                        console.log('[Emergency Fix] Boost button forced visible with meter');
+                    }
+                    
+                    // Remove all tab handles
+                    document.querySelectorAll('.mobile-tab-handle').forEach(handle => {
+                        handle.style.display = 'none';
+                        handle.remove();
+                    });
+                    
+                    console.log('[Emergency Fix] Mobile UI visibility enforcement complete');
+                }
+            }, 500); // Small delay to ensure everything is loaded
+        });
+    </script>
+<!-- Emergency Mobile UI Fix -->
+<script>
+(function() {
+    // Mobile detection
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                     'ontouchstart' in window ||
+                     window.innerWidth < 768;
+    
+    if (!isMobile) return;
+    
+    // Force mobile UI visibility
+    function forceMobileUI() {
+        // Player stats box
+        const statsBox = document.querySelector('.player-info-box');
+        if (statsBox) {
+            statsBox.style.cssText = `
+                position: fixed !important;
+                top: 10px !important;
+                left: 10px !important;
+                width: 160px !important;
+                height: auto !important;
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                z-index: 100 !important;
+                background: rgba(16, 16, 64, 0.95) !important;
+                border: 3px solid !important;
+                border-color: #5878F8 #000080 #000080 #5878F8 !important;
+                padding: 6px !important;
+                box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.5) !important;
+                transform: none !important;
+            `;
+        }
+        
+        // Leaderboard
+        const leaderboard = document.querySelector('.leaderboard-box');
+        if (leaderboard) {
+            leaderboard.style.cssText = `
+                position: fixed !important;
+                top: 10px !important;
+                right: 10px !important;
+                width: 180px !important;
+                height: auto !important;
+                max-height: 250px !important;
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                z-index: 100 !important;
+                background: rgba(248, 248, 248, 0.95) !important;
+                border: 3px solid !important;
+                border-color: #F8F8F8 #A8A8A8 #A8A8A8 #F8F8F8 !important;
+                box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.5) !important;
+                transform: none !important;
+                overflow: hidden !important;
+            `;
+        }
+        
+        // Boost button with meter
+        const boostBtn = document.querySelector('.boost-button');
+        if (boostBtn) {
+            boostBtn.style.cssText = `
+                position: fixed !important;
+                bottom: 40px !important;
+                right: 40px !important;
+                width: 100px !important;
+                height: 100px !important;
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                z-index: 95 !important;
+                background: rgba(16, 16, 64, 0.95) !important;
+                border: 3px solid !important;
+                border-color: #00F8F8 #4800A8 #4800A8 #00F8F8 !important;
+                border-radius: 0 !important;
+                box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.5) !important;
+                overflow: hidden !important;
+                font-family: 'Press Start 2P', monospace !important;
+                color: #F8F8F8 !important;
+                font-size: 10px !important;
+                cursor: pointer !important;
+            `;
+            
+            // Ensure boost meter functionality
+            if (!boostBtn.querySelector('.boost-meter-fill')) {
+                const meterFill = document.createElement('div');
+                meterFill.className = 'boost-meter-fill';
+                meterFill.style.cssText = `
+                    position: absolute !important;
+                    bottom: 0 !important;
+                    left: 0 !important;
+                    right: 0 !important;
+                    height: 100% !important;
+                    background: linear-gradient(to top, #00F8F8 0%, #7828F8 100%) !important;
+                    transition: height 0.1s linear !important;
+                    pointer-events: none !important;
+                    z-index: 0 !important;
+                `;
+                boostBtn.insertBefore(meterFill, boostBtn.firstChild);
+            }
+            
+            // Ensure text is on top
+            const boostText = boostBtn.querySelector('span') || boostBtn;
+            if (boostText !== boostBtn) {
+                boostText.style.position = 'relative';
+                boostText.style.zIndex = '1';
+            }
+        }
+        
+        // Remove tab handles
+        document.querySelectorAll('.mobile-tab-handle').forEach(el => el.remove());
+        
+        // Update boost meter
+        setInterval(() => {
+            const boostBar = document.getElementById('boostBarFill');
+            const boostBtn = document.querySelector('.boost-button');
+            const meterFill = boostBtn?.querySelector('.boost-meter-fill');
+            
+            if (boostBar && boostBtn && meterFill) {
+                const width = boostBar.style.width || '100%';
+                const boostAmount = parseInt(width);
+                meterFill.style.height = `${boostAmount}%`;
+                boostBtn.style.setProperty('--boost-fill', `${boostAmount}%`);
+                
+                if (boostAmount < 20) {
+                    boostBtn.classList.add('low-boost');
+                } else {
+                    boostBtn.classList.remove('low-boost');
+                }
+            }
+        }, 100);
+    }
+    
+    // Apply fixes on load and periodically
+    document.addEventListener('DOMContentLoaded', forceMobileUI);
+    setTimeout(forceMobileUI, 100);
+    setTimeout(forceMobileUI, 500);
+    setTimeout(forceMobileUI, 1000);
+    setInterval(forceMobileUI, 2000);
+})();
+</script>
 </body>
 </html>

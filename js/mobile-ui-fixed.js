@@ -2,6 +2,8 @@
 
 // Initialize mobile UI when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('[Mobile UI Fixed] DOM loaded, initializing...');
+    
     // Check for mobile using the same method as mobile-ui-unified.js
     const checkMobile = () => {
         return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
@@ -9,19 +11,41 @@ document.addEventListener('DOMContentLoaded', function() {
                window.innerWidth < 768;
     };
     
-    if (!checkMobile()) return;
+    const mobile = checkMobile();
+    console.log('[Mobile UI Fixed] Mobile detected:', mobile);
+    
+    if (!mobile) {
+        console.log('[Mobile UI Fixed] Not mobile, exiting');
+        return;
+    }
+    
+    // Add mobile class to body if not already present
+    if (!document.body.classList.contains('mobile')) {
+        document.body.classList.add('mobile');
+        console.log('[Mobile UI Fixed] Added mobile class to body');
+    }
     
     // Wait for mobile-ui-unified to initialize first
     setTimeout(() => {
+        console.log('[Mobile UI Fixed] Starting initialization after delay...');
         initializeMobileLeaderboard();
         removeSlideOutHandlers();
         forceFixedPositioning();
         restoreBoostMeter();
         
         // Apply fixes again after delays to override any late-loading styles
-        setTimeout(forceFixedPositioning, 100);
-        setTimeout(forceFixedPositioning, 500);
-        setTimeout(forceFixedPositioning, 1000);
+        setTimeout(() => {
+            console.log('[Mobile UI Fixed] Applying fixes after 100ms');
+            forceFixedPositioning();
+        }, 100);
+        setTimeout(() => {
+            console.log('[Mobile UI Fixed] Applying fixes after 500ms');
+            forceFixedPositioning();
+        }, 500);
+        setTimeout(() => {
+            console.log('[Mobile UI Fixed] Applying fixes after 1000ms');
+            forceFixedPositioning();
+        }, 1000);
         
         // Keep applying periodically to combat other scripts
         setInterval(() => {
@@ -118,7 +142,13 @@ if (typeof window.togglePanel !== 'undefined') {
 
 // Make sure panels stay visible
 function ensurePanelsVisible() {
-    if (!isMobile) return;
+    const checkMobile = () => {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+               'ontouchstart' in window ||
+               window.innerWidth < 768;
+    };
+    
+    if (!checkMobile()) return;
     
     const statsPanel = document.querySelector('.player-info-box');
     const leaderboardPanel = document.querySelector('.leaderboard-box');
@@ -150,6 +180,12 @@ function forceFixedPositioning() {
     const statsPanel = document.querySelector('.player-info-box');
     const leaderboardPanel = document.querySelector('.leaderboard-box');
     const discoveryFeed = document.querySelector('.discovery-feed');
+    
+    console.log('[Mobile UI Fixed] forceFixedPositioning called:', {
+        statsPanel: statsPanel ? 'found' : 'not found',
+        leaderboardPanel: leaderboardPanel ? 'found' : 'not found',
+        discoveryFeed: discoveryFeed ? 'found' : 'not found'
+    });
     
     if (statsPanel) {
         // Remove any tab handles first
@@ -280,7 +316,7 @@ function restoreBoostMeter() {
         const boostBar = document.getElementById('boostBarFill');
         if (boostBar) {
             const width = boostBar.style.width || '100%';
-            const boostAmount = parseInt(width);
+            const boostAmount = parseInt(width) || 100;
             boostButton.style.setProperty('--boost-fill', `${boostAmount}%`);
             
             // Update meter fill height
@@ -293,6 +329,15 @@ function restoreBoostMeter() {
                 boostButton.classList.add('low-boost');
             } else {
                 boostButton.classList.remove('low-boost');
+            }
+        } else {
+            // If no boost bar found, check for boost amount in game state
+            if (typeof window.boostAmount !== 'undefined') {
+                const boostPercent = (window.boostAmount / 100) * 100;
+                boostButton.style.setProperty('--boost-fill', `${boostPercent}%`);
+                if (meterFill) {
+                    meterFill.style.height = `${boostPercent}%`;
+                }
             }
         }
     }, 100);

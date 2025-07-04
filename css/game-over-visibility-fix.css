@@ -1,0 +1,105 @@
+/* Game Over Screen Visibility Fix - Cosmic SNES Theme */
+
+/* Fix the main game over container background */
+#permaDeathScreen > div {
+    /* Change from rgba(16, 16, 64, 0.95) to a lighter cosmic purple gradient */
+    background: linear-gradient(135deg, 
+        rgba(42, 0, 85, 0.95) 0%,    /* Lighter purple */
+        rgba(72, 0, 168, 0.95) 50%,   /* Medium purple */
+        rgba(26, 0, 51, 0.95) 100%    /* Dark purple */
+    ) !important;
+}
+
+/* Fix the stats container backgrounds */
+#permaDeathScreen div[style*="background: rgba(0, 0, 0, 0.8)"] {
+    /* Change from 80% black to semi-transparent cosmic blue */
+    background: linear-gradient(135deg,
+        rgba(40, 120, 248, 0.3) 0%,   /* Semi-transparent cosmic blue */
+        rgba(72, 0, 168, 0.4) 100%    /* Semi-transparent purple */
+    ) !important;
+    
+    /* Add a subtle glow to make it pop */
+    box-shadow: 
+        inset 2px 2px 0 rgba(255, 255, 255, 0.2),
+        inset -2px -2px 0 rgba(0, 0, 0, 0.5),
+        0 0 20px rgba(120, 40, 248, 0.3) !important;
+}
+
+/* Improve text contrast */
+#permaDeathScreen span[style*="color: var(--snes-gray)"] {
+    /* Change gray text to bright cyan for better contrast */
+    color: var(--snes-cosmic-teal) !important;
+    text-shadow: 1px 1px 0 #000 !important;
+}
+
+/* Make the GAME OVER title more vibrant */
+#permaDeathScreen h1 {
+    /* Add a glow effect to the title */
+    text-shadow: 
+        2px 2px 0 var(--snes-cosmic-pink),
+        4px 4px 0 var(--snes-dark-purple),
+        6px 6px 0 #000,
+        0 0 30px rgba(248, 40, 248, 0.6) !important;
+}
+
+/* Lighten the CRT effect for better visibility */
+#permaDeathScreen div[style*="repeating-linear-gradient"] {
+    /* Reduce the opacity of scanlines */
+    opacity: 0.3 !important;
+    mix-blend-mode: overlay !important; /* Change from multiply to overlay for less darkening */
+}
+
+/* Ensure the leaderboard rank message is visible */
+#permaDeathScreen div[style*="font-size: 10px"][style*="color: var(--snes-white)"] {
+    /* Add background contrast to the message box */
+    background: linear-gradient(135deg,
+        rgba(0, 248, 248, 0.2) 0%,
+        rgba(120, 40, 248, 0.3) 100%
+    ) !important;
+}
+
+/* Make buttons more visible */
+#permaDeathScreen button {
+    /* Ensure buttons have proper contrast */
+    position: relative;
+    z-index: 10;
+}
+
+/* Add cosmic glow to score and stats */
+#permaDeathScreen div[style*="color: var(--snes-gold)"],
+#permaDeathScreen div[style*="color: var(--snes-cosmic-teal)"] {
+    text-shadow: 
+        1px 1px 0 #000,
+        0 0 10px currentColor !important;
+}
+
+/* Ensure corner decorations are visible */
+#permaDeathScreen div[style*="border-top: 4px solid"] {
+    /* Add glow to corner decorations */
+    filter: drop-shadow(0 0 5px currentColor);
+}
+
+/* Optional: Add animated cosmic background particles */
+@keyframes cosmic-float {
+    0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+}
+
+#permaDeathScreen::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        radial-gradient(2px 2px at 20% 30%, rgba(248, 40, 248, 0.3), transparent),
+        radial-gradient(2px 2px at 60% 70%, rgba(120, 40, 248, 0.3), transparent),
+        radial-gradient(1px 1px at 90% 10%, rgba(0, 248, 248, 0.3), transparent);
+    background-size: 200% 200%;
+    animation: cosmic-float 20s linear infinite;
+    pointer-events: none;
+    z-index: 0;
+}
