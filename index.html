@@ -7059,6 +7059,8 @@
                     this.panicTimer = 0;
                     this.lastDangerAngle = null; // Remember last danger direction
                     this.consecutiveDangerFrames = 0; // Track how long we've been in danger
+                    this.huntTarget = null; // Active hunting target for aggressive snakes
+                    this.huntTargetTimer = 0; // How long to track hunt target
                 }
                 
                 // Initialize segments
@@ -8754,30 +8756,100 @@
                     shouldBoost = personality.riskTolerance < 0.7 && this.stamina > 40;
                 }
                 // Priority 3: Hunt prey (aggressive personalities)
-                else if (nearestPrey) {
-                    // For aggressive personalities, ALWAYS prioritize hunting over elements
-                    const shouldHunt = personality.huntingPriority > 0.8 || 
-                                     (personality.huntingPriority > 0.5 && preyDistance < 150);
-                    
-                    if (shouldHunt) {
-                        // Predict where the prey's head will be to eat them
-                        const predictedPos = this.predictHeadPosition(nearestPrey);
-                        if (predictedPos) {
-                            const dx = predictedPos.x - this.x;
-                            const dy = predictedPos.y - this.y;
-                            targetAngle = Math.atan2(dy, dx);
-                        } else {
-                            // Fallback to current head position
-                            const dx = nearestPrey.x - this.x;
-                            const dy = nearestPrey.y - this.y;
-                            targetAngle = Math.atan2(dy, dx);
+                else if (nearestPrey || (personality.huntingPriority > 0.7 && !this.huntTarget)) {
+                    // For aggressive personalities, actively search for prey
+                    if (!nearestPrey && personality.huntingPriority > 0.7) {
+                        // Active hunting - scan for ANY potential prey
+                        let bestPrey = null;
+                        let bestPreyScore = -Infinity;
+                        const huntRadius = personality.chaseDistance * 1.5; // Extended search radius
+                        
+                        for (const otherSnake of snakes) {
+                            if (otherSnake === this || !otherSnake.alive) continue;
+                            
+                            const dist = Math.hypot(otherSnake.x - this.x, otherSnake.y - this.y);
+                            if (dist > huntRadius) continue;
+                            
+                            const lengthRatio = otherSnake.length / this.length;
+                            if (lengthRatio > personality.preyRatioMax) continue;
+                            
+                            // Score based on size, distance, and vulnerability
+                            let preyScore = (this.length - otherSnake.length) / dist;
+                            
+                            // Prioritize player for aggressive snakes
+                            if (otherSnake.isPlayer) preyScore *= 2.0;
+                            
+                            // Prioritize wounded or low stamina targets
+                            if (otherSnake.stamina < 30) preyScore *= 1.5;
+                            
+                            // Check if we can intercept them
+                            const interceptPos = this.calculateInterceptPosition(otherSnake);
+                            if (interceptPos) preyScore *= 1.3;
+                            
+                            if (preyScore > bestPreyScore) {
+                                bestPreyScore = preyScore;
+                                bestPrey = otherSnake;
+                            }
                         }
                         
-                        shouldBoost = this.stamina > 30 && preyDistance < 200;
+                        if (bestPrey) {
+                            this.huntTarget = bestPrey;
+                            this.huntTargetTimer = 180; // Track for 3 seconds
+                        }
+                    }
+                    
+                    // Use existing nearestPrey or hunted target
+                    const actualPrey = nearestPrey || this.huntTarget;
+                    
+                    if (actualPrey && actualPrey.alive) {
+                        const preyDist = Math.hypot(actualPrey.x - this.x, actualPrey.y - this.y);
+                        const shouldHunt = personality.huntingPriority > 0.8 || 
+                                         (personality.huntingPriority > 0.5 && preyDist < 200);
                         
-                        // Override element seeking for aggressive snakes
-                        this.targetMemory = null;
-                        this.targetMemoryTimer = 0;
+                        if (shouldHunt) {
+                            // Advanced interception logic
+                            let interceptPos = null;
+                            
+                            // For aggressive snakes, try to cut off escape routes
+                            if (personality.huntingPriority > 0.8 && actualPrey.isPlayer) {
+                                interceptPos = this.calculateCutoffPosition(actualPrey);
+                            }
+                            
+                            // Fallback to standard interception
+                            if (!interceptPos) {
+                                interceptPos = this.calculateInterceptPosition(actualPrey);
+                            }
+                            
+                            // Use prediction or current position
+                            if (interceptPos) {
+                                targetAngle = Math.atan2(interceptPos.y - this.y, interceptPos.x - this.x);
+                            } else {
+                                const dx = actualPrey.x - this.x;
+                                const dy = actualPrey.y - this.y;
+                                targetAngle = Math.atan2(dy, dx);
+                            }
+                            
+                            // Aggressive boost strategy
+                            if (personality.huntingPriority > 0.8) {
+                                // Boost when closing in or when prey is escaping
+                                shouldBoost = (this.stamina > 40 && preyDist < 300) ||
+                                            (this.stamina > 60 && actualPrey.isBoosting);
+                            } else {
+                                shouldBoost = this.stamina > 30 && preyDist < 200;
+                            }
+                            
+                            // Override element seeking for aggressive snakes
+                            this.targetMemory = null;
+                            this.targetMemoryTimer = 0;
+                        }
+                    }
+                    
+                    // Update hunt target timer
+                    if (this.huntTargetTimer > 0) {
+                        this.huntTargetTimer--;
+                        if (this.huntTargetTimer === 0 || !this.huntTarget || !this.huntTarget.alive) {
+                            this.huntTarget = null;
+                        }
                     }
                 }
                 // Priority 4: Seek game objectives
@@ -8979,6 +9051,153 @@
                 }
                 
                 return false; // Path is clear
+            }
+            
+            // Calculate intercept position for predictive targeting
+            calculateInterceptPosition(targetSnake) {
+                if (!targetSnake || !targetSnake.segments || targetSnake.segments.length === 0) {
+                    return null;
+                }
+                
+                // Get target's current position and velocity
+                const targetHead = targetSnake.segments[0];
+                const targetSpeed = targetSnake.isBoosting ? targetSnake.speed * 1.5 : targetSnake.speed;
+                const targetVx = Math.cos(targetSnake.angle) * targetSpeed;
+                const targetVy = Math.sin(targetSnake.angle) * targetSpeed;
+                
+                // Our current position and max speed
+                const mySpeed = this.isBoosting ? this.speed * 1.5 : this.speed;
+                const myMaxSpeed = this.speed * 1.5; // Assume we can boost
+                
+                // Calculate relative position
+                const dx = targetHead.x - this.x;
+                const dy = targetHead.y - this.y;
+                const distance = Math.hypot(dx, dy);
+                
+                // If target is very close, just go directly to current position
+                if (distance < 50) {
+                    return { x: targetHead.x, y: targetHead.y };
+                }
+                
+                // Iterative prediction - find where we'll intercept
+                let interceptTime = 0;
+                let interceptX = targetHead.x;
+                let interceptY = targetHead.y;
+                const maxPredictionTime = 120; // 2 seconds at 60fps
+                const timeStep = 5; // Check every 5 frames
+                
+                for (let t = 0; t < maxPredictionTime; t += timeStep) {
+                    // Predict target position at time t
+                    const predX = targetHead.x + targetVx * t;
+                    const predY = targetHead.y + targetVy * t;
+                    
+                    // Distance we need to travel to intercept
+                    const interceptDist = Math.hypot(predX - this.x, predY - this.y);
+                    
+                    // Time it would take us to reach that point
+                    const ourTravelTime = interceptDist / myMaxSpeed;
+                    
+                    // If we can reach the intercept point in time, we found it
+                    if (ourTravelTime <= t) {
+                        interceptTime = t;
+                        interceptX = predX;
+                        interceptY = predY;
+                        break;
+                    }
+                }
+                
+                // If no intercept found, predict ahead a bit anyway
+                if (interceptTime === 0) {
+                    interceptX = targetHead.x + targetVx * 30; // Half second prediction
+                    interceptY = targetHead.y + targetVy * 30;
+                }
+                
+                return { x: interceptX, y: interceptY };
+            }
+            
+            // Calculate cutoff position to block escape routes
+            calculateCutoffPosition(targetSnake) {
+                if (!targetSnake || !targetSnake.segments || targetSnake.segments.length === 0) {
+                    return null;
+                }
+                
+                const targetHead = targetSnake.segments[0];
+                
+                // Find nearest borders to the target
+                const borderDistances = {
+                    left: targetHead.x,
+                    right: GAME_WIDTH - targetHead.x,
+                    top: targetHead.y,
+                    bottom: GAME_HEIGHT - targetHead.y
+                };
+                
+                // Find which border the target is heading towards
+                const targetVx = Math.cos(targetSnake.angle);
+                const targetVy = Math.sin(targetSnake.angle);
+                
+                let escapeDirection = null;
+                let minBorderDist = Infinity;
+                
+                // Check which border they're closest to and moving towards
+                if (targetVx < -0.3 && borderDistances.left < 400) {
+                    escapeDirection = 'left';
+                    minBorderDist = borderDistances.left;
+                } else if (targetVx > 0.3 && borderDistances.right < 400) {
+                    escapeDirection = 'right';
+                    minBorderDist = borderDistances.right;
+                }
+                
+                if (targetVy < -0.3 && borderDistances.top < 400 && borderDistances.top < minBorderDist) {
+                    escapeDirection = 'top';
+                    minBorderDist = borderDistances.top;
+                } else if (targetVy > 0.3 && borderDistances.bottom < 400 && borderDistances.bottom < minBorderDist) {
+                    escapeDirection = 'bottom';
+                    minBorderDist = borderDistances.bottom;
+                }
+                
+                // If target is heading to a border, try to cut them off
+                if (escapeDirection && minBorderDist < 400) {
+                    let cutoffX = targetHead.x;
+                    let cutoffY = targetHead.y;
+                    const cutoffDistance = 100; // How far ahead to aim
+                    
+                    switch (escapeDirection) {
+                        case 'left':
+                            cutoffX = Math.max(50, targetHead.x - cutoffDistance);
+                            cutoffY = targetHead.y + targetVy * 30;
+                            break;
+                        case 'right':
+                            cutoffX = Math.min(GAME_WIDTH - 50, targetHead.x + cutoffDistance);
+                            cutoffY = targetHead.y + targetVy * 30;
+                            break;
+                        case 'top':
+                            cutoffX = targetHead.x + targetVx * 30;
+                            cutoffY = Math.max(50, targetHead.y - cutoffDistance);
+                            break;
+                        case 'bottom':
+                            cutoffX = targetHead.x + targetVx * 30;
+                            cutoffY = Math.min(GAME_HEIGHT - 50, targetHead.y + cutoffDistance);
+                            break;
+                    }
+                    
+                    return { x: cutoffX, y: cutoffY };
+                }
+                
+                // If not escaping to border, try to cut off based on map center
+                // Push them towards dangerous areas (other snakes or borders)
+                const centerX = GAME_WIDTH / 2;
+                const centerY = GAME_HEIGHT / 2;
+                const toCenterX = centerX - targetHead.x;
+                const toCenterY = centerY - targetHead.y;
+                
+                // Position ourselves opposite of center to push them out
+                const cutoffAngle = Math.atan2(-toCenterY, -toCenterX);
+                const cutoffDist = 150;
+                
+                return {
+                    x: targetHead.x + Math.cos(cutoffAngle) * cutoffDist,
+                    y: targetHead.y + Math.sin(cutoffAngle) * cutoffDist
+                };
             }
         }
         
