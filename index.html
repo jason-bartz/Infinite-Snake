@@ -7049,6 +7049,9 @@
                         this.personality = AI_PERSONALITIES[personalityKey];
                         this.name = this.personality.name + ' ' + this.name;
                         this.personalityColor = PERSONALITY_COLORS[this.personality.name];
+                        if (this.personality.name === 'Aggressive') {
+                            console.log(`[DEBUG] Created Aggressive AI snake: ${this.name}`);
+                        }
                     }
                     
                     // AI-specific properties
@@ -8520,6 +8523,9 @@
                             } else if (distance < preyDistance) {
                                 preyDistance = distance;
                                 nearestPrey = otherSnake;
+                                if (this.personality && this.personality.name === 'Aggressive' && otherSnake.isPlayer) {
+                                    console.log(`[DEBUG] Aggressive AI ${this.name} detected player as nearestPrey at distance ${distance.toFixed(0)}`);
+                                }
                             }
                         }
                         
@@ -8757,6 +8763,9 @@
                 }
                 // Priority 3: Hunt prey (aggressive personalities)
                 else if (nearestPrey || (personality.huntingPriority > 0.7 && !this.huntTarget)) {
+                    if (this.personality && this.personality.name === 'Aggressive') {
+                        console.log(`[DEBUG] Aggressive AI ${this.name} entering hunting logic. nearestPrey: ${nearestPrey ? 'YES' : 'NO'}, huntTarget: ${this.huntTarget ? 'YES' : 'NO'}`);
+                    }
                     // For aggressive personalities, actively search for prey
                     if (!nearestPrey && personality.huntingPriority > 0.7) {
                         // Active hunting - scan for ANY potential prey
@@ -8777,7 +8786,12 @@
                             let preyScore = (this.length - otherSnake.length) / dist;
                             
                             // Prioritize player for aggressive snakes
-                            if (otherSnake.isPlayer) preyScore *= 2.0;
+                            if (otherSnake.isPlayer) {
+                                preyScore *= 2.0;
+                                if (this.personality && this.personality.name === 'Aggressive') {
+                                    console.log(`[DEBUG] Aggressive AI ${this.name} found player snake at distance ${dist.toFixed(0)}, score: ${preyScore.toFixed(2)}`);
+                                }
+                            }
                             
                             // Prioritize wounded or low stamina targets
                             if (otherSnake.stamina < 30) preyScore *= 1.5;
@@ -8795,6 +8809,9 @@
                         if (bestPrey) {
                             this.huntTarget = bestPrey;
                             this.huntTargetTimer = 180; // Track for 3 seconds
+                            if (this.personality && this.personality.name === 'Aggressive' && bestPrey.isPlayer) {
+                                console.log(`[DEBUG] Aggressive AI ${this.name} is now hunting PLAYER! Best score: ${bestPreyScore.toFixed(2)}`);
+                            }
                         }
                     }
                     
@@ -8813,6 +8830,9 @@
                             // For aggressive snakes, try to cut off escape routes
                             if (personality.huntingPriority > 0.8 && actualPrey.isPlayer) {
                                 interceptPos = this.calculateCutoffPosition(actualPrey);
+                                if (this.personality && this.personality.name === 'Aggressive') {
+                                    console.log(`[DEBUG] Aggressive AI ${this.name} is actively hunting player! Distance: ${preyDist.toFixed(0)}`);
+                                }
                             }
                             
                             // Fallback to standard interception
@@ -17118,6 +17138,7 @@
                         // Only restore personality if not a boss (safety check)
                         if (!newAISnake.isBoss && snakeData.personality) {
                             newAISnake.personality = snakeData.personality;
+                            newAISnake.personalityColor = PERSONALITY_COLORS[snakeData.personality.name];
                         }
                         newAISnake.name = snakeData.name;
                         newAISnake.skin = snakeData.skin;
