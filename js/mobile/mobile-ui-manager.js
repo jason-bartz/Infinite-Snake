@@ -1,6 +1,3 @@
-// Consolidated Mobile UI Manager for Infinite Snake
-// Combines functionality from multiple mobile UI files into a single, efficient system
-
 import MOBILE_UI_CONFIG from './mobile-config.js';
 
 class MobileUIManager {
@@ -20,27 +17,22 @@ class MobileUIManager {
         this.currentSkin = null;
     }
     
-    // Unified mobile detection - single source of truth
     static isMobile() {
-        // Check if already determined
         if (window.mobileDetected !== undefined) {
             return window.mobileDetected;
         }
         
-        // Multiple detection methods
         const hasBodyClass = document.body && document.body.classList.contains('mobile');
         const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         const hasTouchScreen = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
         const hasCoarsePointer = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
         const isSmallScreen = window.innerWidth < MOBILE_UI_CONFIG.detection.smallScreenWidth;
         
-        // Determine if mobile
         window.mobileDetected = hasBodyClass || isMobileUA || (hasTouchScreen && hasCoarsePointer) || (isSmallScreen && hasTouchScreen);
         
         return window.mobileDetected;
     }
     
-    // Initialize the mobile UI system
     init() {
         if (!MobileUIManager.isMobile() || this.initialized) {
             return;
@@ -50,30 +42,22 @@ class MobileUIManager {
             console.log('[MobileUI] Initializing mobile UI manager...');
         }
         
-        // Wait for DOM if needed
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => this.init());
             return;
         }
         
-        // Find UI elements
         this.findElements();
         
-        // Setup based on mode
         if (this.mode === 'fixed') {
             this.setupFixedMode();
         } else {
             this.setupSlideoutMode();
         }
         
-        // Setup common features
         this.setupBoostMeter();
         this.setupDiscoveryFeed();
-        
-        // Start monitoring
         this.startMonitoring();
-        
-        // Setup mutation observer for dynamic content
         this.setupMutationObserver();
         
         this.initialized = true;
@@ -82,14 +66,12 @@ class MobileUIManager {
         }
     }
     
-    // Find all UI elements
     findElements() {
         this.panels.stats = document.querySelector('.player-info-box');
         this.panels.leaderboard = document.querySelector('.leaderboard-box');
         this.boostButton = document.querySelector('.boost-button');
         this.discoveryFeed = document.querySelector('.discovery-feed');
         
-        // Create boost meter fill if needed
         if (this.boostButton && !this.boostButton.querySelector('.boost-meter-fill')) {
             const fill = document.createElement('div');
             fill.className = 'boost-meter-fill';
@@ -109,70 +91,64 @@ class MobileUIManager {
         this.boostMeterFill = this.boostButton?.querySelector('.boost-meter-fill');
     }
     
-    // Setup fixed positioning mode
     setupFixedMode() {
         if (this.config.debug.logInitialization) {
             console.log('[MobileUI] Setting up fixed mode');
         }
         
-        // Remove any existing tab handles
         document.querySelectorAll('.mobile-tab-handle').forEach(el => el.remove());
         
-        // Apply fixed positioning to panels
         if (this.panels.stats) {
-            this.panels.stats.style.cssText = `
-                position: fixed !important;
-                top: ${this.config.positions.stats.top}px !important;
-                left: ${this.config.positions.stats.left}px !important;
-                transform: none !important;
-                opacity: ${this.config.visual.panelOpacity} !important;
-                visibility: visible !important;
-                display: block !important;
-                z-index: 1001 !important;
-                max-width: ${this.config.visual.panelMaxWidth}px !important;
-            `;
+            this.applyFixedStyles(this.panels.stats, 'stats');
         }
         
         if (this.panels.leaderboard) {
-            this.panels.leaderboard.style.cssText = `
-                position: fixed !important;
-                top: ${this.config.positions.leaderboard.top}px !important;
-                right: ${this.config.positions.leaderboard.right}px !important;
-                transform: none !important;
-                opacity: ${this.config.visual.panelOpacity} !important;
-                visibility: visible !important;
-                display: block !important;
-                z-index: 1001 !important;
-                max-width: ${this.config.visual.panelMaxWidth}px !important;
-            `;
-            
-            // Make leaderboard collapsible
+            this.applyFixedStyles(this.panels.leaderboard, 'leaderboard');
             this.setupCollapsibleLeaderboard();
         }
         
-        // Setup boost button
         if (this.boostButton) {
-            this.boostButton.style.cssText = `
-                position: fixed !important;
-                bottom: ${this.config.positions.boostButton.bottom}px !important;
-                right: ${this.config.positions.boostButton.right}px !important;
-                width: ${this.config.visual.boostButtonSize}px !important;
-                height: ${this.config.visual.boostButtonSize}px !important;
-                opacity: ${this.config.visual.panelOpacity} !important;
-                visibility: visible !important;
-                display: flex !important;
-                z-index: 1002 !important;
-            `;
+            this.applyBoostButtonStyles();
         }
     }
     
-    // Setup slide-out mode (based on unified implementation)
+    applyFixedStyles(panel, type) {
+        const positions = this.config.positions[type];
+        const isStats = type === 'stats';
+        
+        panel.style.cssText = `
+            position: fixed !important;
+            ${isStats ? 'top' : 'top'}: ${positions.top}px !important;
+            ${isStats ? 'left' : 'right'}: ${isStats ? positions.left : positions.right}px !important;
+            transform: none !important;
+            opacity: ${this.config.visual.panelOpacity} !important;
+            visibility: visible !important;
+            display: block !important;
+            z-index: 1001 !important;
+            max-width: ${this.config.visual.panelMaxWidth}px !important;
+        `;
+    }
+    
+    applyBoostButtonStyles() {
+        const pos = this.config.positions.boostButton;
+        this.boostButton.style.cssText = `
+            position: fixed !important;
+            bottom: ${pos.bottom}px !important;
+            right: ${pos.right}px !important;
+            width: ${this.config.visual.boostButtonSize}px !important;
+            height: ${this.config.visual.boostButtonSize}px !important;
+            opacity: ${this.config.visual.panelOpacity} !important;
+            visibility: visible !important;
+            display: flex !important;
+            z-index: 1002 !important;
+        `;
+    }
+    
     setupSlideoutMode() {
         if (this.config.debug.logInitialization) {
             console.log('[MobileUI] Setting up slideout mode');
         }
         
-        // Create tabs for panels
         if (this.panels.stats && !this.panels.stats.querySelector('.mobile-tab-handle')) {
             this.createSlideoutTab(this.panels.stats, 'stats', 'left');
         }
@@ -181,47 +157,41 @@ class MobileUIManager {
             this.createSlideoutTab(this.panels.leaderboard, 'leaderboard', 'right');
         }
         
-        // Apply slideout styles
+        this.applySlideoutStyles();
+    }
+    
+    applySlideoutStyles() {
         if (this.panels.stats) {
-            this.panels.stats.style.cssText = `
-                position: fixed !important;
-                top: 50% !important;
-                left: 0 !important;
-                transform: translate(-100%, -50%) !important;
-                opacity: ${this.config.visual.panelOpacity} !important;
-                visibility: visible !important;
-                display: block !important;
-                z-index: 1001 !important;
-                transition: transform ${this.config.timing.panelTransition}ms ease !important;
-                max-width: ${this.config.visual.panelMaxWidth + 20}px !important;
-            `;
-            this.panels.stats.dataset.mobilePanel = 'closed';
+            this.applyPanelSlideoutStyle(this.panels.stats, 'left');
         }
         
         if (this.panels.leaderboard) {
-            this.panels.leaderboard.style.cssText = `
-                position: fixed !important;
-                top: 50% !important;
-                right: 0 !important;
-                transform: translate(100%, -50%) !important;
-                opacity: ${this.config.visual.panelOpacity} !important;
-                visibility: visible !important;
-                display: block !important;
-                z-index: 1001 !important;
-                transition: transform ${this.config.timing.panelTransition}ms ease !important;
-                max-width: ${this.config.visual.panelMaxWidth + 20}px !important;
-            `;
-            this.panels.leaderboard.dataset.mobilePanel = 'closed';
+            this.applyPanelSlideoutStyle(this.panels.leaderboard, 'right');
         }
     }
     
-    // Create slide-out tab
+    applyPanelSlideoutStyle(panel, side) {
+        const isLeft = side === 'left';
+        panel.style.cssText = `
+            position: fixed !important;
+            top: 50% !important;
+            ${side}: 0 !important;
+            transform: translate(${isLeft ? '-100%' : '100%'}, -50%) !important;
+            opacity: ${this.config.visual.panelOpacity} !important;
+            visibility: visible !important;
+            display: block !important;
+            z-index: 1001 !important;
+            transition: transform ${this.config.timing.panelTransition}ms ease !important;
+            max-width: ${this.config.visual.panelMaxWidth + 20}px !important;
+        `;
+        panel.dataset.mobilePanel = 'closed';
+    }
+    
     createSlideoutTab(panel, type, side) {
         const tab = document.createElement('div');
         tab.className = 'mobile-tab-handle';
         tab.dataset.panel = type;
         
-        // Tab content based on type
         const icon = type === 'stats' ? '📊' : '🏆';
         const label = type === 'stats' ? 'Stats' : 'Ranks';
         
@@ -230,7 +200,21 @@ class MobileUIManager {
             <span class="mobile-tab-label">${label}</span>
         `;
         
-        // Tab styling
+        this.styleSlideoutTab(tab, side);
+        
+        if (type === 'stats' && this.config.features.skinPreview) {
+            this.addSkinPreview(tab);
+        }
+        
+        tab.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.togglePanel(type);
+        });
+        
+        panel.appendChild(tab);
+    }
+    
+    styleSlideoutTab(tab, side) {
         const isLeft = side === 'left';
         tab.style.cssText = `
             position: absolute !important;
@@ -253,32 +237,22 @@ class MobileUIManager {
             visibility: visible !important;
             opacity: 1 !important;
         `;
-        
-        // Add skin preview for stats tab
-        if (type === 'stats' && this.config.features.skinPreview) {
-            const skinPreview = document.createElement('div');
-            skinPreview.className = 'mobile-tab-skin';
-            skinPreview.style.cssText = `
-                width: 24px !important;
-                height: 24px !important;
-                background-size: contain !important;
-                background-repeat: no-repeat !important;
-                background-position: center !important;
-                margin-top: 5px !important;
-            `;
-            tab.appendChild(skinPreview);
-        }
-        
-        // Touch event handling
-        tab.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.togglePanel(type);
-        });
-        
-        panel.appendChild(tab);
     }
     
-    // Toggle panel visibility
+    addSkinPreview(tab) {
+        const skinPreview = document.createElement('div');
+        skinPreview.className = 'mobile-tab-skin';
+        skinPreview.style.cssText = `
+            width: 24px !important;
+            height: 24px !important;
+            background-size: contain !important;
+            background-repeat: no-repeat !important;
+            background-position: center !important;
+            margin-top: 5px !important;
+        `;
+        tab.appendChild(skinPreview);
+    }
+    
     togglePanel(type) {
         const panel = type === 'stats' ? this.panels.stats : this.panels.leaderboard;
         if (!panel) return;
@@ -296,147 +270,184 @@ class MobileUIManager {
         }
     }
     
-    // Setup collapsible leaderboard for fixed mode
     setupCollapsibleLeaderboard() {
-        let header = this.panels.leaderboard.querySelector('.leaderboard-header');
-        if (!header) {
-            // Find first h2 or create header
-            const h2 = this.panels.leaderboard.querySelector('h2');
-            if (h2) {
-                header = document.createElement('div');
-                header.className = 'leaderboard-header';
-                header.style.cssText = 'cursor: pointer; user-select: none;';
-                h2.parentNode.insertBefore(header, h2);
-                header.appendChild(h2);
-            }
-        }
+        if (!this.panels.leaderboard) return;
         
-        if (header) {
-            header.addEventListener('click', () => {
-                const content = this.panels.leaderboard.querySelector('.leaderboard-content') ||
-                               this.panels.leaderboard.querySelector('table') ||
-                               this.panels.leaderboard.querySelector('ul');
-                
-                if (content) {
-                    const isHidden = content.style.display === 'none';
-                    content.style.display = isHidden ? '' : 'none';
-                    this.panels.leaderboard.classList.toggle('collapsed', !isHidden);
-                }
-            });
-        }
+        const header = document.createElement('div');
+        header.className = 'mobile-leaderboard-header';
+        header.innerHTML = '<span>🏆 Leaderboard</span><span class="toggle-icon">▼</span>';
+        header.style.cssText = `
+            padding: 10px !important;
+            cursor: pointer !important;
+            background: rgba(0, 0, 0, 0.3) !important;
+            border-bottom: 1px solid rgba(147, 51, 234, 0.3) !important;
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+        `;
+        
+        const content = this.panels.leaderboard.querySelector('.scrollable-content') || this.panels.leaderboard;
+        content.style.maxHeight = '200px';
+        content.style.overflow = 'hidden';
+        content.style.transition = 'max-height 0.3s ease';
+        
+        header.addEventListener('click', () => {
+            const isCollapsed = content.style.maxHeight === '0px';
+            content.style.maxHeight = isCollapsed ? '200px' : '0px';
+            header.querySelector('.toggle-icon').textContent = isCollapsed ? '▼' : '▲';
+        });
+        
+        this.panels.leaderboard.insertBefore(header, this.panels.leaderboard.firstChild);
     }
     
-    // Setup boost meter
     setupBoostMeter() {
-        if (!this.config.features.boostMeter || !this.boostButton || !this.boostMeterFill) {
-            return;
-        }
+        if (!this.boostButton || !this.boostMeterFill) return;
         
-        // Ensure boost button text is on top
-        const boostText = this.boostButton.querySelector('.boost-text') || this.boostButton;
-        if (boostText && boostText !== this.boostButton) {
-            boostText.style.position = 'relative';
-            boostText.style.zIndex = '2';
-        }
-    }
-    
-    // Setup discovery feed click to dismiss
-    setupDiscoveryFeed() {
-        if (!this.config.features.discoveryFeed || !this.discoveryFeed) {
-            return;
-        }
-        
-        this.discoveryFeed.style.cursor = 'pointer';
-        this.discoveryFeed.addEventListener('click', (e) => {
-            if (e.target.closest('.discovery-feed')) {
-                this.discoveryFeed.style.display = 'none';
-                setTimeout(() => {
-                    this.discoveryFeed.style.display = '';
-                }, 5000);
-            }
-        });
-    }
-    
-    // Start monitoring for updates
-    startMonitoring() {
-        if (this.monitorInterval) {
-            clearInterval(this.monitorInterval);
-        }
-        
-        this.monitorInterval = setInterval(() => {
-            this.updateBoostMeter();
-            this.updateSkinPreview();
-            this.ensureVisibility();
-        }, this.config.timing.updateInterval);
-    }
-    
-    // Update boost meter fill
-    updateBoostMeter() {
-        if (!this.config.features.boostMeter || !this.boostMeterFill) {
-            return;
-        }
-        
-        const boostAmount = window.boostAmount || 0;
-        if (boostAmount !== this.lastBoostAmount) {
-            this.lastBoostAmount = boostAmount;
-            const percentage = Math.min(100, Math.max(0, boostAmount));
-            this.boostMeterFill.style.height = `${percentage}%`;
-        }
-    }
-    
-    // Update skin preview in tab
-    updateSkinPreview() {
-        if (!this.config.features.skinPreview || this.mode !== 'slideout') {
-            return;
-        }
-        
-        const playerPortrait = document.querySelector('.player-portrait');
-        const skinPreview = document.querySelector('.mobile-tab-skin');
-        
-        if (playerPortrait && skinPreview) {
-            const bgImage = playerPortrait.style.backgroundImage;
-            if (bgImage && bgImage !== this.currentSkin) {
-                this.currentSkin = bgImage;
-                skinPreview.style.backgroundImage = bgImage;
-            }
-        }
-    }
-    
-    // Ensure elements remain visible
-    ensureVisibility() {
-        // Only for fixed mode
-        if (this.mode !== 'fixed') {
-            return;
-        }
-        
-        // Check and restore visibility if needed
-        [this.panels.stats, this.panels.leaderboard, this.boostButton].forEach(element => {
-            if (element && (element.style.display === 'none' || element.style.visibility === 'hidden')) {
-                element.style.display = '';
-                element.style.visibility = 'visible';
-            }
-        });
-    }
-    
-    // Setup mutation observer for dynamic content
-    setupMutationObserver() {
-        const observer = new MutationObserver((mutations) => {
-            mutations.forEach((mutation) => {
-                if (mutation.type === 'childList') {
-                    // Re-find elements if they were replaced
-                    if (!document.body.contains(this.panels.stats) ||
-                        !document.body.contains(this.panels.leaderboard)) {
-                        this.findElements();
-                        
-                        // Reapply mode setup
-                        if (this.mode === 'fixed') {
-                            this.setupFixedMode();
-                        } else {
-                            this.setupSlideoutMode();
-                        }
-                    }
+        const updateBoostDisplay = () => {
+            if (window.playerSnake && window.playerSnake.isAlive) {
+                const staminaPercent = window.playerSnake.stamina;
+                this.boostMeterFill.style.height = `${staminaPercent}%`;
+                
+                if (staminaPercent < 30) {
+                    this.boostMeterFill.style.background = 'linear-gradient(to top, #ff4444, #cc0000)';
+                } else if (staminaPercent < 60) {
+                    this.boostMeterFill.style.background = 'linear-gradient(to top, #ffaa00, #ff6600)';
+                } else {
+                    this.boostMeterFill.style.background = 'linear-gradient(to top, #00ff00, #00cc00)';
                 }
-            });
+                
+                if (Math.abs(staminaPercent - this.lastBoostAmount) > 1) {
+                    this.animateBoostChange(staminaPercent > this.lastBoostAmount);
+                    this.lastBoostAmount = staminaPercent;
+                }
+            }
+        };
+        
+        this.boostUpdateInterval = setInterval(updateBoostDisplay, 50);
+    }
+    
+    animateBoostChange(isIncreasing) {
+        if (!this.boostButton) return;
+        
+        const animation = isIncreasing ? 'boost-pulse' : 'boost-drain';
+        this.boostButton.style.animation = `${animation} 0.3s ease`;
+        
+        setTimeout(() => {
+            if (this.boostButton) {
+                this.boostButton.style.animation = '';
+            }
+        }, 300);
+    }
+    
+    setupDiscoveryFeed() {
+        if (!this.config.features.discoveryFeed) return;
+        
+        this.createDiscoveryFeed();
+        this.listenForDiscoveries();
+    }
+    
+    createDiscoveryFeed() {
+        if (document.querySelector('.discovery-feed')) return;
+        
+        const feed = document.createElement('div');
+        feed.className = 'discovery-feed';
+        feed.style.cssText = `
+            position: fixed !important;
+            bottom: ${this.config.positions.discoveryFeed.bottom}px !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            width: 80% !important;
+            max-width: 300px !important;
+            height: 60px !important;
+            pointer-events: none !important;
+            z-index: 1000 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            justify-content: flex-end !important;
+        `;
+        
+        document.body.appendChild(feed);
+        this.discoveryFeed = feed;
+    }
+    
+    listenForDiscoveries() {
+        window.addEventListener('elementDiscovered', (event) => {
+            if (!this.discoveryFeed) return;
+            
+            const { element } = event.detail;
+            this.showDiscoveryNotification(element);
+        });
+    }
+    
+    showDiscoveryNotification(element) {
+        const notification = document.createElement('div');
+        notification.className = 'discovery-notification';
+        notification.style.cssText = `
+            background: rgba(30, 30, 30, 0.95) !important;
+            border: 2px solid #ffd700 !important;
+            border-radius: 10px !important;
+            padding: 8px 15px !important;
+            margin-bottom: 5px !important;
+            animation: discoverySlideUp 0.5s ease, discoveryFadeOut 0.5s ease 2.5s !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 10px !important;
+            font-size: 14px !important;
+            color: #fff !important;
+        `;
+        
+        notification.innerHTML = `
+            <span style="font-size: 20px;">${element.emoji}</span>
+            <span>Discovered ${element.name}!</span>
+        `;
+        
+        this.discoveryFeed.appendChild(notification);
+        
+        setTimeout(() => notification.remove(), 3000);
+    }
+    
+    startMonitoring() {
+        this.monitorInterval = setInterval(() => {
+            this.updateSkinPreview();
+            this.checkPanelVisibility();
+        }, 1000);
+    }
+    
+    updateSkinPreview() {
+        if (!this.config.features.skinPreview) return;
+        
+        const skinPreview = document.querySelector('.mobile-tab-skin');
+        if (!skinPreview) return;
+        
+        const currentSkin = window.currentPlayerSkin || 'snake-default-green';
+        if (currentSkin !== this.currentSkin) {
+            this.currentSkin = currentSkin;
+            const skinData = window.skinMetadata?.[currentSkin];
+            if (skinData && skinData.image) {
+                skinPreview.style.backgroundImage = `url('${skinData.image}')`;
+            }
+        }
+    }
+    
+    checkPanelVisibility() {
+        if (this.panels.stats && !this.panels.stats.querySelector('.player-info')) {
+            this.panels.stats.style.display = 'none';
+        } else if (this.panels.stats) {
+            this.panels.stats.style.display = 'block';
+        }
+    }
+    
+    setupMutationObserver() {
+        const observer = new MutationObserver(() => {
+            if (!this.panels.stats || !this.panels.leaderboard) {
+                this.findElements();
+                if (this.mode === 'fixed') {
+                    this.setupFixedMode();
+                } else {
+                    this.setupSlideoutMode();
+                }
+            }
         });
         
         observer.observe(document.body, {
@@ -445,37 +456,38 @@ class MobileUIManager {
         });
     }
     
-    // Cleanup method
     destroy() {
         if (this.monitorInterval) {
             clearInterval(this.monitorInterval);
-            this.monitorInterval = null;
+        }
+        if (this.boostUpdateInterval) {
+            clearInterval(this.boostUpdateInterval);
         }
         
-        // Remove added elements
         document.querySelectorAll('.mobile-tab-handle').forEach(el => el.remove());
         
-        // Reset styles
-        [this.panels.stats, this.panels.leaderboard, this.boostButton].forEach(element => {
-            if (element) {
-                element.style.cssText = '';
-            }
-        });
+        if (this.discoveryFeed) {
+            this.discoveryFeed.remove();
+        }
         
         this.initialized = false;
     }
+    
+    switchMode(newMode) {
+        if (newMode === this.mode) return;
+        
+        this.mode = newMode;
+        this.config.mode = newMode;
+        
+        document.querySelectorAll('.mobile-tab-handle').forEach(el => el.remove());
+        
+        if (newMode === 'fixed') {
+            this.setupFixedMode();
+        } else {
+            this.setupSlideoutMode();
+        }
+    }
 }
 
-// Global instance
-window.mobileUIManager = new MobileUIManager();
-
-// Auto-initialize on load
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-        window.mobileUIManager.init();
-    });
-} else {
-    window.mobileUIManager.init();
-}
-
+window.MobileUIManager = MobileUIManager;
 export default MobileUIManager;

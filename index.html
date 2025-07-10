@@ -161,6 +161,7 @@
     <link rel="alternate" hreflang="x-default" href="https://infinitesnake.io" />
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/skin-selection.css">
+    <link rel="stylesheet" href="css/cosmic-ui-override.css">
     <link rel="stylesheet" href="css/unlock-notifications.css">
     <link rel="stylesheet" href="css/discovery-feed-gradients.css">
     <link rel="stylesheet" href="css/cosmic-ui-theme.css">
@@ -1028,8 +1029,8 @@
         
         /* Boost Bar (Mana Bar Style) */
         .boost-bar-container {
-            width: 60%;
-            max-width: 800px;
+            width: auto;
+            max-width: 444px; /* 6 slots * 64px + 5 gaps * 4px + padding */
             margin: 0 auto 15px;
             padding: 0 20px;
         }
@@ -1492,6 +1493,31 @@
             border-bottom: 2px solid var(--snes-black);
             font-family: 'Press Start 2P';
             letter-spacing: 0;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+        
+        .leaderboard-header:hover {
+            background: #506090;
+        }
+        
+        .collapse-icon {
+            font-size: 10px;
+            transition: transform 0.3s ease;
+        }
+        
+        .leaderboard-box.collapsed {
+            max-height: 40px;
+            overflow: hidden;
+        }
+        
+        .leaderboard-box.collapsed .scrollable-content,
+        .leaderboard-box.collapsed .leaderboard-entry,
+        .leaderboard-box.collapsed .leaderboard-divider {
+            display: none;
         }
         
         .leaderboard-entry {

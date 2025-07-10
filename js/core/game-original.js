@@ -1,28 +1,22 @@
-        // Mobile detection (needs to be before canvas setup)
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
                         || ('ontouchstart' in window && navigator.maxTouchPoints > 0);
         
-        // Canvas setup
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         
-        // Pixel perfect rendering
         ctx.imageSmoothingEnabled = false;
         ctx.mozImageSmoothingEnabled = false;
         ctx.webkitImageSmoothingEnabled = false;
         ctx.msImageSmoothingEnabled = false;
         ctx.imageSmoothingQuality = 'low';
         
-        // Set canvas to pixelated rendering
         canvas.style.imageRendering = 'pixelated';
         canvas.style.imageRendering = '-moz-crisp-edges';
         canvas.style.imageRendering = 'crisp-edges';
         
-        // Emoji cache for performance
         const emojiCache = new Map();
-        const MAX_CACHE_SIZE = 200; // Limit cache size
+        const MAX_CACHE_SIZE = 200;
         
-        // Performance optimization: Reusable objects to reduce allocations
         const reusableObjects = {
             vector: { x: 0, y: 0 },
             point: { x: 0, y: 0 },
@@ -30,22 +24,18 @@
             gradient: null
         };
         
-        // Performance optimization: Pre-calculated math tables
         const mathTables = {
             sin: new Float32Array(360),
             cos: new Float32Array(360)
         };
         
-        // Initialize math lookup tables
         for (let i = 0; i < 360; i++) {
             const rad = (i * Math.PI) / 180;
             mathTables.sin[i] = Math.sin(rad);
             mathTables.cos[i] = Math.cos(rad);
         }
         
-        // Fast math approximations
         const fastMath = {
-            // Fast square root approximation (good enough for distance comparisons)
             fastSqrt: function(n) {
                 if (n < 0) return NaN;
                 if (n === 0) return 0;
@@ -57,26 +47,22 @@
                 return y;
             },
             
-            // Convert angle to table index
             angleToIndex: function(angle) {
                 let degrees = (angle * 180 / Math.PI) % 360;
                 if (degrees < 0) degrees += 360;
                 return Math.floor(degrees);
             },
             
-            // Fast sin using lookup table
             sin: function(angle) {
                 return mathTables.sin[this.angleToIndex(angle)];
             },
             
-            // Fast cos using lookup table
             cos: function(angle) {
                 return mathTables.cos[this.angleToIndex(angle)];
             }
         };
         
         function getCachedEmoji(emoji, size) {
-            // Ensure size is valid
             const validSize = Math.max(1, Math.round(size) || 20);
             const key = `${emoji}_${validSize}`;
             
@@ -84,7 +70,6 @@
                 return emojiCache.get(key);
             }
             
-            // Check if we have pre-rendered emoji (mobile optimization)
             if (isMobile && window.getCachedEmojiTexture) {
                 const preRendered = window.getCachedEmojiTexture(emoji, validSize);
                 if (preRendered) {
@@ -93,29 +78,24 @@
                 }
             }
             
-            // Create offscreen canvas
             const offscreenCanvas = document.createElement('canvas');
-            const padding = 4; // Small padding for emoji rendering
+            const padding = 4;
             offscreenCanvas.width = validSize + padding * 2;
             offscreenCanvas.height = validSize + padding * 2;
             const offscreenCtx = offscreenCanvas.getContext('2d');
             
-            // Configure for crisp rendering on mobile
             if (isMobile) {
                 offscreenCtx.imageSmoothingEnabled = false;
             }
             
-            // Draw emoji to offscreen canvas
             offscreenCtx.font = `${validSize}px Arial`;
             offscreenCtx.textAlign = 'center';
             offscreenCtx.textBaseline = 'middle';
             offscreenCtx.fillStyle = 'black';
             offscreenCtx.fillText(emoji, offscreenCanvas.width / 2, offscreenCanvas.height / 2);
             
-            // Store in cache
             emojiCache.set(key, offscreenCanvas);
             
-            // Clean up old entries if cache is too large
             if (emojiCache.size > MAX_CACHE_SIZE) {
                 const firstKey = emojiCache.keys().next().value;
                 emojiCache.delete(firstKey);
@@ -124,53 +104,42 @@
             return offscreenCanvas;
         }
         
-        // Make canvas fit full window
         function resizeCanvas() {
-            // Mobile performance optimizations
             if (isMobile) {
-                // Use optimized scale from mobile background optimizer
-                let mobileScale = 0.75; // Default improved scale
+                let mobileScale = 0.75;
                 
                 if (window.updateMobileCanvasScale) {
-                    // Use dynamic scale based on performance
                     mobileScale = window.updateMobileCanvasScale();
                 } else {
-                    // Fallback to improved default
                     const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-                    mobileScale = 0.75; // Improved from 0.5 for sharper rendering
+                    mobileScale = 0.75;
                 }
                 
                 canvas.width = window.innerWidth * mobileScale;
                 canvas.height = window.innerHeight * mobileScale;
                 
-                // Scale canvas to full size with CSS
                 canvas.style.width = window.innerWidth + 'px';
                 canvas.style.height = window.innerHeight + 'px';
                 
-                // Disable image smoothing for sharper pixel art
                 ctx.imageSmoothingEnabled = false;
                 ctx.imageSmoothingQuality = 'high';
             } else {
-                // Desktop keeps full resolution
                 const scale = 1;
                 canvas.width = window.innerWidth * scale;
                 canvas.height = window.innerHeight * scale;
             }
             
-            // Clear emoji cache on resize as sizes might change
             emojiCache.clear();
         }
         resizeCanvas();
         window.addEventListener('resize', resizeCanvas);
         
-        // Game constants
         const WORLD_SIZE = 4000;
         const SEGMENT_SIZE = 15;
-        const SNAKE_SPEED = 4.761; // Increased by 15% from 4.14 (total 55.37% increase from original 3.0)
+        const SNAKE_SPEED = 4.761;
         const TURN_SPEED = 0.08;
         const ELEMENT_SIZE = 20;
         
-        // Convert world coordinates to screen coordinates with zoom
         function worldToScreen(x, y) {
             return {
                 x: (x - camera.x) * cameraZoom + canvas.width / 2,
@@ -178,7 +147,6 @@
             };
         }
         
-        // Viewport culling helper
         function isInViewport(x, y, margin = 100) {
             const screen = worldToScreen(x, y);
             
@@ -188,18 +156,16 @@
                    screen.y <= canvas.height + margin;
         }
         
-        // Game state
         let gameStarted = false;
         let paused = false;
         let controlScheme = 'arrows';
-        let gameMode = 'infinite'; // 'classic' or 'infinite'
-        let gameWon = false; // Track if victory has been achieved
-        let gameTarget = 0; // Target value for victory
-        let deathCount = 0; // Track total deaths in current game
+        let gameMode = 'infinite';
+        let gameWon = false;
+        let gameTarget = 0;
+        let deathCount = 0;
         let camera = { x: WORLD_SIZE / 2, y: WORLD_SIZE / 2 };
-        let cameraZoom = isMobile ? 0.75 : 1.0; // 0.75 = 20% more zoomed in than 0.625 for mobile
+        let cameraZoom = isMobile ? 0.75 : 1.0;
         
-        // Game loop timing variables
         let lastTime = 0;
         let frameCount = 0;
         let lastFpsUpdate = 0;
@@ -211,19 +177,18 @@
         let highScore = parseInt(localStorage.getItem('highScore') || '0');
         let gameStartTime = Date.now();
         let bestRank = 0;
-        let playerRespawnTimer = 0; // Player respawn countdown
-        let revivesRemaining = 3; // Number of revives left in current game
-        let savedSnakeLength = 0; // Store snake length for revive
-        let savedSnakeScore = 0; // Store snake score for revive
-        let comboStreak = 0; // Track consecutive combinations
-        let animationFrameId = null; // Track the animation frame to prevent multiple loops
+        let playerRespawnTimer = 0;
+        let revivesRemaining = 3;
+        let savedSnakeLength = 0;
+        let savedSnakeScore = 0;
+        let comboStreak = 0;
+        let animationFrameId = null;
         
-        // Death sequence animation state
         let deathSequenceActive = false;
         let deathSequenceTimer = 0;
-        let deathProcessed = false; // Flag to ensure death is only processed once
-        let isRespawning = false; // Flag to prevent death sequence during respawn
-        const DEATH_SEQUENCE_DURATION = 2000; // 2 seconds total
+        let deathProcessed = false;
+        let isRespawning = false;
+        const DEATH_SEQUENCE_DURATION = 2000;
         let deathCameraAnimation = {
             active: false,
             startZoom: 1.0,
@@ -232,16 +197,13 @@
             progress: 0
         };
         
-        // Enhanced mobile detection including iPads
         function isTabletOrMobile() {
             return window.matchMedia("(max-width: 1024px)").matches || 
                    window.matchMedia("(pointer: coarse)").matches ||
                    /iPad|iPhone|iPod|Android/i.test(navigator.userAgent);
         }
         
-        // Show rotate device message for mobile users
         function showRotateDeviceMessage() {
-            // Check if message already exists
             if (document.getElementById('rotate-device-message')) return;
             
             const rotateMsg = document.createElement('div');
@@ -269,7 +231,6 @@
                 <div style="font-size: 11px; margin-top: 10px; color: #4ecdc4;">Infinite Snake is best in landscape</div>
             `;
             
-            // Add rotation animation
             const style = document.createElement('style');
             style.textContent = `
                 @keyframes rotate {
@@ -284,7 +245,6 @@
             
             document.body.appendChild(rotateMsg);
             
-            // Remove message when device is rotated
             const checkOrientation = () => {
                 if (window.innerWidth > window.innerHeight) {
                     const msg = document.getElementById('rotate-device-message');
@@ -297,87 +257,79 @@
             window.addEventListener('resize', checkOrientation);
         }
         
-        // Force landscape orientation for mobile devices
         function lockToLandscape() {
             if (screen.orientation && screen.orientation.lock) {
                 screen.orientation.lock('landscape').then(() => {
                     console.log('Successfully locked to landscape mode');
                 }).catch((err) => {
                     console.log('Could not lock orientation:', err);
-                    // Still check and show rotate message if needed
                     checkAndShowRotateMessage();
                 });
             } else {
-                // Fallback for browsers without orientation API
                 console.log('Screen orientation API not supported');
                 checkAndShowRotateMessage();
             }
         }
         
-        // Check orientation and show rotate message if needed
         function checkAndShowRotateMessage() {
             if (window.innerHeight > window.innerWidth) {
                 showRotateDeviceMessage();
             }
         }
         
-        // Alchemy Vision power-up
         let alchemyVisionPowerUps = [];
         let alchemyVisionActive = false;
         let alchemyVisionTimer = 0;
         let lastAlchemyVisionSpawn = 0;
-        const ALCHEMY_VISION_DURATION = 30000; // 30 seconds
-        const ALCHEMY_VISION_SPAWN_INTERVAL = 120000; // 2 minutes
-        const ALCHEMY_VISION_SPAWN_COUNT = 3; // Number of power-ups to spawn at once
+        const ALCHEMY_VISION_DURATION = 30000;
+        const ALCHEMY_VISION_SPAWN_INTERVAL = 120000;
+        const ALCHEMY_VISION_SPAWN_COUNT = 3;
         
-        // Void Orb mechanic
         let voidOrbs = [];
         let lastVoidOrbSpawn = 0;
-        const VOID_ORB_SPAWN_INTERVAL = 75000; // 75 seconds (25% less common)
-        const VOID_ORB_SPAWN_COUNT = 4; // Number of void orbs to maintain on map
+        const VOID_ORB_SPAWN_INTERVAL = 75000;
+        const VOID_ORB_SPAWN_COUNT = 4;
         
-        // Catalyst Gem mechanic
         let catalystGems = [];
         let lastCatalystGemSpawn = 0;
-        const CATALYST_GEM_SPAWN_INTERVAL = 45000; // 45 seconds (doubled spawn rate)
-        const CATALYST_GEM_SPAWN_COUNT = 3; // Number of catalyst gems to maintain on map
-        let catalystSpawnedElements = []; // Track elements spawned by catalyst for visual effect
+        const CATALYST_GEM_SPAWN_INTERVAL = 45000;
+        const CATALYST_GEM_SPAWN_COUNT = 3;
+        let catalystSpawnedElements = [];
         
-        // AI Personality Types
         const AI_PERSONALITIES = {
             AGGRESSIVE: {
                 name: 'Aggressive',
-                huntingPriority: 0.95,      // Almost always hunts
-                comboPriority: 0.05,        // Rarely cares about combos
-                riskTolerance: 0.95,        // Very high risk tolerance
-                boostThreshold: 0.2,        // Boosts frequently
-                chaseDistance: 500,         // Long chase range
-                fleeThreshold: 2.0,         // Only flee if enemy is 2x larger
-                preyRatioMax: 1.2,          // Hunt snakes up to 1.2x their size
-                collisionAvoidanceRadius: 120, // Increased from 60
-                dangerZoneRadius: 200,      // Early warning radius
-                aggressionMultiplier: 2.0,  // How much to prioritize hunting
-                elementIgnoreChance: 0.7,   // 70% chance to ignore elements when hunting
-                avoidanceStrength: 0.4,     // How strongly to avoid collisions
-                predictiveLookAhead: 0.5,   // Look 0.5 seconds ahead
-                bodyAvoidanceMultiplier: 0.7 // Reduced body avoidance for aggressive play
+                huntingPriority: 0.95,
+                comboPriority: 0.05,
+                riskTolerance: 0.95,
+                boostThreshold: 0.2,
+                chaseDistance: 500,
+                fleeThreshold: 2.0,
+                preyRatioMax: 1.2,
+                collisionAvoidanceRadius: 120,
+                dangerZoneRadius: 200,
+                aggressionMultiplier: 2.0,
+                elementIgnoreChance: 0.7,
+                avoidanceStrength: 0.4,
+                predictiveLookAhead: 0.5,
+                bodyAvoidanceMultiplier: 0.7
             },
             COMBO_FOCUSED: {
                 name: 'Combo Master',
-                huntingPriority: 0.05,      // Almost never hunts
-                comboPriority: 0.95,        // Always seeks combos
-                riskTolerance: 0.2,         // Low risk tolerance
-                boostThreshold: 0.7,        // Rarely boosts
-                chaseDistance: 50,          // Very short chase range
-                fleeThreshold: 0.9,         // Flee from 90% size snakes
-                preyRatioMax: 0.5,          // Only hunt snakes half their size
-                collisionAvoidanceRadius: 250, // Increased from 150
-                dangerZoneRadius: 350,      // Large early warning
+                huntingPriority: 0.05,
+                comboPriority: 0.95,
+                riskTolerance: 0.2,
+                boostThreshold: 0.7,
+                chaseDistance: 50,
+                fleeThreshold: 0.9,
+                preyRatioMax: 0.5,
+                collisionAvoidanceRadius: 250,
+                dangerZoneRadius: 350,
                 aggressionMultiplier: 0.2,
-                elementIgnoreChance: 0.0,   // Never ignores elements
-                avoidanceStrength: 0.8,     // Strong avoidance
-                predictiveLookAhead: 1.0,   // Look 1 second ahead
-                bodyAvoidanceMultiplier: 1.5 // Extra careful around bodies
+                elementIgnoreChance: 0.0,
+                avoidanceStrength: 0.8,
+                predictiveLookAhead: 1.0,
+                bodyAvoidanceMultiplier: 1.5
             },
             BALANCED: {
                 name: 'Balanced',
@@ -387,107 +339,97 @@
                 boostThreshold: 0.5,
                 chaseDistance: 250,
                 fleeThreshold: 1.3,
-                preyRatioMax: 0.8,          // Hunt snakes up to 0.8x their size
-                collisionAvoidanceRadius: 180, // Increased from 100
-                dangerZoneRadius: 280,      // Moderate early warning
+                preyRatioMax: 0.8,
+                collisionAvoidanceRadius: 180,
+                dangerZoneRadius: 280,
                 aggressionMultiplier: 1.0,
                 elementIgnoreChance: 0.3,
-                avoidanceStrength: 0.6,     // Moderate avoidance
-                predictiveLookAhead: 0.7,   // Look 0.7 seconds ahead
-                bodyAvoidanceMultiplier: 1.0 // Standard body avoidance
+                avoidanceStrength: 0.6,
+                predictiveLookAhead: 0.7,
+                bodyAvoidanceMultiplier: 1.0
             },
             CAUTIOUS: {
                 name: 'Cautious',
-                huntingPriority: 0.0,       // Never hunts
-                comboPriority: 1.0,         // Only focuses on elements
-                riskTolerance: 0.1,         // Very low risk
-                boostThreshold: 0.85,       // Almost never boosts
-                chaseDistance: 0,           // Never chases
-                fleeThreshold: 0.8,         // Flee from 80% size snakes
-                preyRatioMax: 0.0,          // Never considers hunting
-                collisionAvoidanceRadius: 300, // Increased from 200
-                dangerZoneRadius: 400,      // Very large early warning
-                aggressionMultiplier: 0.0,  // No aggression
+                huntingPriority: 0.0,
+                comboPriority: 1.0,
+                riskTolerance: 0.1,
+                boostThreshold: 0.85,
+                chaseDistance: 0,
+                fleeThreshold: 0.8,
+                preyRatioMax: 0.0,
+                collisionAvoidanceRadius: 300,
+                dangerZoneRadius: 400,
+                aggressionMultiplier: 0.0,
                 elementIgnoreChance: 0.0,
-                avoidanceStrength: 1.0,     // Maximum avoidance
-                predictiveLookAhead: 1.2,   // Look 1.2 seconds ahead
-                bodyAvoidanceMultiplier: 2.0, // Very cautious around bodies
-                playerAvoidanceRadius: 600  // Stay far away from player
+                avoidanceStrength: 1.0,
+                predictiveLookAhead: 1.2,
+                bodyAvoidanceMultiplier: 2.0,
+                playerAvoidanceRadius: 600
             },
             OPPORTUNIST: {
                 name: 'Opportunist',
-                huntingPriority: 0.8,       // High hunting when safe
+                huntingPriority: 0.8,
                 comboPriority: 0.2,
                 riskTolerance: 0.6,
                 boostThreshold: 0.3,
                 chaseDistance: 350,
-                fleeThreshold: 1.1,         // Careful about size matchups
-                preyRatioMax: 0.7,          // Hunt snakes up to 0.7x their size
-                collisionAvoidanceRadius: 150, // Increased from 80
-                dangerZoneRadius: 250,      // Moderate early warning
+                fleeThreshold: 1.1,
+                preyRatioMax: 0.7,
+                collisionAvoidanceRadius: 150,
+                dangerZoneRadius: 250,
                 aggressionMultiplier: 1.5,
                 elementIgnoreChance: 0.5,
-                preferWeakTargets: true,    // Specifically targets smaller/wounded snakes
-                avoidanceStrength: 0.5,     // Moderate avoidance
-                predictiveLookAhead: 0.6,   // Look 0.6 seconds ahead
-                bodyAvoidanceMultiplier: 0.8 // Slightly reduced for opportunistic strikes
+                preferWeakTargets: true,
+                avoidanceStrength: 0.5,
+                predictiveLookAhead: 0.6,
+                bodyAvoidanceMultiplier: 0.8
             }
         };
         
-        // AI respawn cooldown tracking
         let aiRespawnQueue = [];
-        const AI_RESPAWN_COOLDOWN = 5000; // 5 seconds
-        const MAX_AI_SNAKES = 6; // Increased from 5 to 6
+        const AI_RESPAWN_COOLDOWN = 5000;
+        const MAX_AI_SNAKES = 6;
         
-        // Track used AI skins to prevent duplicates
         let usedAISkins = new Set();
         
-        // Track AI snake data for respawning with scores
         let aiSnakeDataMap = new Map();
         
-        // Personality colors for name display
         const PERSONALITY_COLORS = {
-            'Aggressive': '#ff4444',      // Red
-            'Combo Master': '#44ff44',    // Green
-            'Cautious': '#ffff44',        // Yellow
-            'Balanced': '#4444ff',        // Blue
-            'Opportunist': '#ff8844'      // Orange
+            'Aggressive': '#ff4444',
+            'Combo Master': '#44ff44',
+            'Cautious': '#ffff44',
+            'Balanced': '#4444ff',
+            'Opportunist': '#ff8844'
         };
         
-        // Space effects
         let staticStars = [];
         let shootingStars = [];
         let lastShootingStarTime = 0;
         
-        // Pixel art star layers for parallax
         const pixelStarLayers = [
-            { stars: [], speed: 0.05, size: 1, color: '#666', count: 100 },  // Far
-            { stars: [], speed: 0.1, size: 1, color: '#999', count: 80 },   // Mid
-            { stars: [], speed: 0.15, size: 2, color: '#CCC', count: 60 },   // Near
-            { stars: [], speed: 0.2, size: 2, color: '#FFF', count: 40 }    // Close
+            { stars: [], speed: 0.05, size: 1, color: '#666', count: 100 },
+            { stars: [], speed: 0.1, size: 1, color: '#999', count: 80 },
+            { stars: [], speed: 0.15, size: 2, color: '#CCC', count: 60 },
+            { stars: [], speed: 0.2, size: 2, color: '#FFF', count: 40 }
         ];
         
-        // Pixel nebulae - many smaller, organic shapes
         const pixelNebulae = [];
-        const nebulaCanvases = new Map(); // Cache for pre-rendered nebulae
+        const nebulaCanvases = new Map();
         
-        // Generate many smaller nebulae across the world
         for (let i = 0; i < 25; i++) {
-            const size = 250 + Math.random() * 350; // Use same size for width and height for circular nebulae
+            const size = 250 + Math.random() * 350;
             pixelNebulae.push({
                 x: Math.random() * WORLD_SIZE,
                 y: Math.random() * WORLD_SIZE,
                 width: size,
                 height: size,
                 color: ['#4B0082', '#8B008B', '#191970', '#483D8B', '#6A0DAD', '#9400D3'][Math.floor(Math.random() * 6)],
-                density: 0.25 + Math.random() * 0.25, // Increased density for better visibility
-                clusters: [] // Will store random pixel clusters for organic shape
+                density: 0.25 + Math.random() * 0.25,
+                clusters: []
             });
         }
         
-        // Pixel planets - many smaller planets with grid-based distribution
         const pixelPlanets = [];
-        // Generate planets in a 5x4 grid for uniform distribution
         const gridCols = 5;
         const gridRows = 4;
         const cellWidth = WORLD_SIZE / gridCols;
@@ -496,48 +438,44 @@
         for (let row = 0; row < gridRows; row++) {
             for (let col = 0; col < gridCols; col++) {
                 const planetColors = [
-                    { color1: '#5A3A0D', color2: '#704020' }, // Darker browns
-                    { color1: '#2E5A74', color2: '#3F6E80' }, // Darker blues
-                    { color1: '#B24430', color2: '#B23000' }, // Darker reds
-                    { color1: '#165916', color2: '#004400' }, // Darker greens
-                    { color1: '#9A7016', color2: '#856008' }, // Darker golds
-                    { color1: '#4A5A6A', color2: '#1F2F2F' }, // Darker grays
-                    { color1: '#B2497F', color2: '#B21066' }, // Darker pinks
-                    { color1: '#009091', color2: '#005B5B' }, // Darker cyans
-                    { color1: '#654E92', color2: '#4A0D7A' }, // Darker purples
-                    { color1: '#B26200', color2: '#B24430' }, // Darker oranges
-                    { color1: '#229022', color2: '#165916' }  // Darker lime greens
+                    { color1: '#5A3A0D', color2: '#704020' },
+                    { color1: '#2E5A74', color2: '#3F6E80' },
+                    { color1: '#B24430', color2: '#B23000' },
+                    { color1: '#165916', color2: '#004400' },
+                    { color1: '#9A7016', color2: '#856008' },
+                    { color1: '#4A5A6A', color2: '#1F2F2F' },
+                    { color1: '#B2497F', color2: '#B21066' },
+                    { color1: '#009091', color2: '#005B5B' },
+                    { color1: '#654E92', color2: '#4A0D7A' },
+                    { color1: '#B26200', color2: '#B24430' },
+                    { color1: '#229022', color2: '#165916' }
                 ];
                 const colors = planetColors[Math.floor(Math.random() * planetColors.length)];
                 
-                // Place planet randomly within its grid cell
                 const x = col * cellWidth + (cellWidth * 0.2) + (Math.random() * cellWidth * 0.6);
                 const y = row * cellHeight + (cellHeight * 0.2) + (Math.random() * cellHeight * 0.6);
                 
                 pixelPlanets.push({
                     x: x,
                     y: y,
-                    radius: 20 + Math.random() * 40, // Varied planet sizes (20-60)
+                    radius: 20 + Math.random() * 40,
                     color1: colors.color1,
                     color2: colors.color2,
-                    rings: Math.random() > 0.7, // 30% chance of rings
-                    opacity: 0.6 // 40% transparency
+                    rings: Math.random() > 0.7,
+                    opacity: 0.6
                 });
             }
         }
         
-        // Pixel asteroids - will be populated dynamically
         const pixelAsteroids = [];
         
-        // Asteroid clusters for more interesting space fields
         const asteroidClusters = [];
-        // Generate 8-10 asteroid clusters
         const numClusters = 8 + Math.floor(Math.random() * 3);
         for (let i = 0; i < numClusters; i++) {
             const clusterX = Math.random() * WORLD_SIZE;
             const clusterY = Math.random() * WORLD_SIZE;
-            const clusterRadius = 200 + Math.random() * 100; // 200-300 pixel radius
-            const numAsteroids = 15 + Math.floor(Math.random() * 11); // 15-25 asteroids per cluster
+            const clusterRadius = 200 + Math.random() * 100;
+            const numAsteroids = 15 + Math.floor(Math.random() * 11);
             
             const cluster = {
                 x: clusterX,
@@ -555,7 +493,7 @@
                 cluster.asteroids.push({
                     x: asteroidX,
                     y: asteroidY,
-                    size: 2 + Math.random() * 6, // Smaller asteroids in clusters (2-8 pixels)
+                    size: 2 + Math.random() * 6,
                     rotation: Math.random() * Math.PI * 2,
                     rotationSpeed: (Math.random() - 0.5) * 0.02,
                     driftX: (Math.random() - 0.5) * 0.1,
@@ -566,42 +504,35 @@
             asteroidClusters.push(cluster);
         }
         
-        // Nebula border effect variables
         let borderParticles = [];
         let animationTime = 0;
-        const MAX_BORDER_PARTICLES = isMobile ? 50 : 150; // Reduced for mobile
+        const MAX_BORDER_PARTICLES = isMobile ? 50 : 150;
         
-        // Element database
-        let elementDatabase = {}; // Keep for compatibility
-        let combinations = {}; // Keep for compatibility
-        let discoveredElements = new Set(); // Start with no discoveries - global pool of all discovered elements
-        let playerDiscoveredElements = new Set(); // Player-only discoveries for UI and progression
+        let elementDatabase = {};
+        let combinations = {};
+        let discoveredElements = new Set();
+        let playerDiscoveredElements = new Set();
         
-        // All-time discoveries (persistent across sessions)
-        let allTimeDiscoveries = new Map(); // Map of element -> recipe
+        let allTimeDiscoveries = new Map();
         
-        // Element progression system
-        let recentlySpawnedElements = []; // Track last spawned elements to prevent clustering
-        const MAX_SPAWN_HISTORY = 20; // Remember last 20 spawned elements
-        let recentlyDiscoveredElements = new Map(); // Track recently discovered elements with timestamp
-        const DISCOVERY_ECHO_DURATION = 30000; // 30 seconds of boosted spawn rate
+        let recentlySpawnedElements = [];
+        const MAX_SPAWN_HISTORY = 20;
+        let recentlyDiscoveredElements = new Map();
+        const DISCOVERY_ECHO_DURATION = 30000;
         
-        // Grid-based spawning for even distribution
-        const ELEMENT_GRID_SIZE = 400; // Divide world into 400x400 cells (10x10 grid)
-        let elementGrid = new Map(); // Track elements per grid cell
-        const MIN_ELEMENTS_PER_CELL = 2; // Minimum elements per grid cell
-        const MAX_ELEMENTS_PER_CELL = 5; // Maximum elements per grid cell
-        const TARGET_ELEMENT_COUNT = isMobile ? 100 : 200; // Further reduced for mobile performance
+        const ELEMENT_GRID_SIZE = 400;
+        let elementGrid = new Map();
+        const MIN_ELEMENTS_PER_CELL = 2;
+        const MAX_ELEMENTS_PER_CELL = 5;
+        const TARGET_ELEMENT_COUNT = isMobile ? 100 : 200;
         
-        // Snake names data
         let snakeNameData = null;
         
-        // Boss System
         const BOSS_TYPES = {
             PYRAXIS: {
                 name: "Pyraxis the Molten",
                 element: "fire",
-                elementId: 3, // Fire element ID
+                elementId: 3,
                 emoji: "🔥",
                 color: "#ff4444",
                 maxHealth: 5,
@@ -614,7 +545,7 @@
             ABYSSOS: {
                 name: "Abyssos the Deep One",
                 element: "water",
-                elementId: 1, // Water element ID
+                elementId: 1,
                 emoji: "🌊",
                 color: "#4444ff",
                 maxHealth: 5,
@@ -627,7 +558,7 @@
             OSSEUS: {
                 name: "Osseus the Bone Sovereign",
                 element: "earth",
-                elementId: 0, // Earth element ID
+                elementId: 0,
                 emoji: "🗿",
                 color: "#8b4513",
                 maxHealth: 5,
@@ -640,11 +571,11 @@
             ZEPHYRUS: {
                 name: "Zephyrus the Storm Caller",
                 element: "air",
-                elementId: 2, // Air element ID
+                elementId: 2,
                 emoji: "💨",
                 color: "#87ceeb",
                 maxHealth: 5,
-                attackCooldown: 8000, // Increased to allow element repopulation after vacuum
+                attackCooldown: 8000,
                 defeated: false,
                 skin: 'zephyrus',
                 attackSound: 'sounds/power-surge.mp3',
@@ -652,21 +583,17 @@
             }
         };
         
-        // Boss state management
         let currentBoss = null;
         let bossEncounterActive = false;
-        let nextBossSpawnScore = 0; // Dynamic spawn point
-        let lastBossDefeatScore = 0; // Track score when boss was defeated
-        let bossSpawnCount = 0; // Track number of bosses spawned
+        let nextBossSpawnScore = 0;
+        let lastBossDefeatScore = 0;
+        let bossSpawnCount = 0;
         let defeatedBosses = new Set();
         
-        // Calculate next boss spawn point with randomization
         function calculateNextBossSpawn() {
             if (bossSpawnCount === 0) {
-                // First boss: 50k-75k range
                 nextBossSpawnScore = 50000 + Math.floor(Math.random() * 25000);
             } else {
-                // Subsequent bosses: spawn 200k-250k points after the last boss defeat
                 const baseInterval = 200000;
                 const randomRange = 50000;
                 nextBossSpawnScore = lastBossDefeatScore + baseInterval + Math.floor(Math.random() * randomRange);
@@ -680,7 +607,7 @@
         let bossHealthBar = null;
         let bossHealthBarContainer = null;
         let bossNameDisplay = null;
-        let elementBankSlots = 6; // Start with 6 slots, expandable to 12
+        let elementBankSlots = 6;
         let bossDamageFlashTimer = 0;
         let bossStunTimer = 0;
         let bossProjectiles = [];
@@ -690,11 +617,10 @@
         let bossScreenShakeIntensity = 0;
         let elementVacuumActive = false;
         let elementVacuumTimer = 0;
-        let vacuumedElements = []; // Store elements being sucked into void
-        let damageNumbers = []; // Floating damage numbers
-        let bossFissures = []; // Ground fissures for Osseus
+        let vacuumedElements = [];
+        let damageNumbers = [];
+        let bossFissures = [];
         
-        // Skin system - merge old system with new data from skinData.js
         let skinMetadata = {
             'snake-default-green': { name: 'Basic Boy', unlocked: true, colors: ['#75d18e', '#6abf81'] },
             'neko': { name: 'Lil Beans (Beta Perk)', unlocked: true, colors: ['#c6c6cb', '#c3c3e7'] },
@@ -742,46 +668,35 @@
             'murica': { name: "'Murica", unlocked: false, colors: ['#ecf0f1', '#f2eeed'] },
             'pod-player': { name: 'Poddington', unlocked: false, colors: ['#87ceeb', '#5f9ea0'] },
             'whale': { name: 'Spout', unlocked: false, colors: ['#3498db', '#2980b9'] },
-            // Boss skins (not available for players or AI)
             'pyraxis': { name: 'Pyraxis the Molten', unlocked: false, colors: ['#ff4444', '#cc0000'], isBoss: true },
             'abyssos': { name: 'Abyssos the Deep One', unlocked: false, colors: ['#4444ff', '#0000cc'], isBoss: true },
             'osseus': { name: 'Osseus the Bone Sovereign', unlocked: false, colors: ['#8b4513', '#654321'], isBoss: true },
             'zephyrus': { name: 'Zephyrus the Storm Caller', unlocked: false, colors: ['#87ceeb', '#5f9ea0'], isBoss: true }
         };
         
-        // Merge with new skin data if available
         if (window.SKIN_DATA && window.skinIdConverter) {
-            // Create a merged metadata object
             const mergedMetadata = {};
             
-            // First, convert all old IDs to maintain compatibility
             Object.keys(skinMetadata).forEach(oldId => {
                 mergedMetadata[oldId] = { ...skinMetadata[oldId] };
                 
-                // Try to find corresponding new data
                 const newId = window.skinIdConverter.toNewId(oldId);
                 if (newId && window.SKIN_DATA[newId]) {
-                    // Merge in new properties while keeping old ones
                     mergedMetadata[oldId] = {
                         ...mergedMetadata[oldId],
                         ...window.SKIN_DATA[newId],
-                        // Keep the original colors as they're used for rendering
                         colors: skinMetadata[oldId].colors,
-                        // Keep the original unlocked state
                         unlocked: skinMetadata[oldId].unlocked
                     };
                 }
             });
             
-            // Add any skins that only exist in the new system (like boss skins with new IDs)
             Object.keys(window.SKIN_DATA).forEach(newId => {
                 const oldId = window.skinIdConverter.toOldId(newId);
                 if (!oldId || !mergedMetadata[oldId]) {
-                    // This is a new skin not in the old system
                     mergedMetadata[newId] = {
                         ...window.SKIN_DATA[newId],
                         unlocked: false,
-                        // Generate default colors if not provided
                         colors: window.SKIN_DATA[newId].colors || ['#888888', '#666666']
                     };
                 }
@@ -790,14 +705,13 @@
             skinMetadata = mergedMetadata;
         }
         
-        const aiSkins = Object.keys(skinMetadata).filter(skin => skinMetadata[skin] && !skinMetadata[skin].isBoss); // All non-boss skins available for AI
+        const aiSkins = Object.keys(skinMetadata).filter(skin => skinMetadata[skin] && !skinMetadata[skin].isBoss);
         let currentPlayerSkin = 'snake-default-green';
         let unlockedSkins = new Set(['snake-default-green']);
-        let viewedSkins = new Set(['snake-default-green']); // Track which skins have been viewed
+        let viewedSkins = new Set(['snake-default-green']);
         let availableUnlocks = 0;
-        let skinImages = {}; // Cache for loaded skin images
+        let skinImages = {};
         
-        // Load skin system from localStorage
         function loadSkinData() {
             const saved = localStorage.getItem('unlockedSkins');
             if (saved) {
@@ -812,16 +726,13 @@
             const savedCurrent = localStorage.getItem('currentSkin');
             if (savedCurrent && unlockedSkins.has(savedCurrent)) {
                 currentPlayerSkin = savedCurrent;
-                // Update player portrait on load
                 const portrait = document.getElementById('playerPortrait');
                 if (portrait) {
-                    // Boss skins are in a different directory
                     if (skinMetadata[currentPlayerSkin] && skinMetadata[currentPlayerSkin].isBoss) {
                         portrait.src = `assets/boss-skins/${currentPlayerSkin}.png`;
                     } else {
                         portrait.src = `skins/${currentPlayerSkin}.png`;
                     }
-                    // Update mobile UI skin preview after load
                     setTimeout(() => {
                         document.dispatchEvent(new Event('skinChanged'));
                         if (window.unifiedMobileUI) {
@@ -831,18 +742,14 @@
                 }
             }
             
-            // Update metadata with ID conversion support
             for (const skin of unlockedSkins) {
-                // Try direct match first
                 if (skinMetadata[skin]) {
                     skinMetadata[skin].unlocked = true;
                 } else if (window.skinIdConverter) {
-                    // Try converting from new ID to old ID
                     const oldId = window.skinIdConverter.toOldId(skin);
                     if (oldId && skinMetadata[oldId]) {
                         skinMetadata[oldId].unlocked = true;
                     }
-                    // Also try converting from old ID to new ID
                     const newId = window.skinIdConverter.toNewId(skin);
                     if (newId && skinMetadata[newId]) {
                         skinMetadata[newId].unlocked = true;
@@ -851,23 +758,20 @@
             }
         }
         
-        // Save skin data
         function saveSkinData() {
             localStorage.setItem('unlockedSkins', JSON.stringify(Array.from(unlockedSkins)));
             localStorage.setItem('viewedSkins', JSON.stringify(Array.from(viewedSkins)));
             localStorage.setItem('currentSkin', currentPlayerSkin);
         }
         
-        // Preload skin images
         function preloadSkins() {
-            const allSkins = Object.keys(skinMetadata); // Load all skins including boss skins
+            const allSkins = Object.keys(skinMetadata);
             allSkins.forEach(skin => {
                 const img = new Image();
                 img.onerror = function() {
                     console.warn(`Failed to load skin: ${skin}.png`);
                     this.error = true;
                 };
-                // Boss skins are in a different directory
                 if (skinMetadata[skin].isBoss) {
                     img.src = `assets/boss-skins/${skin}.png`;
                 } else {
@@ -877,7 +781,6 @@
             });
         }
         
-        // Calculate available unlocks based on high score
         function calculateAvailableUnlocks() {
             let unlocks = 0;
             if (highScore >= 50000) unlocks++;
@@ -887,41 +790,34 @@
                 unlocks += Math.floor((highScore - 150000) / 250000);
             }
             
-            // Subtract already unlocked skins (minus the default)
             const alreadyUnlocked = unlockedSkins.size - 1;
             availableUnlocks = Math.max(0, unlocks - alreadyUnlocked);
             return availableUnlocks;
         }
         
-        // Load all-time discoveries from localStorage
         function loadAllTimeDiscoveries() {
             const saved = localStorage.getItem('allTimeDiscoveries');
             if (saved) {
                 const data = JSON.parse(saved);
                 allTimeDiscoveries = new Map(data);
             } else {
-                // Initialize with base elements using numeric IDs
-                allTimeDiscoveries.set(0, 'Base Element');  // Earth
-                allTimeDiscoveries.set(1, 'Base Element');  // Water
-                allTimeDiscoveries.set(2, 'Base Element');  // Air
-                allTimeDiscoveries.set(3, 'Base Element');  // Fire
+                allTimeDiscoveries.set(0, 'Base Element');
+                allTimeDiscoveries.set(1, 'Base Element');
+                allTimeDiscoveries.set(2, 'Base Element');
+                allTimeDiscoveries.set(3, 'Base Element');
                 saveAllTimeDiscoveries();
             }
         }
         
-        // Save all-time discoveries to localStorage
         function saveAllTimeDiscoveries() {
             const data = Array.from(allTimeDiscoveries.entries());
             localStorage.setItem('allTimeDiscoveries', JSON.stringify(data));
         }
         
-        // Music system
-        // Background music tracks - see CREDITS.md for full attribution
-        // All tracks produced by ZapSplat under Standard License
         let currentTrack = null;
         let musicVolume = 0.3;
         let musicMuted = false;
-        let musicShouldBePlaying = false; // Track whether music is intended to play
+        let musicShouldBePlaying = false;
         const musicTracks = [
             'bright-white-lights.mp3',
             'last-ones-standing.mp3', 
@@ -932,15 +828,12 @@
         ];
         let availableTracks = [];
         
-        
-        // Input handling
         const keys = {};
         let mouseAngle = 0;
         let mouseDown = false;
         let mouseMovedRecently = false;
         let mouseMovedTimer = null;
         
-        // Combination animation state
         let combinationAnimationState = {
             isAnimating: false,
             combiningIndices: [],
@@ -948,9 +841,6 @@
             newElementIndex: -1
         };
         
-        // Mobile detection removed - using global definition
-        
-        // Mobile controls state
         let joystickActive = false;
         let joystickBase = { x: 0, y: 0 };
         let joystickKnob = { x: 0, y: 0 };
@@ -965,7 +855,6 @@
             }
             
             
-            // Resume pending music on first interaction
             if (window.pendingMusicTrack && !musicMuted) {
                 window.pendingMusicTrack.play().then(() => {
                 }).catch(err => {
@@ -988,15 +877,12 @@
                 const mouseY = e.clientY - rect.top;
                 mouseAngle = Math.atan2(mouseY - centerY, mouseX - centerX);
                 
-                // Track that mouse has moved recently
                 mouseMovedRecently = true;
                 
-                // Clear existing timer
                 if (mouseMovedTimer) {
                     clearTimeout(mouseMovedTimer);
                 }
                 
-                // Set timer to reset mouseMovedRecently after inactivity
                 mouseMovedTimer = setTimeout(() => {
                     mouseMovedRecently = false;
                 }, 1000); // Reset after 1 second of no mouse movement
@@ -8649,6 +8535,48 @@
         // Also expose it globally so we can call it when the overlay is shown
         window.setupLeaderboardListeners = setupLeaderboardListeners;
         
+        // Initialize leaderboard collapsibility for both desktop and mobile
+        function initLeaderboardCollapse() {
+            const leaderboardBox = document.querySelector('.leaderboard-box');
+            if (!leaderboardBox) return;
+            
+            // Create header if it doesn't exist
+            let header = leaderboardBox.querySelector('.leaderboard-header');
+            if (!header) {
+                header = document.createElement('div');
+                header.className = 'leaderboard-header';
+                header.innerHTML = '<span>🏆 Leaderboard</span><span class="collapse-icon">▼</span>';
+                leaderboardBox.insertBefore(header, leaderboardBox.firstChild);
+            }
+            
+            // Add click handler
+            header.addEventListener('click', function(e) {
+                e.stopPropagation();
+                leaderboardBox.classList.toggle('collapsed');
+                
+                // Update icon
+                const icon = header.querySelector('.collapse-icon');
+                if (icon) {
+                    icon.textContent = leaderboardBox.classList.contains('collapsed') ? '▲' : '▼';
+                }
+                
+                // Save collapsed state
+                const isCollapsed = leaderboardBox.classList.contains('collapsed');
+                localStorage.setItem('leaderboardCollapsed', isCollapsed);
+            });
+            
+            // Restore saved state
+            const savedState = localStorage.getItem('leaderboardCollapsed');
+            if (savedState === 'true') {
+                leaderboardBox.classList.add('collapsed');
+                const icon = header.querySelector('.collapse-icon');
+                if (icon) icon.textContent = '▲';
+            }
+        }
+        
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', initLeaderboardCollapse);
+        
         // Submit score to leaderboard
         window.submitToLeaderboard = async function() {
             playUISound();
@@ -12721,30 +12649,6 @@
             
             // Add mobile class to body
             document.body.classList.add('mobile');
-            
-            // Make leaderboard collapsible on mobile
-            const leaderboardBox = document.querySelector('.leaderboard-box');
-            if (leaderboardBox) {
-                leaderboardBox.addEventListener('click', function(e) {
-                    // Only toggle if clicking on the header
-                    if (e.target.classList.contains('leaderboard-header') || 
-                        e.target.parentElement.classList.contains('leaderboard-header')) {
-                        this.classList.toggle('collapsed');
-                        
-                        // Save collapsed state
-                        const isCollapsed = this.classList.contains('collapsed');
-                        localStorage.setItem('leaderboardCollapsed', isCollapsed);
-                    }
-                });
-                
-                // Start expanded on mobile for better visibility
-                // Only collapse if user previously chose to collapse it
-                const savedState = localStorage.getItem('leaderboardCollapsed');
-                if (savedState === 'true') {
-                    leaderboardBox.classList.add('collapsed');
-                }
-                // Remove the automatic collapse on mobile
-            }
             
             const joystick = document.getElementById('virtualJoystick');
             const knob = document.getElementById('joystickKnob');

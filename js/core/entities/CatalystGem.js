@@ -1,4 +1,6 @@
-        class CatalystGem {
+import { MagnetismMixin, MAGNETISM_PRESETS } from '../utilities/magnetism.js';
+
+class CatalystGem {
             constructor(x, y) {
                 this.x = x;
                 this.y = y;
@@ -6,6 +8,9 @@
                 this.pulse = Math.random() * Math.PI * 2;
                 this.rotation = 0;
                 this.sparkleTime = 0;
+                
+                this.magnetRange = 120;
+                this.magnetStrength = 5.0;
             }
             
             update(deltaTime = 1) {
@@ -13,29 +18,7 @@
                 this.rotation += 0.02 * deltaTime;
                 this.sparkleTime += 0.1 * deltaTime;
                 
-                // Magnetism effect
-                const magnetRange = 120; // Slightly larger range for power-ups
-                const magnetRangeSq = magnetRange * magnetRange;
-                const magnetStrength = 5.0; // Stronger pull for power-ups
-                const sizeSq = this.size * this.size;
-                
-                for (const snake of snakes) {
-                    if (!snake.alive) continue;
-                    
-                    const dx = snake.x - this.x;
-                    const dy = snake.y - this.y;
-                    const distanceSq = dx * dx + dy * dy;
-                    
-                    if (distanceSq < magnetRangeSq && distanceSq > sizeSq) {
-                        const distance = Math.sqrt(distanceSq);
-                        const dirX = dx / distance;
-                        const dirY = dy / distance;
-                        const pullStrength = (1 - distance / magnetRange) * magnetStrength;
-                        
-                        this.x += dirX * pullStrength;
-                        this.y += dirY * pullStrength;
-                    }
-                }
+                MagnetismMixin.applyMagnetism.call(this, 1, true);
             }
             
             draw() {
@@ -43,7 +26,6 @@
                 const screenX = screen.x;
                 const screenY = screen.y;
                 
-                // Skip if off-screen - tighter culling on mobile
                 const margin = isMobile ? 30 : 50;
                 if (screenX < -margin || screenX > canvas.width + margin ||
                     screenY < -margin || screenY > canvas.height + margin) return;
@@ -64,14 +46,14 @@
                 ctx.fillRect(-glowSize, -glowSize, glowSize * 2, glowSize * 2);
                 
                 // Catalyst gem emoji
-                ctx.save(); // Save canvas state for emoji
-                ctx.globalAlpha = 1; // Ensure full opacity
-                ctx.fillStyle = 'black'; // Set solid color for emoji
+                ctx.save();
+                ctx.globalAlpha = 1;
+                ctx.fillStyle = 'black';
                 ctx.font = `${this.size * 2 * scale * cameraZoom}px Arial`;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText('💎', 0, 0);
-                ctx.restore(); // Restore canvas state
+                ctx.restore();
                 
                 // Sparkle particles
                 for (let i = 0; i < 6; i++) {
