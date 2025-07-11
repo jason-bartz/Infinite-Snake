@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="en-us">
 <head>
-    <title>Credits - Infinite Snake | Music & Sound Attribution</title>
+    <title>Credits - Infinite Snake | Game Credits & Attribution</title>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Credits and attribution for music and sound effects used in Infinite Snake." />
+    <meta name="description" content="Complete credits for Infinite Snake game including development, music, and sound attribution." />
     <meta property="og:title" content="Credits - Infinite Snake" />
-    <meta property="og:description" content="Credits and attribution for music and sound effects used in Infinite Snake." />
+    <meta property="og:description" content="Complete credits for Infinite Snake game including development, music, and sound attribution." />
     <meta property="og:image" content="https://infinitesnake.io/assets/snake-logo.png" />
     <meta property="og:url" content="https://infinitesnake.io/credits" />
     
@@ -136,6 +136,30 @@
                 4px 4px 0 rgba(0,0,0,0.5);
         }
         
+        .dev-section {
+            border-color: var(--snes-gold);
+            box-shadow: 
+                inset -2px -2px 0 rgba(248, 216, 0, 0.5),
+                inset 2px 2px 0 rgba(0, 0, 0, 0.8),
+                4px 4px 0 rgba(0,0,0,0.5);
+        }
+        
+        .tech-section {
+            border-color: var(--snes-green);
+            box-shadow: 
+                inset -2px -2px 0 rgba(0, 232, 0, 0.5),
+                inset 2px 2px 0 rgba(0, 0, 0, 0.8),
+                4px 4px 0 rgba(0,0,0,0.5);
+        }
+        
+        .thanks-section {
+            border-color: var(--snes-cosmic-pink);
+            box-shadow: 
+                inset -2px -2px 0 rgba(248, 40, 248, 0.5),
+                inset 2px 2px 0 rgba(0, 0, 0, 0.8),
+                4px 4px 0 rgba(0,0,0,0.5);
+        }
+        
         h2 {
             font-size: 16px;
             color: var(--snes-cosmic-teal);
@@ -143,6 +167,18 @@
             text-shadow: 2px 2px 0 var(--snes-black);
             letter-spacing: 1px;
             text-transform: uppercase;
+        }
+        
+        .dev-section h2 {
+            color: var(--snes-gold);
+        }
+        
+        .tech-section h2 {
+            color: var(--snes-green);
+        }
+        
+        .thanks-section h2 {
+            color: var(--snes-cosmic-pink);
         }
         
         h3 {
@@ -166,6 +202,26 @@
             line-height: 16px;
             color: var(--snes-white);
             margin: 10px 0;
+        }
+        
+        .role {
+            background: rgba(40, 40, 60, 0.5);
+            border: 2px solid var(--snes-dark-purple);
+            padding: 10px;
+            margin: 10px 0;
+        }
+        
+        .role-title {
+            color: var(--snes-cosmic-teal);
+            font-size: 10px;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+        
+        .role-name {
+            color: var(--snes-gold);
+            font-size: 8px;
+            font-weight: bold;
         }
         
         ul {
@@ -214,6 +270,31 @@
             font-size: 8px;
         }
         
+        .copyright-info {
+            text-align: center;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid var(--snes-gray);
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 8px;
+            color: var(--snes-gray);
+        }
+        
+        .tech-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .tech-item {
+            background: rgba(20, 60, 20, 0.5);
+            border: 2px solid var(--snes-green);
+            padding: 8px;
+            text-align: center;
+            font-size: 8px;
+        }
+        
         @media (max-width: 768px) {
             .container {
                 padding: 10px;
@@ -230,6 +311,10 @@
             .back-button {
                 padding: 8px 16px;
                 font-size: 8px;
+            }
+            
+            .tech-list {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -251,14 +336,67 @@
         
         <header>
             <h1>Credits</h1>
-            <p class="subtitle">Music & Sound Attribution</p>
+            <p class="subtitle">Infinite Snake Development Team</p>
         </header>
         
-        <div class="section">
-            <h2>Background Music</h2>
-            <p>All music tracks produced by <strong>ZapSplat</strong> and licensed under the <span class="license">ZapSplat Standard License</span>.</p>
+        <!-- Special Thanks Section moved to top -->
+        <div class="section thanks-section">
+            <h2>Special Thanks</h2>
             
-            <h3>Track List</h3>
+            <h3>The Story Behind Infinite Snake</h3>
+            <div class="role">
+                <p>I created Infinite Snake as a surprise for my son. He absolutely loves <a href="https://neal.fun/infinite-craft/" target="_blank">Infinite Craft</a> and <a href="https://snake.io/" target="_blank">snake.io</a>, so before leaving for a work trip, I wanted to give him something special, a game that combined both of his favorites. What started as a surprise gift has become something we both enjoy playing together.</p>
+                <p>The game will always be 100% free because I want other families to enjoy this unique experience too. If you'd like to support development, you can <a href="https://buymeacoffee.com/jasonbartz" target="_blank">buy me a coffee</a>.</p>
+            </div>
+            
+            <h3>Inspiration</h3>
+            <p>Special thanks to Neal Agarwal for creating <a href="https://neal.fun/infinite-craft/" target="_blank">Infinite Craft</a>, and to the classic Snake games and <a href="https://snake.io/" target="_blank">snake.io</a> that provided the foundation for this unique combination.</p>
+        </div>
+        
+        <!-- Game Development Section -->
+        <div class="section dev-section">
+            <h2>Game Development</h2>
+            
+            <div class="role">
+                <div class="role-title">Solo Developer</div>
+                <div class="role-name">Jason Bartz</div>
+                <p>Game Development • Design • Quality(?) Assurance • Bug Generation • AI Prompt Design</p>
+            </div>
+            
+            <h3>Development Assistance</h3>
+            <div class="role">
+                <div class="role-title">Senior Developer Agent</div>
+                <div class="role-name">Claude Code by Anthropic</div>
+                <p>Coding assistance, debugging support, emotional support, and development guidance. Riding the vibes.</p>
+            </div>
+        </div>
+        
+        <!-- Technology Section -->
+        <div class="section tech-section">
+            <h2>Development Tools & Technologies</h2>
+            
+            <h3>Core Technologies</h3>
+            <div class="tech-list">
+                <div class="tech-item">JavaScript</div>
+                <div class="tech-item">HTML5</div>
+                <div class="tech-item">CSS3</div>
+            </div>
+            
+            <h3>Platforms & Infrastructure</h3>
+            <div class="tech-list">
+                <div class="tech-item">Vercel</div>
+                <div class="tech-item">Upstash Redis</div>
+                <div class="tech-item">Supabase</div>
+                <div class="tech-item">Node.js</div>
+            </div>
+        </div>
+        
+        <!-- Audio Section -->
+        <div class="section">
+            <h2>Audio & Music</h2>
+            
+            <h3>Background Music</h3>
+            <p>All music tracks produced by <strong>ZapSplat</strong> and licensed under the <span class="license">ZapSplat Standard License</span>.</p>
             
             <div class="track-info">
                 <h4>1. Bright White Lights</h4>
@@ -310,10 +448,8 @@
                 <p class="producer">Producer: ZapSplat</p>
                 <p><a href="https://www.zapsplat.com/music/game-music-repetitive-dark-dramatic-action-music-bed-pounding-drums-and-a-chugging-bass/" target="_blank">Source →</a></p>
             </div>
-        </div>
-        
-        <div class="section">
-            <h2>Sound Effects</h2>
+            
+            <h3>Sound Effects</h3>
             <p>All sound effects licensed under the <span class="license">ZapSplat Standard License</span>.</p>
             
             <div class="track-info">
@@ -429,14 +565,19 @@
             </div>
         </div>
         
+        <!-- License Information -->
         <div class="section">
             <h2>License Information</h2>
             <p>All music tracks and sound effects are used under the <a href="https://www.zapsplat.com/license-type/standard-license/" target="_blank">ZapSplat Standard License</a>, which permits use in personal and commercial projects with attribution.</p>
+            
+            <p>The Press Start 2P font is licensed under the <a href="https://scripts.sil.org/OFL" target="_blank">SIL Open Font License</a>.</p>
         </div>
         
-        <div class="section" style="text-align: center;">
-            <h2>Attribution</h2>
-            <p>Music and Sound Effects from <a href="https://www.zapsplat.com" target="_blank">ZapSplat.com</a></p>
+        <!-- Copyright -->
+        <div class="copyright-info">
+            <p><strong>Infinite Snake</strong></p>
+            <p>© 2024 All rights reserved.</p>
+            <p>Visit us at <a href="https://infinitesnake.io" target="_blank">infinitesnake.io</a></p>
         </div>
     </div>
     
