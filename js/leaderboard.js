@@ -1,5 +1,5 @@
-// js/supabase.js - Upstash Redis Leaderboard Client
-// This maintains compatibility with your existing game code
+// js/leaderboard.js - Leaderboard Client (Upstash Redis)
+// Handles score submission and leaderboard data retrieval
 
 const API_ENDPOINT = '/api/leaderboard';
 
@@ -13,9 +13,9 @@ let leaderboardCache = {
 
 const CACHE_DURATION = 30000; // 30 seconds
 
-// Initialize (kept for compatibility with existing code)
-export async function initializeAuth() {
-  console.log('Upstash Leaderboard system initializing...');
+// Initialize leaderboard system
+export async function initializeLeaderboard() {
+  console.log('Leaderboard system initializing...');
   
   // Test API connection
   try {
@@ -215,5 +215,6 @@ export async function getPlayerRank(score, period = 'daily') {
   return null;
 }
 
-// For backward compatibility - no longer using Supabase
-export const supabase = null;
+// Backward compatibility alias
+export const initializeAuth = initializeLeaderboard;
+

@@ -2497,8 +2497,8 @@
                                     const resultData = window.elementLoader.elements.get(resultId);
                                     
                                     // Track discovery event
-                                    if (window.supabaseModule && window.supabaseModule.addGameEvent) {
-                                        window.supabaseModule.addGameEvent('discovery', {
+                                    if (window.leaderboardModule && window.leaderboardModule.addGameEvent) {
+                                        window.leaderboardModule.addGameEvent('discovery', {
                                             element_id: resultId,
                                             element_name: resultData?.n || 'Unknown',
                                             recipe: [newElementId, existingId],
@@ -2921,8 +2921,8 @@
                             totalKills: killer.kills
                         });
                         
-                        if (window.supabaseModule && window.supabaseModule.addGameEvent) {
-                            window.supabaseModule.addGameEvent('kill', {
+                        if (window.leaderboardModule && window.leaderboardModule.addGameEvent) {
+                            window.leaderboardModule.addGameEvent('kill', {
                                 victim_name: this.name,
                                 victim_score: this.score,
                                 victim_length: this.segments.length,
@@ -8386,8 +8386,8 @@
         }
         
         // Leaderboard Integration Variables
-        // Make supabaseModule globally accessible
-        window.supabaseModule = null;
+        // Make leaderboardModule globally accessible
+        window.leaderboardModule = null;
         let leaderboardSubmitted = false;
         let lastSubmissionTime = 0; // Track when last submission started
         let currentGameSessionId = null;
@@ -8415,8 +8415,8 @@
         // Test function to verify script is working
         window.testLeaderboard = function() {
             console.log('=== LEADERBOARD DEBUG INFO ===');
-            console.log('supabaseModule loaded:', !!supabaseModule);
-            console.log('submitScore function exists:', !!(window.supabaseModule && window.supabaseModule.submitScore));
+            console.log('leaderboardModule loaded:', !!leaderboardModule);
+            console.log('submitScore function exists:', !!(window.leaderboardModule && window.leaderboardModule.submitScore));
             console.log('leaderboardSubmitted:', leaderboardSubmitted);
             console.log('gameMode:', typeof gameMode !== 'undefined' ? gameMode : 'undefined');
             console.log('playerSnake:', playerSnake ? { alive: playerSnake.alive, score: playerSnake.score } : 'null');
@@ -8427,7 +8427,7 @@
         // Test automatic submission manually
         window.testAutoSubmit = async function() {
             console.log('Testing automatic submission...');
-            if (!window.supabaseModule || !window.supabaseModule.submitScore) {
+            if (!window.leaderboardModule || !window.leaderboardModule.submitScore) {
                 console.error('Supabase module not loaded!');
                 return;
             }
@@ -8443,7 +8443,7 @@
             console.log('Submitting test data:', testData);
             
             try {
-                const result = await window.supabaseModule.submitScore(
+                const result = await window.leaderboardModule.submitScore(
                     testData.username,
                     testData.score,
                     testData.elements,
@@ -8458,16 +8458,16 @@
             }
         }
         
-        // Initialize Supabase when the module loads
-        async function initSupabase() {
+        // Initialize Leaderboard when the module loads
+        async function initLeaderboard() {
             try {
-                console.log('[SUPABASE] Starting initialization...');
-                window.supabaseModule = await import('./js/supabase.js');
-                console.log('[SUPABASE] Module loaded:', window.supabaseModule);
+                console.log('[LEADERBOARD] Starting initialization...');
+                window.leaderboardModule = await import('./js/leaderboard.js');
+                console.log('[LEADERBOARD] Module loaded:', window.leaderboardModule);
                 
-                if (window.supabaseModule && window.supabaseModule.initializeAuth) {
-                    await window.supabaseModule.initializeAuth();
-                    console.log('[SUPABASE] Successfully initialized!');
+                if (window.leaderboardModule && window.leaderboardModule.initializeLeaderboard) {
+                    await window.leaderboardModule.initializeLeaderboard();
+                    console.log('[LEADERBOARD] Successfully initialized!');
                     
                     // Update any waiting submission forms
                     const statusEl = document.getElementById('submissionStatus');
@@ -8475,11 +8475,11 @@
                         statusEl.innerHTML = '';
                     }
                 } else {
-                    console.error('[SUPABASE] Module loaded but functions not found');
+                    console.error('[LEADERBOARD] Module loaded but functions not found');
                 }
             } catch (error) {
-                console.error('[SUPABASE] Failed to initialize:', error);
-                console.error('[SUPABASE] Error details:', error.message, error.stack);
+                console.error('[LEADERBOARD] Failed to initialize:', error);
+                console.error('[LEADERBOARD] Error details:', error.message, error.stack);
                 
                 // Show error in submission status if visible
                 const statusEl = document.getElementById('submissionStatus');
@@ -8490,24 +8490,24 @@
         }
         
         // Initialize Supabase immediately on page load
-        console.log('[SUPABASE] Initial load - starting initialization');
-        initSupabase();
+        console.log('[LEADERBOARD] Initial load - starting initialization');
+        initLeaderboard();
         
         // Also try to init again after a delay in case it failed
         setTimeout(() => {
-            if (!supabaseModule) {
-                console.log('[SUPABASE] Retrying initialization (2s delay)...');
-                initSupabase();
+            if (!leaderboardModule) {
+                console.log('[LEADERBOARD] Retrying initialization (2s delay)...');
+                initLeaderboard();
             } else {
-                console.log('[SUPABASE] Module already loaded, no retry needed');
+                console.log('[LEADERBOARD] Module already loaded, no retry needed');
             }
         }, 2000);
         
         // Add another retry after 5 seconds if still not loaded
         setTimeout(() => {
-            if (!supabaseModule) {
-                console.log('[SUPABASE] Retrying initialization (5s delay)...');
-                initSupabase();
+            if (!leaderboardModule) {
+                console.log('[LEADERBOARD] Retrying initialization (5s delay)...');
+                initLeaderboard();
             }
         }, 5000);
         
@@ -8588,7 +8588,7 @@
             }
             
             // Check if Supabase module is loaded
-            if (!supabaseModule) {
+            if (!leaderboardModule) {
                 console.error('Supabase module not loaded');
                 document.getElementById('submissionStatus').innerHTML = 
                     '<span style="color: #ff4444;">Leaderboard service not ready. Please try again.</span>';
@@ -8644,7 +8644,7 @@
                 
                 let result;
                 try {
-                    result = await window.supabaseModule.submitScore(
+                    result = await window.leaderboardModule.submitScore(
                         username,
                         Math.floor(playerSnake.score),
                         playerDiscoveredElements.size,
@@ -8802,8 +8802,8 @@
                 const playerName = localStorage.getItem('playerName') || 'Anonymous';
                 const playTime = gameSessionStartTime ? Math.floor((Date.now() - gameSessionStartTime) / 1000) : 0;
                 
-                if (window.supabaseModule && window.supabaseModule.submitScore) {
-                    window.supabaseModule.submitScore(
+                if (window.leaderboardModule && window.leaderboardModule.submitScore) {
+                    window.leaderboardModule.submitScore(
                         playerName,
                         Math.floor(finalScore),
                         finalDiscoveries,
@@ -9229,13 +9229,13 @@
             event.target.classList.add('active');
             event.target.style.color = '#4ecdc4';
             
-            if (!supabaseModule) return;
+            if (!leaderboardModule) return;
             
             const entriesDiv = document.getElementById('pauseLeaderboardEntries');
             entriesDiv.innerHTML = '<div style="color: #888; text-align: center; padding: 20px;">Loading...</div>';
             
             try {
-                const data = await window.supabaseModule.getLeaderboard(period, 10); // Top 10 only
+                const data = await window.leaderboardModule.getLeaderboard(period, 10); // Top 10 only
                 
                 if (!data || data.length === 0) {
                     entriesDiv.innerHTML = '<div style="color: #888; text-align: center; padding: 20px;">No scores yet. Be the first!</div>';
@@ -9266,13 +9266,13 @@
         }
         
         async function loadLeaderboard(period) {
-            if (!supabaseModule) return;
+            if (!leaderboardModule) return;
             
             const entriesDiv = document.getElementById('leaderboardEntries');
             entriesDiv.innerHTML = '<div style="color: #888; text-align: center; padding: 40px; font-family: monospace;">Loading leaderboard...</div>';
             
             try {
-                leaderboardData = await window.supabaseModule.getLeaderboard(period, 100);
+                leaderboardData = await window.leaderboardModule.getLeaderboard(period, 100);
                 
                 if (!leaderboardData || leaderboardData.length === 0) {
                     entriesDiv.innerHTML = '<div style="color: #888; text-align: center; padding: 40px; font-family: monospace;">No scores yet. Be the first!</div>';
@@ -9420,8 +9420,8 @@
                         hasScore: playerSnake.score > 0,
                         gameSessionStartTime: gameSessionStartTime,
                         currentTime: Date.now(),
-                        supabaseModuleLoaded: !!window.supabaseModule,
-                        submitScoreFunctionExists: !!(window.supabaseModule && window.supabaseModule.submitScore)
+                        leaderboardModuleLoaded: !!window.leaderboardModule,
+                        submitScoreFunctionExists: !!(window.leaderboardModule && window.leaderboardModule.submitScore)
                     });
                     
                     if (gameMode === 'infinite' && playerSnake.score > 0) {
@@ -9444,11 +9444,11 @@
                             });
                             
                             // Submit score automatically
-                            if (window.supabaseModule && window.supabaseModule.submitScore) {
+                            if (window.leaderboardModule && window.leaderboardModule.submitScore) {
                                 console.log('[LEADERBOARD] Supabase module found, submitting...');
                                 
                                 // Call the working submitScore function with ALL required parameters
-                                window.supabaseModule.submitScore(
+                                window.leaderboardModule.submitScore(
                                     playerName,
                                     Math.floor(playerSnake.score),
                                     playerDiscoveredElements.size,
@@ -9496,18 +9496,18 @@
                                 });
                             } else {
                                 console.error('[LEADERBOARD] Supabase module not available!', {
-                                    module: window.supabaseModule,
-                                    submitScore: window.supabaseModule?.submitScore
+                                    module: window.leaderboardModule,
+                                    submitScore: window.leaderboardModule?.submitScore
                                 });
                                 
                                 // Try to initialize it now if not loaded
-                                if (!window.supabaseModule) {
+                                if (!window.leaderboardModule) {
                                     console.log('[LEADERBOARD] Attempting to initialize Supabase module now...');
-                                    initSupabase().then(() => {
-                                        if (window.supabaseModule && window.supabaseModule.submitScore) {
+                                    initLeaderboard().then(() => {
+                                        if (window.leaderboardModule && window.leaderboardModule.submitScore) {
                                             console.log('[LEADERBOARD] Module loaded! Retrying submission...');
                                             // Retry the submission
-                                            window.supabaseModule.submitScore(
+                                            window.leaderboardModule.submitScore(
                                                 playerName,
                                                 Math.floor(playerSnake.score),
                                                 playerDiscoveredElements.size,
@@ -10975,8 +10975,8 @@
                 lastSubmissionTime = 0; // Reset submission timestamp
                 gameSessionStartTime = Date.now();
                 
-                if (window.supabaseModule) {
-                    window.supabaseModule.startGameSession().then(sessionId => {
+                if (window.leaderboardModule) {
+                    window.leaderboardModule.startGameSession().then(sessionId => {
                         currentGameSessionId = sessionId;
                     });
                 }
@@ -12207,17 +12207,17 @@
                         leaderboardSubmitted,
                         playerScore: playerSnake.score,
                         hasScore: playerSnake.score > 0,
-                        moduleLoaded: !!(window.supabaseModule && window.supabaseModule.submitScore)
+                        moduleLoaded: !!(window.leaderboardModule && window.leaderboardModule.submitScore)
                     });
                     if (playerSnake.score > 0 && canSubmitScore()) {
                         const submitName = localStorage.getItem('playerName') || 'Anonymous';
                         const submitTime = gameSessionStartTime ? Math.floor((Date.now() - gameSessionStartTime) / 1000) : 0;
                         
                         // Try to submit right away if module is loaded
-                        if (window.supabaseModule && window.supabaseModule.submitScore) {
+                        if (window.leaderboardModule && window.leaderboardModule.submitScore) {
                             console.log('[DEATH] Submitting score NOW...');
                             try {
-                                window.supabaseModule.submitScore(
+                                window.leaderboardModule.submitScore(
                                 submitName,
                                 Math.floor(playerSnake.score),
                                 playerDiscoveredElements.size,
@@ -12276,9 +12276,9 @@
                             console.error('[DEATH] Supabase not loaded, will retry...');
                             // Keep trying every 500ms until it works
                             const retryInterval = setInterval(() => {
-                                if (window.supabaseModule && window.supabaseModule.submitScore && canSubmitScore()) {
+                                if (window.leaderboardModule && window.leaderboardModule.submitScore && canSubmitScore()) {
                                     console.log('[DEATH] Retrying submission...');
-                                    window.supabaseModule.submitScore(
+                                    window.leaderboardModule.submitScore(
                                         submitName,
                                         Math.floor(playerSnake.score),
                                         playerDiscoveredElements.size,
@@ -12332,8 +12332,8 @@
                             
                             console.log('[AUTO-SUBMIT] Attempting automatic score submission...');
                             
-                            if (window.supabaseModule && window.supabaseModule.submitScore) {
-                                window.supabaseModule.submitScore(
+                            if (window.leaderboardModule && window.leaderboardModule.submitScore) {
+                                window.leaderboardModule.submitScore(
                                     playerName,
                                     Math.floor(playerSnake.score),
                                     playerDiscoveredElements.size,
@@ -12382,8 +12382,8 @@
                     });
                     
                     // Track death event
-                    if (supabaseModule && supabaseModule.addGameEvent) {
-                        supabaseModule.addGameEvent('death', {
+                    if (leaderboardModule && leaderboardModule.addGameEvent) {
+                        leaderboardModule.addGameEvent('death', {
                             score: playerSnake.score,
                             discoveries: playerSnake.discoveries,
                             kills: playerSnake.kills,
@@ -12504,8 +12504,8 @@
                     }
                     
                     // Start a new game session for proper server-side validation
-                    if (gameMode === 'infinite' && supabaseModule) {
-                        supabaseModule.startGameSession().then(sessionId => {
+                    if (gameMode === 'infinite' && leaderboardModule) {
+                        leaderboardModule.startGameSession().then(sessionId => {
                             currentGameSessionId = sessionId;
                         });
                     }

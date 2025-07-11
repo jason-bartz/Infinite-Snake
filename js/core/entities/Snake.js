@@ -649,8 +649,8 @@ class Snake {
                 
                 const resultData = window.elementLoader.elements.get(resultId);
                 
-                if (window.supabaseModule && window.supabaseModule.addGameEvent) {
-                    window.supabaseModule.addGameEvent('discovery', {
+                if (window.leaderboardModule && window.leaderboardModule.addGameEvent) {
+                    window.leaderboardModule.addGameEvent('discovery', {
                         element_id: resultId,
                         element_name: resultData?.n || 'Unknown',
                         recipe: [elem1Id, elem2Id],
