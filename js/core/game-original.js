@@ -11087,6 +11087,9 @@
             gameStarted = true;
             gameStartTime = Date.now();
             
+            // Signal that game is initialized for performance optimizations
+            window.gameInitialized = true;
+            
             // Reset session flags
             window.firstPlaceAchievedThisGame = false;
             
@@ -13274,3 +13277,8 @@
                 });
             }
         }, { once: true });
+        
+        // Expose key functions for performance integration
+        window.gameLoop = gameLoop;
+        window.resizeCanvas = resizeCanvas;
+        window.drawBackground = drawBackground;
