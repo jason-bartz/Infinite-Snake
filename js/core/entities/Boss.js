@@ -245,8 +245,16 @@ class Boss extends Snake {
         
         this.specialAttackCounter++;
         
-        if (this.bossType === 'zephyrus' && this.specialAttackCounter % this.vacuumAttackInterval === 0) {
-            this.createVacuumAttack();
+        if (this.bossType === 'zephyrus') {
+            // Alternate between vacuum and tornado attacks
+            if (this.specialAttackCounter % this.vacuumAttackInterval === 0) {
+                this.createVacuumAttack();
+            } else if (this.specialAttackCounter % 60 === 0) {
+                // Dispatch tornados every 60 frames (1 second)
+                this.dispatchTornado();
+            } else {
+                this.createProjectileAttack();
+            }
         } else {
             this.createProjectileAttack();
         }
@@ -535,6 +543,36 @@ class Boss extends Snake {
             ctx.stroke();
             ctx.restore();
         }
+    }
+    
+    dispatchTornado() {
+        const tornadoCount = 5;
+        for (let i = 0; i < tornadoCount; i++) {
+            const spreadAngle = (Math.PI * 2 / tornadoCount) * i;
+            const spawnDistance = 50;
+            const spawnX = this.x + Math.cos(spreadAngle) * spawnDistance;
+            const spawnY = this.y + Math.sin(spreadAngle) * spawnDistance;
+            
+            bossProjectiles.push({
+                x: spawnX,
+                y: spawnY,
+                vx: Math.cos(spreadAngle) * 2,
+                vy: Math.sin(spreadAngle) * 2,
+                type: 'tornado',
+                owner: this,
+                damage: 2,
+                size: 40,
+                color: '#87ceeb',
+                emoji: '🌪️',
+                rotationSpeed: 0.2,
+                homingStrength: 0.02,
+                lifetime: 600,
+                knockback: true,
+                knockbackForce: 20
+            });
+        }
+        
+        showMessage("Zephyrus unleashes twisters!", 'purple', 2000);
     }
 }
 
