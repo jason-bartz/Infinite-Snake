@@ -21,6 +21,9 @@
             { path: 'core/shared-context.js', name: 'SharedContext' },
             { path: 'core/game-main.js', name: 'GameMain', isMain: true },
             
+            // Entity modules
+            { path: 'core/entities/EasterEggElements.js', name: 'EasterEggElements' },
+            
             // Performance modules
             { path: 'performance/debug-config.js', name: 'DebugConfig' },
             { path: 'performance/logger.js', name: 'Logger' },
@@ -36,6 +39,7 @@
             'DebugConfig',
             'Logger',
             'SharedContext',
+            'EasterEggElements',
             'MobileConfig',
             'PerformanceSystem',
             'MobileUI',

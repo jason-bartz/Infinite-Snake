@@ -15,6 +15,8 @@ const skinIdMapping = {
         'gnome': 'world-traveler',
         'floral': 'bo-kay',
         'brick-man': 'the-special',
+        'ruby': 'ruby', // Same ID
+        'chirpy': 'chirpy', // Same ID
         
         // Uncommon skins
         'pod-player': 'poddington',
@@ -54,7 +56,11 @@ const skinIdMapping = {
         'unicorn': 'tres-commas',
         'nyan': 'pastry-cat',
         'infinity-glove': 'snappy',
-        'lovecraft': 'eldritch-horror'
+        'lovecraft': 'eldritch-horror',
+        'icecream': 'sir-whirl',
+        'popcorn': 'colonel-kernel',
+        'pixel': 'pixel',  // Same ID
+        'midnight': 'midnight'  // Same ID
     },
     
     // Reverse mapping (new IDs to old IDs)

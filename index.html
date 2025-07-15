@@ -2649,8 +2649,9 @@
             display: none;
             animation: fadeIn 0.3s;
             flex: 1;
-            overflow-y: auto;
+            overflow: hidden;
             min-height: 0;
+            position: relative;
         }
         
         .tab-content.active {
@@ -2808,10 +2809,15 @@
             padding: 20px;
             background: rgba(0,0,0,0.5);
             border-radius: 10px;
-            flex: 1;
-            overflow-y: auto;
+            height: 100%;
             display: flex;
             flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
         }
         
         #skinSelection h4 {
@@ -2828,15 +2834,40 @@
         }
         
         #skinGrid {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 10px;
+            display: flex;
+            flex-direction: row;
+            gap: 15px;
             margin-top: 15px;
-            flex: 1;
-            align-content: start;
-            overflow-y: auto;
-            overflow-x: hidden;
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding-bottom: 15px;
             padding-right: 10px;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+            scrollbar-color: var(--snes-cosmic-purple) rgba(255, 255, 255, 0.1);
+            flex: 1;
+            align-items: stretch;
+            border: none;
+        }
+        
+        /* Webkit scrollbar styling for horizontal scroll */
+        #skinGrid::-webkit-scrollbar {
+            height: 8px;
+        }
+        
+        #skinGrid::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+        
+        #skinGrid::-webkit-scrollbar-thumb {
+            background: var(--snes-cosmic-purple);
+            border-radius: 4px;
+        }
+        
+        #skinGrid::-webkit-scrollbar-thumb:hover {
+            background: var(--snes-cosmic-pink);
         }
         
         .skin-item {
@@ -2844,15 +2875,17 @@
             background: rgba(255,255,255,0.1);
             border: 2px solid rgba(255,255,255,0.2);
             border-radius: 8px;
-            padding: 8px;
+            padding: 10px;
             cursor: pointer;
             transition: all 0.3s;
             text-align: center;
-            aspect-ratio: 1;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            flex-shrink: 0;
+            width: 120px;
+            min-height: 180px;
         }
         
         .skin-item:hover {
@@ -2887,21 +2920,29 @@
         .skin-image {
             width: 100%;
             height: 100%;
-            max-width: 60px;
-            max-height: 60px;
-            margin: 0 auto 3px;
+            max-width: 90px;
+            max-height: 90px;
+            margin: 0 auto 10px;
             display: block;
             image-rendering: pixelated;
             image-rendering: -moz-crisp-edges;
             image-rendering: crisp-edges;
             object-fit: contain;
+            flex-shrink: 0;
         }
         
         .skin-name {
-            font-size: 10px;
+            font-size: 11px;
             color: #CCC;
-            margin-top: 3px;
-            line-height: 1.2;
+            margin-top: 10px;
+            line-height: 1.3;
+            word-wrap: break-word;
+            white-space: normal;
+            width: calc(100% - 20px);
+            text-align: center;
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
         }
         
         .skin-unlock-icon {
@@ -2909,6 +2950,11 @@
             top: 5px;
             right: 5px;
             font-size: 16px;
+        }
+        
+        /* Hide the rarity indicator bar */
+        .rarity-indicator {
+            display: none;
         }
         /* Mobile pause menu fixes */
         @media (max-width: 800px) {
@@ -2920,23 +2966,24 @@
             }
             
             #skinGrid {
-                grid-template-columns: repeat(4, 1fr);
-                gap: 8px;
-                padding-right: 0;
-                overflow-x: hidden;
+                gap: 10px;
+                padding-right: 10px;
             }
             
             .skin-item {
-                padding: 6px;
+                padding: 8px;
+                width: 100px;
+                min-height: 140px;
             }
             
             .skin-image {
-                max-width: 50px;
-                max-height: 50px;
+                max-width: 70px;
+                max-height: 70px;
             }
             
             .skin-name {
-                font-size: 8px;
+                font-size: 9px;
+                line-height: 1.2;
             }
             
             .discovery-grid {
@@ -2997,9 +3044,11 @@
                 max-height: 85vh;
             }
             
-            #skinGrid,
             .discovery-grid {
                 grid-template-columns: repeat(5, 1fr);
+            }
+            
+            .discovery-grid {
                 max-height: 200px;
             }
         }
@@ -3555,7 +3604,7 @@
             <a href="/credits.html" style="color: #888; text-decoration: none; font-family: 'Press Start 2P', monospace; font-size: 10px;">Credits</a>
         </div>
         <div id="splashContent">
-            <img src="assets/word-logo.webp" alt="Infinite Snake" id="splashLogo" style="width: 400px; max-width: 80%; margin-bottom: 30px;" onerror="this.style.display='none'; document.getElementById('splashTitle').style.display='block';">
+            <img src="assets/preview-logo.png" alt="Infinite Snake Preview" id="splashLogo" style="width: 400px; max-width: 80%; margin-bottom: 30px;" onerror="this.style.display='none'; document.getElementById('splashTitle').style.display='block';">
             <h1 id="splashTitle">Infinite Snake</h1>
             <p>Welcome to what's left.<br><br>
             The Universe collapsed, scattered its contents across infinite coils of nothing. You're the Infinite Snake - part cleanup crew, part living library.<br><br>
@@ -3920,7 +3969,7 @@
                     </div>
                     
                     <!-- Skin Grid Container -->
-                    <div id="skinGrid" class="skin-grid-new"></div>
+                    <div id="skinGrid"></div>
                 </div>
             </div>
             
@@ -4613,11 +4662,10 @@
             
             /* Fix skin grid for mobile */
             #skinGrid {
-                grid-template-columns: repeat(3, 1fr) !important;
                 gap: 8px !important;
-                padding-right: 5px !important;
-                overflow-x: hidden !important;
+                padding-right: 10px !important;
             }
+            
             
             .skin-item {
                 padding: 6px !important;
@@ -4677,9 +4725,11 @@
             
             /* Tab content adjustments */
             .tab-content {
-                padding: 8px !important;
-                overflow-y: auto !important;
-                -webkit-overflow-scrolling: touch !important;
+                flex: 1;
+                /* Remove display: flex here - only active tabs should display */
+                flex-direction: column;
+                min-height: 0;
+                overflow: hidden;
             }
             
             /* Ensure proper scrolling */
@@ -4688,7 +4738,9 @@
                 height: 100% !important;
                 display: flex !important;
                 flex-direction: column !important;
+                overflow: hidden !important;
             }
+            
             
             /* Fix button spacing in pause menu */
             #pauseMenu button {
@@ -4749,11 +4801,9 @@
             }
             
             /* Even smaller grids in landscape */
-            #skinGrid,
             .discovery-grid {
                 grid-template-columns: repeat(4, 1fr) !important;
                 gap: 6px !important;
-                overflow-x: hidden !important;
             }
             
             .skin-preview {
@@ -4776,7 +4826,6 @@
         
         /* Small mobile portrait (iPhone SE, etc) */
         @media (max-width: 375px) and (orientation: portrait) {
-            #skinGrid,
             .discovery-grid {
                 grid-template-columns: repeat(2, 1fr) !important;
             }
@@ -4808,6 +4857,100 @@
         }
         
         /* Landscape adjustments - removed hardcoded positions that were overriding CSS variables */
+        
+        
+        
+        
+        /* Ensure tab content takes remaining height */
+        .tab-content {
+            /* Remove fixed height calculation - let flexbox handle it */
+            flex: 1;
+            /* Remove display: flex here - only active tabs should display */
+            flex-direction: column;
+            min-height: 0;
+            overflow: hidden;
+        }
+        
+        /* Rarity tabs should not cause overflow */
+        .rarity-tabs {
+            flex-shrink: 0; /* Prevent tabs from shrinking */
+            margin-bottom: 15px;
+            max-width: 100%;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scrollbar-width: thin;
+        }
+        
+        /* Available unlocks should not cause overflow */
+        #availableUnlocks {
+            flex-shrink: 0;
+            flex-shrink: 0; /* Prevent from shrinking */
+            margin-bottom: 10px;
+        }
+        
+        /* Mobile-specific overflow fixes */
+        @media (max-width: 768px) {
+            #pauseMenu {
+                padding: 20px !important;
+            }
+            
+            .tab-content {
+                flex: 1;
+                min-height: 0;
+            }
+            
+            #skinGrid {
+                padding-bottom: 20px; /* Add extra bottom padding for last row visibility */
+            }
+        }
+        
+        /* Landscape mobile specific */
+        @media screen and (orientation: landscape) and (max-width: 812px) {
+            #pauseMenu {
+                height: 85vh !important;
+                max-height: 85vh !important;
+            }
+            
+            .tab-content {
+                flex: 1;
+                min-height: 0;
+            }
+        }
+        
+        /* Critical flexbox structure fixes for pause menu */
+        #pauseMenu > h2,
+        #pauseMenu > p {
+            flex-shrink: 0;
+        }
+        
+        .tab-navigation {
+            flex-shrink: 0;
+            margin-bottom: 15px;
+        }
+        
+        /* Bottom buttons container */
+        #pauseMenu > div:last-child {
+            flex-shrink: 0;
+            margin-top: 10px;
+        }
+        
+        /* Fix for tab content display */
+        .tab-content.active {
+            display: flex !important;
+            flex-direction: column;
+        }
+        
+        /* Ensure skin selection fills space properly */
+        #skinSelection {
+            flex: 1;
+            min-height: 0;
+        }
+        
+        
+        /* Firefox scrollbar support */
+        * {
+            scrollbar-width: thin;
+        }
     </style>
 
     <!-- External Dependencies -->
@@ -4864,6 +5007,40 @@
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
         gtag('config', 'G-YOUR_ID');
+    </script>
+    
+    <!-- Tab switching function -->
+    <script>
+        // Tab switching for pause menu
+        window.switchTab = function(tabName) {
+            // Update button states
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update content visibility
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            if (tabName === 'skins') {
+                document.getElementById('skinsTab').classList.add('active');
+            } else if (tabName === 'journal') {
+                document.getElementById('journalTab').classList.add('active');
+                // Populate the discovery journal when tab is opened
+                if (typeof populateDiscoveryJournal === 'function') {
+                    populateDiscoveryJournal();
+                }
+            } else if (tabName === 'howto') {
+                document.getElementById('howtoTab').classList.add('active');
+            } else if (tabName === 'leaderboard') {
+                document.getElementById('leaderboardTab').classList.add('active');
+                // Load leaderboard data when tab is opened
+                if (typeof loadPauseLeaderboard === 'function') {
+                    loadPauseLeaderboard('daily');
+                }
+            }
+        };
     </script>
 </body>
 </html>

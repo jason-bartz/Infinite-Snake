@@ -7,6 +7,7 @@ window.mobileStarRenderer = null;
 window.mobileBackgroundOptimizer = null;
 window.assetPreloader = null;
 window.preloadedAssets = null;
+window.easterEggElements = null;
 
 /**
  * Initialize mobile renderers and optimizations
@@ -63,6 +64,15 @@ async function initializeMobileRenderers() {
             useParallax: true,
             renderMode: 'auto'
         });
+        
+        // Initialize Easter Egg Elements
+        if (typeof EasterEggElements !== 'undefined') {
+            window.easterEggElements = new EasterEggElements();
+            
+            // Set initial quality based on device performance
+            const qualityLevel = window.mobileBackgroundOptimizer.currentQuality || 'medium';
+            window.easterEggElements.setQualityLevel(qualityLevel);
+        }
         
         // Hide loading screen
         hideLoadingScreen();
@@ -249,6 +259,21 @@ function renderMobileBackground(ctx, camera) {
         optimizer.incrementDrawCalls();
     }
     
+    // Update and render Easter Egg elements (rare background decorations)
+    if (window.easterEggElements && optimizer.shouldRender('effects')) {
+        // Create game state object for easter eggs
+        const gameState = {
+            worldWidth: window.WORLD_WIDTH || 8000,
+            worldHeight: window.WORLD_HEIGHT || 8000,
+            playerSnake: window.playerSnake || null,
+            bossActive: window.currentBoss && window.currentBoss.isActive || false
+        };
+        
+        window.easterEggElements.update(16.67, gameState);
+        window.easterEggElements.render(ctx, camera);
+        optimizer.incrementDrawCalls();
+    }
+    
     // Render grid pattern
     if (assets && assets.backgrounds.grid && optimizer.shouldRender('grid')) {
         ctx.save();
@@ -354,6 +379,10 @@ window.addEventListener('beforeunload', () => {
     
     if (window.mobileStarRenderer) {
         window.mobileStarRenderer.destroy();
+    }
+    
+    if (window.easterEggElements) {
+        window.easterEggElements.clear();
     }
 });
 

@@ -140,6 +140,10 @@
         const TURN_SPEED = 0.08;
         const ELEMENT_SIZE = 20;
         
+        // Make world size available globally
+        window.WORLD_WIDTH = WORLD_SIZE;
+        window.WORLD_HEIGHT = WORLD_SIZE;
+        
         function worldToScreen(x, y) {
             return {
                 x: (x - camera.x) * cameraZoom + canvas.width / 2,
@@ -287,8 +291,8 @@
         
         let voidOrbs = [];
         let lastVoidOrbSpawn = 0;
-        const VOID_ORB_SPAWN_INTERVAL = 75000;
-        const VOID_ORB_SPAWN_COUNT = 4;
+        const VOID_ORB_SPAWN_INTERVAL = 50000; // Reduced from 75s to 50s for more frequent spawns
+        const VOID_ORB_SPAWN_COUNT = 6; // Increased from 4 to 6 for more orbs on map
         
         let catalystGems = [];
         let lastCatalystGemSpawn = 0;
@@ -416,55 +420,86 @@
         const pixelNebulae = [];
         const nebulaCanvases = new Map();
         
-        for (let i = 0; i < 25; i++) {
-            const size = 250 + Math.random() * 350;
+        // Increase nebula count and distribute more uniformly
+        const nebulaCount = 50; // Increased from 25
+        const nebulaColors = [
+            '#4B0082', '#8B008B', '#191970', '#483D8B', '#6A0DAD', '#9400D3',
+            '#FF1493', '#FF69B4', '#DA70D6', '#BA55D3', '#9370DB', '#8A2BE2',
+            '#00CED1', '#48D1CC', '#00BFFF', '#1E90FF', '#6495ED', '#4169E1'
+        ]; // More color variety including pinks, purples, and blues
+        
+        for (let i = 0; i < nebulaCount; i++) {
+            // Distribute nebulas randomly across the entire world
+            const x = Math.random() * WORLD_SIZE;
+            const y = Math.random() * WORLD_SIZE;
+            
+            const size = 300 + Math.random() * 400; // Slightly larger
             pixelNebulae.push({
-                x: Math.random() * WORLD_SIZE,
-                y: Math.random() * WORLD_SIZE,
+                x: x,
+                y: y,
                 width: size,
                 height: size,
-                color: ['#4B0082', '#8B008B', '#191970', '#483D8B', '#6A0DAD', '#9400D3'][Math.floor(Math.random() * 6)],
-                density: 0.25 + Math.random() * 0.25,
+                color: nebulaColors[Math.floor(Math.random() * nebulaColors.length)],
+                density: 0.3 + Math.random() * 0.3, // Slightly denser
                 clusters: []
             });
         }
         
         const pixelPlanets = [];
-        const gridCols = 5;
-        const gridRows = 4;
-        const cellWidth = WORLD_SIZE / gridCols;
-        const cellHeight = WORLD_SIZE / gridRows;
+        // Create planets with better distribution
+        const planetCount = 35; // Fixed number of planets
+        const planetColors = [
+            { color1: '#5A3A0D', color2: '#704020' },
+            { color1: '#2E5A74', color2: '#3F6E80' },
+            { color1: '#B24430', color2: '#B23000' },
+            { color1: '#165916', color2: '#004400' },
+            { color1: '#9A7016', color2: '#856008' },
+            { color1: '#4A5A6A', color2: '#1F2F2F' },
+            { color1: '#B2497F', color2: '#B21066' },
+            { color1: '#009091', color2: '#005B5B' },
+            { color1: '#654E92', color2: '#4A0D7A' },
+            { color1: '#B26200', color2: '#B24430' },
+            { color1: '#229022', color2: '#165916' }
+        ];
         
-        for (let row = 0; row < gridRows; row++) {
-            for (let col = 0; col < gridCols; col++) {
-                const planetColors = [
-                    { color1: '#5A3A0D', color2: '#704020' },
-                    { color1: '#2E5A74', color2: '#3F6E80' },
-                    { color1: '#B24430', color2: '#B23000' },
-                    { color1: '#165916', color2: '#004400' },
-                    { color1: '#9A7016', color2: '#856008' },
-                    { color1: '#4A5A6A', color2: '#1F2F2F' },
-                    { color1: '#B2497F', color2: '#B21066' },
-                    { color1: '#009091', color2: '#005B5B' },
-                    { color1: '#654E92', color2: '#4A0D7A' },
-                    { color1: '#B26200', color2: '#B24430' },
-                    { color1: '#229022', color2: '#165916' }
-                ];
-                const colors = planetColors[Math.floor(Math.random() * planetColors.length)];
+        // Use a minimum distance between planets to prevent clumping
+        const minPlanetDistance = 400;
+        const maxAttempts = 100;
+        
+        for (let i = 0; i < planetCount; i++) {
+            let validPosition = false;
+            let attempts = 0;
+            let x, y;
+            
+            // Try to find a position that's not too close to other planets
+            while (!validPosition && attempts < maxAttempts) {
+                x = Math.random() * WORLD_SIZE;
+                y = Math.random() * WORLD_SIZE;
                 
-                const x = col * cellWidth + (cellWidth * 0.2) + (Math.random() * cellWidth * 0.6);
-                const y = row * cellHeight + (cellHeight * 0.2) + (Math.random() * cellHeight * 0.6);
-                
-                pixelPlanets.push({
-                    x: x,
-                    y: y,
-                    radius: 20 + Math.random() * 40,
-                    color1: colors.color1,
-                    color2: colors.color2,
-                    rings: Math.random() > 0.7,
-                    opacity: 0.6
-                });
+                validPosition = true;
+                for (let j = 0; j < pixelPlanets.length; j++) {
+                    const dx = pixelPlanets[j].x - x;
+                    const dy = pixelPlanets[j].y - y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < minPlanetDistance) {
+                        validPosition = false;
+                        break;
+                    }
+                }
+                attempts++;
             }
+            
+            const colors = planetColors[Math.floor(Math.random() * planetColors.length)];
+            
+            pixelPlanets.push({
+                x: x,
+                y: y,
+                radius: 20 + Math.random() * 40,
+                color1: colors.color1,
+                color2: colors.color2,
+                rings: Math.random() > 0.7,
+                opacity: 0.9
+            });
         }
         
         const pixelAsteroids = [];
@@ -668,6 +703,12 @@
             'murica': { name: "'Murica", unlocked: false, colors: ['#ecf0f1', '#f2eeed'] },
             'pod-player': { name: 'Poddington', unlocked: false, colors: ['#87ceeb', '#5f9ea0'] },
             'whale': { name: 'Spout', unlocked: false, colors: ['#3498db', '#2980b9'] },
+            'ruby': { name: 'Ruby', unlocked: true, colors: ['#87bb4a', '#7aa53f'] },
+            'chirpy': { name: 'Chirpy', unlocked: true, colors: ['#8eccdb', '#7db8c7'] },
+            'icecream': { name: 'Sir Whirl', unlocked: false, colors: ['#fde3a9', '#fbd692'] },
+            'popcorn': { name: 'Colonel Kernel', unlocked: false, colors: ['#39b7ff', '#2aa2e6'] },
+            'pixel': { name: 'Pixel', unlocked: false, colors: ['#50b72d', '#46a127'] },
+            'midnight': { name: 'Midnight', unlocked: false, colors: ['#474e54', '#3a4147'] },
             'pyraxis': { name: 'Pyraxis the Molten', unlocked: false, colors: ['#ff4444', '#cc0000'], isBoss: true },
             'abyssos': { name: 'Abyssos the Deep One', unlocked: false, colors: ['#4444ff', '#0000cc'], isBoss: true },
             'osseus': { name: 'Osseus the Bone Sovereign', unlocked: false, colors: ['#8b4513', '#654321'], isBoss: true },
@@ -707,8 +748,8 @@
         
         const aiSkins = Object.keys(skinMetadata).filter(skin => skinMetadata[skin] && !skinMetadata[skin].isBoss);
         let currentPlayerSkin = 'snake-default-green';
-        let unlockedSkins = new Set(['snake-default-green']);
-        let viewedSkins = new Set(['snake-default-green']);
+        let unlockedSkins = new Set(['snake-default-green', 'lil-beans']);
+        let viewedSkins = new Set(['snake-default-green', 'lil-beans']);
         let availableUnlocks = 0;
         let skinImages = {};
         
@@ -716,11 +757,17 @@
             const saved = localStorage.getItem('unlockedSkins');
             if (saved) {
                 unlockedSkins = new Set(JSON.parse(saved));
+                // Ensure default skins are always unlocked
+                unlockedSkins.add('snake-default-green');
+                unlockedSkins.add('lil-beans');
             }
             
             const savedViewed = localStorage.getItem('viewedSkins');
             if (savedViewed) {
                 viewedSkins = new Set(JSON.parse(savedViewed));
+                // Ensure default skins are marked as viewed
+                viewedSkins.add('snake-default-green');
+                viewedSkins.add('lil-beans');
             }
             
             const savedCurrent = localStorage.getItem('currentSkin');
@@ -728,10 +775,11 @@
                 currentPlayerSkin = savedCurrent;
                 const portrait = document.getElementById('playerPortrait');
                 if (portrait) {
+                    const fileId = window.skinIdConverter ? (window.skinIdConverter.toOldId(currentPlayerSkin) || currentPlayerSkin) : currentPlayerSkin;
                     if (skinMetadata[currentPlayerSkin] && skinMetadata[currentPlayerSkin].isBoss) {
-                        portrait.src = `assets/boss-skins/${currentPlayerSkin}.png`;
+                        portrait.src = `assets/boss-skins/${fileId}.png`;
                     } else {
-                        portrait.src = `skins/${currentPlayerSkin}.png`;
+                        portrait.src = `skins/${fileId}.png`;
                     }
                     setTimeout(() => {
                         document.dispatchEvent(new Event('skinChanged'));
@@ -2872,8 +2920,9 @@
                     
                     // Screen shake for player death
                     if (this.isPlayer) {
-                        screenShakeTimer = 20;
-                        screenShakeIntensity = 10;
+                        // TODO: Implement regular screen shake
+                        // screenShakeTimer = 20;
+                        // screenShakeIntensity = 10;
                     }
                 }
                 
@@ -4054,9 +4103,9 @@
                 // Find nearest borders to the target
                 const borderDistances = {
                     left: targetHead.x,
-                    right: GAME_WIDTH - targetHead.x,
+                    right: WORLD_SIZE - targetHead.x,
                     top: targetHead.y,
-                    bottom: GAME_HEIGHT - targetHead.y
+                    bottom: WORLD_SIZE - targetHead.y
                 };
                 
                 // Find which border the target is heading towards
@@ -4095,7 +4144,7 @@
                             cutoffY = targetHead.y + targetVy * 30;
                             break;
                         case 'right':
-                            cutoffX = Math.min(GAME_WIDTH - 50, targetHead.x + cutoffDistance);
+                            cutoffX = Math.min(WORLD_SIZE - 50, targetHead.x + cutoffDistance);
                             cutoffY = targetHead.y + targetVy * 30;
                             break;
                         case 'top':
@@ -4104,7 +4153,7 @@
                             break;
                         case 'bottom':
                             cutoffX = targetHead.x + targetVx * 30;
-                            cutoffY = Math.min(GAME_HEIGHT - 50, targetHead.y + cutoffDistance);
+                            cutoffY = Math.min(WORLD_SIZE - 50, targetHead.y + cutoffDistance);
                             break;
                     }
                     
@@ -4113,8 +4162,8 @@
                 
                 // If not escaping to border, try to cut off based on map center
                 // Push them towards dangerous areas (other snakes or borders)
-                const centerX = GAME_WIDTH / 2;
-                const centerY = GAME_HEIGHT / 2;
+                const centerX = WORLD_SIZE / 2;
+                const centerY = WORLD_SIZE / 2;
                 const toCenterX = centerX - targetHead.x;
                 const toCenterY = centerY - targetHead.y;
                 
@@ -9109,7 +9158,8 @@
                             reviveBtn.style.background = '#e74c3c';
                             reviveBtn.style.borderColor = '#c0392b';
                             reviveBtn.style.boxShadow = '0 0 20px rgba(231, 76, 60, 0.5)';
-                            document.getElementById('actionText').textContent = 'continue on final life';
+                            const actionText = document.getElementById('actionText');
+                            if (actionText) actionText.textContent = 'continue on final life';
                         } else {
                             reviveBtn.innerHTML = 'RESPAWN';
                             reviveBtn.style.background = 'var(--snes-cosmic-purple)';
@@ -9118,7 +9168,8 @@
                             reviveBtn.style.boxShadow = 'inset 2px 2px 0 var(--snes-cosmic-pink), inset -2px -2px 0 var(--snes-dark-purple), 4px 4px 0 rgba(0,0,0,0.5)';
                             reviveBtn.style.fontFamily = "'Press Start 2P'";
                             reviveBtn.style.textTransform = 'uppercase';
-                            document.getElementById('actionText').textContent = 'respawn';
+                            const actionText = document.getElementById('actionText');
+                            if (actionText) actionText.textContent = 'respawn';
                         }
                         const respawnPenaltyText = document.getElementById('respawnPenaltyText');
                         if (respawnPenaltyText) respawnPenaltyText.style.display = 'block';
@@ -9379,7 +9430,8 @@
                             reviveBtn.style.boxShadow = 'inset 2px 2px 0 var(--snes-cosmic-pink), inset -2px -2px 0 var(--snes-dark-purple), 4px 4px 0 rgba(0,0,0,0.5)';
                             reviveBtn.style.fontFamily = "'Press Start 2P'";
                             reviveBtn.style.textTransform = 'uppercase';
-                            document.getElementById('actionText').textContent = 'revive';
+                            const actionText = document.getElementById('actionText');
+                            if (actionText) actionText.textContent = 'revive';
                             if (respawnPenaltyText) respawnPenaltyText.style.display = 'none';
                         } else {
                             // Check if Classic mode for FINAL LIFE
@@ -9391,7 +9443,8 @@
                                 reviveBtn.style.color = 'var(--snes-white)';
                                 reviveBtn.style.fontFamily = "'Press Start 2P'";
                                 reviveBtn.style.textTransform = 'uppercase';
-                                document.getElementById('actionText').textContent = 'continue on final life';
+                                const actionText = document.getElementById('actionText');
+                            if (actionText) actionText.textContent = 'continue on final life';
                                 if (respawnPenaltyText) respawnPenaltyText.style.display = 'none';
                             } else {
                                 reviveBtn.innerHTML = 'RESPAWN';
@@ -9401,7 +9454,8 @@
                                 reviveBtn.style.boxShadow = 'inset 2px 2px 0 var(--snes-cosmic-pink), inset -2px -2px 0 var(--snes-dark-purple), 4px 4px 0 rgba(0,0,0,0.5)';
                                 reviveBtn.style.fontFamily = "'Press Start 2P'";
                                 reviveBtn.style.textTransform = 'uppercase';
-                                document.getElementById('actionText').textContent = 'respawn';
+                                const actionText = document.getElementById('actionText');
+                            if (actionText) actionText.textContent = 'respawn';
                                 if (respawnPenaltyText) respawnPenaltyText.style.display = 'block';
                             }
                         }
@@ -10423,6 +10477,13 @@
                 return; // Skip desktop background effects
             }
             
+            // Initialize Easter Egg elements for desktop
+            if (!window.easterEggElements && typeof EasterEggElements !== 'undefined') {
+                window.easterEggElements = new EasterEggElements();
+                // Desktop gets high quality by default
+                window.easterEggElements.setQualityLevel('high');
+            }
+            
             // Initialize grid pattern cache if needed (desktop only)
             if (!window.gridPatternCanvas) {
                 window.gridPatternCanvas = document.createElement('canvas');
@@ -10482,6 +10543,19 @@
             // Draw pixel nebulae BEFORE grid
             drawPixelNebulae();
             
+            // Draw Easter Egg elements (rare background decorations)
+            if (window.easterEggElements) {
+                const gameState = {
+                    worldWidth: WORLD_WIDTH,
+                    worldHeight: WORLD_HEIGHT,
+                    playerSnake: playerSnake,
+                    bossActive: currentBoss && currentBoss.isActive || false
+                };
+                
+                window.easterEggElements.update(16.67, gameState);
+                window.easterEggElements.render(ctx, camera);
+            }
+            
             // Draw pixel planets BEFORE grid
             drawPixelPlanets();
             
@@ -10528,6 +10602,9 @@
         // Draw pixel nebulae with parallax
         function drawPixelNebulae() {
             const pixelSize = 8;
+            
+            // Save context state to ensure proper layering
+            ctx.save();
             
             pixelNebulae.forEach((nebula, index) => {
                 // Check if nebula is cached
@@ -10597,7 +10674,7 @@
                                 // More cloud-like density with smoother falloff
                                 const density = nebula.density * (1 - minDist * minDist); // Quadratic falloff
                                 if (Math.random() < density) {
-                                    const opacity = 0.05 + (1 - minDist) * 0.3; // Lower opacity for more ethereal look
+                                    const opacity = 0.1 + (1 - minDist) * 0.4; // Increased opacity for better visibility
                                     
                                     cacheCtx.fillStyle = nebula.color;
                                     cacheCtx.globalAlpha = opacity;
@@ -10617,7 +10694,7 @@
                 }
                 
                 // Calculate position with parallax
-                const parallaxFactor = 0.2 + (index % 5) * 0.05;
+                const parallaxFactor = 0.1 + (index % 5) * 0.025; // Reduced parallax for nebulae
                 const x = nebula.x - camera.x * parallaxFactor + canvas.width / 2;
                 const y = nebula.y - camera.y * parallaxFactor + canvas.height / 2;
                 
@@ -10629,12 +10706,15 @@
                 // Draw the cached nebula
                 ctx.drawImage(cachedCanvas, x, y);
             });
+            
+            // Restore context state
+            ctx.restore();
         }
         
         // Draw pixel planets with parallax
         function drawPixelPlanets() {
             pixelPlanets.forEach((planet, i) => {
-                const parallaxFactor = 0.3 + i * 0.05; // Increased parallax for better visibility
+                const parallaxFactor = 0.15 + i * 0.025; // Reduced parallax by 50%
                 const x = planet.x - camera.x * parallaxFactor + canvas.width / 2;
                 const y = planet.y - camera.y * parallaxFactor + canvas.height / 2;
                 
@@ -10927,6 +11007,7 @@
             alchemyVisionTimer = 0;
             bestRank = 0;
             playerSnake = null;
+            window.playerSnake = null;
             
             // Reset game loop timing variables
             lastTime = 0;
@@ -10961,6 +11042,7 @@
             // Create player snake
             console.log('[GAME START] Creating player snake...');
             playerSnake = new Snake(WORLD_SIZE / 2, WORLD_SIZE / 2, true);
+            window.playerSnake = playerSnake; // Make available globally
             
             // Set player name
             const playerName = localStorage.getItem('playerName') || window.nameGenerator.generateRandomName();
@@ -11051,6 +11133,19 @@
             }
             
             
+            // Spawn initial void orbs to help players clear banks early
+            const INITIAL_VOID_ORB_COUNT = 2; // Start with 2 void orbs on the map
+            for (let i = 0; i < INITIAL_VOID_ORB_COUNT; i++) {
+                // Distribute initial void orbs across different map sections
+                const sectionWidth = WORLD_SIZE / INITIAL_VOID_ORB_COUNT;
+                const sectionX = i * sectionWidth;
+                
+                const x = sectionX + 200 + Math.random() * (sectionWidth - 400);
+                const y = 200 + Math.random() * (WORLD_SIZE - 400);
+                
+                voidOrbs.push(new VoidOrb(x, y));
+            }
+            
             // Initialize music and sound effects
             initMusic();
             initSoundEffects();
@@ -11088,6 +11183,7 @@
             // Clear ALL game objects
             snakes = [];
             playerSnake = null;
+            window.playerSnake = null;
             elements = [];
             particles = [];
             voidOrbs = [];
@@ -11220,6 +11316,15 @@
                 if (rarityIndexA !== rarityIndexB) {
                     return rarityIndexA - rarityIndexB;
                 }
+                
+                // Custom sorting for common skins: Basic Boy first, then Lil Beans, then alphabetical
+                if (skinA.rarity === 'common' && skinB.rarity === 'common') {
+                    if (a === 'snake-default-green') return -1;
+                    if (b === 'snake-default-green') return 1;
+                    if (a === 'lil-beans') return -1;
+                    if (b === 'lil-beans') return 1;
+                }
+                
                 return skinA.name.localeCompare(skinB.name);
             });
             
@@ -11263,11 +11368,13 @@
                 } else {
                     const img = document.createElement('img');
                     img.className = 'skin-image';
-                    img.src = skinData.isBoss ? `assets/boss-skins/${skinId}.png` : `skins/${skinId}.png`;
+                    // Use old ID for file path if available
+                    const fileId = window.skinIdConverter ? (window.skinIdConverter.toOldId(skinId) || skinId) : skinId;
+                    img.src = skinData.isBoss ? `assets/boss-skins/${fileId}.png` : `skins/${fileId}.png`;
                     img.alt = skinData.name;
                     img.onerror = function() {
                         // Try webp fallback
-                        const basePath = skinData.isBoss ? `assets/boss-skins/${skinId}` : `skins/${skinId}`;
+                        const basePath = skinData.isBoss ? `assets/boss-skins/${fileId}` : `skins/${fileId}`;
                         this.src = `${basePath}.webp`;
                         this.onerror = null;
                     };
@@ -11336,10 +11443,11 @@
                 const portrait = document.getElementById('playerPortrait');
                 if (portrait) {
                     // Boss skins are in a different directory
+                    const fileId = window.skinIdConverter ? (window.skinIdConverter.toOldId(skinId) || skinId) : skinId;
                     if (skinMetadata[skinId].isBoss) {
-                        portrait.src = `assets/boss-skins/${skinId}.png`;
+                        portrait.src = `assets/boss-skins/${fileId}.png`;
                     } else {
-                        portrait.src = `skins/${skinId}.png`;
+                        portrait.src = `skins/${fileId}.png`;
                     }
                     // Dispatch event for mobile UI to update
                     document.dispatchEvent(new Event('skinChanged'));
@@ -11365,10 +11473,11 @@
                 const portrait = document.getElementById('playerPortrait');
                 if (portrait) {
                     // Boss skins are in a different directory
+                    const fileId = window.skinIdConverter ? (window.skinIdConverter.toOldId(skinId) || skinId) : skinId;
                     if (skinMetadata[skinId].isBoss) {
-                        portrait.src = `assets/boss-skins/${skinId}.png`;
+                        portrait.src = `assets/boss-skins/${fileId}.png`;
                     } else {
-                        portrait.src = `skins/${skinId}.png`;
+                        portrait.src = `skins/${fileId}.png`;
                     }
                 }
                 
@@ -11717,7 +11826,8 @@
             
             // Load and draw the skin image with rotation animation
             const img = new Image();
-            img.src = skinData.isBoss ? `assets/boss-skins/${skinId}.png` : `skins/${skinId}.png`;
+            const fileId = window.skinIdConverter ? (window.skinIdConverter.toOldId(skinId) || skinId) : skinId;
+            img.src = skinData.isBoss ? `assets/boss-skins/${fileId}.png` : `skins/${fileId}.png`;
             
             let rotation = 0;
             function animate() {
@@ -11991,10 +12101,48 @@
                 // Update AlchemyVision power-ups (keeping for existing ones to expire)
                 alchemyVisionPowerUps.forEach(powerUp => powerUp.update(1.0));
                 
-                // Spawn Void Orbs to maintain count
+                // Spawn Void Orbs to maintain count with better distribution
                 if (voidOrbs.length < VOID_ORB_SPAWN_COUNT && Date.now() - lastVoidOrbSpawn >= VOID_ORB_SPAWN_INTERVAL / VOID_ORB_SPAWN_COUNT) {
-                    const x = 100 + Math.random() * (WORLD_SIZE - 200);
-                    const y = 100 + Math.random() * (WORLD_SIZE - 200);
+                    // Try to find a position that's not too close to existing void orbs
+                    let attempts = 0;
+                    let validPosition = false;
+                    let x, y;
+                    const MIN_DISTANCE_BETWEEN_ORBS = 500; // Minimum distance between void orbs
+                    
+                    while (!validPosition && attempts < 20) {
+                        // Divide map into grid sections for better initial distribution
+                        const gridSize = Math.ceil(Math.sqrt(VOID_ORB_SPAWN_COUNT));
+                        const sectionWidth = WORLD_SIZE / gridSize;
+                        const sectionHeight = WORLD_SIZE / gridSize;
+                        
+                        // Pick a random section
+                        const sectionX = Math.floor(Math.random() * gridSize) * sectionWidth;
+                        const sectionY = Math.floor(Math.random() * gridSize) * sectionHeight;
+                        
+                        // Random position within section with buffer from edges
+                        x = sectionX + 100 + Math.random() * (sectionWidth - 200);
+                        y = sectionY + 100 + Math.random() * (sectionHeight - 200);
+                        
+                        // Ensure position is within world bounds
+                        x = Math.max(100, Math.min(WORLD_SIZE - 100, x));
+                        y = Math.max(100, Math.min(WORLD_SIZE - 100, y));
+                        
+                        // Check distance from existing void orbs
+                        validPosition = true;
+                        for (const orb of voidOrbs) {
+                            const dx = orb.x - x;
+                            const dy = orb.y - y;
+                            const distance = Math.sqrt(dx * dx + dy * dy);
+                            if (distance < MIN_DISTANCE_BETWEEN_ORBS) {
+                                validPosition = false;
+                                break;
+                            }
+                        }
+                        
+                        attempts++;
+                    }
+                    
+                    // Spawn the void orb at the found position
                     voidOrbs.push(new VoidOrb(x, y));
                     lastVoidOrbSpawn = Date.now();
                 }
@@ -12441,6 +12589,7 @@
                     
                     // Respawn player at center
                     playerSnake = new Snake(WORLD_SIZE / 2, WORLD_SIZE / 2, true);
+                    window.playerSnake = playerSnake; // Make available globally
                     
                     // Set player name
                     const playerName = localStorage.getItem('playerName') || window.nameGenerator.generateRandomName();

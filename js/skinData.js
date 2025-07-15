@@ -1,6 +1,6 @@
 // Skin Data Structure with Rarity Tiers and Unlock Criteria
 const skinData = {
-    // COMMON (13 skins including default)
+    // COMMON (15 skins including default)
     'snake-default-green': {
         name: 'Basic Boy',
         rarity: 'common',
@@ -36,10 +36,9 @@ const skinData = {
         rarity: 'common',
         bio: 'Professional nap enthusiast found on a keyboard near you.',
         unlockCriteria: {
-            type: 'timeWindow',
-            startHour: 2,
-            endHour: 4,
-            description: 'Play between 2-4 AM'
+            type: 'default',
+            value: 0,
+            description: 'Play the Infinite Snake Preview'
         }
     },
     'spout': {
@@ -133,6 +132,26 @@ const skinData = {
             description: 'Achieve 1st place in a game, 10 times'
         }
     },
+    'ruby': {
+        name: 'Ruby',
+        rarity: 'common',
+        bio: 'The cheeriest apple in the orchard who believes a smile a day keeps the chaos demons away.',
+        unlockCriteria: {
+            type: 'default',
+            value: 0,
+            description: 'Default skin - always unlocked'
+        }
+    },
+    'chirpy': {
+        name: 'Chirpy',
+        rarity: 'common',
+        bio: "A small blue bird who tweets the morning news to anyone who'll listen.",
+        unlockCriteria: {
+            type: 'default',
+            value: 0,
+            description: 'Default skin - always unlocked'
+        }
+    },
 
     // UNCOMMON (9 skins)
     'poddington': {
@@ -224,6 +243,26 @@ const skinData = {
             type: 'voidOrbs',
             value: 100,
             description: 'Eat 100 void orbs'
+        }
+    },
+    'sir-whirl': {
+        name: 'Sir Whirl',
+        rarity: 'uncommon',
+        bio: 'The sweetest ice cream cone around who melts hearts faster than summer heat.',
+        unlockCriteria: {
+            type: 'catalystGems',
+            value: 100,
+            description: 'Collect 100 catalyst gems total'
+        }
+    },
+    'colonel-kernel': {
+        name: 'Colonel Kernel',
+        rarity: 'uncommon',
+        bio: 'A theater major with a buttery smooth smile and always quoting his favorite indie-comedy.',
+        unlockCriteria: {
+            type: 'playTime',
+            value: 120,
+            description: 'Play for 2 hours total'
         }
     },
 
@@ -403,8 +442,18 @@ const skinData = {
             description: 'Play during December'
         }
     },
+    'pixel': {
+        name: 'Pixel',
+        rarity: 'legendary',
+        bio: 'A misunderstood monster who just wants a hug but tends to surprise people.',
+        unlockCriteria: {
+            type: 'scoreInGame',
+            value: 250000,
+            description: 'Score 250,000 points in a single classic mode game'
+        }
+    },
 
-    // EXOTIC (6 skins)
+    // EXOTIC (8 skins)
     'woz': {
         name: 'Woz',
         rarity: 'exotic',
@@ -463,6 +512,18 @@ const skinData = {
             type: 'voidOrbs',
             value: 1000,
             description: 'Eat 1,000 void orbs'
+        }
+    },
+    'midnight': {
+        name: 'Midnight',
+        rarity: 'exotic',
+        bio: 'A mysterious companion who channels dark magic through the pentagram on their forehead.',
+        unlockCriteria: {
+            type: 'timeWindow',
+            startHour: 0,
+            endHour: 3,
+            gamesRequired: 13,
+            description: 'Play 13 games between midnight and 3 AM'
         }
     },
 
