@@ -1169,12 +1169,19 @@ class Snake {
         
         const personalityColor = this.personalityColor || '#ffffff';
         
+        // Get display name (remove personality prefix for AI snakes)
+        let displayName = this.name;
+        if (!this.isPlayer && this.personality) {
+            const personalityPrefix = this.personality.name + ' ';
+            displayName = this.name.substring(personalityPrefix.length);
+        }
+        
         window.ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)';
         window.ctx.lineWidth = 3;
-        window.ctx.strokeText(this.name, headScreen.x, headScreen.y - nameOffset);
+        window.ctx.strokeText(displayName, headScreen.x, headScreen.y - nameOffset);
         
         window.ctx.fillStyle = this.isPlayer ? '#4ecdc4' : personalityColor;
-        window.ctx.fillText(this.name, headScreen.x, headScreen.y - nameOffset);
+        window.ctx.fillText(displayName, headScreen.x, headScreen.y - nameOffset);
         
         const scoreY = headScreen.y - nameOffset - 12 * window.cameraZoom;
         const scoreText = `${this.score}`;

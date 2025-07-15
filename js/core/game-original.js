@@ -3338,29 +3338,16 @@
                     if (this.isBoss) {
                         // Bosses don't show their name, only the skull emoji below
                     } else if (!this.isPlayer && this.personality) {
-                        // Split name into personality and actual name parts
+                        // Get actual name without personality prefix
                         const personalityName = this.personality.name + ' ';
                         const actualName = this.name.substring(personalityName.length);
                         
-                        // Measure text widths
-                        ctx.fillStyle = this.personalityColor;
-                        const personalityWidth = ctx.measureText(personalityName).width;
-                        ctx.fillStyle = 'white';
-                        const actualNameWidth = ctx.measureText(actualName).width;
-                        const totalWidth = personalityWidth + actualNameWidth;
-                        
-                        // Draw personality name with color
-                        const startX = screenX - totalWidth / 2;
+                        // Draw only the actual name (no personality prefix)
                         ctx.strokeStyle = 'black';
                         ctx.lineWidth = 3;
-                        ctx.strokeText(personalityName, startX + personalityWidth / 2, nameY);
-                        ctx.fillStyle = this.personalityColor;
-                        ctx.fillText(personalityName, startX + personalityWidth / 2, nameY);
-                        
-                        // Draw actual name in white
-                        ctx.strokeText(actualName, startX + personalityWidth + actualNameWidth / 2, nameY);
                         ctx.fillStyle = 'white';
-                        ctx.fillText(actualName, startX + personalityWidth + actualNameWidth / 2, nameY);
+                        ctx.strokeText(actualName, screenX, nameY);
+                        ctx.fillText(actualName, screenX, nameY);
                     } else {
                         // Player name or AI without personality - draw normally
                         ctx.strokeStyle = 'black';
@@ -8361,36 +8348,25 @@
                 const nameSpan = document.createElement('span');
                 nameSpan.className = 'leaderboard-name';
                 
-                // Handle colored personality names for AI snakes
-                if (!snake.isPlayer && snake.personality) {
-                    // Add crown for leader
-                    if (index === 0) {
-                        const crownSpan = document.createElement('span');
-                        crownSpan.textContent = '👑 ';
-                        nameSpan.appendChild(crownSpan);
+                // Handle snake names and emojis
+                let displayText = index === 0 ? '👑 ' : '';
+                let displayName = snake.name;
+                
+                // For AI snakes, check if name has personality prefix and replace with emoji
+                if (!snake.isPlayer) {
+                    if (displayName.startsWith('Aggressive ')) {
+                        displayText += '😡 ';
+                        displayName = displayName.substring(11); // "Aggressive ".length = 11
+                    } else if (displayName.startsWith('Combo Master ')) {
+                        displayText += '😎 ';
+                        displayName = displayName.substring(13); // "Combo Master ".length = 13
+                    } else if (displayName.startsWith('Balanced ')) {
+                        displayText += '😊 ';
+                        displayName = displayName.substring(9); // "Balanced ".length = 9
                     }
-                    
-                    // Split name into personality and actual name
-                    const personalityName = snake.personality.name + ' ';
-                    const actualName = snake.name.substring(personalityName.length);
-                    
-                    // Create colored personality span
-                    const personalitySpan = document.createElement('span');
-                    personalitySpan.style.color = snake.personalityColor;
-                    personalitySpan.style.fontWeight = 'bold';
-                    personalitySpan.textContent = personalityName;
-                    
-                    // Create white name span
-                    const actualNameSpan = document.createElement('span');
-                    actualNameSpan.style.color = '#ffffff';
-                    actualNameSpan.textContent = actualName;
-                    
-                    nameSpan.appendChild(personalitySpan);
-                    nameSpan.appendChild(actualNameSpan);
-                } else {
-                    // Player or fallback - normal display
-                    nameSpan.textContent = (index === 0 ? '👑 ' : '') + snake.name;
                 }
+                
+                nameSpan.textContent = displayText + displayName;
                 
                 const statsDiv = document.createElement('div');
                 statsDiv.className = 'leaderboard-stats';
@@ -9325,7 +9301,7 @@
         // Load mini leaderboard for pause menu
         let currentPauseLBPeriod = 'daily';
         
-        window.loadPauseLeaderboard = async function(period) {
+        window.loadPauseLeaderboard = async function(event, period) {
             currentPauseLBPeriod = period;
             
             // Update mini tab styles
@@ -9333,10 +9309,12 @@
                 tab.classList.remove('active');
                 tab.style.color = '#888';
             });
-            event.target.classList.add('active');
-            event.target.style.color = '#4ecdc4';
+            if (event && event.target) {
+                event.target.classList.add('active');
+                event.target.style.color = '#4ecdc4';
+            }
             
-            if (!leaderboardModule) return;
+            if (!window.leaderboardModule) return;
             
             const entriesDiv = document.getElementById('pauseLeaderboardEntries');
             entriesDiv.innerHTML = '<div style="color: #888; text-align: center; padding: 20px;">Loading...</div>';
@@ -9355,12 +9333,22 @@
                     const isPlayer = currentUsername && entry.username === currentUsername;
                     const rankClass = entry.rank <= 3 ? `rank-${entry.rank}` : '';
                     
+                    // Replace personality prefixes with emojis
+                    let displayName = entry.username;
+                    if (displayName.startsWith('Aggressive ')) {
+                        displayName = '😡 ' + displayName.substring(11);
+                    } else if (displayName.startsWith('Combo Master ')) {
+                        displayName = '😎 ' + displayName.substring(13);
+                    } else if (displayName.startsWith('Balanced ')) {
+                        displayName = '😊 ' + displayName.substring(9);
+                    }
+                    
                     return `
                         <div style="display: flex; justify-content: space-between; padding: 10px; 
                                     background: ${isPlayer ? 'rgba(78, 205, 196, 0.2)' : 'rgba(0, 0, 0, 0.2)'}; 
                                     margin-bottom: 5px; border: 2px solid ${isPlayer ? '#4ecdc4' : 'transparent'}; font-size: 14px;">
                             <span class="${rankClass}" style="font-weight: bold; font-size: 14px;">#${entry.rank}</span>
-                            <span style="color: ${isPlayer ? '#4ecdc4' : '#FFF'}; flex: 1; margin: 0 10px; overflow: hidden; text-overflow: ellipsis; font-size: 14px;">${entry.username}</span>
+                            <span style="color: ${isPlayer ? '#4ecdc4' : '#FFF'}; flex: 1; margin: 0 10px; overflow: hidden; text-overflow: ellipsis; font-size: 14px;">${displayName}</span>
                             <span style="color: #4ecdc4; font-size: 14px;">${entry.score.toLocaleString()}</span>
                         </div>
                     `;
@@ -9401,11 +9389,21 @@
                     // Get country display
                     const countryDisplay = getCountryDisplay(entry.country_code || 'XX');
                     
+                    // Replace personality prefixes with emojis
+                    let displayName = entry.username;
+                    if (displayName.startsWith('Aggressive ')) {
+                        displayName = '😡 ' + displayName.substring(11);
+                    } else if (displayName.startsWith('Combo Master ')) {
+                        displayName = '😎 ' + displayName.substring(13);
+                    } else if (displayName.startsWith('Balanced ')) {
+                        displayName = '😊 ' + displayName.substring(9);
+                    }
+                    
                     return `
                         <div class="leaderboard-entry ${isPlayer ? 'player-entry' : ''}">
                             <div class="${rankClass}" style="font-weight: bold;">#${entry.rank}</div>
                             <div>${countryDisplay}</div>
-                            <div style="color: ${isPlayer ? '#4ecdc4' : '#FFF'}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${entry.username}</div>
+                            <div style="color: ${isPlayer ? '#4ecdc4' : '#FFF'}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${displayName}</div>
                             <div style="color: #4ecdc4; text-align: right;">${entry.score.toLocaleString()}</div>
                             <div style="color: #FFD700; text-align: right;">${entry.elements_discovered || 0}</div>
                             <div style="color: #AAA; text-align: right;">${timeStr}</div>
@@ -11345,7 +11343,7 @@
             } else if (tabName === 'leaderboard') {
                 document.getElementById('leaderboardTab').classList.add('active');
                 // Load leaderboard when tab is opened
-                window.loadPauseLeaderboard(currentPauseLBPeriod);
+                window.loadPauseLeaderboard(null, currentPauseLBPeriod);
             }
         }
         
