@@ -70,3 +70,6 @@
         // Make available globally
         window.ParticlePool = ParticlePool;
         window.particlePool = particlePool;
+        
+        // Export for ES6 modules
+        export default ParticlePool;

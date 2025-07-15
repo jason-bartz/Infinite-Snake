@@ -1608,6 +1608,7 @@
             audioWasPlaying.bossIntro = bossIntroMusic && !bossIntroMusic.paused;
             audioWasPlaying.bossBattle = bossBattleMusic && !bossBattleMusic.paused;
             
+            console.log('Audio state before pause:', {
                 music: audioWasPlaying.music,
                 bossIntro: audioWasPlaying.bossIntro,
                 bossBattle: audioWasPlaying.bossBattle,
@@ -1642,13 +1643,6 @@
         const MAX_RESUME_ATTEMPTS = 3;
         
         function resumeAudio() {
-                audioWasPlaying,
-                musicShouldBePlaying,
-                currentTrack: currentTrack ? 'exists' : 'null',
-                musicMuted,
-                gameStarted,
-                pendingMusicTrack: window.pendingMusicTrack ? 'exists' : 'null'
-            });
             
             // Check if music should be playing even if it wasn't actively playing
             const shouldAttemptResume = (audioWasPlaying.music || musicShouldBePlaying) || 
@@ -2736,11 +2730,6 @@
             }
             
             die(isBossDeath = false) {
-                    isPlayer: this.isPlayer,
-                    isDying: this.isDying,
-                    alive: this.alive,
-                    deathAnimationTimer: this.deathAnimationTimer
-                });
                 
                 // Start death animation if not already dying
                 if (!this.isDying) {
@@ -9468,16 +9457,6 @@
                     // Only check once per death (not every frame!)
                     if (!window.deathLeaderboardChecked) {
                         window.deathLeaderboardChecked = true;
-                        gameMode: gameMode,
-                        isInfinite: gameMode === 'infinite',
-                        leaderboardSubmitted: leaderboardSubmitted,
-                        playerScore: playerSnake.score,
-                        hasScore: playerSnake.score > 0,
-                        gameSessionStartTime: gameSessionStartTime,
-                        currentTime: Date.now(),
-                        leaderboardModuleLoaded: !!window.leaderboardModule,
-                        submitScoreFunctionExists: !!(window.leaderboardModule && window.leaderboardModule.submitScore)
-                    });
                     
                     if (gameMode === 'infinite' && playerSnake.score > 0) {
                         const playTime = gameSessionStartTime ? 
@@ -9489,12 +9468,6 @@
                             // Get player name
                             const playerName = localStorage.getItem('playerName') || window.nameGenerator.generateRandomName();
                             
-                                name: playerName,
-                                score: Math.floor(playerSnake.score),
-                                discoveries: playerDiscoveredElements.size,
-                                kills: playerSnake.kills,
-                                playTime: playTime
-                            });
                             
                             // Submit score automatically
                             if (window.leaderboardModule && window.leaderboardModule.submitScore) {
@@ -12271,177 +12244,6 @@
                             deathSequenceActive,
                             deathProcessed,
                             gameMode,
-                            shouldShowDeathScreen: deathCount < 4 || revivesRemaining > 0
-                        });
-                    }
-                    
-                    // Initialize camera animation
-                    deathCameraAnimation.active = true;
-                    deathCameraAnimation.startZoom = cameraZoom;
-                    deathCameraAnimation.targetZoom = cameraZoom * 0.7; // Zoom out by 30%
-                    deathCameraAnimation.currentZoom = cameraZoom;
-                    deathCameraAnimation.progress = 0;
-                    
-                        startZoom: deathCameraAnimation.startZoom,
-                        targetZoom: deathCameraAnimation.targetZoom
-                    });
-                }
-                
-                // Update death sequence
-                if (deathSequenceActive && !deathProcessed) {
-                    deathSequenceTimer += frameTime;
-                    
-                    // Update camera zoom animation (200ms to 1200ms)
-                    if (deathSequenceTimer >= 200 && deathSequenceTimer <= 1200) {
-                        const animProgress = (deathSequenceTimer - 200) / 1000; // 0 to 1 over 1 second
-                        deathCameraAnimation.progress = Math.min(1, animProgress);
-                        
-                        // Smooth easing function
-                        const easedProgress = 1 - Math.pow(1 - deathCameraAnimation.progress, 3);
-                        deathCameraAnimation.currentZoom = deathCameraAnimation.startZoom + 
-                            (deathCameraAnimation.targetZoom - deathCameraAnimation.startZoom) * easedProgress;
-                        cameraZoom = deathCameraAnimation.currentZoom;
-                        
-                            timer: deathSequenceTimer,
-                            progress: deathCameraAnimation.progress,
-                            currentZoom: cameraZoom
-                        });
-                    }
-                    
-                    // Complete death sequence
-                    if (deathSequenceTimer >= DEATH_SEQUENCE_DURATION && !deathProcessed) {
-                        deathSequenceActive = false;
-                        deathCameraAnimation.active = false;
-                        deathProcessed = true; // Mark as processed
-                        
-                        // Reset camera zoom
-                        cameraZoom = isMobile ? 0.75 : 1.0;
-                        
-                        // Check if this is the final death in Classic mode
-                        if (gameMode === 'classic' && deathCount >= 4 && revivesRemaining === 0) {
-                            playerRespawnTimer = 0; // No respawn timer
-                            handlePermadeath();
-                            return;
-                        }
-                        
-                        // Now start the respawn timer and do all the death processing
-                        playerRespawnTimer = 10000; // 10 seconds
-                        comboStreak = 0; // Reset combo streak on death
-                        
-                        // Save snake state for potential revive
-                        savedSnakeLength = playerSnake.segments.length;
-                        savedSnakeScore = playerSnake.score;
-                        
-                        // Set random death message (only once on death)
-                        const deathMessageEl = document.getElementById('deathMessage');
-                        if (deathMessageEl && window.nameGenerator) {
-                            deathMessageEl.textContent = window.nameGenerator.getRandomDeathMessage();
-                        }
-                        
-                        // FORCE AUTO-SUBMIT IMMEDIATELY ON DEATH
-                        leaderboardSubmitted,
-                        playerScore: playerSnake.score,
-                        hasScore: playerSnake.score > 0,
-                        moduleLoaded: !!(window.leaderboardModule && window.leaderboardModule.submitScore)
-                    });
-                    if (playerSnake.score > 0 && canSubmitScore()) {
-                        const submitName = localStorage.getItem('playerName') || 'Anonymous';
-                        const submitTime = gameSessionStartTime ? Math.floor((Date.now() - gameSessionStartTime) / 1000) : 0;
-                        
-                        // Try to submit right away if module is loaded
-                        if (window.leaderboardModule && window.leaderboardModule.submitScore) {
-                            try {
-                                window.leaderboardModule.submitScore(
-                                submitName,
-                                Math.floor(playerSnake.score),
-                                playerDiscoveredElements.size,
-                                submitTime,
-                                playerSnake.kills
-                                ).then(result => {
-                                    
-                                    // submitScore returns the rank as a number or 'Submitted' if rank is null
-                                    if (result !== null && result !== undefined) {
-                                        
-                                        // Update rank display immediately
-                                        const rankEl = document.getElementById('globalRank');
-                                        
-                                        if (rankEl) {
-                                            if (typeof result === 'number') {
-                                                rankEl.textContent = `#${result}`;
-                                            } else if (result === 'Submitted') {
-                                                rankEl.textContent = 'Submitted';
-                                            }
-                                            
-                                            // Double-check the update
-                                        } else {
-                                            console.error('[DEATH] ❌ Could not find globalRank element!');
-                                            // Try to find it by searching all elements
-                                            const allElements = document.querySelectorAll('[id*="rank"]');
-                                        }
-                                        
-                                        // Already set to true above
-                                    } else {
-                                        console.error('[DEATH] ❌ Result is null or undefined:', result);
-                                        // Reset flag on failure
-                                        leaderboardSubmitted = false;
-                                    }
-                                }).catch(err => {
-                                    console.error('[DEATH] Submission failed:', err);
-                                    // Reset flag on error
-                                    leaderboardSubmitted = false;
-                                });
-                            } catch (error) {
-                                console.error('[DEATH] Error calling submitScore:', error);
-                                // Reset flag on error
-                                leaderboardSubmitted = false;
-                            }
-                        } else {
-                            console.error('[DEATH] Supabase not loaded, will retry...');
-                            // Keep trying every 500ms until it works
-                            const retryInterval = setInterval(() => {
-                                if (window.leaderboardModule && window.leaderboardModule.submitScore && canSubmitScore()) {
-                                    window.leaderboardModule.submitScore(
-                                        submitName,
-                                        Math.floor(playerSnake.score),
-                                        playerDiscoveredElements.size,
-                                        submitTime,
-                                        playerSnake.kills
-                                    ).then(result => {
-                                        if (result !== null && result !== undefined) {
-                                            const rankEl = document.getElementById('globalRank');
-                                            if (rankEl) {
-                                                if (typeof result === 'number') {
-                                                    rankEl.textContent = `#${result}`;
-                                                } else if (result === 'Submitted') {
-                                                    rankEl.textContent = 'Submitted';
-                                                }
-                                            }
-                                            // Already set to true above
-                                            clearInterval(retryInterval);
-                                        } else {
-                                            // Reset flag on failure
-                                            leaderboardSubmitted = false;
-                                        }
-                                    }).catch(err => {
-                                        console.error('[DEATH] Retry failed:', err);
-                                        // Reset flag on error
-                                        leaderboardSubmitted = false;
-                                    });
-                                } else if (leaderboardSubmitted) {
-                                    clearInterval(retryInterval);
-                                }
-                            }, 500);
-                        }
-                    }
-                    
-                    // Dispatch player death event
-                    dispatchGameEvent('playerDeath', {
-                        score: playerSnake.score,
-                        discoveries: playerSnake.discoveries,
-                        kills: playerSnake.kills,
-                        length: playerSnake.segments.length,
-                        playTime: gameSessionStartTime ? Math.floor((Date.now() - gameSessionStartTime) / 1000) : 0
-                    });
                     
                     // AUTO-SUBMIT SCORE ON DEATH
                     setTimeout(() => {

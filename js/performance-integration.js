@@ -29,12 +29,20 @@
 
         // Rebuild quadtree each frame
         if (window.WORLD_SIZE) {
-            window.snakeQuadTree = new SnakeQuadTree(window.WORLD_SIZE);
+            window.snakeQuadTree = new QuadTree(0, 0, window.WORLD_SIZE, window.WORLD_SIZE, 10);
             
             // Insert all snakes
             if (window.snakes) {
                 window.snakes.forEach(snake => {
-                    window.snakeQuadTree.insertSnake(snake);
+                    if (snake.alive && !snake.isDying) {
+                        window.snakeQuadTree.insert({
+                            x: snake.x,
+                            y: snake.y,
+                            width: 1,
+                            height: 1,
+                            snake: snake
+                        });
+                    }
                 });
             }
             
@@ -42,7 +50,13 @@
             if (window.elementPool && window.elementPool.pool) {
                 window.elementPool.pool.forEach(element => {
                     if (element.active) {
-                        window.snakeQuadTree.insertElement(element);
+                        window.snakeQuadTree.insert({
+                            x: element.x,
+                            y: element.y,
+                            width: 1,
+                            height: 1,
+                            element: element
+                        });
                     }
                 });
             }
@@ -69,8 +83,16 @@
             if (!snake.alive || snake.isDying) return;
 
             // Check collisions with other snakes
-            const nearbySnakes = window.snakeQuadTree.getPotentialSnakeCollisions(snake);
-            nearbySnakes.forEach(({ snake: otherSnake }) => {
+            const searchArea = {
+                x: snake.x - 150,
+                y: snake.y - 150,
+                width: 300,
+                height: 300
+            };
+            const nearbyObjects = window.snakeQuadTree.retrieve(searchArea);
+            nearbyObjects.forEach((obj) => {
+                if (!obj.snake) return;
+                const otherSnake = obj.snake;
                 if (snake === otherSnake || !otherSnake.alive || otherSnake.isDying) return;
 
                 // Check head-to-head collision
@@ -82,8 +104,9 @@
             });
 
             // Check element collection
-            const nearbyElements = window.snakeQuadTree.getNearbyElements(snake);
-            nearbyElements.forEach(({ element }) => {
+            nearbyObjects.forEach((obj) => {
+                if (!obj.element) return;
+                const element = obj.element;
                 if (!element.active) return;
 
                 const dist = mathOptimizer.distance(snake.x, snake.y, element.x, element.y);
