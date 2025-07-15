@@ -15,7 +15,7 @@ const CACHE_DURATION = 30000; // 30 seconds
 
 // Initialize leaderboard system
 export async function initializeLeaderboard() {
-  logger.debug('Leaderboard system initializing...');
+  // Leaderboard system initializing
   
   // Test API connection
   try {
@@ -81,13 +81,13 @@ export async function submitScore(username, score, elementsDiscovered, playTime,
       throw new Error(responseData.error || 'Failed to submit score');
     }
     
-    logger.debug('📊 Daily rank:', responseData.daily_rank);
+    // Daily rank: responseData.daily_rank
     
     // Return the daily rank for the UI, or a special value if null
     // If daily_rank is null, it means the score was submitted but rank couldn't be determined
     // (possibly because leaderboard is still calculating or score is outside top ranks)
     if (responseData.daily_rank === null) {
-      logger.debug('⚠️ Score submitted but rank is null');
+      // Score submitted but rank is null
       return 'Submitted'; // Return a string to indicate successful submission without rank
     }
     
@@ -105,7 +105,7 @@ export async function getLeaderboard(period = 'daily', limit = 100) {
     // Check cache first
     const cached = leaderboardCache[period];
     if (cached && cached.data && Date.now() - cached.timestamp < CACHE_DURATION) {
-      logger.debug(`Using cached ${period} leaderboard`);
+      // Using cached leaderboard
       return cached.data.slice(0, limit);
     }
     

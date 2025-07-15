@@ -101,7 +101,7 @@
         if (window.canvas && window.gameInitialized) {
             clearInterval(initCheckInterval);
             
-            logger.debug('[Performance] Game initialized, setting up optimizations');
+            // Performance: Game initialized, setting up optimizations
             
             // Initialize performance optimizer with canvas
             window.perfOptimizer.init(window.canvas, window.isMobile);
@@ -113,7 +113,7 @@
                     window.enhancedEmojiCache.set(key, value);
                 });
                 window.emojiCache = window.enhancedEmojiCache;
-                logger.debug('[Performance] Enhanced emoji cache installed');
+                // Performance: Enhanced emoji cache installed
             }
             
             // Add performance monitoring to game loop
@@ -126,7 +126,7 @@
                     // Call original game loop
                     originalGameLoop.call(this, currentTime);
                 };
-                logger.debug('[Performance] Game loop enhanced');
+                // Performance: Game loop enhanced
             }
             
             // Setup optimized resize handler
@@ -141,7 +141,7 @@
                     // Call original resize
                     originalResize.call(this);
                 };
-                logger.debug('[Performance] Resize handler optimized');
+                // Performance: Resize handler optimized
             }
             
             // Replace math functions with optimized versions
@@ -150,7 +150,7 @@
             window.fastDistance = mathOptimizer.distance.bind(mathOptimizer);
             window.fastDistanceSquared = mathOptimizer.distanceSquared.bind(mathOptimizer);
             
-            logger.debug('[Performance] Math optimizations available');
+            // Performance: Math optimizations available
             
             // Expose performance metrics
             window.getPerformanceMetrics = function() {
@@ -163,7 +163,7 @@
                 };
             };
             
-            logger.debug('[Performance] All optimizations integrated successfully');
+            // Performance: All optimizations integrated successfully
         }
     }, 100);
 })();
