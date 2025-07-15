@@ -80,18 +80,18 @@ class InitializationSequence {
     
     // Start the initialization sequence
     async start() {
-        console.log('=== Starting Infinite Snake Initialization ===');
+        // Starting Infinite Snake Initialization
         
         for (let i = 0; i < this.steps.length; i++) {
             const step = this.steps[i];
             this.currentStep = i;
             
             try {
-                console.log(`[${i + 1}/${this.steps.length}] ${step.name}...`);
+                // Executing step: ${step.name}
                 
                 // Check if already completed
                 if (step.check()) {
-                    console.log(`✓ ${step.name} - Already initialized`);
+                    // ${step.name} - Already initialized
                     continue;
                 }
                 
@@ -100,7 +100,7 @@ class InitializationSequence {
                 
                 // Verify completion
                 if (step.check()) {
-                    console.log(`✓ ${step.name} - Complete`);
+                    // ${step.name} - Complete
                 } else {
                     throw new Error(`${step.name} failed verification`);
                 }
@@ -118,7 +118,7 @@ class InitializationSequence {
         }
         
         this.completed = true;
-        console.log('=== Initialization Complete ===');
+        // Initialization Complete
         
         // Dispatch completion event
         window.dispatchEvent(new CustomEvent('gameReady', {

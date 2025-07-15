@@ -1973,11 +1973,7 @@
                     console.warn('Snake size was invalid, setting to 1');
                 }
                 
-                // Debug logging for player snake creation
-                if (isPlayer) {
-                    console.log('[PLAYER CREATED] Size:', this.size);
-                    console.trace(); // Show stack trace to see where it's being called from
-                }
+                // Player snake created
                 this.discoveredElements = new Set(); // Each snake tracks its own discoveries - starts empty
                 
                 // Speed boost properties

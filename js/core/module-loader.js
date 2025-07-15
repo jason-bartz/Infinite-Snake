@@ -57,7 +57,7 @@
         
         // Load all modules
         async loadAll() {
-            console.log('[ModuleLoader] Starting module load...');
+            // Module load starting...
             
             try {
                 // Load modules in order
@@ -68,7 +68,7 @@
                     }
                 }
                 
-                console.log('[ModuleLoader] All modules loaded successfully');
+                // All modules loaded successfully
                 
                 // Dispatch event when all modules are loaded
                 window.dispatchEvent(new CustomEvent('modulesLoaded', {
@@ -103,7 +103,7 @@
                 return this.loading.get(name);
             }
             
-            console.log(`[ModuleLoader] Loading ${name}...`);
+            // Loading module: ${name}
             
             // Create loading promise
             const loadPromise = this.importModule(path, name, config);
@@ -114,7 +114,7 @@
                 this.loaded.set(name, module);
                 this.loading.delete(name);
                 
-                console.log(`[ModuleLoader] Loaded ${name}`);
+                // Module loaded: ${name}
                 return module;
                 
             } catch (error) {
