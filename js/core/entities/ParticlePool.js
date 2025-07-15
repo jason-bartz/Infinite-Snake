@@ -65,6 +65,8 @@
         }
         
         // Initialize particle pool
-        const particlePool = new ParticlePool(isMobile ? 50 : 200); // Further reduced for mobile performance
-
-export default ParticlePool;
+        const particlePool = new ParticlePool(window.isMobile ? 50 : 200); // Further reduced for mobile performance
+        
+        // Make available globally
+        window.ParticlePool = ParticlePool;
+        window.particlePool = particlePool;

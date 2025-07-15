@@ -303,20 +303,23 @@
         const AI_PERSONALITIES = {
             AGGRESSIVE: {
                 name: 'Aggressive',
-                huntingPriority: 0.95,
-                comboPriority: 0.05,
-                riskTolerance: 0.95,
-                boostThreshold: 0.2,
-                chaseDistance: 500,
-                fleeThreshold: 2.0,
-                preyRatioMax: 1.2,
-                collisionAvoidanceRadius: 120,
-                dangerZoneRadius: 200,
-                aggressionMultiplier: 2.0,
-                elementIgnoreChance: 0.7,
-                avoidanceStrength: 0.4,
-                predictiveLookAhead: 0.5,
-                bodyAvoidanceMultiplier: 0.7
+                huntingPriority: 0.9,
+                comboPriority: 0.1,
+                riskTolerance: 0.9,
+                boostThreshold: 0.3,
+                chaseDistance: 600,
+                fleeThreshold: 1.5,
+                preyRatioMax: 1.3,
+                collisionAvoidanceRadius: 80,
+                dangerZoneRadius: 150,
+                aggressionMultiplier: 2.5,
+                elementIgnoreChance: 0.6,
+                avoidanceStrength: 0.3,
+                predictiveLookAhead: 1.0,
+                bodyAvoidanceMultiplier: 0.5,
+                encircleDistance: 300,
+                ramThreshold: 1.2,
+                cutoffAnticipation: 0.8
             },
             COMBO_FOCUSED: {
                 name: 'Combo Master',
@@ -324,16 +327,19 @@
                 comboPriority: 0.95,
                 riskTolerance: 0.2,
                 boostThreshold: 0.7,
-                chaseDistance: 50,
+                chaseDistance: 100,
                 fleeThreshold: 0.9,
                 preyRatioMax: 0.5,
-                collisionAvoidanceRadius: 250,
-                dangerZoneRadius: 350,
-                aggressionMultiplier: 0.2,
+                collisionAvoidanceRadius: 200,
+                dangerZoneRadius: 300,
+                aggressionMultiplier: 0.1,
                 elementIgnoreChance: 0.0,
-                avoidanceStrength: 0.8,
-                predictiveLookAhead: 1.0,
-                bodyAvoidanceMultiplier: 1.5
+                avoidanceStrength: 0.9,
+                predictiveLookAhead: 0.5,
+                bodyAvoidanceMultiplier: 1.0,
+                encircleDistance: 0,
+                ramThreshold: 2.0,
+                cutoffAnticipation: 0.0
             },
             BALANCED: {
                 name: 'Balanced',
@@ -341,53 +347,20 @@
                 comboPriority: 0.5,
                 riskTolerance: 0.5,
                 boostThreshold: 0.5,
-                chaseDistance: 250,
-                fleeThreshold: 1.3,
-                preyRatioMax: 0.8,
-                collisionAvoidanceRadius: 180,
-                dangerZoneRadius: 280,
+                chaseDistance: 400,
+                fleeThreshold: 1.2,
+                preyRatioMax: 0.9,
+                collisionAvoidanceRadius: 120,
+                dangerZoneRadius: 200,
                 aggressionMultiplier: 1.0,
                 elementIgnoreChance: 0.3,
                 avoidanceStrength: 0.6,
                 predictiveLookAhead: 0.7,
-                bodyAvoidanceMultiplier: 1.0
+                bodyAvoidanceMultiplier: 0.8,
+                encircleDistance: 250,
+                ramThreshold: 1.5,
+                cutoffAnticipation: 0.5
             },
-            CAUTIOUS: {
-                name: 'Cautious',
-                huntingPriority: 0.0,
-                comboPriority: 1.0,
-                riskTolerance: 0.1,
-                boostThreshold: 0.85,
-                chaseDistance: 0,
-                fleeThreshold: 0.8,
-                preyRatioMax: 0.0,
-                collisionAvoidanceRadius: 300,
-                dangerZoneRadius: 400,
-                aggressionMultiplier: 0.0,
-                elementIgnoreChance: 0.0,
-                avoidanceStrength: 1.0,
-                predictiveLookAhead: 1.2,
-                bodyAvoidanceMultiplier: 2.0,
-                playerAvoidanceRadius: 600
-            },
-            OPPORTUNIST: {
-                name: 'Opportunist',
-                huntingPriority: 0.8,
-                comboPriority: 0.2,
-                riskTolerance: 0.6,
-                boostThreshold: 0.3,
-                chaseDistance: 350,
-                fleeThreshold: 1.1,
-                preyRatioMax: 0.7,
-                collisionAvoidanceRadius: 150,
-                dangerZoneRadius: 250,
-                aggressionMultiplier: 1.5,
-                elementIgnoreChance: 0.5,
-                preferWeakTargets: true,
-                avoidanceStrength: 0.5,
-                predictiveLookAhead: 0.6,
-                bodyAvoidanceMultiplier: 0.8
-            }
         };
         
         let aiRespawnQueue = [];
@@ -401,9 +374,7 @@
         const PERSONALITY_COLORS = {
             'Aggressive': '#ff4444',
             'Combo Master': '#44ff44',
-            'Cautious': '#ffff44',
-            'Balanced': '#4444ff',
-            'Opportunist': '#ff8844'
+            'Balanced': '#4444ff'
         };
         
         let staticStars = [];
@@ -420,30 +391,46 @@
         const pixelNebulae = [];
         const nebulaCanvases = new Map();
         
-        // Increase nebula count and distribute more uniformly
-        const nebulaCount = 50; // Increased from 25
+        // Increase nebula count and distribute more uniformly using grid-based approach
         const nebulaColors = [
             '#4B0082', '#8B008B', '#191970', '#483D8B', '#6A0DAD', '#9400D3',
             '#FF1493', '#FF69B4', '#DA70D6', '#BA55D3', '#9370DB', '#8A2BE2',
-            '#00CED1', '#48D1CC', '#00BFFF', '#1E90FF', '#6495ED', '#4169E1'
-        ]; // More color variety including pinks, purples, and blues
+            '#00CED1', '#48D1CC', '#00BFFF', '#1E90FF', '#6495ED', '#4169E1',
+            '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD',
+            '#F08080', '#87CEEB', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E2'
+        ]; // Extended color palette for more variety
         
-        for (let i = 0; i < nebulaCount; i++) {
-            // Distribute nebulas randomly across the entire world
-            const x = Math.random() * WORLD_SIZE;
-            const y = Math.random() * WORLD_SIZE;
-            
-            const size = 300 + Math.random() * 400; // Slightly larger
-            pixelNebulae.push({
-                x: x,
-                y: y,
-                width: size,
-                height: size,
-                color: nebulaColors[Math.floor(Math.random() * nebulaColors.length)],
-                density: 0.3 + Math.random() * 0.3, // Slightly denser
-                clusters: []
-            });
+        // Generate nebulas across entire world like planets and asteroids
+        const NEBULA_GRID_SIZE = 8; // 8x8 grid = 64 sections
+        const NEBULAS_PER_SECTION = 1; // 1 nebula per section
+        const sectionWidth = WORLD_SIZE / NEBULA_GRID_SIZE;
+        const sectionHeight = WORLD_SIZE / NEBULA_GRID_SIZE;
+        
+        // Generate nebulas in grid sections across full world
+        for (let gx = 0; gx < NEBULA_GRID_SIZE; gx++) {
+            for (let gy = 0; gy < NEBULA_GRID_SIZE; gy++) {
+                // Calculate position across full world
+                const baseX = gx * sectionWidth;
+                const baseY = gy * sectionHeight;
+                
+                // Add randomization within the section
+                const x = baseX + (sectionWidth * 0.2) + (Math.random() * sectionWidth * 0.6);
+                const y = baseY + (sectionHeight * 0.2) + (Math.random() * sectionHeight * 0.6);
+                
+                const size = 400 + Math.random() * 400; // Size range: 400-800px
+                pixelNebulae.push({
+                    x: x,
+                    y: y,
+                    width: size,
+                    height: size,
+                    color: nebulaColors[Math.floor(Math.random() * nebulaColors.length)],
+                    density: 0.3 + Math.random() * 0.2, // Reduced density range
+                    clusters: []
+                });
+            }
         }
+        
+        console.log(`[NEBULA GENERATION] Generated ${pixelNebulae.length} nebulas across full world`);
         
         const pixelPlanets = [];
         // Create planets with better distribution
@@ -464,7 +451,7 @@
         
         // Use a minimum distance between planets to prevent clumping
         const minPlanetDistance = 400;
-        const maxAttempts = 100;
+        const maxPlanetAttempts = 100;
         
         for (let i = 0; i < planetCount; i++) {
             let validPosition = false;
@@ -472,7 +459,7 @@
             let x, y;
             
             // Try to find a position that's not too close to other planets
-            while (!validPosition && attempts < maxAttempts) {
+            while (!validPosition && attempts < maxPlanetAttempts) {
                 x = Math.random() * WORLD_SIZE;
                 y = Math.random() * WORLD_SIZE;
                 
@@ -1032,6 +1019,69 @@
             updateNamePlaceholder();
             setInterval(updateNamePlaceholder, 3000); // Change every 3 seconds
         }, 200);
+        
+        // Welcome modal functionality
+        function checkAndShowWelcomeModal() {
+            // Get session tracking data
+            let sessionCount = parseInt(localStorage.getItem('sessionCount') || '0');
+            const lastWelcomeShown = parseInt(localStorage.getItem('lastWelcomeShown') || '0');
+            
+            // Increment session count
+            sessionCount++;
+            localStorage.setItem('sessionCount', sessionCount.toString());
+            
+            // Show modal if:
+            // 1. First time player (sessionCount === 1)
+            // 2. Every 5 sessions after the last shown
+            const shouldShowWelcome = (sessionCount === 1) || 
+                                    (sessionCount - lastWelcomeShown >= 5);
+            
+            if (shouldShowWelcome) {
+                // Update last shown
+                localStorage.setItem('lastWelcomeShown', sessionCount.toString());
+                
+                // Show the modal
+                const modal = document.getElementById('welcomeModal');
+                if (modal) {
+                    modal.style.display = 'flex';
+                    
+                    // Setup close handlers
+                    setupWelcomeModalHandlers();
+                }
+            }
+        }
+        
+        // Setup welcome modal event handlers
+        function setupWelcomeModalHandlers() {
+            const modal = document.getElementById('welcomeModal');
+            const closeBtn = modal.querySelector('.welcome-modal-close');
+            const overlay = modal.querySelector('.welcome-modal-overlay');
+            
+            // Close function
+            const closeModal = () => {
+                playUISound();
+                modal.style.display = 'none';
+            };
+            
+            // Close button click
+            if (closeBtn) {
+                closeBtn.onclick = closeModal;
+            }
+            
+            // Overlay click
+            if (overlay) {
+                overlay.onclick = closeModal;
+            }
+            
+            // Prevent clicks on content from closing
+            const content = modal.querySelector('.welcome-modal-content');
+            if (content) {
+                content.onclick = (e) => e.stopPropagation();
+            }
+        }
+        
+        // Make it globally available
+        window.checkAndShowWelcomeModal = checkAndShowWelcomeModal;
         
         // Splash screen
         document.getElementById('startButton').addEventListener('click', async () => {
@@ -3447,7 +3497,7 @@
                         // Check if this snake is a threat or prey
                         const lengthRatio = otherSnake.length / this.length;
                         
-                        // Special Cautious behavior - always avoid player
+                        // Special avoidance behavior - always avoid player
                         if (personality.playerAvoidanceRadius && otherSnake.isPlayer) {
                             if (distance < personality.playerAvoidanceRadius) {
                                 // Treat player as major threat regardless of size
@@ -3470,7 +3520,7 @@
                         const inChaseRange = distance < personality.chaseDistance;
                         
                         if (isValidPrey && inChaseRange && personality.huntingPriority > 0) {
-                            // Opportunists prefer wounded or very small targets
+                            // Some personalities prefer wounded or very small targets
                             if (personality.preferWeakTargets) {
                                 const isWeak = otherSnake.length < this.length * 0.5 || otherSnake.stamina < 30;
                                 if (isWeak && distance < preyDistance) {
@@ -3697,7 +3747,7 @@
                     if (personality.riskTolerance > 0.8 && escapeAngles[0].narrowestGap > 30) {
                         targetAngle = escapeAngles[0].angle;
                     } else {
-                        // Cautious snakes prefer wider gaps
+                        // Defensive snakes prefer wider gaps
                         const safeOptions = escapeAngles.filter(e => e.narrowestGap > 45);
                         targetAngle = safeOptions.length > 0 ? safeOptions[0].angle : escapeAngles[0].angle;
                     }
@@ -8031,6 +8081,9 @@
         }
         
         function showMessage(text, isDiscovery, timeout = 3000) {
+            // Don't show messages if game hasn't started
+            if (!gameStarted) return;
+            
             const popup = document.getElementById('recentDiscovery');
             popup.innerHTML = text;
             
@@ -8066,6 +8119,9 @@
                 popup.className = '';
             }, timeout);
         }
+        
+        // Expose showMessage globally
+        window.showMessage = showMessage;
         
         // Boss Victory Message function
         function showBossVictoryMessage(boss, skinUnlocked, elementBankExpanded) {
@@ -10567,21 +10623,21 @@
             const offsetX = (camera.x * 0.05) % gridSize;
             const offsetY = (camera.y * 0.05) % gridSize;
             
-            // Use the cached grid pattern
-            ctx.save();
-            ctx.translate(-offsetX, -offsetY);
-            
-            // Draw the cached grid canvas tiled across the screen
-            const tilesX = Math.ceil((canvas.width + gridSize) / 128);
-            const tilesY = Math.ceil((canvas.height + gridSize) / 128);
-            
-            for (let tx = 0; tx < tilesX; tx++) {
-                for (let ty = 0; ty < tilesY; ty++) {
-                    ctx.drawImage(window.gridPatternCanvas, tx * 128, ty * 128);
-                }
-            }
-            
-            ctx.restore()
+            // Grid pattern drawing removed - commented out to remove grid lines
+            // ctx.save();
+            // ctx.translate(-offsetX, -offsetY);
+            // 
+            // // Draw the cached grid canvas tiled across the screen
+            // const tilesX = Math.ceil((canvas.width + gridSize) / 128);
+            // const tilesY = Math.ceil((canvas.height + gridSize) / 128);
+            // 
+            // for (let tx = 0; tx < tilesX; tx++) {
+            //     for (let ty = 0; ty < tilesY; ty++) {
+            //         ctx.drawImage(window.gridPatternCanvas, tx * 128, ty * 128);
+            //     }
+            // }
+            // 
+            // ctx.restore()
             
             // Draw shooting stars (desktop only)
             if (!isMobile) {
@@ -10674,7 +10730,7 @@
                                 // More cloud-like density with smoother falloff
                                 const density = nebula.density * (1 - minDist * minDist); // Quadratic falloff
                                 if (Math.random() < density) {
-                                    const opacity = 0.1 + (1 - minDist) * 0.4; // Increased opacity for better visibility
+                                    const opacity = 0.03 + (1 - minDist) * 0.15; // Very low opacity for subtle background effect
                                     
                                     cacheCtx.fillStyle = nebula.color;
                                     cacheCtx.globalAlpha = opacity;
@@ -11039,6 +11095,11 @@
             // Dispatch game start event
             dispatchGameEvent('gameStart', { timestamp: gameStartTime });
             
+            // Notify unlock manager that game has started
+            if (window.unlockManager && window.unlockManager.onGameStart) {
+                window.unlockManager.onGameStart();
+            }
+            
             // Create player snake
             console.log('[GAME START] Creating player snake...');
             playerSnake = new Snake(WORLD_SIZE / 2, WORLD_SIZE / 2, true);
@@ -11177,6 +11238,11 @@
             // Reset game state
             gameStarted = false;
             paused = false;
+            
+            // Notify unlock manager that game has ended
+            if (window.unlockManager && window.unlockManager.onGameEnd) {
+                window.unlockManager.onGameEnd();
+            }
             
             // Keep orientation locked on mobile - no unlocking
             
@@ -11871,7 +11937,7 @@
             // Update discovery count
             const countElement = document.getElementById('discoveryCount');
             if (countElement) {
-                countElement.textContent = `Total Discoveries: ${allTimeDiscoveries.size}`;
+                countElement.textContent = `All-Time Discoveries: ${allTimeDiscoveries.size}`;
             }
             
             // Use allTimeDiscoveries for persistent journal
@@ -13027,6 +13093,14 @@
             
             // Initialize mobile controls if needed
             initMobileControls();
+        });
+        
+        // Show welcome modal on page load if needed
+        document.addEventListener('DOMContentLoaded', function() {
+            // Small delay to ensure everything is loaded
+            setTimeout(() => {
+                checkAndShowWelcomeModal();
+            }, 500);
         });
         
         // Persistent stars animation for all screens

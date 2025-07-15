@@ -199,10 +199,10 @@ if (typeof window !== 'undefined') {
     });
 }
 
+// Make available globally
+window.DEBUG_CONFIG = DEBUG_CONFIG;
+window.Debug = Debug;
+
 // Export for module usage
 export default DEBUG_CONFIG;
 export { Debug };
-
-// Also make available globally
-window.DEBUG_CONFIG = DEBUG_CONFIG;
-window.Debug = Debug;

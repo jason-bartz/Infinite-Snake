@@ -4,6 +4,10 @@ class UnlockManager {
         this.STORAGE_KEY = 'infiniteSnakeUnlocks';
         this.unlockedSkins = new Set(['snake-default-green']); // Initialize with default first
         this.pendingUnlocks = [];
+        this.gameStarted = false;
+        this.initialDelayTimer = null;
+        this.notificationQueue = [];
+        this.isProcessingNotification = false;
         this.loadUnlockedSkins(); // Load will update the set
         this.initializeEventListeners();
     }
@@ -198,19 +202,33 @@ class UnlockManager {
     }
 
     showUnlockNotifications(unlocks) {
+        // If game hasn't started yet, queue the notifications
+        if (!this.gameStarted) {
+            this.notificationQueue.push(...unlocks);
+            return;
+        }
+        
         // Queue notifications to show one at a time
         this.pendingUnlocks.push(...unlocks);
-        this.processNextUnlock();
+        
+        // If not already processing, start processing
+        if (!this.isProcessingNotification) {
+            this.processNextUnlock();
+        }
     }
 
     processNextUnlock() {
-        if (this.pendingUnlocks.length === 0) return;
+        if (this.pendingUnlocks.length === 0) {
+            this.isProcessingNotification = false;
+            return;
+        }
         
+        this.isProcessingNotification = true;
         const unlock = this.pendingUnlocks.shift();
         this.showUnlockNotification(unlock.skinId, unlock.data);
         
-        // Show next unlock after delay
-        setTimeout(() => this.processNextUnlock(), 3000);
+        // Show next unlock after a longer delay (4 seconds instead of 3)
+        setTimeout(() => this.processNextUnlock(), 4000);
     }
 
     showUnlockNotification(skinId, skinData) {
@@ -432,7 +450,7 @@ class UnlockManager {
         // Reload unlocked skins to sync with main game
         this.loadUnlockedSkins();
         
-        // Check all unlocks on initialization
+        // Check all unlocks on initialization but don't show notifications yet
         this.checkAllUnlocks();
         
         // Sync with skinMetadata if available
@@ -443,6 +461,39 @@ class UnlockManager {
                 }
             });
         }
+    }
+    
+    // Called when the game actually starts
+    onGameStart() {
+        this.gameStarted = true;
+        
+        // Clear any existing timer
+        if (this.initialDelayTimer) {
+            clearTimeout(this.initialDelayTimer);
+        }
+        
+        // Wait 3 seconds before showing any queued notifications
+        this.initialDelayTimer = setTimeout(() => {
+            if (this.notificationQueue.length > 0) {
+                this.showUnlockNotifications(this.notificationQueue);
+                this.notificationQueue = [];
+            }
+        }, 3000);
+    }
+    
+    // Called when returning to menu
+    onGameEnd() {
+        this.gameStarted = false;
+        
+        // Clear any pending timers
+        if (this.initialDelayTimer) {
+            clearTimeout(this.initialDelayTimer);
+            this.initialDelayTimer = null;
+        }
+        
+        // Clear pending unlocks
+        this.pendingUnlocks = [];
+        this.isProcessingNotification = false;
     }
     
     // Get unlocked skins

@@ -13,8 +13,94 @@ const MAX_CHAIN_DEPTH = 3;
 const INITIAL_SNAKE_LENGTH = 10;
 const DEFAULT_MAX_VISIBLE_ELEMENTS = 6;
 
+// Get game constants from window or use defaults
+const SNAKE_SPEED = window.SNAKE_SPEED || 4.761;
+const TURN_SPEED = window.TURN_SPEED || 0.08;
+const WORLD_SIZE = window.WORLD_SIZE || 4000;
+const SEGMENT_SIZE = window.SEGMENT_SIZE || 15;
+
+// Note: Global dependencies are accessed from window object directly in the code
+
+// AI Personality definitions
+const AI_PERSONALITIES = {
+    AGGRESSIVE: {
+        name: 'Aggressive',
+        huntingPriority: 0.9,
+        comboPriority: 0.1,
+        riskTolerance: 0.9,
+        boostThreshold: 0.3,
+        chaseDistance: 600,
+        fleeThreshold: 1.5,
+        preyRatioMax: 1.3,
+        collisionAvoidanceRadius: 80,
+        dangerZoneRadius: 150,
+        aggressionMultiplier: 2.5,
+        elementIgnoreChance: 0.6,
+        avoidanceStrength: 0.3,
+        predictiveLookAhead: 1.0,
+        bodyAvoidanceMultiplier: 0.5,
+        encircleDistance: 300,
+        ramThreshold: 1.2,
+        cutoffAnticipation: 0.8
+    },
+    BALANCED: {
+        name: 'Balanced',
+        huntingPriority: 0.5,
+        comboPriority: 0.5,
+        riskTolerance: 0.5,
+        boostThreshold: 0.5,
+        chaseDistance: 400,
+        fleeThreshold: 1.2,
+        preyRatioMax: 0.9,
+        collisionAvoidanceRadius: 120,
+        dangerZoneRadius: 200,
+        aggressionMultiplier: 1.0,
+        elementIgnoreChance: 0.3,
+        avoidanceStrength: 0.6,
+        predictiveLookAhead: 0.7,
+        bodyAvoidanceMultiplier: 0.8,
+        encircleDistance: 250,
+        ramThreshold: 1.5,
+        cutoffAnticipation: 0.5
+    },
+    COMBO_FOCUSED: {
+        name: 'Combo Master',
+        huntingPriority: 0.05,
+        comboPriority: 0.95,
+        riskTolerance: 0.2,
+        boostThreshold: 0.7,
+        chaseDistance: 100,
+        fleeThreshold: 0.9,
+        preyRatioMax: 0.5,
+        collisionAvoidanceRadius: 200,
+        dangerZoneRadius: 300,
+        aggressionMultiplier: 0.1,
+        elementIgnoreChance: 0.0,
+        avoidanceStrength: 0.9,
+        predictiveLookAhead: 0.5,
+        bodyAvoidanceMultiplier: 1.0,
+        encircleDistance: 0,
+        ramThreshold: 2.0,
+        cutoffAnticipation: 0.0
+    }
+};
+
+const PERSONALITY_COLORS = {
+    'Aggressive': '#ff4444',
+    'Combo Master': '#44ff44',
+    'Balanced': '#4444ff'
+};
+
 class Snake {
     constructor(x, y, isPlayer = false) {
+        // Ensure global constants are available
+        if (!window.AI_PERSONALITIES) {
+            window.AI_PERSONALITIES = AI_PERSONALITIES;
+        }
+        if (!window.PERSONALITY_COLORS) {
+            window.PERSONALITY_COLORS = PERSONALITY_COLORS;
+        }
+        
         this.initializePosition(x, y);
         this.initializeMovement();
         this.initializeStats();
@@ -55,7 +141,7 @@ class Snake {
     initializeGameplay(isPlayer) {
         this.isAlive = true;
         this.isPlayer = isPlayer;
-        this.name = isPlayer ? 'You' : generateSnakeName();
+        this.name = isPlayer ? 'You' : (window.generateSnakeName ? window.generateSnakeName() : 'Snake' + Math.floor(Math.random() * 1000));
         this.invincibilityTimer = 0;
         this.size = 1;
         
@@ -90,21 +176,21 @@ class Snake {
     }
     
     assignAISkin() {
-        const allSkins = Object.keys(skinMetadata).filter(skin => 
-            skin !== 'snake-default-green' && !skinMetadata[skin].isBoss && !usedAISkins.has(skin)
+        const allSkins = Object.keys(window.skinMetadata || {}).filter(skin => 
+            skin !== 'snake-default-green' && !(window.skinMetadata[skin] && window.skinMetadata[skin].isBoss) && !(window.usedAISkins && window.usedAISkins.has(skin))
         );
         
         if (allSkins.length === 0) {
-            usedAISkins.clear();
-            const resetSkins = Object.keys(skinMetadata).filter(skin => 
-                skin !== 'snake-default-green' && !skinMetadata[skin].isBoss
+            if (window.usedAISkins) window.usedAISkins.clear();
+            const resetSkins = Object.keys(window.skinMetadata || {}).filter(skin => 
+                skin !== 'snake-default-green' && !(window.skinMetadata[skin] && window.skinMetadata[skin].isBoss)
             );
             this.skin = resetSkins[Math.floor(Math.random() * resetSkins.length)];
         } else {
             this.skin = allSkins[Math.floor(Math.random() * allSkins.length)];
         }
         
-        usedAISkins.add(this.skin);
+        if (window.usedAISkins) window.usedAISkins.add(this.skin);
     }
     
     initializeAI(isPlayer) {
@@ -128,6 +214,23 @@ class Snake {
             this.consecutiveDangerFrames = 0;
             this.huntTarget = null;
             this.huntTargetTimer = 0;
+            this.lastBoostTime = 0;
+            this.aggressionLevel = 0;
+            this.encircleTarget = null;
+            this.encirclePhase = 0;
+            this.lastElementTarget = null;
+            this.elementMemoryTimer = 0;
+            this.voidOrbCooldown = 0;
+            
+            // New AI properties for enhanced behavior
+            this.persistentTarget = null;
+            this.persistentTargetTimer = 0;
+            this.attackPattern = 0; // Cycles through different attack strategies
+            this.playerSearchCooldown = 0;
+            this.lastTargetPosition = null;
+            this.predictedTargetPosition = null;
+            this.territoryCenter = { x: this.x, y: this.y };
+            this.intimidationPhase = 0;
         }
     }
     
@@ -200,8 +303,8 @@ class Snake {
     }
     
     handlePlayerControls() {
-        if (this !== playerSnake) {
-            const playerSnakeCount = snakes.filter(s => s.isPlayer && s.isAlive).length;
+        if (this !== window.playerSnake) {
+            const playerSnakeCount = window.snakes.filter(s => s.isPlayer && s.isAlive).length;
             
             if (playerSnakeCount > 1) {
                 console.error('[CONTROLS] WARNING: Multiple player snakes detected! Killing duplicate:', this.name);
@@ -209,45 +312,45 @@ class Snake {
                 return;
             } else {
                 console.warn('[CONTROLS] Player snake reference mismatch, updating reference');
-                playerSnake = this;
+                window.playerSnake = this;
             }
         }
         
         let turnMultiplier = this.isBoosting ? BOOST_TURN_MULTIPLIER : 1;
         
-        if (isMobile && joystickActive) {
+        if (window.isMobile && window.joystickActive) {
             this.handleMobileControls(turnMultiplier);
-        } else if (controlScheme === 'arrows') {
+        } else if (window.controlScheme === 'arrows') {
             this.handleArrowControls(turnMultiplier);
-        } else if (controlScheme === 'mouse') {
+        } else if (window.controlScheme === 'mouse') {
             this.handleMouseControls(turnMultiplier);
         }
     }
     
     handleMobileControls(turnMultiplier) {
-        let angleDiff = mouseAngle - this.angle;
+        let angleDiff = window.mouseAngle - this.angle;
         while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
         while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
         const angleChange = angleDiff * MOBILE_TURN_SENSITIVITY * turnMultiplier;
         if (isFinite(angleChange)) {
             this.angle += angleChange;
         }
-        this.isBoosting = mouseDown && this.stamina > 0;
+        this.isBoosting = window.mouseDown && this.stamina > 0;
     }
     
     handleArrowControls(turnMultiplier) {
-        if (keys['ArrowLeft'] || keys['a'] || keys['A']) this.angle -= TURN_SPEED * turnMultiplier;
-        if (keys['ArrowRight'] || keys['d'] || keys['D']) this.angle += TURN_SPEED * turnMultiplier;
-        this.isBoosting = (keys['ArrowUp'] || keys['w'] || keys['W']) && this.stamina > 0;
+        if (window.keys['ArrowLeft'] || window.keys['a'] || window.keys['A']) this.angle -= TURN_SPEED * turnMultiplier;
+        if (window.keys['ArrowRight'] || window.keys['d'] || window.keys['D']) this.angle += TURN_SPEED * turnMultiplier;
+        this.isBoosting = (window.keys['ArrowUp'] || window.keys['w'] || window.keys['W']) && this.stamina > 0;
     }
     
     handleMouseControls(turnMultiplier) {
-        if (keys['a'] || keys['A']) this.angle -= TURN_SPEED * turnMultiplier;
-        if (keys['d'] || keys['D']) this.angle += TURN_SPEED * turnMultiplier;
+        if (window.keys['a'] || window.keys['A']) this.angle -= TURN_SPEED * turnMultiplier;
+        if (window.keys['d'] || window.keys['D']) this.angle += TURN_SPEED * turnMultiplier;
         
-        const usingWASD = keys['a'] || keys['A'] || keys['d'] || keys['D'];
-        if (!usingWASD && mouseMovedRecently) {
-            let angleDiff = mouseAngle - this.angle;
+        const usingWASD = window.keys['a'] || window.keys['A'] || window.keys['d'] || window.keys['D'];
+        if (!usingWASD && window.mouseMovedRecently) {
+            let angleDiff = window.mouseAngle - this.angle;
             while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
             while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
             const angleChange = angleDiff * MOUSE_TURN_SENSITIVITY * turnMultiplier;
@@ -256,13 +359,13 @@ class Snake {
             }
         }
         
-        this.isBoosting = (mouseDown || keys['w'] || keys['W']) && this.stamina > 0;
+        this.isBoosting = (window.mouseDown || window.keys['w'] || window.keys['W']) && this.stamina > 0;
     }
     
     updateStamina(deltaTime) {
         if (this.isBoosting && this.stamina > 0) {
             if (!this.wasBoosting) {
-                playBoostSound(this.isPlayer);
+                if (window.playBoostSound) window.playBoostSound(this.isPlayer);
             }
             
             this.stamina -= STAMINA_DRAIN_RATE * deltaTime;
@@ -293,7 +396,7 @@ class Snake {
             const vx = Math.cos(particleAngle) * particleSpeed;
             const vy = Math.sin(particleAngle) * particleSpeed;
             const color = this.isPlayer ? 'rgba(100, 200, 255, 0.8)' : 'rgba(255, 100, 100, 0.8)';
-            particlePool.spawn(this.x, this.y, vx, vy, color);
+            if (window.particlePool) window.particlePool.spawn(this.x, this.y, vx, vy, color);
         }
     }
     
@@ -303,6 +406,7 @@ class Snake {
             this.angle = 0;
         }
         
+        const fastMath = window.fastMath || Math;
         const moveX = fastMath.cos(this.angle) * this.speed * deltaTime;
         const moveY = fastMath.sin(this.angle) * this.speed * deltaTime;
         
@@ -352,8 +456,8 @@ class Snake {
         const possibleCombos = this.findPossibleCombinations();
         
         if (possibleCombos.length === 0) {
-            if (this.isPlayer && this === playerSnake) {
-                comboStreak = 0;
+            if (this.isPlayer && this === window.playerSnake) {
+                window.comboStreak = 0;
             }
             return;
         }
@@ -406,10 +510,10 @@ class Snake {
     performCombination(chosen, depth) {
         if (this.isPlayer) {
             this.startCombinationAnimation(chosen.index1, chosen.index2);
-            createCombinationFlash();
+            if (window.createCombinationFlash) window.createCombinationFlash();
             this.glowWobbleIndices = [chosen.index1, chosen.index2];
             this.glowWobbleTime = Date.now();
-            updateUI();
+            if (window.updateUI) window.updateUI();
         }
         
         const indices = [chosen.index1, chosen.index2].sort((a, b) => b - a);
@@ -430,9 +534,9 @@ class Snake {
             this.handleExistingCombination(chosen);
         }
         
-        createCombinationParticles(this.segments[0].x, this.segments[0].y);
+        if (window.createCombinationParticles) window.createCombinationParticles(this.segments[0].x, this.segments[0].y);
         
-        if (this.isPlayer && this === playerSnake && currentBoss && currentBoss.alive) {
+        if (this.isPlayer && this === window.playerSnake && window.currentBoss && window.currentBoss.alive) {
             this.checkBossElementCombination(chosen);
         }
         
@@ -442,21 +546,21 @@ class Snake {
     handleNewDiscovery(chosen) {
         this.discoveredElements.add(chosen.result);
         
-        const gameTime = Date.now() - gameStartTime;
+        const gameTime = Date.now() - window.gameStartTime;
         if (this.isPlayer || gameTime > 10000) {
-            discoveredElements.add(chosen.result);
+            window.discoveredElements.add(chosen.result);
         }
         
-        if (this.isPlayer && this === playerSnake) {
+        if (this.isPlayer && this === window.playerSnake) {
             const resultId = typeof chosen.result === 'string' ? parseInt(chosen.result) : chosen.result;
-            playerDiscoveredElements.add(resultId);
+            window.playerDiscoveredElements.add(resultId);
         }
         
         this.score += 500;
         this.discoveries++;
         
-        if (this.isPlayer && this === playerSnake) {
-            dispatchGameEvent('elementDiscovered', {
+        if (this.isPlayer && this === window.playerSnake) {
+            window.dispatchGameEvent('elementDiscovered', {
                 element1: chosen.elem1,
                 element2: chosen.elem2,
                 result: chosen.result,
@@ -465,12 +569,12 @@ class Snake {
             });
             
             this.saveDiscoveryRecipe(chosen);
-            showCombinationMessage(chosen.elem1, chosen.elem2, chosen.result, true);
+            window.showCombinationMessage(chosen.elem1, chosen.elem2, chosen.result, true);
             this.invincibilityTimer = 2000;
             
-            if (this.score > highScore) {
-                highScore = this.score;
-                localStorage.setItem('highScore', highScore.toString());
+            if (this.score > window.highScore) {
+                window.highScore = this.score;
+                localStorage.setItem('highScore', window.highScore.toString());
             }
         }
     }
@@ -482,34 +586,34 @@ class Snake {
             const emoji1 = window.elementLoader.getEmojiForElement(chosen.elem1, elem1Data.e);
             const emoji2 = window.elementLoader.getEmojiForElement(chosen.elem2, elem2Data.e);
             const recipe = `${emoji1} ${elem1Data.n} + ${emoji2} ${elem2Data.n}`;
-            allTimeDiscoveries.set(chosen.result, recipe);
-            saveAllTimeDiscoveries();
+            window.allTimeDiscoveries.set(chosen.result, recipe);
+            window.saveAllTimeDiscoveries();
         }
     }
     
     handleExistingCombination(chosen) {
-        if (this.isPlayer && this === playerSnake) {
-            comboStreak++;
+        if (this.isPlayer && this === window.playerSnake) {
+            window.comboStreak++;
             let comboBonus = 100;
             
-            if (comboStreak >= 4) {
+            if (window.comboStreak >= 4) {
                 comboBonus = 2500;
-                showMessage(`4x COMBO STREAK! +${comboBonus} points!`, 'combo', 5000);
-            } else if (comboStreak >= 3) {
+                window.showMessage(`4x COMBO STREAK! +${comboBonus} points!`, 'combo', 5000);
+            } else if (window.comboStreak >= 3) {
                 comboBonus = 1000;
-                showMessage(`3x Combo Streak! +${comboBonus} points!`, 'combo', 5000);
-            } else if (comboStreak >= 2) {
+                window.showMessage(`3x Combo Streak! +${comboBonus} points!`, 'combo', 5000);
+            } else if (window.comboStreak >= 2) {
                 comboBonus = 500;
-                showMessage(`2x Combo! +${comboBonus} points!`, 'combo', 5000);
+                window.showMessage(`2x Combo! +${comboBonus} points!`, 'combo', 5000);
             }
             
             this.score += comboBonus;
-            showCombinationMessage(chosen.elem1, chosen.elem2, chosen.result, false);
+            window.showCombinationMessage(chosen.elem1, chosen.elem2, chosen.result, false);
         }
     }
     
     checkBossElementCombination(chosen) {
-        const bossElementId = currentBoss.elementId;
+        const bossElementId = window.currentBoss.elementId;
         if (chosen.elem1 === bossElementId || chosen.elem2 === bossElementId || chosen.result === bossElementId) {
             console.log('[SHOCKWAVE] Creating shockwave for player:', this.name);
             
@@ -526,7 +630,7 @@ class Snake {
                 shockwaveColor = elementColors[primaryElement] || '#FFD700';
             }
             
-            shockwaves.push({
+            window.shockwaves.push({
                 x: this.segments[0].x,
                 y: this.segments[0].y,
                 radius: 0,
@@ -542,20 +646,20 @@ class Snake {
             shockwaveSound.volume = 0.8;
             shockwaveSound.play().catch(e => {});
             
-            showMessage('Boss Element Resonance!', 'gold', 3000);
+            window.showMessage('Boss Element Resonance!', 'gold', 3000);
         }
     }
     
     consume(element) {
         if (this.isPlayer) {
-            playEatSound();
+            if (window.playEatSound) window.playEatSound();
         }
         
-        if (this.elements.length > elementBankSlots) {
-            this.elements = this.elements.slice(0, elementBankSlots);
+        if (this.elements.length > (window.elementBankSlots || 6)) {
+            this.elements = this.elements.slice(0, (window.elementBankSlots || 6));
         }
         
-        if (this.elements.length >= elementBankSlots) {
+        if (this.elements.length >= (window.elementBankSlots || 6)) {
             this.tryImmediateCombination(element);
         } else {
             this.addElementToBank(element);
@@ -565,15 +669,15 @@ class Snake {
         this.length += 2;
         this.score += 100;
         
-        if (this.isPlayer && this.score > highScore) {
-            highScore = this.score;
-            localStorage.setItem('highScore', highScore.toString());
+        if (this.isPlayer && this.score > window.highScore) {
+            window.highScore = this.score;
+            localStorage.setItem('window.highScore', window.highScore.toString());
         }
         
-        elementPool.remove(element);
+        window.elementPool.remove(element);
         
         if (this.isPlayer) {
-            updateUI();
+            window.updateUI();
         }
     }
     
@@ -597,15 +701,15 @@ class Snake {
                 if (this.isPlayer) {
                     this.pendingCombinationIndex = i;
                     this.pendingCombinationTime = Date.now();
-                    updateUI();
+                    window.updateUI();
                 }
                 
                 setTimeout(() => {
                     this.elements[i] = resultId;
                     
-                    if (this.elements.length > elementBankSlots) {
+                    if (this.elements.length > (window.elementBankSlots || 6)) {
                         console.error('[SAFETY] Elements exceed max after replacement, trimming');
-                        this.elements = this.elements.slice(0, elementBankSlots);
+                        this.elements = this.elements.slice(0, (window.elementBankSlots || 6));
                     }
                     
                     if (this.isPlayer) {
@@ -614,7 +718,7 @@ class Snake {
                     
                     this.processCombinationResult(resultId, newElementId, existingId);
                     this.checkCombinations();
-                    updateUI();
+                    window.updateUI();
                 }, 300);
             }
         }
@@ -644,8 +748,8 @@ class Snake {
             this.score += 500;
             this.discoveries++;
             
-            if (this.isPlayer && this === playerSnake) {
-                discoveredElements.add(resultId);
+            if (this.isPlayer && this === window.playerSnake) {
+                window.discoveredElements.add(resultId);
                 
                 const resultData = window.elementLoader.elements.get(resultId);
                 
@@ -660,16 +764,16 @@ class Snake {
                 }
                 
                 this.saveDiscoveryFromConsumption(resultId, elem1Id, elem2Id);
-                showCombinationMessage(elem1Id, elem2Id, resultId, true);
+                window.showCombinationMessage(elem1Id, elem2Id, resultId, true);
                 this.invincibilityTimer = 2000;
             }
         } else {
-            if (this.isPlayer && this === playerSnake) {
+            if (this.isPlayer && this === window.playerSnake) {
                 this.handleComboStreak(elem1Id, elem2Id, resultId);
             }
         }
         
-        createCombinationParticles(this.segments[0].x, this.segments[0].y);
+        if (window.createCombinationParticles) window.createCombinationParticles(this.segments[0].x, this.segments[0].y);
     }
     
     saveDiscoveryFromConsumption(resultId, elem1Id, elem2Id) {
@@ -681,28 +785,28 @@ class Snake {
             const emoji1 = window.elementLoader.getEmojiForElement(elem1Id, elem1Data.e);
             const emoji2 = window.elementLoader.getEmojiForElement(elem2Id, elem2Data.e);
             const recipe = `${emoji1} ${elem1Data.n} + ${emoji2} ${elem2Data.n}`;
-            allTimeDiscoveries.set(resultId, recipe);
-            saveAllTimeDiscoveries();
+            window.allTimeDiscoveries.set(resultId, recipe);
+            window.saveAllTimeDiscoveries();
         }
     }
     
     handleComboStreak(elem1Id, elem2Id, resultId) {
-        comboStreak++;
+        window.comboStreak++;
         let comboBonus = 100;
         
-        if (comboStreak >= 4) {
+        if (window.comboStreak >= 4) {
             comboBonus = 2500;
-            showMessage(`4x COMBO STREAK! +${comboBonus} points!`, 'combo', 5000);
-        } else if (comboStreak >= 3) {
+            window.showMessage(`4x COMBO STREAK! +${comboBonus} points!`, 'combo', 5000);
+        } else if (window.comboStreak >= 3) {
             comboBonus = 1000;
-            showMessage(`3x Combo Streak! +${comboBonus} points!`, 'combo', 5000);
-        } else if (comboStreak >= 2) {
+            window.showMessage(`3x Combo Streak! +${comboBonus} points!`, 'combo', 5000);
+        } else if (window.comboStreak >= 2) {
             comboBonus = 500;
-            showMessage(`2x Combo! +${comboBonus} points!`, 'combo', 5000);
+            window.showMessage(`2x Combo! +${comboBonus} points!`, 'combo', 5000);
         }
         
         this.score += comboBonus;
-        showCombinationMessage(elem1Id, elem2Id, resultId, false);
+        window.showCombinationMessage(elem1Id, elem2Id, resultId, false);
     }
     
     digest() {
@@ -712,14 +816,14 @@ class Snake {
         const digestBonus = Math.floor(digestedCount * 50);
         this.score += digestBonus;
         
-        if (this.isPlayer && this.score > highScore) {
-            highScore = this.score;
-            localStorage.setItem('highScore', highScore.toString());
+        if (this.isPlayer && this.score > window.highScore) {
+            window.highScore = this.score;
+            localStorage.setItem('window.highScore', window.highScore.toString());
         }
         
-        if (this.isPlayer && this === playerSnake && digestedCount > 0) {
-            showMessage(`Digesting ${digestedCount} elements! +${digestBonus} points`, false);
-            updateUI();
+        if (this.isPlayer && this === window.playerSnake && digestedCount > 0) {
+            window.showMessage(`Digesting ${digestedCount} elements! +${digestBonus} points`, false);
+            window.updateUI();
         }
     }
     
@@ -737,7 +841,7 @@ class Snake {
                 const remainingElements = this.elements.length;
                 if (remainingElements > 0) {
                     combinationAnimationState.newElementIndex = Math.floor(Math.random() * remainingElements);
-                    updateUI();
+                    window.updateUI();
                 }
             }, 300);
         }
@@ -773,7 +877,7 @@ class Snake {
         
         if (!this.finalExplosionTriggered) {
             const snakeColor = this.color || '#ff0000';
-            createDeathParticles(this.x, this.y, this.length, snakeColor, this.elements);
+            if (window.createDeathParticles) window.createDeathParticles(this.x, this.y, this.length, snakeColor, this.elements);
         }
         
         if (this.isPlayer && !isBossDeath) {
@@ -810,7 +914,7 @@ class Snake {
             finalX = Math.max(margin, Math.min(WORLD_SIZE - margin, finalX));
             finalY = Math.max(margin, Math.min(WORLD_SIZE - margin, finalY));
             
-            spawnElement(this.elements[i], finalX, finalY);
+            window.spawnElement(this.elements[i], finalX, finalY);
         }
     }
     
@@ -863,14 +967,14 @@ class Snake {
             );
         }
         
-        if (!musicMuted) {
+        if (!window.musicMuted) {
             const explosionSound = new Audio('sounds/big-powerful-explosion.mp3');
             explosionSound.volume = 0.7;
             explosionSound.play().catch(e => {});
         }
         
-        bossScreenShakeTimer = 60;
-        bossScreenShakeIntensity = 20;
+        window.bossScreenShakeTimer = 60;
+        window.bossScreenShakeIntensity = 20;
     }
     
     updateDeathAnimation(deltaTime) {
@@ -931,9 +1035,9 @@ class Snake {
         this.finalExplosionTriggered = true;
         
         const snakeColor = this.color || '#ff0000';
-        createDeathParticles(this.x, this.y, this.length, snakeColor, this.elements);
+        if (window.createDeathParticles) window.createDeathParticles(this.x, this.y, this.length, snakeColor, this.elements);
         
-        if (this.isPlayer && !musicMuted) {
+        if (this.isPlayer && !window.musicMuted) {
             const retroExplosion = new Audio('sounds/retro-explode-boom.mp3');
             retroExplosion.volume = 0.7;
             retroExplosion.play().catch(e => {});
@@ -945,9 +1049,9 @@ class Snake {
     }
     
     createDeathCameraShake() {
-        cameraShake.intensity = 15;
-        cameraShake.duration = 500;
-        cameraShake.startTime = Date.now();
+        window.cameraShake.intensity = 15;
+        window.cameraShake.duration = 500;
+        window.cameraShake.startTime = Date.now();
     }
     
     draw() {
@@ -958,17 +1062,17 @@ class Snake {
         const deathOpacity = this.calculateDeathOpacity();
         if (deathOpacity <= 0) return;
         
-        ctx.save();
-        ctx.globalAlpha = deathOpacity;
+        window.ctx.save();
+        window.ctx.globalAlpha = deathOpacity;
         
         if (this.invincibilityTimer > 0 && Math.floor(this.invincibilityTimer / 100) % 2 === 0) {
-            ctx.globalAlpha *= 0.5;
+            window.ctx.globalAlpha *= 0.5;
         }
         
         this.drawSegments();
         this.drawHead();
         
-        ctx.restore();
+        window.ctx.restore();
     }
     
     calculateDeathOpacity() {
@@ -986,22 +1090,22 @@ class Snake {
     }
     
     drawSegments() {
-        const skinData = skinMetadata[this.skin] || skinMetadata['snake-default-green'];
-        const skinImg = snakeSkinImages[this.skin];
+        const skinData = window.skinMetadata[this.skin] || window.skinMetadata['snake-default-green'];
+        const skinImg = window.snakeSkinImages[this.skin];
         const emoji = skinData.emoji;
         
-        const effectiveSegmentSize = SEGMENT_SIZE * this.size * cameraZoom;
+        const effectiveSegmentSize = SEGMENT_SIZE * this.size * window.cameraZoom;
         const minSize = isMobile ? 8 : 10;
         const maxSize = isMobile ? 30 : 40;
         const clampedSize = Math.max(minSize, Math.min(maxSize, effectiveSegmentSize));
         
         for (let i = this.segments.length - 1; i >= 0; i--) {
             const segment = this.segments[i];
-            const screen = worldToScreen(segment.x, segment.y);
+            const screen = window.worldToScreen(segment.x, segment.y);
             const margin = 100;
             
-            if (screen.x < -margin || screen.x > canvas.width + margin ||
-                screen.y < -margin || screen.y > canvas.height + margin) continue;
+            if (screen.x < -margin || screen.x > window.canvas.width + margin ||
+                screen.y < -margin || screen.y > window.canvas.height + margin) continue;
             
             this.drawSegmentBody(screen, i, clampedSize, skinImg, emoji);
         }
@@ -1018,40 +1122,40 @@ class Snake {
         }
         
         if (skinImg && skinImg.complete) {
-            ctx.drawImage(skinImg, screen.x - size/2, screen.y - size/2, size, size);
+            window.ctx.drawImage(skinImg, screen.x - size/2, screen.y - size/2, size, size);
         } else {
-            const cachedEmoji = getCachedEmoji(emoji, size);
-            ctx.drawImage(cachedEmoji, screen.x - cachedEmoji.width/2, screen.y - cachedEmoji.height/2);
+            const cachedEmoji = window.getCachedEmoji(emoji, size);
+            window.ctx.drawImage(cachedEmoji, screen.x - cachedEmoji.width/2, screen.y - cachedEmoji.height/2);
         }
     }
     
     drawHead() {
-        const headScreen = worldToScreen(this.x, this.y);
+        const headScreen = window.worldToScreen(this.x, this.y);
         const margin = 100;
         
-        if (headScreen.x < -margin || headScreen.x > canvas.width + margin ||
-            headScreen.y < -margin || headScreen.y > canvas.height + margin) return;
+        if (headScreen.x < -margin || headScreen.x > window.canvas.width + margin ||
+            headScreen.y < -margin || headScreen.y > window.canvas.height + margin) return;
         
-        const effectiveSegmentSize = SEGMENT_SIZE * this.size * cameraZoom;
+        const effectiveSegmentSize = SEGMENT_SIZE * this.size * window.cameraZoom;
         const minSize = isMobile ? 10 : 12;
         const maxSize = isMobile ? 35 : 50;
         const headSize = Math.max(minSize, Math.min(maxSize, effectiveSegmentSize * 1.5));
         
-        const skinData = skinMetadata[this.skin] || skinMetadata['snake-default-green'];
-        const skinImg = snakeSkinImages[this.skin + '-head'] || snakeSkinImages[this.skin];
+        const skinData = window.skinMetadata[this.skin] || window.skinMetadata['snake-default-green'];
+        const skinImg = window.snakeSkinImages[this.skin + '-head'] || window.snakeSkinImages[this.skin];
         
-        ctx.save();
-        ctx.translate(headScreen.x, headScreen.y);
-        ctx.rotate(this.angle);
+        window.ctx.save();
+        window.ctx.translate(headScreen.x, headScreen.y);
+        window.ctx.rotate(this.angle);
         
         if (skinImg && skinImg.complete) {
-            ctx.drawImage(skinImg, -headSize/2, -headSize/2, headSize, headSize);
+            window.ctx.drawImage(skinImg, -headSize/2, -headSize/2, headSize, headSize);
         } else {
-            const cachedEmoji = getCachedEmoji(skinData.emoji, headSize);
-            ctx.drawImage(cachedEmoji, -cachedEmoji.width/2, -cachedEmoji.height/2);
+            const cachedEmoji = window.getCachedEmoji(skinData.emoji, headSize);
+            window.ctx.drawImage(cachedEmoji, -cachedEmoji.width/2, -cachedEmoji.height/2);
         }
         
-        ctx.restore();
+        window.ctx.restore();
         
         this.drawNameAndStats(headScreen, headSize);
     }
@@ -1059,35 +1163,653 @@ class Snake {
     drawNameAndStats(headScreen, headSize) {
         const nameOffset = headSize * 0.8;
         
-        ctx.font = `${Math.round(10 * cameraZoom)}px 'Press Start 2P'`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'bottom';
+        window.ctx.font = `${Math.round(10 * window.cameraZoom)}px 'Press Start 2P'`;
+        window.ctx.textAlign = 'center';
+        window.ctx.textBaseline = 'bottom';
         
         const personalityColor = this.personalityColor || '#ffffff';
         
-        ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)';
-        ctx.lineWidth = 3;
-        ctx.strokeText(this.name, headScreen.x, headScreen.y - nameOffset);
+        window.ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)';
+        window.ctx.lineWidth = 3;
+        window.ctx.strokeText(this.name, headScreen.x, headScreen.y - nameOffset);
         
-        ctx.fillStyle = this.isPlayer ? '#4ecdc4' : personalityColor;
-        ctx.fillText(this.name, headScreen.x, headScreen.y - nameOffset);
+        window.ctx.fillStyle = this.isPlayer ? '#4ecdc4' : personalityColor;
+        window.ctx.fillText(this.name, headScreen.x, headScreen.y - nameOffset);
         
-        const scoreY = headScreen.y - nameOffset - 12 * cameraZoom;
+        const scoreY = headScreen.y - nameOffset - 12 * window.cameraZoom;
         const scoreText = `${this.score}`;
         
-        ctx.strokeText(scoreText, headScreen.x, scoreY);
-        ctx.fillStyle = '#ffeb3b';
-        ctx.fillText(scoreText, headScreen.x, scoreY);
+        window.ctx.strokeText(scoreText, headScreen.x, scoreY);
+        window.ctx.fillStyle = '#ffeb3b';
+        window.ctx.fillText(scoreText, headScreen.x, scoreY);
     }
     
     getColor() {
-        const skinData = skinMetadata[this.skin];
+        const skinData = window.skinMetadata[this.skin];
         return skinData ? skinData.color : '#4ecdc4';
     }
     
     updateAI(deltaTime) {
-        // AI implementation would go here
-        // This is a placeholder for the AI logic
+        if (!this.personality || !this.isAlive) return;
+        
+        const personality = this.personality;
+        const currentTime = Date.now();
+        
+        // Update timers
+        if (this.panicMode) {
+            this.panicTimer--;
+            if (this.panicTimer <= 0) {
+                this.panicMode = false;
+            }
+        }
+        
+        if (this.targetMemoryTimer > 0) {
+            this.targetMemoryTimer--;
+        }
+        
+        if (this.huntTargetTimer > 0) {
+            this.huntTargetTimer--;
+        }
+        
+        if (this.elementMemoryTimer > 0) {
+            this.elementMemoryTimer--;
+        }
+        
+        if (this.voidOrbCooldown > 0) {
+            this.voidOrbCooldown--;
+        }
+        
+        // Update persistent target tracking
+        if (this.persistentTargetTimer > 0) {
+            this.persistentTargetTimer--;
+            if (this.persistentTargetTimer <= 0) {
+                this.persistentTarget = null;
+                this.lastTargetPosition = null;
+            }
+        }
+        
+        if (this.playerSearchCooldown > 0) {
+            this.playerSearchCooldown--;
+        }
+        
+        // Update aggression level based on length
+        this.aggressionLevel = Math.min(1.0, this.length / 100);
+        
+        // Get all threats and targets
+        const threats = this.assessThreats();
+        const targets = this.findTargets();
+        
+        // Decide action based on personality and situation
+        let targetAngle = null;
+        let shouldBoost = false;
+        
+        // Emergency border avoidance
+        const borderAvoidance = this.checkBorderDanger();
+        if (borderAvoidance.emergency) {
+            targetAngle = borderAvoidance.angle;
+            shouldBoost = true;
+            this.panicMode = true;
+            this.panicTimer = 30;
+        } else if (threats.immediateDanger) {
+            // Immediate danger - evade
+            targetAngle = this.calculateEvasionAngle(threats);
+            shouldBoost = personality.riskTolerance < 0.5 || threats.dangerLevel > 0.8;
+        } else {
+            // No immediate danger - pursue objectives
+            const action = this.chooseAction(targets, threats);
+            
+            switch (action.type) {
+                case 'hunt':
+                    targetAngle = this.calculateHuntAngle(action.target);
+                    shouldBoost = this.shouldBoostForHunt(action.target);
+                    break;
+                case 'collect':
+                    targetAngle = this.calculateCollectAngle(action.target);
+                    shouldBoost = false;
+                    break;
+                case 'encircle':
+                    targetAngle = this.calculateEncircleAngle(action.target);
+                    shouldBoost = true;
+                    break;
+                case 'ram':
+                    targetAngle = this.calculateRamAngle(action.target);
+                    shouldBoost = true;
+                    break;
+                case 'cutoff':
+                    targetAngle = this.calculateCutoffAngle(action.target);
+                    shouldBoost = true;
+                    break;
+                case 'intimidate':
+                    targetAngle = this.calculateIntimidateAngle(action.target);
+                    shouldBoost = Math.sin(this.intimidationPhase) > 0; // Alternating boost pattern
+                    break;
+                case 'wander':
+                    targetAngle = this.calculateWanderAngle();
+                    shouldBoost = false;
+                    break;
+            }
+        }
+        
+        // Apply movement
+        if (targetAngle !== null) {
+            this.turnTowardsAngle(targetAngle, personality.avoidanceStrength);
+        }
+        
+        // Boost management
+        if (shouldBoost && this.stamina > personality.boostThreshold * 100) {
+            this.isBoosting = true;
+            this.lastBoostTime = currentTime;
+        } else {
+            this.isBoosting = false;
+        }
+        
+        // Check if we should use void orb
+        if (this.elements.length >= this.maxVisibleElements - 1) {
+            this.checkVoidOrbUsage();
+        }
+    }
+    
+    assessThreats() {
+        const threats = {
+            immediateDanger: false,
+            dangerLevel: 0,
+            nearestThreat: null,
+            allThreats: []
+        };
+        
+        if (!window.snakes) return threats;
+        
+        const mySize = this.length;
+        const personality = this.personality;
+        
+        for (const snake of window.snakes) {
+            if (snake === this || !snake.isAlive) continue;
+            
+            const distance = Math.hypot(snake.x - this.x, snake.y - this.y);
+            const sizeRatio = snake.length / mySize;
+            
+            // Check head collision danger
+            const headDanger = distance < personality.dangerZoneRadius && sizeRatio > personality.fleeThreshold;
+            
+            // Check body collision danger
+            let bodyDanger = false;
+            for (const segment of snake.segments) {
+                const segDist = Math.hypot(segment.x - this.x, segment.y - this.y);
+                if (segDist < personality.collisionAvoidanceRadius) {
+                    bodyDanger = true;
+                    break;
+                }
+            }
+            
+            if (headDanger || bodyDanger) {
+                const threat = {
+                    snake: snake,
+                    distance: distance,
+                    sizeRatio: sizeRatio,
+                    angle: Math.atan2(snake.y - this.y, snake.x - this.x),
+                    isDangerous: sizeRatio > personality.fleeThreshold,
+                    isBody: bodyDanger
+                };
+                
+                threats.allThreats.push(threat);
+                
+                if (!threats.nearestThreat || distance < threats.nearestThreat.distance) {
+                    threats.nearestThreat = threat;
+                }
+            }
+        }
+        
+        if (threats.nearestThreat) {
+            threats.immediateDanger = threats.nearestThreat.distance < personality.collisionAvoidanceRadius;
+            threats.dangerLevel = 1 - (threats.nearestThreat.distance / personality.dangerZoneRadius);
+        }
+        
+        return threats;
+    }
+    
+    findTargets() {
+        const targets = {
+            snakes: [],
+            playerTargets: [],
+            elements: [],
+            voidOrbs: []
+        };
+        
+        const mySize = this.length;
+        const personality = this.personality;
+        
+        // Find huntable snakes
+        if (window.snakes) {
+            for (const snake of window.snakes) {
+                if (snake === this || !snake.isAlive) continue;
+                
+                const distance = Math.hypot(snake.x - this.x, snake.y - this.y);
+                const sizeRatio = mySize / snake.length;
+                
+                // For aggressive personality, hunt players across the entire map
+                const isValidTarget = personality.name === 'Aggressive' && snake.isPlayer ? 
+                    true : // No distance limit for aggressive hunting players
+                    (distance < personality.chaseDistance && sizeRatio > 1 / personality.preyRatioMax);
+                
+                if (isValidTarget) {
+                    const targetData = {
+                        snake: snake,
+                        distance: distance,
+                        sizeRatio: sizeRatio,
+                        angle: Math.atan2(snake.y - this.y, snake.x - this.x),
+                        priority: (sizeRatio * personality.aggressionMultiplier) / (distance / 100),
+                        isPlayer: snake.isPlayer
+                    };
+                    
+                    // Separate player targets for aggressive prioritization
+                    if (snake.isPlayer) {
+                        // Boost priority for player targets when aggressive
+                        if (personality.name === 'Aggressive') {
+                            targetData.priority *= 10; // Heavily prioritize players
+                        }
+                        targets.playerTargets.push(targetData);
+                    } else {
+                        targets.snakes.push(targetData);
+                    }
+                }
+            }
+            
+            targets.snakes.sort((a, b) => b.priority - a.priority);
+            targets.playerTargets.sort((a, b) => b.priority - a.priority);
+        }
+        
+        // Find nearby elements
+        if (window.elements) {
+            for (const element of window.elements) {
+                const distance = Math.hypot(element.x - this.x, element.y - this.y);
+                if (distance < 500) {
+                    targets.elements.push({
+                        element: element,
+                        distance: distance,
+                        angle: Math.atan2(element.y - this.y, element.x - this.x)
+                    });
+                }
+            }
+            
+            targets.elements.sort((a, b) => a.distance - b.distance);
+        }
+        
+        // Find void orbs
+        if (window.voidOrbs) {
+            for (const orb of window.voidOrbs) {
+                const distance = Math.hypot(orb.x - this.x, orb.y - this.y);
+                if (distance < 300) {
+                    targets.voidOrbs.push({
+                        orb: orb,
+                        distance: distance,
+                        angle: Math.atan2(orb.y - this.y, orb.x - this.x)
+                    });
+                }
+            }
+        }
+        
+        return targets;
+    }
+    
+    chooseAction(targets, threats) {
+        const personality = this.personality;
+        const hasFullInventory = this.elements.length >= this.maxVisibleElements - 1;
+        
+        // Combo-focused always prioritizes elements unless in danger
+        if (personality.name === 'Combo Master') {
+            if (hasFullInventory && targets.voidOrbs.length > 0 && !this.hasValidCombos()) {
+                return { type: 'collect', target: targets.voidOrbs[0] };
+            }
+            if (targets.elements.length > 0) {
+                return { type: 'collect', target: targets.elements[0] };
+            }
+            return { type: 'wander' };
+        }
+        
+        // Aggressive personality - ALWAYS hunt players if available
+        if (personality.name === 'Aggressive') {
+            // Check if we have a valid persistent target
+            let target = null;
+            if (this.persistentTarget && this.persistentTarget.isAlive) {
+                // Verify the persistent target is still valid
+                const distance = Math.hypot(this.persistentTarget.x - this.x, this.persistentTarget.y - this.y);
+                const sizeRatio = this.length / this.persistentTarget.length;
+                target = {
+                    snake: this.persistentTarget,
+                    distance: distance,
+                    sizeRatio: sizeRatio,
+                    angle: Math.atan2(this.persistentTarget.y - this.y, this.persistentTarget.x - this.x),
+                    isPlayer: this.persistentTarget.isPlayer
+                };
+            } else if (targets.playerTargets.length > 0) {
+                // Get new player target
+                target = targets.playerTargets[0];
+                // Set as persistent target
+                this.persistentTarget = target.snake;
+                this.persistentTargetTimer = 500; // Track for 500 frames (~8 seconds)
+                this.lastTargetPosition = { x: target.snake.x, y: target.snake.y };
+            }
+            
+            if (target) {
+                // Update last known position
+                if (this.persistentTarget) {
+                    this.lastTargetPosition = { x: this.persistentTarget.x, y: this.persistentTarget.y };
+                }
+                
+                // Cycle attack patterns for variety
+                this.attackPattern = (this.attackPattern + 1) % 4;
+                
+                // Debug logging for aggressive behavior
+                if (Math.random() < 0.02) { // Log occasionally to avoid spam
+                    console.log(`[AGGRESSIVE AI] ${this.name} hunting ${target.isPlayer ? 'PLAYER' : 'AI'} at distance ${Math.round(target.distance)}`);
+                }
+                
+                // Choose attack strategy based on situation and pattern
+                if (target.sizeRatio > personality.ramThreshold && target.distance < 250) {
+                    console.log(`[AGGRESSIVE AI] ${this.name} - RAM attack!`);
+                    return { type: 'ram', target: target };
+                } else if (target.distance < personality.encircleDistance && this.length > 40 && this.attackPattern === 0) {
+                    console.log(`[AGGRESSIVE AI] ${this.name} - ENCIRCLE attack!`);
+                    return { type: 'encircle', target: target };
+                } else if (target.distance < 300 && target.sizeRatio > 1.1 && this.attackPattern === 1) {
+                    // Cut-off attack for close targets
+                    console.log(`[AGGRESSIVE AI] ${this.name} - CUTOFF attack!`);
+                    return { type: 'cutoff', target: target };
+                } else if (this.attackPattern === 2 && target.distance < 400) {
+                    // Intimidation behavior
+                    this.intimidationPhase = (this.intimidationPhase + 0.1) % (Math.PI * 2);
+                    return { type: 'intimidate', target: target };
+                } else {
+                    return { type: 'hunt', target: target };
+                }
+            }
+            // Hunt AI snakes if no players available
+            else if (targets.snakes.length > 0) {
+                const target = targets.snakes[0];
+                if (target.sizeRatio > personality.ramThreshold && target.distance < 200) {
+                    return { type: 'ram', target: target };
+                } else {
+                    return { type: 'hunt', target: target };
+                }
+            }
+            // Only collect elements if nothing to hunt
+            else if (targets.elements.length > 0 && Math.random() < 0.3) {
+                return { type: 'collect', target: targets.elements[0] };
+            }
+        }
+        
+        // Balanced personality - opportunistic hunting
+        if (personality.name === 'Balanced') {
+            // Hunt players if they're close
+            if (targets.playerTargets.length > 0 && targets.playerTargets[0].distance < 400) {
+                const target = targets.playerTargets[0];
+                if (target.sizeRatio > 1.5) {
+                    return { type: 'hunt', target: target };
+                }
+            }
+            
+            // Normal balanced decision making
+            const huntWeight = personality.huntingPriority * (1 + this.aggressionLevel);
+            const collectWeight = personality.comboPriority * (hasFullInventory ? 0.3 : 1);
+            
+            if (Math.random() < huntWeight && (targets.snakes.length > 0 || targets.playerTargets.length > 0)) {
+                const allTargets = [...targets.playerTargets, ...targets.snakes];
+                return { type: 'hunt', target: allTargets[0] };
+            } else if (Math.random() < collectWeight && targets.elements.length > 0) {
+                return { type: 'collect', target: targets.elements[0] };
+            }
+        }
+        
+        // Default behaviors
+        if (hasFullInventory && targets.voidOrbs.length > 0 && !this.hasValidCombos()) {
+            return { type: 'collect', target: targets.voidOrbs[0] };
+        }
+        
+        return { type: 'wander' };
+    }
+    
+    calculateEvasionAngle(threats) {
+        // Calculate average danger direction
+        let dangerX = 0;
+        let dangerY = 0;
+        
+        for (const threat of threats.allThreats) {
+            const weight = 1 / (threat.distance + 1);
+            dangerX += Math.cos(threat.angle) * weight;
+            dangerY += Math.sin(threat.angle) * weight;
+        }
+        
+        // Move away from average danger
+        const dangerAngle = Math.atan2(dangerY, dangerX);
+        return dangerAngle + Math.PI;
+    }
+    
+    calculateHuntAngle(target) {
+        const personality = this.personality;
+        
+        // Predict target position
+        const targetSpeed = target.snake.speed || SNAKE_SPEED;
+        const timeToIntercept = target.distance / (this.speed * 2);
+        const predictedX = target.snake.x + Math.cos(target.snake.angle) * targetSpeed * timeToIntercept * personality.predictiveLookAhead;
+        const predictedY = target.snake.y + Math.sin(target.snake.angle) * targetSpeed * timeToIntercept * personality.predictiveLookAhead;
+        
+        // Calculate cutoff angle
+        const cutoffAngle = Math.atan2(predictedY - this.y, predictedX - this.x);
+        
+        // Mix direct and cutoff angles based on personality
+        const directAngle = target.angle;
+        return directAngle + (cutoffAngle - directAngle) * personality.cutoffAnticipation;
+    }
+    
+    calculateEncircleAngle(target) {
+        // Enhanced encircle behavior - create a spiral pattern to trap target
+        this.encirclePhase = (this.encirclePhase + 0.08) % (Math.PI * 2);
+        
+        const distance = target.distance;
+        const targetSnake = target.snake;
+        
+        // Dynamic radius based on target size and our length
+        const minRadius = targetSnake.length * 2 + 100;
+        const maxRadius = targetSnake.length * 3 + 200;
+        const currentRadius = minRadius + (maxRadius - minRadius) * (0.5 + 0.5 * Math.sin(this.encirclePhase * 0.5));
+        
+        // Calculate desired position on circle around target
+        const circleX = targetSnake.x + Math.cos(this.encirclePhase) * currentRadius;
+        const circleY = targetSnake.y + Math.sin(this.encirclePhase) * currentRadius;
+        
+        // If we're far from the circle, move towards it
+        if (distance > currentRadius * 1.5) {
+            return Math.atan2(circleY - this.y, circleX - this.x);
+        }
+        
+        // If we're on the circle, follow the spiral
+        const tangentAngle = this.encirclePhase + Math.PI / 2;
+        
+        // Add inward pressure to tighten the spiral
+        const inwardAngle = Math.atan2(targetSnake.y - this.y, targetSnake.x - this.x);
+        const spiralAngle = tangentAngle * 0.8 + inwardAngle * 0.2;
+        
+        // Predict target movement and adjust
+        if (targetSnake.speed > 0) {
+            const predictedX = targetSnake.x + Math.cos(targetSnake.angle) * targetSnake.speed * 30;
+            const predictedY = targetSnake.y + Math.sin(targetSnake.angle) * targetSnake.speed * 30;
+            const adjustAngle = Math.atan2(predictedY - this.y, predictedX - this.x);
+            return spiralAngle * 0.7 + adjustAngle * 0.3;
+        }
+        
+        return spiralAngle;
+    }
+    
+    calculateRamAngle(target) {
+        // Direct angle to target head
+        return target.angle;
+    }
+    
+    calculateCollectAngle(target) {
+        return target.angle;
+    }
+    
+    calculateWanderAngle() {
+        // Wander towards center if near edge
+        const centerDist = Math.hypot(this.x - WORLD_SIZE / 2, this.y - WORLD_SIZE / 2);
+        if (centerDist > WORLD_SIZE * 0.4) {
+            return Math.atan2(WORLD_SIZE / 2 - this.y, WORLD_SIZE / 2 - this.x);
+        }
+        
+        // Random wander
+        return this.angle + (Math.random() - 0.5) * 0.2;
+    }
+    
+    calculateCutoffAngle(target) {
+        // Advanced cut-off calculation for intercepting targets
+        const targetSnake = target.snake;
+        const targetSpeed = targetSnake.isBoosting ? targetSnake.speed * BOOST_SPEED_MULTIPLIER : targetSnake.speed;
+        const mySpeed = this.isBoosting ? this.speed * BOOST_SPEED_MULTIPLIER : this.speed;
+        
+        // Calculate intercept point
+        const dx = targetSnake.x - this.x;
+        const dy = targetSnake.y - this.y;
+        const targetVx = Math.cos(targetSnake.angle) * targetSpeed;
+        const targetVy = Math.sin(targetSnake.angle) * targetSpeed;
+        
+        // Solve quadratic equation for intercept time
+        const a = targetVx * targetVx + targetVy * targetVy - mySpeed * mySpeed;
+        const b = 2 * (dx * targetVx + dy * targetVy);
+        const c = dx * dx + dy * dy;
+        
+        const discriminant = b * b - 4 * a * c;
+        if (discriminant < 0) {
+            // Can't intercept, aim ahead of target
+            const leadTime = target.distance / (mySpeed * 2);
+            const leadX = targetSnake.x + targetVx * leadTime;
+            const leadY = targetSnake.y + targetVy * leadTime;
+            return Math.atan2(leadY - this.y, leadX - this.x);
+        }
+        
+        const t1 = (-b - Math.sqrt(discriminant)) / (2 * a);
+        const t2 = (-b + Math.sqrt(discriminant)) / (2 * a);
+        const t = t1 > 0 ? t1 : t2;
+        
+        if (t < 0) {
+            // Target is moving away, aim at predicted position
+            const leadTime = target.distance / mySpeed;
+            const leadX = targetSnake.x + targetVx * leadTime * 0.5;
+            const leadY = targetSnake.y + targetVy * leadTime * 0.5;
+            return Math.atan2(leadY - this.y, leadX - this.x);
+        }
+        
+        // Calculate intercept position
+        const interceptX = targetSnake.x + targetVx * t;
+        const interceptY = targetSnake.y + targetVy * t;
+        
+        // Add slight adjustment for head collision
+        const adjustmentAngle = Math.atan2(targetVy, targetVx);
+        const adjustedX = interceptX + Math.cos(adjustmentAngle + Math.PI/2) * 20;
+        const adjustedY = interceptY + Math.sin(adjustmentAngle + Math.PI/2) * 20;
+        
+        return Math.atan2(adjustedY - this.y, adjustedX - this.x);
+    }
+    
+    calculateIntimidateAngle(target) {
+        // Create threatening movements - circling and feinting
+        const baseAngle = target.angle;
+        const distance = target.distance;
+        
+        // Circle around target at medium distance
+        if (distance > 150 && distance < 300) {
+            // Orbit around target
+            const orbitAngle = baseAngle + Math.PI/2 + Math.sin(this.intimidationPhase) * 0.3;
+            return orbitAngle;
+        } else if (distance <= 150) {
+            // Feint attacks - dart in and out
+            const feintAngle = baseAngle + Math.sin(this.intimidationPhase * 2) * Math.PI/3;
+            return feintAngle;
+        } else {
+            // Move closer while weaving
+            return baseAngle + Math.sin(this.intimidationPhase * 3) * 0.5;
+        }
+    }
+    
+    turnTowardsAngle(targetAngle, strength = 1.0) {
+        let angleDiff = targetAngle - this.angle;
+        while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
+        while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
+        
+        const turnSpeed = TURN_SPEED * strength;
+        if (Math.abs(angleDiff) > turnSpeed) {
+            this.angle += Math.sign(angleDiff) * turnSpeed;
+        } else {
+            this.angle = targetAngle;
+        }
+    }
+    
+    shouldBoostForHunt(target) {
+        const personality = this.personality;
+        
+        // Aggressive snakes boost more strategically
+        if (personality.name === 'Aggressive') {
+            // Always boost when very close for the kill
+            if (target.distance < 200) return true;
+            
+            // Boost when chasing players
+            if (target.isPlayer && this.stamina > 30) return true;
+            
+            // Tactical boost - sprint in bursts to conserve stamina
+            const shouldSprint = Math.sin(Date.now() * 0.002) > 0.3;
+            return this.stamina > 50 && shouldSprint;
+        }
+        
+        // Balanced personality
+        if (personality.name === 'Balanced') {
+            if (target.distance < 150) return true;
+            return this.stamina > personality.boostThreshold * 100 && target.distance < 300;
+        }
+        
+        // Default conservative boosting
+        return this.stamina > personality.boostThreshold * 100 && target.distance < 200;
+    }
+    
+    checkBorderDanger() {
+        const margin = 100;
+        const emergencyMargin = 50;
+        
+        let emergency = false;
+        let angle = this.angle;
+        
+        if (this.x < margin || this.x > WORLD_SIZE - margin ||
+            this.y < margin || this.y > WORLD_SIZE - margin) {
+            
+            // Calculate angle to center
+            angle = Math.atan2(WORLD_SIZE / 2 - this.y, WORLD_SIZE / 2 - this.x);
+            
+            if (this.x < emergencyMargin || this.x > WORLD_SIZE - emergencyMargin ||
+                this.y < emergencyMargin || this.y > WORLD_SIZE - emergencyMargin) {
+                emergency = true;
+            }
+        }
+        
+        return { emergency, angle };
+    }
+    
+    hasValidCombos() {
+        return this.findPossibleCombinations().length > 0;
+    }
+    
+    checkVoidOrbUsage() {
+        if (this.voidOrbCooldown > 0 || this.hasValidCombos()) return;
+        
+        // Check if we're near a void orb
+        if (window.voidOrbs) {
+            for (const orb of window.voidOrbs) {
+                const distance = Math.hypot(orb.x - this.x, orb.y - this.y);
+                if (distance < 50) {
+                    // Simulate using void orb
+                    this.digest();
+                    this.voidOrbCooldown = 120; // 2 second cooldown
+                    break;
+                }
+            }
+        }
     }
 }
 

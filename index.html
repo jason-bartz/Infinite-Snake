@@ -4126,6 +4126,21 @@
         </div>
     </div>
     
+    <!-- Welcome Modal -->
+    <div id="welcomeModal" class="welcome-modal" style="display: none;">
+        <div class="welcome-modal-overlay"></div>
+        <div class="welcome-modal-content">
+            <button class="welcome-modal-close">&times;</button>
+            <h2>Welcome to <span class="title-green">Infinite Snake</span> - <span class="title-yellow">Preview</span>!</h2>
+            <div class="welcome-message">
+                <p>Thanks for checking out this early preview! This is a work in progress, so you may encounter bugs, unexpected element combos, or other quirks. I'm updating the game daily to improve the experience and to add more fun stuff.</p>
+                <p>If you run into any issues or have feedback, feel free to join the community <a href="https://discord.gg/a6X4W7QbkG" target="_blank" class="link-blue">Discord</a> or email me directly at <a href="mailto:jason@infinitesnake.io" class="link-blue">jason@infinitesnake.io</a></p>
+                <p>Thanks for playing and enjoy the game!</p>
+                <p class="signature">- Jason</p>
+            </div>
+        </div>
+    </div>
+    
     <!-- Unlock Notification Container -->
     <div id="unlockNotificationContainer" class="unlock-notification-container"></div>
     
@@ -4951,6 +4966,140 @@
         * {
             scrollbar-width: thin;
         }
+        
+        /* Welcome Modal Styles */
+        .welcome-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .welcome-modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            cursor: pointer;
+        }
+        
+        .welcome-modal-content {
+            position: relative;
+            background: #1a1a2e; /* Solid dark background */
+            border: 4px solid var(--snes-cosmic-purple);
+            border-radius: 0;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 
+                inset 2px 2px 0 var(--snes-cosmic-pink),
+                inset -2px -2px 0 var(--snes-dark-purple),
+                8px 8px 0 rgba(0,0,0,0.5);
+            font-family: 'Press Start 2P', monospace;
+        }
+        
+        .welcome-modal-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--snes-cosmic-purple);
+            color: var(--snes-white);
+            border: 2px solid var(--snes-cosmic-pink);
+            padding: 5px 10px;
+            font-size: 16px;
+            cursor: pointer;
+            font-family: 'Press Start 2P', monospace;
+            box-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+            transition: none;
+        }
+        
+        .welcome-modal-close:hover {
+            background: var(--snes-cosmic-pink);
+            transform: translate(1px, 1px);
+            box-shadow: 1px 1px 0 rgba(0,0,0,0.5);
+        }
+        
+        .welcome-modal-content h2 {
+            color: var(--snes-white);
+            font-size: 16px;
+            margin-bottom: 20px;
+            text-align: center;
+            text-transform: uppercase;
+            text-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+        }
+        
+        .title-green {
+            color: #4ECB71; /* Bright green */
+        }
+        
+        .title-yellow {
+            color: #FFD700; /* Gold/yellow */
+        }
+        
+        .welcome-message {
+            color: var(--snes-white);
+            font-size: 10px;
+            line-height: 2;
+        }
+        
+        .welcome-message p {
+            margin-bottom: 15px;
+        }
+        
+        .welcome-message a {
+            color: var(--snes-cosmic-blue);
+            text-decoration: none;
+            border-bottom: 2px solid var(--snes-cosmic-blue);
+            transition: none;
+        }
+        
+        .welcome-message a:hover {
+            color: var(--snes-cosmic-pink);
+            border-bottom-color: var(--snes-cosmic-pink);
+        }
+        
+        .welcome-message .link-blue {
+            color: #4A90E2; /* Nice blue color */
+            border-bottom-color: #4A90E2;
+        }
+        
+        .welcome-message .link-blue:hover {
+            color: #6BB6FF; /* Lighter blue on hover */
+            border-bottom-color: #6BB6FF;
+        }
+        
+        .welcome-message .signature {
+            text-align: right;
+            color: var(--snes-cosmic-pink);
+            margin-top: 20px;
+            font-style: italic;
+        }
+        
+        /* Mobile adjustments for welcome modal */
+        @media (max-width: 768px) {
+            .welcome-modal-content {
+                padding: 20px;
+                width: 95%;
+                max-height: 70vh;
+            }
+            
+            .welcome-modal-content h2 {
+                font-size: 12px;
+            }
+            
+            .welcome-message {
+                font-size: 8px;
+            }
+        }
     </style>
 
     <!-- External Dependencies -->
@@ -4980,6 +5129,7 @@
     
     <!-- Main Game Code (extracted from inline script) -->
     <script src="js/core/game-original.js" defer></script>
+    
     
     <!-- Integration -->
     <script>
@@ -5042,5 +5192,11 @@
             }
         };
     </script>
+    
+    <!-- Vercel Web Analytics -->
+    <script>
+      window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+    </script>
+    <script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>
