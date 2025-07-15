@@ -15,13 +15,12 @@ const CACHE_DURATION = 30000; // 30 seconds
 
 // Initialize leaderboard system
 export async function initializeLeaderboard() {
-  console.log('Leaderboard system initializing...');
+  logger.debug('Leaderboard system initializing...');
   
   // Test API connection
   try {
     const response = await fetch(`${API_ENDPOINT}?limit=1`);
     if (response.ok) {
-      console.log('✅ Leaderboard API connected successfully');
       return true;
     } else {
       console.error('❌ Leaderboard API returned error:', response.status);
@@ -82,14 +81,13 @@ export async function submitScore(username, score, elementsDiscovered, playTime,
       throw new Error(responseData.error || 'Failed to submit score');
     }
     
-    console.log('✅ Score submitted successfully! Response:', responseData);
-    console.log('📊 Daily rank:', responseData.daily_rank);
+    logger.debug('📊 Daily rank:', responseData.daily_rank);
     
     // Return the daily rank for the UI, or a special value if null
     // If daily_rank is null, it means the score was submitted but rank couldn't be determined
     // (possibly because leaderboard is still calculating or score is outside top ranks)
     if (responseData.daily_rank === null) {
-      console.log('⚠️ Score submitted but rank is null (score may be outside leaderboard range)');
+      logger.debug('⚠️ Score submitted but rank is null');
       return 'Submitted'; // Return a string to indicate successful submission without rank
     }
     
@@ -107,11 +105,10 @@ export async function getLeaderboard(period = 'daily', limit = 100) {
     // Check cache first
     const cached = leaderboardCache[period];
     if (cached && cached.data && Date.now() - cached.timestamp < CACHE_DURATION) {
-      console.log(`Using cached ${period} leaderboard`);
+      logger.debug(`Using cached ${period} leaderboard`);
       return cached.data.slice(0, limit);
     }
     
-    console.log(`Fetching ${period} leaderboard...`);
     
     const response = await fetch(`${API_ENDPOINT}?period=${period}&limit=${limit}`);
     

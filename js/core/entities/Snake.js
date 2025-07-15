@@ -202,7 +202,6 @@ class Snake {
             this.personalityColor = PERSONALITY_COLORS[this.personality.name];
             
             if (this.personality.name === 'Aggressive') {
-                console.log(`[DEBUG] Created Aggressive AI snake: ${this.name}`);
             }
             
             this.targetMemory = null;
@@ -1508,19 +1507,15 @@ class Snake {
                 
                 // Debug logging for aggressive behavior
                 if (Math.random() < 0.02) { // Log occasionally to avoid spam
-                    console.log(`[AGGRESSIVE AI] ${this.name} hunting ${target.isPlayer ? 'PLAYER' : 'AI'} at distance ${Math.round(target.distance)}`);
                 }
                 
                 // Choose attack strategy based on situation and pattern
                 if (target.sizeRatio > personality.ramThreshold && target.distance < 250) {
-                    console.log(`[AGGRESSIVE AI] ${this.name} - RAM attack!`);
                     return { type: 'ram', target: target };
                 } else if (target.distance < personality.encircleDistance && this.length > 40 && this.attackPattern === 0) {
-                    console.log(`[AGGRESSIVE AI] ${this.name} - ENCIRCLE attack!`);
                     return { type: 'encircle', target: target };
                 } else if (target.distance < 300 && target.sizeRatio > 1.1 && this.attackPattern === 1) {
                     // Cut-off attack for close targets
-                    console.log(`[AGGRESSIVE AI] ${this.name} - CUTOFF attack!`);
                     return { type: 'cutoff', target: target };
                 } else if (this.attackPattern === 2 && target.distance < 400) {
                     // Intimidation behavior

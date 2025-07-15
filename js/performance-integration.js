@@ -3,7 +3,7 @@
 // It should be loaded after game-original.js
 
 (function() {
-    console.log('[Performance] Performance integration module loaded');
+    // Performance integration module loaded
     
     // Initialize performance systems
     window.perfOptimizer = new PerformanceOptimizer();
@@ -101,7 +101,7 @@
         if (window.canvas && window.gameInitialized) {
             clearInterval(initCheckInterval);
             
-            console.log('[Performance] Game initialized, setting up optimizations');
+            logger.debug('[Performance] Game initialized, setting up optimizations');
             
             // Initialize performance optimizer with canvas
             window.perfOptimizer.init(window.canvas, window.isMobile);
@@ -113,7 +113,7 @@
                     window.enhancedEmojiCache.set(key, value);
                 });
                 window.emojiCache = window.enhancedEmojiCache;
-                console.log('[Performance] Enhanced emoji cache installed');
+                logger.debug('[Performance] Enhanced emoji cache installed');
             }
             
             // Add performance monitoring to game loop
@@ -126,7 +126,7 @@
                     // Call original game loop
                     originalGameLoop.call(this, currentTime);
                 };
-                console.log('[Performance] Game loop enhanced');
+                logger.debug('[Performance] Game loop enhanced');
             }
             
             // Setup optimized resize handler
@@ -141,7 +141,7 @@
                     // Call original resize
                     originalResize.call(this);
                 };
-                console.log('[Performance] Resize handler optimized');
+                logger.debug('[Performance] Resize handler optimized');
             }
             
             // Replace math functions with optimized versions
@@ -150,7 +150,7 @@
             window.fastDistance = mathOptimizer.distance.bind(mathOptimizer);
             window.fastDistanceSquared = mathOptimizer.distanceSquared.bind(mathOptimizer);
             
-            console.log('[Performance] Math optimizations available');
+            logger.debug('[Performance] Math optimizations available');
             
             // Expose performance metrics
             window.getPerformanceMetrics = function() {
@@ -163,7 +163,7 @@
                 };
             };
             
-            console.log('[Performance] All optimizations integrated successfully');
+            logger.debug('[Performance] All optimizations integrated successfully');
         }
     }, 100);
 })();
