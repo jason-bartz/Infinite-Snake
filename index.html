@@ -4770,6 +4770,49 @@
             }
         }
 
+        /* ===== MOBILE BOOST BUTTON FIX - HIGHEST SPECIFICITY ===== */
+        body.mobile .mobile-controls .boost-button {
+            width: 120px !important;
+            height: 120px !important;
+            bottom: 40px !important;
+            right: 40px !important;
+            position: fixed !important;
+            z-index: 1002 !important;
+        }
+        
+        /* Ensure boost meter fill is visible */
+        body.mobile .boost-button .boost-meter-fill {
+            display: block !important;
+            visibility: visible !important;
+        }
+        
+        /* ===== LEADERBOARD HEADER CLICKABILITY FIX ===== */
+        body.mobile .leaderboard-box .leaderboard-header {
+            position: relative !important;
+            z-index: 1010 !important;
+            pointer-events: auto !important;
+            cursor: pointer !important;
+            -webkit-tap-highlight-color: transparent !important;
+            user-select: none !important;
+            min-height: 40px !important;
+            display: flex !important;
+            align-items: center !important;
+        }
+        
+        body.mobile .leaderboard-box {
+            pointer-events: auto !important;
+        }
+        
+        /* ===== VIRTUAL JOYSTICK SIZE FIX ===== */
+        body.mobile .mobile-controls .virtual-joystick {
+            width: 120px !important;
+            height: 120px !important;
+            bottom: 40px !important;
+            left: 40px !important;
+            position: fixed !important;
+            z-index: 1002 !important;
+        }
+        
         /* ===== FPS COUNTER POSITION FIX ===== */
         body.mobile #pauseText {
             display: none !important; /* Hide keyboard shortcuts on mobile */
