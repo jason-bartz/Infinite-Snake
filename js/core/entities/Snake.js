@@ -156,6 +156,15 @@ class Snake {
         }
     }
     
+    // Compatibility getter/setter for game-original.js which uses 'alive' instead of 'isAlive'
+    get alive() {
+        return this.isAlive;
+    }
+    
+    set alive(value) {
+        this.isAlive = value;
+    }
+    
     initializeBoost() {
         this.stamina = 100;
         this.maxStamina = 100;
@@ -239,6 +248,7 @@ class Snake {
         this.deathFlashPhase = 0;
         this.deathSegmentPhase = 0;
         this.isDying = false;
+        this.hasExploded = false;
     }
     
     initializeSegments() {

@@ -8431,6 +8431,30 @@
                 window.unifiedMobileUI.updateBoost(staminaPercent);
                 window.unifiedMobileUI.activateBoost(playerSnake.isBoosting);
             }
+            
+            // Update boost button meter fill directly
+            const boostButton = document.getElementById('boostButton');
+            if (boostButton) {
+                let boostMeterFill = boostButton.querySelector('.boost-meter-fill');
+                if (!boostMeterFill) {
+                    // Create fill element if it doesn't exist
+                    boostMeterFill = document.createElement('div');
+                    boostMeterFill.className = 'boost-meter-fill';
+                    boostButton.appendChild(boostMeterFill);
+                }
+                
+                // Update the height
+                boostMeterFill.style.height = `${staminaPercent}%`;
+                
+                // Change color based on stamina level
+                if (staminaPercent < 30) {
+                    boostMeterFill.style.background = 'linear-gradient(to top, rgba(255, 68, 68, 0.6), rgba(204, 0, 0, 0.6))';
+                } else if (staminaPercent < 60) {
+                    boostMeterFill.style.background = 'linear-gradient(to top, rgba(255, 170, 0, 0.6), rgba(255, 102, 0, 0.6))';
+                } else {
+                    boostMeterFill.style.background = 'linear-gradient(to top, rgba(0, 255, 0, 0.6), rgba(0, 204, 0, 0.6))';
+                }
+            }
         }
         
         // Leaderboard Integration Variables
@@ -8580,22 +8604,24 @@
             const leaderboardBox = document.querySelector('.leaderboard-box');
             if (!leaderboardBox) return;
             
-            // Create header if it doesn't exist
-            let header = leaderboardBox.querySelector('.leaderboard-header');
+            // Use existing header
+            const header = leaderboardBox.querySelector('.leaderboard-header');
             if (!header) {
-                header = document.createElement('div');
-                header.className = 'leaderboard-header';
-                header.innerHTML = '<span>🏆 Leaderboard</span><span class="collapse-icon">▼</span>';
-                leaderboardBox.insertBefore(header, leaderboardBox.firstChild);
+                console.warn('Leaderboard header not found');
+                return;
             }
             
+            // Remove any existing click handlers to avoid duplicates
+            const newHeader = header.cloneNode(true);
+            header.parentNode.replaceChild(newHeader, header);
+            
             // Add click handler
-            header.addEventListener('click', function(e) {
+            newHeader.addEventListener('click', function(e) {
                 e.stopPropagation();
                 leaderboardBox.classList.toggle('collapsed');
                 
                 // Update icon
-                const icon = header.querySelector('.collapse-icon');
+                const icon = newHeader.querySelector('.collapse-icon');
                 if (icon) {
                     icon.textContent = leaderboardBox.classList.contains('collapsed') ? '▲' : '▼';
                 }
@@ -8605,11 +8631,15 @@
                 localStorage.setItem('leaderboardCollapsed', isCollapsed);
             });
             
+            // Make the header more clickable on mobile
+            newHeader.style.cursor = 'pointer';
+            newHeader.style.userSelect = 'none';
+            
             // Restore saved state
             const savedState = localStorage.getItem('leaderboardCollapsed');
             if (savedState === 'true') {
                 leaderboardBox.classList.add('collapsed');
-                const icon = header.querySelector('.collapse-icon');
+                const icon = newHeader.querySelector('.collapse-icon');
                 if (icon) icon.textContent = '▲';
             }
         }
@@ -11366,10 +11396,14 @@
                     img.src = skinData.isBoss ? `assets/boss-skins/${fileId}.png` : `skins/${fileId}.png`;
                     img.alt = skinData.name;
                     img.onerror = function() {
-                        // Try webp fallback
-                        const basePath = skinData.isBoss ? `assets/boss-skins/${fileId}` : `skins/${fileId}`;
-                        this.src = `${basePath}.webp`;
-                        this.onerror = null;
+                        // Show placeholder on error
+                        console.error(`Failed to load skin image: ${this.src}`);
+                        this.style.display = 'none';
+                        const placeholder = document.createElement('div');
+                        placeholder.className = 'skin-error';
+                        placeholder.innerHTML = '⚠️';
+                        placeholder.style.cssText = 'width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 24px;';
+                        this.parentNode.appendChild(placeholder);
                     };
                     innerContainer.appendChild(img);
                 }
@@ -11817,32 +11851,65 @@
                 return;
             }
             
+            // Show loading indicator
+            ctx.fillStyle = '#1a1a2e';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#4ecdc4';
+            ctx.font = '16px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('Loading...', canvas.width / 2, canvas.height / 2);
+            
             // Load and draw the skin image with rotation animation
             const img = new Image();
             const fileId = window.skinIdConverter ? (window.skinIdConverter.toOldId(skinId) || skinId) : skinId;
-            img.src = skinData.isBoss ? `assets/boss-skins/${fileId}.png` : `skins/${fileId}.png`;
+            const imagePath = skinData.isBoss ? `assets/boss-skins/${fileId}.png` : `skins/${fileId}.png`;
             
-            let rotation = 0;
+            let wobbleTime = 0;
+            let animationId = null;
+            
             function animate() {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.save();
                 ctx.translate(canvas.width / 2, canvas.height / 2);
-                ctx.rotate(rotation);
                 
-                if (img.complete && img.naturalHeight !== 0) {
-                    const size = Math.min(canvas.width, canvas.height) * 0.8;
-                    ctx.drawImage(img, -size / 2, -size / 2, size, size);
-                }
+                // Create subtle wobble effect
+                const wobbleAngle = Math.sin(wobbleTime) * 0.05; // Max 0.05 radians (~3 degrees)
+                ctx.rotate(wobbleAngle);
+                
+                const size = Math.min(canvas.width, canvas.height) * 0.8;
+                ctx.drawImage(img, -size / 2, -size / 2, size, size);
                 
                 ctx.restore();
-                rotation += 0.01;
+                wobbleTime += 0.02; // Slow wobble speed
                 
                 if (document.getElementById('skinPreviewModal').style.display === 'flex') {
-                    requestAnimationFrame(animate);
+                    animationId = requestAnimationFrame(animate);
                 }
             }
             
-            animate();
+            // Wait for image to load before starting animation
+            img.onload = function() {
+                // Clear loading text
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                // Start animation
+                animate();
+            };
+            
+            img.onerror = function() {
+                // Show error message
+                ctx.fillStyle = '#1a1a2e';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#e74c3c';
+                ctx.font = '16px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('Failed to load image', canvas.width / 2, canvas.height / 2);
+                console.error('Failed to load skin image:', imagePath);
+            };
+            
+            // Set the source after setting up handlers
+            img.src = imagePath;
         }
         
         // Populate discovery journal with discovered elements

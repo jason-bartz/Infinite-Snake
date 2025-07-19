@@ -431,7 +431,7 @@ class MobileUIManager {
     }
     
     checkPanelVisibility() {
-        if (this.panels.stats && !this.panels.stats.querySelector('.player-info')) {
+        if (this.panels.stats && !this.panels.stats.querySelector('.player-info-header')) {
             this.panels.stats.style.display = 'none';
         } else if (this.panels.stats) {
             this.panels.stats.style.display = 'block';

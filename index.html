@@ -218,7 +218,7 @@
             --mobile-discovery-scale: 0.8;
             
             --mobile-joystick-opacity: 0.3;
-            --mobile-boost-opacity: 0.7;
+            --mobile-boost-opacity: 0.4;
             
             --mobile-boost-bar-height: 20px;
             --mobile-landscape-ui-spacing: 15px;
@@ -1834,8 +1834,8 @@
             position: absolute;
             bottom: 40px;
             right: 40px;
-            width: 80px;
-            height: 80px;
+            width: 120px;
+            height: 120px;
             background: rgba(78, 205, 196, 0.15);
             border: 3px solid rgba(78, 205, 196, 0.5);
             border-radius: 50%;
@@ -1848,11 +1848,45 @@
             pointer-events: auto;
             user-select: none;
             -webkit-user-select: none;
+            position: relative;
+            overflow: hidden;
         }
         
         .boost-button.active {
             background: rgba(78, 205, 196, 0.4);
             transform: scale(0.95);
+        }
+        
+        /* Boost meter fill inside button */
+        .boost-button .boost-meter-fill {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 0%;
+            background: linear-gradient(to top, rgba(0, 255, 0, 0.6), rgba(0, 204, 0, 0.6));
+            transition: height 0.3s ease;
+            border-radius: 50%;
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        /* Ensure text is above the fill */
+        .boost-button {
+            z-index: 0;
+        }
+        
+        .boost-button::after {
+            content: 'BOOST';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 16px;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
         }
         
         .pause-button-mobile {
@@ -2184,6 +2218,11 @@
             -webkit-transform: translateZ(0);
             backface-visibility: hidden;
             -webkit-backface-visibility: hidden;
+        }
+        
+        /* Hide boost bar on mobile - boost is shown in button instead */
+        body.mobile .boost-bar-container {
+            display: none !important;
         }
         
         body.mobile .desktop-only {
@@ -3206,6 +3245,9 @@
         /* Mobile positioning fix - ensure top positioning takes precedence */
         body.mobile .player-info-box {
             bottom: unset !important;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
         }
         
         body.mobile .leaderboard-box {
@@ -3913,7 +3955,7 @@
                 <div class="joystick-knob" id="joystickKnob"></div>
             </div>
         </div>
-        <div class="boost-button" id="boostButton">BOOST</div>
+        <div class="boost-button" id="boostButton"></div>
         <div class="pause-button-mobile" id="pauseButtonMobile" onclick="togglePause()">⏸</div>
         <div class="mute-button-mobile" id="muteButtonMobile" onclick="toggleMusic()">🔇</div>
     </div>
