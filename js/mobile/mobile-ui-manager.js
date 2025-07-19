@@ -273,31 +273,80 @@ class MobileUIManager {
     setupCollapsibleLeaderboard() {
         if (!this.panels.leaderboard) return;
         
-        const header = document.createElement('div');
-        header.className = 'mobile-leaderboard-header';
-        header.innerHTML = '<span>🏆 Leaderboard</span><span class="toggle-icon">▼</span>';
-        header.style.cssText = `
-            padding: 10px !important;
+        // Remove any existing mobile headers first
+        const existingMobileHeader = this.panels.leaderboard.querySelector('.mobile-leaderboard-header');
+        if (existingMobileHeader) {
+            existingMobileHeader.remove();
+        }
+        
+        // Check if there's already a leaderboard-header from the HTML
+        const existingHeader = this.panels.leaderboard.querySelector('.leaderboard-header');
+        if (!existingHeader) {
+            console.warn('[MobileUI] No existing leaderboard header found');
+            return;
+        }
+        
+        // Store reference to the scrollable content  
+        const scrollableContent = this.panels.leaderboard.querySelector('.scrollable-content');
+        if (!scrollableContent) {
+            console.warn('[MobileUI] No scrollable content found in leaderboard');
+            return;
+        }
+        
+        // Remove any existing click handlers by cloning the header
+        const newHeader = existingHeader.cloneNode(true);
+        existingHeader.parentNode.replaceChild(newHeader, existingHeader);
+        
+        // Apply mobile-specific styles to the existing header
+        newHeader.style.cssText += `
             cursor: pointer !important;
-            background: rgba(0, 0, 0, 0.3) !important;
-            border-bottom: 1px solid rgba(147, 51, 234, 0.3) !important;
-            display: flex !important;
-            justify-content: space-between !important;
-            align-items: center !important;
+            user-select: none !important;
+            -webkit-user-select: none !important;
+            position: relative !important;
+            z-index: 1010 !important;
         `;
         
-        const content = this.panels.leaderboard.querySelector('.scrollable-content') || this.panels.leaderboard;
-        content.style.maxHeight = '200px';
-        content.style.overflow = 'hidden';
-        content.style.transition = 'max-height 0.3s ease';
+        // Set up proper collapse functionality
+        const collapseIcon = newHeader.querySelector('.collapse-icon');
         
-        header.addEventListener('click', () => {
-            const isCollapsed = content.style.maxHeight === '0px';
-            content.style.maxHeight = isCollapsed ? '200px' : '0px';
-            header.querySelector('.toggle-icon').textContent = isCollapsed ? '▼' : '▲';
+        // Initialize state
+        const savedState = localStorage.getItem('mobileLeaderboardCollapsed');
+        const startCollapsed = savedState === 'true';
+        
+        if (startCollapsed) {
+            this.panels.leaderboard.classList.add('collapsed');
+            scrollableContent.style.display = 'none';
+            if (collapseIcon) collapseIcon.textContent = '▲';
+        } else {
+            scrollableContent.style.display = 'block';
+            if (collapseIcon) collapseIcon.textContent = '▼';
+        }
+        
+        // Add click handler
+        newHeader.addEventListener('click', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            
+            const isCollapsed = this.panels.leaderboard.classList.contains('collapsed');
+            
+            if (isCollapsed) {
+                // Expand
+                this.panels.leaderboard.classList.remove('collapsed');
+                scrollableContent.style.display = 'block';
+                if (collapseIcon) collapseIcon.textContent = '▼';
+                localStorage.setItem('mobileLeaderboardCollapsed', 'false');
+            } else {
+                // Collapse
+                this.panels.leaderboard.classList.add('collapsed');
+                scrollableContent.style.display = 'none';
+                if (collapseIcon) collapseIcon.textContent = '▲';
+                localStorage.setItem('mobileLeaderboardCollapsed', 'true');
+            }
+            
+            if (this.config.debug.logInitialization) {
+                console.log(`[MobileUI] Leaderboard ${isCollapsed ? 'expanded' : 'collapsed'}`);
+            }
         });
-        
-        this.panels.leaderboard.insertBefore(header, this.panels.leaderboard.firstChild);
     }
     
     setupBoostMeter() {

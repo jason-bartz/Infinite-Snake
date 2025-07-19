@@ -8599,8 +8599,14 @@
         // Also expose it globally so we can call it when the overlay is shown
         window.setupLeaderboardListeners = setupLeaderboardListeners;
         
-        // Initialize leaderboard collapsibility for both desktop and mobile
+        // Initialize leaderboard collapsibility for desktop only
         function initLeaderboardCollapse() {
+            // Skip initialization on mobile - let MobileUIManager handle it
+            if (document.body.classList.contains('mobile')) {
+                console.log('[Game] Skipping leaderboard collapse init on mobile');
+                return;
+            }
+            
             const leaderboardBox = document.querySelector('.leaderboard-box');
             if (!leaderboardBox) return;
             
@@ -8631,7 +8637,7 @@
                 localStorage.setItem('leaderboardCollapsed', isCollapsed);
             });
             
-            // Make the header more clickable on mobile
+            // Make the header more clickable
             newHeader.style.cursor = 'pointer';
             newHeader.style.userSelect = 'none';
             

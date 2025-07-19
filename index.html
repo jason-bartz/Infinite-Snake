@@ -4735,16 +4735,51 @@
         /* ===== COLLAPSIBLE LEADERBOARD ENHANCEMENT ===== */
         body.mobile .leaderboard-box {
             transition: all 0.3s ease !important;
+            max-height: none !important;
+            overflow: visible !important;
         }
 
         body.mobile .leaderboard-box.collapsed {
-            width: 100px !important;
+            width: auto !important;
+            min-width: 120px !important;
+            max-width: 180px !important;
             min-height: 40px !important;
         }
 
         body.mobile .leaderboard-box.collapsed .leaderboard-header {
             font-size: 10px !important;
             padding: 8px !important;
+        }
+        
+        /* Hide scrollable content when collapsed, not the entries themselves */
+        body.mobile .leaderboard-box.collapsed .scrollable-content {
+            display: none !important;
+        }
+        
+        /* Ensure entries are visible when expanded */
+        body.mobile .leaderboard-box:not(.collapsed) .scrollable-content {
+            display: block !important;
+            max-height: 250px !important;
+            overflow-y: auto !important;
+        }
+        
+        body.mobile .leaderboard-box:not(.collapsed) .leaderboard-entry {
+            display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+        
+        /* Fix for the LEADERBOARD header font size */
+        body.mobile .leaderboard-box .leaderboard-header {
+            font-size: 11px !important;
+            font-family: 'Press Start 2P', monospace !important;
+            text-transform: none !important;
+            letter-spacing: 0 !important;
+        }
+        
+        /* Remove any duplicate headers */
+        body.mobile .mobile-leaderboard-header {
+            display: none !important;
         }
 
         /* ===== IPAD MINI SPECIFIC OPTIMIZATIONS ===== */
