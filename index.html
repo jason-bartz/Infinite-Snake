@@ -4805,16 +4805,6 @@
             }
         }
 
-        /* ===== MOBILE BOOST BUTTON FIX - HIGHEST SPECIFICITY ===== */
-        body.mobile .mobile-controls .boost-button {
-            width: 120px !important;
-            height: 120px !important;
-            bottom: 40px !important;
-            right: 40px !important;
-            position: fixed !important;
-            z-index: 1002 !important;
-        }
-        
         /* Ensure boost meter fill is visible */
         body.mobile .boost-button .boost-meter-fill {
             display: block !important;
@@ -4846,6 +4836,58 @@
             left: 40px !important;
             position: fixed !important;
             z-index: 1002 !important;
+        }
+        
+        /* ===== UNIFIED MOBILE CONTROLS SIZING - HIGHEST SPECIFICITY ===== */
+        /* Ensure both controls are exactly the same size on all mobile devices */
+        body.mobile .virtual-joystick,
+        body.mobile .boost-button {
+            width: 120px !important;
+            height: 120px !important;
+            border-radius: 50% !important;
+            position: fixed !important;
+            z-index: 1002 !important;
+            border-width: 3px !important;
+            border-style: solid !important;
+        }
+        
+        /* Standard mobile positioning */
+        body.mobile .virtual-joystick {
+            bottom: 40px !important;
+            left: 40px !important;
+        }
+        
+        body.mobile .boost-button {
+            bottom: 40px !important;
+            right: 40px !important;
+        }
+        
+        /* Smaller screens - reduce size but keep them equal */
+        @media (max-width: 600px) {
+            body.mobile .virtual-joystick,
+            body.mobile .boost-button {
+                width: 100px !important;
+                height: 100px !important;
+            }
+            
+            body.mobile .virtual-joystick {
+                bottom: 30px !important;
+                left: 30px !important;
+            }
+            
+            body.mobile .boost-button {
+                bottom: 30px !important;
+                right: 30px !important;
+            }
+        }
+        
+        /* iPad Mini and larger tablets - increase size but keep them equal */
+        @media (min-width: 768px) and (max-width: 1024px) {
+            body.mobile .virtual-joystick,
+            body.mobile .boost-button {
+                width: 140px !important;
+                height: 140px !important;
+            }
         }
         
         /* ===== FPS COUNTER POSITION FIX ===== */
