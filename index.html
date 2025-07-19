@@ -1135,6 +1135,38 @@
             transition: transform 0.2s;
         }
         
+        /* Killstreak Display - Positioned above regular messages */
+        #killstreakDisplay {
+            position: absolute;
+            bottom: 280px; /* Higher than recentDiscovery */
+            left: 50%;
+            transform: translateX(-50%);
+            background: transparent;
+            z-index: 104;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        
+        #killstreakDisplay.show {
+            opacity: 1;
+            background: linear-gradient(135deg, 
+                rgba(60, 0, 80, 0.95) 0%, 
+                rgba(120, 0, 60, 0.95) 50%, 
+                rgba(80, 0, 120, 0.95) 100%);
+            color: #ff00ff;
+            padding: 16px 32px;
+            border: 4px solid #ff00ff;
+            border-color: #ff00ff #cc00cc #cc00cc #ff00ff;
+            outline: 2px solid #ff00ff;
+            outline-offset: -6px;
+            box-shadow: 0 0 30px rgba(255, 0, 255, 0.8),
+                        inset 0 0 20px rgba(255, 0, 255, 0.3),
+                        0 8px 0 rgba(0,0,0,0.8);
+            text-align: center;
+            animation: killstreakPulse 0.5s steps(8);
+        }
+        
         /* Message Popups (Over Element Bar) - SNES Style */
         #recentDiscovery {
             position: absolute;
@@ -1168,6 +1200,10 @@
         }
         
         /* Mobile popup adjustments */
+        body.mobile #killstreakDisplay {
+            bottom: 140px; /* Above recentDiscovery on mobile */
+        }
+        
         body.mobile #recentDiscovery {
             bottom: 80px;
             font-size: 10px;
@@ -1262,6 +1298,81 @@
             color: #ff8c00;
             border-color: #ff8c00 #cc6600 #cc6600 #ff8c00;
             outline-color: #ff8c00;
+        }
+        
+        /* Killstreak Message Style */
+        #recentDiscovery.killstreak {
+            background: linear-gradient(135deg, 
+                rgba(60, 0, 80, 0.95) 0%, 
+                rgba(120, 0, 60, 0.95) 50%, 
+                rgba(80, 0, 120, 0.95) 100%);
+            color: #ff00ff;
+            border-color: #ff00ff #cc00cc #cc00cc #ff00ff;
+            outline-color: #ff00ff;
+            box-shadow: 0 0 30px rgba(255, 0, 255, 0.8),
+                        inset 0 0 20px rgba(255, 0, 255, 0.3),
+                        0 8px 0 rgba(0,0,0,0.8);
+            text-align: center;
+            animation: killstreakPulse 0.5s steps(8);
+        }
+        
+        @keyframes killstreakPulse {
+            0%, 100% {
+                transform: translateX(-50%) scale(1);
+                filter: brightness(1);
+            }
+            25% {
+                transform: translateX(-50%) scale(1.1);
+                filter: brightness(1.3);
+            }
+            50% {
+                transform: translateX(-50%) scale(1.05);
+                filter: brightness(1.2);
+            }
+            75% {
+                transform: translateX(-50%) scale(1.08);
+                filter: brightness(1.4);
+            }
+        }
+        
+        .killstreak-medal {
+            display: block;
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 8px;
+            image-rendering: pixelated;
+            filter: drop-shadow(0 0 10px rgba(255, 0, 255, 0.8));
+            animation: medalBounce 0.5s ease-out;
+        }
+        
+        @keyframes medalBounce {
+            0% {
+                transform: scale(0) rotate(0deg);
+            }
+            50% {
+                transform: scale(1.2) rotate(180deg);
+            }
+            100% {
+                transform: scale(1) rotate(360deg);
+            }
+        }
+        
+        .killstreak-text {
+            font-size: 18px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: bold;
+            text-shadow: 3px 3px 0 rgba(0,0,0,0.8),
+                        0 0 20px rgba(255, 0, 255, 0.5);
+        }
+        
+        body.mobile .killstreak-medal {
+            width: 48px;
+            height: 48px;
+        }
+        
+        body.mobile .killstreak-text {
+            font-size: 14px;
         }
         
         /* Boss Victory Message - Epic announcement */
@@ -1488,7 +1599,7 @@
             color: var(--snes-white);
             text-transform: uppercase;
             font-size: 12px;
-            padding: 8px;
+            padding: 8px 12px;
             text-align: center;
             border-bottom: 2px solid var(--snes-black);
             font-family: 'Press Start 2P';
@@ -1498,6 +1609,7 @@
             justify-content: space-between;
             align-items: center;
             user-select: none;
+            position: relative;
         }
         
         .leaderboard-header:hover {
@@ -1505,8 +1617,12 @@
         }
         
         .collapse-icon {
-            font-size: 10px;
+            font-size: 12px;
             transition: transform 0.3s ease;
+            font-family: 'Press Start 2P', monospace;
+            margin-left: 15px;
+            display: inline-block;
+            line-height: 1;
         }
         
         .leaderboard-box.collapsed {
@@ -1523,14 +1639,14 @@
         .leaderboard-entry {
             display: flex;
             justify-content: space-between;
-            padding: 6px 10px;
+            padding: 4px 8px;
             margin: 0;
             background: #181850;
             border-bottom: 1px solid var(--snes-black);
             font-size: 10px;
             transition: none;
-            font-family: 'Press Start 2P';
-            line-height: 1.4;
+            font-family: 'Press Start 2P', monospace !important;
+            line-height: 1.2;
         }
         
         .leaderboard-entry:hover {
@@ -1563,7 +1679,8 @@
             text-align: right;
             font-size: 9px;
             color: var(--snes-gray);
-            line-height: 1.4;
+            line-height: 1.2;
+            font-family: 'Press Start 2P', monospace !important;
         }
         
         /* Discovery Feed (Left Side Chat-style) - SNES Style */
@@ -1935,12 +2052,19 @@
             
             body.mobile .leaderboard-header {
                 font-size: 10px !important;
-                padding: 4px !important;
+                padding: 6px 10px !important;
+            }
+            
+            body.mobile .collapse-icon {
+                font-size: 10px !important;
+                margin-left: 10px !important;
             }
             
             body.mobile .leaderboard-entry {
-                padding: 3px 4px !important;
+                padding: 2px 4px !important;
                 font-size: 8px !important;
+                min-height: 20px !important;
+                font-family: 'Press Start 2P', monospace !important;
             }
         }
         
@@ -2006,25 +2130,17 @@
             cursor: pointer;
         }
         
-        body.mobile .leaderboard-header::after {
-            content: '▼';
-            font-size: 10px;
-            margin-left: 5px;
-            transition: transform 0.3s ease;
-        }
-        
-        body.mobile .leaderboard-box.collapsed .leaderboard-header::after {
-            transform: rotate(-90deg);
-        }
         
         body.mobile .leaderboard-entry {
-            padding: 4px 6px;
-            margin: 2px 0;
-            font-size: 10px;
+            padding: 3px 5px;
+            margin: 1px 0;
+            font-size: 9px;
+            font-family: 'Press Start 2P', monospace !important;
         }
         
         body.mobile .leaderboard-stats {
-            font-size: 9px;
+            font-size: 8px;
+            font-family: 'Press Start 2P', monospace !important;
         }
         
         /* Commented out - replaced by professional mobile UI with orientation-aware positioning
@@ -3139,20 +3255,6 @@
             position: relative !important;
         }
 
-        /* Add collapse indicator */
-        .leaderboard-header::after {
-            content: '▼' !important;
-            position: absolute !important;
-            right: 12px !important;
-            top: 50% !important;
-            transform: translateY(-50%) !important;
-            font-size: 10px !important;
-            transition: transform 0.3s ease !important;
-        }
-
-        .leaderboard-box.collapsed .leaderboard-header::after {
-            transform: translateY(-50%) rotate(-90deg) !important;
-        }
 
         /* Collapsed state */
         .leaderboard-box.collapsed {
@@ -3167,9 +3269,9 @@
         /* Restructure leaderboard entries */
         .leaderboard-entry {
             display: block !important; /* Change from flex to block */
-            padding: 10px 12px !important;
+            padding: 5px 8px !important;
             position: relative !important;
-            min-height: 45px !important; /* Ensure enough height for two lines */
+            min-height: 28px !important; /* Reduced height for less spacing */
         }
 
         /* Two-line layout for names */
@@ -3193,12 +3295,13 @@
         /* Stats on the right side */
         .leaderboard-stats {
             position: absolute !important;
-            right: 12px !important;
+            right: 8px !important;
             top: 50% !important;
             transform: translateY(-50%) !important;
             text-align: right !important;
-            font-size: 11px !important;
-            line-height: 1.3 !important;
+            font-size: 9px !important;
+            line-height: 1.1 !important;
+            font-family: 'Press Start 2P', monospace !important;
         }
 
         .leaderboard-stats div {
@@ -3724,6 +3827,7 @@
     
     <!-- UI Overlay -->
     <div id="ui">
+        <div id="killstreakDisplay"></div>
         <div id="recentDiscovery"></div>
         <div id="bossVictoryMessage"></div>
         <div id="score">Score: 0</div>
@@ -3786,8 +3890,11 @@
         </div>
         
         <!-- Leaderboard Box -->
-        <div class="leaderboard-box">
-            <div class="leaderboard-header">Leaderboard</div>
+        <div class="leaderboard-box" id="leaderboardBox">
+            <div class="leaderboard-header">
+                <span>Leaderboard</span>
+                <span class="collapse-icon">▼</span>
+            </div>
             <div id="leaderboardList"></div>
         </div>
         
@@ -4232,12 +4339,12 @@
             display: grid;
             grid-template-columns: 80px 80px 200px 150px 120px 120px 100px;
             gap: 10px;
-            padding: 8px 12px;
-            margin-bottom: 3px;
+            padding: 6px 10px;
+            margin-bottom: 2px;
             background: rgba(0, 0, 0, 0.3);
             border: 2px solid transparent;
-            font-family: monospace;
-            font-size: 14px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 12px;
             transition: all 0.2s;
             align-items: center;
         }
@@ -4524,9 +4631,10 @@
             }
             
             body.mobile .leaderboard-entry {
-                font-size: 9px !important;
-                padding: 4px 6px !important;
-                min-height: 32px !important;
+                font-size: 8px !important;
+                padding: 3px 5px !important;
+                min-height: 22px !important;
+                font-family: 'Press Start 2P', monospace !important;
             }
         }
 
@@ -5110,6 +5218,7 @@
     <script src="js/skinData.js" defer></script>
     <script src="js/skinIdMapping.js" defer></script>
     <script src="js/playerStats.js" defer></script>
+    <script src="js/killstreakManager.js" defer></script>
     <script src="js/unlockManager.js" defer></script>
     <script src="js/nameGenerator.js" defer></script>
     

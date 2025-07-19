@@ -161,6 +161,7 @@
         }
         
         let gameStarted = false;
+        window.gameStarted = false; // Expose globally
         let paused = false;
         let controlScheme = 'arrows';
         let gameMode = 'infinite';
@@ -192,7 +193,17 @@
         let deathSequenceTimer = 0;
         let deathProcessed = false;
         let isRespawning = false;
+        let waitingForRespawnInput = false; // New flag for death screen
         const DEATH_SEQUENCE_DURATION = 2000;
+        
+        // Expose death variables for debugging
+        window.deathSequenceActive = false;
+        window.deathSequenceTimer = 0;
+        window.deathProcessed = false;
+        window.playerRespawnTimer = 0;
+        window.savedSnakeScore = 0;
+        window.savedSnakeLength = 0;
+        window.waitingForRespawnInput = false;
         let deathCameraAnimation = {
             active: false,
             startZoom: 1.0,
@@ -1966,6 +1977,7 @@
                 this.deathFlashPhase = 0;
                 this.deathSegmentPhase = 0;
                 this.isDying = false;
+                this.hasExploded = false;
                 
                 // Validate size to prevent invisibility
                 if (!this.size || this.size <= 0) {
@@ -2957,13 +2969,18 @@
                     ctx.restore();
                 }
                 
-                // Award points and kills to killer
-                if (killer && killer.alive) {
+                // Award points and kills to killer - but only once
+                if (killer && killer.alive && !this.hasExploded) {
                     killer.score += 500; // 500 points for snake explosion
                     killer.kills++; // Increment kill count
                     
                     // Track kill event if player is the killer
                     if (killer.isPlayer) {
+                        // Track killstreak for AI snake kills
+                        if (!this.isPlayer && window.killstreakManager) {
+                            window.killstreakManager.onKill();
+                        }
+                        
                         // Dispatch enemy killed event
                         dispatchGameEvent('enemyKilled', {
                             victimName: this.name,
@@ -2989,7 +3006,12 @@
                         highScore = killer.score;
                         localStorage.setItem('highScore', highScore.toString());
                     }
+                    
+                    // Mark as exploded to prevent double scoring
+                    this.hasExploded = true;
                 }
+                
+                // Always call die to trigger death animation
                 this.die();
             }
             
@@ -8017,7 +8039,7 @@
         
         function showMessage(text, isDiscovery, timeout = 3000) {
             // Don't show messages if game hasn't started
-            if (!gameStarted) return;
+            if (!window.gameStarted) return;
             
             const popup = document.getElementById('recentDiscovery');
             popup.innerHTML = text;
@@ -8300,16 +8322,13 @@
                 let displayText = index === 0 ? '👑 ' : '';
                 let displayName = snake.name;
                 
-                // For AI snakes, check if name has personality prefix and replace with emoji
+                // For AI snakes, remove personality prefix from name (but don't add emoji)
                 if (!snake.isPlayer) {
                     if (displayName.startsWith('Aggressive ')) {
-                        displayText += '😡 ';
                         displayName = displayName.substring(11); // "Aggressive ".length = 11
                     } else if (displayName.startsWith('Combo Master ')) {
-                        displayText += '😎 ';
                         displayName = displayName.substring(13); // "Combo Master ".length = 13
                     } else if (displayName.startsWith('Balanced ')) {
-                        displayText += '😊 ';
                         displayName = displayName.substring(9); // "Balanced ".length = 9
                     }
                 }
@@ -9166,6 +9185,8 @@
             // Reset death processed flag
             deathProcessed = false;
             isRespawning = true; // Set respawning flag
+            waitingForRespawnInput = false; // Clear waiting flag
+            window.waitingForRespawnInput = false;
             
             console.log('[RESPAWN BUTTON] Setting timer to -1, isRespawning=true');
             playerRespawnTimer = -1; // Trigger immediate respawn
@@ -9356,9 +9377,15 @@
         function updateUI() {
             if (!playerSnake) return;
             
-            // Handle dead player with respawn timer
-            if (!playerSnake.alive && playerRespawnTimer > 0 && !deathSequenceActive) {
-                const respawnSeconds = Math.ceil(playerRespawnTimer / 1000);
+            // Debug death screen conditions
+            if (!playerSnake.alive) {
+                console.log('[DEATH UI] Player dead, waitingForRespawnInput:', waitingForRespawnInput, 
+                    'deathSequenceActive:', deathSequenceActive, 'deathProcessed:', deathProcessed);
+            }
+            
+            // Handle dead player - show death screen when waiting for input
+            if (!playerSnake.alive && waitingForRespawnInput) {
+                const respawnSeconds = 0; // No countdown since we wait for player input
                 
                 // Check if this is the final death in classic mode (4th death)
                 if (gameMode === 'classic' && deathCount >= 4 && revivesRemaining === 0) {
@@ -9371,6 +9398,7 @@
                 // Show respawn overlay
                 const respawnOverlay = document.getElementById('respawnOverlay');
                 if (respawnOverlay) {
+                    console.log('[DEATH SCREEN] Showing respawn overlay');
                     respawnOverlay.style.display = 'block';
                     
                     // Update respawn stats
@@ -10984,6 +11012,7 @@
             
             // Start fresh game
             gameStarted = true;
+            window.gameStarted = true; // Update global
             gameStartTime = Date.now();
             
             // Signal that game is initialized for performance optimizations
@@ -12230,6 +12259,34 @@
                 if (!deathSequenceActive && (playerSnake.isDying || !playerSnake.alive) && playerRespawnTimer <= 0 && !deathProcessed && !isRespawning) {
                     deathSequenceActive = true;
                     deathSequenceTimer = 0;
+                    window.deathSequenceActive = true;
+                    window.deathSequenceTimer = 0;
+                    
+                    // Save snake state for respawn
+                    savedSnakeScore = playerSnake.score;
+                    savedSnakeLength = playerSnake.segments.length; // Use segments.length not .length
+                    window.savedSnakeScore = savedSnakeScore;
+                    window.savedSnakeLength = savedSnakeLength;
+                    
+                    // Set death processed flag
+                    deathProcessed = true;
+                    window.deathProcessed = true;
+                    
+                    // Don't set respawn timer here - wait for player input
+                    // playerRespawnTimer = 3000; // 3 seconds
+                    // window.playerRespawnTimer = playerRespawnTimer;
+                    
+                    // Initialize camera animation
+                    deathCameraAnimation.active = true;
+                    deathCameraAnimation.startZoom = cameraZoom;
+                    deathCameraAnimation.targetZoom = cameraZoom * 0.7; // Zoom out by 30%
+                    deathCameraAnimation.currentZoom = cameraZoom;
+                    deathCameraAnimation.progress = 0;
+                    
+                    // Reset killstreak on player death
+                    if (window.killstreakManager) {
+                        window.killstreakManager.onPlayerDeath();
+                    }
                     
                     // Increment death count at death start (Classic mode only)
                     if (gameMode === 'classic' && !window.deathCountIncremented) {
@@ -12309,12 +12366,41 @@
                         });
                     }
                     } // End of death sequence completion
+                }
+                
+                // Update death sequence timer
+                if (deathSequenceActive) {
+                    deathSequenceTimer += frameTime;
+                    window.deathSequenceTimer = deathSequenceTimer;
+                    
+                    // Update camera zoom animation (200ms to 1200ms)
+                    if (deathSequenceTimer >= 200 && deathSequenceTimer <= 1200) {
+                        const animProgress = (deathSequenceTimer - 200) / 1000; // 0 to 1 over 1 second
+                        deathCameraAnimation.progress = Math.min(1, animProgress);
+                        
+                        // Smooth easing function
+                        const easedProgress = 1 - Math.pow(1 - deathCameraAnimation.progress, 3);
+                        deathCameraAnimation.currentZoom = deathCameraAnimation.startZoom + 
+                            (deathCameraAnimation.targetZoom - deathCameraAnimation.startZoom) * easedProgress;
+                        cameraZoom = deathCameraAnimation.currentZoom;
+                    }
+                    
+                    // Check if death sequence is complete
+                    if (deathSequenceTimer >= DEATH_SEQUENCE_DURATION) {
+                        deathSequenceActive = false;
+                        window.deathSequenceActive = false;
+                        deathCameraAnimation.active = false;
+                        waitingForRespawnInput = true; // Now waiting for player to click respawn
+                        window.waitingForRespawnInput = true;
+                        console.log('[DEATH] Death sequence complete, showing death screen');
+                    }
                 } // End of deathSequenceActive check
             } // End of player death check - MOVED HERE
             
             // Update respawn timer (NOW OUTSIDE death check)
             if (playerRespawnTimer > 0) {
                 playerRespawnTimer -= frameTime;
+                window.playerRespawnTimer = playerRespawnTimer;
                 
                 // Debug why respawn might be failing
                 if (playerRespawnTimer <= 100 && playerRespawnTimer > 0) {
@@ -12334,7 +12420,7 @@
                 
             // Handle respawn when timer reaches zero
             // Check isRespawning to allow forced respawn to proceed
-            if (playerSnake && playerRespawnTimer <= 0 && (!deathSequenceActive || isRespawning) && !playerSnake.alive) {
+            if (playerSnake && playerRespawnTimer <= 0 && (!deathSequenceActive || isRespawning) && !playerSnake.alive && !waitingForRespawnInput) {
                     // Store previous score before creating new snake
                     const previousScore = playerSnake.score;
                     const previousCapacity = playerSnake.elementCapacity;
@@ -12402,14 +12488,24 @@
                     camera.x = WORLD_SIZE / 2;
                     camera.y = WORLD_SIZE / 2;
                     
+                    // Reset camera zoom to default
+                    cameraZoom = isMobile ? 0.75 : 1.0;
+                    deathCameraAnimation.active = false;
+                    
                     // Reset respawn timer
                     playerRespawnTimer = 0;
+                    window.playerRespawnTimer = 0;
                     
                     // Reset death flags for next death
                     deathProcessed = false;
                     deathSequenceActive = false;
                     isRespawning = false; // Reset respawning flag
+                    waitingForRespawnInput = false; // Reset waiting flag
                     deathSequenceTimer = 0;
+                    window.deathProcessed = false;
+                    window.waitingForRespawnInput = false;
+                    window.deathSequenceActive = false;
+                    window.deathSequenceTimer = 0;
                     leaderboardSubmitted = false;
                     window.deathLeaderboardChecked = false;
                     window.deathCountIncremented = false; // Reset death count flag
