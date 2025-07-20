@@ -358,11 +358,11 @@ class MobileUIManager {
                 this.boostMeterFill.style.height = `${staminaPercent}%`;
                 
                 if (staminaPercent < 30) {
-                    this.boostMeterFill.style.background = 'linear-gradient(to top, #ff4444, #cc0000)';
+                    this.boostMeterFill.style.background = 'linear-gradient(to top, rgba(59, 16, 83, 0.8), rgba(76, 29, 117, 0.8))';
                 } else if (staminaPercent < 60) {
-                    this.boostMeterFill.style.background = 'linear-gradient(to top, #ffaa00, #ff6600)';
+                    this.boostMeterFill.style.background = 'linear-gradient(to top, rgba(89, 28, 135, 0.8), rgba(147, 51, 234, 0.8))';
                 } else {
-                    this.boostMeterFill.style.background = 'linear-gradient(to top, #00ff00, #00cc00)';
+                    this.boostMeterFill.style.background = 'linear-gradient(to top, rgba(124, 58, 237, 0.8), rgba(167, 139, 250, 0.8))';
                 }
                 
                 if (Math.abs(staminaPercent - this.lastBoostAmount) > 1) {

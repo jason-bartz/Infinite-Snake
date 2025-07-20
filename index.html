@@ -4740,15 +4740,14 @@
         }
 
         body.mobile .leaderboard-box.collapsed {
-            width: auto !important;
-            min-width: 120px !important;
-            max-width: 180px !important;
+            width: 320px !important; /* Keep same width as expanded */
             min-height: 40px !important;
         }
 
         body.mobile .leaderboard-box.collapsed .leaderboard-header {
-            font-size: 10px !important;
-            padding: 8px !important;
+            font-size: 11px !important; /* Keep same size as expanded */
+            padding: 10px !important;
+            margin: 0 !important;
         }
         
         /* Hide scrollable content when collapsed, not the entries themselves */
@@ -4795,6 +4794,9 @@
             font-family: 'Press Start 2P', monospace !important;
             text-transform: none !important;
             letter-spacing: 0 !important;
+            margin: 0 !important;
+            padding: 10px !important;
+            box-sizing: border-box !important;
         }
         
         /* Remove any duplicate headers */
@@ -4865,32 +4867,90 @@
             z-index: 1002 !important;
         }
         
-        /* ===== UNIFIED MOBILE CONTROLS SIZING - HIGHEST SPECIFICITY ===== */
-        /* Ensure both controls are exactly the same size on all mobile devices */
+        /* ===== FINAL BOOST BUTTON FIX - ABSOLUTE HIGHEST SPECIFICITY ===== */
+        /* Remove ALL styles and start fresh to ensure perfect mirroring */
+        body.mobile .mobile-controls .virtual-joystick,
+        body.mobile .mobile-controls .boost-button,
         body.mobile .virtual-joystick,
         body.mobile .boost-button {
+            /* Reset everything */
+            all: unset !important;
+            
+            /* Base styles - exactly the same for both */
+            display: block !important;
+            position: fixed !important;
             width: 120px !important;
             height: 120px !important;
+            border: 3px solid rgba(255, 255, 255, 0.3) !important;
             border-radius: 0 !important; /* Square shape */
-            position: fixed !important;
+            background: rgba(0, 0, 0, 0.5) !important;
             z-index: 1002 !important;
-            border-width: 3px !important;
-            border-style: solid !important;
+            box-sizing: border-box !important;
+            pointer-events: auto !important;
         }
         
-        /* Standard mobile positioning - symmetrical */
+        /* Position them symmetrically */
         body.mobile .virtual-joystick {
             bottom: 40px !important;
             left: 40px !important;
+            top: auto !important;
+            right: auto !important;
         }
         
         body.mobile .boost-button {
             bottom: 40px !important;
             right: 40px !important;
+            top: auto !important;
+            left: auto !important;
         }
         
-        /* Smaller screens - reduce size but keep them equal */
+        /* Joystick specific visual styling */
+        body.mobile .virtual-joystick {
+            border-color: rgba(78, 205, 196, 0.4) !important;
+        }
+        
+        /* Boost button specific visual styling */
+        body.mobile .boost-button {
+            border-color: rgba(147, 51, 234, 0.6) !important;
+            background: radial-gradient(circle, rgba(147, 51, 234, 0.2) 0%, rgba(89, 28, 135, 0.2) 100%) !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+        
+        /* Boost button text */
+        body.mobile .boost-button::after {
+            content: 'BOOST' !important;
+            position: absolute !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            z-index: 2 !important;
+            color: rgba(255, 255, 255, 0.9) !important;
+            font-size: 8px !important; /* Reduced by 50% from 16px */
+            font-weight: bold !important;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8) !important;
+            font-family: 'Press Start 2P', monospace !important;
+        }
+        
+        /* Boost meter with purple/blue theme */
+        body.mobile .boost-button .boost-meter-fill {
+            position: absolute !important;
+            bottom: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 0% !important;
+            background: linear-gradient(to top, rgba(89, 28, 135, 0.8), rgba(147, 51, 234, 0.8)) !important;
+            transition: height 0.3s ease !important;
+            border-radius: 0 !important;
+            z-index: 1 !important;
+            pointer-events: none !important;
+        }
+        
+        /* Responsive sizing - keep them equal */
         @media (max-width: 600px) {
+            body.mobile .mobile-controls .virtual-joystick,
+            body.mobile .mobile-controls .boost-button,
             body.mobile .virtual-joystick,
             body.mobile .boost-button {
                 width: 100px !important;
@@ -4906,14 +4966,24 @@
                 bottom: 30px !important;
                 right: 30px !important;
             }
+            
+            body.mobile .boost-button::after {
+                font-size: 7px !important;
+            }
         }
         
-        /* iPad Mini and larger tablets - increase size but keep them equal */
+        /* iPad Mini and larger tablets */
         @media (min-width: 768px) and (max-width: 1024px) {
+            body.mobile .mobile-controls .virtual-joystick,
+            body.mobile .mobile-controls .boost-button,
             body.mobile .virtual-joystick,
             body.mobile .boost-button {
                 width: 140px !important;
                 height: 140px !important;
+            }
+            
+            body.mobile .boost-button::after {
+                font-size: 10px !important;
             }
         }
         
