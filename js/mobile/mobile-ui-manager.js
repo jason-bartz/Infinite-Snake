@@ -141,6 +141,12 @@ class MobileUIManager {
             visibility: visible !important;
             display: flex !important;
             z-index: 1002 !important;
+            border: 3px solid rgba(147, 51, 234, 0.6) !important;
+            border-radius: 0 !important;
+            background: rgba(0, 0, 0, 0.5) !important;
+            align-items: center !important;
+            justify-content: center !important;
+            box-sizing: border-box !important;
         `;
     }
     

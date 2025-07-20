@@ -30,7 +30,7 @@ const MOBILE_UI_CONFIG = {
         panelMaxWidth: 280,       // Maximum width for panels
         tabWidth: 40,             // Width of slideout tabs
         tabHeight: 120,           // Height of slideout tabs
-        boostButtonSize: 80       // Size of boost button
+        boostButtonSize: 120      // Size of boost button (matches joystick)
     },
     
     // Position configuration (fixed mode)
@@ -44,8 +44,8 @@ const MOBILE_UI_CONFIG = {
             right: 10
         },
         boostButton: {
-            bottom: 120,
-            right: 20
+            bottom: 40,
+            right: 40
         }
     },
     
