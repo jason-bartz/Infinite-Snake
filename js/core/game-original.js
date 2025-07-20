@@ -8665,7 +8665,7 @@
         // Initialize Leaderboard when the module loads
         async function initLeaderboard() {
             try {
-                window.leaderboardModule = await import('./js/leaderboard.js');
+                window.leaderboardModule = await import('../leaderboard.js');
                 
                 if (window.leaderboardModule && window.leaderboardModule.initializeLeaderboard) {
                     await window.leaderboardModule.initializeLeaderboard();
