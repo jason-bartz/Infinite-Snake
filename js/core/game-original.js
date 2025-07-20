@@ -766,7 +766,13 @@
         let bossHealthBar = null;
         let bossHealthBarContainer = null;
         let bossNameDisplay = null;
-        let elementBankSlots = 6;
+        // Load element bank slots from localStorage or default to 6
+        let elementBankSlots = parseInt(localStorage.getItem('elementBankSlots')) || 6;
+        
+        // Save element bank slots when updated
+        function saveElementBankSlots() {
+            localStorage.setItem('elementBankSlots', elementBankSlots.toString());
+        }
         let bossDamageFlashTimer = 0;
         let bossStunTimer = 0;
         let bossProjectiles = [];
@@ -5978,6 +5984,7 @@
                 let elementBankExpanded = false;
                 if (elementBankSlots < 12) {
                     elementBankSlots++;
+                    saveElementBankSlots(); // Save to localStorage
                     updateElementBankUI();
                     elementBankExpanded = true;
                 }
@@ -8688,15 +8695,17 @@
         
         // Also try to init again after a delay in case it failed
         setTimeout(() => {
-            if (!leaderboardModule) {
+            if (!window.leaderboardModule) {
                 initLeaderboard();
             } else {
+                console.log('Leaderboard module loaded successfully');
             }
         }, 2000);
         
         // Add another retry after 5 seconds if still not loaded
         setTimeout(() => {
-            if (!leaderboardModule) {
+            if (!window.leaderboardModule) {
+                console.log('Retrying leaderboard initialization...');
                 initLeaderboard();
             }
         }, 5000);
@@ -9327,6 +9336,9 @@
             // Hide overlay and trigger respawn
             document.getElementById('respawnOverlay').style.display = 'none';
             
+            // Reset death message flag for next death
+            window.deathMessageSet = false;
+            
             // Force end death sequence if still active
             if (deathSequenceActive) {
                 deathSequenceActive = false;
@@ -9410,7 +9422,7 @@
         // Load mini leaderboard for pause menu
         let currentPauseLBPeriod = 'daily';
         
-        window.loadPauseLeaderboard = async function(event, period) {
+        window.loadPauseLeaderboard = async function(event, period, retryCount = 0) {
             currentPauseLBPeriod = period;
             
             // Update mini tab styles
@@ -9423,9 +9435,30 @@
                 event.target.style.color = '#4ecdc4';
             }
             
-            if (!window.leaderboardModule) return;
-            
             const entriesDiv = document.getElementById('pauseLeaderboardEntries');
+            
+            // Check if leaderboard module is loaded
+            if (!window.leaderboardModule) {
+                // Show loading message while we wait for the module
+                entriesDiv.innerHTML = '<div style="color: #888; text-align: center; padding: 20px;">Initializing leaderboard...</div>';
+                
+                // Try to initialize if not already done
+                if (retryCount === 0) {
+                    initLeaderboard();
+                }
+                
+                // Retry with exponential backoff (max 3 retries)
+                if (retryCount < 3) {
+                    const delay = Math.min(1000 * Math.pow(2, retryCount), 4000);
+                    setTimeout(() => {
+                        window.loadPauseLeaderboard(event, period, retryCount + 1);
+                    }, delay);
+                } else {
+                    entriesDiv.innerHTML = '<div style="color: #ff4444; text-align: center; padding: 20px;">Leaderboard service unavailable</div>';
+                }
+                return;
+            }
+            
             entriesDiv.innerHTML = '<div style="color: #888; text-align: center; padding: 20px;">Loading...</div>';
             
             try {
@@ -9470,7 +9503,10 @@
         }
         
         async function loadLeaderboard(period) {
-            if (!leaderboardModule) return;
+            if (!window.leaderboardModule) {
+                console.error('Leaderboard module not loaded in loadLeaderboard');
+                return;
+            }
             
             const entriesDiv = document.getElementById('leaderboardEntries');
             entriesDiv.innerHTML = '<div style="color: #888; text-align: center; padding: 40px; font-family: monospace;">Loading leaderboard...</div>';
@@ -9552,6 +9588,12 @@
                 if (respawnOverlay) {
                     console.log('[DEATH SCREEN] Showing respawn overlay');
                     respawnOverlay.style.display = 'block';
+                    
+                    // Update death message with random message only if not already set for this death
+                    if (window.nameGenerator && !window.deathMessageSet) {
+                        document.getElementById('deathMessage').textContent = window.nameGenerator.getRandomDeathMessage();
+                        window.deathMessageSet = true;
+                    }
                     
                     // Update respawn stats
                     document.getElementById('respawnScore').textContent = Math.floor(playerSnake.score).toLocaleString();
@@ -9726,6 +9768,8 @@
             } else {
                 // Reset death leaderboard check flag when alive
                 window.deathLeaderboardChecked = false;
+                // Reset death message flag when alive
+                window.deathMessageSet = false;
                 
                 // Hide respawn overlay when alive
                 const respawnOverlay = document.getElementById('respawnOverlay');
@@ -9830,6 +9874,16 @@
             // Update element collection bar (MMO skill bar style)
             const elementBar = document.getElementById('elementBar');
             elementBar.innerHTML = '';
+            
+            // Apply two-rows class when 9 or more slots
+            if (elementBankSlots >= 9) {
+                elementBar.classList.add('two-rows');
+                // Add data attribute for exact slot count to enable specific CSS rules
+                elementBar.setAttribute('data-slots', elementBankSlots);
+            } else {
+                elementBar.classList.remove('two-rows');
+                elementBar.removeAttribute('data-slots');
+            }
             
             // Check if we're animating a combination
             const isCombining = playerSnake.isAnimatingCombination && playerSnake.combiningIndices;
@@ -12122,7 +12176,6 @@
                 const div = document.createElement('div');
                 div.className = 'discovery-item';
                 div.dataset.name = elementData.n.toLowerCase();
-                div.dataset.recipe = recipe.toLowerCase();
                 
                 // Element emoji/symbol
                 const symbol = document.createElement('div');
@@ -12134,14 +12187,8 @@
                 name.className = 'element-name';
                 name.textContent = elementData.n;
                 
-                // Recipe tooltip
-                const recipeTooltip = document.createElement('div');
-                recipeTooltip.className = 'recipe';
-                recipeTooltip.textContent = recipe;
-                
                 div.appendChild(symbol);
                 div.appendChild(name);
-                div.appendChild(recipeTooltip);
                 
                 grid.appendChild(div);
             });
@@ -13313,3 +13360,38 @@
         window.gameLoop = gameLoop;
         window.resizeCanvas = resizeCanvas;
         window.drawBackground = drawBackground;
+        
+        // Console commands for element bank management
+        window.addElementBankSlots = function(count = 1) {
+            const newSlots = elementBankSlots + count;
+            if (newSlots > 12) {
+                console.log('[ELEMENT BANK] Maximum slots is 12. Current:', elementBankSlots);
+                return;
+            }
+            if (newSlots < 6) {
+                console.log('[ELEMENT BANK] Minimum slots is 6. Current:', elementBankSlots);
+                return;
+            }
+            elementBankSlots = newSlots;
+            saveElementBankSlots();
+            updateElementBankUI();
+            console.log('[ELEMENT BANK] Slots updated to:', elementBankSlots);
+        };
+        
+        window.setElementBankSlots = function(slots) {
+            if (slots < 6 || slots > 12) {
+                console.log('[ELEMENT BANK] Slots must be between 6 and 12. Current:', elementBankSlots);
+                return;
+            }
+            elementBankSlots = slots;
+            saveElementBankSlots();
+            updateElementBankUI();
+            console.log('[ELEMENT BANK] Slots set to:', elementBankSlots);
+        };
+        
+        window.showElementBankSlots = function() {
+            console.log('[ELEMENT BANK] Current slots:', elementBankSlots);
+            console.log('[ELEMENT BANK] Maximum slots: 12');
+            console.log('[ELEMENT BANK] Use addElementBankSlots(n) to add n slots');
+            console.log('[ELEMENT BANK] Use setElementBankSlots(n) to set to n slots');
+        };

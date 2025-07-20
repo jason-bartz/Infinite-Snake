@@ -1,5 +1,5 @@
 const FRAME_TIME_MS = 16;
-const STAMINA_DRAIN_RATE = 100 / (5 * 60);
+const STAMINA_DRAIN_RATE = 100 / (6.25 * 60); // Increased boost duration by 25% (from 5 to 6.25 seconds)
 const STAMINA_REGEN_RATE = 100 / (2 * 60);
 const STAMINA_REGEN_COOLDOWN = 30;
 const BOOST_SPEED_MULTIPLIER = 1.75;
@@ -1063,7 +1063,7 @@ class Snake {
         window.cameraShake.startTime = Date.now();
     }
     
-    draw() {
+    draw(interpolation = 1) {
         if (!this.alive && !this.isDying) return;
         
         if (!this.segments || this.segments.length === 0) return;
@@ -1078,8 +1078,8 @@ class Snake {
             window.ctx.globalAlpha *= 0.5;
         }
         
-        this.drawSegments();
-        this.drawHead();
+        this.drawSegments(interpolation);
+        this.drawHead(interpolation);
         
         window.ctx.restore();
     }
@@ -1098,7 +1098,7 @@ class Snake {
         return deathOpacity;
     }
     
-    drawSegments() {
+    drawSegments(interpolation) {
         const skinData = window.skinMetadata[this.skin] || window.skinMetadata['snake-default-green'];
         const skinImg = window.snakeSkinImages[this.skin];
         const emoji = skinData.emoji;
@@ -1110,7 +1110,12 @@ class Snake {
         
         for (let i = this.segments.length - 1; i >= 0; i--) {
             const segment = this.segments[i];
-            const screen = window.worldToScreen(segment.x, segment.y);
+            
+            // Interpolate segment position for smooth rendering
+            const interpolatedX = segment.prevX + (segment.x - segment.prevX) * interpolation;
+            const interpolatedY = segment.prevY + (segment.y - segment.prevY) * interpolation;
+            
+            const screen = window.worldToScreen(interpolatedX, interpolatedY);
             const margin = 100;
             
             if (screen.x < -margin || screen.x > window.canvas.width + margin ||
@@ -1138,8 +1143,13 @@ class Snake {
         }
     }
     
-    drawHead() {
-        const headScreen = window.worldToScreen(this.x, this.y);
+    drawHead(interpolation) {
+        // Interpolate head position for smooth rendering
+        const interpolatedX = this.prevX + (this.x - this.prevX) * interpolation;
+        const interpolatedY = this.prevY + (this.y - this.prevY) * interpolation;
+        const interpolatedAngle = this.prevAngle + (this.angle - this.prevAngle) * interpolation;
+        
+        const headScreen = window.worldToScreen(interpolatedX, interpolatedY);
         const margin = 100;
         
         if (headScreen.x < -margin || headScreen.x > window.canvas.width + margin ||
@@ -1155,7 +1165,7 @@ class Snake {
         
         window.ctx.save();
         window.ctx.translate(headScreen.x, headScreen.y);
-        window.ctx.rotate(this.angle);
+        window.ctx.rotate(interpolatedAngle);
         
         if (skinImg && skinImg.complete) {
             window.ctx.drawImage(skinImg, -headSize/2, -headSize/2, headSize, headSize);

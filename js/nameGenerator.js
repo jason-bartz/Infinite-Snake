@@ -8,7 +8,7 @@ class NameGenerator {
             'Sir', 'General', 'Major', 'Colonel', 'Agent', 'Sergeant', 'Officer', 'Detective', 
             'Mighty', 'Tiny', 'Big', 'Little', 'Angry', 'Happy', 'Grumpy', 'Sleepy', 
             'Crazy', 'Lucky', 'Unlucky', 'Derpy', 'Elite', 'Royal', 'Noble', 'Ancient', 
-            'Baby', 'Elder'
+            'Baby', 'Elder', 'Glizzy', 'Noodles'
         ];
         
         this.lastNames = [
@@ -20,7 +20,7 @@ class NameGenerator {
             'Benderson', 'Twistworth', 'Longbody', 'Shortfang', 'Quickstrike', 'Deadlyson', 
             'the Snake', 'the Serpent', 'the Noodle', 'the Danger', 'the Destroyer', 
             'the Devourer', 'the Mighty', 'the Terrible', 'the Great', 'the Lesser', 
-            'the Unwise', 'the Bold', 'the Coward', 'the Brave', 'the Foolish'
+            'the Unwise', 'the Bold', 'the Coward', 'the Brave', 'the Foolish', 'GlizzMeister', 'The Just'
         ];
         
         this.suffixes = [
@@ -28,7 +28,7 @@ class NameGenerator {
             '69', '2000', '9000', 'XxX', '360', 'NoScope', 'YT', 'TTV', 'GG', 'EZ', 
             'Pro', 'Noob', 'God', 'Bot', 'Main', 'OG', 'Prime', 'Alpha', 'Beta', 
             'Omega', 'Max', 'Mini', 'Mega', 'Ultra', 'Hyper', 'Turbo', 'Elite', 
-            'Legend', 'Master', 'King', 'Queen', 'Lord', 'UwU', 'OwO', 'Bruh'
+            'Legend', 'Master', 'King', 'Queen', 'Lord', 'UwU', 'OwO', 'Bruh', 'Junior'
         ];
         
         this.deathMessages = [
@@ -51,18 +51,17 @@ class NameGenerator {
             'Game Over, Space Snake',
             'Another One Bites the Dust',
             'Deleted from Reality',
+            'Snake? Snake?! SNAAAAAAAAKE!',
             'Snake Down',
             'The Void Consumed You',
             'Life Expired',
             'Back to the Void',
-            'Mission Failed',
-            'You Have Died',
-            'Eliminated',
-            'Flatlined',
-            'Signal Lost',
-            'Terminated',
+            'Ded, LOL',
+            'You Had One Job',
+            'Big Ooof',
+            'WASTED',
+            'Hasta La Vista, Snakey',
             'End of the Line',
-            'Lights Out',
             'That\'s All, Folks',
             'The End... For Now'
         ];

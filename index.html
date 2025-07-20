@@ -12,7 +12,7 @@
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Infinite Snake - Craft the Cosmos" />
     <meta property="og:site_name" content="Infinite Snake" />
-    <meta property="og:image" content="https://infinitesnake.io/assets/snake-logo.png" />
+    <meta property="og:image" content="https://infinitesnake.io/og-image-a.png" />
     <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
@@ -22,7 +22,7 @@
     <meta name="twitter:title" content="Infinite Snake - Craft the Cosmos" />
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:description" content="Combine elements, grow your snake, and discover endless combinations in this unique twist on the classic snake game. Free to play in your browser and mobile!">
-    <meta name="twitter:image" content="https://infinitesnake.io/assets/snake-logo.png">
+    <meta name="twitter:image" content="https://infinitesnake.io/og-image-a.png">
     
     <meta name='robots' content='index,follow' />
     <meta name="twitter:url" content="https://infinitesnake.io" />
@@ -756,10 +756,37 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 0 20px;
+            padding: 0;
             margin-bottom: 10px;
             gap: 4px;
             image-rendering: pixelated;
+            flex-wrap: wrap;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        /* Two-row layout when 9+ slots */
+        .element-collection-bar.two-rows {
+            display: grid;
+            gap: 4px;
+            justify-content: center;
+        }
+        
+        /* Specific grid layouts for each slot count */
+        .element-collection-bar.two-rows[data-slots="9"] {
+            grid-template-columns: repeat(5, 64px);
+        }
+        
+        .element-collection-bar.two-rows[data-slots="10"] {
+            grid-template-columns: repeat(5, 64px);
+        }
+        
+        .element-collection-bar.two-rows[data-slots="11"] {
+            grid-template-columns: repeat(6, 64px);
+        }
+        
+        .element-collection-bar.two-rows[data-slots="12"] {
+            grid-template-columns: repeat(6, 64px);
         }
         
         .element-slot {
@@ -1030,9 +1057,9 @@
         /* Boost Bar (Mana Bar Style) */
         .boost-bar-container {
             width: auto;
-            max-width: 444px; /* 6 slots * 64px + 5 gaps * 4px + padding */
+            max-width: 404px; /* 6 slots * 64px + 5 gaps * 4px */
             margin: 0 auto 15px;
-            padding: 0 20px;
+            padding: 0;
         }
         
         .boost-bar-frame {
@@ -2053,8 +2080,25 @@
             }
             
             body.mobile .element-collection-bar {
-                padding: 0 10px;
+                padding: 0;
                 margin-bottom: 5px;
+            }
+            
+            /* Mobile specific grid layouts */
+            body.mobile .element-collection-bar.two-rows[data-slots="9"] {
+                grid-template-columns: repeat(5, 48px);
+            }
+            
+            body.mobile .element-collection-bar.two-rows[data-slots="10"] {
+                grid-template-columns: repeat(5, 48px);
+            }
+            
+            body.mobile .element-collection-bar.two-rows[data-slots="11"] {
+                grid-template-columns: repeat(6, 48px);
+            }
+            
+            body.mobile .element-collection-bar.two-rows[data-slots="12"] {
+                grid-template-columns: repeat(6, 48px);
             }
             
             body.mobile .element-slot {
@@ -3741,11 +3785,11 @@
     <!-- Splash Screen -->
     <div id="splashScreen">
         <div style="position: absolute; top: 20px; left: 20px; z-index: 10;">
-            <a href="https://discord.gg/a6X4W7QbkG" target="_blank" style="color: #4ecdc4; text-decoration: none; font-family: monospace; font-size: 16px;">💬 Join the Discord Server</a>
+            <a href="https://discord.gg/a6X4W7QbkG" target="_blank" style="color: #4ecdc4; text-decoration: none; font-family: 'Press Start 2P', monospace; font-size: 14px;">💬 Join the Discord Server</a>
         </div>
         <div style="position: absolute; top: 20px; right: 20px; z-index: 10;">
-            <a href="/how-to-play.html" style="color: #4ecdc4; text-decoration: none; font-family: monospace; font-size: 16px; margin-right: 20px;">📖 How to Play</a>
-            <a href="/leaderboard.html" style="color: #4ecdc4; text-decoration: none; font-family: monospace; font-size: 16px;">🏆 Leaderboard</a>
+            <a href="/how-to-play.html" style="color: #4ecdc4; text-decoration: none; font-family: 'Press Start 2P', monospace; font-size: 14px; margin-right: 20px;">📖 How to Play</a>
+            <a href="/leaderboard.html" style="color: #4ecdc4; text-decoration: none; font-family: 'Press Start 2P', monospace; font-size: 14px;">🏆 Leaderboard</a>
         </div>
         <div style="position: absolute; bottom: 20px; right: 20px; z-index: 10;">
             <a href="/credits.html" style="color: #888; text-decoration: none; font-family: 'Press Start 2P', monospace; font-size: 10px;">Credits</a>
@@ -3785,11 +3829,11 @@
     <div id="gameModeSelect">
         <!-- Navigation Bar -->
         <div style="position: absolute; top: 20px; left: 20px; z-index: 10;">
-            <a href="https://discord.gg/a6X4W7QbkG" target="_blank" style="color: #4ecdc4; text-decoration: none; font-family: monospace; font-size: 16px;">💬 Join the Discord Server</a>
+            <a href="https://discord.gg/a6X4W7QbkG" target="_blank" style="color: #4ecdc4; text-decoration: none; font-family: 'Press Start 2P', monospace; font-size: 14px;">💬 Join the Discord Server</a>
         </div>
         <div style="position: absolute; top: 20px; right: 20px; z-index: 10;">
-            <a href="/how-to-play.html" style="color: #4ecdc4; text-decoration: none; font-family: monospace; font-size: 16px; margin-right: 20px;">📖 How to Play</a>
-            <a href="/leaderboard.html" style="color: #4ecdc4; text-decoration: none; font-family: monospace; font-size: 16px;">🏆 Leaderboard</a>
+            <a href="/how-to-play.html" style="color: #4ecdc4; text-decoration: none; font-family: 'Press Start 2P', monospace; font-size: 14px; margin-right: 20px;">📖 How to Play</a>
+            <a href="/leaderboard.html" style="color: #4ecdc4; text-decoration: none; font-family: 'Press Start 2P', monospace; font-size: 14px;">🏆 Leaderboard</a>
         </div>
         <div style="position: absolute; bottom: 20px; right: 20px; z-index: 10;">
             <a href="/credits.html" style="color: #888; text-decoration: none; font-family: 'Press Start 2P', monospace; font-size: 10px;">Credits</a>
@@ -3802,13 +3846,13 @@
             <h4>Choose Your Mode</h4>
             <div id="victoryButtons" style="display: flex; flex-direction: row; gap: 30px; justify-content: center; align-items: stretch; margin-top: 30px; flex-wrap: wrap;">
                 <div style="text-align: center; width: 280px;">
-                    <button class="btn-infinite" onclick="selectGameMode('classic')" style="width: 100%; height: 40px; padding: 10px !important; font-size: 10pt !important; display: flex; align-items: center; justify-content: center;">
+                    <button class="btn-classic" onclick="selectGameMode('classic')" style="width: 100%; height: 40px; padding: 10px; font-size: 10pt; background: #333; border: 2px solid #222; display: flex; align-items: center; justify-content: center;">
                         Classic Mode
                     </button>
                     <p style="color: #ccc; margin-top: 10px; font-size: 14px;">Test your survival skills and compete for your spot on the leaderboard</p>
                 </div>
                 <div style="text-align: center; width: 280px;">
-                    <button class="btn-classic" onclick="selectGameMode('infinite')" style="width: 100%; height: 40px; padding: 10px; font-size: 10pt; background: #333; border: 2px solid #222; display: flex; align-items: center; justify-content: center;">
+                    <button class="btn-infinite" onclick="selectGameMode('infinite')" style="width: 100%; height: 40px; padding: 10px !important; font-size: 10pt !important; display: flex; align-items: center; justify-content: center;">
                         Infinite Mode
                     </button>
                     <p style="color: #ccc; margin-top: 10px; font-size: 14px;">Unlimited respawns to experiment freely and discover new combinations</p>
@@ -4731,6 +4775,25 @@
             
             .element-slot .emoji {
                 font-size: 20px !important;
+            }
+            
+            /* Small screen specific grid layouts */
+            @media (max-width: 768px) {
+                .element-collection-bar.two-rows[data-slots="9"] {
+                    grid-template-columns: repeat(5, 36px) !important;
+                }
+                
+                .element-collection-bar.two-rows[data-slots="10"] {
+                    grid-template-columns: repeat(5, 36px) !important;
+                }
+                
+                .element-collection-bar.two-rows[data-slots="11"] {
+                    grid-template-columns: repeat(6, 36px) !important;
+                }
+                
+                .element-collection-bar.two-rows[data-slots="12"] {
+                    grid-template-columns: repeat(6, 36px) !important;
+                }
             }
         }
 
