@@ -101,18 +101,18 @@
     body:not(.mobile) .leaderboard-entry {
         padding: 6px 8px !important;
         border-bottom: 1px solid #333 !important;
-        font-size: 10px !important;
+        font-size: 8px !important;
     }
     
     /* Ensure consistent styling for stat elements */
     body:not(.mobile) .stat-label {
         color: #AAA !important;
-        font-size: 10px !important;
+        font-size: 8px !important;
     }
     
     body:not(.mobile) .stat-value {
         color: #FFF !important;
-        font-size: 10px !important;
+        font-size: 8px !important;
     }
     
     /* Ensure desktop panels are not affected by mobile styles */
