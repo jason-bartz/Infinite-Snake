@@ -3310,7 +3310,7 @@
 
         /* Restructure leaderboard entries */
         .leaderboard-entry {
-            display: block !important; /* Change from flex to block */
+            display: flex !important;
             padding: 5px 8px !important;
             position: relative !important;
             min-height: 28px !important; /* Reduced height for less spacing */
@@ -4767,6 +4767,26 @@
             display: flex !important;
             visibility: visible !important;
             opacity: 1 !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            gap: 10px !important;
+        }
+        
+        /* Fix leaderboard text overflow on mobile */
+        body.mobile .leaderboard-name {
+            flex: 1 !important;
+            min-width: 0 !important; /* Important for text-overflow to work */
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            white-space: nowrap !important;
+            display: block !important;
+            max-width: 60% !important; /* Ensure space for score */
+        }
+        
+        body.mobile .leaderboard-stats {
+            flex-shrink: 0 !important;
+            white-space: nowrap !important;
+            margin-left: auto !important;
         }
         
         /* Fix for the LEADERBOARD header font size */
@@ -4809,6 +4829,13 @@
         body.mobile .boost-button .boost-meter-fill {
             display: block !important;
             visibility: visible !important;
+            border-radius: 0 !important; /* Square shape */
+        }
+        
+        /* Override circular shapes for mobile controls */
+        body.mobile .joystick-base,
+        body.mobile .joystick-knob {
+            border-radius: 0 !important;
         }
         
         /* ===== LEADERBOARD HEADER CLICKABILITY FIX ===== */
@@ -4844,14 +4871,14 @@
         body.mobile .boost-button {
             width: 120px !important;
             height: 120px !important;
-            border-radius: 50% !important;
+            border-radius: 0 !important; /* Square shape */
             position: fixed !important;
             z-index: 1002 !important;
             border-width: 3px !important;
             border-style: solid !important;
         }
         
-        /* Standard mobile positioning */
+        /* Standard mobile positioning - symmetrical */
         body.mobile .virtual-joystick {
             bottom: 40px !important;
             left: 40px !important;
