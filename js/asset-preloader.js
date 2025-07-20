@@ -8,13 +8,18 @@ class AssetPreloader {
             emojis: {},
             borders: {},
             snakeAssets: {},
-            starField: null
+            starField: null,
+            planets: {
+                standard: {},
+                special: {}
+            }
         };
         
         this.loadingPhases = [
-            { phase: "Initializing Cosmos", weight: 15, method: 'initializeSystem' },
-            { phase: "Loading Elements", weight: 30, method: 'preloadEmojis' },
-            { phase: "Crafting Combinations", weight: 25, method: 'precomputeBackgrounds' },
+            { phase: "Initializing Cosmos", weight: 10, method: 'initializeSystem' },
+            { phase: "Loading Elements", weight: 25, method: 'preloadEmojis' },
+            { phase: "Loading Planets", weight: 15, method: 'preloadPlanets' },
+            { phase: "Crafting Combinations", weight: 20, method: 'precomputeBackgrounds' },
             { phase: "Preparing Skins", weight: 20, method: 'preRenderSnakeAssets' },
             { phase: "Awakening Snakes", weight: 10, method: 'cacheBorderStates' }
         ];
@@ -191,6 +196,63 @@ class AssetPreloader {
                 }
             }
         }
+    }
+    
+    /**
+     * Preload planet images
+     */
+    async preloadPlanets() {
+        const standardPlanets = 17;
+        const specialPlanets = 5;
+        const totalPlanets = standardPlanets + specialPlanets;
+        let loaded = 0;
+        
+        // Load standard planets
+        for (let i = 1; i <= standardPlanets; i++) {
+            const planetId = `planet-${i}`;
+            this.updateProgress((loaded / totalPlanets) * 100, `Loading ${planetId}`);
+            
+            try {
+                const img = await this.loadImage(`assets/planets/${planetId}.png`);
+                this.assets.planets.standard[planetId] = img;
+                loaded++;
+            } catch (error) {
+                console.warn(`Failed to load ${planetId}:`, error);
+            }
+            
+            // Small delay to prevent blocking
+            if (loaded % 5 === 0) {
+                await this.delay(10);
+            }
+        }
+        
+        // Load special planets
+        for (let i = 1; i <= specialPlanets; i++) {
+            const planetId = `special-planet-${i}`;
+            this.updateProgress((loaded / totalPlanets) * 100, `Loading ${planetId}`);
+            
+            try {
+                const img = await this.loadImage(`assets/planets/${planetId}.png`);
+                this.assets.planets.special[planetId] = img;
+                loaded++;
+            } catch (error) {
+                console.warn(`Failed to load ${planetId}:`, error);
+            }
+        }
+        
+        this.updateProgress(100, "Planets loaded");
+    }
+    
+    /**
+     * Load a single image
+     */
+    loadImage(src) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => resolve(img);
+            img.onerror = () => reject(new Error(`Failed to load image: ${src}`));
+            img.src = src;
+        });
     }
     
     /**

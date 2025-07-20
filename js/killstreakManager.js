@@ -2,7 +2,7 @@ class KillstreakManager {
     constructor() {
         this.currentStreak = 0;
         this.lastKillTime = 0;
-        this.streakTimeout = 5000; // 5 seconds between kills
+        this.streakTimeout = 6000; // 6 seconds between kills (increased from 5)
         this.isActive = false;
         
         // Killstreak milestones
@@ -47,6 +47,9 @@ class KillstreakManager {
         this.currentStreak++;
         this.lastKillTime = now;
         this.isActive = true;
+        
+        // Add 1 second bonus to streak timeout after each kill
+        this.streakTimeout += 1000;
         
         console.log('[KILLSTREAK] Kill registered, current streak:', this.currentStreak);
         
@@ -116,6 +119,8 @@ class KillstreakManager {
     resetStreak() {
         this.currentStreak = 0;
         this.isActive = false;
+        // Reset streak timeout to base value
+        this.streakTimeout = 6000;
     }
     
     onPlayerDeath() {

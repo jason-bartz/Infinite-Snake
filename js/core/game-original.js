@@ -4,6 +4,24 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         
+        // Initialize AssetPreloader if not already done
+        async function initializeAssets() {
+            if (!window.preloadedAssets && window.AssetPreloader) {
+                try {
+                    window.assetPreloader = new AssetPreloader();
+                    window.preloadedAssets = await window.assetPreloader.preload((progress) => {
+                        console.log(`Loading assets: ${progress.percent}% - ${progress.phase}`);
+                    });
+                    console.log('Assets preloaded successfully');
+                } catch (error) {
+                    console.error('Failed to preload assets:', error);
+                }
+            }
+        }
+        
+        // Start asset loading immediately
+        initializeAssets();
+        
         ctx.imageSmoothingEnabled = false;
         ctx.mozImageSmoothingEnabled = false;
         ctx.webkitImageSmoothingEnabled = false;
@@ -104,7 +122,15 @@
             return offscreenCanvas;
         }
         
-        function resizeCanvas() {
+        let resizeTimeout;
+        let lastCanvasWidth = 0;
+        let lastCanvasHeight = 0;
+        
+        function resizeCanvas(force = false) {
+            // Get actual viewport dimensions
+            const viewportWidth = window.visualViewport ? window.visualViewport.width : window.innerWidth;
+            const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+            
             if (isMobile) {
                 let mobileScale = 0.75;
                 
@@ -115,24 +141,65 @@
                     mobileScale = 0.75;
                 }
                 
-                canvas.width = window.innerWidth * mobileScale;
-                canvas.height = window.innerHeight * mobileScale;
+                const newWidth = viewportWidth * mobileScale;
+                const newHeight = viewportHeight * mobileScale;
                 
-                canvas.style.width = window.innerWidth + 'px';
-                canvas.style.height = window.innerHeight + 'px';
-                
-                ctx.imageSmoothingEnabled = false;
-                ctx.imageSmoothingQuality = 'high';
+                // Only resize if dimensions actually changed or forced
+                if (force || Math.abs(newWidth - lastCanvasWidth) > 1 || Math.abs(newHeight - lastCanvasHeight) > 1) {
+                    canvas.width = newWidth;
+                    canvas.height = newHeight;
+                    lastCanvasWidth = newWidth;
+                    lastCanvasHeight = newHeight;
+                    
+                    canvas.style.width = viewportWidth + 'px';
+                    canvas.style.height = viewportHeight + 'px';
+                    
+                    ctx.imageSmoothingEnabled = false;
+                    ctx.imageSmoothingQuality = 'high';
+                    
+                    // Clear emoji cache on significant resize
+                    if (Math.abs(newWidth - lastCanvasWidth) > 50 || Math.abs(newHeight - lastCanvasHeight) > 50) {
+                        emojiCache.clear();
+                    }
+                }
             } else {
                 const scale = 1;
-                canvas.width = window.innerWidth * scale;
-                canvas.height = window.innerHeight * scale;
+                const newWidth = viewportWidth * scale;
+                const newHeight = viewportHeight * scale;
+                
+                if (force || newWidth !== lastCanvasWidth || newHeight !== lastCanvasHeight) {
+                    canvas.width = newWidth;
+                    canvas.height = newHeight;
+                    lastCanvasWidth = newWidth;
+                    lastCanvasHeight = newHeight;
+                    emojiCache.clear();
+                }
             }
-            
-            emojiCache.clear();
         }
-        resizeCanvas();
-        window.addEventListener('resize', resizeCanvas);
+        
+        // Debounced resize handler
+        function handleResize() {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                resizeCanvas();
+            }, 100);
+        }
+        
+        // Initial resize
+        resizeCanvas(true);
+        
+        // Listen to multiple resize events for better mobile support
+        window.addEventListener('resize', handleResize);
+        window.addEventListener('orientationchange', () => {
+            // Force resize on orientation change
+            setTimeout(() => resizeCanvas(true), 100);
+        });
+        
+        // Visual viewport API for mobile browsers
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', handleResize);
+            window.visualViewport.addEventListener('scroll', handleResize);
+        }
         
         const WORLD_SIZE = 4000;
         const SEGMENT_SIZE = 15;
@@ -411,70 +478,111 @@
             '#F08080', '#87CEEB', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E2'
         ]; // Extended color palette for more variety
         
-        // Generate nebulas across entire world like planets and asteroids
-        const NEBULA_GRID_SIZE = 8; // 8x8 grid = 64 sections
-        const NEBULAS_PER_SECTION = 1; // 1 nebula per section
-        const sectionWidth = WORLD_SIZE / NEBULA_GRID_SIZE;
-        const sectionHeight = WORLD_SIZE / NEBULA_GRID_SIZE;
+        // Generate nebulas with improved distribution
+        const NEBULA_COUNT = 14; // Further reduced number of nebulae
+        const NEBULA_GRID_SIZE = 4; // 4x4 grid for distribution
+        const cellWidth = WORLD_SIZE / NEBULA_GRID_SIZE;
+        const cellHeight = WORLD_SIZE / NEBULA_GRID_SIZE;
+        const minNebulaDistance = 500; // Minimum distance between nebulae
         
-        // Generate nebulas in grid sections across full world
+        let nebulaIndex = 0;
+        
+        // Generate nebulae with grid-based distribution and distance checking
         for (let gx = 0; gx < NEBULA_GRID_SIZE; gx++) {
             for (let gy = 0; gy < NEBULA_GRID_SIZE; gy++) {
-                // Calculate position across full world
-                const baseX = gx * sectionWidth;
-                const baseY = gy * sectionHeight;
+                if (nebulaIndex >= NEBULA_COUNT) break;
                 
-                // Add randomization within the section
-                const x = baseX + (sectionWidth * 0.2) + (Math.random() * sectionWidth * 0.6);
-                const y = baseY + (sectionHeight * 0.2) + (Math.random() * sectionHeight * 0.6);
+                // Skip some cells randomly for more natural distribution
+                if (Math.random() < 0.2) continue;
                 
-                const size = 400 + Math.random() * 400; // Size range: 400-800px
-                pixelNebulae.push({
-                    x: x,
-                    y: y,
-                    width: size,
-                    height: size,
-                    color: nebulaColors[Math.floor(Math.random() * nebulaColors.length)],
-                    density: 0.3 + Math.random() * 0.2, // Reduced density range
-                    clusters: []
-                });
+                let attempts = 0;
+                let placed = false;
+                
+                while (!placed && attempts < 10) {
+                    // Random position within grid cell
+                    const x = gx * cellWidth + Math.random() * cellWidth;
+                    const y = gy * cellHeight + Math.random() * cellHeight;
+                    
+                    // Check distance from other nebulae
+                    let validPosition = true;
+                    for (const nebula of pixelNebulae) {
+                        const dx = nebula.x - x;
+                        const dy = nebula.y - y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        if (distance < minNebulaDistance) {
+                            validPosition = false;
+                            break;
+                        }
+                    }
+                    
+                    if (validPosition) {
+                        const size = 600 + Math.random() * 600; // Size range: 600-1200px (larger than before)
+                        pixelNebulae.push({
+                            x: x,
+                            y: y,
+                            width: size,
+                            height: size,
+                            color: nebulaColors[Math.floor(Math.random() * nebulaColors.length)],
+                            density: 0.25 + Math.random() * 0.2, // Slightly reduced density: 0.25-0.45
+                            clusters: []
+                        });
+                        nebulaIndex++;
+                        placed = true;
+                    }
+                    attempts++;
+                }
             }
+            if (nebulaIndex >= NEBULA_COUNT) break;
         }
         
         console.log(`[NEBULA GENERATION] Generated ${pixelNebulae.length} nebulas across full world`);
         
         const pixelPlanets = [];
         // Create planets with better distribution
-        const planetCount = 35; // Fixed number of planets
-        const planetColors = [
-            { color1: '#5A3A0D', color2: '#704020' },
-            { color1: '#2E5A74', color2: '#3F6E80' },
-            { color1: '#B24430', color2: '#B23000' },
-            { color1: '#165916', color2: '#004400' },
-            { color1: '#9A7016', color2: '#856008' },
-            { color1: '#4A5A6A', color2: '#1F2F2F' },
-            { color1: '#B2497F', color2: '#B21066' },
-            { color1: '#009091', color2: '#005B5B' },
-            { color1: '#654E92', color2: '#4A0D7A' },
-            { color1: '#B26200', color2: '#B24430' },
-            { color1: '#229022', color2: '#165916' }
-        ];
+        const planetCount = 35; // Reduced back to original count
+        
+        // Define planet distribution
+        const standardPlanetIds = [];
+        for (let i = 1; i <= 17; i++) {
+            standardPlanetIds.push(`planet-${i}`);
+        }
+        
+        const specialPlanetIds = [];
+        for (let i = 1; i <= 5; i++) {
+            specialPlanetIds.push(`special-planet-${i}`);
+        }
+        
+        // Grid-based distribution with randomization for more even spread
+        const gridSize = 8; // 8x8 grid
+        const cellSize = WORLD_SIZE / gridSize;
+        const planetsPerCell = Math.ceil(planetCount / (gridSize * gridSize));
         
         // Use a minimum distance between planets to prevent clumping
-        const minPlanetDistance = 400;
-        const maxPlanetAttempts = 100;
+        const minPlanetDistance = 300; // Reduced from 400 for better coverage
         
-        for (let i = 0; i < planetCount; i++) {
-            let validPosition = false;
-            let attempts = 0;
-            let x, y;
-            
-            // Try to find a position that's not too close to other planets
-            while (!validPosition && attempts < maxPlanetAttempts) {
-                x = Math.random() * WORLD_SIZE;
-                y = Math.random() * WORLD_SIZE;
+        // Determine number of special planets (2-3 max)
+        const specialPlanetCount = Math.floor(Math.random() * 2) + 2;
+        
+        // Track used special planets to avoid duplicates
+        const usedSpecialPlanets = new Set();
+        
+        let planetIndex = 0;
+        
+        // Generate planets in a grid pattern with randomization
+        for (let gridX = 0; gridX < gridSize; gridX++) {
+            for (let gridY = 0; gridY < gridSize; gridY++) {
+                if (planetIndex >= planetCount) break;
                 
-                validPosition = true;
+                // Random position within grid cell
+                const cellX = gridX * cellSize;
+                const cellY = gridY * cellSize;
+                
+                // Add some randomness to position within cell
+                const x = cellX + Math.random() * cellSize;
+                const y = cellY + Math.random() * cellSize;
+                
+                // Check distance from other planets
+                let validPosition = true;
                 for (let j = 0; j < pixelPlanets.length; j++) {
                     const dx = pixelPlanets[j].x - x;
                     const dy = pixelPlanets[j].y - y;
@@ -484,20 +592,38 @@
                         break;
                     }
                 }
-                attempts++;
+                
+                if (!validPosition) continue;
+                
+                // Determine planet type and ID
+                let planetId;
+                let isSpecial = false;
+                
+                if (planetIndex < specialPlanetCount && usedSpecialPlanets.size < specialPlanetCount) {
+                    // Add a special planet
+                    const availableSpecials = specialPlanetIds.filter(id => !usedSpecialPlanets.has(id));
+                    planetId = availableSpecials[Math.floor(Math.random() * availableSpecials.length)];
+                    usedSpecialPlanets.add(planetId);
+                    isSpecial = true;
+                } else {
+                    // Add a standard planet (can duplicate)
+                    planetId = standardPlanetIds[Math.floor(Math.random() * standardPlanetIds.length)];
+                }
+                
+                pixelPlanets.push({
+                    x: x,
+                    y: y,
+                    radius: 30 + Math.random() * 80,  // Was 20-60, now 30-110
+                    imageId: planetId,
+                    isSpecial: isSpecial,
+                    rotation: Math.random() * Math.PI * 2,
+                    rotationSpeed: (Math.random() - 0.5) * 0.01,
+                    opacity: 0.9
+                });
+                
+                planetIndex++;
             }
-            
-            const colors = planetColors[Math.floor(Math.random() * planetColors.length)];
-            
-            pixelPlanets.push({
-                x: x,
-                y: y,
-                radius: 20 + Math.random() * 40,
-                color1: colors.color1,
-                color2: colors.color2,
-                rings: Math.random() > 0.7,
-                opacity: 0.9
-            });
+            if (planetIndex >= planetCount) break;
         }
         
         const pixelAsteroids = [];
@@ -10296,7 +10422,9 @@
             ctx.globalAlpha = 1;
             
             // Draw world borders with subtle pixel grid
-            const borderThickness = isMobile ? 120 : 60; // Much thicker on mobile
+            const borderThickness = isMobile ? 150 : 60; // Extra thick on mobile to prevent edge issues
+            const borderBuffer = isMobile ? 50 : 0; // Additional buffer for mobile to extend borders
+            
             const leftBorder = (-camera.x) * cameraZoom + canvas.width / 2;
             const rightBorder = (WORLD_SIZE - camera.x) * cameraZoom + canvas.width / 2;
             const topBorder = (-camera.y) * cameraZoom + canvas.height / 2;
@@ -10345,22 +10473,23 @@
             }
             
             // Right border barrier
-            if (rightBorder < canvas.width + borderThickness) {
-                const startX = Math.max(0, rightBorder - borderThickness);
-                const borderWidth = canvas.width - startX;
+            if (rightBorder < canvas.width + borderThickness + borderBuffer) {
+                const startX = Math.max(0, rightBorder - borderThickness - borderBuffer);
+                const borderWidth = canvas.width - startX + borderBuffer; // Extend beyond canvas edge
                 if (borderWidth > 0) {
                     if (isMobile) {
-                        // Solid gradient for mobile
-                        const gradient = ctx.createLinearGradient(startX, 0, canvas.width, 0);
+                        // Solid gradient for mobile - ensure it extends fully to edge
+                        const gradient = ctx.createLinearGradient(startX, 0, canvas.width + borderBuffer, 0);
                         gradient.addColorStop(0, 'rgba(128, 64, 255, 0.1)');
                         gradient.addColorStop(0.3, 'rgba(128, 64, 255, 0.6)');
                         gradient.addColorStop(1, 'rgba(128, 64, 255, 0.9)');
                         ctx.fillStyle = gradient;
                         ctx.fillRect(startX, 0, borderWidth, canvas.height);
                         
-                        // Solid warning line
+                        // Solid warning line - ensure it's visible
                         ctx.fillStyle = '#8844FF';
-                        ctx.fillRect(Math.min(canvas.width - warningLineThickness - 2, rightBorder - warningLineThickness/2), 0, warningLineThickness, canvas.height);
+                        const lineX = Math.max(startX + warningLineThickness, Math.min(canvas.width - warningLineThickness - 2, rightBorder - warningLineThickness/2));
+                        ctx.fillRect(lineX, 0, warningLineThickness, canvas.height);
                     } else {
                         // Draw subtle grid pattern for desktop
                         for (let y = 0; y < canvas.height; y += pixelSize * 2) {
@@ -10700,8 +10829,8 @@
                     nebulaCanvases.set(cacheKey, cachedCanvas);
                 }
                 
-                // Calculate position with parallax
-                const parallaxFactor = 0.1 + (index % 5) * 0.025; // Reduced parallax for nebulae
+                // Calculate position with parallax - slower than planets to appear farther
+                const parallaxFactor = 0.95; // Nebulae move at 95% of camera speed (planets are at 85%)
                 const x = nebula.x - camera.x * parallaxFactor + canvas.width / 2;
                 const y = nebula.y - camera.y * parallaxFactor + canvas.height / 2;
                 
@@ -10720,8 +10849,11 @@
         
         // Draw pixel planets with parallax
         function drawPixelPlanets() {
+            // Single parallax factor for all planets - creates consistent depth layer
+            const parallaxFactor = 0.85; // Planets move at 85% of camera speed
+            
             pixelPlanets.forEach((planet, i) => {
-                const parallaxFactor = 0.15 + i * 0.025; // Reduced parallax by 50%
+                // Simple parallax calculation - planets move slower than camera
                 const x = planet.x - camera.x * parallaxFactor + canvas.width / 2;
                 const y = planet.y - camera.y * parallaxFactor + canvas.height / 2;
                 
@@ -10729,74 +10861,77 @@
                 if (x < -planet.radius * 2 || x > canvas.width + planet.radius * 2 ||
                     y < -planet.radius * 2 || y > canvas.height + planet.radius * 2) return;
                 
-                drawPixelPlanet(x, y, planet.radius, planet.color1, planet.color2, planet.rings, planet.opacity);
+                // Update rotation
+                planet.rotation += planet.rotationSpeed;
+                
+                // Check if planet assets are loaded
+                if (window.preloadedAssets && window.preloadedAssets.planets) {
+                    drawPlanetImage(x, y, planet.radius, planet.imageId, planet.isSpecial, planet.rotation, planet.opacity);
+                } else {
+                    // Fallback to simple circle drawing if assets not loaded
+                    drawFallbackPlanet(x, y, planet.radius, planet.opacity);
+                }
             });
         }
         
-        // Draw a single pixel planet
-        function drawPixelPlanet(x, y, radius, color1, color2, hasRings, opacity = 1) {
-            const pixelSize = 4;
+        // Draw a planet using preloaded image
+        function drawPlanetImage(x, y, radius, imageId, isSpecial, rotation, opacity = 1) {
+            // Get the appropriate planet image
+            const planetType = isSpecial ? 'special' : 'standard';
+            const planetImage = window.preloadedAssets.planets[planetType][imageId];
             
-            // Save context for opacity
+            if (!planetImage) {
+                console.warn(`Planet image not found: ${imageId}`);
+                drawFallbackPlanet(x, y, radius, opacity);
+                return;
+            }
+            
+            // Save context
+            ctx.save();
+            
+            // Set opacity
+            ctx.globalAlpha = opacity;
+            
+            // Move to planet center and rotate
+            ctx.translate(x, y);
+            ctx.rotate(rotation);
+            
+            // Draw the planet image scaled to the radius
+            const size = radius * 2;
+            ctx.drawImage(
+                planetImage,
+                -radius,
+                -radius,
+                size,
+                size
+            );
+            
+            // Restore context
+            ctx.restore();
+        }
+        
+        // Fallback planet drawing for when images aren't loaded
+        function drawFallbackPlanet(x, y, radius, opacity = 1) {
             ctx.save();
             ctx.globalAlpha = opacity;
             
-            // Create blocky circle - optimized with squared distance
-            const radiusSquared = radius * radius;
-            for (let py = -radius; py <= radius; py += pixelSize) {
-                for (let px = -radius; px <= radius; px += pixelSize) {
-                    const distSquared = px * px + py * py;
-                    if (distSquared <= radiusSquared) {
-                        // Determine color based on position for banding effect
-                        const band = Math.floor((py + radius) / (radius * 0.4));
-                        ctx.fillStyle = band % 2 === 0 ? color1 : color2;
-                        
-                        ctx.fillRect(
-                            Math.floor((x + px) / pixelSize) * pixelSize,
-                            Math.floor((y + py) / pixelSize) * pixelSize,
-                            pixelSize,
-                            pixelSize
-                        );
-                    }
-                }
-            }
+            // Draw a simple gradient circle
+            const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
+            gradient.addColorStop(0, '#8B7355');
+            gradient.addColorStop(0.5, '#6B5D54');
+            gradient.addColorStop(1, '#4A3C3B');
             
-            // Shadow - optimized with squared distance
-            ctx.fillStyle = 'rgba(0,0,0,0.5)';
-            for (let py = -radius * 0.7; py <= radius * 0.7; py += pixelSize) {
-                for (let px = radius * 0.3; px <= radius; px += pixelSize) {
-                    const distSquared = px * px + py * py;
-                    if (distSquared <= radiusSquared) {
-                        ctx.fillRect(
-                            Math.floor((x + px) / pixelSize) * pixelSize,
-                            Math.floor((y + py) / pixelSize) * pixelSize,
-                            pixelSize,
-                            pixelSize
-                        );
-                    }
-                }
-            }
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
+            ctx.fill();
             
-            // Rings
-            if (hasRings) {
-                ctx.globalAlpha = opacity * 0.5; // Rings at 50% of planet's opacity
-                ctx.strokeStyle = '#D2691E';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.ellipse(x, y, radius * 1.5, radius * 0.5, 0, 0, Math.PI * 2);
-                ctx.stroke();
-                
-                // Ring segments
-                for (let i = 0; i < 8; i++) {
-                    const angle = (i / 8) * Math.PI * 2;
-                    const rx = x + Math.cos(angle) * radius * 1.5;
-                    const ry = y + Math.sin(angle) * radius * 0.5;
-                    ctx.fillStyle = i % 2 === 0 ? '#D2691E' : '#A0522D';
-                    ctx.fillRect(rx - 2, ry - 2, 4, 4);
-                }
-            }
+            // Add a simple shadow
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+            ctx.beginPath();
+            ctx.arc(x + radius * 0.2, y + radius * 0.2, radius * 0.8, 0, Math.PI * 2);
+            ctx.fill();
             
-            // Restore context
             ctx.restore();
         }
         
@@ -11175,7 +11310,42 @@
             // Initialize static stars
             initializeStaticStars();
             
-            gameLoop();
+            // For mobile, ensure viewport is stable before starting game loop
+            if (isMobile) {
+                let viewportCheckCount = 0;
+                let lastViewportWidth = window.visualViewport ? window.visualViewport.width : window.innerWidth;
+                let lastViewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+                
+                const checkViewportStability = () => {
+                    const currentWidth = window.visualViewport ? window.visualViewport.width : window.innerWidth;
+                    const currentHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+                    
+                    if (currentWidth === lastViewportWidth && currentHeight === lastViewportHeight) {
+                        viewportCheckCount++;
+                        if (viewportCheckCount >= 3) {
+                            // Viewport is stable for 300ms, force resize and start game
+                            resizeCanvas(true);
+                            gameLoop();
+                            return;
+                        }
+                    } else {
+                        // Viewport changed, reset counter
+                        viewportCheckCount = 0;
+                        lastViewportWidth = currentWidth;
+                        lastViewportHeight = currentHeight;
+                        resizeCanvas(true); // Force resize on change
+                    }
+                    
+                    // Check again in 100ms
+                    setTimeout(checkViewportStability, 100);
+                };
+                
+                // Start checking viewport stability
+                checkViewportStability();
+            } else {
+                // Desktop - start immediately
+                gameLoop();
+            }
         }
         
         function stopGame() {
