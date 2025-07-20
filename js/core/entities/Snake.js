@@ -147,12 +147,11 @@ class Snake {
         
         if (!this.size || this.size <= 0) {
             this.size = 1;
-            console.warn('Snake size was invalid, setting to 1');
+            window.gameLogger.warn('SNAKE', 'Snake size was invalid, setting to 1');
         }
         
         if (isPlayer) {
-            console.log('[PLAYER CREATED] Size:', this.size);
-            console.trace();
+            window.gameLogger.debug('PLAYER CREATED', 'Size:', this.size);
         }
     }
     
@@ -316,11 +315,11 @@ class Snake {
             const playerSnakeCount = window.snakes.filter(s => s.isPlayer && s.isAlive).length;
             
             if (playerSnakeCount > 1) {
-                console.error('[CONTROLS] WARNING: Multiple player snakes detected! Killing duplicate:', this.name);
+                window.gameLogger.critical('CONTROLS', 'WARNING: Multiple player snakes detected! Killing duplicate:', this.name);
                 this.isAlive = false;
                 return;
             } else {
-                console.warn('[CONTROLS] Player snake reference mismatch, updating reference');
+                window.gameLogger.warn('CONTROLS', 'Player snake reference mismatch, updating reference');
                 window.playerSnake = this;
             }
         }
@@ -411,7 +410,7 @@ class Snake {
     
     updateMovement(deltaTime) {
         if (!isFinite(this.angle)) {
-            console.error('Angle is invalid!', this.angle, 'Resetting to 0');
+            window.gameLogger.error('MOVEMENT', 'Angle is invalid!', this.angle, 'Resetting to 0');
             this.angle = 0;
         }
         
@@ -423,7 +422,7 @@ class Snake {
             this.x += moveX;
             this.y += moveY;
         } else {
-            console.error('Invalid movement!', 'angle:', this.angle, 'speed:', this.speed, 'deltaTime:', deltaTime);
+            window.gameLogger.error('MOVEMENT', 'Invalid movement!', 'angle:', this.angle, 'speed:', this.speed, 'deltaTime:', deltaTime);
         }
     }
     
@@ -437,7 +436,7 @@ class Snake {
     
     updateSegments() {
         if (!this.segments) {
-            console.error('Segments array is undefined!');
+            window.gameLogger.error('SEGMENTS', 'Segments array is undefined!');
             this.segments = [];
         }
         this.segments.unshift({ 
@@ -455,7 +454,7 @@ class Snake {
         if (this.elements.length < 2) return;
         
         if (this.elements.length > this.maxVisibleElements) {
-            console.error('[CRITICAL] Elements array exceeds max visible elements!', this.elements.length);
+            window.gameLogger.critical('ELEMENT BANK', 'Elements array exceeds max visible elements!', this.elements.length);
             this.elements = this.elements.slice(0, this.maxVisibleElements);
         }
         
@@ -533,7 +532,7 @@ class Snake {
         this.elements.splice(insertIndex, 0, chosen.result);
         
         if (this.elements.length > this.maxVisibleElements) {
-            console.error('[SAFETY] Elements exceed max after combination, trimming');
+            window.gameLogger.warn('ELEMENT BANK', 'Elements exceed max after combination, trimming');
             this.elements = this.elements.slice(0, this.maxVisibleElements);
         }
         
@@ -624,7 +623,7 @@ class Snake {
     checkBossElementCombination(chosen) {
         const bossElementId = window.currentBoss.elementId;
         if (chosen.elem1 === bossElementId || chosen.elem2 === bossElementId || chosen.result === bossElementId) {
-            console.log('[SHOCKWAVE] Creating shockwave for player:', this.name);
+            window.gameLogger.debug('SHOCKWAVE', 'Creating shockwave for player:', this.name);
             
             const elementColors = {
                 0: '#8b6914',
@@ -695,7 +694,7 @@ class Snake {
         let combined = false;
         
         if (!window.elementLoader || !window.elementLoader.combinations) {
-            console.error('[ERROR] ElementLoader or combinations not loaded!');
+            window.gameLogger.error('COMBINATION', 'ElementLoader or combinations not loaded!');
             return;
         }
         
@@ -717,7 +716,7 @@ class Snake {
                     this.elements[i] = resultId;
                     
                     if (this.elements.length > (window.elementBankSlots || 6)) {
-                        console.error('[SAFETY] Elements exceed max after replacement, trimming');
+                        window.gameLogger.warn('ELEMENT BANK', 'Elements exceed max after replacement, trimming');
                         this.elements = this.elements.slice(0, (window.elementBankSlots || 6));
                     }
                     
@@ -742,7 +741,7 @@ class Snake {
         this.elements.splice(insertIndex, 0, element.id);
         
         if (this.elements.length > elementBankSlots) {
-            console.error('[SAFETY] Trimming elements array to max size');
+            window.gameLogger.warn('ELEMENT BANK', 'Trimming elements array to max size');
             this.elements = this.elements.slice(0, elementBankSlots);
         }
         
@@ -857,7 +856,7 @@ class Snake {
     }
     
     die(isBossDeath = false) {
-        console.log('[SNAKE DEATH] die() called', {
+        window.gameLogger.debug('SNAKE DEATH', 'die() called', {
             isPlayer: this.isPlayer,
             isDying: this.isDying,
             alive: this.isAlive,
@@ -865,7 +864,7 @@ class Snake {
         });
         
         if (!this.isDying) {
-            console.log('[SNAKE DEATH] Starting snake death animation');
+            window.gameLogger.debug('SNAKE DEATH', 'Starting snake death animation');
             this.isDying = true;
             this.deathAnimationTimer = 0;
             this.speed = 0;
@@ -879,7 +878,7 @@ class Snake {
             return;
         }
         
-        console.log('[SNAKE DEATH] Processing actual death (alive = false)');
+        window.gameLogger.debug('SNAKE DEATH', 'Processing actual death (alive = false)');
         this.isAlive = false;
         
         this.dropElements();

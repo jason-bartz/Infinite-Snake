@@ -1,6 +1,8 @@
 // js/leaderboard.js - Leaderboard Client (Upstash Redis)
 // Handles score submission and leaderboard data retrieval
 
+import gameLogger from './core/logger.js';
+
 const API_ENDPOINT = '/api/leaderboard';
 
 // Cache for leaderboard data to reduce API calls
@@ -23,10 +25,10 @@ export async function initializeLeaderboard() {
     if (response.ok) {
       return true;
     } else {
-      console.error('❌ Leaderboard API returned error:', response.status);
+      gameLogger.error('LEADERBOARD', 'Leaderboard API returned error:', response.status);
     }
   } catch (error) {
-    console.error('❌ Failed to connect to leaderboard API:', error);
+    gameLogger.error('LEADERBOARD', 'Failed to connect to leaderboard API:', error);
   }
   return false;
 }
@@ -34,7 +36,7 @@ export async function initializeLeaderboard() {
 // Start game session (kept for compatibility)
 export async function startGameSession() {
   const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  console.log('Game session started:', sessionId);
+  gameLogger.debug('LEADERBOARD', 'Game session started:', sessionId);
   return sessionId;
 }
 
@@ -46,8 +48,8 @@ export async function submitScore(username, score, elementsDiscovered, playTime,
       leaderboardCache[key] = { data: null, timestamp: 0 };
     });
     
-    console.log('📤 Submitting score:', { username, score, elementsDiscovered, playTime, kills });
-    console.log('📍 API Endpoint:', API_ENDPOINT);
+    gameLogger.info('LEADERBOARD', 'Submitting score:', { username, score, elementsDiscovered, playTime, kills });
+    gameLogger.debug('LEADERBOARD', 'API Endpoint:', API_ENDPOINT);
     
     const requestBody = {
       username,
@@ -56,7 +58,7 @@ export async function submitScore(username, score, elementsDiscovered, playTime,
       play_time: playTime,
       kills
     };
-    console.log('📦 Request body:', requestBody);
+    gameLogger.debug('LEADERBOARD', 'Request body:', requestBody);
     
     const response = await fetch(API_ENDPOINT, {
       method: 'POST',
@@ -66,13 +68,13 @@ export async function submitScore(username, score, elementsDiscovered, playTime,
       body: JSON.stringify(requestBody)
     });
     
-    console.log('📨 Response status:', response.status, response.statusText);
+    gameLogger.debug('LEADERBOARD', 'Response status:', response.status, response.statusText);
     
     const responseData = await response.json();
-    console.log('📊 Response data:', responseData);
+    gameLogger.debug('LEADERBOARD', 'Response data:', responseData);
     
     if (!response.ok) {
-      console.error('❌ API Error:', {
+      gameLogger.error('LEADERBOARD', 'API Error:', {
         status: response.status,
         statusText: response.statusText,
         error: responseData.error,
@@ -94,7 +96,7 @@ export async function submitScore(username, score, elementsDiscovered, playTime,
     return responseData.daily_rank;
     
   } catch (error) {
-    console.error('❌ Submit score error:', error);
+    gameLogger.error('LEADERBOARD', 'Submit score error:', error);
     throw error;
   }
 }
@@ -130,11 +132,11 @@ export async function getLeaderboard(period = 'daily', limit = 100) {
     return data.leaderboard || [];
     
   } catch (error) {
-    console.error('❌ Get leaderboard error:', error);
+    gameLogger.error('LEADERBOARD', 'Get leaderboard error:', error);
     
     // Return cached data if available, even if expired
     if (leaderboardCache[period] && leaderboardCache[period].data) {
-      console.log('Returning stale cache due to error');
+      gameLogger.warn('LEADERBOARD', 'Returning stale cache due to error');
       return leaderboardCache[period].data.slice(0, limit);
     }
     
@@ -157,7 +159,7 @@ export async function getUserRank(username, period = 'daily') {
     return data.userRank;
     
   } catch (error) {
-    console.error('Get user rank error:', error);
+    gameLogger.error('LEADERBOARD', 'Get user rank error:', error);
     return null;
   }
 }
@@ -167,7 +169,7 @@ export function clearCache() {
   Object.keys(leaderboardCache).forEach(key => {
     leaderboardCache[key] = { data: null, timestamp: 0 };
   });
-  console.log('Leaderboard cache cleared');
+  gameLogger.debug('LEADERBOARD', 'Leaderboard cache cleared');
 }
 
 // Utility function to format time
@@ -199,7 +201,7 @@ export function generateDeviceFingerprint() {
 // Keep this for compatibility but it's no longer used
 export function addGameEvent(eventType, eventData) {
   // No-op - events are not tracked in Redis version
-  console.log('Game event (not tracked):', eventType, eventData);
+  gameLogger.debug('LEADERBOARD', 'Game event (not tracked):', eventType, eventData);
 }
 
 // No longer needed, but kept for compatibility

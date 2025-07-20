@@ -10,11 +10,11 @@
                 try {
                     window.assetPreloader = new AssetPreloader();
                     window.preloadedAssets = await window.assetPreloader.preload((progress) => {
-                        console.log(`Loading assets: ${progress.percent}% - ${progress.phase}`);
+                        gameLogger.assetProgress(progress.percent, progress.phase);
                     });
-                    console.log('Assets preloaded successfully');
+                    gameLogger.assetProgress(100, 'Complete');
                 } catch (error) {
-                    console.error('Failed to preload assets:', error);
+                    gameLogger.error('ASSETS', 'Failed to preload assets:', error);
                 }
             }
         }
@@ -342,13 +342,13 @@
         function lockToLandscape() {
             if (screen.orientation && screen.orientation.lock) {
                 screen.orientation.lock('landscape').then(() => {
-                    console.log('Successfully locked to landscape mode');
+                    gameLogger.debug('ORIENTATION', 'Successfully locked to landscape mode');
                 }).catch((err) => {
-                    console.log('Could not lock orientation:', err);
+                    gameLogger.debug('ORIENTATION', 'Could not lock orientation:', err);
                     checkAndShowRotateMessage();
                 });
             } else {
-                console.log('Screen orientation API not supported');
+                gameLogger.debug('ORIENTATION', 'Screen orientation API not supported');
                 checkAndShowRotateMessage();
             }
         }
@@ -535,7 +535,7 @@
             if (nebulaIndex >= NEBULA_COUNT) break;
         }
         
-        console.log(`[NEBULA GENERATION] Generated ${pixelNebulae.length} nebulas across full world`);
+        gameLogger.debug('NEBULA GENERATION', `Generated ${pixelNebulae.length} nebulas across full world`);
         
         const pixelPlanets = [];
         // Create planets with better distribution
@@ -757,7 +757,7 @@
                 const randomRange = 50000;
                 nextBossSpawnScore = lastBossDefeatScore + baseInterval + Math.floor(Math.random() * randomRange);
             }
-            console.log(`[BOSS] Next boss will spawn at ${nextBossSpawnScore.toLocaleString()} points`);
+            gameLogger.debug('BOSS', `Next boss will spawn at ${nextBossSpawnScore.toLocaleString()} points`);
         }
         let bossesDefeatedThisCycle = 0;
         let bossIsUndead = false;
@@ -947,7 +947,7 @@
             allSkins.forEach(skin => {
                 const img = new Image();
                 img.onerror = function() {
-                    console.warn(`Failed to load skin: ${skin}.png`);
+                    gameLogger.warn('ASSETS', `Failed to load skin: ${skin}.png`);
                     this.error = true;
                 };
                 if (skinMetadata[skin].isBoss) {
@@ -1036,7 +1036,7 @@
             if (window.pendingMusicTrack && !musicMuted) {
                 window.pendingMusicTrack.play().then(() => {
                 }).catch(err => {
-                    console.error('Failed to resume music:', err);
+                    gameLogger.error('AUDIO', 'Failed to resume music:', err);
                 });
                 window.pendingMusicTrack = null;
             }
@@ -1092,7 +1092,7 @@
                     currentTrack = window.pendingMusicTrack;
                     window.pendingMusicTrack = null;
                 }).catch(err => {
-                    console.error('[AUDIO] Failed to resume music on touch:', err);
+                    gameLogger.error('AUDIO', 'Failed to resume music on touch:', err);
                 });
             }
             
@@ -1240,7 +1240,7 @@
                 try {
                     await initializeMobileRenderers();
                 } catch (error) {
-                    console.error('Failed to initialize mobile renderers:', error);
+                    gameLogger.error('MOBILE', 'Failed to initialize mobile renderers:', error);
                 }
             } else {
                 // Desktop: Just hide splash screen
@@ -1314,7 +1314,7 @@
                 const data = await response.json();
                 snakeNameData = data;
             } catch (error) {
-                console.error('Failed to load snake names:', error);
+                gameLogger.error('ASSETS', 'Failed to load snake names:', error);
                 // Fallback data
                 snakeNameData = {
                     firstParts: ['Sir', 'Lord', 'Captain', 'Master', 'Swift', 'Mighty', 'Sneaky'],
@@ -1353,7 +1353,7 @@
                     air: { emoji: '💨', name: 'Air', tier: 0, base: true }
                 };
             } catch (error) {
-                console.error('Failed to load elements:', error);
+                gameLogger.error('ASSETS', 'Failed to load elements:', error);
                 // Fallback to basic elements
                 elementDatabase = {
                     fire: { emoji: '🔥', name: 'Fire', tier: 0, base: true },
@@ -1623,7 +1623,7 @@
                         try {
                             playRandomTrack();
                         } catch (error) {
-                            console.error('Error playing next track:', error);
+                            gameLogger.error('AUDIO', 'Error playing next track:', error);
                             // Try again in a few seconds
                             setTimeout(playRandomTrack, 3000);
                         }
@@ -1633,7 +1633,7 @@
             };
             
             currentTrack.errorHandler = (e) => {
-                console.error('Error loading track:', trackName, e);
+                gameLogger.error('AUDIO', 'Error loading track:', trackName, e);
                 // Reset the playing flag
                 isPlayingNext = false;
                 // Try next track after a short delay
@@ -1656,7 +1656,7 @@
                         oldTrack = null;
                     }
                 }).catch(e => {
-                    console.error('[AUDIO] Failed to play track:', trackName, e);
+                    gameLogger.error('AUDIO', 'Failed to play track:', trackName, e);
                     // Store track to retry on user interaction
                     window.pendingMusicTrack = currentTrack;
                     isPlayingNext = false; // Reset flag on error
@@ -1751,7 +1751,7 @@
             audioWasPlaying.bossIntro = bossIntroMusic && !bossIntroMusic.paused;
             audioWasPlaying.bossBattle = bossBattleMusic && !bossBattleMusic.paused;
             
-            console.log('Audio state before pause:', {
+            gameLogger.debug('AUDIO', 'Audio state before pause:', {
                 music: audioWasPlaying.music,
                 bossIntro: audioWasPlaying.bossIntro,
                 bossBattle: audioWasPlaying.bossBattle,
@@ -1806,7 +1806,7 @@
                             audioWasPlaying.music = false;
                             resumeAttempts = 0;
                         }).catch(error => {
-                            console.error('[AUDIO] Failed to resume background music:', error);
+                            gameLogger.error('AUDIO', 'Failed to resume background music:', error);
                             
                             // Retry with exponential backoff
                             if (resumeAttempts < MAX_RESUME_ATTEMPTS) {
@@ -1833,7 +1833,7 @@
                             currentTrack = window.pendingMusicTrack;
                             window.pendingMusicTrack = null;
                         }).catch(error => {
-                            console.error('[AUDIO] Failed to play pending music track:', error);
+                            gameLogger.error('AUDIO', 'Failed to play pending music track:', error);
                             // Try starting a new track instead
                             if (gameStarted && !musicMuted) {
                                 playRandomTrack();
@@ -1856,14 +1856,14 @@
                     bossIntroMusic.play().then(() => {
                         audioWasPlaying.bossIntro = false;
                     }).catch(error => {
-                        console.error('[AUDIO] Failed to resume boss intro music:', error);
+                        gameLogger.error('AUDIO', 'Failed to resume boss intro music:', error);
                         audioWasPlaying.bossIntro = false;
                     });
                 } else if (audioWasPlaying.bossBattle && bossBattleMusic) {
                     bossBattleMusic.play().then(() => {
                         audioWasPlaying.bossBattle = false;
                     }).catch(error => {
-                        console.error('[AUDIO] Failed to resume boss battle music:', error);
+                        gameLogger.error('AUDIO', 'Failed to resume boss battle music:', error);
                         audioWasPlaying.bossBattle = false;
                     });
                 }
@@ -2114,7 +2114,7 @@
                 // Validate size to prevent invisibility
                 if (!this.size || this.size <= 0) {
                     this.size = 1;
-                    console.warn('Snake size was invalid, setting to 1');
+                    gameLogger.warn('SNAKE', 'Snake size was invalid, setting to 1');
                 }
                 
                 // Player snake created
@@ -2218,7 +2218,7 @@
                 
                 // Debug check
                 if (!isFinite(this.x) || !isFinite(this.y)) {
-                    console.error('Snake position is NaN!', 'x:', this.x, 'y:', this.y, 'deltaTime:', deltaTime);
+                    gameLogger.error('SNAKE', 'Snake position is NaN!', 'x:', this.x, 'y:', this.y, 'deltaTime:', deltaTime);
                 }
                 
                 // Update invincibility
@@ -2235,12 +2235,12 @@
                         
                         // Only kill if there's actually more than one player snake
                         if (playerSnakeCount > 1) {
-                            console.error('[CONTROLS] WARNING: Multiple player snakes detected! Killing duplicate:', this.name);
+                            gameLogger.error('CONTROLS', 'WARNING: Multiple player snakes detected! Killing duplicate:', this.name);
                             this.alive = false; // Kill duplicate player snake
                             return;
                         } else {
                             // If there's only one player snake, update the reference
-                            console.warn('[CONTROLS] Player snake reference mismatch, updating reference');
+                            gameLogger.warn('CONTROLS', 'Player snake reference mismatch, updating reference');
                             playerSnake = this;
                         }
                     }
@@ -2339,7 +2339,7 @@
                 
                 // Ensure angle is valid
                 if (!isFinite(this.angle)) {
-                    console.error('Angle is invalid!', this.angle, 'Resetting to 0');
+                    gameLogger.error('SNAKE', 'Angle is invalid!', this.angle, 'Resetting to 0');
                     this.angle = 0;
                 }
                 
@@ -2352,7 +2352,7 @@
                     this.x += moveX;
                     this.y += moveY;
                 } else {
-                    console.error('Invalid movement!', 'angle:', this.angle, 'speed:', this.speed, 'deltaTime:', deltaTime);
+                    gameLogger.error('SNAKE', 'Invalid movement!', 'angle:', this.angle, 'speed:', this.speed, 'deltaTime:', deltaTime);
                 }
                 
                 // World boundaries - add small margin for floating point precision
@@ -2365,7 +2365,7 @@
                 
                 // Update segments
                 if (!this.segments) {
-                    console.error('Segments array is undefined!');
+                    gameLogger.error('SNAKE', 'Segments array is undefined!');
                     this.segments = [];
                 }
                 this.segments.unshift({ 
@@ -2390,7 +2390,7 @@
                 
                 // Safety check - ensure we never exceed max elements
                 if (this.elements.length > this.maxVisibleElements) {
-                    console.error('[CRITICAL] Elements array exceeds max visible elements!', this.elements.length);
+                    gameLogger.critical('SNAKE', 'Elements array exceeds max visible elements!', this.elements.length);
                     // Trim to max size
                     this.elements = this.elements.slice(0, this.maxVisibleElements);
                 }
@@ -2485,7 +2485,7 @@
                 
                 // Safety check - ensure we never exceed max elements after combination
                 if (this.elements.length > this.maxVisibleElements) {
-                    console.error('[SAFETY] Elements exceed max after combination, trimming');
+                    gameLogger.error('SAFETY', 'Elements exceed max after combination, trimming');
                     this.elements = this.elements.slice(0, this.maxVisibleElements);
                 }
                             
@@ -2570,7 +2570,7 @@
                     
                     // Debug: Log when any snake creates a combination during boss fight
                     if (currentBoss && currentBoss.alive) {
-                        console.log('[COMBINATION] Snake:', this.name, 'isPlayer:', this.isPlayer, 'created combination:', chosen.elem1, '+', chosen.elem2, '=', chosen.result, 'Boss element:', currentBoss.elementId);
+                        gameLogger.debug('COMBINATION', `Snake: ${this.name} isPlayer: ${this.isPlayer} created combination: ${chosen.elem1} + ${chosen.elem2} = ${chosen.result} Boss element: ${currentBoss.elementId}`);
                     }
                     
                     // Check if this combination involves the boss's element and create shockwave
@@ -2578,7 +2578,7 @@
                         const bossElementId = currentBoss.elementId;
                         // Check if either of the combining elements or the result is the boss element
                         if (chosen.elem1 === bossElementId || chosen.elem2 === bossElementId || chosen.result === bossElementId) {
-                            console.log('[SHOCKWAVE] Creating shockwave for player:', this.name, 'isPlayer:', this.isPlayer, 'playerSnake match:', this === playerSnake);
+                            gameLogger.debug('SHOCKWAVE', `Creating shockwave for player: ${this.name} isPlayer: ${this.isPlayer} playerSnake match: ${this === playerSnake}`);
                             // Create shockwave effect
                             const elementColors = {
                                 0: '#8b6914', // Earth - brown
@@ -2634,7 +2634,7 @@
                 
                 // Safety check - ensure we never have more than max elements (use global elementBankSlots)
                 if (this.elements.length > elementBankSlots) {
-                    console.error('[CRITICAL] Bank already exceeds maximum!', this.elements.length);
+                    gameLogger.critical('ELEMENT BANK', 'Bank already exceeds maximum!', this.elements.length);
                     this.elements = this.elements.slice(0, elementBankSlots);
                 }
                 
@@ -2650,7 +2650,7 @@
                     
                     // Add safety check for elementLoader
                     if (!window.elementLoader || !window.elementLoader.combinations) {
-                        console.error('[ERROR] ElementLoader or combinations not loaded!');
+                        gameLogger.error('ELEMENT LOADER', 'ElementLoader or combinations not loaded!');
                         return;
                     }
                     
@@ -2680,7 +2680,7 @@
                                 
                                 // Final safety check after replacement (use global elementBankSlots)
                                 if (this.elements.length > elementBankSlots) {
-                                    console.error('[SAFETY] Elements exceed max after replacement, trimming');
+                                    gameLogger.error('SAFETY', 'Elements exceed max after replacement, trimming');
                                     this.elements = this.elements.slice(0, elementBankSlots);
                                 }
                                 
@@ -2770,7 +2770,7 @@
                     
                     // Immediately enforce max limit as a safety measure (use global elementBankSlots)
                     if (this.elements.length > elementBankSlots) {
-                        console.error('[SAFETY] Trimming elements array to max size');
+                        gameLogger.error('SAFETY', 'Trimming elements array to max size');
                         this.elements = this.elements.slice(0, elementBankSlots);
                     }
                     
@@ -4339,7 +4339,7 @@
                 
                 // Fallback if element not found
                 if (!this.data) {
-                    console.warn(`Element ID ${id} not found`);
+                    gameLogger.warn('ELEMENTS', `Element ID ${id} not found`);
                     this.data = { emoji: '❓', name: 'Unknown', tier: 0 };
                 }
                 this.pulse = 0;
@@ -5079,7 +5079,7 @@
                             base: elem.t === 0
                         };
                     } else {
-                        console.warn(`Element ID ${id} not found`);
+                        gameLogger.warn('ELEMENTS', `Element ID ${id} not found`);
                         element.data = { emoji: '❓', name: 'Unknown', tier: 0 };
                     }
                     element.pulse = 0;
@@ -5722,18 +5722,18 @@
                 
                 // Only allow damage from player elemental combinations
                 if (source !== 'player_elemental') {
-                    console.warn('[BOSS] Damage blocked - not from player elemental:', source);
+                    gameLogger.warn('BOSS', 'Damage blocked - not from player elemental:', source);
                     return;
                 }
                 
                 // Make boss invincible during stun period and post-stun invulnerability
                 if (this.stunTimer > 0) {
-                    console.log('[BOSS] Damage blocked - boss is stunned');
+                    gameLogger.debug('BOSS', 'Damage blocked - boss is stunned');
                     return;
                 }
                 
                 if (this.invulnerabilityTimer > 0) {
-                    console.log('[BOSS] Damage blocked - boss is invulnerable');
+                    gameLogger.debug('BOSS', 'Damage blocked - boss is invulnerable');
                     return;
                 }
                 
@@ -5817,7 +5817,7 @@
                 // Award extra revive for defeating boss (Classic mode only)
                 if (gameMode === 'classic' && revivesRemaining < 3) {
                     revivesRemaining++;
-                    console.log('[BOSS] Extra revive awarded! Revives remaining:', revivesRemaining);
+                    gameLogger.debug('BOSS', 'Extra revive awarded! Revives remaining:', revivesRemaining);
                     
                     // Show revive award message
                     showCombinationMessage('', '', `+1 REVIVE! Boss defeated!`, false, 3000);
@@ -6064,7 +6064,7 @@
                     // Call parent draw method directly
                     super.draw(interpolation);
                 } catch (e) {
-                    console.error('Boss draw error:', e);
+                    gameLogger.error('BOSS', 'Boss draw error:', e);
                     // Fallback to custom boss drawing
                     this.drawBossSnake(interpolation);
                 }
@@ -8139,7 +8139,7 @@
             const resultData = window.elementLoader.elements.get(resultId);
             
             if (!elem1Data || !elem2Data || !resultData) {
-                console.error('Missing element data for combination message');
+                gameLogger.error('UI', 'Missing element data for combination message');
                 return;
             }
             
@@ -8342,7 +8342,7 @@
         function addDiscoveryToFeed(element, recipe) {
             const feed = document.getElementById('discoveryFeed');
             if (!feed) {
-                console.error('Discovery feed element not found!');
+                gameLogger.error('UI', 'Discovery feed element not found!');
                 return;
             }
             
@@ -8603,36 +8603,36 @@
             const now = Date.now();
             // Prevent submissions within 3 seconds of each other (increased from 1 second)
             if (now - lastSubmissionTime < 3000) {
-                console.log('[SUBMISSION] Blocked - too soon after last submission', now - lastSubmissionTime, 'ms');
+                gameLogger.debug('SUBMISSION', 'Blocked - too soon after last submission', now - lastSubmissionTime, 'ms');
                 return false;
             }
             if (leaderboardSubmitted) {
-                console.log('[SUBMISSION] Blocked - already submitted');
+                gameLogger.debug('SUBMISSION', 'Blocked - already submitted');
                 return false;
             }
             // Mark as submitted and record time
             leaderboardSubmitted = true;
             lastSubmissionTime = now;
-            console.log('[SUBMISSION] Allowed - marking as submitted at', now);
+            gameLogger.debug('SUBMISSION', 'Allowed - marking as submitted at', now);
             return true;
         }
         
         // Test function to verify script is working
         window.testLeaderboard = function() {
-            console.log('=== LEADERBOARD DEBUG INFO ===');
-            console.log('leaderboardModule loaded:', !!leaderboardModule);
-            console.log('submitScore function exists:', !!(window.leaderboardModule && window.leaderboardModule.submitScore));
-            console.log('leaderboardSubmitted:', leaderboardSubmitted);
-            console.log('gameMode:', typeof gameMode !== 'undefined' ? gameMode : 'undefined');
-            console.log('playerSnake:', playerSnake ? { alive: playerSnake.alive, score: playerSnake.score } : 'null');
-            console.log('gameSessionStartTime:', gameSessionStartTime);
-            console.log('==============================');
+            gameLogger.debug('LEADERBOARD', 'Debug info:', {
+                moduleLoaded: !!leaderboardModule,
+                submitScoreExists: !!(window.leaderboardModule && window.leaderboardModule.submitScore),
+                leaderboardSubmitted,
+                gameMode: typeof gameMode !== 'undefined' ? gameMode : 'undefined',
+                playerSnake: playerSnake ? { alive: playerSnake.alive, score: playerSnake.score } : 'null',
+                gameSessionStartTime
+            });
         }
         
         // Test automatic submission manually
         window.testAutoSubmit = async function() {
             if (!window.leaderboardModule || !window.leaderboardModule.submitScore) {
-                console.error('Supabase module not loaded!');
+                gameLogger.error('LEADERBOARD', 'Supabase module not loaded!');
                 return;
             }
             
@@ -8644,7 +8644,7 @@
                 kills: 5
             };
             
-            console.log('Submitting test data:', testData);
+            gameLogger.debug('LEADERBOARD', 'Submitting test data:', testData);
             
             try {
                 const result = await window.leaderboardModule.submitScore(
@@ -8654,11 +8654,9 @@
                     testData.playTime,
                     testData.kills
                 );
-                console.log('Test submission result:', result);
-                console.log('Result type:', typeof result);
-                console.log('Result keys:', result ? Object.keys(result) : 'null');
+                gameLogger.debug('LEADERBOARD', 'Test submission result:', result, 'Type:', typeof result, 'Keys:', result ? Object.keys(result) : 'null');
             } catch (error) {
-                console.error('Test submission failed:', error);
+                gameLogger.error('LEADERBOARD', 'Test submission failed:', error);
             }
         }
         
@@ -8676,11 +8674,11 @@
                         statusEl.innerHTML = '';
                     }
                 } else {
-                    console.error('[LEADERBOARD] Module loaded but functions not found');
+                    gameLogger.error('LEADERBOARD', 'Module loaded but functions not found');
                 }
             } catch (error) {
-                console.error('[LEADERBOARD] Failed to initialize:', error);
-                console.error('[LEADERBOARD] Error details:', error.message, error.stack);
+                gameLogger.error('LEADERBOARD', 'Failed to initialize:', error);
+                gameLogger.error('LEADERBOARD', 'Error details:', error.message, error.stack);
                 
                 // Show error in submission status if visible
                 const statusEl = document.getElementById('submissionStatus');
@@ -8698,14 +8696,14 @@
             if (!window.leaderboardModule) {
                 initLeaderboard();
             } else {
-                console.log('Leaderboard module loaded successfully');
+                gameLogger.debug('LEADERBOARD', 'Module loaded successfully');
             }
         }, 2000);
         
         // Add another retry after 5 seconds if still not loaded
         setTimeout(() => {
             if (!window.leaderboardModule) {
-                console.log('Retrying leaderboard initialization...');
+                gameLogger.debug('LEADERBOARD', 'Retrying initialization...');
                 initLeaderboard();
             }
         }, 5000);
@@ -8738,7 +8736,7 @@
         function initLeaderboardCollapse() {
             // Skip initialization on mobile - let MobileUIManager handle it
             if (document.body.classList.contains('mobile')) {
-                console.log('[Game] Skipping leaderboard collapse init on mobile');
+                gameLogger.debug('GAME', 'Skipping leaderboard collapse init on mobile');
                 return;
             }
             
@@ -8748,7 +8746,7 @@
             // Use existing header
             const header = leaderboardBox.querySelector('.leaderboard-header');
             if (!header) {
-                console.warn('Leaderboard header not found');
+                gameLogger.warn('UI', 'Leaderboard header not found');
                 return;
             }
             
@@ -8800,7 +8798,7 @@
             
             // Check if Supabase module is loaded
             if (!leaderboardModule) {
-                console.error('Supabase module not loaded');
+                gameLogger.error('LEADERBOARD', 'Supabase module not loaded');
                 document.getElementById('submissionStatus').innerHTML = 
                     '<span style="color: #ff4444;">Leaderboard service not ready. Please try again.</span>';
                 if (submitBtn) {
@@ -8844,7 +8842,7 @@
                 const playTime = gameSessionStartTime ? 
                     Math.floor((Date.now() - gameSessionStartTime) / 1000) : 0;
                 
-                console.log('Score data:', {
+                gameLogger.debug('LEADERBOARD', 'Score data:', {
                     username,
                     score: Math.floor(playerSnake.score),
                     elements: playerDiscoveredElements.size,
@@ -8862,9 +8860,9 @@
                         playTime,
                         playerSnake.kills
                     );
-                    console.log('Submission result:', result);
+                    gameLogger.debug('LEADERBOARD', 'Submission result:', result);
                 } catch (supabaseError) {
-                    console.error('Supabase error details:', supabaseError);
+                    gameLogger.error('LEADERBOARD', 'Supabase error details:', supabaseError);
                     
                     // Extract error message from Supabase error
                     let errorMsg = 'Score validation failed';
@@ -8953,7 +8951,7 @@
                     throw new Error('No response from server');
                 }
             } catch (error) {
-                console.error('Leaderboard submission error:', error);
+                gameLogger.error('LEADERBOARD', 'Submission error:', error);
                 
                 // Check if it's a Supabase error with details
                 let errorMessage = 'Score validation failed';
@@ -8961,10 +8959,10 @@
                     errorMessage = error.message;
                 }
                 if (error.details) {
-                    console.error('Error details:', error.details);
+                    gameLogger.error('LEADERBOARD', 'Error details:', error.details);
                 }
                 if (error.code) {
-                    console.error('Error code:', error.code);
+                    gameLogger.error('LEADERBOARD', 'Error code:', error.code);
                 }
                 
                 document.getElementById('submissionStatus').innerHTML = 
@@ -8977,14 +8975,14 @@
         
         // Skip leaderboard submission
         window.skipLeaderboard = function() {
-            console.log('[DEPRECATED] skipLeaderboard called - this function should not be used anymore');
+            gameLogger.debug('DEPRECATED', 'skipLeaderboard called - this function should not be used anymore');
             // Removed - auto-submit only now
         }
         
         // Force immediate respawn
         window.forceRespawn = function() {
             playUISound();
-            console.log('forceRespawn called');
+            gameLogger.debug('RESPAWN', 'forceRespawn called');
             if (playerRespawnTimer > 0) {
                 playerRespawnTimer = 100; // Set to almost 0 to trigger respawn
             }
@@ -9352,7 +9350,7 @@
             waitingForRespawnInput = false; // Clear waiting flag
             window.waitingForRespawnInput = false;
             
-            console.log('[RESPAWN BUTTON] Setting timer to -1, isRespawning=true');
+            gameLogger.debug('RESPAWN', 'Setting timer to -1, isRespawning=true');
             playerRespawnTimer = -1; // Trigger immediate respawn
             
             // Reset leaderboard submission flag for next game
@@ -9497,14 +9495,14 @@
                 }).join('');
                 
             } catch (error) {
-                console.error('Failed to load pause leaderboard:', error);
+                gameLogger.error('LEADERBOARD', 'Failed to load pause leaderboard:', error);
                 entriesDiv.innerHTML = '<div style="color: #ff4444; text-align: center; padding: 20px;">Failed to load</div>';
             }
         }
         
         async function loadLeaderboard(period) {
             if (!window.leaderboardModule) {
-                console.error('Leaderboard module not loaded in loadLeaderboard');
+                gameLogger.error('LEADERBOARD', 'Module not loaded in loadLeaderboard');
                 return;
             }
             
@@ -9557,7 +9555,7 @@
                     `;
                 }).join('');
             } catch (error) {
-                console.error('Failed to load leaderboard:', error);
+                gameLogger.error('LEADERBOARD', 'Failed to load leaderboard:', error);
                 entriesDiv.innerHTML = '<div style="color: #ff4444; text-align: center; padding: 40px; font-family: monospace;">Failed to load leaderboard. Please try again.</div>';
             }
         }
@@ -9567,7 +9565,7 @@
             
             // Debug death screen conditions
             if (!playerSnake.alive) {
-                console.log('[DEATH UI] Player dead, waitingForRespawnInput:', waitingForRespawnInput, 
+                gameLogger.debug('DEATH UI', 'Player dead, waitingForRespawnInput:', waitingForRespawnInput, 
                     'deathSequenceActive:', deathSequenceActive, 'deathProcessed:', deathProcessed);
             }
             
@@ -9586,7 +9584,7 @@
                 // Show respawn overlay
                 const respawnOverlay = document.getElementById('respawnOverlay');
                 if (respawnOverlay) {
-                    console.log('[DEATH SCREEN] Showing respawn overlay');
+                    gameLogger.debug('DEATH SCREEN', 'Showing respawn overlay');
                     respawnOverlay.style.display = 'block';
                     
                     // Update death message with random message only if not already set for this death
@@ -9713,13 +9711,13 @@
                                         
                                         // Already marked as submitted above
                                     } else {
-                                        console.error('[LEADERBOARD] ❌ Submission failed or returned invalid data:', result);
+                                        gameLogger.error('LEADERBOARD', '❌ Submission failed or returned invalid data:', result);
                                         // Reset flag so it can retry
                                         leaderboardSubmitted = false;
                                     }
                                 }).catch(error => {
-                                    console.error('[LEADERBOARD] ❌ Failed to submit score:', error);
-                                    console.error('[LEADERBOARD] Error details:', {
+                                    gameLogger.error('LEADERBOARD', '❌ Failed to submit score:', error);
+                                    gameLogger.error('LEADERBOARD', 'Error details:', {
                                         message: error.message,
                                         stack: error.stack,
                                         type: error.constructor.name
@@ -9728,7 +9726,7 @@
                                     leaderboardSubmitted = false;
                                 });
                             } else {
-                                console.error('[LEADERBOARD] Supabase module not available!', {
+                                gameLogger.error('LEADERBOARD', 'Supabase module not available!', {
                                     module: window.leaderboardModule,
                                     submitScore: window.leaderboardModule?.submitScore
                                 });
@@ -9753,7 +9751,7 @@
                                                     leaderboardSubmitted = true;
                                                 }
                                             }).catch(err => {
-                                                console.error('[LEADERBOARD] Retry failed:', err);
+                                                gameLogger.error('LEADERBOARD', 'Retry failed:', err);
                                             });
                                         }
                                     });
@@ -10108,7 +10106,7 @@
                             
                             // 50% chance to spawn a discovery element
                             if (Math.random() < 0.5) {
-                                console.log('[VOID ORB] Attempting to spawn element...');
+                                gameLogger.debug('VOID ORB', 'Attempting to spawn element...');
                                 
                                 // Get all available elements
                                 let availableElements = [];
@@ -10116,10 +10114,10 @@
                                     // Get all elements and extract their keys
                                     const allElements = window.elementLoader.getAllElements();
                                     availableElements = allElements.map(elem => elem.key);
-                                    console.log('[VOID ORB] Using element loader, found', availableElements.length, 'total elements');
+                                    gameLogger.debug('VOID ORB', 'Using element loader, found', availableElements.length, 'total elements');
                                 } else {
                                     availableElements = Object.keys(elementDatabase);
-                                    console.log('[VOID ORB] Using legacy database, found', availableElements.length, 'total elements');
+                                    gameLogger.debug('VOID ORB', 'Using legacy database, found', availableElements.length, 'total elements');
                                 }
                                 
                                 // Filter to only discovered elements (except base elements which are always available)
@@ -10150,12 +10148,12 @@
                                 // Use discovery potential elements if available, otherwise use any spawnable element
                                 const finalPool = discoveryPotentialElements.length > 0 ? discoveryPotentialElements : spawnableElements;
                                 
-                                console.log('[VOID ORB] Spawnable elements:', spawnableElements.length, 'Discovery potential:', discoveryPotentialElements.length, 'Final pool:', finalPool.length);
+                                gameLogger.debug('VOID ORB', 'Spawnable elements:', spawnableElements.length, 'Discovery potential:', discoveryPotentialElements.length, 'Final pool:', finalPool.length);
                                 
                                 if (finalPool.length > 0) {
                                     // Pick a random element
                                     const randomElement = finalPool[Math.floor(Math.random() * finalPool.length)];
-                                    console.log('[VOID ORB] Selected element to spawn:', randomElement);
+                                    gameLogger.debug('VOID ORB', 'Selected element to spawn:', randomElement);
                                     
                                     // Spawn it at a random location near the void orb
                                     const spawnAngle = Math.random() * Math.PI * 2;
@@ -10935,7 +10933,7 @@
             const planetImage = window.preloadedAssets.planets[planetType][imageId];
             
             if (!planetImage) {
-                console.warn(`Planet image not found: ${imageId}`);
+                gameLogger.warn('ASSETS', `Planet image not found: ${imageId}`);
                 drawFallbackPlanet(x, y, radius, opacity);
                 return;
             }
@@ -11152,7 +11150,7 @@
             
             // Prevent multiple game instances
             if (gameStarted) {
-                console.log('Game already running, ignoring start request');
+                gameLogger.debug('GAME', 'Game already running, ignoring start request');
                 return;
             }
             
@@ -11328,8 +11326,8 @@
             }
             
             if (missingElements.length > 0) {
-                console.warn('[BASE ELEMENT SPAWN] WARNING: Missing base elements:', missingElements);
-                console.warn('[BASE ELEMENT SPAWN] This should not happen with proper distribution!');
+                gameLogger.warn('BASE ELEMENT SPAWN', 'WARNING: Missing base elements:', missingElements);
+                gameLogger.warn('BASE ELEMENT SPAWN', 'This should not happen with proper distribution!');
             } else {
             }
             
@@ -11530,7 +11528,7 @@
         function buildSkinGrid() {
             const grid = document.getElementById('skinGrid');
             if (!grid) {
-                console.error('Skin grid element not found!');
+                gameLogger.error('UI', 'Skin grid element not found!');
                 return;
             }
             
@@ -11623,7 +11621,7 @@
                     img.alt = skinData.name;
                     img.onerror = function() {
                         // Show placeholder on error
-                        console.error(`Failed to load skin image: ${this.src}`);
+                        gameLogger.error('ASSETS', `Failed to load skin image: ${this.src}`);
                         this.style.display = 'none';
                         const placeholder = document.createElement('div');
                         placeholder.className = 'skin-error';
@@ -11789,7 +11787,7 @@
         function dispatchGameEvent(eventName, detail = {}) {
             const event = new CustomEvent(eventName, { detail });
             window.dispatchEvent(event);
-            console.log(`[Game Event] ${eventName}`, detail);
+            gameLogger.debug('Game Event', `${eventName}`, detail);
         }
         
         // Rarity tab functionality
@@ -12131,7 +12129,7 @@
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText('Failed to load image', canvas.width / 2, canvas.height / 2);
-                console.error('Failed to load skin image:', imagePath);
+                gameLogger.error('ASSETS', 'Failed to load skin image:', imagePath);
             };
             
             // Set the source after setting up handlers
@@ -12142,7 +12140,7 @@
         function populateDiscoveryJournal() {
             const grid = document.getElementById('discoveryGrid');
             if (!grid) {
-                console.error('Discovery grid element not found!');
+                gameLogger.error('UI', 'Discovery grid element not found!');
                 return;
             }
             
@@ -12150,7 +12148,7 @@
             
             // Check if element loader is ready
             if (!window.elementLoader || !window.elementLoader.elements) {
-                console.error('Element loader not ready');
+                gameLogger.error('ELEMENT LOADER', 'Element loader not ready');
                 return;
             }
             
@@ -12224,7 +12222,7 @@
             
             // Calculate frame time
             if (!isFinite(currentTime)) {
-                console.error('currentTime is not finite:', currentTime);
+                gameLogger.error('GAME LOOP', 'currentTime is not finite:', currentTime);
                 return;
             }
             const frameTime = Math.min(elapsed, 250); // Cap at 250ms (4 FPS min)
@@ -12235,7 +12233,7 @@
             
             // Check for NaN
             if (!isFinite(accumulator) || !isFinite(frameTime)) {
-                console.error('Accumulator or frameTime became NaN! frameTime:', frameTime, 'currentTime:', currentTime, 'lastTime:', lastTime, 'accumulator:', accumulator);
+                gameLogger.error('GAME LOOP', 'Accumulator or frameTime became NaN!', 'frameTime:', frameTime, 'currentTime:', currentTime, 'lastTime:', lastTime, 'accumulator:', accumulator);
                 accumulator = 0;
                 lastTime = currentTime;
                 return;
@@ -12590,7 +12588,7 @@
                             const playerName = localStorage.getItem('playerName') || 'Anonymous';
                             const playTime = gameSessionStartTime ? Math.floor((Date.now() - gameSessionStartTime) / 1000) : 0;
                             
-                            console.log('[AUTO-SUBMIT] Attempting automatic score submission...');
+                            gameLogger.debug('AUTO-SUBMIT', 'Attempting automatic score submission...');
                             
                             if (window.leaderboardModule && window.leaderboardModule.submitScore) {
                                 window.leaderboardModule.submitScore(
@@ -12600,34 +12598,34 @@
                                     playTime,
                                     playerSnake.kills
                                 ).then(result => {
-                                    console.log('[AUTO-SUBMIT] Score submitted!', result);
+                                    gameLogger.debug('AUTO-SUBMIT', 'Score submitted!', result);
                                     if (result !== null && result !== undefined) {
                                         if (typeof result === 'number') {
                                             const globalRankEl = document.getElementById('globalRank');
                                             if (globalRankEl) {
                                                 globalRankEl.textContent = `#${result}`;
-                                                console.log('[AUTO-SUBMIT] Updated rank display to:', `#${result}`);
+                                                gameLogger.debug('AUTO-SUBMIT', 'Updated rank display to:', `#${result}`);
                                             }
                                         } else if (result === 'Submitted') {
                                             const globalRankEl = document.getElementById('globalRank');
                                             if (globalRankEl) {
                                                 globalRankEl.textContent = 'Submitted';
-                                                console.log('[AUTO-SUBMIT] Score submitted (no rank available)');
+                                                gameLogger.debug('AUTO-SUBMIT', 'Score submitted (no rank available)');
                                             }
                                         }
                                         // Already set to true above
                                     } else {
-                                        console.error('[AUTO-SUBMIT] Invalid result:', result);
+                                        gameLogger.error('AUTO-SUBMIT', 'Invalid result:', result);
                                         // Reset flag on failure
                                         leaderboardSubmitted = false;
                                     }
                                 }).catch(err => {
-                                    console.error('[AUTO-SUBMIT] Failed:', err);
+                                    gameLogger.error('AUTO-SUBMIT', 'Failed:', err);
                                     // Reset flag on error
                                     leaderboardSubmitted = false;
                                 });
                             } else {
-                                console.error('[AUTO-SUBMIT] Supabase module not loaded!');
+                                gameLogger.error('AUTO-SUBMIT', 'Supabase module not loaded!');
                             }
                         }
                     }, 100); // Small delay to ensure UI is ready
@@ -12678,7 +12676,7 @@
                         deathCameraAnimation.active = false;
                         waitingForRespawnInput = true; // Now waiting for player to click respawn
                         window.waitingForRespawnInput = true;
-                        console.log('[DEATH] Death sequence complete, showing death screen');
+                        gameLogger.debug('DEATH', 'Death sequence complete, showing death screen');
                     }
                 } // End of deathSequenceActive check
             } // End of player death check - MOVED HERE
@@ -12690,7 +12688,7 @@
                 
                 // Debug why respawn might be failing
                 if (playerRespawnTimer <= 100 && playerRespawnTimer > 0) {
-                        console.log('[RESPAWN DEBUG]', {
+                        gameLogger.debug('RESPAWN', 'RESPAWN DEBUG', {
                             playerRespawnTimer,
                             deathSequenceActive,
                             playerAlive: playerSnake.alive,
@@ -12721,7 +12719,7 @@
                     
                     // Double check that playerSnake is cleared
                     if (snakes.some(s => s.isPlayer)) {
-                        console.error('[RESPAWN] ERROR: Player snake still exists after cleanup!');
+                        gameLogger.error('RESPAWN', 'ERROR: Player snake still exists after cleanup!');
                         snakes = snakes.filter(snake => !snake.isPlayer);
                     }
                     
@@ -12754,7 +12752,7 @@
                         playerSnake.discoveries = previousDiscoveries;
                         playerSnake.kills = previousKills;
                         
-                        console.log('[RESPAWN] Score restored to:', savedSnakeScore, 'Length:', targetLength);
+                        gameLogger.debug('RESPAWN', 'Score restored to:', savedSnakeScore, 'Length:', targetLength);
                         window.isReviving = false;
                     } else {
                         // This branch should never be reached now, but keeping for safety
@@ -13342,7 +13340,7 @@
             if (currentTrack && currentTrack.paused && gameStarted && !musicMuted && !bossEncounterActive) {
                 currentTrack.play().then(() => {
                 }).catch(error => {
-                    console.error('[AUDIO] Failed to start music on user interaction:', error);
+                    gameLogger.error('AUDIO', 'Failed to start music on user interaction:', error);
                 });
             }
             
@@ -13351,7 +13349,7 @@
                 window.pendingMusicTrack.play().then(() => {
                     window.pendingMusicTrack = null;
                 }).catch(error => {
-                    console.error('[AUDIO] Failed to start pending music:', error);
+                    gameLogger.error('AUDIO', 'Failed to start pending music:', error);
                 });
             }
         }, { once: true });
@@ -13365,33 +13363,33 @@
         window.addElementBankSlots = function(count = 1) {
             const newSlots = elementBankSlots + count;
             if (newSlots > 12) {
-                console.log('[ELEMENT BANK] Maximum slots is 12. Current:', elementBankSlots);
+                gameLogger.debug('ELEMENT BANK', 'Maximum slots is 12. Current:', elementBankSlots);
                 return;
             }
             if (newSlots < 6) {
-                console.log('[ELEMENT BANK] Minimum slots is 6. Current:', elementBankSlots);
+                gameLogger.debug('ELEMENT BANK', 'Minimum slots is 6. Current:', elementBankSlots);
                 return;
             }
             elementBankSlots = newSlots;
             saveElementBankSlots();
             updateElementBankUI();
-            console.log('[ELEMENT BANK] Slots updated to:', elementBankSlots);
+            gameLogger.debug('ELEMENT BANK', 'Slots updated to:', elementBankSlots);
         };
         
         window.setElementBankSlots = function(slots) {
             if (slots < 6 || slots > 12) {
-                console.log('[ELEMENT BANK] Slots must be between 6 and 12. Current:', elementBankSlots);
+                gameLogger.debug('ELEMENT BANK', 'Slots must be between 6 and 12. Current:', elementBankSlots);
                 return;
             }
             elementBankSlots = slots;
             saveElementBankSlots();
             updateElementBankUI();
-            console.log('[ELEMENT BANK] Slots set to:', elementBankSlots);
+            gameLogger.debug('ELEMENT BANK', 'Slots set to:', elementBankSlots);
         };
         
         window.showElementBankSlots = function() {
-            console.log('[ELEMENT BANK] Current slots:', elementBankSlots);
-            console.log('[ELEMENT BANK] Maximum slots: 12');
-            console.log('[ELEMENT BANK] Use addElementBankSlots(n) to add n slots');
-            console.log('[ELEMENT BANK] Use setElementBankSlots(n) to set to n slots');
+            gameLogger.debug('ELEMENT BANK', 'Current slots:', elementBankSlots);
+            gameLogger.debug('ELEMENT BANK', 'Maximum slots: 12');
+            gameLogger.debug('ELEMENT BANK', 'Use addElementBankSlots(n) to add n slots');
+            gameLogger.debug('ELEMENT BANK', 'Use setElementBankSlots(n) to set to n slots');
         };
