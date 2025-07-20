@@ -8473,7 +8473,6 @@
                 const discoveriesText = isMobile ? 'disc.' : 'discoveries';
                 statsDiv.innerHTML = `
                     <div>${Math.floor(snake.score).toLocaleString()} pts</div>
-                    <div>${snake.discoveries || 0} ${discoveriesText}</div>
                 `;
                 
                 div.appendChild(nameSpan);
@@ -9548,9 +9547,6 @@
                             <div>${countryDisplay}</div>
                             <div style="color: ${isPlayer ? '#4ecdc4' : '#FFF'}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${displayName}</div>
                             <div style="color: #4ecdc4; text-align: right;">${entry.score.toLocaleString()}</div>
-                            <div style="color: #FFD700; text-align: right;">${entry.elements_discovered || 0}</div>
-                            <div style="color: #AAA; text-align: right;">${timeStr}</div>
-                            <div style="color: #ff6b6b; text-align: right;">${entry.kills || 0}</div>
                         </div>
                     `;
                 }).join('');
