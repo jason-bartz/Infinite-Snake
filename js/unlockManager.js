@@ -2,7 +2,8 @@
 class UnlockManager {
     constructor() {
         this.STORAGE_KEY = 'infiniteSnakeUnlocks';
-        this.unlockedSkins = new Set(['snake-default-green']); // Initialize with default first
+        // Initialize with all default skins
+        this.unlockedSkins = new Set(['snake-default-green', 'chirpy', 'ruby', 'lil-beans']);
         this.pendingUnlocks = [];
         this.gameStarted = false;
         this.initialDelayTimer = null;
@@ -14,9 +15,12 @@ class UnlockManager {
 
     loadUnlockedSkins() {
         try {
+            // Default skins that are always unlocked
+            const defaultSkins = ['snake-default-green', 'chirpy', 'ruby', 'lil-beans'];
+            
             // Try to load from unlock manager storage
             const stored = localStorage.getItem(this.STORAGE_KEY);
-            let unlocks = stored ? new Set(JSON.parse(stored)) : new Set(['snake-default-green']);
+            let unlocks = stored ? new Set(JSON.parse(stored)) : new Set(defaultSkins);
             
             // Also merge with main game storage
             const mainGameUnlocks = localStorage.getItem('unlockedSkins');
@@ -25,8 +29,8 @@ class UnlockManager {
                 mainUnlocks.forEach(skin => unlocks.add(skin));
             }
             
-            // Always ensure default skin is unlocked
-            unlocks.add('snake-default-green');
+            // Always ensure default skins are unlocked
+            defaultSkins.forEach(skin => unlocks.add(skin));
             
             // Update the instance property
             this.unlockedSkins = unlocks;
@@ -37,7 +41,7 @@ class UnlockManager {
             }
         } catch (error) {
             console.error('Failed to load unlocked skins:', error);
-            this.unlockedSkins = new Set(['snake-default-green']);
+            this.unlockedSkins = new Set(['snake-default-green', 'chirpy', 'ruby', 'lil-beans']);
         }
     }
 
@@ -142,11 +146,18 @@ class UnlockManager {
     checkAllUnlocks() {
         const newUnlocks = [];
         
+        // Define default skins that should not show notifications
+        const defaultSkins = ['snake-default-green', 'chirpy', 'ruby', 'lil-beans'];
+        
         for (const [skinId, data] of Object.entries(window.SKIN_DATA)) {
             if (!this.unlockedSkins.has(skinId)) {
                 if (this.checkUnlockCriteria(skinId, data.unlockCriteria)) {
                     this.unlockSkin(skinId, data);
-                    newUnlocks.push({ skinId, data });
+                    
+                    // Only add to notifications if not a default skin
+                    if (!defaultSkins.includes(skinId)) {
+                        newUnlocks.push({ skinId, data });
+                    }
                 }
             }
         }

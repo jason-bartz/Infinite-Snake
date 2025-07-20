@@ -144,12 +144,38 @@
     cursor: pointer;
     transition: all 0.3s ease;
     overflow: hidden;
-    background: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.5);
+    background-image: url('../assets/profile-background.png');
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
     border: 3px solid rgba(255, 255, 255, 0.2);
 }
 
 .skin-item:hover {
     transform: scale(1.05);
+}
+
+/* Add background layer to ensure visibility */
+.skin-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('../assets/profile-background.png');
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    z-index: 0;
+    border-radius: 12px;
+}
+
+/* Ensure content is above background */
+.skin-item > * {
+    position: relative;
+    z-index: 1;
 }
 
 .skin-item.locked {
@@ -182,6 +208,7 @@
     justify-content: center;
     position: relative;
     padding: 10px;
+    background: transparent;
 }
 
 .skin-preview {
@@ -412,7 +439,7 @@
 }
 
 .skin-preview-modal #skinPreviewCanvas {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.05) url('../assets/profile-background.png') center/cover;
     border-radius: 10px;
     border: 2px solid rgba(255, 255, 255, 0.1);
     width: 225px;

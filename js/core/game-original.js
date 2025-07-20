@@ -746,8 +746,8 @@
         
         const aiSkins = Object.keys(skinMetadata).filter(skin => skinMetadata[skin] && !skinMetadata[skin].isBoss);
         let currentPlayerSkin = 'snake-default-green';
-        let unlockedSkins = new Set(['snake-default-green', 'lil-beans']);
-        let viewedSkins = new Set(['snake-default-green', 'lil-beans']);
+        let unlockedSkins = new Set(['snake-default-green', 'chirpy', 'ruby', 'lil-beans']);
+        let viewedSkins = new Set(['snake-default-green', 'chirpy', 'ruby', 'lil-beans']);
         let availableUnlocks = 0;
         let skinImages = {};
         
@@ -755,10 +755,10 @@
             const saved = localStorage.getItem('unlockedSkins');
             if (saved) {
                 unlockedSkins = new Set(JSON.parse(saved));
-                // Ensure default skins are always unlocked
-                unlockedSkins.add('snake-default-green');
-                unlockedSkins.add('lil-beans');
             }
+            // Ensure default skins are always unlocked
+            const defaultSkins = ['snake-default-green', 'chirpy', 'ruby', 'lil-beans'];
+            defaultSkins.forEach(skin => unlockedSkins.add(skin));
             
             const savedViewed = localStorage.getItem('viewedSkins');
             if (savedViewed) {
@@ -5682,7 +5682,7 @@
                     calculateNextBossSpawn();
                 }
                 
-                // Award extra revive for defeating boss
+                // Award extra revive for defeating boss (Classic mode only)
                 if (gameMode === 'classic' && revivesRemaining < 3) {
                     revivesRemaining++;
                     console.log('[BOSS] Extra revive awarded! Revives remaining:', revivesRemaining);
@@ -9160,52 +9160,42 @@
         window.handleReviveOrRespawn = function() {
             playUISound();
             
-            // Check for permadeath in Classic mode (4th death)
-            if (gameMode === 'classic' && deathCount >= 4 && revivesRemaining === 0) {
-                // This should not normally be reached as death screen shouldn't show on 4th death
-                handlePermadeath();
-                return;
-            }
-            
-            if (revivesRemaining > 0) {
-                // Use a revive
-                revivesRemaining--;
+            // Check game mode
+            if (gameMode === 'classic') {
+                // Classic mode: Check for permadeath (4th death)
+                if (deathCount >= 4 && revivesRemaining === 0) {
+                    handlePermadeath();
+                    return;
+                }
                 
-                // Update button text
-                const reviveBtn = document.getElementById('reviveBtn');
-                if (reviveBtn) {
-                    if (revivesRemaining > 0) {
-                        reviveBtn.innerHTML = `REVIVE (<span id="revivesLeft">${revivesRemaining}</span>)`;
-                    } else {
-                        // In Classic mode, show different text for last life
-                        if (gameMode === 'classic') {
+                if (revivesRemaining > 0) {
+                    // Use a revive
+                    revivesRemaining--;
+                    
+                    // Update button text
+                    const reviveBtn = document.getElementById('reviveBtn');
+                    if (reviveBtn) {
+                        if (revivesRemaining > 0) {
+                            reviveBtn.innerHTML = `REVIVE (<span id="revivesLeft">${revivesRemaining}</span>)`;
+                        } else {
+                            // Last life
                             reviveBtn.innerHTML = 'FINAL LIFE';
                             reviveBtn.style.background = '#e74c3c';
                             reviveBtn.style.borderColor = '#c0392b';
                             reviveBtn.style.boxShadow = '0 0 20px rgba(231, 76, 60, 0.5)';
-                            const actionText = document.getElementById('actionText');
-                            if (actionText) actionText.textContent = 'continue on final life';
-                        } else {
-                            reviveBtn.innerHTML = 'RESPAWN';
-                            reviveBtn.style.background = 'var(--snes-cosmic-purple)';
-                            reviveBtn.style.color = 'var(--snes-white)';
-                            reviveBtn.style.border = '4px solid var(--snes-white)';
-                            reviveBtn.style.boxShadow = 'inset 2px 2px 0 var(--snes-cosmic-pink), inset -2px -2px 0 var(--snes-dark-purple), 4px 4px 0 rgba(0,0,0,0.5)';
-                            reviveBtn.style.fontFamily = "'Press Start 2P'";
-                            reviveBtn.style.textTransform = 'uppercase';
-                            const actionText = document.getElementById('actionText');
-                            if (actionText) actionText.textContent = 'respawn';
                         }
-                        const respawnPenaltyText = document.getElementById('respawnPenaltyText');
-                        if (respawnPenaltyText) respawnPenaltyText.style.display = 'block';
                     }
+                    
+                    // Set flag for revive (no penalty)
+                    window.isReviving = true;
+                } else {
+                    // Should not reach here in classic mode
+                    handlePermadeath();
+                    return;
                 }
-                
-                // Set flag for revive (will be handled in respawn logic)
-                window.isReviving = true;
             } else {
-                // Normal respawn (only in Infinite mode)
-                window.isReviving = false;
+                // Infinite mode: Always allow respawn without penalty
+                window.isReviving = true;
             }
             
             // Hide overlay and trigger respawn
@@ -9474,43 +9464,41 @@
                     }
                     
                     if (reviveBtn) {
-                        if (revivesRemaining > 0) {
-                            reviveBtn.innerHTML = `REVIVE (<span id="revivesLeft">${revivesRemaining}</span>)`;
-                            reviveBtn.style.background = 'var(--snes-cosmic-purple)';
-                            reviveBtn.style.color = 'var(--snes-white)';
-                            reviveBtn.style.border = '4px solid var(--snes-white)';
-                            reviveBtn.style.boxShadow = 'inset 2px 2px 0 var(--snes-cosmic-pink), inset -2px -2px 0 var(--snes-dark-purple), 4px 4px 0 rgba(0,0,0,0.5)';
-                            reviveBtn.style.fontFamily = "'Press Start 2P'";
-                            reviveBtn.style.textTransform = 'uppercase';
-                            const actionText = document.getElementById('actionText');
-                            if (actionText) actionText.textContent = 'revive';
-                            if (respawnPenaltyText) respawnPenaltyText.style.display = 'none';
-                        } else {
-                            // Check if Classic mode for FINAL LIFE
-                            if (gameMode === 'classic') {
+                        if (gameMode === 'classic') {
+                            // Classic mode: Show revive count or final life
+                            if (revivesRemaining > 0) {
+                                reviveBtn.innerHTML = `REVIVE (<span id="revivesLeft">${revivesRemaining}</span>)`;
+                                reviveBtn.style.background = 'var(--snes-cosmic-purple)';
+                                reviveBtn.style.color = 'var(--snes-white)';
+                                reviveBtn.style.border = '4px solid var(--snes-white)';
+                                reviveBtn.style.boxShadow = 'inset 2px 2px 0 var(--snes-cosmic-pink), inset -2px -2px 0 var(--snes-dark-purple), 4px 4px 0 rgba(0,0,0,0.5)';
+                                const actionText = document.getElementById('actionText');
+                                if (actionText) actionText.textContent = 'revive';
+                                if (respawnPenaltyText) respawnPenaltyText.style.display = 'none';
+                            } else {
+                                // Final life
                                 reviveBtn.innerHTML = 'FINAL LIFE';
                                 reviveBtn.style.background = '#e74c3c';
                                 reviveBtn.style.borderColor = '#c0392b';
                                 reviveBtn.style.boxShadow = '0 0 20px rgba(231, 76, 60, 0.5)';
                                 reviveBtn.style.color = 'var(--snes-white)';
-                                reviveBtn.style.fontFamily = "'Press Start 2P'";
-                                reviveBtn.style.textTransform = 'uppercase';
                                 const actionText = document.getElementById('actionText');
-                            if (actionText) actionText.textContent = 'continue on final life';
+                                if (actionText) actionText.textContent = 'continue on final life';
                                 if (respawnPenaltyText) respawnPenaltyText.style.display = 'none';
-                            } else {
-                                reviveBtn.innerHTML = 'RESPAWN';
-                                reviveBtn.style.background = 'var(--snes-cosmic-purple)';
-                                reviveBtn.style.color = 'var(--snes-white)';
-                                reviveBtn.style.border = '4px solid var(--snes-white)';
-                                reviveBtn.style.boxShadow = 'inset 2px 2px 0 var(--snes-cosmic-pink), inset -2px -2px 0 var(--snes-dark-purple), 4px 4px 0 rgba(0,0,0,0.5)';
-                                reviveBtn.style.fontFamily = "'Press Start 2P'";
-                                reviveBtn.style.textTransform = 'uppercase';
-                                const actionText = document.getElementById('actionText');
-                            if (actionText) actionText.textContent = 'respawn';
-                                if (respawnPenaltyText) respawnPenaltyText.style.display = 'block';
                             }
+                        } else {
+                            // Infinite mode: Always show respawn (no penalty)
+                            reviveBtn.innerHTML = 'RESPAWN';
+                            reviveBtn.style.background = 'var(--snes-cosmic-purple)';
+                            reviveBtn.style.color = 'var(--snes-white)';
+                            reviveBtn.style.border = '4px solid var(--snes-white)';
+                            reviveBtn.style.boxShadow = 'inset 2px 2px 0 var(--snes-cosmic-pink), inset -2px -2px 0 var(--snes-dark-purple), 4px 4px 0 rgba(0,0,0,0.5)';
+                            const actionText = document.getElementById('actionText');
+                            if (actionText) actionText.textContent = 'respawn';
+                            if (respawnPenaltyText) respawnPenaltyText.style.display = 'none'; // No penalty in infinite mode
                         }
+                        reviveBtn.style.fontFamily = "'Press Start 2P'";
+                        reviveBtn.style.textTransform = 'uppercase';
                     }
                     
                     // Automatic leaderboard submission for infinite mode
@@ -10986,7 +10974,7 @@
             elements = [];
             gameWon = false; // Reset victory flag
             particles = [];
-            revivesRemaining = 3; // Reset revives for new game
+            revivesRemaining = 3; // Reset revives for new game (Classic mode)
             deathCount = 0; // Reset death count
             voidOrbs = [];
             catalystGems = [];
@@ -11346,12 +11334,20 @@
                     return rarityIndexA - rarityIndexB;
                 }
                 
-                // Custom sorting for common skins: Basic Boy first, then Lil Beans, then alphabetical
+                // Custom sorting for common skins: Default skins first, then alphabetical
                 if (skinA.rarity === 'common' && skinB.rarity === 'common') {
-                    if (a === 'snake-default-green') return -1;
-                    if (b === 'snake-default-green') return 1;
-                    if (a === 'lil-beans') return -1;
-                    if (b === 'lil-beans') return 1;
+                    const defaultSkins = ['snake-default-green', 'chirpy', 'ruby', 'lil-beans'];
+                    const aIsDefault = defaultSkins.includes(a);
+                    const bIsDefault = defaultSkins.includes(b);
+                    
+                    // If one is default and one isn't, default comes first
+                    if (aIsDefault && !bIsDefault) return -1;
+                    if (!aIsDefault && bIsDefault) return 1;
+                    
+                    // If both are defaults, maintain the order defined in defaultSkins array
+                    if (aIsDefault && bIsDefault) {
+                        return defaultSkins.indexOf(a) - defaultSkins.indexOf(b);
+                    }
                 }
                 
                 return skinA.name.localeCompare(skinB.name);
@@ -12522,8 +12518,8 @@
                     playerSnake.name = playerName;
                     
                     // Check if this is a revive or respawn
-                    if (window.isReviving && revivesRemaining >= 0) {
-                        // Revive: restore full score and length
+                    if (gameMode === 'classic' || window.isReviving) {
+                        // Classic mode revive or Infinite mode respawn: restore full score and length
                         playerSnake.score = savedSnakeScore;
                         
                         // Restore snake to saved length
@@ -12541,13 +12537,14 @@
                         playerSnake.discoveries = previousDiscoveries;
                         playerSnake.kills = previousKills;
                         
+                        console.log('[RESPAWN] Score restored to:', savedSnakeScore, 'Length:', targetLength);
                         window.isReviving = false;
                     } else {
-                        // Normal respawn: apply penalties
-                        playerSnake.score = Math.floor(previousScore * 0.75);
-                        playerSnake.elementCapacity = Math.max(4, Math.floor(previousCapacity * 0.5));
-                        playerSnake.discoveries = Math.floor(previousDiscoveries * 0.5);
-                        playerSnake.kills = Math.floor(previousKills * 0.5);
+                        // This branch should never be reached now, but keeping for safety
+                        playerSnake.score = savedSnakeScore;
+                        playerSnake.elementCapacity = previousCapacity;
+                        playerSnake.discoveries = previousDiscoveries;
+                        playerSnake.kills = previousKills;
                     }
                     
                     // Grant 3 seconds of invincibility on respawn
