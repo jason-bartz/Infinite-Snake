@@ -111,6 +111,16 @@ class PlayerStats {
                 toStore.stats.achievements.playedDuringMonths = Array.from(this.stats.stats.achievements.playedDuringMonths);
                 
                 localStorage.setItem(this.STORAGE_KEY, JSON.stringify(toStore));
+                
+                // Check for new lore unlocks when stats are saved
+                if (window.loreUnlockManager && window.loreUnlockManager.checkAllLoreUnlocks) {
+                    window.loreUnlockManager.checkAllLoreUnlocks();
+                }
+                
+                // Also check skin unlocks
+                if (window.unlockManager && window.unlockManager.checkAllUnlocks) {
+                    window.unlockManager.checkAllUnlocks();
+                }
             } catch (error) {
                 console.error('Failed to save player stats:', error);
             }
@@ -207,6 +217,11 @@ class PlayerStats {
         this.stats.stats.achievements.playedDuringMonths.add(month);
         
         this.saveStats();
+        
+        // Check lore unlocks at game start (for time-based unlocks)
+        setTimeout(() => {
+            this.checkLoreUnlocks();
+        }, 1000);
     }
 
     recordGameEnd(finalScore) {
@@ -220,6 +235,14 @@ class PlayerStats {
         this.stats.stats.lifetime.totalPlayTime += sessionTime;
         
         this.saveStats();
+        
+        // Check for lore unlocks after saving stats
+        if (window.loreUnlockManager && window.loreUnlockManager.checkAllLoreUnlocks) {
+            console.log('[STATS] Checking lore unlocks at game end');
+            setTimeout(() => {
+                window.loreUnlockManager.checkAllLoreUnlocks();
+            }, 100);
+        }
     }
 
     recordFirstPlace() {
@@ -323,20 +346,48 @@ class PlayerStats {
         return false;
     }
 
+    checkLoreUnlocks() {
+        if (window.loreUnlockManager && window.loreUnlockManager.checkAllLoreUnlocks) {
+            console.log('[STATS] Periodic lore unlock check');
+            window.loreUnlockManager.checkAllLoreUnlocks();
+        }
+    }
+
     initializeEventListeners() {
         // Hook into game events
         window.addEventListener('gameStart', () => this.recordGameStart());
         window.addEventListener('gameEnd', (e) => this.recordGameEnd(e.detail?.score));
         window.addEventListener('playerDeath', () => this.recordDeath());
-        window.addEventListener('enemyKilled', () => this.recordKill());
+        window.addEventListener('enemyKilled', () => {
+            this.recordKill();
+            // Check lore every 100 kills
+            if (this.stats.stats.lifetime.totalKills % 100 === 0) {
+                this.checkLoreUnlocks();
+            }
+        });
         window.addEventListener('elementDiscovered', (e) => {
             // Handle the result element from the discovery
             if (e.detail.result) {
                 this.recordDiscovery(e.detail.result);
+                // Check lore every 10 discoveries
+                if (this.stats.stats.lifetime.elementsDiscovered.size % 10 === 0) {
+                    this.checkLoreUnlocks();
+                }
             }
         });
         window.addEventListener('powerupCollected', (e) => this.recordPowerupCollected(e.detail.type));
-        window.addEventListener('scoreUpdate', (e) => this.updateScore(e.detail.score));
+        window.addEventListener('scoreUpdate', (e) => {
+            this.updateScore(e.detail.score);
+            // Check lore at score milestones
+            if (e.detail.score >= 25000 && !this.sessionStats.checkedLore25k) {
+                this.sessionStats.checkedLore25k = true;
+                this.checkLoreUnlocks();
+            }
+            if (e.detail.score >= 100000 && !this.sessionStats.checkedLore100k) {
+                this.sessionStats.checkedLore100k = true;
+                this.checkLoreUnlocks();
+            }
+        });
         window.addEventListener('firstPlace', () => this.recordFirstPlace());
     }
 

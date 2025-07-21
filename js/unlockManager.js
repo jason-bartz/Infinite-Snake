@@ -492,6 +492,27 @@ class UnlockManager {
         }, 3000);
     }
     
+    // Called when a boss is defeated
+    onBossDefeat(bossType) {
+        console.log('[UNLOCK] Boss defeated:', bossType);
+        
+        // Find skins that require defeating this boss
+        for (const [skinId, data] of Object.entries(window.SKIN_DATA)) {
+            if (!this.unlockedSkins.has(skinId) && data.unlockCriteria) {
+                if (data.unlockCriteria.type === 'defeatBoss' && 
+                    data.unlockCriteria.boss === bossType.toLowerCase()) {
+                    this.unlockSkin(skinId, data);
+                    this.pendingUnlocks.push({ skinId, data });
+                }
+            }
+        }
+        
+        // Process unlock notifications
+        if (this.pendingUnlocks.length > 0 && !this.isProcessingNotification) {
+            this.processNextUnlock();
+        }
+    }
+    
     // Called when returning to menu
     onGameEnd() {
         this.gameStarted = false;

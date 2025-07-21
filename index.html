@@ -1162,6 +1162,49 @@
             transition: transform 0.2s;
         }
         
+        /* Lore Unlock Display - Positioned same as killstreak */
+        #loreUnlockDisplay {
+            position: absolute;
+            bottom: 280px; /* Same height as killstreak */
+            left: 50%;
+            transform: translateX(-50%);
+            background: transparent;
+            z-index: 104;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        
+        #loreUnlockDisplay.show {
+            opacity: 1;
+            background: linear-gradient(135deg, 
+                rgba(248, 216, 0, 0.95) 0%, 
+                rgba(248, 168, 0, 0.95) 50%, 
+                rgba(248, 216, 0, 0.95) 100%);
+            color: #000000;
+            padding: 16px 32px;
+            border: 4px solid #F8D800;
+            border-color: #F8D800 #C8A800 #C8A800 #F8D800;
+            outline: 2px solid #F8D800;
+            outline-offset: -6px;
+            box-shadow: 0 0 30px rgba(248, 216, 0, 0.8),
+                        inset 0 0 20px rgba(248, 216, 0, 0.3),
+                        0 8px 0 rgba(0,0,0,0.8);
+            text-align: center;
+            animation: loreUnlockPulse 0.5s steps(8);
+            font-size: 14px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        @keyframes loreUnlockPulse {
+            0%, 100% { transform: translateX(-50%) scale(1); }
+            25% { transform: translateX(-50%) scale(1.05); }
+            50% { transform: translateX(-50%) scale(1.1); }
+            75% { transform: translateX(-50%) scale(1.05); }
+        }
+        
         /* Killstreak Display - Positioned above regular messages */
         #killstreakDisplay {
             position: absolute;
@@ -1227,7 +1270,8 @@
         }
         
         /* Mobile popup adjustments */
-        body.mobile #killstreakDisplay {
+        body.mobile #killstreakDisplay,
+        body.mobile #loreUnlockDisplay {
             bottom: 140px; /* Above recentDiscovery on mobile */
         }
         
@@ -3789,6 +3833,7 @@
         </div>
         <div style="position: absolute; top: 20px; right: 20px; z-index: 10;">
             <a href="/how-to-play.html" style="color: #4ecdc4; text-decoration: none; font-family: 'Press Start 2P', monospace; font-size: 10px; margin-right: 20px;">📖 How to Play</a>
+            <a href="/lore.html" style="color: #4ecdc4; text-decoration: none; font-family: 'Press Start 2P', monospace; font-size: 10px; margin-right: 20px;">📜 Lore</a>
             <a href="/leaderboard.html" style="color: #4ecdc4; text-decoration: none; font-family: 'Press Start 2P', monospace; font-size: 10px;">🏆 Leaderboard</a>
         </div>
         <div style="position: absolute; bottom: 20px; right: 20px; z-index: 10;">
@@ -3833,6 +3878,7 @@
         </div>
         <div style="position: absolute; top: 20px; right: 20px; z-index: 10;">
             <a href="/how-to-play.html" style="color: #4ecdc4; text-decoration: none; font-family: 'Press Start 2P', monospace; font-size: 10px; margin-right: 20px;">📖 How to Play</a>
+            <a href="/lore.html" style="color: #4ecdc4; text-decoration: none; font-family: 'Press Start 2P', monospace; font-size: 10px; margin-right: 20px;">📜 Lore</a>
             <a href="/leaderboard.html" style="color: #4ecdc4; text-decoration: none; font-family: 'Press Start 2P', monospace; font-size: 10px;">🏆 Leaderboard</a>
         </div>
         <div style="position: absolute; bottom: 20px; right: 20px; z-index: 10;">
@@ -3916,6 +3962,7 @@
     <!-- UI Overlay -->
     <div id="ui">
         <div id="killstreakDisplay"></div>
+        <div id="loreUnlockDisplay"></div>
         <div id="recentDiscovery"></div>
         <div id="bossVictoryMessage"></div>
         <div id="score">Score: 0</div>
@@ -5447,9 +5494,11 @@
     <!-- Skin System -->
     <script src="js/skinData.js" defer></script>
     <script src="js/skinIdMapping.js" defer></script>
+    <script src="js/loreData.js" defer></script>
     <script src="js/playerStats.js" defer></script>
     <script src="js/killstreakManager.js" defer></script>
     <script src="js/unlockManager.js" defer></script>
+    <script src="js/loreUnlockManager.js" defer></script>
     <script src="js/nameGenerator.js" defer></script>
     
     <!-- Rendering Systems -->
