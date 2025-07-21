@@ -48,7 +48,7 @@ const MOBILE_UI_CONFIG = {
             right: 105
         },
         discoveryFeed: {
-            bottom: 255,
+            bottom: 330,
             maxItems: 2
         }
     },

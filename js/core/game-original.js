@@ -3344,7 +3344,7 @@
                     // Spawn invincibility sparkle particles for player
                     if (this.invincibilityTimer > 0 && this.isPlayer) {
                         // Spawn subtle sparkle particles occasionally
-                        if (Math.random() < 0.08) { // 8% chance per segment per frame
+                        if (Math.random() < 0.04) { // 4% chance per segment per frame (reduced by 50%)
                             const sparkleAngle = Math.random() * Math.PI * 2;
                             const sparkleSpeed = 0.5 + Math.random() * 1.5;
                             
@@ -3419,9 +3419,9 @@
                     // Spawn invincibility sparkle particles around head for player
                     if (this.invincibilityTimer > 0 && this.isPlayer) {
                         // More frequent particles around the head
-                        if (Math.random() < 0.2) { // 20% chance per frame for head
+                        if (Math.random() < 0.1) { // 10% chance per frame for head (reduced by 50%)
                             // Create a ring of particles around the head
-                            const numParticles = 2 + Math.floor(Math.random() * 2);
+                            const numParticles = 1 + Math.floor(Math.random() * 1); // Reduced from 2-3 to 1-1 particles
                             for (let i = 0; i < numParticles; i++) {
                                 const angle = Math.random() * Math.PI * 2;
                                 const distance = SEGMENT_SIZE * sizeMultiplier * 1.5;

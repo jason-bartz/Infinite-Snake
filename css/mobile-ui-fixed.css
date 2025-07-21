@@ -247,7 +247,7 @@
     .mobile .discovery-feed {
         /* Position higher up and centered */
         position: fixed !important;
-        bottom: 255px !important;
+        bottom: 330px !important;
         left: 50% !important;
         transform: translateX(-50%) !important;
         top: auto !important;
@@ -402,7 +402,7 @@ body.mobile .boost-button:active {
     
     body.mobile .discovery-feed {
         width: 200px !important;
-        bottom: 255px !important;
+        bottom: 330px !important;
     }
 }
 
@@ -420,6 +420,6 @@ body.mobile .boost-button:active {
     body.mobile .discovery-feed {
         width: 280px !important;
         max-height: 80px !important;
-        bottom: 255px !important;
+        bottom: 330px !important;
     }
 }
