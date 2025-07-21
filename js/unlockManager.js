@@ -289,10 +289,12 @@ class UnlockManager {
     }
 
     playUnlockSound(rarity) {
-        // Play different sounds based on rarity
-        // This would be implemented with actual sound files
-        const audio = new Audio(`/sounds/unlock-${rarity}.mp3`);
-        audio.play().catch(() => {}); // Ignore errors if sound fails
+        // Play skin unlock achievement sound
+        const audio = new Audio('/sounds/award-achievement-2.mp3');
+        audio.volume = 0.7;
+        audio.play().catch(() => {
+            console.log('[UNLOCK] Failed to play skin unlock sound');
+        });
     }
 
     // Boss unlock method
