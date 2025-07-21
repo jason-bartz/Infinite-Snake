@@ -216,6 +216,11 @@
         font-family: 'Press Start 2P', monospace !important;
     }
     
+    /* Ensure all text within mobile leaderboard entries matches the stat box font size (6px) */
+    body.mobile .leaderboard-entry div {
+        font-size: 6px !important;
+    }
+    
     body.mobile .leaderboard-entry:hover {
         background: rgba(78, 205, 196, 0.2) !important;
     }

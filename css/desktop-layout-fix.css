@@ -104,6 +104,11 @@
         font-size: 8px !important;
     }
     
+    /* Ensure all text within leaderboard entries, including snake names, matches stat box font size */
+    body:not(.mobile) .leaderboard-entry div {
+        font-size: 8px !important;
+    }
+    
     /* Ensure consistent styling for stat elements */
     body:not(.mobile) .stat-label {
         color: #AAA !important;
