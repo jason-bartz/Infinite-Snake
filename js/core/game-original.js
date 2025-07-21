@@ -8521,12 +8521,6 @@
                     }
                 }
                 
-                // Truncate long names to prevent overlap
-                const maxLength = 12;
-                if (displayName.length > maxLength) {
-                    displayName = displayName.substring(0, maxLength) + '...';
-                }
-                
                 nameSpan.textContent = displayText + displayName;
                 
                 const statsDiv = document.createElement('div');
