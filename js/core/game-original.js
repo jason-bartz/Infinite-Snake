@@ -203,7 +203,7 @@
         
         const WORLD_SIZE = 4000;
         const SEGMENT_SIZE = 15;
-        const SNAKE_SPEED = 4.761;
+        const SNAKE_SPEED = 5.95125;
         const TURN_SPEED = 0.08;
         const ELEMENT_SIZE = 20;
         
@@ -781,6 +781,13 @@
         let lastBossDefeatScore = 0;
         let bossSpawnCount = 0;
         let defeatedBosses = new Set();
+        
+        // Load defeated bosses from localStorage for persistence
+        const savedDefeatedBosses = JSON.parse(localStorage.getItem('defeatedBosses') || '[]');
+        savedDefeatedBosses.forEach(boss => defeatedBosses.add(boss));
+        
+        // Make defeatedBosses available globally for unlock checks
+        window.defeatedBosses = defeatedBosses;
         
         function calculateNextBossSpawn() {
             if (bossSpawnCount === 0) {
@@ -2130,8 +2137,8 @@
                 this.kills = 0; // Track kills for this snake
                 this.alive = true;
                 this.isPlayer = isPlayer;
-                this.speed = SNAKE_SPEED;
-                this.baseSpeed = SNAKE_SPEED; // Store base speed for boost calculations
+                this.speed = isPlayer ? SNAKE_SPEED : SNAKE_SPEED * 0.9; // AI snakes are 10% slower
+                this.baseSpeed = isPlayer ? SNAKE_SPEED : SNAKE_SPEED * 0.9; // Store base speed for boost calculations
                 this.name = isPlayer ? 'You' : generateSnakeName();
                 this.invincibilityTimer = 0;
                 this.size = 1; // Default size for normal snakes
@@ -2337,12 +2344,12 @@
                     }
                     
                     // Deplete stamina (5 seconds of continuous use)
-                    this.stamina -= (100 / (5 * 60)) * deltaTime; // 100 stamina over 5 seconds
+                    this.stamina -= (100 / (6.25 * 60)) * deltaTime; // 100 stamina over 6.25 seconds
                     this.stamina = Math.max(0, this.stamina);
                     this.staminaRegenCooldown = 30; // Half second cooldown before regen starts
                     
                     // Apply speed boost
-                    this.speed = this.baseSpeed * 1.75;
+                    this.speed = this.baseSpeed * 1.96875; // 2.1875 * 0.9 = 10% reduction
                     
                     // Create boost particles
                     this.boostParticleTimer++;
@@ -2365,7 +2372,7 @@
                         this.staminaRegenCooldown -= deltaTime;
                     } else if (this.stamina < this.maxStamina) {
                         // Regenerate stamina (2 seconds to full)
-                        this.stamina += (100 / (2 * 60)) * deltaTime; // 100 stamina over 2 seconds
+                        this.stamina += (100 / (2.5 * 60)) * deltaTime; // 100 stamina over 2.5 seconds
                         this.stamina = Math.min(this.maxStamina, this.stamina);
                     }
                 }
@@ -2924,41 +2931,39 @@
                 
                 this.alive = false;
                 
-                // Drop all elements with scatter effect
-                for (let i = 0; i < this.elements.length && i < this.segments.length; i++) {
-                    const segment = this.segments[i];
+                // Drop all elements in the shape of the snake
+                const elementsToSpawn = this.elements.length;
+                if (elementsToSpawn > 0 && this.segments && this.segments.length > 0) {
+                    // Calculate spacing between elements based on snake length
+                    const segmentSpacing = Math.max(1, Math.floor(this.segments.length / elementsToSpawn));
                     
-                    // Skip if segment is undefined or missing position
-                    if (!segment || segment.x === undefined || segment.y === undefined) {
-                        continue;
+                    for (let i = 0; i < elementsToSpawn; i++) {
+                        // Place elements evenly along the snake's body
+                        const segmentIndex = Math.min(i * segmentSpacing, this.segments.length - 1);
+                        const segment = this.segments[segmentIndex];
+                        
+                        // Skip if segment is undefined or missing position
+                        if (!segment || segment.x === undefined || segment.y === undefined) {
+                            continue;
+                        }
+                        
+                        // Add small random offset to prevent exact overlap
+                        const smallOffset = 10;
+                        const offsetX = (Math.random() - 0.5) * smallOffset;
+                        const offsetY = (Math.random() - 0.5) * smallOffset;
+                        
+                        // Calculate final position
+                        let finalX = segment.x + offsetX;
+                        let finalY = segment.y + offsetY;
+                        
+                        // Ensure elements stay within world bounds
+                        const margin = 50;
+                        finalX = Math.max(margin, Math.min(WORLD_SIZE - margin, finalX));
+                        finalY = Math.max(margin, Math.min(WORLD_SIZE - margin, finalY));
+                        
+                        // Spawn the element at the position along the snake
+                        spawnElement(this.elements[i], finalX, finalY);
                     }
-                    
-                    // Calculate scatter radius based on position in snake
-                    // Head elements scatter less, tail elements scatter more
-                    const baseRadius = 30; // Base scatter radius
-                    const maxRadius = 80; // Maximum scatter radius
-                    const radiusProgress = i / Math.max(1, this.elements.length - 1); // 0 to 1
-                    const scatterRadius = baseRadius + (maxRadius - baseRadius) * radiusProgress;
-                    
-                    // Random angle for circular distribution
-                    const angle = Math.random() * Math.PI * 2;
-                    
-                    // Calculate offset with some randomness
-                    const actualRadius = scatterRadius * (0.5 + Math.random() * 0.5); // 50% to 100% of radius
-                    const offsetX = Math.cos(angle) * actualRadius;
-                    const offsetY = Math.sin(angle) * actualRadius;
-                    
-                    // Calculate final position
-                    let finalX = segment.x + offsetX;
-                    let finalY = segment.y + offsetY;
-                    
-                    // Ensure elements stay within world bounds
-                    const margin = 50;
-                    finalX = Math.max(margin, Math.min(WORLD_SIZE - margin, finalX));
-                    finalY = Math.max(margin, Math.min(WORLD_SIZE - margin, finalY));
-                    
-                    // Spawn the element at the scattered position
-                    spawnElement(this.elements[i], finalX, finalY);
                 }
                 
                 // Only create death particles if not already created during animation
@@ -5294,8 +5299,8 @@
                 this.isBoss = true;
                 this.size = 3; // 300% larger than normal snakes
                 this.length = 30; // Longer than normal snakes
-                this.speed = SNAKE_SPEED * 0.8; // 80% of normal speed (20% slower)
-                this.baseSpeed = SNAKE_SPEED * 0.8;
+                this.speed = SNAKE_SPEED * 0.8 * 0.9; // 80% of normal speed (20% slower) * 0.9 for AI reduction
+                this.baseSpeed = SNAKE_SPEED * 0.8 * 0.9;
                 this.attackTimer = 0;
                 this.introAnimationTimer = 120; // 2 seconds of intro animation
                 this.damageFlashTimer = 0;
@@ -5840,6 +5845,23 @@
                 bossEncounterActive = false;
                 defeatedBosses.add(this.bossType);
                 bossesDefeatedThisCycle++;
+                
+                // Save defeated bosses to localStorage for persistent tracking
+                const defeatedBossList = JSON.parse(localStorage.getItem('defeatedBosses') || '[]');
+                if (!defeatedBossList.includes(this.bossType)) {
+                    defeatedBossList.push(this.bossType);
+                    localStorage.setItem('defeatedBosses', JSON.stringify(defeatedBossList));
+                }
+                
+                // Check for lore unlocks related to this boss
+                if (window.loreUnlockManager && window.loreUnlockManager.checkAllLoreUnlocks) {
+                    window.loreUnlockManager.checkAllLoreUnlocks();
+                }
+                
+                // Check for skin unlocks related to this boss
+                if (window.unlockManager && window.unlockManager.onBossDefeat) {
+                    window.unlockManager.onBossDefeat(this.bossType);
+                }
                 
                 // Track score at boss defeat and calculate next spawn
                 if (playerSnake) {
@@ -13447,6 +13469,8 @@
         window.gameLoop = gameLoop;
         window.resizeCanvas = resizeCanvas;
         window.drawBackground = drawBackground;
+        window.spawnElement = spawnElement;
+        window.createDeathParticles = createDeathParticles;
         
         // Console commands for element bank management
         window.addElementBankSlots = function(count = 1) {

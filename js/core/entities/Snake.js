@@ -898,26 +898,31 @@ class Snake {
     }
     
     dropElements() {
-        for (let i = 0; i < this.elements.length && i < this.segments.length; i++) {
-            const segment = this.segments[i];
+        // Spawn elements along the snake's body shape
+        const elementsToSpawn = this.elements.length;
+        if (elementsToSpawn === 0 || !this.segments || this.segments.length === 0) return;
+        
+        // Calculate spacing between elements based on snake length
+        const segmentSpacing = Math.max(1, Math.floor(this.segments.length / elementsToSpawn));
+        
+        for (let i = 0; i < elementsToSpawn; i++) {
+            // Place elements evenly along the snake's body
+            const segmentIndex = Math.min(i * segmentSpacing, this.segments.length - 1);
+            const segment = this.segments[segmentIndex];
             
             if (!segment || segment.x === undefined || segment.y === undefined) {
                 continue;
             }
             
-            const baseRadius = 30;
-            const maxRadius = 80;
-            const radiusProgress = i / Math.max(1, this.elements.length - 1);
-            const scatterRadius = baseRadius + (maxRadius - baseRadius) * radiusProgress;
-            
-            const angle = Math.random() * Math.PI * 2;
-            const actualRadius = scatterRadius * (0.5 + Math.random() * 0.5);
-            const offsetX = Math.cos(angle) * actualRadius;
-            const offsetY = Math.sin(angle) * actualRadius;
+            // Add small random offset to prevent exact overlap
+            const smallOffset = 10;
+            const offsetX = (Math.random() - 0.5) * smallOffset;
+            const offsetY = (Math.random() - 0.5) * smallOffset;
             
             let finalX = segment.x + offsetX;
             let finalY = segment.y + offsetY;
             
+            // Ensure elements stay within world boundaries
             const margin = 50;
             finalX = Math.max(margin, Math.min(WORLD_SIZE - margin, finalX));
             finalY = Math.max(margin, Math.min(WORLD_SIZE - margin, finalY));
