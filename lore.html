@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <title>Lore - Infinite Snake | The Coiled Archive</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Discover the lore of Infinite Snake - The Coiled Archive reveals the mysteries of the Fold, the Serpent, and the endless descent." />
+    <meta property="og:title" content="Lore - Infinite Snake" />
+    <meta property="og:description" content="Discover the lore of Infinite Snake - The Coiled Archive reveals the mysteries of the Fold, the Serpent, and the endless descent." />
+    <meta property="og:image" content="https://infinitesnake.io/og-image-a.png" />
+    <meta property="og:url" content="https://infinitesnake.io/lore" />
+    
+    <!-- Favicons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --snes-primary-blue: #2038EC;
+            --snes-dark-blue: #000080;
+            --snes-light-blue: #5878F8;
+            --snes-cosmic-purple: #7828F8;
+            --snes-cosmic-pink: #F828F8;
+            --snes-gold: #F8D800;
+            --snes-red: #F83800;
+            --snes-green: #00E800;
+            --snes-white: #F8F8F8;
+            --snes-black: #000000;
+            --snes-gray: #A8A8A8;
+            --snes-dark-purple: #4800A8;
+            --snes-cosmic-teal: #00F8F8;
+            
+            /* Category colors */
+            --cat-beginning: #F8D800;     /* Gold */
+            --cat-serpent: #00E800;       /* Green */
+            --cat-fragments: #00F8F8;     /* Teal */
+            --cat-old-ones: #F828F8;      /* Pink */
+            --cat-deep-coils: #7828F8;    /* Purple */
+            --cat-theories: #F83800;      /* Red */
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000011;
+            color: var(--snes-white);
+            font-family: 'Press Start 2P', monospace;
+            overflow-x: hidden;
+            image-rendering: pixelated;
+            -webkit-font-smoothing: none;
+            -moz-osx-font-smoothing: none;
+        }
+        
+        /* Animated starfield background */
+        #stars-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+        
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 60px auto 0;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            background: var(--snes-black);
+            border: 4px solid var(--snes-gold);
+            box-shadow: 4px 4px 0 rgba(0,0,0,0.5);
+            position: relative;
+        }
+        
+        h1 {
+            font-size: 24px;
+            color: var(--snes-gold);
+            margin: 0 0 15px 0;
+            text-shadow: 2px 2px 0 var(--snes-black);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        
+        .subtitle {
+            color: var(--snes-gray);
+            font-size: 10px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        
+        .back-button {
+            display: inline-block;
+            background: var(--snes-cosmic-purple);
+            border: 4px solid var(--snes-white);
+            color: var(--snes-white);
+            padding: 10px 20px;
+            font-size: 10px;
+            text-decoration: none;
+            box-shadow: 
+                inset 2px 2px 0 var(--snes-cosmic-pink),
+                inset -2px -2px 0 var(--snes-dark-purple),
+                4px 4px 0 rgba(0,0,0,0.5);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: none;
+            margin-bottom: 20px;
+        }
+        
+        .back-button:hover {
+            background: var(--snes-cosmic-pink);
+            transform: translate(2px, 2px);
+            box-shadow: 
+                inset 2px 2px 0 #FFA8FF,
+                inset -2px -2px 0 var(--snes-dark-purple),
+                2px 2px 0 rgba(0,0,0,0.5);
+        }
+        
+        .back-button:active {
+            transform: translate(4px, 4px);
+            box-shadow: none;
+        }
+        
+        /* Progress Section */
+        .progress-section {
+            background: rgba(0, 0, 0, 0.8);
+            border: 4px solid var(--snes-cosmic-teal);
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 
+                inset -2px -2px 0 rgba(0, 248, 248, 0.5),
+                inset 2px 2px 0 rgba(0, 0, 0, 0.8),
+                4px 4px 0 rgba(0,0,0,0.5);
+            text-align: center;
+        }
+        
+        .progress-bar-container {
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid var(--snes-gray);
+            height: 20px;
+            margin: 15px 0;
+            position: relative;
+        }
+        
+        .progress-bar-fill {
+            background: linear-gradient(to right, var(--snes-cosmic-purple), var(--snes-cosmic-pink));
+            height: 100%;
+            transition: width 0.5s ease;
+        }
+        
+        .progress-text {
+            font-size: 10px;
+            color: var(--snes-gold);
+            margin-top: 10px;
+        }
+        
+        /* Category Tabs */
+        .category-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .category-tab {
+            background: rgba(0, 0, 0, 0.8);
+            border: 3px solid var(--snes-gray);
+            color: var(--snes-gray);
+            padding: 10px 20px;
+            font-size: 10px;
+            font-family: 'Press Start 2P', monospace;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: none;
+            box-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+        }
+        
+        .category-tab:hover {
+            transform: translate(1px, 1px);
+            box-shadow: 1px 1px 0 rgba(0,0,0,0.5);
+        }
+        
+        .category-tab.active {
+            background: var(--snes-cosmic-purple);
+            border-color: var(--snes-cosmic-pink);
+            color: var(--snes-white);
+            outline: 3px solid var(--snes-white);
+            outline-offset: -6px;
+        }
+        
+        /* Category-specific colors (always visible) */
+        .category-tab[data-category="beginning"] {
+            background: var(--cat-beginning);
+            border-color: var(--cat-beginning);
+            color: var(--snes-black);
+        }
+        
+        .category-tab[data-category="serpent"] {
+            background: var(--cat-serpent);
+            border-color: var(--cat-serpent);
+            color: var(--snes-black);
+        }
+        
+        .category-tab[data-category="fragments"] {
+            background: var(--cat-fragments);
+            border-color: var(--cat-fragments);
+            color: var(--snes-black);
+        }
+        
+        .category-tab[data-category="old-ones"] {
+            background: var(--cat-old-ones);
+            border-color: var(--cat-old-ones);
+            color: var(--snes-white);
+        }
+        
+        .category-tab[data-category="deep-coils"] {
+            background: var(--cat-deep-coils);
+            border-color: var(--cat-deep-coils);
+            color: var(--snes-white);
+        }
+        
+        .category-tab[data-category="theories"] {
+            background: var(--cat-theories);
+            border-color: var(--cat-theories);
+            color: var(--snes-white);
+        }
+        
+        /* Keep "All Entries" tab with default style */
+        .category-tab[data-category="all"] {
+            background: rgba(0, 0, 0, 0.8);
+            border: 3px solid var(--snes-gray);
+            color: var(--snes-gray);
+        }
+        
+        .category-tab[data-category="all"].active {
+            background: var(--snes-cosmic-purple);
+            border-color: var(--snes-cosmic-pink);
+            color: var(--snes-white);
+        }
+        
+        /* Search Bar */
+        .search-section {
+            background: rgba(0, 0, 0, 0.8);
+            border: 3px solid var(--snes-cosmic-purple);
+            padding: 15px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .search-input {
+            flex-grow: 1;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid var(--snes-gray);
+            color: var(--snes-white);
+            font-family: 'Press Start 2P', monospace;
+            font-size: 10px;
+            padding: 10px;
+            outline: none;
+        }
+        
+        .search-input:focus {
+            border-color: var(--snes-cosmic-teal);
+        }
+        
+        /* Lore Grid */
+        .lore-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        /* Lore Card */
+        .lore-card {
+            background: rgba(0, 0, 0, 0.9);
+            border: 3px solid var(--snes-dark-purple);
+            padding: 15px;
+            cursor: pointer;
+            position: relative;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            transition: none;
+            box-shadow: 
+                inset -2px -2px 0 rgba(72, 0, 168, 0.5),
+                inset 2px 2px 0 rgba(0, 0, 0, 0.8),
+                3px 3px 0 rgba(0,0,0,0.5);
+        }
+        
+        .lore-card:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 
+                inset -2px -2px 0 rgba(72, 0, 168, 0.5),
+                inset 2px 2px 0 rgba(0, 0, 0, 0.8),
+                5px 5px 0 rgba(0,0,0,0.5);
+        }
+        
+        .lore-card.unlocked {
+            border-color: var(--snes-cosmic-teal);
+            box-shadow: 
+                inset -2px -2px 0 rgba(0, 248, 248, 0.5),
+                inset 2px 2px 0 rgba(0, 0, 0, 0.8),
+                3px 3px 0 rgba(0,0,0,0.5);
+        }
+        
+        /* Category-specific card colors */
+        .lore-card.unlocked[data-category="beginning"] {
+            border-color: var(--cat-beginning);
+            box-shadow: 
+                inset -2px -2px 0 rgba(248, 216, 0, 0.5),
+                inset 2px 2px 0 rgba(0, 0, 0, 0.8),
+                3px 3px 0 rgba(0,0,0,0.5);
+        }
+        
+        .lore-card.unlocked[data-category="serpent"] {
+            border-color: var(--cat-serpent);
+            box-shadow: 
+                inset -2px -2px 0 rgba(0, 232, 0, 0.5),
+                inset 2px 2px 0 rgba(0, 0, 0, 0.8),
+                3px 3px 0 rgba(0,0,0,0.5);
+        }
+        
+        .lore-card.unlocked[data-category="fragments"] {
+            border-color: var(--cat-fragments);
+            box-shadow: 
+                inset -2px -2px 0 rgba(0, 248, 248, 0.5),
+                inset 2px 2px 0 rgba(0, 0, 0, 0.8),
+                3px 3px 0 rgba(0,0,0,0.5);
+        }
+        
+        .lore-card.unlocked[data-category="old-ones"] {
+            border-color: var(--cat-old-ones);
+            box-shadow: 
+                inset -2px -2px 0 rgba(248, 40, 248, 0.5),
+                inset 2px 2px 0 rgba(0, 0, 0, 0.8),
+                3px 3px 0 rgba(0,0,0,0.5);
+        }
+        
+        .lore-card.unlocked[data-category="deep-coils"] {
+            border-color: var(--cat-deep-coils);
+            box-shadow: 
+                inset -2px -2px 0 rgba(120, 40, 248, 0.5),
+                inset 2px 2px 0 rgba(0, 0, 0, 0.8),
+                3px 3px 0 rgba(0,0,0,0.5);
+        }
+        
+        .lore-card.unlocked[data-category="theories"] {
+            border-color: var(--cat-theories);
+            box-shadow: 
+                inset -2px -2px 0 rgba(248, 56, 0, 0.5),
+                inset 2px 2px 0 rgba(0, 0, 0, 0.8),
+                3px 3px 0 rgba(0,0,0,0.5);
+        }
+        
+        .lore-card.locked {
+            background: rgba(0, 0, 0, 0.95);
+            border-color: var(--snes-gray);
+            cursor: default;
+            opacity: 0.7;
+        }
+        
+        .lore-card.locked:hover {
+            transform: none;
+        }
+        
+        .lore-card-number {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 8px;
+            color: var(--snes-gray);
+        }
+        
+        .lore-card-new {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: var(--snes-red);
+            color: var(--snes-white);
+            padding: 3px 8px;
+            font-size: 8px;
+            animation: pulse 1s infinite;
+            border: 2px solid var(--snes-white);
+            box-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            z-index: 10;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .lore-card-title {
+            font-size: 12px;
+            color: var(--snes-gold);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            line-height: 1.6;
+        }
+        
+        .lore-card.locked .lore-card-title {
+            color: var(--snes-gray);
+        }
+        
+        .lore-card-unlock {
+            font-size: 8px;
+            color: var(--snes-gray);
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+        
+        .lore-card-preview {
+            font-size: 8px;
+            line-height: 14px;
+            color: var(--snes-white);
+            flex-grow: 1;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 6;
+            -webkit-box-orient: vertical;
+        }
+        
+        .lore-card.locked .lore-card-preview {
+            color: var(--snes-gray);
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            min-height: 80px;
+            margin-bottom: 30px;
+        }
+        
+        .lore-card-category {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-size: 8px;
+            text-transform: uppercase;
+        }
+        
+        /* Category-specific text colors */
+        .lore-card-category.beginning { color: var(--cat-beginning); }
+        .lore-card-category.serpent { color: var(--cat-serpent); }
+        .lore-card-category.fragments { color: var(--cat-fragments); }
+        .lore-card-category.old-ones { color: var(--cat-old-ones); }
+        .lore-card-category.deep-coils { color: var(--cat-deep-coils); }
+        .lore-card-category.theories { color: var(--cat-theories); }
+        
+        /* Lore Modal */
+        .lore-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .lore-modal-content {
+            background: var(--snes-black);
+            border: 4px solid var(--snes-cosmic-teal);
+            padding: 30px;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 
+                inset -2px -2px 0 rgba(0, 248, 248, 0.5),
+                inset 2px 2px 0 rgba(0, 0, 0, 0.8),
+                8px 8px 0 rgba(0,0,0,0.8);
+        }
+        
+        .lore-modal-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--snes-red);
+            border: 2px solid var(--snes-white);
+            color: var(--snes-white);
+            padding: 5px 10px;
+            font-size: 10px;
+            cursor: pointer;
+        }
+        
+        .lore-modal-close:hover {
+            background: var(--snes-dark-purple);
+        }
+        
+        .lore-modal-title {
+            font-size: 16px;
+            color: var(--snes-gold);
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+        
+        .lore-modal-body {
+            font-size: 10px;
+            line-height: 18px;
+            color: var(--snes-white);
+        }
+        
+        .lore-modal-body p {
+            margin-bottom: 15px;
+        }
+        
+        .lore-modal-metadata {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid var(--snes-gray);
+            font-size: 8px;
+            color: var(--snes-gray);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 18px;
+            }
+            
+            .lore-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .back-button {
+                padding: 8px 16px;
+                font-size: 8px;
+            }
+            
+            .category-tabs {
+                gap: 5px;
+            }
+            
+            .category-tab {
+                padding: 8px 12px;
+                font-size: 8px;
+            }
+        }
+    </style>
+    
+    <!-- Load shared lore data -->
+    <script src="js/loreData.js"></script>
+</head>
+<body>
+    <canvas id="stars-canvas"></canvas>
+    
+    <!-- Navigation Bar -->
+    <div style="position: absolute; top: 20px; left: 20px; z-index: 10;">
+        <a href="https://discord.gg/a6X4W7QbkG" target="_blank" style="color: #4ecdc4; text-decoration: none; font-family: 'Press Start 2P', monospace; font-size: 10px;">💬 Join the Discord Server</a>
+    </div>
+    <div style="position: absolute; top: 20px; right: 20px; z-index: 10;">
+        <a href="/how-to-play.html" style="color: #4ecdc4; text-decoration: none; font-family: 'Press Start 2P', monospace; font-size: 10px; margin-right: 20px;">📖 How to Play</a>
+        <a href="/lore.html" style="color: #4ecdc4; text-decoration: none; font-family: 'Press Start 2P', monospace; font-size: 10px; margin-right: 20px;">📜 Lore</a>
+        <a href="/leaderboard.html" style="color: #4ecdc4; text-decoration: none; font-family: 'Press Start 2P', monospace; font-size: 10px;">🏆 Leaderboard</a>
+    </div>
+    
+    <div class="container">
+        <a href="/" class="back-button">← Back to Game</a>
+        
+        <header>
+            <h1>The Coiled Archive</h1>
+            <p class="subtitle">Fragments of a universe that forgot how to be whole</p>
+        </header>
+        
+        <!-- Progress Section -->
+        <div class="progress-section">
+            <h2 style="font-size: 14px; color: var(--snes-cosmic-teal); margin-bottom: 15px;">Archive Progress</h2>
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" style="width: 0%;"></div>
+            </div>
+            <p class="progress-text">0 / 0 Entries Discovered</p>
+        </div>
+        
+        <!-- Search Section -->
+        <div class="search-section">
+            <input type="text" class="search-input" placeholder="Search the archive..." id="loreSearch">
+        </div>
+        
+        <!-- Category Tabs -->
+        <div class="category-tabs">
+            <button class="category-tab active" data-category="all">All Entries</button>
+            <button class="category-tab" data-category="beginning">The Beginning</button>
+            <button class="category-tab" data-category="serpent">The Serpent</button>
+            <button class="category-tab" data-category="fragments">Fragments</button>
+            <button class="category-tab" data-category="old-ones">The Old Ones</button>
+            <button class="category-tab" data-category="deep-coils">Deep Coils</button>
+            <button class="category-tab" data-category="theories">Theories</button>
+        </div>
+        
+        <!-- Lore Grid -->
+        <div class="lore-grid" id="loreGrid">
+            <!-- Cards will be dynamically generated -->
+        </div>
+    </div>
+    
+    <!-- Lore Modal -->
+    <div class="lore-modal" id="loreModal">
+        <div class="lore-modal-content">
+            <button class="lore-modal-close" onclick="closeLoreModal()">X</button>
+            <h2 class="lore-modal-title" id="modalTitle">The Fold</h2>
+            <div class="lore-modal-body" id="modalBody">
+                <p>Before separation, there was unity. Not the unity of harmony, but the unity of things that have not yet learned they are different.</p>
+                <p>The Fold existed outside of sequence, outside of causality. All elements occupied the same conceptual space without intersection or reaction. Fire contained no heat because heat required something else to burn. Water held no depth because depth required somewhere else to be.</p>
+                <p>Duration is the wrong word. The Fold persisted in a state that predated the necessity of persistence.</p>
+            </div>
+            <div class="lore-modal-metadata" id="modalMetadata">
+                <p><strong>Entry #:</strong> 001</p>
+                <p><strong>Category:</strong> The Beginning</p>
+                <p><strong>Discovered:</strong> Starting Entry</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Animated starfield background
+        const canvas = document.getElementById('stars-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        const stars = [];
+        const numStars = 200;
+        
+        for (let i = 0; i < numStars; i++) {
+            stars.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                radius: Math.random() * 1.5,
+                opacity: Math.random() * 0.8 + 0.2,
+                speed: Math.random() * 0.5 + 0.1
+            });
+        }
+        
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            stars.forEach(star => {
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(248, 248, 248, ${star.opacity})`;
+                ctx.fill();
+                
+                star.y += star.speed;
+                
+                if (star.y > canvas.height) {
+                    star.y = -10;
+                    star.x = Math.random() * canvas.width;
+                }
+            });
+            
+            requestAnimationFrame(animate);
+        }
+        
+        animate();
+        
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+        
+        // Lore System - Use shared LORE_DATA if available, fallback to local copy
+        const loreData = window.LORE_DATA || {
+            'fold-1': {
+                id: 'fold-1',
+                number: '001',
+                title: 'The Fold',
+                category: 'beginning',
+                content: `Before separation, there was unity. Not the unity of harmony, but the unity of things that have not yet learned they are different.
+                
+                The Fold existed outside of sequence, outside of causality. All elements occupied the same conceptual space without intersection or reaction. Fire contained no heat because heat required something else to burn. Water held no depth because depth required somewhere else to be.
+                
+                Duration is the wrong word. The Fold persisted in a state that predated the necessity of persistence.`,
+                unlockCriteria: { type: 'default' }
+            },
+            'unraveling-1': {
+                id: 'unraveling-1',
+                number: '002',
+                title: 'The Unraveling',
+                category: 'beginning',
+                content: `Something shifted. Not moved - movement requires space. Not changed - change requires time. Shifted.
+                
+                The unity began to question itself. Is fire fire if it does not burn? Is water water if it does not flow? The questions themselves became the first wounds in perfection.
+                
+                Separation birthed possibility. Possibility birthed pain.`,
+                unlockCriteria: { type: 'scoreInGame', value: 5000 },
+                unlockText: 'Score 5,000 points'
+            },
+            'serpent-1': {
+                id: 'serpent-1',
+                number: '010',
+                title: 'First Sighting',
+                category: 'serpent',
+                content: `The Infinite Snake manifested seventeen units after primary stabilization. No arrival. No genesis. Simple existence without precedent.
+                
+                Initial measurements:
+                - Length: Non-Euclidean
+                - Mass: Contextual
+                - Behavior: Consumptive
+                - Purpose: [DATA EXPUNGED]
+                
+                Note: Observers report persistent feeling of being watched. Snake shows no visible eyes.`,
+                unlockCriteria: { type: 'gamesPlayed', value: 10 },
+                unlockText: 'Play 10 games'
+            },
+            'fragment-1': {
+                id: 'fragment-1',
+                number: '020',
+                title: 'Element Echo',
+                category: 'fragments',
+                content: `Found this carved into a meteor fragment:
+                
+                "We were whole once. Fire knew Water's name. Earth sang to Air. Now we drift, seeking combinations that feel like memories of home."
+                
+                Carbon dating impossible. Material predates known atomic structures.`,
+                unlockCriteria: { type: 'discoveries', value: 50 },
+                unlockText: 'Discover 50 elements'
+            },
+            'osseus-diary': {
+                id: 'osseus-diary',
+                number: '030',
+                title: "Osseus's Diary",
+                category: 'old-ones',
+                content: `Epoch 1: The earth remembers weight. I am weight. We are the same.
+                
+                Epoch 1,337: Visitors today. They did not appreciate my poetry. Their fragments were bitter.
+                
+                Epoch 50,293: Structural integrity holding. Visitor count: 0. Greg hasn't visited in three epochs. Starting to think he's avoiding me.
+                
+                Epoch 50,294: Wrote new poem about bones. It's terrible. Perfect.`,
+                unlockCriteria: { type: 'defeatBoss', bossName: 'Osseus' },
+                unlockText: 'Defeat Osseus'
+            },
+            'recursion-1': {
+                id: 'recursion-1',
+                number: '040',
+                title: 'Recursion Event',
+                category: 'deep-coils',
+                content: `I encountered myself ascending while I descended. We agreed to disagree on direction. Time flows differently here. Sideways, perhaps.
+                
+                The Snake was there. Or will be there. Tense becomes meaningless when past and future coil together.
+                
+                Warning: Do not attempt to map these regions. The maps become the territory.`,
+                unlockCriteria: { type: 'totalScore', value: 100000 },
+                unlockText: 'Reach 100,000 total score'
+            },
+            'theory-1': {
+                id: 'theory-1',
+                number: '050',
+                title: 'The Consumption Hypothesis',
+                category: 'theories',
+                content: `Theory: The Infinite Snake is not destroying elements. It's returning them to the Fold.
+                
+                Each consumed element reduces universal entropy. Given sufficient consumption, reality might achieve pre-separation unity.
+                
+                Counterpoint: Unity achieved through consumption is not unity. It's loneliness with a full stomach.`,
+                unlockCriteria: { type: 'gamesPlayed', value: 100 },
+                unlockText: 'Complete 100 games'
+            }
+            // More lore entries will be added here later
+        };
+        
+        // Category names mapping
+        const categoryNames = {
+            'beginning': 'The Beginning',
+            'serpent': 'The Serpent',
+            'fragments': 'Fragments',
+            'old-ones': 'The Old Ones',
+            'deep-coils': 'Deep Coils',
+            'theories': 'Theories'
+        };
+        
+        // Load unlock manager from parent window if available
+        let loreUnlockManager;
+        
+        // Try to get the loreUnlockManager from various sources
+        if (window.opener && window.opener.loreUnlockManager) {
+            // If opened in new window/tab
+            loreUnlockManager = window.opener.loreUnlockManager;
+            console.log('[LORE PAGE] Using loreUnlockManager from opener');
+        } else if (window.parent && window.parent.loreUnlockManager) {
+            // If in iframe
+            loreUnlockManager = window.parent.loreUnlockManager;
+            console.log('[LORE PAGE] Using loreUnlockManager from parent');
+        } else if (window.loreUnlockManager) {
+            // If loaded directly
+            loreUnlockManager = window.loreUnlockManager;
+            console.log('[LORE PAGE] Using local loreUnlockManager');
+        } else {
+            // Fallback - create minimal version that reads from localStorage
+            console.log('[LORE PAGE] Creating fallback loreUnlockManager');
+            const STORAGE_KEY = 'infiniteSnakeLoreUnlocks';
+            let unlockedLore = new Map();
+            
+            try {
+                const stored = localStorage.getItem(STORAGE_KEY);
+                if (stored) {
+                    unlockedLore = new Map(JSON.parse(stored));
+                }
+            } catch (error) {
+                console.error('[LORE PAGE] Failed to load unlocked lore:', error);
+            }
+            
+            loreUnlockManager = {
+                isUnlocked: (loreId) => unlockedLore.has(loreId) || (loreData[loreId] && loreData[loreId].unlockCriteria.type === 'default'),
+                getUnlockData: (loreId) => unlockedLore.get(loreId),
+                markAsRead: (loreId) => {
+                    const data = unlockedLore.get(loreId);
+                    if (data && data.isNew) {
+                        data.isNew = false;
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(unlockedLore.entries())));
+                    }
+                },
+                getAllUnlockedLore: () => Array.from(unlockedLore.entries())
+            };
+        }
+        
+        // Store current active tab
+        let currentActiveTab = 'all';
+        
+        // Generate lore cards
+        function generateLoreCards() {
+            const loreGrid = document.getElementById('loreGrid');
+            loreGrid.innerHTML = '';
+            
+            // Sort entries by entry number
+            const sortedEntries = Object.entries(loreData).sort((a, b) => {
+                const numA = parseInt(a[1].number);
+                const numB = parseInt(b[1].number);
+                return numA - numB;
+            });
+            
+            sortedEntries.forEach(([id, data]) => {
+                const isUnlocked = data.unlockCriteria.type === 'default' || loreUnlockManager.isUnlocked(id);
+                const unlockData = loreUnlockManager.getUnlockData(id);
+                const isNew = unlockData && unlockData.isNew;
+                
+                const card = document.createElement('div');
+                card.className = `lore-card ${isUnlocked ? 'unlocked' : 'locked'}`;
+                card.dataset.category = data.category;
+                card.dataset.id = id;
+                
+                let cardContent = '';
+                
+                if (isNew) {
+                    cardContent += '<span class="lore-card-new">NEW</span>';
+                }
+                
+                cardContent += `<span class="lore-card-number">#${data.number}</span>`;
+                
+                if (isUnlocked) {
+                    cardContent += `
+                        <h3 class="lore-card-title">${data.title}</h3>
+                        <p class="lore-card-preview">${data.content.substring(0, 150)}...</p>
+                        <span class="lore-card-category ${data.category}">${categoryNames[data.category]}</span>
+                    `;
+                } else {
+                    cardContent += `
+                        <h3 class="lore-card-title">???</h3>
+                        <p class="lore-card-unlock">Locked</p>
+                        <div class="lore-card-preview">🔒</div>
+                        <span class="lore-card-category ${data.category}">${categoryNames[data.category]}</span>
+                    `;
+                }
+                
+                card.innerHTML = cardContent;
+                
+                if (isUnlocked) {
+                    card.addEventListener('click', () => {
+                        openLoreModal(id);
+                        // Remove NEW badge on click
+                        const newBadge = card.querySelector('.lore-card-new');
+                        if (newBadge) {
+                            newBadge.remove();
+                            loreUnlockManager.markAsRead(id);
+                        }
+                    });
+                }
+                
+                loreGrid.appendChild(card);
+            });
+            
+            updateProgress();
+            
+            // Reapply filter after regenerating cards
+            filterCards(currentActiveTab);
+            
+            // Restore active tab visual state
+            categoryTabs.forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.dataset.category === currentActiveTab) {
+                    tab.classList.add('active');
+                }
+            });
+        }
+        
+        // Category filtering
+        const categoryTabs = document.querySelectorAll('.category-tab');
+        
+        categoryTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                categoryTabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                const category = tab.dataset.category;
+                currentActiveTab = category; // Store the current active tab
+                filterCards(category);
+            });
+        });
+        
+        function filterCards(category) {
+            const loreCards = document.querySelectorAll('.lore-card');
+            loreCards.forEach(card => {
+                if (category === 'all' || card.dataset.category === category) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+        
+        // Search functionality
+        const searchInput = document.getElementById('loreSearch');
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const loreCards = document.querySelectorAll('.lore-card');
+            loreCards.forEach(card => {
+                const title = card.querySelector('.lore-card-title').textContent.toLowerCase();
+                const preview = card.querySelector('.lore-card-preview').textContent.toLowerCase();
+                if (title.includes(searchTerm) || preview.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+        
+        // Modal functionality
+        function openLoreModal(cardId) {
+            const modal = document.getElementById('loreModal');
+            const data = loreData[cardId];
+            const unlockData = loreUnlockManager.getUnlockData(cardId);
+            
+            if (data) {
+                document.getElementById('modalTitle').textContent = data.title;
+                document.getElementById('modalBody').innerHTML = `<p>${data.content.split('\n\n').join('</p><p>')}</p>`;
+                
+                // Update metadata
+                let discoveredText = 'Starting Entry';
+                if (unlockData && unlockData.unlockedAt) {
+                    const date = new Date(unlockData.unlockedAt);
+                    discoveredText = date.toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                }
+                
+                document.getElementById('modalMetadata').innerHTML = `
+                    <p><strong>Entry #:</strong> ${data.number}</p>
+                    <p><strong>Category:</strong> ${categoryNames[data.category]}</p>
+                    <p><strong>Discovered:</strong> ${discoveredText}</p>
+                    <p><strong>Unlock Requirement:</strong> ${data.unlockText || 'Default unlock'}</p>
+                `;
+                
+                modal.style.display = 'flex';
+                
+                // Mark as read (already done on click now)
+                // loreUnlockManager.markAsRead(cardId);
+            }
+        }
+        
+        function closeLoreModal() {
+            document.getElementById('loreModal').style.display = 'none';
+        }
+        
+        // Close modal on outside click
+        document.getElementById('loreModal').addEventListener('click', (e) => {
+            if (e.target.id === 'loreModal') {
+                closeLoreModal();
+            }
+        });
+        
+        // Update progress
+        function updateProgress() {
+            const totalEntries = Object.keys(loreData).length;
+            const unlockedCount = Object.keys(loreData).filter(id => 
+                loreData[id].unlockCriteria.type === 'default' || loreUnlockManager.isUnlocked(id)
+            ).length;
+            
+            const progressFill = document.querySelector('.progress-bar-fill');
+            const progressText = document.querySelector('.progress-text');
+            
+            const percentage = totalEntries > 0 ? (unlockedCount / totalEntries) * 100 : 0;
+            progressFill.style.width = `${percentage}%`;
+            progressText.textContent = `${unlockedCount} / ${totalEntries} Entries Discovered`;
+        }
+        
+        // Initialize
+        generateLoreCards();
+        
+        // Refresh periodically to check for new unlocks
+        setInterval(() => {
+            generateLoreCards();
+        }, 5000);
+    </script>
+    
+    <!-- Vercel Web Analytics -->
+    <script>
+      window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+    </script>
+    <script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>
