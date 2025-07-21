@@ -543,22 +543,25 @@
         
         // Define planet distribution
         const standardPlanetIds = [];
-        for (let i = 1; i <= 17; i++) {
+        for (let i = 1; i <= 35; i++) {
             standardPlanetIds.push(`planet-${i}`);
         }
         
         const specialPlanetIds = [];
-        for (let i = 1; i <= 5; i++) {
+        for (let i = 1; i <= 12; i++) {
             specialPlanetIds.push(`special-planet-${i}`);
         }
         
         // Grid-based distribution with randomization for more even spread
         const gridSize = 8; // 8x8 grid
-        const cellSize = WORLD_SIZE / gridSize;
+        // Extend planet generation area by 20% on each side to account for parallax
+        const extendedWorldSize = WORLD_SIZE * 1.4;
+        const worldOffset = WORLD_SIZE * 0.2; // Start 20% before world boundary
+        const cellSize = extendedWorldSize / gridSize;
         const planetsPerCell = Math.ceil(planetCount / (gridSize * gridSize));
         
         // Use a minimum distance between planets to prevent clumping
-        const minPlanetDistance = 300; // Reduced from 400 for better coverage
+        const minPlanetDistance = 250; // Further reduced for better coverage with extended area
         
         // Determine number of special planets (2-3 max)
         const specialPlanetCount = Math.floor(Math.random() * 2) + 2;
@@ -566,16 +569,26 @@
         // Track used special planets to avoid duplicates
         const usedSpecialPlanets = new Set();
         
+        // Shuffle standard planets to use each one exactly once
+        const shuffledStandardPlanets = [...standardPlanetIds];
+        for (let i = shuffledStandardPlanets.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffledStandardPlanets[i], shuffledStandardPlanets[j]] = [shuffledStandardPlanets[j], shuffledStandardPlanets[i]];
+        }
+        let standardPlanetIndex = 0;
+        
         let planetIndex = 0;
         
-        // Generate planets in a grid pattern with randomization
+        // First, generate all planet positions without assigning types
+        const planetPositions = [];
+        
         for (let gridX = 0; gridX < gridSize; gridX++) {
             for (let gridY = 0; gridY < gridSize; gridY++) {
-                if (planetIndex >= planetCount) break;
+                if (planetPositions.length >= planetCount) break;
                 
-                // Random position within grid cell
-                const cellX = gridX * cellSize;
-                const cellY = gridY * cellSize;
+                // Random position within grid cell - offset to start before world boundary
+                const cellX = gridX * cellSize - worldOffset + 300; // Shifted 300 pixels right total
+                const cellY = gridY * cellSize - worldOffset + 100; // Shifted 100 pixels down
                 
                 // Add some randomness to position within cell
                 const x = cellX + Math.random() * cellSize;
@@ -583,9 +596,9 @@
                 
                 // Check distance from other planets
                 let validPosition = true;
-                for (let j = 0; j < pixelPlanets.length; j++) {
-                    const dx = pixelPlanets[j].x - x;
-                    const dy = pixelPlanets[j].y - y;
+                for (let j = 0; j < planetPositions.length; j++) {
+                    const dx = planetPositions[j].x - x;
+                    const dy = planetPositions[j].y - y;
                     const distance = Math.sqrt(dx * dx + dy * dy);
                     if (distance < minPlanetDistance) {
                         validPosition = false;
@@ -595,35 +608,49 @@
                 
                 if (!validPosition) continue;
                 
-                // Determine planet type and ID
-                let planetId;
-                let isSpecial = false;
-                
-                if (planetIndex < specialPlanetCount && usedSpecialPlanets.size < specialPlanetCount) {
-                    // Add a special planet
-                    const availableSpecials = specialPlanetIds.filter(id => !usedSpecialPlanets.has(id));
-                    planetId = availableSpecials[Math.floor(Math.random() * availableSpecials.length)];
-                    usedSpecialPlanets.add(planetId);
-                    isSpecial = true;
-                } else {
-                    // Add a standard planet (can duplicate)
-                    planetId = standardPlanetIds[Math.floor(Math.random() * standardPlanetIds.length)];
-                }
-                
-                pixelPlanets.push({
+                planetPositions.push({
                     x: x,
                     y: y,
                     radius: 30 + Math.random() * 80,  // Was 20-60, now 30-110
-                    imageId: planetId,
-                    isSpecial: isSpecial,
                     rotation: Math.random() * Math.PI * 2,
                     rotationSpeed: (Math.random() - 0.5) * 0.01,
                     opacity: 0.9
                 });
-                
-                planetIndex++;
             }
-            if (planetIndex >= planetCount) break;
+            if (planetPositions.length >= planetCount) break;
+        }
+        
+        // Now randomly select which positions will have special planets
+        const shuffledIndices = Array.from({length: planetPositions.length}, (_, i) => i);
+        for (let i = shuffledIndices.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffledIndices[i], shuffledIndices[j]] = [shuffledIndices[j], shuffledIndices[i]];
+        }
+        
+        // Assign planet types
+        for (let i = 0; i < planetPositions.length; i++) {
+            const position = planetPositions[i];
+            let planetId;
+            let isSpecial = false;
+            
+            // Check if this should be a special planet
+            if (shuffledIndices.indexOf(i) < specialPlanetCount && usedSpecialPlanets.size < specialPlanetCount) {
+                // Add a special planet
+                const availableSpecials = specialPlanetIds.filter(id => !usedSpecialPlanets.has(id));
+                planetId = availableSpecials[Math.floor(Math.random() * availableSpecials.length)];
+                usedSpecialPlanets.add(planetId);
+                isSpecial = true;
+            } else {
+                // Add a standard planet (no duplicates - use next from shuffled array)
+                planetId = shuffledStandardPlanets[standardPlanetIndex];
+                standardPlanetIndex++;
+            }
+            
+            pixelPlanets.push({
+                ...position,
+                imageId: planetId,
+                isSpecial: isSpecial
+            });
         }
         
         const pixelAsteroids = [];

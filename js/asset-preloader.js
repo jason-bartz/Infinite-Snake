@@ -202,8 +202,8 @@ class AssetPreloader {
      * Preload planet images
      */
     async preloadPlanets() {
-        const standardPlanets = 17;
-        const specialPlanets = 5;
+        const standardPlanets = 35;
+        const specialPlanets = 12;
         const totalPlanets = standardPlanets + specialPlanets;
         let loaded = 0;
         
