@@ -245,25 +245,39 @@
     /* =============== DISCOVERY FEED - SMALLER AND REPOSITIONED =============== */
     body.mobile .discovery-feed,
     .mobile .discovery-feed {
-        /* Position below stat box with more space */
+        /* Position higher up and centered */
         position: fixed !important;
-        top: 120px !important; /* Increased from 80px to 120px */
-        left: 10px !important;
-        bottom: auto !important;
+        bottom: 180px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        top: auto !important;
         right: auto !important;
         
-        /* Smaller dimensions */
-        width: 180px !important;
-        max-height: 200px !important;
+        /* Compact dimensions */
+        width: 250px !important;
+        max-height: 80px !important;
         
-        /* Reduced opacity */
-        opacity: 0.6 !important;
+        /* Slightly more visible */
+        opacity: 0.8 !important;
         
         /* No pointer events to not block gameplay */
         pointer-events: none !important;
         
         /* Higher z-index but below UI */
         z-index: 80 !important;
+    }
+    
+    /* Limit to 2 visible items */
+    body.mobile .discovery-feed #discoveryFeed {
+        display: flex !important;
+        flex-direction: column !important;
+        max-height: 80px !important;
+        overflow: hidden !important;
+    }
+    
+    /* Hide messages beyond the 2nd one */
+    body.mobile .discovery-feed .discovery-message:nth-child(n+3) {
+        display: none !important;
     }
 
     /* Smaller discovery messages */
@@ -310,10 +324,10 @@ body.mobile .leaderboard-box {
 /* =============== BOOST BUTTON WITH METER =============== */
 body.mobile .boost-button {
     position: fixed !important;
-    bottom: 40px !important;
-    right: 40px !important;
-    width: 100px !important;
-    height: 100px !important;
+    bottom: 20px !important;
+    right: 20px !important;
+    width: 140px !important;
+    height: 140px !important;
     background: rgba(16, 16, 64, 0.95) !important;
     border: 3px solid !important;
     border-color: var(--snes-cosmic-teal) var(--snes-dark-purple) var(--snes-dark-purple) var(--snes-cosmic-teal) !important;
@@ -387,8 +401,8 @@ body.mobile .boost-button:active {
     }
     
     body.mobile .discovery-feed {
-        width: 150px !important;
-        top: 110px !important;
+        width: 200px !important;
+        bottom: 180px !important;
     }
 }
 
@@ -404,8 +418,8 @@ body.mobile .boost-button:active {
     }
     
     body.mobile .discovery-feed {
-        width: 220px !important;
-        max-height: 250px !important;
-        top: 130px !important;
+        width: 280px !important;
+        max-height: 80px !important;
+        bottom: 180px !important;
     }
 }

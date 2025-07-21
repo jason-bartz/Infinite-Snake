@@ -459,6 +459,12 @@
         let shootingStars = [];
         let lastShootingStarTime = 0;
         
+        // Spaceship system
+        let spaceships = [];
+        let lastSpaceshipSpawnTime = 0;
+        let SPACESHIP_SPAWN_INTERVAL = 180000; // 3 minutes in milliseconds
+        let SPACESHIP_SPAWN_CHANCE = 0.2; // 20% chance
+        
         const pixelStarLayers = [
             { stars: [], speed: 0.05, size: 1, color: '#666', count: 100 },
             { stars: [], speed: 0.1, size: 1, color: '#999', count: 80 },
@@ -10514,36 +10520,17 @@
             if (leftBorder > -borderThickness) {
                 const borderWidth = Math.min(borderThickness, leftBorder);
                 if (borderWidth > 0) {
-                    if (isMobile) {
-                        // Solid gradient for mobile with increased opacity
-                        const gradient = ctx.createLinearGradient(0, 0, borderWidth, 0);
-                        gradient.addColorStop(0, 'rgba(128, 64, 255, 0.9)');
-                        gradient.addColorStop(0.7, 'rgba(128, 64, 255, 0.6)');
-                        gradient.addColorStop(1, 'rgba(128, 64, 255, 0.1)');
-                        ctx.fillStyle = gradient;
-                        ctx.fillRect(0, 0, borderWidth, canvas.height);
-                        
-                        // Solid warning line
-                        ctx.fillStyle = '#8844FF';
-                        ctx.fillRect(Math.max(2, leftBorder - warningLineThickness/2), 0, warningLineThickness, canvas.height);
-                    } else {
-                        // Draw subtle grid pattern for desktop
-                        for (let y = 0; y < canvas.height; y += pixelSize * 2) {
-                            for (let x = 0; x < borderWidth; x += pixelSize * 2) {
-                                const fadeAlpha = 1 - (x / borderThickness);
-                                const pulse = (pulsePhase === 0 || pulsePhase === 2) ? 0.8 : 0.4;
-                                ctx.fillStyle = `rgba(64, 32, 128, ${fadeAlpha * pulse})`;
-                                ctx.fillRect(x, y, pixelSize, pixelSize);
-                            }
-                        }
-                        
-                        // Warning line
-                        ctx.fillStyle = '#6633CC';
-                        const lineX = Math.max(10, leftBorder);
-                        for (let y = 0; y < canvas.height; y += pixelSize * 4) {
-                            ctx.fillRect(lineX - 2, y, 4, pixelSize * 2);
-                        }
-                    }
+                    // Solid gradient for both mobile and desktop
+                    const gradient = ctx.createLinearGradient(0, 0, borderWidth, 0);
+                    gradient.addColorStop(0, 'rgba(128, 64, 255, 0.675)');
+                    gradient.addColorStop(0.7, 'rgba(128, 64, 255, 0.45)');
+                    gradient.addColorStop(1, 'rgba(128, 64, 255, 0.075)');
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(0, 0, borderWidth, canvas.height);
+                    
+                    // Solid warning line
+                    ctx.fillStyle = '#8844FF';
+                    ctx.fillRect(Math.max(2, leftBorder - warningLineThickness/2), 0, warningLineThickness, canvas.height);
                 }
             }
             
@@ -10552,36 +10539,18 @@
                 const startX = Math.max(0, rightBorder - borderThickness - borderBuffer);
                 const borderWidth = canvas.width - startX + borderBuffer; // Extend beyond canvas edge
                 if (borderWidth > 0) {
-                    if (isMobile) {
-                        // Solid gradient for mobile - ensure it extends fully to edge
-                        const gradient = ctx.createLinearGradient(startX, 0, canvas.width + borderBuffer, 0);
-                        gradient.addColorStop(0, 'rgba(128, 64, 255, 0.1)');
-                        gradient.addColorStop(0.3, 'rgba(128, 64, 255, 0.6)');
-                        gradient.addColorStop(1, 'rgba(128, 64, 255, 0.9)');
-                        ctx.fillStyle = gradient;
-                        ctx.fillRect(startX, 0, borderWidth, canvas.height);
-                        
-                        // Solid warning line - ensure it's visible
-                        ctx.fillStyle = '#8844FF';
-                        const lineX = Math.max(startX + warningLineThickness, Math.min(canvas.width - warningLineThickness - 2, rightBorder - warningLineThickness/2));
-                        ctx.fillRect(lineX, 0, warningLineThickness, canvas.height);
-                    } else {
-                        // Draw subtle grid pattern for desktop
-                        for (let y = 0; y < canvas.height; y += pixelSize * 2) {
-                            for (let x = Math.max(rightBorder - borderThickness, rightBorder); x < canvas.width; x += pixelSize * 2) {
-                                const fadeAlpha = 1 - ((canvas.width - x) / borderThickness);
-                                const pulse = (pulsePhase === 0 || pulsePhase === 2) ? 0.8 : 0.4;
-                                ctx.fillStyle = `rgba(64, 32, 128, ${fadeAlpha * pulse})`;
-                                ctx.fillRect(x, y, pixelSize, pixelSize);
-                            }
-                        }
-                        
-                        // Warning line
-                        ctx.fillStyle = '#6633CC';
-                        for (let y = 0; y < canvas.height; y += pixelSize * 4) {
-                            ctx.fillRect(rightBorder - 2, y, 4, pixelSize * 2);
-                        }
-                    }
+                    // Solid gradient for both mobile and desktop
+                    const gradient = ctx.createLinearGradient(startX, 0, canvas.width + borderBuffer, 0);
+                    gradient.addColorStop(0, 'rgba(128, 64, 255, 0.075)');
+                    gradient.addColorStop(0.3, 'rgba(128, 64, 255, 0.45)');
+                    gradient.addColorStop(1, 'rgba(128, 64, 255, 0.675)');
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(startX, 0, borderWidth, canvas.height);
+                    
+                    // Solid warning line
+                    ctx.fillStyle = '#8844FF';
+                    const lineX = Math.max(startX + warningLineThickness, Math.min(canvas.width - warningLineThickness - 2, rightBorder - warningLineThickness/2));
+                    ctx.fillRect(lineX, 0, warningLineThickness, canvas.height);
                 }
             }
             
@@ -10589,36 +10558,17 @@
             if (topBorder > -borderThickness) {
                 const borderHeight = Math.min(borderThickness, topBorder);
                 if (borderHeight > 0) {
-                    if (isMobile) {
-                        // Solid gradient for mobile
-                        const gradient = ctx.createLinearGradient(0, 0, 0, borderHeight);
-                        gradient.addColorStop(0, 'rgba(128, 64, 255, 0.9)');
-                        gradient.addColorStop(0.7, 'rgba(128, 64, 255, 0.6)');
-                        gradient.addColorStop(1, 'rgba(128, 64, 255, 0.1)');
-                        ctx.fillStyle = gradient;
-                        ctx.fillRect(0, 0, canvas.width, borderHeight);
-                        
-                        // Solid warning line
-                        ctx.fillStyle = '#8844FF';
-                        ctx.fillRect(0, Math.max(2, topBorder - warningLineThickness/2), canvas.width, warningLineThickness);
-                    } else {
-                        // Draw subtle grid pattern for desktop
-                        for (let y = 0; y < borderHeight; y += pixelSize * 2) {
-                            for (let x = 0; x < canvas.width; x += pixelSize * 2) {
-                                const fadeAlpha = 1 - (y / borderThickness);
-                                const pulse = (pulsePhase === 0 || pulsePhase === 2) ? 0.8 : 0.4;
-                                ctx.fillStyle = `rgba(64, 32, 128, ${fadeAlpha * pulse})`;
-                                ctx.fillRect(x, y, pixelSize, pixelSize);
-                            }
-                        }
-                        
-                        // Warning line
-                        ctx.fillStyle = '#6633CC';
-                        const lineY = Math.max(10, topBorder);
-                        for (let x = 0; x < canvas.width; x += pixelSize * 4) {
-                            ctx.fillRect(x, lineY - 2, pixelSize * 2, 4);
-                        }
-                    }
+                    // Solid gradient for both mobile and desktop
+                    const gradient = ctx.createLinearGradient(0, 0, 0, borderHeight);
+                    gradient.addColorStop(0, 'rgba(128, 64, 255, 0.675)');
+                    gradient.addColorStop(0.7, 'rgba(128, 64, 255, 0.45)');
+                    gradient.addColorStop(1, 'rgba(128, 64, 255, 0.075)');
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(0, 0, canvas.width, borderHeight);
+                    
+                    // Solid warning line
+                    ctx.fillStyle = '#8844FF';
+                    ctx.fillRect(0, Math.max(2, topBorder - warningLineThickness/2), canvas.width, warningLineThickness);
                 }
             }
             
@@ -10627,35 +10577,17 @@
                 const startY = Math.max(0, bottomBorder - borderThickness);
                 const borderHeight = canvas.height - startY;
                 if (borderHeight > 0) {
-                    if (isMobile) {
-                        // Solid gradient for mobile
-                        const gradient = ctx.createLinearGradient(0, startY, 0, canvas.height);
-                        gradient.addColorStop(0, 'rgba(128, 64, 255, 0.1)');
-                        gradient.addColorStop(0.3, 'rgba(128, 64, 255, 0.6)');
-                        gradient.addColorStop(1, 'rgba(128, 64, 255, 0.9)');
-                        ctx.fillStyle = gradient;
-                        ctx.fillRect(0, startY, canvas.width, borderHeight);
-                        
-                        // Solid warning line
-                        ctx.fillStyle = '#8844FF';
-                        ctx.fillRect(0, Math.min(canvas.height - warningLineThickness - 2, bottomBorder - warningLineThickness/2), canvas.width, warningLineThickness);
-                    } else {
-                        // Draw subtle grid pattern for desktop
-                        for (let y = Math.max(bottomBorder - borderThickness, bottomBorder); y < canvas.height; y += pixelSize * 2) {
-                            for (let x = 0; x < canvas.width; x += pixelSize * 2) {
-                                const fadeAlpha = 1 - ((canvas.height - y) / borderThickness);
-                                const pulse = (pulsePhase === 0 || pulsePhase === 2) ? 0.8 : 0.4;
-                                ctx.fillStyle = `rgba(64, 32, 128, ${fadeAlpha * pulse})`;
-                                ctx.fillRect(x, y, pixelSize, pixelSize);
-                            }
-                        }
-                        
-                        // Warning line
-                        ctx.fillStyle = '#6633CC';
-                        for (let x = 0; x < canvas.width; x += pixelSize * 4) {
-                            ctx.fillRect(x, bottomBorder - 2, pixelSize * 2, 4);
-                        }
-                    }
+                    // Solid gradient for both mobile and desktop
+                    const gradient = ctx.createLinearGradient(0, startY, 0, canvas.height);
+                    gradient.addColorStop(0, 'rgba(128, 64, 255, 0.075)');
+                    gradient.addColorStop(0.3, 'rgba(128, 64, 255, 0.45)');
+                    gradient.addColorStop(1, 'rgba(128, 64, 255, 0.675)');
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(0, startY, canvas.width, borderHeight);
+                    
+                    // Solid warning line
+                    ctx.fillStyle = '#8844FF';
+                    ctx.fillRect(0, Math.min(canvas.height - warningLineThickness - 2, bottomBorder - warningLineThickness/2), canvas.width, warningLineThickness);
                 }
             }
             
@@ -10668,8 +10600,7 @@
             ctx.fillStyle = '#000011';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // ALWAYS draw borders first (for both mobile and desktop)
-            drawBorders();
+            // Borders will be drawn at the end to appear on top
             
             // Use optimized mobile renderer if available
             if (isMobile) {
@@ -10766,6 +10697,11 @@
                 window.easterEggElements.update(16.67, gameState);
                 window.easterEggElements.render(ctx, camera);
             }
+            
+            // Draw spaceships (behind planets)
+            spaceships.forEach(spaceship => {
+                spaceship.draw(ctx, camera);
+            });
             
             // Draw pixel planets BEFORE grid
             drawPixelPlanets();
@@ -12309,6 +12245,29 @@
                     }
                 }
                 
+                // Update spaceships
+                spaceships = spaceships.filter(spaceship => {
+                    spaceship.update(16.67); // Fixed timestep
+                    return spaceship.alive;
+                });
+                
+                // Spawn spaceship occasionally
+                if (currentTime - lastSpaceshipSpawnTime > SPACESHIP_SPAWN_INTERVAL && spaceships.length === 0) {
+                    if (Math.random() < SPACESHIP_SPAWN_CHANCE) {
+                        const types = ['enterprise', 'millenium-falcon', 'pillar-of-autumn'];
+                        const randomType = types[Math.floor(Math.random() * types.length)];
+                        
+                        // Spawn in player's field of view
+                        // Camera position is the center of the view, so we need to calculate world position
+                        const spawnX = camera.x + canvas.width / (2 * cameraZoom) + 100; // Just off-screen to the right
+                        const spawnY = camera.y + (Math.random() - 0.5) * canvas.height / (2 * cameraZoom); // Within viewport height
+                        
+                        const spaceship = new Spaceship(spawnX, spawnY, randomType);
+                        spaceships.push(spaceship);
+                    }
+                    lastSpaceshipSpawnTime = currentTime;
+                }
+                
                 // Check collisions
                 checkCollisions();
                 
@@ -12961,6 +12920,9 @@
             if (screenShakeActive) {
                 ctx.restore();
             }
+            
+            // Draw borders LAST to ensure they appear on top of everything
+            drawBorders();
         }
         
         // Initialize mobile controls
@@ -13063,6 +13025,105 @@
             // Prevent scrolling on game canvas
             canvas.addEventListener('touchmove', (e) => {
                 e.preventDefault();
+            });
+            
+            // Add touch-anywhere controls for left/right sides
+            let leftSideTouch = null;
+            let rightSideTouch = null;
+            let leftTouchStartPos = null;
+            
+            // Touch anywhere on left side for joystick control
+            document.addEventListener('touchstart', (e) => {
+                // Don't interfere with existing UI elements
+                if (e.target.closest('.player-info-box') || 
+                    e.target.closest('.leaderboard-box') || 
+                    e.target.closest('.discovery-feed') ||
+                    e.target.closest('.pause-button-mobile') ||
+                    e.target.closest('.mute-button-mobile')) {
+                    return;
+                }
+                
+                for (let i = 0; i < e.changedTouches.length; i++) {
+                    const touch = e.changedTouches[i];
+                    const x = touch.clientX;
+                    const screenWidth = window.innerWidth;
+                    
+                    // Left half of screen - joystick control
+                    if (x < screenWidth / 2 && leftSideTouch === null) {
+                        leftSideTouch = touch.identifier;
+                        leftTouchStartPos = { x: touch.clientX, y: touch.clientY };
+                        joystickActive = true;
+                        
+                        // Simulate joystick touch at the current position
+                        const rect = joystick.getBoundingClientRect();
+                        joystickBase.x = rect.left + rect.width / 2;
+                        joystickBase.y = rect.top + rect.height / 2;
+                    }
+                    // Right half of screen - boost
+                    else if (x >= screenWidth / 2 && rightSideTouch === null) {
+                        rightSideTouch = touch.identifier;
+                        mouseDown = true;
+                        boostBtn.classList.add('active');
+                    }
+                }
+            });
+            
+            document.addEventListener('touchmove', (e) => {
+                for (let i = 0; i < e.changedTouches.length; i++) {
+                    const touch = e.changedTouches[i];
+                    
+                    // Handle left side joystick movement
+                    if (touch.identifier === leftSideTouch && leftTouchStartPos) {
+                        const dx = touch.clientX - leftTouchStartPos.x;
+                        const dy = touch.clientY - leftTouchStartPos.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        // Update mouse angle for game controls with a lower dead zone
+                        if (distance > 5) {
+                            mouseAngle = Math.atan2(dy, dx);
+                            
+                            // Also update visual joystick position
+                            const maxDistance = 40;
+                            let knobX = dx;
+                            let knobY = dy;
+                            
+                            if (distance > maxDistance) {
+                                knobX = (dx / distance) * maxDistance;
+                                knobY = (dy / distance) * maxDistance;
+                            }
+                            
+                            knob.style.left = `${50 + (knobX / 60) * 50}%`;
+                            knob.style.top = `${50 + (knobY / 60) * 50}%`;
+                        }
+                    }
+                }
+            });
+            
+            document.addEventListener('touchend', (e) => {
+                for (let i = 0; i < e.changedTouches.length; i++) {
+                    const touch = e.changedTouches[i];
+                    
+                    if (touch.identifier === leftSideTouch) {
+                        leftSideTouch = null;
+                        leftTouchStartPos = null;
+                        resetJoystick();
+                    }
+                    else if (touch.identifier === rightSideTouch) {
+                        rightSideTouch = null;
+                        mouseDown = false;
+                        boostBtn.classList.remove('active');
+                    }
+                }
+            });
+            
+            document.addEventListener('touchcancel', (e) => {
+                // Reset all touches on cancel
+                leftSideTouch = null;
+                rightSideTouch = null;
+                leftTouchStartPos = null;
+                resetJoystick();
+                mouseDown = false;
+                boostBtn.classList.remove('active');
             });
         }
         
@@ -13408,6 +13469,54 @@
             saveElementBankSlots();
             updateElementBankUI();
             gameLogger.debug('ELEMENT BANK', 'Slots set to:', elementBankSlots);
+        };
+        
+        // Console commands for spaceship system
+        window.spawnSpaceship = function(type) {
+            const validTypes = ['enterprise', 'millenium-falcon', 'pillar-of-autumn'];
+            if (!type || !validTypes.includes(type)) {
+                console.log('Usage: spawnSpaceship(type)');
+                console.log('Valid types:', validTypes.join(', '));
+                return;
+            }
+            
+            // Spawn in player's field of view
+            // Camera position is the center of the view, so we need to calculate world position
+            const spawnX = camera.x + canvas.width / (2 * cameraZoom) + 100; // Just off-screen to the right
+            const spawnY = camera.y + (Math.random() - 0.5) * canvas.height / (2 * cameraZoom); // Within viewport height
+            
+            const spaceship = new Spaceship(spawnX, spawnY, type);
+            spaceships.push(spaceship);
+            console.log(`Spawned ${type} spaceship at world position: ${spawnX}, ${spawnY}`);
+            console.log(`Camera position: ${camera.x}, ${camera.y}, Zoom: ${cameraZoom}`);
+        };
+        
+        window.spawnRandomSpaceship = function() {
+            const types = ['enterprise', 'millenium-falcon', 'pillar-of-autumn'];
+            const randomType = types[Math.floor(Math.random() * types.length)];
+            window.spawnSpaceship(randomType);
+        };
+        
+        window.setSpaceshipSpawnRate = function(minutes) {
+            if (minutes < 0.1 || minutes > 60) {
+                console.log('Spawn rate must be between 0.1 and 60 minutes');
+                return;
+            }
+            SPACESHIP_SPAWN_INTERVAL = minutes * 60000;
+            console.log(`Spaceship spawn interval set to ${minutes} minutes`);
+        };
+        
+        window.toggleSpaceships = function(enabled) {
+            if (enabled === undefined) {
+                console.log('Usage: toggleSpaceships(true/false)');
+                return;
+            }
+            if (!enabled) {
+                spaceships = [];
+                console.log('Spaceships disabled');
+            } else {
+                console.log('Spaceships enabled');
+            }
         };
         
         window.showElementBankSlots = function() {
