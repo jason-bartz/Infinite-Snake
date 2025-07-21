@@ -127,3 +127,6 @@ if (typeof module !== 'undefined' && module.exports) {
 } else {
     window.gameLogger = gameLogger;
 }
+
+// ES6 export for module imports
+export default gameLogger;
