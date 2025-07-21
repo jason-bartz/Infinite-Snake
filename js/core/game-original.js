@@ -13034,12 +13034,17 @@
             
             // Touch anywhere on left side for joystick control
             document.addEventListener('touchstart', (e) => {
-                // Don't interfere with existing UI elements
-                if (e.target.closest('.player-info-box') || 
+                // Don't interfere with existing UI elements, but DO work on canvas
+                const isCanvas = e.target.id === 'gameCanvas' || e.target.tagName === 'CANVAS';
+                const isUIElement = e.target.closest('.player-info-box') || 
                     e.target.closest('.leaderboard-box') || 
                     e.target.closest('.discovery-feed') ||
                     e.target.closest('.pause-button-mobile') ||
-                    e.target.closest('.mute-button-mobile')) {
+                    e.target.closest('.mute-button-mobile') ||
+                    e.target.closest('.virtual-joystick') ||
+                    e.target.closest('.boost-button');
+                    
+                if (isUIElement && !isCanvas) {
                     return;
                 }
                 
@@ -13066,7 +13071,7 @@
                         boostBtn.classList.add('active');
                     }
                 }
-            });
+            }, { passive: false });
             
             document.addEventListener('touchmove', (e) => {
                 for (let i = 0; i < e.changedTouches.length; i++) {
@@ -13097,7 +13102,7 @@
                         }
                     }
                 }
-            });
+            }, { passive: false });
             
             document.addEventListener('touchend', (e) => {
                 for (let i = 0; i < e.changedTouches.length; i++) {
@@ -13114,7 +13119,7 @@
                         boostBtn.classList.remove('active');
                     }
                 }
-            });
+            }, { passive: false });
             
             document.addEventListener('touchcancel', (e) => {
                 // Reset all touches on cancel

@@ -45,10 +45,10 @@ const MOBILE_UI_CONFIG = {
         },
         boostButton: {
             bottom: 120,
-            right: 30
+            right: 105
         },
         discoveryFeed: {
-            bottom: 180,
+            bottom: 255,
             maxItems: 2
         }
     },
