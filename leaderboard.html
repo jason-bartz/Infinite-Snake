@@ -474,7 +474,7 @@
                         <div class="leaderboard-entry ${isPlayer ? 'player-entry' : ''}">
                             <div class="${rankClass}" style="font-weight: bold;">#${entry.rank}</div>
                             <div>${countryDisplay}</div>
-                            <div style="color: ${isPlayer ? '#4ecdc4' : '#FFF'}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${entry.username}">${truncateName(entry.username)}</div>
+                            <div style="color: ${isPlayer ? '#4ecdc4' : '#FFF'}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${entry.username}">${entry.username}</div>
                             <div style="color: #4ecdc4; text-align: right;">${entry.score.toLocaleString()}</div>
                             <div style="color: #FFD700; text-align: right;">${entry.elements_discovered}</div>
                             <div style="color: #AAA; text-align: right;">${timeStr}</div>
