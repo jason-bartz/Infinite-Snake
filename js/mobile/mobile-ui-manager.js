@@ -104,7 +104,7 @@ class MobileUIManager {
         
         if (this.panels.leaderboard) {
             this.applyFixedStyles(this.panels.leaderboard, 'leaderboard');
-            this.setupCollapsibleLeaderboard();
+            this.setupCollapsibleScoreboard();
         }
         
         if (this.boostButton) {
@@ -276,7 +276,7 @@ class MobileUIManager {
         }
     }
     
-    setupCollapsibleLeaderboard() {
+    setupCollapsibleScoreboard() {
         if (!this.panels.leaderboard) return;
         
         // Remove any existing mobile headers first
@@ -285,7 +285,7 @@ class MobileUIManager {
             existingMobileHeader.remove();
         }
         
-        // Check if there's already a leaderboard-header from the HTML
+        // Check if there's already a scoreboard-header from the HTML
         const existingHeader = this.panels.leaderboard.querySelector('.leaderboard-header');
         if (!existingHeader) {
             console.warn('[MobileUI] No existing leaderboard header found');
@@ -316,7 +316,7 @@ class MobileUIManager {
         const collapseIcon = newHeader.querySelector('.collapse-icon');
         
         // Initialize state
-        const savedState = localStorage.getItem('mobileLeaderboardCollapsed');
+        const savedState = localStorage.getItem('mobileScoreboardCollapsed');
         const startCollapsed = savedState === 'true';
         
         if (startCollapsed) {
@@ -340,17 +340,17 @@ class MobileUIManager {
                 this.panels.leaderboard.classList.remove('collapsed');
                 scrollableContent.style.display = 'block';
                 if (collapseIcon) collapseIcon.textContent = '▼';
-                localStorage.setItem('mobileLeaderboardCollapsed', 'false');
+                localStorage.setItem('mobileScoreboardCollapsed', 'false');
             } else {
                 // Collapse
                 this.panels.leaderboard.classList.add('collapsed');
                 scrollableContent.style.display = 'none';
                 if (collapseIcon) collapseIcon.textContent = '▲';
-                localStorage.setItem('mobileLeaderboardCollapsed', 'true');
+                localStorage.setItem('mobileScoreboardCollapsed', 'true');
             }
             
             if (this.config.debug.logInitialization) {
-                console.log(`[MobileUI] Leaderboard ${isCollapsed ? 'expanded' : 'collapsed'}`);
+                console.log(`[MobileUI] Scoreboard ${isCollapsed ? 'expanded' : 'collapsed'}`);
             }
         });
     }

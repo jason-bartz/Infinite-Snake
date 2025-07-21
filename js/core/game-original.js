@@ -8465,8 +8465,8 @@
             }
         }
         
-        function updateLeaderboard() {
-            const leaderboardList = document.getElementById('leaderboardList');
+        function updateScoreboard() {
+            const scoreboardList = document.getElementById('leaderboardList'); // Still using old ID for compatibility
             
             // Sort snakes based on game mode
             let sortedSnakes = [...snakes].filter(s => s.alive);
@@ -8491,7 +8491,7 @@
             }
             
             // Display top 5 with MMO-style formatting
-            leaderboardList.innerHTML = '';
+            scoreboardList.innerHTML = '';
             sortedSnakes.slice(0, 5).forEach((snake, index) => {
                 const div = document.createElement('div');
                 div.className = 'leaderboard-entry';
@@ -8532,7 +8532,7 @@
                 
                 div.appendChild(nameSpan);
                 div.appendChild(statsDiv);
-                leaderboardList.appendChild(div);
+                scoreboardList.appendChild(div);
             });
         }
         
@@ -8786,21 +8786,21 @@
         // Also expose it globally so we can call it when the overlay is shown
         window.setupLeaderboardListeners = setupLeaderboardListeners;
         
-        // Initialize leaderboard collapsibility for desktop only
-        function initLeaderboardCollapse() {
+        // Initialize scoreboard collapsibility for desktop only
+        function initScoreboardCollapse() {
             // Skip initialization on mobile - let MobileUIManager handle it
             if (document.body.classList.contains('mobile')) {
-                gameLogger.debug('GAME', 'Skipping leaderboard collapse init on mobile');
+                gameLogger.debug('GAME', 'Skipping scoreboard collapse init on mobile');
                 return;
             }
             
-            const leaderboardBox = document.querySelector('.leaderboard-box');
-            if (!leaderboardBox) return;
+            const scoreboardBox = document.querySelector('.leaderboard-box'); // Still using .leaderboard-box class for compatibility
+            if (!scoreboardBox) return;
             
             // Use existing header
-            const header = leaderboardBox.querySelector('.leaderboard-header');
+            const header = scoreboardBox.querySelector('.leaderboard-header');
             if (!header) {
-                gameLogger.warn('UI', 'Leaderboard header not found');
+                gameLogger.warn('UI', 'Scoreboard header not found');
                 return;
             }
             
@@ -8811,17 +8811,17 @@
             // Add click handler
             newHeader.addEventListener('click', function(e) {
                 e.stopPropagation();
-                leaderboardBox.classList.toggle('collapsed');
+                scoreboardBox.classList.toggle('collapsed');
                 
                 // Update icon
                 const icon = newHeader.querySelector('.collapse-icon');
                 if (icon) {
-                    icon.textContent = leaderboardBox.classList.contains('collapsed') ? '▲' : '▼';
+                    icon.textContent = scoreboardBox.classList.contains('collapsed') ? '▲' : '▼';
                 }
                 
                 // Save collapsed state
-                const isCollapsed = leaderboardBox.classList.contains('collapsed');
-                localStorage.setItem('leaderboardCollapsed', isCollapsed);
+                const isCollapsed = scoreboardBox.classList.contains('collapsed');
+                localStorage.setItem('scoreboardCollapsed', isCollapsed);
             });
             
             // Make the header more clickable
@@ -8829,16 +8829,16 @@
             newHeader.style.userSelect = 'none';
             
             // Restore saved state
-            const savedState = localStorage.getItem('leaderboardCollapsed');
+            const savedState = localStorage.getItem('scoreboardCollapsed');
             if (savedState === 'true') {
-                leaderboardBox.classList.add('collapsed');
+                scoreboardBox.classList.add('collapsed');
                 const icon = newHeader.querySelector('.collapse-icon');
                 if (icon) icon.textContent = '▲';
             }
         }
         
         // Initialize on load
-        document.addEventListener('DOMContentLoaded', initLeaderboardCollapse);
+        document.addEventListener('DOMContentLoaded', initScoreboardCollapse);
         
         // Submit score to leaderboard
         window.submitToLeaderboard = async function() {
@@ -9917,8 +9917,8 @@
                 }
             }
             
-            // Update leaderboard
-            updateLeaderboard();
+            // Update scoreboard
+            updateScoreboard();
             
             // Update element collection bar (MMO skill bar style)
             const elementBar = document.getElementById('elementBar');
