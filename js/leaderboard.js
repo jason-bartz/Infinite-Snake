@@ -1,7 +1,8 @@
 // js/leaderboard.js - Leaderboard Client (Upstash Redis)
 // Handles score submission and leaderboard data retrieval
 
-import gameLogger from './core/logger.js';
+// Use global gameLogger since this module is loaded dynamically
+const gameLogger = window.gameLogger || console;
 
 const API_ENDPOINT = '/api/leaderboard';
 
