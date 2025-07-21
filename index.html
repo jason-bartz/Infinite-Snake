@@ -3877,6 +3877,9 @@
                 </p>
             </div>
             <button id="startButton">Begin Your Journey</button>
+            <div id="assetLoadingStatus" style="margin-top: 20px; font-family: 'Press Start 2P', monospace; font-size: 10px; color: #4ecdc4; text-align: center; min-height: 20px;">
+                <span id="loadingText" style="display: none;">Loading assets...</span>
+            </div>
         </div>
     </div>
     
@@ -5501,7 +5504,7 @@
 
     <!-- External Dependencies -->
     <script src="elements/data/loader.js"></script>
-    <script src="js/asset-preloader.js" defer></script>
+    <script src="js/asset-preloader.js"></script>
     
     <!-- Skin System -->
     <script src="js/skinData.js" defer></script>
@@ -5601,6 +5604,55 @@
                 }
             }
         };
+    </script>
+    
+    <!-- Asset Preloading Script -->
+    <script>
+        // Initialize asset preloading on page load
+        window.assetsReady = false;
+        window.assetLoadingPromise = null;
+        
+        async function initializeAssetsOnLoad() {
+            if (!window.AssetPreloader) {
+                console.warn('AssetPreloader not available yet');
+                return;
+            }
+            
+            const loadingText = document.getElementById('loadingText');
+            if (loadingText) {
+                loadingText.style.display = 'inline';
+            }
+            
+            try {
+                window.assetPreloader = new AssetPreloader();
+                window.preloadedAssets = await window.assetPreloader.preload((progress) => {
+                    if (loadingText) {
+                        loadingText.textContent = `Loading assets... ${Math.floor(progress.percent)}%`;
+                    }
+                });
+                
+                window.assetsReady = true;
+                if (loadingText) {
+                    loadingText.style.display = 'none';
+                }
+                console.log('Assets preloaded successfully');
+            } catch (error) {
+                console.error('Failed to preload assets:', error);
+                window.assetsReady = true; // Allow game to continue with fallbacks
+                if (loadingText) {
+                    loadingText.style.display = 'none';
+                }
+            }
+        }
+        
+        // Start loading assets when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                window.assetLoadingPromise = initializeAssetsOnLoad();
+            });
+        } else {
+            window.assetLoadingPromise = initializeAssetsOnLoad();
+        }
     </script>
     
     <!-- Vercel Web Analytics -->

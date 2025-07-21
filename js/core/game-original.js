@@ -19,8 +19,7 @@
             }
         }
         
-        // Start asset loading immediately
-        initializeAssets();
+        // Don't start asset loading here - it's now done on page load
         
         ctx.imageSmoothingEnabled = false;
         ctx.mozImageSmoothingEnabled = false;
@@ -1273,6 +1272,25 @@
                 const name = nameInput.value.trim() || window.nameGenerator.generateRandomName();
                 localStorage.setItem('playerName', name);
                 window.currentPlayerName = name;
+            }
+            
+            // Ensure assets are loaded
+            if (window.assetLoadingPromise && !window.assetsReady) {
+                const loadingText = document.getElementById('loadingText');
+                if (loadingText) {
+                    loadingText.style.display = 'inline';
+                    loadingText.textContent = 'Finishing asset loading...';
+                }
+                
+                try {
+                    await window.assetLoadingPromise;
+                } catch (error) {
+                    gameLogger.error('ASSETS', 'Asset loading failed:', error);
+                }
+                
+                if (loadingText) {
+                    loadingText.style.display = 'none';
+                }
             }
             
             // Check if mobile and initialize renderers

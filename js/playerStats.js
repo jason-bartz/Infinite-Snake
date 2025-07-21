@@ -345,6 +345,77 @@ class PlayerStats {
         }
         return false;
     }
+    
+    // Additional getter methods for lore unlock criteria
+    getBestKillsInGame() {
+        return this.getMaxKillsInOneGame();
+    }
+    
+    getBestComboStreak() {
+        return this.stats.stats.achievements.bestComboStreak || 0;
+    }
+    
+    getTotalBossKills() {
+        return this.stats.stats.achievements.bossKills || 0;
+    }
+    
+    getWeekendDaysPlayed() {
+        return this.stats.stats.achievements.weekendDaysPlayed || 0;
+    }
+    
+    getMostNewElementsInGame() {
+        return this.stats.stats.achievements.mostNewElementsInGame || 0;
+    }
+    
+    getBestDayStreak() {
+        return this.stats.stats.achievements.bestDayStreak || 0;
+    }
+    
+    getNightOwlDays() {
+        return this.stats.stats.achievements.nightOwlDays || 0;
+    }
+    
+    getMostBossesInGame() {
+        return this.stats.stats.achievements.mostBossesInGame || 0;
+    }
+    
+    getBestSurvivalTime() {
+        return this.stats.stats.achievements.bestSurvivalTime || 0;
+    }
+    
+    getLegendaryDiscoveries() {
+        return this.stats.stats.achievements.legendaryDiscoveries || 0;
+    }
+    
+    getMostVoidOrbsInGame() {
+        return this.stats.stats.achievements.mostVoidOrbsInGame || 0;
+    }
+    
+    getBestCatalystCombo() {
+        return this.stats.stats.achievements.bestCatalystCombo || 0;
+    }
+    
+    getMorningDays() {
+        return this.stats.stats.achievements.morningDays || 0;
+    }
+    
+    getMonthsPlayed() {
+        // Calculate months between first play date and now
+        if (!this.stats.firstPlayDate) return 0;
+        const firstPlay = new Date(this.stats.firstPlayDate);
+        const now = new Date();
+        const months = (now.getFullYear() - firstPlay.getFullYear()) * 12 + 
+                      (now.getMonth() - firstPlay.getMonth());
+        return Math.max(0, months);
+    }
+    
+    getHolidaysPlayed() {
+        return this.stats.stats.achievements.holidaysPlayed || 0;
+    }
+    
+    getAllBossesDefeatedCount() {
+        return this.stats.stats.achievements.allBossesDefeatedCount || 0;
+    }
 
     checkLoreUnlocks() {
         if (window.loreUnlockManager && window.loreUnlockManager.checkAllLoreUnlocks) {

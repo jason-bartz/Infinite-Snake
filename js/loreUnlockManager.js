@@ -40,7 +40,7 @@ class LoreUnlockManager {
         }
     }
     
-    unlockLore(loreId, loreTitle) {
+    unlockLore(loreId, loreTitle, showNotification = true) {
         // Check if already unlocked
         if (this.unlockedLore.has(loreId)) {
             return false;
@@ -56,9 +56,11 @@ class LoreUnlockManager {
         this.unlockedLore.set(loreId, unlockData);
         this.saveUnlockedLore();
         
-        // Queue notification
-        this.notificationQueue.push({ loreId, loreTitle });
-        this.processNotificationQueue();
+        // Queue notification only if requested
+        if (showNotification) {
+            this.notificationQueue.push({ loreId, loreTitle });
+            this.processNotificationQueue();
+        }
         
         return true;
     }
@@ -288,7 +290,7 @@ class LoreUnlockManager {
                     // Don't show notification for default unlocks
                     const showNotification = data.unlockCriteria.type !== 'default';
                     
-                    if (this.unlockLore(loreId, data.title)) {
+                    if (this.unlockLore(loreId, data.title, showNotification)) {
                         newUnlocks.push({ id: loreId, title: data.title, showNotification });
                     }
                 }
