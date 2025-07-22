@@ -566,7 +566,7 @@
         
         const pixelPlanets = [];
         // Create planets with better distribution
-        const planetCount = 22; // Total: 19 standard (missing planet-14) + 3 special planets
+        const planetCount = isMobile ? 8 : 22; // Mobile: 8 planets, Desktop: 22 planets
         
         // Define planet distribution (skip missing planet-14)
         const standardPlanetIds = [];
@@ -588,10 +588,10 @@
         const planetsPerCell = Math.ceil(planetCount / (gridSize * gridSize));
         
         // Use a minimum distance between planets to prevent clumping
-        const minPlanetDistance = 250; // Further reduced for better coverage with extended area
+        const minPlanetDistance = isMobile ? 400 : 250; // Wider spacing on mobile
         
-        // Determine number of special planets (up to 3)
-        const specialPlanetCount = 3;
+        // Determine number of special planets
+        const specialPlanetCount = isMobile ? 2 : 3; // Fewer special planets on mobile
         
         // Track used special planets to avoid duplicates
         const usedSpecialPlanets = new Set();
@@ -1125,7 +1125,6 @@
             'astral-float.mp3',
             'cruising-through-the-asteroid-rain.mp3',
             'exploding-sun.mp3',
-            'exploring-the-new-planets.mp3',
             'space-main-theme.mp3',
             'milky-way.mp3'
         ];
@@ -10929,11 +10928,10 @@
                     // Simple mobile background with new assets
                     drawSimpleMobileBackground(assets);
                 }
-                return; // Skip desktop background effects
+            } else {
+                // Desktop background rendering with new assets
+                drawNewBackgroundSystem(assets);
             }
-            
-            // Desktop background rendering with new assets
-            drawNewBackgroundSystem(assets);
             
             // Initialize Easter Egg elements for desktop - REMOVED (not using black holes/UFOs)
             /*
@@ -11522,8 +11520,8 @@
             if (!spaceshipManager && window.SpaceshipManager) {
                 spaceshipManager = new window.SpaceshipManager(ctx, canvas);
             }
-            const ASTEROID_COUNT = 30; // Fewer asteroids for better spacing
-            const MIN_DISTANCE = 800; // Minimum distance between asteroids
+            const ASTEROID_COUNT = isMobile ? 15 : 30; // Much fewer asteroids on mobile
+            const MIN_DISTANCE = isMobile ? 1200 : 800; // Wider spacing on mobile
             
             // Create asteroids with spacing constraint
             for (let i = 0; i < ASTEROID_COUNT; i++) {

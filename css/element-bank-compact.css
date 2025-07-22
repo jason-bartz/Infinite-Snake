@@ -1,0 +1,189 @@
+/* Compact Element Bank Styles for Two-Row Layout */
+
+/* Desktop: Keep original slot sizes when in two-row layout */
+.element-collection-bar.two-rows .element-slot {
+    width: 64px !important;
+    height: 64px !important;
+    flex-shrink: 0 !important;
+    box-sizing: border-box !important;
+}
+
+/* Base two-row grid container - STRICT 2 ROWS */
+.element-collection-bar.two-rows {
+    display: grid !important;
+    gap: 4px !important;
+    justify-content: center !important;
+    align-items: start !important;
+    width: auto !important;
+    margin: 0 auto !important;
+    padding: 0 20px !important;
+    box-sizing: border-box !important;
+    max-height: calc(2 * 64px + 4px) !important; /* Enforce 2 rows max */
+}
+
+/* 9 slots: 5 on top, 4 on bottom (centered) */
+.element-collection-bar.two-rows[data-slots="9"] {
+    grid-template-columns: repeat(5, 64px) !important;
+    grid-template-rows: 64px 64px !important;
+    grid-auto-flow: dense !important;
+}
+
+/* Use empty grid cells to center the bottom row */
+.element-collection-bar.two-rows[data-slots="9"] .element-slot:nth-child(6) {
+    grid-column: 1 / 2;
+    grid-row: 2;
+    margin-left: calc(32px + 2px); /* Half slot + half gap */
+}
+
+.element-collection-bar.two-rows[data-slots="9"] .element-slot:nth-child(7) {
+    grid-column: 2 / 3;
+    grid-row: 2;
+    margin-left: calc(32px + 2px);
+}
+
+.element-collection-bar.two-rows[data-slots="9"] .element-slot:nth-child(8) {
+    grid-column: 3 / 4;
+    grid-row: 2;
+    margin-left: calc(32px + 2px);
+}
+
+.element-collection-bar.two-rows[data-slots="9"] .element-slot:nth-child(9) {
+    grid-column: 4 / 5;
+    grid-row: 2;
+    margin-left: calc(32px + 2px);
+}
+
+/* 10 slots: 5 on top, 5 on bottom */
+.element-collection-bar.two-rows[data-slots="10"] {
+    grid-template-columns: repeat(5, 64px) !important;
+    grid-template-rows: 64px 64px !important;
+}
+
+/* 11 slots: 6 on top, 5 on bottom (centered) */
+.element-collection-bar.two-rows[data-slots="11"] {
+    grid-template-columns: repeat(6, 64px) !important;
+    grid-template-rows: 64px 64px !important;
+}
+
+/* Center the bottom row for 11 slots */
+.element-collection-bar.two-rows[data-slots="11"] .element-slot:nth-child(7) {
+    grid-column: 1 / 2;
+    grid-row: 2;
+    margin-left: calc(32px + 2px);
+}
+
+.element-collection-bar.two-rows[data-slots="11"] .element-slot:nth-child(8) {
+    grid-column: 2 / 3;
+    grid-row: 2;
+    margin-left: calc(32px + 2px);
+}
+
+.element-collection-bar.two-rows[data-slots="11"] .element-slot:nth-child(9) {
+    grid-column: 3 / 4;
+    grid-row: 2;
+    margin-left: calc(32px + 2px);
+}
+
+.element-collection-bar.two-rows[data-slots="11"] .element-slot:nth-child(10) {
+    grid-column: 4 / 5;
+    grid-row: 2;
+    margin-left: calc(32px + 2px);
+}
+
+.element-collection-bar.two-rows[data-slots="11"] .element-slot:nth-child(11) {
+    grid-column: 5 / 6;
+    grid-row: 2;
+    margin-left: calc(32px + 2px);
+}
+
+/* 12 slots: 6 on top, 6 on bottom */
+.element-collection-bar.two-rows[data-slots="12"] {
+    grid-template-columns: repeat(6, 64px) !important;
+    grid-template-rows: 64px 64px !important;
+}
+
+/* Adjust emoji size for original slots */
+.element-collection-bar.two-rows .element-slot .emoji {
+    font-size: 32px !important;
+}
+
+/* Adjust element name size */
+.element-collection-bar.two-rows .element-slot .element-name {
+    font-size: 7px !important;
+}
+
+/* Mobile: Keep regular sizes for two-row layout */
+body.mobile .element-collection-bar.two-rows .element-slot {
+    width: 48px !important;
+    height: 48px !important;
+}
+
+/* Mobile base container */
+body.mobile .element-collection-bar.two-rows {
+    max-height: calc(2 * 48px + 4px) !important; /* Enforce 2 rows max */
+    padding: 0 15px !important;
+}
+
+/* Mobile 9 slots */
+body.mobile .element-collection-bar.two-rows[data-slots="9"] {
+    grid-template-columns: repeat(5, 48px) !important;
+    grid-template-rows: 48px 48px !important;
+}
+
+body.mobile .element-collection-bar.two-rows[data-slots="9"] .element-slot:nth-child(6),
+body.mobile .element-collection-bar.two-rows[data-slots="9"] .element-slot:nth-child(7),
+body.mobile .element-collection-bar.two-rows[data-slots="9"] .element-slot:nth-child(8),
+body.mobile .element-collection-bar.two-rows[data-slots="9"] .element-slot:nth-child(9) {
+    margin-left: calc(24px + 2px) !important;
+}
+
+/* Mobile 10 slots */
+body.mobile .element-collection-bar.two-rows[data-slots="10"] {
+    grid-template-columns: repeat(5, 48px) !important;
+    grid-template-rows: 48px 48px !important;
+}
+
+/* Mobile 11 slots */
+body.mobile .element-collection-bar.two-rows[data-slots="11"] {
+    grid-template-columns: repeat(6, 48px) !important;
+    grid-template-rows: 48px 48px !important;
+}
+
+body.mobile .element-collection-bar.two-rows[data-slots="11"] .element-slot:nth-child(7),
+body.mobile .element-collection-bar.two-rows[data-slots="11"] .element-slot:nth-child(8),
+body.mobile .element-collection-bar.two-rows[data-slots="11"] .element-slot:nth-child(9),
+body.mobile .element-collection-bar.two-rows[data-slots="11"] .element-slot:nth-child(10),
+body.mobile .element-collection-bar.two-rows[data-slots="11"] .element-slot:nth-child(11) {
+    margin-left: calc(24px + 2px) !important;
+}
+
+/* Mobile 12 slots */
+body.mobile .element-collection-bar.two-rows[data-slots="12"] {
+    grid-template-columns: repeat(6, 48px) !important;
+    grid-template-rows: 48px 48px !important;
+}
+
+body.mobile .element-collection-bar.two-rows .element-slot .emoji {
+    font-size: 24px !important;
+}
+
+body.mobile .element-collection-bar.two-rows .element-slot .element-name {
+    font-size: 5px !important;
+}
+
+/* Ensure the bottom UI has proper overflow handling */
+.bottom-ui {
+    overflow: visible !important;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+}
+
+/* Bottom UI Bar - Increased transparency */
+.bottom-ui {
+    background: linear-gradient(to bottom, 
+        rgba(0, 0, 0, 0) 0%,
+        rgba(0, 0, 0, 0.35) 10%,      /* Reduced from 0.7 to 0.35 (50% reduction) */
+        rgba(10, 10, 26, 0.475) 30%,   /* Reduced from 0.95 to 0.475 (50% reduction) */
+        rgba(10, 10, 26, 0.49) 100%    /* Reduced from 0.98 to 0.49 (50% reduction) */
+    ) !important;
+}
