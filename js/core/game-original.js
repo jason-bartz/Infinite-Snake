@@ -1036,12 +1036,12 @@
         let musicMuted = false;
         let musicShouldBePlaying = false;
         const musicTracks = [
-            'bright-white-lights.mp3',
-            'last-ones-standing.mp3', 
-            'good-times.mp3',
-            'summer-haze.mp3',
-            'on-the-up.mp3',
-            'headliner.mp3'
+            'astral-float.mp3',
+            'cruising-through-the-asteroid-rain.mp3',
+            'exploding-sun.mp3',
+            'exploring-the-new-planets.mp3',
+            'space-main-theme.mp3',
+            'milky-way.mp3'
         ];
         let availableTracks = [];
         
@@ -10739,9 +10739,12 @@
             }
             
             // Draw spaceships (behind planets)
+            // TODO: Spaceship class needs to be implemented
+            /*
             spaceships.forEach(spaceship => {
                 spaceship.draw(ctx, camera);
             });
+            */
             
             // Draw pixel planets BEFORE grid
             drawPixelPlanets();
@@ -12286,12 +12289,17 @@
                 }
                 
                 // Update spaceships
+                // TODO: Spaceship class needs to be implemented
+                /*
                 spaceships = spaceships.filter(spaceship => {
                     spaceship.update(16.67); // Fixed timestep
                     return spaceship.alive;
                 });
+                */
                 
                 // Spawn spaceship occasionally
+                // TODO: Spaceship class needs to be implemented
+                /*
                 if (currentTime - lastSpaceshipSpawnTime > SPACESHIP_SPAWN_INTERVAL && spaceships.length === 0) {
                     if (Math.random() < SPACESHIP_SPAWN_CHANCE) {
                         const types = ['enterprise', 'millenium-falcon', 'pillar-of-autumn'];
@@ -12307,6 +12315,7 @@
                     }
                     lastSpaceshipSpawnTime = currentTime;
                 }
+                */
                 
                 // Check collisions
                 checkCollisions();

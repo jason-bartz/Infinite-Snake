@@ -6,6 +6,9 @@ const gameLogger = window.gameLogger || console;
 
 const API_ENDPOINT = '/api/leaderboard';
 
+// Feature flag to disable leaderboard when API is unavailable
+let LEADERBOARD_ENABLED = true;
+
 // Cache for leaderboard data to reduce API calls
 let leaderboardCache = {
   daily: { data: null, timestamp: 0 },
@@ -44,6 +47,11 @@ export async function startGameSession() {
 // Submit score to leaderboard
 export async function submitScore(username, score, elementsDiscovered, playTime, kills) {
   try {
+    if (!LEADERBOARD_ENABLED) {
+      gameLogger.debug('LEADERBOARD', 'Leaderboard is disabled');
+      return null;
+    }
+    
     // Clear cache on new submission
     Object.keys(leaderboardCache).forEach(key => {
       leaderboardCache[key] = { data: null, timestamp: 0 };
@@ -98,6 +106,14 @@ export async function submitScore(username, score, elementsDiscovered, playTime,
     
   } catch (error) {
     gameLogger.error('LEADERBOARD', 'Submit score error:', error);
+    
+    // Disable leaderboard if API is not available
+    if (error.message.includes('405') || error.message.includes('404') || error.message.includes('Failed to fetch')) {
+      LEADERBOARD_ENABLED = false;
+      gameLogger.warn('LEADERBOARD', 'Disabling leaderboard due to API unavailability');
+      return null;
+    }
+    
     throw error;
   }
 }

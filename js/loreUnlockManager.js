@@ -167,13 +167,22 @@ class LoreUnlockManager {
             
             case 'defeatBoss':
                 // Check if boss has been defeated in the game
-                // This looks for defeatedBosses set from the game
-                if (window.defeatedBosses && window.defeatedBosses.has) {
-                    return window.defeatedBosses.has(criteria.bossName.toLowerCase());
+                // Handle both specific boss names and 'any' boss criteria
+                if (criteria.boss === 'any' && criteria.count) {
+                    // Count total defeated bosses
+                    const defeatedBossList = JSON.parse(localStorage.getItem('defeatedBosses') || '[]');
+                    const defeatedCount = window.defeatedBosses ? window.defeatedBosses.size : defeatedBossList.length;
+                    return defeatedCount >= criteria.count;
+                } else if (criteria.bossName) {
+                    // Check specific boss
+                    if (window.defeatedBosses && window.defeatedBosses.has) {
+                        return window.defeatedBosses.has(criteria.bossName.toLowerCase());
+                    }
+                    // Also check localStorage for persistent tracking
+                    const defeatedBossList = JSON.parse(localStorage.getItem('defeatedBosses') || '[]');
+                    return defeatedBossList.includes(criteria.bossName.toLowerCase());
                 }
-                // Also check localStorage for persistent tracking
-                const defeatedBossList = JSON.parse(localStorage.getItem('defeatedBosses') || '[]');
-                return defeatedBossList.includes(criteria.bossName.toLowerCase());
+                return false;
             
             case 'kills':
                 return stats.getTotalKills() >= criteria.value;

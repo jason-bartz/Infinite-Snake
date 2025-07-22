@@ -83,17 +83,19 @@ class PerformanceOptimizer {
 
     // Setup optimized event handlers with debouncing
     setupOptimizedEventHandlers() {
-        // Optimized resize handler
-        this.addOptimizedListener(window, 'resize', (callback) => {
+        // Setup resize handler template - actual handlers will be added via addResizeHandler
+        this.resizeCallbackWrapper = (callback) => {
             return (event) => {
                 if (this.resizeDebounceTimer) {
                     clearTimeout(this.resizeDebounceTimer);
                 }
                 this.resizeDebounceTimer = setTimeout(() => {
-                    callback(event);
+                    if (typeof callback === 'function') {
+                        callback(event);
+                    }
                 }, this.resizeDebounceDelay);
             };
-        });
+        };
 
         // Passive event listeners for better scrolling performance
         const passiveEvents = ['touchstart', 'touchmove', 'wheel', 'mousewheel'];

@@ -658,7 +658,7 @@ const server = http.createServer((req, res) => {
   // Remove query parameters from URL
   console.log(`[DEBUG] Falling through to static file handler for: ${req.method} ${req.url}`);
   const urlParts = req.url.split('?');
-  let filePath = urlParts[0] === '/' ? '/index.html' : urlParts[0];
+  let filePath = urlParts[0] === '/' ? '/index.html' : decodeURIComponent(urlParts[0]);
   
   // Handle directory requests by adding index.html
   if (filePath.endsWith('/')) {
