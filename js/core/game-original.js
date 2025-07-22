@@ -566,7 +566,7 @@
         
         const pixelPlanets = [];
         // Create planets with better distribution
-        const planetCount = isMobile ? 8 : 22; // Mobile: 8 planets, Desktop: 22 planets
+        const planetCount = isMobile ? 15 : 22; // Mobile: 15 planets (more since static), Desktop: 22 planets
         
         // Define planet distribution (skip missing planet-14)
         const standardPlanetIds = [];
@@ -8771,25 +8771,43 @@
         function updateBoostBar() {
             if (!playerSnake) return;
             
+            // Update both boost bars (mobile bottom bar and desktop player stats bar)
             const boostFill = document.getElementById('boostBarFill');
-            if (!boostFill) return;
+            const playerBoostFill = document.getElementById('playerBoostBarFill');
             
             // Calculate stamina percentage
             const staminaPercent = Math.max(0, Math.min(100, (playerSnake.stamina / playerSnake.maxStamina) * 100));
             
-            // Force immediate style update
-            boostFill.style.width = staminaPercent + '%';
+            // Update mobile boost bar
+            if (boostFill) {
+                // Force immediate style update
+                boostFill.style.width = staminaPercent + '%';
+                
+                // Force browser to recalculate styles
+                boostFill.offsetWidth;
+                
+                // Change color based on stamina level
+                if (staminaPercent <= 20) {
+                    boostFill.className = 'boost-bar-fill low';
+                } else if (playerSnake.isBoosting) {
+                    boostFill.className = 'boost-bar-fill boosting';
+                } else {
+                    boostFill.className = 'boost-bar-fill';
+                }
+            }
             
-            // Force browser to recalculate styles
-            boostFill.offsetWidth;
-            
-            // Change color based on stamina level
-            if (staminaPercent <= 20) {
-                boostFill.className = 'boost-bar-fill low';
-            } else if (playerSnake.isBoosting) {
-                boostFill.className = 'boost-bar-fill boosting';
-            } else {
-                boostFill.className = 'boost-bar-fill';
+            // Update desktop player stats boost bar
+            if (playerBoostFill) {
+                playerBoostFill.style.width = staminaPercent + '%';
+                
+                // Change color based on stamina level
+                if (staminaPercent <= 20) {
+                    playerBoostFill.className = 'player-boost-bar-fill low';
+                } else if (playerSnake.isBoosting) {
+                    playerBoostFill.className = 'player-boost-bar-fill boosting';
+                } else {
+                    playerBoostFill.className = 'player-boost-bar-fill';
+                }
             }
             
             // Update mobile boost button fill
@@ -11115,7 +11133,10 @@
                 if (x < -planet.radius * 2 || x > canvas.width + planet.radius * 2 ||
                     y < -planet.radius * 2 || y > canvas.height + planet.radius * 2) return;
                 
-                // No rotation for animated planets
+                // Update rotation for standard planets on mobile
+                if (window.isTabletOrMobile && window.isTabletOrMobile()) {
+                    planet.rotation += planet.rotationSpeed;
+                }
                 
                 // Check if planet assets are loaded
                 if (window.preloadedAssets && window.preloadedAssets.planets) {
@@ -11173,30 +11194,59 @@
                 ctx.restore();
                 return;
             } else {
-                // Standard planets are animated
-                if (!planetData.frames || planetData.frames.length === 0) {
-                    drawFallbackPlanet(x, y, radius, opacity);
+                // Standard planets - check if mobile static or desktop animated
+                if (planetData.isStatic) {
+                    // Mobile: use static image
+                    currentImage = planetData.staticImage;
+                    
+                    // Apply slow rotation for visual variety on mobile
+                    ctx.translate(x, y);
+                    ctx.rotate(planetInstance.rotation || 0);
+                    
+                    // Draw at translated position
+                    const size = radius * 2;
+                    try {
+                        ctx.drawImage(
+                            currentImage,
+                            -radius,
+                            -radius,
+                            size,
+                            size
+                        );
+                    } catch (e) {
+                        // If image fails, try fallback
+                        drawFallbackPlanet(0, 0, radius, opacity);
+                    }
+                    
+                    // Restore context
                     ctx.restore();
                     return;
-                }
-                
-                // Update animation timing for this planet instance
-                const now = Date.now();
-                if (!planetInstance.lastFrameTime) {
+                } else {
+                    // Desktop: animated planets
+                    if (!planetData.frames || planetData.frames.length === 0) {
+                        drawFallbackPlanet(x, y, radius, opacity);
+                        ctx.restore();
+                        return;
+                    }
+                    
+                    // Update animation timing for this planet instance
+                    const now = Date.now();
+                    if (!planetInstance.lastFrameTime) {
+                        planetInstance.lastFrameTime = now;
+                    }
+                    
+                    const deltaTime = now - planetInstance.lastFrameTime;
+                    planetInstance.frameTime += deltaTime;
                     planetInstance.lastFrameTime = now;
+                    
+                    // Advance frame if needed
+                    while (planetInstance.frameTime >= planetData.frameDuration) {
+                        planetInstance.frameTime -= planetData.frameDuration;
+                        planetInstance.currentFrame = (planetInstance.currentFrame + 1) % planetData.frameCount;
+                    }
+                    
+                    currentImage = planetData.frames[planetInstance.currentFrame];
                 }
-                
-                const deltaTime = now - planetInstance.lastFrameTime;
-                planetInstance.frameTime += deltaTime;
-                planetInstance.lastFrameTime = now;
-                
-                // Advance frame if needed
-                while (planetInstance.frameTime >= planetData.frameDuration) {
-                    planetInstance.frameTime -= planetData.frameDuration;
-                    planetInstance.currentFrame = (planetInstance.currentFrame + 1) % planetData.frameCount;
-                }
-                
-                currentImage = planetData.frames[planetInstance.currentFrame];
             }
             
             // Draw the planet image scaled to the radius

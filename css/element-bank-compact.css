@@ -1,12 +1,7 @@
 /* Compact Element Bank Styles for Two-Row Layout */
 
-/* Desktop: Keep original slot sizes when in two-row layout */
-.element-collection-bar.two-rows .element-slot {
-    width: 64px !important;
-    height: 64px !important;
-    flex-shrink: 0 !important;
-    box-sizing: border-box !important;
-}
+/* Two-row layouts will use the same slot sizes as single-row layouts */
+/* Desktop: 64x64px, Mobile: 48x48px (inherited from main CSS) */
 
 /* Base two-row grid container - STRICT 2 ROWS */
 .element-collection-bar.two-rows {
@@ -18,7 +13,7 @@
     margin: 0 auto !important;
     padding: 0 20px !important;
     box-sizing: border-box !important;
-    max-height: calc(2 * 64px + 4px) !important; /* Enforce 2 rows max */
+    max-height: calc(2 * 64px + 4px) !important; /* Enforce 2 rows max for desktop */
 }
 
 /* 9 slots: 5 on top, 4 on bottom (centered) */
@@ -28,7 +23,7 @@
     grid-auto-flow: dense !important;
 }
 
-/* Use empty grid cells to center the bottom row */
+/* Center the bottom row for 9 slots */
 .element-collection-bar.two-rows[data-slots="9"] .element-slot:nth-child(6) {
     grid-column: 1 / 2;
     grid-row: 2;
@@ -102,25 +97,9 @@
     grid-template-rows: 64px 64px !important;
 }
 
-/* Adjust emoji size for original slots */
-.element-collection-bar.two-rows .element-slot .emoji {
-    font-size: 32px !important;
-}
-
-/* Adjust element name size */
-.element-collection-bar.two-rows .element-slot .element-name {
-    font-size: 7px !important;
-}
-
-/* Mobile: Keep regular sizes for two-row layout */
-body.mobile .element-collection-bar.two-rows .element-slot {
-    width: 48px !important;
-    height: 48px !important;
-}
-
 /* Mobile base container */
 body.mobile .element-collection-bar.two-rows {
-    max-height: calc(2 * 48px + 4px) !important; /* Enforce 2 rows max */
+    max-height: calc(2 * 48px + 4px) !important; /* Enforce 2 rows max for mobile */
     padding: 0 15px !important;
 }
 
@@ -161,14 +140,6 @@ body.mobile .element-collection-bar.two-rows[data-slots="11"] .element-slot:nth-
 body.mobile .element-collection-bar.two-rows[data-slots="12"] {
     grid-template-columns: repeat(6, 48px) !important;
     grid-template-rows: 48px 48px !important;
-}
-
-body.mobile .element-collection-bar.two-rows .element-slot .emoji {
-    font-size: 24px !important;
-}
-
-body.mobile .element-collection-bar.two-rows .element-slot .element-name {
-    font-size: 5px !important;
 }
 
 /* Ensure the bottom UI has proper overflow handling */

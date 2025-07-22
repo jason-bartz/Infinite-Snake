@@ -206,6 +206,59 @@ class AssetPreloader {
     async preloadPlanets() {
         const standardPlanets = 20;
         const specialPlanets = 10;
+        const isMobile = window.isTabletOrMobile && window.isTabletOrMobile();
+        
+        // For mobile, load only static images (first frame)
+        if (isMobile) {
+            let totalPlanets = standardPlanets + specialPlanets;
+            let loadedPlanets = 0;
+            
+            // Load standard planets (only first frame for mobile)
+            for (let i = 1; i <= standardPlanets; i++) {
+                if (i === 14) continue; // Skip missing planet-14
+                
+                const planetId = `planet-${i}`;
+                this.updateProgress((loadedPlanets / totalPlanets) * 100, `Loading ${planetId}`);
+                
+                try {
+                    // Load only the first frame as static image
+                    const img = await this.loadImage(`assets/planets/${planetId}/1.png`);
+                    this.assets.planets.standard[planetId] = {
+                        staticImage: img,
+                        isStatic: true
+                    };
+                    loadedPlanets++;
+                } catch (error) {
+                    console.warn(`Failed to load ${planetId}:`, error);
+                }
+                
+                // Small delay to prevent blocking
+                if (loadedPlanets % 5 === 0) {
+                    await this.delay(10);
+                }
+            }
+            
+            // Load special planets (already single images)
+            for (let i = 1; i <= specialPlanets; i++) {
+                if (i === 1 || i === 6 || i === 8) continue; // Skip removed special-planets 1, 6, 8
+                
+                const planetId = `special-planet-${i}`;
+                this.updateProgress((loadedPlanets / totalPlanets) * 100, `Loading ${planetId}`);
+                
+                try {
+                    const img = await this.loadImage(`assets/planets/${planetId}.png`);
+                    this.assets.planets.special[planetId] = img;
+                    loadedPlanets++;
+                } catch (error) {
+                    console.warn(`Failed to load ${planetId}:`, error);
+                }
+            }
+            
+            this.updateProgress(100, "Planets loaded");
+            return;
+        }
+        
+        // Desktop: Load full animations
         let totalFrames = 0;
         let loadedFrames = 0;
         
@@ -330,18 +383,26 @@ class AssetPreloader {
             console.error('Failed to load star overlay:', error);
         }
         
-        // Load blinking star sprites
-        this.updateProgress(30, "Loading star sprites");
-        const starSprites = [];
-        for (let i = 1; i <= 3; i++) {
-            try {
-                const star = await this.loadImage(`assets/background/star-${i}.png`);
-                starSprites.push(star);
-            } catch (error) {
-                console.error(`Failed to load star-${i}.png:`, error);
+        // Skip individual star sprites on mobile
+        const isMobile = window.isTabletOrMobile && window.isTabletOrMobile();
+        if (!isMobile) {
+            // Load blinking star sprites only on desktop
+            this.updateProgress(30, "Loading star sprites");
+            const starSprites = [];
+            for (let i = 1; i <= 3; i++) {
+                try {
+                    const star = await this.loadImage(`assets/background/star-${i}.png`);
+                    starSprites.push(star);
+                } catch (error) {
+                    console.error(`Failed to load star-${i}.png:`, error);
+                }
             }
+            this.assets.backgrounds.starSprites = starSprites;
+        } else {
+            // Skip on mobile to improve loading time
+            this.assets.backgrounds.starSprites = [];
+            this.updateProgress(30, "Optimizing for mobile");
         }
-        this.assets.backgrounds.starSprites = starSprites;
         
         // Create star field (keeping for compatibility)
         this.updateProgress(40, "Generating star field");

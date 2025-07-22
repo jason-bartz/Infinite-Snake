@@ -747,9 +747,12 @@
                 rgba(10, 10, 26, 0.95) 30%,
                 rgba(10, 10, 26, 0.98) 100%
             );
-            padding-top: 20px;
+            padding: 20px 0;
             border-top: 2px solid rgba(138, 43, 226, 0.3);
             box-shadow: 0 -10px 30px rgba(138, 43, 226, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
         
         /* Element Collection Bar (Skill Bar Style) - SNES Style */
@@ -758,12 +761,11 @@
             justify-content: center;
             align-items: center;
             padding: 0;
-            margin-bottom: 10px;
+            margin: 0 auto 20px;
             gap: 4px;
             image-rendering: pixelated;
             flex-wrap: wrap;
-            margin-left: auto;
-            margin-right: auto;
+            width: fit-content;
         }
         
         /* Two-row layout when 9+ slots */
@@ -771,6 +773,8 @@
             display: grid;
             gap: 4px;
             justify-content: center;
+            width: fit-content;
+            margin: 0 auto 20px;
         }
         
         /* Specific grid layouts for each slot count */
@@ -793,6 +797,10 @@
         .element-slot {
             width: 64px;
             height: 64px;
+            min-width: 64px;
+            min-height: 64px;
+            max-width: 64px;
+            max-height: 64px;
             background: #1a1a2e;
             border: 3px solid;
             border-color: #4a4a6e #0a0a1e #0a0a1e #4a4a6e;
@@ -804,6 +812,12 @@
             border-radius: 0;
             image-rendering: pixelated;
             padding: 2px;
+        }
+        
+        /* Ensure consistent size in grid layouts */
+        .element-collection-bar.two-rows .element-slot {
+            width: 64px;
+            height: 64px;
         }
         
         .element-slot.empty {
@@ -1061,6 +1075,7 @@
             max-width: 404px; /* 6 slots * 64px + 5 gaps * 4px */
             margin: 0 auto 15px;
             padding: 0;
+            display: none; /* Hidden on desktop - now in player stats */
         }
         
         .boost-bar-frame {
@@ -1627,6 +1642,52 @@
             overflow: hidden;
             padding-right: 5px; /* Add padding to prevent content cutoff */
             font-family: 'Press Start 2P', monospace;
+        }
+        
+        /* Player Stats Boost Bar */
+        .player-boost-bar-container {
+            width: 100%;
+            margin-top: 8px;
+            padding: 0;
+        }
+        
+        .player-boost-bar-frame {
+            height: 20px;
+            background: #1a1a1a;
+            border: 2px solid #333;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .player-boost-bar-fill {
+            height: 100%;
+            background: #00a8ff;
+            transition: width 0.3s ease, background-color 0.2s ease;
+            border-right: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .player-boost-bar-fill.low {
+            background: #ff4444;
+        }
+        
+        .player-boost-bar-fill.boosting {
+            background: #44ff44;
+        }
+        
+        .player-boost-bar-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            font-size: 8px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+            pointer-events: none;
+        }
+        
+        /* Hide player boost bar on mobile */
+        body.mobile .player-boost-bar-container {
+            display: none;
         }
         
         .stat-line {
@@ -4034,6 +4095,13 @@
                         <span class="stat-label">Time</span>
                         <span class="stat-value" id="playerTime">0:00</span>
                     </div>
+                </div>
+            </div>
+            <!-- Desktop Boost Bar in Player Stats -->
+            <div class="player-boost-bar-container">
+                <div class="player-boost-bar-frame">
+                    <div class="player-boost-bar-fill" id="playerBoostBarFill" style="width: 100%"></div>
+                    <div class="player-boost-bar-text">BOOST</div>
                 </div>
             </div>
         </div>
