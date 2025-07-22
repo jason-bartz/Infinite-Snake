@@ -163,4 +163,8 @@ class Particle {
     }
 }
 
+// Make available globally
+window.Particle = Particle;
+
+// Export for ES6 modules
 export default Particle;

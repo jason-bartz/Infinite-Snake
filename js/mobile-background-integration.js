@@ -246,9 +246,32 @@ function renderMobileBackground(ctx, camera) {
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     optimizer.incrementDrawCalls();
     
-    // Render space background if available
-    if (assets && assets.backgrounds.space && optimizer.shouldRender('background')) {
-        ctx.drawImage(assets.backgrounds.space.canvas, 0, 0, ctx.canvas.width, ctx.canvas.height);
+    // Render nebula background if available
+    if (assets && assets.backgrounds.nebulaBackground && optimizer.shouldRender('background')) {
+        const zoomScale = 1.5; // 50% zoom in
+        const bgWidth = assets.backgrounds.nebulaBackground.width * zoomScale;
+        const bgHeight = assets.backgrounds.nebulaBackground.height * zoomScale;
+        const parallaxFactor = 0.2;
+        const offsetX = (camera.x * parallaxFactor) % bgWidth;
+        const offsetY = (camera.y * parallaxFactor) % bgHeight;
+        
+        // Simple tiling for mobile with zoom
+        ctx.drawImage(assets.backgrounds.nebulaBackground, -offsetX, -offsetY, ctx.canvas.width + bgWidth, ctx.canvas.height + bgHeight);
+        optimizer.incrementDrawCalls();
+    }
+    
+    // Render star overlay if available
+    if (assets && assets.backgrounds.starOverlay && optimizer.shouldRender('background')) {
+        ctx.save();
+        ctx.globalAlpha = 0.6;
+        const starWidth = assets.backgrounds.starOverlay.width;
+        const starHeight = assets.backgrounds.starOverlay.height;
+        const parallaxFactor = 0.3;
+        const offsetX = (camera.x * parallaxFactor) % starWidth;
+        const offsetY = (camera.y * parallaxFactor) % starHeight;
+        
+        ctx.drawImage(assets.backgrounds.starOverlay, -offsetX, -offsetY, ctx.canvas.width + starWidth, ctx.canvas.height + starHeight);
+        ctx.restore();
         optimizer.incrementDrawCalls();
     }
     

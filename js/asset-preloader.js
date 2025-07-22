@@ -12,15 +12,17 @@ class AssetPreloader {
             planets: {
                 standard: {},
                 special: {}
-            }
+            },
+            stations: {}
         };
         
         this.loadingPhases = [
             { phase: "Initializing Cosmos", weight: 10, method: 'initializeSystem' },
             { phase: "Loading Elements", weight: 25, method: 'preloadEmojis' },
             { phase: "Loading Planets", weight: 15, method: 'preloadPlanets' },
+            { phase: "Loading Stations", weight: 5, method: 'preloadStations' },
             { phase: "Crafting Combinations", weight: 20, method: 'precomputeBackgrounds' },
-            { phase: "Preparing Skins", weight: 20, method: 'preRenderSnakeAssets' },
+            { phase: "Preparing Skins", weight: 15, method: 'preRenderSnakeAssets' },
             { phase: "Awakening Snakes", weight: 10, method: 'cacheBorderStates' }
         ];
         
@@ -202,45 +204,96 @@ class AssetPreloader {
      * Preload planet images
      */
     async preloadPlanets() {
-        const standardPlanets = 35;
-        const specialPlanets = 12;
-        const totalPlanets = standardPlanets + specialPlanets;
-        let loaded = 0;
+        const standardPlanets = 20;
+        const specialPlanets = 10;
+        let totalFrames = 0;
+        let loadedFrames = 0;
         
-        // Load standard planets
+        // First, count total frames for progress tracking
+        const planetFrameCounts = {
+            'planet-1': 60, 'planet-2': 60, 'planet-3': 60, 'planet-4': 60, 'planet-5': 60,
+            'planet-6': 60, 'planet-7': 120, 'planet-8': 60, 'planet-9': 60, 'planet-10': 60,
+            'planet-11': 60, 'planet-12': 60, 'planet-13': 60, 'planet-15': 60,
+            'planet-16': 60, 'planet-17': 60, 'planet-18': 60, 'planet-19': 120, 'planet-20': 60
+        };
+        
+        // Count total frames
+        for (const count of Object.values(planetFrameCounts)) {
+            totalFrames += count;
+        }
+        totalFrames += specialPlanets; // Special planets are single images
+        
+        // Load standard planets (PNG sequences)
         for (let i = 1; i <= standardPlanets; i++) {
+            if (i === 14) continue; // Skip missing planet-14
+            
             const planetId = `planet-${i}`;
-            this.updateProgress((loaded / totalPlanets) * 100, `Loading ${planetId}`);
+            const frameCount = planetFrameCounts[planetId];
             
-            try {
-                const img = await this.loadImage(`assets/planets/${planetId}.png`);
-                this.assets.planets.standard[planetId] = img;
-                loaded++;
-            } catch (error) {
-                console.warn(`Failed to load ${planetId}:`, error);
-            }
+            this.assets.planets.standard[planetId] = {
+                frames: [],
+                frameCount: frameCount,
+                currentFrame: 0,
+                frameTime: 0,
+                frameDuration: 120 // 120ms per frame = 8.33fps (25% faster than 150ms)
+            };
             
-            // Small delay to prevent blocking
-            if (loaded % 5 === 0) {
-                await this.delay(10);
+            // Load all frames for this planet
+            for (let frame = 1; frame <= frameCount; frame++) {
+                try {
+                    const img = await this.loadImage(`assets/planets/${planetId}/${frame}.png`);
+                    this.assets.planets.standard[planetId].frames.push(img);
+                    loadedFrames++;
+                    this.updateProgress((loadedFrames / totalFrames) * 100, `Loading ${planetId} frame ${frame}/${frameCount}`);
+                } catch (error) {
+                    console.warn(`Failed to load ${planetId} frame ${frame}:`, error);
+                }
+                
+                // Small delay to prevent blocking
+                if (loadedFrames % 30 === 0) {
+                    await this.delay(10);
+                }
             }
         }
         
-        // Load special planets
+        // Load special planets (single PNG files)
         for (let i = 1; i <= specialPlanets; i++) {
+            if (i === 1 || i === 6 || i === 8) continue; // Skip removed special-planets 1, 6, 8
+            
             const planetId = `special-planet-${i}`;
-            this.updateProgress((loaded / totalPlanets) * 100, `Loading ${planetId}`);
+            this.updateProgress((loadedFrames / totalFrames) * 100, `Loading ${planetId}`);
             
             try {
                 const img = await this.loadImage(`assets/planets/${planetId}.png`);
                 this.assets.planets.special[planetId] = img;
-                loaded++;
+                loadedFrames++;
             } catch (error) {
                 console.warn(`Failed to load ${planetId}:`, error);
             }
         }
         
         this.updateProgress(100, "Planets loaded");
+    }
+    
+    /**
+     * Preload station images
+     */
+    async preloadStations() {
+        const stationCount = 3;
+        
+        for (let i = 1; i <= stationCount; i++) {
+            const stationId = `station-${i}`;
+            this.updateProgress((i / stationCount) * 100, `Loading ${stationId}`);
+            
+            try {
+                const img = await this.loadImage(`assets/stations/${stationId}.png`);
+                this.assets.stations[stationId] = img;
+            } catch (error) {
+                console.warn(`Failed to load ${stationId}:`, error);
+            }
+        }
+        
+        this.updateProgress(100, "Stations loaded");
     }
     
     /**
@@ -262,20 +315,48 @@ class AssetPreloader {
         const canvas = this.offscreenCanvases.background;
         const ctx = canvas.getContext('2d');
         
-        // Create star field
-        this.updateProgress(20, "Generating star field");
+        // Load pre-made background assets
+        this.updateProgress(10, "Loading nebula background");
+        try {
+            this.assets.backgrounds.nebulaBackground = await this.loadImage('assets/background/purple-blue-bg.png');
+        } catch (error) {
+            console.error('Failed to load nebula background:', error);
+        }
+        
+        this.updateProgress(20, "Loading star overlay");
+        try {
+            this.assets.backgrounds.starOverlay = await this.loadImage('assets/background/stars-blue.png');
+        } catch (error) {
+            console.error('Failed to load star overlay:', error);
+        }
+        
+        // Load blinking star sprites
+        this.updateProgress(30, "Loading star sprites");
+        const starSprites = [];
+        for (let i = 1; i <= 3; i++) {
+            try {
+                const star = await this.loadImage(`assets/background/star-${i}.png`);
+                starSprites.push(star);
+            } catch (error) {
+                console.error(`Failed to load star-${i}.png:`, error);
+            }
+        }
+        this.assets.backgrounds.starSprites = starSprites;
+        
+        // Create star field (keeping for compatibility)
+        this.updateProgress(40, "Generating star field");
         this.assets.backgrounds.starField = await this.generateStarField(canvas, ctx);
         
         // Create grid pattern
-        this.updateProgress(40, "Creating grid pattern");
+        this.updateProgress(60, "Creating grid pattern");
         this.assets.backgrounds.grid = await this.generateGridPattern(canvas, ctx);
         
         // Create border gradients
-        this.updateProgress(60, "Rendering borders");
+        this.updateProgress(80, "Rendering borders");
         this.assets.backgrounds.borders = await this.generateBorderGradients(canvas, ctx);
         
         // Create space background
-        this.updateProgress(80, "Painting cosmos");
+        this.updateProgress(90, "Painting cosmos");
         this.assets.backgrounds.space = await this.generateSpaceBackground(canvas, ctx);
         
         this.updateProgress(100, "Backgrounds ready");
@@ -295,7 +376,9 @@ class AssetPreloader {
         starCtx.fillRect(0, 0, starCanvas.width, starCanvas.height);
         
         // Generate stars
-        const starCount = window.isTabletOrMobile() ? 50 : 100;
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
+                        || ('ontouchstart' in window && navigator.maxTouchPoints > 0);
+        const starCount = isMobile ? 50 : 100;
         const stars = [];
         
         for (let i = 0; i < starCount; i++) {

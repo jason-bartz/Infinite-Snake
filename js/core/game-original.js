@@ -284,6 +284,9 @@
                    /iPad|iPhone|iPod|Android/i.test(navigator.userAgent);
         }
         
+        // Expose to global scope for other modules
+        window.isTabletOrMobile = isTabletOrMobile;
+        
         function showRotateDeviceMessage() {
             if (document.getElementById('rotate-device-message')) return;
             
@@ -458,11 +461,16 @@
         let shootingStars = [];
         let lastShootingStarTime = 0;
         
-        // Spaceship system
+        // Asteroid system
+        let asteroids = [];
+        
+        // Spaceship system - REMOVED (not using spaceships)
+        /*
         let spaceships = [];
         let lastSpaceshipSpawnTime = 0;
         let SPACESHIP_SPAWN_INTERVAL = 180000; // 3 minutes in milliseconds
         let SPACESHIP_SPAWN_CHANCE = 0.2; // 20% chance
+        */
         
         const pixelStarLayers = [
             { stars: [], speed: 0.05, size: 1, color: '#666', count: 100 },
@@ -473,6 +481,25 @@
         
         const pixelNebulae = [];
         const nebulaCanvases = new Map();
+        
+        // Blinking stars for new background system
+        const blinkingStars = [];
+        const BLINKING_STAR_COUNT = 150; // Number of blinking stars across the map
+        
+        // Initialize blinking stars
+        function initializeBlinkingStars() {
+            for (let i = 0; i < BLINKING_STAR_COUNT; i++) {
+                blinkingStars.push({
+                    x: Math.random() * WORLD_SIZE,
+                    y: Math.random() * WORLD_SIZE,
+                    type: Math.floor(Math.random() * 3), // 0, 1, or 2 for star-1, star-2, star-3
+                    blinkPhase: Math.random() * Math.PI * 2,
+                    blinkSpeed: 0.5 + Math.random() * 2, // Different blink speeds
+                    scale: 0.5 + Math.random() * 1 // Size variation
+                });
+            }
+        }
+        initializeBlinkingStars();
         
         // Increase nebula count and distribute more uniformly using grid-based approach
         const nebulaColors = [
@@ -544,32 +571,32 @@
         
         const pixelPlanets = [];
         // Create planets with better distribution
-        const planetCount = 35; // Reduced back to original count
+        const planetCount = 22; // Total: 19 standard (missing planet-14) + 3 special planets
         
-        // Define planet distribution
+        // Define planet distribution (skip missing planet-14)
         const standardPlanetIds = [];
-        for (let i = 1; i <= 35; i++) {
+        for (let i = 1; i <= 20; i++) {
+            if (i === 14) continue; // Skip missing planet-14
             standardPlanetIds.push(`planet-${i}`);
         }
         
         const specialPlanetIds = [];
-        for (let i = 1; i <= 12; i++) {
+        for (let i = 1; i <= 10; i++) {
+            if (i === 1 || i === 6 || i === 8) continue; // Skip removed special-planets 1, 6, 8
             specialPlanetIds.push(`special-planet-${i}`);
         }
         
         // Grid-based distribution with randomization for more even spread
         const gridSize = 8; // 8x8 grid
-        // Extend planet generation area by 20% on each side to account for parallax
-        const extendedWorldSize = WORLD_SIZE * 1.4;
-        const worldOffset = WORLD_SIZE * 0.2; // Start 20% before world boundary
-        const cellSize = extendedWorldSize / gridSize;
+        // Use full world size for planet distribution
+        const cellSize = WORLD_SIZE / gridSize;
         const planetsPerCell = Math.ceil(planetCount / (gridSize * gridSize));
         
         // Use a minimum distance between planets to prevent clumping
         const minPlanetDistance = 250; // Further reduced for better coverage with extended area
         
-        // Determine number of special planets (2-3 max)
-        const specialPlanetCount = Math.floor(Math.random() * 2) + 2;
+        // Determine number of special planets (up to 3)
+        const specialPlanetCount = 3;
         
         // Track used special planets to avoid duplicates
         const usedSpecialPlanets = new Set();
@@ -584,16 +611,33 @@
         
         let planetIndex = 0;
         
-        // First, generate all planet positions without assigning types
-        const planetPositions = [];
-        
+        // First, generate all possible grid positions
+        const allGridPositions = [];
         for (let gridX = 0; gridX < gridSize; gridX++) {
             for (let gridY = 0; gridY < gridSize; gridY++) {
-                if (planetPositions.length >= planetCount) break;
-                
-                // Random position within grid cell - offset to start before world boundary
-                const cellX = gridX * cellSize - worldOffset + 300; // Shifted 300 pixels right total
-                const cellY = gridY * cellSize - worldOffset + 100; // Shifted 100 pixels down
+                allGridPositions.push({ gridX, gridY });
+            }
+        }
+        
+        // Shuffle grid positions for random distribution
+        for (let i = allGridPositions.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [allGridPositions[i], allGridPositions[j]] = [allGridPositions[j], allGridPositions[i]];
+        }
+        
+        // Generate planet positions from shuffled grid
+        const planetPositions = [];
+        for (const gridPos of allGridPositions) {
+            if (planetPositions.length >= planetCount) break;
+            
+            // Random position within grid cell
+            const cellX = gridPos.gridX * cellSize;
+            const cellY = gridPos.gridY * cellSize;
+            
+            // Try a few times to find a valid position in this cell
+            let attempts = 0;
+            while (attempts < 5 && planetPositions.length < planetCount) {
+                attempts++;
                 
                 // Add some randomness to position within cell
                 const x = cellX + Math.random() * cellSize;
@@ -611,18 +655,18 @@
                     }
                 }
                 
-                if (!validPosition) continue;
-                
-                planetPositions.push({
-                    x: x,
-                    y: y,
-                    radius: 30 + Math.random() * 80,  // Was 20-60, now 30-110
-                    rotation: Math.random() * Math.PI * 2,
-                    rotationSpeed: (Math.random() - 0.5) * 0.01,
-                    opacity: 0.9
-                });
+                if (validPosition) {
+                    planetPositions.push({
+                        x: x,
+                        y: y,
+                        radius: 40 + Math.random() * 60,  // Medium to large only: 40-100
+                        rotation: Math.random() * Math.PI * 2,
+                        rotationSpeed: (Math.random() - 0.5) * 0.01, // Increased rotation speed for visibility
+                        opacity: 0.9
+                    });
+                    break;
+                }
             }
-            if (planetPositions.length >= planetCount) break;
         }
         
         // Now randomly select which positions will have special planets
@@ -647,20 +691,66 @@
                 isSpecial = true;
             } else {
                 // Add a standard planet (no duplicates - use next from shuffled array)
-                planetId = shuffledStandardPlanets[standardPlanetIndex];
-                standardPlanetIndex++;
+                if (standardPlanetIndex < shuffledStandardPlanets.length) {
+                    planetId = shuffledStandardPlanets[standardPlanetIndex];
+                    standardPlanetIndex++;
+                } else {
+                    // Skip if we've run out of standard planets
+                    continue;
+                }
+            }
+            
+            // Get the frame count for this planet
+            let frameCount = 60; // default
+            if (!isSpecial) {
+                if (planetId === 'planet-7' || planetId === 'planet-19') frameCount = 120;
+                else if (planetId >= 'planet-21' && planetId <= 'planet-24') frameCount = 8;
             }
             
             pixelPlanets.push({
                 ...position,
                 imageId: planetId,
-                isSpecial: isSpecial
+                isSpecial: isSpecial,
+                currentFrame: Math.floor(Math.random() * frameCount), // Random starting frame
+                frameTime: 0,
+                lastFrameTime: Date.now()
             });
         }
         
-        const pixelAsteroids = [];
+        // Debug planet positions
+        gameLogger.debug('PLANET GENERATION', `Generated ${pixelPlanets.length} planets`);
+        if (pixelPlanets.length > 0) {
+            const xCoords = pixelPlanets.map(p => p.x);
+            const yCoords = pixelPlanets.map(p => p.y);
+            gameLogger.debug('PLANET GENERATION', `X range: ${Math.min(...xCoords)} to ${Math.max(...xCoords)}`);
+            gameLogger.debug('PLANET GENERATION', `Y range: ${Math.min(...yCoords)} to ${Math.max(...yCoords)}`);
+        }
         
+        // Create floating space stations
+        const spaceStations = [];
+        const stationCount = 5 + Math.floor(Math.random() * 3); // 5-7 stations
+        
+        for (let i = 0; i < stationCount; i++) {
+            const stationId = `station-${(i % 3) + 1}`; // Cycle through station-1, station-2, station-3
+            spaceStations.push({
+                x: Math.random() * WORLD_SIZE,
+                y: Math.random() * WORLD_SIZE,
+                vx: (Math.random() - 0.5) * 0.3, // Slow drift velocity
+                vy: (Math.random() - 0.5) * 0.3,
+                width: 25,
+                rotation: Math.random() * Math.PI * 2,
+                rotationSpeed: (Math.random() - 0.5) * 0.001, // Very slow rotation
+                imageId: stationId,
+                driftAngle: Math.random() * Math.PI * 2,
+                driftSpeed: 0.1 + Math.random() * 0.1 // Slight variation in drift
+            });
+        }
+        
+        // Pixel asteroids - REMOVED (using PNG images instead)
+        const pixelAsteroids = [];
         const asteroidClusters = [];
+        
+        /*
         const numClusters = 8 + Math.floor(Math.random() * 3);
         for (let i = 0; i < numClusters; i++) {
             const clusterX = Math.random() * WORLD_SIZE;
@@ -694,6 +784,7 @@
             
             asteroidClusters.push(cluster);
         }
+        */
         
         let borderParticles = [];
         let animationTime = 0;
@@ -1262,14 +1353,27 @@
         // Make it globally available
         window.checkAndShowWelcomeModal = checkAndShowWelcomeModal;
         
-        // Splash screen
-        document.getElementById('startButton').addEventListener('click', async () => {
-            playUISound();
+        // Splash screen - wait for DOM to be ready
+        function setupStartButton() {
+            const startButton = document.getElementById('startButton');
+            if (!startButton) {
+                console.error('Start button not found');
+                return;
+            }
             
-            // Save player name
-            const nameInput = document.getElementById('playerNameInput');
-            if (nameInput) {
-                const name = nameInput.value.trim() || window.nameGenerator.generateRandomName();
+            startButton.addEventListener('click', async () => {
+                playUISound();
+                
+                // Save player name
+                const nameInput = document.getElementById('playerNameInput');
+                if (nameInput) {
+                    let name = nameInput.value.trim();
+                    if (!name && window.nameGenerator && window.nameGenerator.generateRandomName) {
+                        name = window.nameGenerator.generateRandomName();
+                    } else if (!name) {
+                        // Fallback if nameGenerator isn't loaded yet
+                        name = 'Player' + Math.floor(Math.random() * 9999);
+                    }
                 localStorage.setItem('playerName', name);
                 window.currentPlayerName = name;
             }
@@ -1313,6 +1417,14 @@
                 }, 300);
             }
         });
+        }
+        
+        // Setup start button when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', setupStartButton);
+        } else {
+            setupStartButton();
+        }
         
         // Game mode selection
         function selectGameMode(mode) {
@@ -2147,7 +2259,7 @@
                 this.segments = [];
                 
                 this.elements = [];
-                this.maxVisibleElements = 6; // Fixed max of 6 visible element slots
+                this.maxVisibleElements = elementBankSlots; // Dynamic element slots based on global value
                 this.elementsEaten = 0; // Track total elements eaten
                 this.length = 10;
                 this.score = 0;
@@ -2447,10 +2559,10 @@
                 if (this.elements.length < 2) return;
                 
                 // Safety check - ensure we never exceed max elements
-                if (this.elements.length > this.maxVisibleElements) {
+                if (this.elements.length > elementBankSlots) {
                     gameLogger.critical('SNAKE', 'Elements array exceeds max visible elements!', this.elements.length);
                     // Trim to max size
-                    this.elements = this.elements.slice(0, this.maxVisibleElements);
+                    this.elements = this.elements.slice(0, elementBankSlots);
                 }
                 
                 // Limit chain reaction depth
@@ -2542,9 +2654,9 @@
                 this.elements.splice(insertIndex, 0, chosen.result);
                 
                 // Safety check - ensure we never exceed max elements after combination
-                if (this.elements.length > this.maxVisibleElements) {
+                if (this.elements.length > elementBankSlots) {
                     gameLogger.error('SAFETY', 'Elements exceed max after combination, trimming');
-                    this.elements = this.elements.slice(0, this.maxVisibleElements);
+                    this.elements = this.elements.slice(0, elementBankSlots);
                 }
                             
                     // Discovery check
@@ -2822,7 +2934,7 @@
                         // Bank is full and no combination possible - element is lost
                     }
                 } else {
-                    // We have space - add element to a random position within the 6 slots
+                    // We have space - add element to a random position within the available slots
                     const insertIndex = Math.floor(Math.random() * (this.elements.length + 1));
                     this.elements.splice(insertIndex, 0, element.id);
                     
@@ -5178,6 +5290,106 @@
         // Initialize element pool
         const elementPool = new ElementPool();
         
+        // Asteroid class
+        class Asteroid {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                
+                // Random asteroid sprite (1-16)
+                this.spriteIndex = Math.floor(Math.random() * 16) + 1;
+                
+                // Random size
+                this.size = 40 + Math.random() * 60; // 40-100 pixels
+                
+                // Random velocity for slow floating in all directions
+                const angle = Math.random() * Math.PI * 2;
+                const speed = 0.1 + Math.random() * 0.2; // 0.1-0.3 speed
+                this.vx = Math.cos(angle) * speed;
+                this.vy = Math.sin(angle) * speed;
+                
+                // Random rotation
+                this.rotation = Math.random() * Math.PI * 2;
+                this.rotationSpeed = (Math.random() - 0.5) * 0.01; // Very slow rotation
+                
+                // Slight opacity variation
+                this.opacity = 0.5 + Math.random() * 0.3; // 0.5-0.8 opacity
+                
+                // Preload image
+                this.loadImage();
+            }
+            
+            loadImage() {
+                if (!window.asteroidImages) {
+                    window.asteroidImages = new Map();
+                }
+                
+                const key = `asteroid-${this.spriteIndex}`;
+                if (!window.asteroidImages.has(key)) {
+                    const img = new Image();
+                    img.src = `assets/asteroids/${key}.png`;
+                    
+                    // Add error handling
+                    img.onerror = () => {
+                        console.warn(`Failed to load asteroid image: ${key}`);
+                        this.imageLoadFailed = true;
+                    };
+                    
+                    window.asteroidImages.set(key, img);
+                }
+                
+                this.image = window.asteroidImages.get(key);
+            }
+            
+            update(deltaTime = 1) {
+                // Update position with simple floating movement
+                this.x += this.vx * deltaTime;
+                this.y += this.vy * deltaTime;
+                
+                // Update rotation
+                this.rotation += this.rotationSpeed * deltaTime;
+                
+                // Wrap around the world if asteroid goes too far
+                const worldBounds = WORLD_SIZE;
+                if (this.x < -worldBounds) this.x = worldBounds;
+                if (this.x > worldBounds) this.x = -worldBounds;
+                if (this.y < -worldBounds) this.y = worldBounds;
+                if (this.y > worldBounds) this.y = -worldBounds;
+            }
+            
+            draw() {
+                // Skip drawing if image failed to load or is still loading
+                if (this.imageLoadFailed || !this.image || !this.image.complete) return;
+                
+                // Don't draw if not in viewport
+                if (!isInViewport(this.x, this.y, this.size)) return;
+                
+                const screen = worldToScreen(this.x, this.y);
+                
+                ctx.save();
+                
+                // Apply the asteroid's opacity
+                ctx.globalAlpha = this.opacity;
+                
+                // Translate to asteroid position
+                ctx.translate(screen.x, screen.y);
+                
+                // Rotate
+                ctx.rotate(this.rotation);
+                
+                // Draw the asteroid at its actual size
+                const halfSize = this.size / 2;
+                try {
+                    ctx.drawImage(this.image, -halfSize, -halfSize, this.size, this.size);
+                } catch (e) {
+                    // Silently fail if image drawing fails
+                    console.warn('Failed to draw asteroid:', e);
+                }
+                
+                ctx.restore();
+            }
+        }
+        
         // Shooting Star class
         class ShootingStar {
             constructor() {
@@ -5623,8 +5835,13 @@
             }
             
             fireballAttack() {
+                // Get boss head position
+                const bossHead = this.segments && this.segments.length > 0 ? this.segments[0] : {x: this.x, y: this.y};
+                const bossX = bossHead.x || this.x;
+                const bossY = bossHead.y || this.y;
+                
                 // Shoot 4 fireballs in spread pattern toward player
-                const baseAngle = Math.atan2(playerSnake.y - this.y, playerSnake.x - this.x);
+                const baseAngle = Math.atan2(playerSnake.y - bossY, playerSnake.x - bossX);
                 const spreadAngle = Math.PI / 8; // Slightly tighter spread for 4 fireballs
                 
                 for (let i = -1.5; i <= 1.5; i++) {
@@ -5632,8 +5849,8 @@
                     const speed = 8;
                     
                     bossProjectiles.push({
-                        x: this.x,
-                        y: this.y,
+                        x: bossX,
+                        y: bossY,
                         vx: Math.cos(angle) * speed,
                         vy: Math.sin(angle) * speed,
                         type: 'fireball',
@@ -5646,6 +5863,11 @@
             }
             
             waterWaveAttack() {
+                // Get boss head position
+                const bossHead = this.segments && this.segments.length > 0 ? this.segments[0] : {x: this.x, y: this.y};
+                const bossX = bossHead.x || this.x;
+                const bossY = bossHead.y || this.y;
+                
                 // Shoot water orbs in all directions
                 const orbs = 12; // Reduced from 16 for easier dodging
                 for (let i = 0; i < orbs; i++) {
@@ -5653,8 +5875,8 @@
                     const speed = 5; // Reduced from 6 for more reaction time
                     
                     bossProjectiles.push({
-                        x: this.x,
-                        y: this.y,
+                        x: bossX,
+                        y: bossY,
                         vx: Math.cos(angle) * speed,
                         vy: Math.sin(angle) * speed,
                         type: 'waterorb',
@@ -5738,8 +5960,13 @@
             shootVoidProjectiles() {
                 if (!playerSnake || !playerSnake.alive) return;
                 
+                // Get boss head position
+                const bossHead = this.segments && this.segments.length > 0 ? this.segments[0] : {x: this.x, y: this.y};
+                const bossX = bossHead.x || this.x;
+                const bossY = bossHead.y || this.y;
+                
                 // Shoot tornados at the player
-                const baseAngle = Math.atan2(playerSnake.y - this.y, playerSnake.x - this.x);
+                const baseAngle = Math.atan2(playerSnake.y - bossY, playerSnake.x - bossX);
                 
                 // Create 5 tornados in a spread pattern
                 const tornadoCount = 5;
@@ -5750,8 +5977,8 @@
                     const speed = 6; // Increased from 4
                     
                     bossProjectiles.push({
-                        x: this.x + Math.cos(angle) * spawnDistance,
-                        y: this.y + Math.sin(angle) * spawnDistance,
+                        x: bossX + Math.cos(angle) * spawnDistance,
+                        y: bossY + Math.sin(angle) * spawnDistance,
                         vx: Math.cos(angle) * speed,
                         vy: Math.sin(angle) * speed,
                         type: 'tornado',
@@ -6058,6 +6285,10 @@
                 if (elementBankSlots < 12) {
                     elementBankSlots++;
                     saveElementBankSlots(); // Save to localStorage
+                    // Update player snake's max visible elements
+                    if (playerSnake) {
+                        playerSnake.maxVisibleElements = elementBankSlots;
+                    }
                     updateElementBankUI();
                     elementBankExpanded = true;
                 }
@@ -10635,12 +10866,128 @@
             ctx.restore();
         }
         
+        // New background system with pre-made assets
+        function drawNewBackgroundSystem(assets) {
+            // Draw the nebula background covering the entire viewport
+            if (assets.nebulaBackground) {
+                // Calculate how many tiles we need to cover the viewport
+                const zoomScale = 1.5; // 50% zoom in
+                const bgWidth = assets.nebulaBackground.width * zoomScale;
+                const bgHeight = assets.nebulaBackground.height * zoomScale;
+                
+                // Apply parallax scrolling for depth effect
+                const parallaxFactor = 0.3;
+                const offsetX = (camera.x * parallaxFactor) % bgWidth;
+                const offsetY = (camera.y * parallaxFactor) % bgHeight;
+                
+                // Tile the background to cover the entire viewport with zoom
+                for (let x = -bgWidth - offsetX; x < canvas.width + bgWidth; x += bgWidth) {
+                    for (let y = -bgHeight - offsetY; y < canvas.height + bgHeight; y += bgHeight) {
+                        ctx.drawImage(assets.nebulaBackground, x, y, bgWidth, bgHeight);
+                    }
+                }
+            }
+            
+            // Overlay the star field
+            if (assets.starOverlay) {
+                // Different parallax for star overlay
+                const parallaxFactor = 0.5;
+                const starWidth = assets.starOverlay.width;
+                const starHeight = assets.starOverlay.height;
+                const offsetX = (camera.x * parallaxFactor) % starWidth;
+                const offsetY = (camera.y * parallaxFactor) % starHeight;
+                
+                ctx.save();
+                ctx.globalAlpha = 0.8; // Slight transparency for blending
+                
+                // Tile the star overlay
+                for (let x = -starWidth - offsetX; x < canvas.width + starWidth; x += starWidth) {
+                    for (let y = -starHeight - offsetY; y < canvas.height + starHeight; y += starHeight) {
+                        ctx.drawImage(assets.starOverlay, x, y);
+                    }
+                }
+                
+                ctx.restore();
+            }
+            
+            // Draw blinking stars
+            drawBlinkingStars(assets);
+        }
+        
+        // Simple mobile background system
+        function drawSimpleMobileBackground(assets) {
+            // Draw nebula background with reduced tiling for performance
+            if (assets.nebulaBackground) {
+                const zoomScale = 1.5; // 50% zoom in
+                const bgWidth = assets.nebulaBackground.width * zoomScale;
+                const bgHeight = assets.nebulaBackground.height * zoomScale;
+                const parallaxFactor = 0.2;
+                const offsetX = (camera.x * parallaxFactor) % bgWidth;
+                const offsetY = (camera.y * parallaxFactor) % bgHeight;
+                
+                // Simpler tiling for mobile with zoom
+                ctx.drawImage(assets.nebulaBackground, -offsetX, -offsetY, canvas.width + bgWidth, canvas.height + bgHeight);
+            }
+            
+            // Draw fewer blinking stars on mobile
+            drawBlinkingStars(assets, true);
+        }
+        
+        // Draw blinking star sprites
+        function drawBlinkingStars(assets, isMobile = false) {
+            if (!assets.starSprites || assets.starSprites.length === 0) return;
+            
+            const maxStars = isMobile ? 30 : blinkingStars.length; // Fewer stars on mobile
+            
+            for (let i = 0; i < Math.min(maxStars, blinkingStars.length); i++) {
+                const star = blinkingStars[i];
+                
+                // Calculate screen position
+                const screen = worldToScreen(star.x, star.y);
+                
+                // Skip if off-screen
+                if (screen.x < -50 || screen.x > canvas.width + 50 ||
+                    screen.y < -50 || screen.y > canvas.height + 50) continue;
+                
+                // Update blink phase
+                star.blinkPhase += star.blinkSpeed * 0.02;
+                
+                // Calculate opacity based on blink phase
+                const opacity = 0.3 + Math.sin(star.blinkPhase) * 0.7;
+                
+                // Get the sprite
+                const sprite = assets.starSprites[star.type];
+                if (!sprite) continue;
+                
+                ctx.save();
+                ctx.globalAlpha = opacity;
+                
+                // Draw the star sprite
+                const size = sprite.width * star.scale * cameraZoom;
+                ctx.drawImage(
+                    sprite,
+                    screen.x - size / 2,
+                    screen.y - size / 2,
+                    size,
+                    size
+                );
+                
+                ctx.restore();
+            }
+        }
+        
         function drawBackground() {
-            // Deep space background
+            // Clear with deep space background
             ctx.fillStyle = '#000011';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // Borders will be drawn at the end to appear on top
+            // Check if assets are loaded
+            if (!window.preloadedAssets || !window.preloadedAssets.backgrounds) {
+                // Fallback to simple background if assets not loaded
+                return;
+            }
+            
+            const assets = window.preloadedAssets.backgrounds;
             
             // Use optimized mobile renderer if available
             if (isMobile) {
@@ -10648,84 +10995,26 @@
                     // Use new optimized mobile background
                     renderMobileBackground(ctx, camera);
                 } else {
-                    // Fallback: Just draw minimal stars for mobile
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-                    for (let i = 0; i < 20; i++) {
-                        const x = (i * 137 + camera.x * 0.1) % canvas.width;
-                        const y = (i * 241 + camera.y * 0.1) % canvas.height;
-                        ctx.fillRect(x, y, 1, 1);
-                    }
+                    // Simple mobile background with new assets
+                    drawSimpleMobileBackground(assets);
                 }
                 return; // Skip desktop background effects
             }
             
-            // Initialize Easter Egg elements for desktop
+            // Desktop background rendering with new assets
+            drawNewBackgroundSystem(assets);
+            
+            // Initialize Easter Egg elements for desktop - REMOVED (not using black holes/UFOs)
+            /*
             if (!window.easterEggElements && typeof EasterEggElements !== 'undefined') {
                 window.easterEggElements = new EasterEggElements();
                 // Desktop gets high quality by default
                 window.easterEggElements.setQualityLevel('high');
             }
+            */
             
-            // Initialize grid pattern cache if needed (desktop only)
-            if (!window.gridPatternCanvas) {
-                window.gridPatternCanvas = document.createElement('canvas');
-                window.gridPatternCanvas.width = 128;
-                window.gridPatternCanvas.height = 128;
-                const gridCtx = window.gridPatternCanvas.getContext('2d');
-                gridCtx.strokeStyle = '#001122';
-                gridCtx.lineWidth = 1;
-                const gridSize = 64;
-                
-                // Draw grid pattern
-                for (let x = 0; x < 128; x += gridSize) {
-                    gridCtx.beginPath();
-                    gridCtx.moveTo(x, 0);
-                    gridCtx.lineTo(x, 128);
-                    gridCtx.stroke();
-                }
-                
-                for (let y = 0; y < 128; y += gridSize) {
-                    gridCtx.beginPath();
-                    gridCtx.moveTo(0, y);
-                    gridCtx.lineTo(128, y);
-                    gridCtx.stroke();
-                }
-            }
-            
-            // Draw pixel star layers with parallax
-            pixelStarLayers.forEach((layer, layerIndex) => {
-                layer.stars.forEach(star => {
-                    const x = (star.x - camera.x * layer.speed) % WORLD_SIZE;
-                    const y = (star.y - camera.y * layer.speed) % WORLD_SIZE;
-                    
-                    const screen = worldToScreen(x, y);
-                    const screenX = screen.x;
-                    const screenY = screen.y;
-                    
-                    // Skip if off-screen
-                    if (screenX < -10 || screenX > canvas.width + 10 ||
-                        screenY < -10 || screenY > canvas.height + 10) return;
-                    
-                    // Twinkle effect
-                    star.twinkle += 0.03; // Slower, more subtle twinkling
-                    const brightness = 0.5 + Math.sin(star.twinkle) * 0.5;
-                    
-                    ctx.fillStyle = layer.color;
-                    ctx.globalAlpha = brightness;
-                    ctx.fillRect(
-                        Math.floor(screenX / 2) * 2,
-                        Math.floor(screenY / 2) * 2,
-                        layer.size * 2,
-                        layer.size * 2
-                    );
-                });
-            });
-            ctx.globalAlpha = 1;
-            
-            // Draw pixel nebulae BEFORE grid
-            drawPixelNebulae();
-            
-            // Draw Easter Egg elements (rare background decorations)
+            // Draw Easter Egg elements (rare background decorations) - REMOVED (not using black holes/UFOs)
+            /*
             if (window.easterEggElements) {
                 const gameState = {
                     worldWidth: WORLD_WIDTH,
@@ -10737,20 +11026,25 @@
                 window.easterEggElements.update(16.67, gameState);
                 window.easterEggElements.render(ctx, camera);
             }
+            */
             
-            // Draw spaceships (behind planets)
-            // TODO: Spaceship class needs to be implemented
+            // Draw spaceships (behind planets) - REMOVED (not using spaceships)
             /*
-            spaceships.forEach(spaceship => {
-                spaceship.draw(ctx, camera);
-            });
+            if (window.spaceships) {
+                window.spaceships.forEach(spaceship => {
+                    spaceship.draw(ctx, camera);
+                });
+            }
             */
             
             // Draw pixel planets BEFORE grid
             drawPixelPlanets();
             
-            // Draw pixel asteroids
-            drawPixelAsteroids();
+            // Draw floating space stations (above planets)
+            drawSpaceStations();
+            
+            // Draw pixel asteroids - REMOVED (using PNG images instead)
+            // drawPixelAsteroids();
             
             // Draw pixel grid using cached pattern - optimized
             const gridSize = 64;
@@ -10789,153 +11083,128 @@
             }
         }
         
-        // Draw pixel nebulae with parallax
+        // OLD drawPixelNebulae function - no longer used
         function drawPixelNebulae() {
-            const pixelSize = 8;
+            // This function is no longer used - we now use pre-made background assets
+            return;
+        }
+        
+        // Update and draw floating space stations
+        function drawSpaceStations() {
+            if (!window.preloadedAssets || !window.preloadedAssets.stations) return;
             
-            // Save context state to ensure proper layering
-            ctx.save();
+            // Minimal parallax for stations (they're in foreground)
+            const stationParallax = 0.95;
             
-            pixelNebulae.forEach((nebula, index) => {
-                // Check if nebula is cached
-                const cacheKey = `nebula_${index}`;
-                let cachedCanvas = nebulaCanvases.get(cacheKey);
+            spaceStations.forEach((station) => {
+                // Update station position with drifting motion
+                station.driftAngle += 0.005; // Slow oscillation
+                const driftX = Math.cos(station.driftAngle) * station.driftSpeed;
+                const driftY = Math.sin(station.driftAngle * 0.7) * station.driftSpeed; // Different frequency for Y
                 
-                // If not cached, render it once
-                if (!cachedCanvas) {
-                    // Initialize clusters if not already done
-                    if (nebula.clusters.length === 0) {
-                        // Create organic shape with multiple overlapping circular clusters
-                        const clusterCount = 3 + Math.floor(Math.random() * 4);
-                        const centerX = nebula.width / 2;
-                        const centerY = nebula.height / 2;
-                        
-                        for (let i = 0; i < clusterCount; i++) {
-                            // Create clusters that overlap near the center for more organic shapes
-                            const angle = (i / clusterCount) * Math.PI * 2;
-                            const distance = Math.random() * nebula.width * 0.2; // Keep clusters close to center
-                            nebula.clusters.push({
-                                cx: centerX + Math.cos(angle) * distance,
-                                cy: centerY + Math.sin(angle) * distance,
-                                radius: nebula.width * (0.4 + Math.random() * 0.3)
-                            });
-                        }
-                    }
-                    
-                    // Create offscreen canvas
-                    cachedCanvas = document.createElement('canvas');
-                    cachedCanvas.width = nebula.width;
-                    cachedCanvas.height = nebula.height;
-                    const cacheCtx = cachedCanvas.getContext('2d');
-                    
-                    // Pre-calculate values for optimization
-                    const centerX = nebula.width / 2;
-                    const centerY = nebula.height / 2;
-                    const maxRadius = Math.min(nebula.width, nebula.height) / 2;
-                    const maxRadiusSquared = maxRadius * maxRadius;
-                    
-                    // Draw nebula once to cache
-                    for (let nx = 0; nx < nebula.width; nx += pixelSize) {
-                        for (let ny = 0; ny < nebula.height; ny += pixelSize) {
-                            // Optimized distance check (squared distance to avoid sqrt)
-                            const dx = nx - centerX;
-                            const dy = ny - centerY;
-                            const distFromCenterSquared = dx * dx + dy * dy;
-                            if (distFromCenterSquared > maxRadiusSquared) continue;
-                            
-                            // Check if pixel is within any cluster
-                            let inCluster = false;
-                            let minDist = Infinity;
-                            
-                            for (const cluster of nebula.clusters) {
-                                const cdx = nx - cluster.cx;
-                                const cdy = ny - cluster.cy;
-                                const distSquared = cdx * cdx + cdy * cdy;
-                                const radiusSquared = cluster.radius * cluster.radius;
-                                
-                                if (distSquared < radiusSquared) {
-                                    inCluster = true;
-                                    const dist = Math.sqrt(distSquared);
-                                    minDist = Math.min(minDist, dist / cluster.radius);
-                                }
-                            }
-                            
-                            if (inCluster) {
-                                // More cloud-like density with smoother falloff
-                                const density = nebula.density * (1 - minDist * minDist); // Quadratic falloff
-                                if (Math.random() < density) {
-                                    const opacity = 0.03 + (1 - minDist) * 0.15; // Very low opacity for subtle background effect
-                                    
-                                    cacheCtx.fillStyle = nebula.color;
-                                    cacheCtx.globalAlpha = opacity;
-                                    cacheCtx.fillRect(
-                                        Math.floor(nx / pixelSize) * pixelSize,
-                                        Math.floor(ny / pixelSize) * pixelSize,
-                                        pixelSize,
-                                        pixelSize
-                                    );
-                                }
-                            }
-                        }
-                    }
-                    
-                    // Store in cache
-                    nebulaCanvases.set(cacheKey, cachedCanvas);
-                }
+                station.x += station.vx + driftX;
+                station.y += station.vy + driftY;
                 
-                // Calculate position with parallax - slower than planets to appear farther
-                const parallaxFactor = 0.95; // Nebulae move at 95% of camera speed (planets are at 85%)
-                const x = nebula.x - camera.x * parallaxFactor + canvas.width / 2;
-                const y = nebula.y - camera.y * parallaxFactor + canvas.height / 2;
+                // Wrap around world boundaries
+                if (station.x < 0) station.x = WORLD_SIZE;
+                if (station.x > WORLD_SIZE) station.x = 0;
+                if (station.y < 0) station.y = WORLD_SIZE;
+                if (station.y > WORLD_SIZE) station.y = 0;
                 
-                // Viewport culling with margin
-                const margin = 200;
-                if (x + nebula.width < -margin || x > canvas.width + margin ||
-                    y + nebula.height < -margin || y > canvas.height + margin) return;
+                // Update rotation
+                station.rotation += station.rotationSpeed;
                 
-                // Draw the cached nebula
-                ctx.drawImage(cachedCanvas, x, y);
+                // Calculate screen position with parallax
+                const x = station.x - camera.x * stationParallax + canvas.width / 2;
+                const y = station.y - camera.y * stationParallax + canvas.height / 2;
+                
+                // Only draw if in viewport (with margin)
+                const margin = station.width * 2;
+                if (x < -margin || x > canvas.width + margin ||
+                    y < -margin || y > canvas.height + margin) return;
+                
+                // Get station image
+                const stationImage = window.preloadedAssets.stations[station.imageId];
+                if (!stationImage) return;
+                
+                // Draw station with rotation
+                ctx.save();
+                ctx.globalAlpha = 0.9; // Slight transparency
+                ctx.translate(x, y);
+                ctx.rotate(station.rotation);
+                
+                // Draw centered at position
+                const aspectRatio = stationImage.width / stationImage.height;
+                const drawHeight = station.width / aspectRatio;
+                
+                ctx.drawImage(
+                    stationImage,
+                    -station.width / 2,
+                    -drawHeight / 2,
+                    station.width,
+                    drawHeight
+                );
+                
+                ctx.restore();
             });
-            
-            // Restore context state
-            ctx.restore();
         }
         
         // Draw pixel planets with parallax
         function drawPixelPlanets() {
-            // Single parallax factor for all planets - creates consistent depth layer
-            const parallaxFactor = 0.85; // Planets move at 85% of camera speed
+            // Sort planets by type for two-layer parallax
+            const specialPlanets = pixelPlanets.filter(p => p.isSpecial);
+            const regularPlanets = pixelPlanets.filter(p => !p.isSpecial);
             
-            pixelPlanets.forEach((planet, i) => {
-                // Simple parallax calculation - planets move slower than camera
-                const x = planet.x - camera.x * parallaxFactor + canvas.width / 2;
-                const y = planet.y - camera.y * parallaxFactor + canvas.height / 2;
+            // Draw special planets first (back layer with more parallax)
+            const specialParallax = 0.7; // Special planets move at 70% of camera speed
+            specialPlanets.forEach((planet) => {
+                const x = planet.x - camera.x * specialParallax + canvas.width / 2;
+                const y = planet.y - camera.y * specialParallax + canvas.height / 2;
                 
                 // Only draw if in viewport
                 if (x < -planet.radius * 2 || x > canvas.width + planet.radius * 2 ||
                     y < -planet.radius * 2 || y > canvas.height + planet.radius * 2) return;
                 
-                // Update rotation
+                // Update rotation for special planets
                 planet.rotation += planet.rotationSpeed;
                 
                 // Check if planet assets are loaded
                 if (window.preloadedAssets && window.preloadedAssets.planets) {
-                    drawPlanetImage(x, y, planet.radius, planet.imageId, planet.isSpecial, planet.rotation, planet.opacity);
+                    drawPlanetImage(x, y, planet.radius, planet.imageId, planet.isSpecial, planet, planet.opacity);
                 } else {
-                    // Fallback to simple circle drawing if assets not loaded
+                    drawFallbackPlanet(x, y, planet.radius, planet.opacity);
+                }
+            });
+            
+            // Draw regular planets (front layer with less parallax)
+            const regularParallax = 0.9; // Regular planets move at 90% of camera speed
+            regularPlanets.forEach((planet) => {
+                const x = planet.x - camera.x * regularParallax + canvas.width / 2;
+                const y = planet.y - camera.y * regularParallax + canvas.height / 2;
+                
+                // Only draw if in viewport
+                if (x < -planet.radius * 2 || x > canvas.width + planet.radius * 2 ||
+                    y < -planet.radius * 2 || y > canvas.height + planet.radius * 2) return;
+                
+                // No rotation for animated planets
+                
+                // Check if planet assets are loaded
+                if (window.preloadedAssets && window.preloadedAssets.planets) {
+                    drawPlanetImage(x, y, planet.radius, planet.imageId, planet.isSpecial, planet, planet.opacity);
+                } else {
                     drawFallbackPlanet(x, y, planet.radius, planet.opacity);
                 }
             });
         }
         
         // Draw a planet using preloaded image
-        function drawPlanetImage(x, y, radius, imageId, isSpecial, rotation, opacity = 1) {
-            // Get the appropriate planet image
+        function drawPlanetImage(x, y, radius, imageId, isSpecial, planetInstance, opacity = 1) {
+            // Get the appropriate planet data
             const planetType = isSpecial ? 'special' : 'standard';
-            const planetImage = window.preloadedAssets.planets[planetType][imageId];
+            const planetData = window.preloadedAssets.planets[planetType][imageId];
             
-            if (!planetImage) {
-                gameLogger.warn('ASSETS', `Planet image not found: ${imageId}`);
+            if (!planetData) {
+                gameLogger.warn('ASSETS', `Planet data not found: ${imageId}`);
                 drawFallbackPlanet(x, y, radius, opacity);
                 return;
             }
@@ -10946,19 +11215,77 @@
             // Set opacity
             ctx.globalAlpha = opacity;
             
-            // Move to planet center and rotate
-            ctx.translate(x, y);
-            ctx.rotate(rotation);
+            // Get the current frame
+            let currentImage;
+            if (isSpecial) {
+                // Special planets are single images with rotation
+                currentImage = planetData;
+                
+                // Apply rotation for special planets
+                ctx.translate(x, y);
+                ctx.rotate(planetInstance.rotation);
+                
+                // Draw at translated position
+                const size = radius * 2;
+                try {
+                    ctx.drawImage(
+                        currentImage,
+                        -radius,
+                        -radius,
+                        size,
+                        size
+                    );
+                } catch (e) {
+                    // If image fails, try fallback
+                    drawFallbackPlanet(0, 0, radius, opacity);
+                }
+                
+                // Restore context
+                ctx.restore();
+                return;
+            } else {
+                // Standard planets are animated
+                if (!planetData.frames || planetData.frames.length === 0) {
+                    drawFallbackPlanet(x, y, radius, opacity);
+                    ctx.restore();
+                    return;
+                }
+                
+                // Update animation timing for this planet instance
+                const now = Date.now();
+                if (!planetInstance.lastFrameTime) {
+                    planetInstance.lastFrameTime = now;
+                }
+                
+                const deltaTime = now - planetInstance.lastFrameTime;
+                planetInstance.frameTime += deltaTime;
+                planetInstance.lastFrameTime = now;
+                
+                // Advance frame if needed
+                while (planetInstance.frameTime >= planetData.frameDuration) {
+                    planetInstance.frameTime -= planetData.frameDuration;
+                    planetInstance.currentFrame = (planetInstance.currentFrame + 1) % planetData.frameCount;
+                }
+                
+                currentImage = planetData.frames[planetInstance.currentFrame];
+            }
             
             // Draw the planet image scaled to the radius
             const size = radius * 2;
-            ctx.drawImage(
-                planetImage,
-                -radius,
-                -radius,
-                size,
-                size
-            );
+            
+            try {
+                // Draw the planet image (all planets are now square)
+                ctx.drawImage(
+                    currentImage,
+                    x - radius,
+                    y - radius,
+                    size,
+                    size
+                );
+            } catch (e) {
+                // If image fails, try fallback
+                drawFallbackPlanet(x, y, radius, opacity);
+            }
             
             // Restore context
             ctx.restore();
@@ -10989,7 +11316,8 @@
             ctx.restore();
         }
         
-        // Draw pixel asteroids with parallax
+        // Draw pixel asteroids with parallax - REMOVED (using PNG images instead)
+        /*
         function drawPixelAsteroids() {
             // Update asteroid positions
             pixelAsteroids.forEach(asteroid => {
@@ -11064,6 +11392,7 @@
                 });
             });
         }
+        */
         
         // Game functions
         function initializeStaticStars() {
@@ -11093,7 +11422,8 @@
                 }
             });
             
-            // Initialize pixel asteroids - many small ones
+            // Initialize pixel asteroids - REMOVED (using PNG images instead)
+            /*
             pixelAsteroids.length = 0;
             for (let i = 0; i < 50; i++) {
                 pixelAsteroids.push({
@@ -11106,6 +11436,7 @@
                     driftY: (Math.random() - 0.5) * 0.2
                 });
             }
+            */
         }
         
         function initializeBorderParticles() {
@@ -11240,6 +11571,41 @@
             // Notify unlock manager that game has started
             if (window.unlockManager && window.unlockManager.onGameStart) {
                 window.unlockManager.onGameStart();
+            }
+            
+            // Initialize asteroids with better spacing
+            asteroids = [];
+            const ASTEROID_COUNT = 30; // Fewer asteroids for better spacing
+            const MIN_DISTANCE = 800; // Minimum distance between asteroids
+            
+            // Create asteroids with spacing constraint
+            for (let i = 0; i < ASTEROID_COUNT; i++) {
+                let x, y;
+                let validPosition = false;
+                let attempts = 0;
+                
+                // Try to find a position that's not too close to other asteroids
+                while (!validPosition && attempts < 50) {
+                    x = Math.random() * WORLD_SIZE;
+                    y = Math.random() * WORLD_SIZE;
+                    
+                    validPosition = true;
+                    // Check distance from existing asteroids
+                    for (const existingAsteroid of asteroids) {
+                        const dx = existingAsteroid.x - x;
+                        const dy = existingAsteroid.y - y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        if (distance < MIN_DISTANCE) {
+                            validPosition = false;
+                            break;
+                        }
+                    }
+                    attempts++;
+                }
+                
+                // Create asteroid at found position
+                asteroids.push(new Asteroid(x, y));
             }
             
             // Create player snake
@@ -12288,34 +12654,8 @@
                     }
                 }
                 
-                // Update spaceships
-                // TODO: Spaceship class needs to be implemented
-                /*
-                spaceships = spaceships.filter(spaceship => {
-                    spaceship.update(16.67); // Fixed timestep
-                    return spaceship.alive;
-                });
-                */
-                
-                // Spawn spaceship occasionally
-                // TODO: Spaceship class needs to be implemented
-                /*
-                if (currentTime - lastSpaceshipSpawnTime > SPACESHIP_SPAWN_INTERVAL && spaceships.length === 0) {
-                    if (Math.random() < SPACESHIP_SPAWN_CHANCE) {
-                        const types = ['enterprise', 'millenium-falcon', 'pillar-of-autumn'];
-                        const randomType = types[Math.floor(Math.random() * types.length)];
-                        
-                        // Spawn in player's field of view
-                        // Camera position is the center of the view, so we need to calculate world position
-                        const spawnX = camera.x + canvas.width / (2 * cameraZoom) + 100; // Just off-screen to the right
-                        const spawnY = camera.y + (Math.random() - 0.5) * canvas.height / (2 * cameraZoom); // Within viewport height
-                        
-                        const spaceship = new Spaceship(spawnX, spawnY, randomType);
-                        spaceships.push(spaceship);
-                    }
-                    lastSpaceshipSpawnTime = currentTime;
-                }
-                */
+                // Update spaceships - REMOVED (not using spaceships)
+                // Spaceship system has been removed
                 
                 // Check collisions
                 checkCollisions();
@@ -12473,6 +12813,9 @@
                 
                 // Update Catalyst Gems
                 catalystGems.forEach(gem => gem.update(1.0));
+                
+                // Update Asteroids
+                asteroids.forEach(asteroid => asteroid.update(1.0));
                 
                 // Boss spawn check (infinite mode only)
                 // Boss spawning for both Classic and Infinite modes
@@ -12889,6 +13232,14 @@
             
             // Draw everything
             drawBackground();
+            
+            // Draw asteroids (behind elements but in front of background)
+            for (let i = 0; i < asteroids.length; i++) {
+                const asteroid = asteroids[i];
+                if (isInViewport(asteroid.x, asteroid.y, asteroid.size + 50)) {
+                    asteroid.draw();
+                }
+            }
             
             // Draw elements (element pool handles viewport culling)
             elementPool.draw();
@@ -13512,6 +13863,10 @@
             }
             elementBankSlots = newSlots;
             saveElementBankSlots();
+            // Update player snake's max visible elements
+            if (playerSnake) {
+                playerSnake.maxVisibleElements = elementBankSlots;
+            }
             updateElementBankUI();
             gameLogger.debug('ELEMENT BANK', 'Slots updated to:', elementBankSlots);
         };
@@ -13523,11 +13878,16 @@
             }
             elementBankSlots = slots;
             saveElementBankSlots();
+            // Update player snake's max visible elements
+            if (playerSnake) {
+                playerSnake.maxVisibleElements = elementBankSlots;
+            }
             updateElementBankUI();
             gameLogger.debug('ELEMENT BANK', 'Slots set to:', elementBankSlots);
         };
         
-        // Console commands for spaceship system
+        // Console commands for spaceship system - REMOVED (not using spaceships)
+        /*
         window.spawnSpaceship = function(type) {
             const validTypes = ['enterprise', 'millenium-falcon', 'pillar-of-autumn'];
             if (!type || !validTypes.includes(type)) {
@@ -13574,6 +13934,7 @@
                 console.log('Spaceships enabled');
             }
         };
+        */
         
         window.showElementBankSlots = function() {
             gameLogger.debug('ELEMENT BANK', 'Current slots:', elementBankSlots);
@@ -13581,3 +13942,10 @@
             gameLogger.debug('ELEMENT BANK', 'Use addElementBankSlots(n) to add n slots');
             gameLogger.debug('ELEMENT BANK', 'Use setElementBankSlots(n) to set to n slots');
         };
+        
+        // Expose necessary functions to global scope for HTML onclick handlers
+        window.selectGameMode = selectGameMode;
+        window.selectControls = selectControls;
+        window.startGame = startGame;
+        window.startGameTransition = startGameTransition;
+        window.playUISound = playUISound;
