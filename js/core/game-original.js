@@ -464,13 +464,8 @@
         // Asteroid system
         let asteroids = [];
         
-        // Spaceship system - REMOVED (not using spaceships)
-        /*
-        let spaceships = [];
-        let lastSpaceshipSpawnTime = 0;
-        let SPACESHIP_SPAWN_INTERVAL = 180000; // 3 minutes in milliseconds
-        let SPACESHIP_SPAWN_CHANCE = 0.2; // 20% chance
-        */
+        // Spaceship system
+        let spaceshipManager = null;
         
         const pixelStarLayers = [
             { stars: [], speed: 0.05, size: 1, color: '#666', count: 100 },
@@ -5220,6 +5215,9 @@
         // Initialize particle pool
         const particlePool = new ParticlePool(isMobile ? 50 : 200); // Further reduced for mobile performance
         
+        // Explosion manager will be initialized when game starts
+        let explosionManager = null;
+        
         // Element pool for performance
         class ElementPool {
             constructor(size = 50) {
@@ -8298,86 +8296,42 @@
             }
         }
         
-        function createDeathParticles(x, y, snakeLength = 5, snakeColor = null, elementsCarried = []) {
-            // Enhanced death particle system with multiple phases
-            const pixelSize = 4;
-            const baseParticles = isMobile ? 10 : 20;
-            const particleCount = Math.min(baseParticles + Math.floor(snakeLength / (isMobile ? 4 : 2)), isMobile ? 40 : 120);
-            const speedMultiplier = 1 + (snakeLength / 50);
+        function createDeathParticles(x, y, snakeLength = 5, snakeColor = null, elementsCarried = [], snakeType = null) {
+            // Determine explosion type based on snake
+            let explosionType;
+            let isBossSnake = false;
             
-            // Phase 1: Core explosion - red/orange burst
-            const coreParticles = Math.floor(particleCount * 0.4);
-            for (let i = 0; i < coreParticles; i++) {
-                const angle = (Math.PI * 2 * i) / coreParticles;
-                const speed = (Math.random() * 3 + 4) * speedMultiplier;
-                const color = Math.random() > 0.5 ? '#ff0000' : '#ff6600';
-                
-                particlePool.spawn(
-                    Math.floor(x / pixelSize) * pixelSize,
-                    Math.floor(y / pixelSize) * pixelSize,
-                    Math.cos(angle) * speed,
-                    Math.sin(angle) * speed,
-                    color,
-                    pixelSize * (Math.random() > 0.7 ? 2 : 1),
-                    'square',
-                    { fadeRate: 0.025 }
-                );
+            // Check if this is the player snake
+            if (snakeType === 'player' || (snakes[0] && snakes[0].x === x && snakes[0].y === y && snakes[0].isPlayer)) {
+                explosionType = 'toon-impact-large-violet';
+            } 
+            // Check if this is a boss snake
+            else if (snakeType === 'boss' || (currentBoss && currentBoss.snake && currentBoss.snake.x === x && currentBoss.snake.y === y)) {
+                explosionType = 'dust-impact-large-red';
+                isBossSnake = true;
+            }
+            // Default to AI snake explosion
+            else {
+                explosionType = 'quick-impact-large-blue';
             }
             
-            // Phase 2: Snake segment particles - match snake color if available
-            const segmentParticles = Math.floor(particleCount * 0.3);
-            const segmentColors = snakeColor ? [snakeColor] : ['#ff4444', '#ff6666', '#ff8888'];
-            
-            for (let i = 0; i < segmentParticles; i++) {
-                const angle = Math.random() * Math.PI * 2;
-                const speed = (Math.random() * 6 + 2) * speedMultiplier;
-                const color = segmentColors[Math.floor(Math.random() * segmentColors.length)];
-                
-                particlePool.spawn(
-                    x + (Math.random() - 0.5) * 20,
-                    y + (Math.random() - 0.5) * 20,
-                    Math.cos(angle) * speed,
-                    Math.sin(angle) * speed,
-                    color,
-                    pixelSize * (1 + Math.random() * 2),
-                    Math.random() > 0.7 ? 'circle' : 'square',
-                    { 
-                        gravity: Math.random() * 0.2,
-                        fadeRate: 0.02,
-                        trail: Math.random() > 0.8
-                    }
-                );
+            // Create the explosion animation if manager is loaded
+            if (explosionManager) {
+                if (isBossSnake) {
+                    // Boss gets cluster explosion
+                    explosionManager.createClusterExplosion(explosionType, x, y, 4, 60);
+                } else {
+                    // Regular explosion for player and AI snakes
+                    const scale = 1 + (snakeLength / 100); // Scale based on snake size
+                    explosionManager.createExplosion(explosionType, x, y, { scale });
+                }
             }
             
-            // Phase 3: Sparkle particles - glowing effects
-            const sparkleCount = Math.floor(particleCount * 0.2);
-            const sparkleColors = ['#ffff00', '#ffffff', '#ffaa00', '#ff00ff'];
-            
-            for (let i = 0; i < sparkleCount; i++) {
-                const angle = Math.random() * Math.PI * 2;
-                const speed = (Math.random() * 8 + 3) * speedMultiplier;
-                const color = sparkleColors[Math.floor(Math.random() * sparkleColors.length)];
-                
-                particlePool.spawn(
-                    x,
-                    y,
-                    Math.cos(angle) * speed,
-                    Math.sin(angle) * speed,
-                    color,
-                    pixelSize * 0.75,
-                    'star',
-                    {
-                        fadeRate: 0.03,
-                        rotationSpeed: Math.random() * 0.2 - 0.1,
-                        pulse: true,
-                        pulseSpeed: 0.2
-                    }
-                );
-            }
-            
-            // Phase 4: Element particles - if snake was carrying elements
-            if (elementsCarried.length > 0 && !isMobile) {
-                const elementParticleCount = Math.min(elementsCarried.length * 3, 15);
+            // Keep minimal particle effects for elements
+            // Reduce particles significantly for players
+            if (elementsCarried.length > 0 && !isMobile && snakeType !== 'player') {
+                // Only spawn element particles for AI and boss snakes
+                const elementParticleCount = Math.min(elementsCarried.length * 2, 8);
                 for (let i = 0; i < elementParticleCount; i++) {
                     const element = elementsCarried[i % elementsCarried.length];
                     if (!element) continue;
@@ -8392,7 +8346,7 @@
                     }
                     
                     const angle = Math.random() * Math.PI * 2;
-                    const speed = (Math.random() * 4 + 2) * speedMultiplier;
+                    const speed = (Math.random() * 3 + 1) * (1 + snakeLength / 100);
                     
                     particlePool.spawn(
                         x,
@@ -8400,36 +8354,13 @@
                         Math.cos(angle) * speed,
                         Math.sin(angle) * speed,
                         elementColor,
-                        pixelSize * 1.5,
+                        4 * 1.2,
                         'circle',
                         {
-                            fadeRate: 0.015,
+                            fadeRate: 0.02,
                             trail: true,
-                            trailLength: 8,
+                            trailLength: 4,
                             growthRate: -0.05
-                        }
-                    );
-                }
-            }
-            
-            // Large impact particles for big snakes
-            if (snakeLength > 30) {
-                const impactCount = Math.min(Math.floor(snakeLength / 15), 10);
-                for (let i = 0; i < impactCount; i++) {
-                    const angle = (Math.PI * 2 * i) / impactCount;
-                    const speed = 2 * speedMultiplier;
-                    
-                    particlePool.spawn(
-                        Math.floor(x / pixelSize) * pixelSize,
-                        Math.floor(y / pixelSize) * pixelSize,
-                        Math.cos(angle) * speed,
-                        Math.sin(angle) * speed,
-                        '#ff0000',
-                        pixelSize * 4,
-                        'square',
-                        {
-                            fadeRate: 0.01,
-                            growthRate: 0.2
                         }
                     );
                 }
@@ -11554,6 +11485,17 @@
                 // Discovery feed ready for new discoveries
             }
             
+            // Initialize explosion manager if not already done
+            if (!explosionManager) {
+                import('./entities/ExplosionAnimation.js').then(module => {
+                    const { ExplosionManager } = module;
+                    explosionManager = new ExplosionManager({ isMobile });
+                }).catch(err => {
+                    console.error('Failed to load explosion manager:', err);
+                    // Continue game without explosions if loading fails
+                });
+            }
+            
             // Start fresh game
             gameStarted = true;
             window.gameStarted = true; // Update global
@@ -11575,6 +11517,11 @@
             
             // Initialize asteroids with better spacing
             asteroids = [];
+            
+            // Initialize spaceship manager
+            if (!spaceshipManager && window.SpaceshipManager) {
+                spaceshipManager = new window.SpaceshipManager(ctx, canvas);
+            }
             const ASTEROID_COUNT = 30; // Fewer asteroids for better spacing
             const MIN_DISTANCE = 800; // Minimum distance between asteroids
             
@@ -12637,6 +12584,9 @@
                 }
                 elementPool.update(1.0);
                 particlePool.update(1.0);
+                if (explosionManager) {
+                    explosionManager.update(16.67); // Update explosions with fixed timestep
+                }
                 
                 // Update border particles (desktop only)
                 if (!isMobile) {
@@ -12654,8 +12604,10 @@
                     }
                 }
                 
-                // Update spaceships - REMOVED (not using spaceships)
-                // Spaceship system has been removed
+                // Update spaceships
+                if (spaceshipManager) {
+                    spaceshipManager.update();
+                }
                 
                 // Check collisions
                 checkCollisions();
@@ -13292,6 +13244,11 @@
             // Draw particles (particle pool handles viewport culling)
             particlePool.draw();
             
+            // Draw explosion animations
+            if (explosionManager) {
+                explosionManager.render(ctx);
+            }
+            
             // Draw boss damage flash
             if (bossDamageFlashTimer > 0) {
                 ctx.save();
@@ -13319,6 +13276,11 @@
             // Restore context if screen shake was active
             if (screenShakeActive) {
                 ctx.restore();
+            }
+            
+            // Draw spaceships in screen space (not affected by camera)
+            if (spaceshipManager) {
+                spaceshipManager.render();
             }
             
             // Draw borders LAST to ensure they appear on top of everything

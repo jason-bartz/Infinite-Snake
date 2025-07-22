@@ -23,6 +23,7 @@
             
             // Entity modules
             { path: 'core/entities/EasterEggElements.js', name: 'EasterEggElements' },
+            { path: 'core/entities/SpaceshipManager.js', name: 'SpaceshipManager' },
             
             // Performance modules
             { path: 'performance/debug-config.js', name: 'DebugConfig' },
@@ -40,6 +41,7 @@
             'Logger',
             'SharedContext',
             'EasterEggElements',
+            'SpaceshipManager',
             'MobileConfig',
             'PerformanceSystem',
             'MobileUI',

@@ -1600,7 +1600,7 @@
         .player-portrait {
             width: 48px;
             height: 48px;
-            background: var(--snes-black) url('assets/profile-background.png') center/cover;
+            background: var(--snes-black) url('assets/space-background-profile.png') center/cover;
             border: 2px solid var(--snes-gold);
             border-radius: 0;
             display: flex;
@@ -2166,7 +2166,7 @@
             body.mobile .player-portrait {
                 width: 40px !important;
                 height: 40px !important;
-                background: var(--snes-black) url('assets/profile-background.png') center/cover;
+                background: var(--snes-black) url('assets/space-background-profile.png') center/cover;
             }
             
             body.mobile .player-portrait img {
@@ -3353,7 +3353,7 @@
         .player-portrait {
             width: 64px !important; /* Increased from 48px */
             height: 64px !important; /* Increased from 48px */
-            background: var(--snes-black) url('assets/profile-background.png') center/cover;
+            background: var(--snes-black) url('assets/space-background-profile.png') center/cover;
         }
 
         .player-portrait img {
@@ -5560,7 +5560,8 @@
     
     <!-- Game Entities -->
     <!-- Particle and ParticlePool are loaded by the module system -->
-    <script src="js/core/entities/Spaceship.js"></script>
+    <script src="js/core/entities/Spaceship.js" type="module"></script>
+    <script src="js/core/entities/SpaceshipManager.js" type="module"></script>
     
     <!-- Main Game Code (extracted from inline script) -->
     <script src="js/core/game-original.js" defer></script>

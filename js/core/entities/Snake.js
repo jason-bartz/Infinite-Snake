@@ -1048,7 +1048,9 @@ class Snake {
         this.finalExplosionTriggered = true;
         
         const snakeColor = this.color || '#ff0000';
-        if (window.createDeathParticles) window.createDeathParticles(this.x, this.y, this.length, snakeColor, this.elements);
+        // Pass snake type to createDeathParticles
+        const snakeType = this.isPlayer ? 'player' : (this.isBoss ? 'boss' : 'ai');
+        if (window.createDeathParticles) window.createDeathParticles(this.x, this.y, this.length, snakeColor, this.elements, snakeType);
         
         if (this.isPlayer && !window.musicMuted) {
             const retroExplosion = new Audio('sounds/retro-explode-boom.mp3');

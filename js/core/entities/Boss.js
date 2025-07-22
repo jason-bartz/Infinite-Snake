@@ -1,3 +1,5 @@
+import Snake from './Snake.js';
+
 const BOSS_CONSTANTS = {
     SPEED_MULTIPLIER: 0.8,
     INTRO_ANIMATION_DURATION: 120,
