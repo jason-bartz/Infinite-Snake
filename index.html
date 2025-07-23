@@ -482,6 +482,43 @@
             box-shadow: none;
         }
         
+        /* Pixelated scroll indicator chevron */
+        .scroll-indicator {
+            margin: 30px auto 0;
+            width: 40px;
+            height: 40px;
+            position: relative;
+            animation: bounce 2s infinite;
+            cursor: pointer;
+        }
+        
+        .scroll-indicator::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 24px;
+            height: 24px;
+            transform: translateX(-50%) rotate(45deg);
+            border-right: 4px solid var(--snes-cosmic-teal);
+            border-bottom: 4px solid var(--snes-cosmic-teal);
+            box-shadow: 
+                2px 2px 0 rgba(78, 205, 196, 0.5),
+                4px 4px 0 rgba(78, 205, 196, 0.3);
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(10px);
+            }
+            60% {
+                transform: translateY(5px);
+            }
+        }
+        
         #splashTitle {
             font-size: 48px;
             margin-bottom: 30px;
@@ -4024,6 +4061,7 @@
                 </p>
             </div>
             <button id="startButton">ENTER THE VOID</button>
+            <div class="scroll-indicator" onclick="document.getElementById('splashScreen').scrollBy({top: window.innerHeight, behavior: 'smooth'})"></div>
             <div id="assetLoadingStatus" style="margin-top: 20px; font-family: 'Press Start 2P', monospace; font-size: 10px; color: #4ecdc4;  min-height: 20px;">
                 <span id="loadingText" style="display: none;">Loading assets...</span>
             </div>
