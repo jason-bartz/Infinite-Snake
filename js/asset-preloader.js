@@ -17,11 +17,11 @@ class AssetPreloader {
         };
         
         this.loadingPhases = [
-            { phase: "Initializing Cosmos", weight: 10, method: 'initializeSystem' },
-            { phase: "Loading Elements", weight: 25, method: 'preloadEmojis' },
-            { phase: "Loading Planets", weight: 15, method: 'preloadPlanets' },
+            { phase: "Initializing Cosmos", weight: 15, method: 'initializeSystem' },
+            { phase: "Loading Elements", weight: 20, method: 'preloadEmojis' },
+            { phase: "Loading Planets", weight: 10, method: 'preloadPlanets' }, // Reduced weight due to optimization
             { phase: "Loading Stations", weight: 5, method: 'preloadStations' },
-            { phase: "Crafting Combinations", weight: 20, method: 'precomputeBackgrounds' },
+            { phase: "Crafting Combinations", weight: 25, method: 'precomputeBackgrounds' },
             { phase: "Preparing Skins", weight: 15, method: 'preRenderSnakeAssets' },
             { phase: "Awakening Snakes", weight: 10, method: 'cacheBorderStates' }
         ];
@@ -38,6 +38,14 @@ class AssetPreloader {
         
         // Common emoji sizes
         this.emojiSizes = [16, 20, 24, 32];
+        
+        // Planet frame counts - defined early so it's available during initial load
+        this.planetFrameCounts = {
+            'planet-1': 60, 'planet-2': 60, 'planet-3': 60, 'planet-4': 60, 'planet-5': 60,
+            'planet-6': 60, 'planet-7': 120, 'planet-8': 60, 'planet-9': 60, 'planet-10': 60,
+            'planet-11': 60, 'planet-12': 60, 'planet-13': 60, 'planet-15': 60,
+            'planet-16': 60, 'planet-17': 60, 'planet-18': 60, 'planet-19': 120, 'planet-20': 60
+        };
         
         // Loading tips
         this.loadingTips = [
@@ -156,10 +164,14 @@ class AssetPreloader {
             '⭐', '💀', '🏆', '👑', '💎', '✨'
         ];
         
-        // Load from elements data if available
+        // OPTIMIZATION: Only load essential emojis during startup
+        // We'll lazy-load the rest after game starts
         if (window.elements && window.elements.emojis) {
-            const gameEmojis = Object.values(window.elements.emojis).slice(0, 50);
+            const gameEmojis = Object.values(window.elements.emojis).slice(0, 20); // Reduced from 50
             emojisToLoad.push(...gameEmojis);
+            
+            // Store remaining emojis for lazy loading
+            this.remainingEmojis = Object.values(window.elements.emojis).slice(20);
         }
         
         const totalEmojis = emojisToLoad.length * this.emojiSizes.length;
@@ -198,6 +210,45 @@ class AssetPreloader {
                 }
             }
         }
+        
+        // Start lazy loading remaining emojis after game starts
+        if (this.remainingEmojis && this.remainingEmojis.length > 0) {
+            setTimeout(() => this.lazyLoadRemainingEmojis(), 3000);
+        }
+    }
+    
+    /**
+     * Lazy load remaining emojis after game starts
+     */
+    async lazyLoadRemainingEmojis() {
+        console.log(`Lazy loading ${this.remainingEmojis.length} remaining emojis...`);
+        
+        for (const emoji of this.remainingEmojis) {
+            this.assets.emojis[emoji] = {};
+            
+            for (const size of this.emojiSizes) {
+                const canvas = document.createElement('canvas');
+                canvas.width = size;
+                canvas.height = size;
+                const ctx = canvas.getContext('2d');
+                
+                ctx.imageSmoothingEnabled = false;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.font = `${size * 0.8}px Arial`;
+                ctx.fillText(emoji, size / 2, size / 2);
+                
+                this.assets.emojis[emoji][size] = {
+                    imageData: ctx.getImageData(0, 0, size, size),
+                    canvas: canvas
+                };
+            }
+            
+            // Small delay between emojis
+            await this.delay(10);
+        }
+        
+        console.log('Finished lazy loading emojis');
     }
     
     /**
@@ -208,124 +259,65 @@ class AssetPreloader {
         const specialPlanets = 10;
         const isMobile = window.isTabletOrMobile && window.isTabletOrMobile();
         
-        // For mobile, load only static images (first frame)
-        if (isMobile) {
-            let totalPlanets = standardPlanets + specialPlanets;
-            let loadedPlanets = 0;
-            
-            // Load standard planets (only first frame for mobile)
-            for (let i = 1; i <= standardPlanets; i++) {
-                if (i === 14) continue; // Skip missing planet-14
-                
-                const planetId = `planet-${i}`;
-                this.updateProgress((loadedPlanets / totalPlanets) * 100, `Loading ${planetId}`);
-                
-                try {
-                    // Load only the first frame as static image
-                    const img = await this.loadImage(`assets/planets/${planetId}/1.png`);
-                    this.assets.planets.standard[planetId] = {
-                        staticImage: img,
-                        isStatic: true
-                    };
-                    loadedPlanets++;
-                } catch (error) {
-                    console.warn(`Failed to load ${planetId}:`, error);
-                }
-                
-                // Small delay to prevent blocking
-                if (loadedPlanets % 5 === 0) {
-                    await this.delay(10);
-                }
-            }
-            
-            // Load special planets (already single images)
-            for (let i = 1; i <= specialPlanets; i++) {
-                if (i === 1 || i === 6 || i === 8) continue; // Skip removed special-planets 1, 6, 8
-                
-                const planetId = `special-planet-${i}`;
-                this.updateProgress((loadedPlanets / totalPlanets) * 100, `Loading ${planetId}`);
-                
-                try {
-                    const img = await this.loadImage(`assets/planets/${planetId}.png`);
-                    this.assets.planets.special[planetId] = img;
-                    loadedPlanets++;
-                } catch (error) {
-                    console.warn(`Failed to load ${planetId}:`, error);
-                }
-            }
-            
-            this.updateProgress(100, "Planets loaded");
-            return;
-        }
+        // OPTIMIZATION: Load only first frame initially for faster startup
+        // We'll lazy-load additional frames after game starts
+        // This applies to all devices now for consistent fast loading
+        let totalPlanets = standardPlanets + specialPlanets;
+        let loadedPlanets = 0;
         
-        // Desktop: Load full animations
-        let totalFrames = 0;
-        let loadedFrames = 0;
-        
-        // First, count total frames for progress tracking
-        const planetFrameCounts = {
-            'planet-1': 60, 'planet-2': 60, 'planet-3': 60, 'planet-4': 60, 'planet-5': 60,
-            'planet-6': 60, 'planet-7': 120, 'planet-8': 60, 'planet-9': 60, 'planet-10': 60,
-            'planet-11': 60, 'planet-12': 60, 'planet-13': 60, 'planet-15': 60,
-            'planet-16': 60, 'planet-17': 60, 'planet-18': 60, 'planet-19': 120, 'planet-20': 60
-        };
-        
-        // Count total frames
-        for (const count of Object.values(planetFrameCounts)) {
-            totalFrames += count;
-        }
-        totalFrames += specialPlanets; // Special planets are single images
-        
-        // Load standard planets (PNG sequences)
+        // Load standard planets (only first frame initially)
         for (let i = 1; i <= standardPlanets; i++) {
             if (i === 14) continue; // Skip missing planet-14
             
             const planetId = `planet-${i}`;
-            const frameCount = planetFrameCounts[planetId];
+            this.updateProgress((loadedPlanets / totalPlanets) * 100, `Loading ${planetId}`);
             
-            this.assets.planets.standard[planetId] = {
-                frames: [],
-                frameCount: frameCount,
-                currentFrame: 0,
-                frameTime: 0,
-                frameDuration: 120 // 120ms per frame = 8.33fps (25% faster than 150ms)
-            };
-            
-            // Load all frames for this planet
-            for (let frame = 1; frame <= frameCount; frame++) {
-                try {
-                    const img = await this.loadImage(`assets/planets/${planetId}/${frame}.png`);
-                    this.assets.planets.standard[planetId].frames.push(img);
-                    loadedFrames++;
-                    this.updateProgress((loadedFrames / totalFrames) * 100, `Loading ${planetId} frame ${frame}/${frameCount}`);
-                } catch (error) {
-                    console.warn(`Failed to load ${planetId} frame ${frame}:`, error);
-                }
+            try {
+                // Load only the first frame but maintain desktop structure
+                const img = await this.loadImage(`assets/planets/${planetId}/1.png`);
+                const frameCount = this.planetFrameCounts[planetId] || 60;
                 
-                // Small delay to prevent blocking
-                if (loadedFrames % 30 === 0) {
-                    await this.delay(10);
-                }
+                this.assets.planets.standard[planetId] = {
+                    frames: [img], // Start with just first frame
+                    frameCount: frameCount,
+                    currentFrame: 0,
+                    frameTime: 0,
+                    frameDuration: 120,
+                    staticImage: img, // Keep for compatibility
+                    isStatic: true,
+                    isLoading: true // Flag to indicate more frames coming
+                };
+                loadedPlanets++;
+            } catch (error) {
+                console.warn(`Failed to load ${planetId}:`, error);
+            }
+            
+            // Small delay to prevent blocking
+            if (loadedPlanets % 5 === 0) {
+                await this.delay(10);
             }
         }
         
-        // Load special planets (single PNG files)
+        // Load special planets (already single images)
         for (let i = 1; i <= specialPlanets; i++) {
             if (i === 1 || i === 6 || i === 8) continue; // Skip removed special-planets 1, 6, 8
             
             const planetId = `special-planet-${i}`;
-            this.updateProgress((loadedFrames / totalFrames) * 100, `Loading ${planetId}`);
+            this.updateProgress((loadedPlanets / totalPlanets) * 100, `Loading ${planetId}`);
             
             try {
                 const img = await this.loadImage(`assets/planets/${planetId}.png`);
                 this.assets.planets.special[planetId] = img;
-                loadedFrames++;
+                loadedPlanets++;
             } catch (error) {
                 console.warn(`Failed to load ${planetId}:`, error);
             }
         }
         
         this.updateProgress(100, "Planets loaded");
+        
+        // Start lazy loading animation frames in background after game starts
+        setTimeout(() => this.lazyLoadPlanetAnimations(), 2000);
     }
     
     /**
@@ -697,6 +689,78 @@ class AssetPreloader {
         
         this.assets.borders = borderStates;
         this.updateProgress(100, "Borders cached");
+    }
+    
+    /**
+     * Lazy load planet animations after game starts
+     */
+    async lazyLoadPlanetAnimations() {
+        const isMobile = window.isTabletOrMobile && window.isTabletOrMobile();
+        console.log('Lazy load planet animations called. isMobile:', isMobile);
+        
+        if (isMobile) {
+            console.log('Skipping planet animations on mobile');
+            return;
+        }
+        
+        console.log('Starting background planet animation loading...');
+        
+        for (let i = 1; i <= 20; i++) {
+            if (i === 14) continue; // Skip missing planet-14
+            
+            const planetId = `planet-${i}`;
+            const frameCount = this.planetFrameCounts[planetId];
+            const planetData = this.assets.planets.standard[planetId];
+            
+            if (!planetData) {
+                console.log(`Planet data not found for ${planetId}`);
+                continue;
+            }
+            
+            if (!planetData.isLoading) {
+                console.log(`Planet ${planetId} already fully loaded`);
+                continue;
+            }
+            
+            console.log(`Starting lazy load for ${planetId}, frameCount: ${frameCount}`);
+            
+            // Load remaining frames in background
+            this.loadPlanetFramesAsync(planetId, frameCount);
+            
+            // Small delay between planets to prevent overwhelming the browser
+            await this.delay(100);
+        }
+        
+        console.log('Lazy loading initiated for all planets');
+    }
+    
+    /**
+     * Load planet frames asynchronously
+     */
+    async loadPlanetFramesAsync(planetId, frameCount) {
+        const planetData = this.assets.planets.standard[planetId];
+        console.log(`Loading frames for ${planetId}: starting with ${planetData.frames.length} frames`);
+        
+        // Load frames 2 through frameCount
+        let loadedFrames = 0;
+        for (let frame = 2; frame <= frameCount; frame++) {
+            try {
+                const img = await this.loadImage(`assets/planets/${planetId}/${frame}.png`);
+                planetData.frames.push(img);
+                loadedFrames++;
+                
+                // Log progress every 10 frames
+                if (loadedFrames % 10 === 0) {
+                    console.log(`${planetId}: loaded ${loadedFrames + 1}/${frameCount} frames`);
+                }
+            } catch (error) {
+                console.warn(`Failed to load ${planetId} frame ${frame}:`, error);
+            }
+        }
+        
+        planetData.isLoading = false;
+        planetData.isStatic = false; // No longer static
+        console.log(`✓ Finished loading ${planetId} animations (${planetData.frames.length} frames)`);
     }
     
     /**

@@ -11224,28 +11224,40 @@
                 } else {
                     // Desktop: animated planets
                     if (!planetData.frames || planetData.frames.length === 0) {
-                        drawFallbackPlanet(x, y, radius, opacity);
-                        ctx.restore();
-                        return;
-                    }
-                    
-                    // Update animation timing for this planet instance
-                    const now = Date.now();
-                    if (!planetInstance.lastFrameTime) {
+                        // Check if we have a static image (initial load state)
+                        if (planetData.staticImage) {
+                            currentImage = planetData.staticImage;
+                        } else {
+                            drawFallbackPlanet(x, y, radius, opacity);
+                            ctx.restore();
+                            return;
+                        }
+                    } else {
+                        // We have frames, animate them
+                        // Update animation timing for this planet instance
+                        const now = Date.now();
+                        if (!planetInstance.lastFrameTime) {
+                            planetInstance.lastFrameTime = now;
+                        }
+                        
+                        const deltaTime = now - planetInstance.lastFrameTime;
+                        planetInstance.frameTime += deltaTime;
                         planetInstance.lastFrameTime = now;
+                        
+                        // Advance frame if needed, but only up to available frames
+                        const availableFrames = planetData.frames.length;
+                        while (planetInstance.frameTime >= planetData.frameDuration && availableFrames > 1) {
+                            planetInstance.frameTime -= planetData.frameDuration;
+                            planetInstance.currentFrame = (planetInstance.currentFrame + 1) % availableFrames;
+                        }
+                        
+                        // Ensure we don't go out of bounds
+                        if (planetInstance.currentFrame >= availableFrames) {
+                            planetInstance.currentFrame = 0;
+                        }
+                        
+                        currentImage = planetData.frames[planetInstance.currentFrame];
                     }
-                    
-                    const deltaTime = now - planetInstance.lastFrameTime;
-                    planetInstance.frameTime += deltaTime;
-                    planetInstance.lastFrameTime = now;
-                    
-                    // Advance frame if needed
-                    while (planetInstance.frameTime >= planetData.frameDuration) {
-                        planetInstance.frameTime -= planetData.frameDuration;
-                        planetInstance.currentFrame = (planetInstance.currentFrame + 1) % planetData.frameCount;
-                    }
-                    
-                    currentImage = planetData.frames[planetInstance.currentFrame];
                 }
             }
             

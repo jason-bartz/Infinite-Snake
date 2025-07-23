@@ -37,7 +37,13 @@
             try {
                 // Load combined element file with cache busting
                 const timestamp = Date.now();
-                const elementsResponse = await fetch(`elements/data/elements.json?t=${timestamp}`);
+                
+                // OPTIMIZATION: Load elements with compression support
+                const elementsResponse = await fetch(`elements/data/elements.json?t=${timestamp}`, {
+                    headers: {
+                        'Accept-Encoding': 'gzip, deflate, br'
+                    }
+                });
                 const allElements = await elementsResponse.json();
                 
                 // Process all elements
@@ -62,8 +68,16 @@
                     // No deleted elements found
                 }
 
-                // Load combinations
-                const combinationsResponse = await fetch(`elements/data/combinations.json?t=${timestamp}`);
+                // OPTIMIZATION: Load all JSON files in parallel
+                const [combinationsResponse, emojiResponse] = await Promise.all([
+                    fetch(`elements/data/combinations.json?t=${timestamp}`, {
+                        headers: { 'Accept-Encoding': 'gzip, deflate, br' }
+                    }),
+                    fetch(`elements/data/emojis.json?t=${timestamp}`, {
+                        headers: { 'Accept-Encoding': 'gzip, deflate, br' }
+                    })
+                ]);
+                
                 this.combinations = await combinationsResponse.json();
                 
                 // Load deleted combinations
@@ -85,9 +99,8 @@
                     // No deleted combinations found
                 }
 
-                // Load emoji mapping from JSON
+                // Process emoji data (already loaded in parallel above)
                 try {
-                    const emojiResponse = await fetch(`elements/data/emojis.json?t=${timestamp}`);
                     const emojiData = await emojiResponse.json();
                     
                     // Build the emoji map

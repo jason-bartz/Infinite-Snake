@@ -30,27 +30,63 @@
     <meta name="url" content="https://infinitesnake.io" />
     <link rel="canonical" href="https://infinitesnake.io">
     
+    <!-- Mobile App Meta Tags -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Infinite Snake">
+    <meta name="application-name" content="Infinite Snake">
+    <meta name="msapplication-TileColor" content="#8A2BE2">
+    <meta name="msapplication-TileImage" content="/android-chrome-192x192.png">
+    <meta name="msapplication-config" content="/browserconfig.xml">
+    <meta name="theme-color" content="#8A2BE2">
+    
+    <!-- iOS Splash Screens -->
+    <link rel="apple-touch-startup-image" href="/apple-touch-icon.png">
+    
     <!-- Favicons -->
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="manifest" href="/site.webmanifest">
     
+    <!-- Resource Hints for Performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="/assets/preview-logo.png" as="image">
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" as="style">
+    
+    <!-- OPTIMIZATION: Preload critical game assets -->
+    <link rel="preload" href="/elements/data/elements.json" as="fetch" crossorigin>
+    <link rel="preload" href="/elements/data/combinations.json" as="fetch" crossorigin>
+    <link rel="preload" href="/elements/data/emojis.json" as="fetch" crossorigin>
+    <link rel="preload" href="/js/asset-preloader.js" as="script">
+    <link rel="preload" href="/assets/background/purple-blue-bg.png" as="image">
+    <link rel="preload" href="/assets/background/stars-blue.png" as="image">
+    
     <!-- Schema.org structured data -->
     <script type="application/ld+json">
     {
         "@context": "https://schema.org/",
-        "@type": "Game",
+        "@type": "VideoGame",
         "image": "https://infinitesnake.io/assets/snake-logo.png",
         "name": "Infinite Snake",
         "url": "https://infinitesnake.io",
         "description": "A unique snake game featuring element crafting mechanics. Combine fire, water, earth, and air to discover endless elements while growing your snake and rebuilding the cosmos.",
-        "genre": "Arcade, Puzzle, Strategy, Casual",
+        "genre": ["Arcade", "Puzzle", "Strategy", "Casual", "Multiplayer"],
         "gamePlatform": ["Web Browser", "Mobile Web"],
         "operatingSystem": "Any",
         "applicationCategory": "Game",
         "inLanguage": "en",
         "author": {
+            "@type": "Person",
+            "name": "Jason Bartz"
+        },
+        "publisher": {
             "@type": "Person",
             "name": "Jason Bartz"
         },
@@ -64,7 +100,57 @@
             "ratingValue": "4.6",
             "bestRating": "5",
             "ratingCount": "2847"
+        },
+        "gameItem": [
+            {
+                "@type": "Thing",
+                "name": "Elements",
+                "description": "Collectible elements that can be combined"
+            },
+            {
+                "@type": "Thing",
+                "name": "Snake Skins",
+                "description": "Unlockable cosmetic skins for your snake"
+            }
+        ],
+        "numberOfPlayers": {
+            "@type": "QuantitativeValue",
+            "minValue": 1,
+            "maxValue": 100
+        },
+        "playMode": "MultiPlayer"
+    }
+    </script>
+    
+    <!-- WebSite Schema -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Infinite Snake",
+        "url": "https://infinitesnake.io",
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": {
+                "@type": "EntryPoint",
+                "urlTemplate": "https://infinitesnake.io/?search={search_term_string}"
+            },
+            "query-input": "required name=search_term_string"
         }
+    }
+    </script>
+    
+    <!-- BreadcrumbList Schema -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [{
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://infinitesnake.io"
+        }]
     }
     </script>
     
@@ -3912,7 +3998,7 @@
             <a href="/credits.html" style="color: #888; text-decoration: none; font-family: 'Press Start 2P', monospace; font-size: 10px;">Credits</a>
         </div>
         <div id="splashContent">
-            <img src="assets/preview-logo.png" alt="Infinite Snake Preview" id="splashLogo" style="width: 400px; max-width: 80%; margin-bottom: 30px;" onerror="this.style.display='none'; document.getElementById('splashTitle').style.display='block';">
+            <img src="assets/preview-logo.png" alt="Infinite Snake game logo - A cosmic snake forming an infinity symbol" id="splashLogo" style="width: 400px; max-width: 80%; margin-bottom: 30px;" onerror="this.style.display='none'; document.getElementById('splashTitle').style.display='block';">
             <h1 id="splashTitle">Infinite Snake</h1>
             <p>Welcome to what's left.<br><br>
             The Universe collapsed, scattered its contents across infinite coils of nothing. You're the Infinite Snake - part cleanup crew, part living library.<br><br>
@@ -4072,7 +4158,7 @@
         <div class="player-info-box">
             <div class="player-info-header">
                 <div class="player-portrait">
-                    <img id="playerPortrait" src="skins/snake-default-green.png" alt="Player">
+                    <img id="playerPortrait" src="skins/snake-default-green.png" alt="Player snake portrait showing selected skin">
                 </div>
                 <div class="player-stats">
                     <div class="stat-line">
