@@ -1399,7 +1399,9 @@
                     gameLogger.error('MOBILE', 'Failed to initialize mobile renderers:', error);
                 }
             } else {
-                // Desktop: Just hide splash screen
+                // Desktop: Initialize assets and hide splash screen
+                await initializeAssets();
+                
                 document.getElementById('splashScreen').style.opacity = '0';
                 setTimeout(() => {
                     document.getElementById('splashScreen').style.display = 'none';

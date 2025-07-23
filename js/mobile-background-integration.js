@@ -247,7 +247,7 @@ function renderMobileBackground(ctx, camera) {
     optimizer.incrementDrawCalls();
     
     // Render nebula background if available
-    if (assets && assets.backgrounds.nebulaBackground && optimizer.shouldRender('background')) {
+    if (assets && assets.backgrounds && assets.backgrounds.nebulaBackground && optimizer.shouldRender('background')) {
         const zoomScale = 1.5; // 50% zoom in
         const bgWidth = assets.backgrounds.nebulaBackground.width * zoomScale;
         const bgHeight = assets.backgrounds.nebulaBackground.height * zoomScale;
@@ -261,7 +261,7 @@ function renderMobileBackground(ctx, camera) {
     }
     
     // Render star overlay if available
-    if (assets && assets.backgrounds.starOverlay && optimizer.shouldRender('background')) {
+    if (assets && assets.backgrounds && assets.backgrounds.starOverlay && optimizer.shouldRender('background')) {
         ctx.save();
         ctx.globalAlpha = 0.6;
         const starWidth = assets.backgrounds.starOverlay.width;
