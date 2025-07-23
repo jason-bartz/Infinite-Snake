@@ -45,4 +45,20 @@
         <changefreq>monthly</changefreq>
         <priority>0.5</priority>
     </url>
+    
+    <!-- Privacy Policy - lower priority -->
+    <url>
+        <loc>https://infinitesnake.io/privacypolicy</loc>
+        <lastmod>2025-01-23</lastmod>
+        <changefreq>yearly</changefreq>
+        <priority>0.4</priority>
+    </url>
+    
+    <!-- Terms of Service - lower priority -->
+    <url>
+        <loc>https://infinitesnake.io/termsofservice</loc>
+        <lastmod>2025-01-23</lastmod>
+        <changefreq>yearly</changefreq>
+        <priority>0.4</priority>
+    </url>
 </urlset>
