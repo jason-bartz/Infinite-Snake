@@ -13247,6 +13247,14 @@
             // Draw everything
             drawBackground();
             
+            // Draw spaceships in pure screen space (behind all game elements)
+            if (spaceshipManager) {
+                ctx.save();
+                ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset to identity matrix to remove all transformations
+                spaceshipManager.render();
+                ctx.restore();
+            }
+            
             // Draw asteroids (behind elements but in front of background)
             for (let i = 0; i < asteroids.length; i++) {
                 const asteroid = asteroids[i];
@@ -13338,11 +13346,6 @@
             // Restore context if screen shake was active
             if (screenShakeActive) {
                 ctx.restore();
-            }
-            
-            // Draw spaceships in screen space (not affected by camera)
-            if (spaceshipManager) {
-                spaceshipManager.render();
             }
             
             // Draw borders LAST to ensure they appear on top of everything
