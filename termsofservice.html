@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms of Service - Infinite Snake</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --snes-primary-blue: #2038EC;
+            --snes-dark-blue: #000080;
+            --snes-light-blue: #5878F8;
+            --snes-cosmic-purple: #7828F8;
+            --snes-cosmic-pink: #F828F8;
+            --snes-gold: #F8D800;
+            --snes-red: #F83800;
+            --snes-green: #00E800;
+            --snes-white: #F8F8F8;
+            --snes-black: #000000;
+            --snes-gray: #A8A8A8;
+            --snes-dark-purple: #4800A8;
+            --snes-cosmic-teal: #00F8F8;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #e0e0e0;
+            background: #000011;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            image-rendering: pixelated;
+            -webkit-font-smoothing: none;
+            -moz-osx-font-smoothing: none;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            flex: 1;
+        }
+        
+        h1 {
+            font-family: 'Press Start 2P', monospace;
+            color: var(--snes-gold);
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 2rem;
+            text-shadow: 2px 2px 0 var(--snes-black);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        
+        h2 {
+            color: #00cc00;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+        
+        h3 {
+            color: #00aa00;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        p, li {
+            margin-bottom: 1rem;
+        }
+        
+        strong {
+            color: #00ff00;
+        }
+        
+        a {
+            color: #00ff00;
+            text-decoration: none;
+        }
+        
+        a:hover {
+            text-decoration: underline;
+        }
+        
+        .back-button {
+            font-family: 'Press Start 2P', monospace;
+            background: var(--snes-cosmic-purple);
+            border: 4px solid var(--snes-white);
+            box-shadow: 
+                inset 2px 2px 0 var(--snes-cosmic-pink),
+                inset -2px -2px 0 var(--snes-dark-purple),
+                4px 4px 0 rgba(0,0,0,0.5);
+            color: var(--snes-white);
+            padding: 10px 20px;
+            font-size: 10px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.1s;
+            text-transform: uppercase;
+            z-index: 10;
+            margin-bottom: 20px;
+        }
+        
+        .back-button:hover {
+            background: var(--snes-cosmic-pink);
+            transform: translate(-1px, -1px);
+            box-shadow: 
+                inset 2px 2px 0 var(--snes-light-blue),
+                inset -2px -2px 0 var(--snes-dark-purple),
+                5px 5px 0 rgba(0,0,0,0.5);
+        }
+        
+        ul {
+            padding-left: 2rem;
+        }
+        
+        .footer {
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 1rem 0;
+            text-align: center;
+            border-top: 1px solid rgba(0, 255, 0, 0.3);
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            flex-wrap: nowrap;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .footer-links a {
+            font-family: 'Press Start 2P', monospace;
+            color: #00ff00;
+            text-decoration: none;
+            font-size: 10px;
+            padding: 0.25rem 0.5rem;
+            border: 1px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .footer-links a:hover {
+            border-color: #00ff00;
+            background-color: rgba(0, 255, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <div style="position: absolute; top: 20px; left: 20px; z-index: 10;">
+        <a href="https://discord.gg/a6X4W7QbkG" target="_blank" style="color: #4ecdc4; text-decoration: none; font-family: 'Press Start 2P', monospace; font-size: 10px;">💬 Join the Discord Server</a>
+    </div>
+    <div style="position: absolute; top: 20px; right: 20px; z-index: 10;">
+        <a href="/how-to-play.html" style="color: #4ecdc4; text-decoration: none; font-family: 'Press Start 2P', monospace; font-size: 10px; margin-right: 20px;">📖 How to Play</a>
+        <a href="/lore.html" style="color: #4ecdc4; text-decoration: none; font-family: 'Press Start 2P', monospace; font-size: 10px; margin-right: 20px;">📜 Lore</a>
+        <a href="/leaderboard.html" style="color: #4ecdc4; text-decoration: none; font-family: 'Press Start 2P', monospace; font-size: 10px;">🏆 Leaderboard</a>
+    </div>
+    
+    <div class="container" style="margin-top: 60px;">
+        <a href="index.html" class="back-button">← Back to Game</a>
+        
+        <h1>Terms of Service for Infinite Snake</h1>
+        
+        <p><strong>Last Updated: July 23, 2025</strong></p>
+        
+        <h2>1. Agreement to Terms</h2>
+        <p>By accessing and playing Infinite Snake ("Game"), you agree to be bound by these Terms of Service ("Terms"). If you disagree with any part of these terms, please do not play our Game.</p>
+        
+        <h2>2. Game License</h2>
+        <p>We grant you a limited, non-exclusive, non-transferable, revocable license to access and play Infinite Snake for your personal, non-commercial entertainment purposes. This license does not constitute a transfer of title, and under this license you may not:</p>
+        <ul>
+            <li>Modify, copy, or create derivative works based on the Game</li>
+            <li>Reverse engineer, decompile, or disassemble the Game</li>
+            <li>Use the Game for commercial purposes</li>
+            <li>Attempt to gain unauthorized access to the Game's systems or servers</li>
+        </ul>
+        
+        <h2>3. User Conduct</h2>
+        <p>When playing Infinite Snake, you agree to:</p>
+        <ul>
+            <li>Choose appropriate usernames that do not contain offensive, harmful, or inappropriate content</li>
+            <li>Not use usernames that impersonate others or infringe on intellectual property rights</li>
+            <li>Not attempt to manipulate leaderboards or game mechanics through cheating, exploits, or automation</li>
+            <li>Not interfere with or disrupt the Game or servers</li>
+            <li>Not engage in any activity that could harm minors</li>
+        </ul>
+        <p>We reserve the right to remove any username or score from leaderboards at our sole discretion.</p>
+        
+        <h2>4. Intellectual Property</h2>
+        <p>All content in Infinite Snake, including but not limited to graphics, sounds, text, code, and game mechanics, is owned by us or our licensors and is protected by intellectual property laws. You may not use our intellectual property without explicit written permission.</p>
+        
+        <h2>5. User-Generated Content</h2>
+        <p>By submitting a username to our leaderboards, you:</p>
+        <ul>
+            <li>Grant us a worldwide, non-exclusive, royalty-free license to display your username and associated scores</li>
+            <li>Represent that your username does not violate any third-party rights</li>
+            <li>Understand that usernames and scores are publicly visible</li>
+        </ul>
+        
+        <h2>6. Privacy</h2>
+        <p>Your use of Infinite Snake is also governed by our Privacy Policy. Please review our Privacy Policy, which also governs the Game and informs you of our data practices.</p>
+        
+        <h2>7. Disclaimers and Limitations of Liability</h2>
+        <p>THE GAME IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND. WE DISCLAIM ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.</p>
+        <p>IN NO EVENT SHALL WE BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES ARISING OUT OF OR RELATED TO YOUR USE OF THE GAME, EVEN IF WE HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. OUR TOTAL LIABILITY SHALL NOT EXCEED ONE HUNDRED DOLLARS ($100).</p>
+        
+        <h2>8. Indemnification</h2>
+        <p>You agree to indemnify and hold us harmless from any claims, damages, or expenses (including reasonable attorneys' fees) arising from your violation of these Terms or your use of the Game.</p>
+        
+        <h2>9. Modifications to Game and Terms</h2>
+        <p>We reserve the right to:</p>
+        <ul>
+            <li>Modify or discontinue the Game at any time without notice</li>
+            <li>Update these Terms at any time by posting changes to this page</li>
+            <li>Reset or modify leaderboards as necessary for game integrity</li>
+        </ul>
+        <p>Your continued use of the Game after any changes constitutes acceptance of the new Terms.</p>
+        
+        <h2>10. Termination</h2>
+        <p>We may terminate or suspend your access to the Game immediately, without prior notice, for any reason, including breach of these Terms. Upon termination, your right to use the Game will cease immediately.</p>
+        
+        <h2>11. Governing Law and Jurisdiction</h2>
+        <p>These Terms shall be governed by and construed in accordance with the laws of the State of New York, without regard to its conflict of law provisions. You agree to submit to the personal jurisdiction of the courts located in the State of New York for any disputes.</p>
+        
+        <h2>12. Severability</h2>
+        <p>If any provision of these Terms is found to be unenforceable or invalid, that provision will be limited or eliminated to the minimum extent necessary so that these Terms will otherwise remain in full force and effect.</p>
+        
+        <h2>13. Entire Agreement</h2>
+        <p>These Terms, together with our Privacy Policy, constitute the entire agreement between you and us regarding the Game and supersede all prior agreements and understandings.</p>
+        
+        <h2>14. Contact Information</h2>
+        <p>For questions about these Terms of Service, please contact us at:</p>
+        <p><strong>Email</strong>: <a href="mailto:support@infinitesnake.io">support@infinitesnake.io</a></p>
+        
+        <h2>15. Acceptance</h2>
+        <p>BY PLAYING INFINITE SNAKE, YOU ACKNOWLEDGE THAT YOU HAVE READ THESE TERMS OF SERVICE, UNDERSTAND THEM, AND AGREE TO BE BOUND BY THEM.</p>
+    </div>
+    
+    <footer class="footer">
+        <div class="footer-links">
+            <a href="index.html">Play Game</a>
+            <a href="how-to-play.html">How to Play</a>
+            <a href="lore.html">Lore</a>
+            <a href="leaderboard.html">Leaderboard</a>
+            <a href="credits.html">Credits</a>
+            <a href="privacypolicy.html">Privacy Policy</a>
+            <a href="termsofservice.html">Terms of Service</a>
+            <a href="https://discord.gg/a6X4W7QbkG" target="_blank">Discord</a>
+        </div>
+    </footer>
+</body>
+</html>

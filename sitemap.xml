@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+    <!-- Homepage - highest priority -->
+    <url>
+        <loc>https://infinitesnake.io/</loc>
+        <lastmod>2025-01-23</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>1.0</priority>
+        <image:image>
+            <image:loc>https://infinitesnake.io/og-image-a.png</image:loc>
+            <image:title>Infinite Snake Game</image:title>
+            <image:caption>A snake game where you craft elements and rebuild the cosmos</image:caption>
+        </image:image>
+    </url>
+    
+    <!-- How to Play - high priority -->
+    <url>
+        <loc>https://infinitesnake.io/how-to-play</loc>
+        <lastmod>2025-01-23</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.9</priority>
+    </url>
+    
+    <!-- Leaderboard - high priority, frequent updates -->
+    <url>
+        <loc>https://infinitesnake.io/leaderboard</loc>
+        <lastmod>2025-01-23</lastmod>
+        <changefreq>hourly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    
+    <!-- Lore - medium priority -->
+    <url>
+        <loc>https://infinitesnake.io/lore</loc>
+        <lastmod>2025-01-23</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    
+    <!-- Credits - lower priority -->
+    <url>
+        <loc>https://infinitesnake.io/credits</loc>
+        <lastmod>2025-01-23</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.5</priority>
+    </url>
+</urlset>

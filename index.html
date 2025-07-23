@@ -4445,14 +4445,14 @@
             <div class="story-section">
                 <h2 class="section-title">THE STORY</h2>
                 <p class="story-text" style="">
-                    Created as a surprise gift combining two beloved games - Infinite Craft and Snake.io.
-                    What started as a father's gift to his son has become a cosmic adventure for players worldwide.
+                    Created as a surprise gift combining my son's favorite gaming genres - crafting, alchemy, and snake games. 
+                    What started as a gift to my son to play while I was away for work has spawned an epic cosmic adventure.
                     <br><br>
-                    This game will always remain 100% free because we believe in sharing the joy of discovery.
-                    New elements, lore fragments, and features are added regularly, expanding the cosmos with each update.
+                    This game will always remain 100% free because we believe in sharing the small joys of new discoveries. 
+                    New elements, combinations, lore fragments, skins, and features are added weekly. We're expanding the cosmos with each update.
                     <br><br>
-                    Immerse yourself in the electronic space soundtrack as you uncover the mysteries
-                    of why the universe collapsed and your role as the Infinite Snake.
+                    Immerse yourself in an electronic space soundtrack as you uncover the mysteries of why the universe collapsed 
+                    and your role as the Infinite Snake.
                 </p>
             </div>
             
@@ -4500,9 +4500,17 @@
                 </div>
             </div>
             
-            <!-- Credits moved to bottom -->
-            <div style=" margin-top: 60px; padding-top: 40px; border-top: 2px solid var(--snes-dark-purple);">
-                <a href="/credits.html" style="color: #888; text-decoration: none; font-family: 'Press Start 2P', monospace; font-size: 10px;">Credits</a>
+            <!-- Footer Links -->
+            <div style="margin-top: 60px; padding-top: 40px; border-top: 2px solid var(--snes-dark-purple);">
+                <div class="title-footer-links">
+                    <a href="/how-to-play.html">How to Play</a>
+                    <a href="/lore.html">Lore</a>
+                    <a href="/leaderboard.html">Leaderboard</a>
+                    <a href="/credits.html">Credits</a>
+                    <a href="/privacypolicy.html">Privacy Policy</a>
+                    <a href="/termsofservice.html">Terms of Service</a>
+                    <a href="https://discord.gg/a6X4W7QbkG" target="_blank">Discord</a>
+                </div>
             </div>
             
         </div>
@@ -6160,6 +6168,30 @@
                 font-size: 8px;
             }
         }
+        
+        /* Title Page Footer Styles */
+        .title-footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            flex-wrap: nowrap;
+        }
+        
+        .title-footer-links a {
+            color: #00ff00;
+            text-decoration: none;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 10px;
+            padding: 0.25rem 0.5rem;
+            border: 1px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .title-footer-links a:hover {
+            border-color: #00ff00;
+            background-color: rgba(0, 255, 0, 0.1);
+        }
+        
     </style>
 
     <!-- External Dependencies -->
@@ -6322,5 +6354,6 @@
       window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
     </script>
     <script defer src="/_vercel/insights/script.js"></script>
+    
 </body>
 </html>
