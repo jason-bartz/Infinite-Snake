@@ -17,6 +17,25 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="manifest" href="/site.webmanifest">
     
+    <!-- BreadcrumbList Schema -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [{
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://infinitesnake.io"
+        }, {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Leaderboard",
+            "item": "https://infinitesnake.io/leaderboard"
+        }]
+    }
+    </script>
+    
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     
@@ -47,16 +66,6 @@
             image-rendering: pixelated;
             -webkit-font-smoothing: none;
             -moz-osx-font-smoothing: none;
-        }
-        
-        /* Animated starfield background */
-        #stars-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
         }
         
         .container {
@@ -306,7 +315,15 @@
     </style>
 </head>
 <body>
-    <canvas id="stars-canvas"></canvas>
+    
+    <!-- Breadcrumb Navigation -->
+    <nav aria-label="breadcrumb" style="position: absolute; top: 10px; left: 50%; transform: translateX(-50%); z-index: 10;">
+        <div style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #A8A8A8;">
+            <a href="/" style="color: #00F8F8; text-decoration: none;">Home</a>
+            <span style="color: #A8A8A8;"> > </span>
+            <span style="color: #F8D800;">Leaderboard</span>
+        </div>
+    </nav>
     
     <!-- Navigation Bar -->
     <div style="position: absolute; top: 20px; left: 20px; z-index: 10;">
@@ -423,8 +440,6 @@
         
         // Initialize
         async function init() {
-            drawStars();
-            animateStars();
             await loadLeaderboard('daily');
         }
         
@@ -488,54 +503,6 @@
                 content.innerHTML = '<div class="error">Failed to load leaderboard. Please try again later.</div>';
             }
         }
-        
-        // Starfield animation
-        const canvas = document.getElementById('stars-canvas');
-        const ctx = canvas.getContext('2d');
-        let stars = [];
-        
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        
-        function drawStars() {
-            resizeCanvas();
-            stars = [];
-            
-            // Create static stars
-            for (let i = 0; i < 200; i++) {
-                stars.push({
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height,
-                    size: Math.random() * 2,
-                    speed: Math.random() * 0.5 + 0.1
-                });
-            }
-        }
-        
-        function animateStars() {
-            ctx.fillStyle = 'rgba(0, 0, 17, 0.1)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            ctx.fillStyle = '#F8F8F8';
-            ctx.imageSmoothingEnabled = false;
-            stars.forEach(star => {
-                // Make stars more pixelated
-                const pixelSize = Math.ceil(star.size);
-                ctx.fillRect(Math.floor(star.x), Math.floor(star.y), pixelSize, pixelSize);
-                
-                star.y += star.speed;
-                if (star.y > canvas.height) {
-                    star.y = 0;
-                    star.x = Math.random() * canvas.width;
-                }
-            });
-            
-            requestAnimationFrame(animateStars);
-        }
-        
-        window.addEventListener('resize', drawStars);
         
         // Initialize on load
         init();
