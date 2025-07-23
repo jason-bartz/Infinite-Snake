@@ -361,7 +361,8 @@
             width: 100%;
             height: 100%;
             background: var(--snes-black);
-            overflow: hidden;
+            overflow-y: auto;
+            overflow-x: hidden;
             z-index: 1000;
             transition: opacity 0.3s;
         }
@@ -399,11 +400,12 @@
             position: relative;
             z-index: 1;
             width: 100%;
-            height: 100%;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            padding: 40px 20px;
         }
         
         #splashScreen img {
@@ -438,7 +440,7 @@
         
         #splashScreen p {
             max-width: 600px;
-            text-align: center;
+            
             font-size: 10px;
             line-height: 2;
             color: var(--snes-cosmic-teal);
@@ -545,7 +547,7 @@
             background: linear-gradient(135deg, #1a1a40 0%, #2a1a50 50%, #181850 100%);
             padding: 32px;
             border-radius: 0;
-            text-align: center;
+            
             border: 8px solid;
             border-color: var(--snes-cosmic-purple) var(--snes-dark-purple) var(--snes-dark-purple) var(--snes-cosmic-purple);
             max-width: 800px;
@@ -643,7 +645,7 @@
         .victory-column h5 {
             color: var(--snes-gold);
             margin: 0 0 12px 0;
-            text-align: center;
+            
             font-size: 10px;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -743,7 +745,7 @@
             margin: 0 0 20px 0;
             font-size: 20px;
             color: #FFD700;
-            text-align: center;
+            
             padding-bottom: 10px;
             border-bottom: 1px solid #444;
         }
@@ -1143,7 +1145,7 @@
         .element-slot .element-name {
             font-size: 7px;
             color: var(--snes-white);
-            text-align: center;
+            
             font-family: 'Press Start 2P';
             line-height: 1.1;
             text-shadow: 1px 1px 0 rgba(0,0,0,0.8);
@@ -1224,7 +1226,7 @@
         .element-square .element-name {
             font-size: 7px;
             color: #AAA;
-            text-align: center;
+            
             margin-top: 2px;
             line-height: 1;
             overflow: hidden;
@@ -1292,7 +1294,7 @@
             box-shadow: 0 0 30px rgba(248, 216, 0, 0.8),
                         inset 0 0 20px rgba(248, 216, 0, 0.3),
                         0 8px 0 rgba(0,0,0,0.8);
-            text-align: center;
+            
             animation: loreUnlockPulse 0.5s steps(8);
             font-size: 14px;
             font-weight: bold;
@@ -1335,7 +1337,7 @@
             box-shadow: 0 0 30px rgba(255, 0, 255, 0.8),
                         inset 0 0 20px rgba(255, 0, 255, 0.3),
                         0 8px 0 rgba(0,0,0,0.8);
-            text-align: center;
+            
             animation: killstreakPulse 0.5s steps(8);
         }
         
@@ -1354,7 +1356,7 @@
             border-radius: 0;
             border: 4px solid var(--snes-cosmic-teal);
             border-color: var(--snes-cosmic-teal) #0090A0 #0090A0 var(--snes-cosmic-teal);
-            text-align: center;
+            
             pointer-events: none;
             box-shadow: 6px 6px 0 rgba(0,0,0,0.8);
             opacity: 0;
@@ -1485,7 +1487,7 @@
             box-shadow: 0 0 30px rgba(255, 0, 255, 0.8),
                         inset 0 0 20px rgba(255, 0, 255, 0.3),
                         0 8px 0 rgba(0,0,0,0.8);
-            text-align: center;
+            
             animation: killstreakPulse 0.5s steps(8);
         }
         
@@ -1565,7 +1567,7 @@
             border-radius: 0;
             border: 6px solid var(--snes-gold);
             border-color: var(--snes-gold) #A88800 #A88800 var(--snes-gold);
-            text-align: center;
+            
             pointer-events: none;
             box-shadow: 8px 8px 0 rgba(0,0,0,0.9), 
                         0 0 30px rgba(255, 215, 0, 0.3),
@@ -1823,7 +1825,7 @@
             text-transform: uppercase;
             font-size: 12px;
             padding: 8px 12px;
-            text-align: center;
+            
             border-bottom: 2px solid var(--snes-black);
             font-family: 'Press Start 2P';
             letter-spacing: 0;
@@ -2183,7 +2185,7 @@
             border: 2px solid #FFD700;
             border-radius: 8px;
             padding: 10px;
-            text-align: center;
+            
             color: #FFD700;
             font-size: 18px;
             font-weight: bold;
@@ -2512,7 +2514,7 @@
                 line-height: 1.2 !important;
                 max-height: none;
                 overflow: visible;
-                text-align: center;
+                
                 display: none !important; /* Hide text in extreme landscape */
             }
             
@@ -2809,7 +2811,7 @@
             -webkit-backdrop-filter: blur(10px);
             padding: 48px;
             border-radius: 0;
-            text-align: center;
+            
             max-width: 600px;
             width: 90%;
             border: 8px solid;
@@ -2958,7 +2960,7 @@
             background: linear-gradient(135deg, #181850 0%, #2a1a50 50%, #1a1a40 100%);
             padding: 32px;
             border-radius: 0;
-            text-align: center;
+            
             width: 900px;
             height: 700px;
             max-width: 90vw;
@@ -3120,7 +3122,7 @@
             border-color: var(--snes-cosmic-purple) var(--snes-dark-purple) var(--snes-dark-purple) var(--snes-cosmic-purple);
             border-radius: 0;
             padding: 4px;
-            text-align: center;
+            
             transition: none;
             cursor: pointer;
             position: relative;
@@ -3183,7 +3185,7 @@
         .howToPlay h5 {
             color: var(--snes-gold);
             margin-bottom: 12px;
-            text-align: center;
+            
             font-size: 10px;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -3222,11 +3224,11 @@
         #skinSelection h4 {
             color: #FFD700;
             margin-bottom: 10px;
-            text-align: center;
+            
         }
         
         #availableUnlocks {
-            text-align: center;
+            
             color: #4ecdc4;
             font-size: 16px;
             margin-bottom: 15px;
@@ -3277,7 +3279,7 @@
             padding: 10px;
             cursor: pointer;
             transition: all 0.3s;
-            text-align: center;
+            
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -3338,7 +3340,7 @@
             word-wrap: break-word;
             white-space: normal;
             width: calc(100% - 20px);
-            text-align: center;
+            
             position: absolute;
             bottom: 10px;
             left: 10px;
@@ -3754,7 +3756,7 @@
         .loading-content {
             width: 90%;
             max-width: 600px;
-            text-align: center;
+            
             position: relative;
         }
         
@@ -3994,9 +3996,6 @@
             <a href="/lore.html" style="color: #4ecdc4; text-decoration: none; font-family: 'Press Start 2P', monospace; font-size: 10px; margin-right: 20px;">📜 Lore</a>
             <a href="/leaderboard.html" style="color: #4ecdc4; text-decoration: none; font-family: 'Press Start 2P', monospace; font-size: 10px;">🏆 Leaderboard</a>
         </div>
-        <div style="position: absolute; bottom: 20px; right: 20px; z-index: 10;">
-            <a href="/credits.html" style="color: #888; text-decoration: none; font-family: 'Press Start 2P', monospace; font-size: 10px;">Credits</a>
-        </div>
         <div id="splashContent">
             <img src="assets/preview-logo.png" alt="Infinite Snake game logo - A cosmic snake forming an infinity symbol" id="splashLogo" style="width: 400px; max-width: 80%; margin-bottom: 30px;" onerror="this.style.display='none'; document.getElementById('splashTitle').style.display='block';">
             <h1 id="splashTitle">Infinite Snake</h1>
@@ -4010,7 +4009,7 @@
                               font-family: 'Press Start 2P', monospace; font-size: 12px; 
                               background: rgba(0, 0, 0, 0.8); 
                               border: 4px solid #fff; 
-                              color: #4ecdc4; text-align: center; 
+                              color: #4ecdc4;  
                               border-radius: 0; outline: none;
                               box-shadow: 
                                 inset 2px 2px 0 #2a2a4a,
@@ -4020,15 +4019,500 @@
                               display: block;
                               margin: 0 auto;"
                        maxlength="30">
-                <p style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #888; margin-top: 8px; text-align: center;">
+                <p style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #888; margin-top: 8px; ">
                     Enter your nickname
                 </p>
             </div>
             <button id="startButton">ENTER THE VOID</button>
-            <div id="assetLoadingStatus" style="margin-top: 20px; font-family: 'Press Start 2P', monospace; font-size: 10px; color: #4ecdc4; text-align: center; min-height: 20px;">
+            <div id="assetLoadingStatus" style="margin-top: 20px; font-family: 'Press Start 2P', monospace; font-size: 10px; color: #4ecdc4;  min-height: 20px;">
                 <span id="loadingText" style="display: none;">Loading assets...</span>
             </div>
         </div>
+        
+        <!-- Infinite Snake Info Section -->
+    <style>
+        .info-section {
+            color: var(--snes-white);
+            font-family: 'Press Start 2P', monospace;
+            padding: 80px 0;
+            width: 100%;
+        }
+        
+        .info-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .section-block {
+            margin-bottom: 80px;
+            
+        }
+        
+        .section-title {
+            font-size: 28px;
+            color: var(--snes-cosmic-teal);
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 
+                2px 2px 0 var(--snes-dark-purple),
+                4px 4px 0 var(--snes-black);
+        }
+        
+        .section-subtitle {
+            font-size: 14px;
+            color: var(--snes-cosmic-purple);
+            margin-bottom: 40px;
+            line-height: 1.8;
+            
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 60px;
+            margin-top: 50px;
+            max-width: 1200px;
+            padding: 0 20px;
+        }
+        
+        .feature-card {
+            background: rgba(120, 40, 248, 0.1);
+            border: 4px solid var(--snes-dark-purple);
+            padding: 30px;
+            border-radius: 0;
+            transition: all 0.3s ease;
+            box-shadow: 
+                inset 2px 2px 0 rgba(255,255,255,0.1),
+                inset -2px -2px 0 rgba(0,0,0,0.3),
+                4px 4px 0 rgba(0,0,0,0.5);
+            width: 100%;
+            max-width: 280px;
+        }
+        
+        .feature-card:hover {
+            border-color: var(--snes-cosmic-teal);
+            transform: translateY(-5px);
+            box-shadow: 
+                inset 2px 2px 0 rgba(255,255,255,0.2),
+                inset -2px -2px 0 rgba(0,0,0,0.4),
+                0 10px 30px rgba(78, 205, 196, 0.3);
+        }
+        
+        .feature-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        
+        .feature-title {
+            font-size: 16px;
+            color: var(--snes-cosmic-pink);
+            margin-bottom: 15px;
+        }
+        
+        .feature-description {
+            font-size: 10px;
+            line-height: 1.8;
+            color: var(--snes-gray);
+            
+        }
+        
+        .stats-row {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin: 60px 0;
+            gap: 30px;
+        }
+        
+        .info-section .stat-item {
+            
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .stat-number {
+            font-size: 36px;
+            color: var(--snes-gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+            text-shadow: 
+                2px 2px 0 var(--snes-cosmic-purple),
+                4px 4px 0 var(--snes-black);
+            height: 50px;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: var(--snes-gray);
+        }
+        
+        .gameplay-showcase {
+            background: rgba(78, 205, 196, 0.1);
+            border: 4px solid var(--snes-cosmic-teal);
+            padding: 40px;
+            border-radius: 0;
+            margin: 60px 0;
+            box-shadow: 
+                inset 2px 2px 0 rgba(255,255,255,0.2),
+                inset -2px -2px 0 rgba(0,0,0,0.3),
+                4px 4px 0 rgba(0,0,0,0.5);
+        }
+        
+        .element-examples {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        
+        .element-combo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 24px;
+        }
+        
+        .plus-sign {
+            color: var(--snes-cosmic-teal);
+            font-size: 20px;
+        }
+        
+        .equals-sign {
+            color: var(--snes-cosmic-pink);
+            font-size: 20px;
+        }
+        
+        .cta-section {
+            
+            margin: 80px 0;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background: var(--snes-cosmic-purple);
+            color: var(--snes-white);
+            padding: 16px 32px;
+            text-decoration: none;
+            font-size: 12px;
+            border: 4px solid var(--snes-white);
+            border-radius: 0;
+            transition: none;
+            text-transform: uppercase;
+            font-family: 'Press Start 2P', monospace;
+            box-shadow: 
+                inset 2px 2px 0 var(--snes-cosmic-pink),
+                inset -2px -2px 0 var(--snes-dark-purple),
+                4px 4px 0 rgba(0,0,0,0.5);
+            cursor: pointer;
+            letter-spacing: 1px;
+        }
+        
+        .cta-button:hover {
+            background: var(--snes-cosmic-pink);
+            transform: translate(2px, 2px);
+            box-shadow: 
+                inset 2px 2px 0 #FFA8FF,
+                inset -2px -2px 0 var(--snes-dark-purple),
+                2px 2px 0 rgba(0,0,0,0.5);
+        }
+        
+        .cta-button:active {
+            transform: translate(4px, 4px);
+            box-shadow: none;
+        }
+        
+        .story-section {
+            background: rgba(120, 40, 248, 0.1);
+            border: 4px solid var(--snes-cosmic-purple);
+            padding: 40px;
+            border-radius: 0;
+            margin: 60px 0;
+            
+            box-shadow: 
+                inset 2px 2px 0 rgba(255,255,255,0.1),
+                inset -2px -2px 0 rgba(0,0,0,0.3),
+                4px 4px 0 rgba(0,0,0,0.5);
+        }
+        
+        .story-text {
+            font-size: 11px;
+            line-height: 2;
+            color: var(--snes-white);
+            max-width: 800px;
+            margin: 0 auto;
+            
+        }
+        
+        @media (max-width: 768px) {
+            .section-title {
+                font-size: 20px;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stat-number {
+                font-size: 28px;
+            }
+        }
+    </style>
+
+    <div class="info-section">
+        <div class="info-container">
+            
+            <!-- Main Introduction -->
+            <div class="section-block">
+                <h2 class="section-title">Craft the Cosmos, One Element at a Time</h2>
+                <p class="section-subtitle" style="">
+                    THE UNIVERSE COLLAPSED. YOU ARE THE INFINITE SNAKE.<br>
+                    CONSUME. COMBINE. CREATE. REBUILD REALITY.
+                </p>
+            </div>
+            
+            <!-- Stats Section -->
+            <div class="stats-row">
+                <div class="stat-item">
+                    <span class="stat-number">10,000+</span>
+                    <span class="stat-label">ELEMENTS TO DISCOVER</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">20,000+</span>
+                    <span class="stat-label">COMBINATIONS POSSIBLE</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">80+</span>
+                    <span class="stat-label">LORE FRAGMENTS</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">100%</span>
+                    <span class="stat-label">FREE FOREVER</span>
+                </div>
+            </div>
+            
+            <!-- Core Features -->
+            <div class="section-block">
+                <h2 class="section-title">FEATURES</h2>
+                
+                <div class="features-grid" style="margin: 50px auto 0;">
+                    <div class="feature-card">
+                        <div class="feature-icon">🧪</div>
+                        <h3 class="feature-title">ELEMENT CRAFTING</h3>
+                        <p class="feature-description" style="">
+                            Collect and combine elements inside your snake's body.<br>
+                            Start with Earth, Air, Fire, and Water.<br>
+                            Discover over 10,000 unique combinations!
+                        </p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">🏆</div>
+                        <h3 class="feature-title">GLOBAL LEADERBOARDS</h3>
+                        <p class="feature-description" style="">
+                            Compete for the top spot in Daily, Weekly, Monthly, and All-Time rankings.<br>
+                            Every element combination counts toward your score!
+                        </p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">📖</div>
+                        <h3 class="feature-title">DISCOVERY JOURNAL</h3>
+                        <p class="feature-description" style="">
+                            Track every element you've discovered.<br>
+                            Your collection persists between sessions.<br>
+                            Can you discover them all?
+                        </p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">👹</div>
+                        <h3 class="feature-title">BOSS BATTLES</h3>
+                        <p class="feature-description" style="">
+                            Face the Deep Old Ones - ancient beings from the void.<br>
+                            Defeat them to unlock exclusive snake skins and rare elements.
+                        </p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">🎮</div>
+                        <h3 class="feature-title">GAME MODES</h3>
+                        <p class="feature-description" style="">
+                            Classic Mode: 3 lives, high stakes permadeath challenge.<br>
+                            Infinite Mode: Endless discovery, create combinations forever.<br>
+                            Choose your path to rebuild the cosmos!
+                        </p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">📜</div>
+                        <h3 class="feature-title">LORE FRAGMENTS</h3>
+                        <p class="feature-description" style="">
+                            Uncover the mysteries of the collapsed universe.<br>
+                            Over 80 lore fragments to unlock through gameplay.<br>
+                            Piece together the cosmic story!
+                        </p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">🔥</div>
+                        <h3 class="feature-title">KILLSTREAKS & COMBOS</h3>
+                        <p class="feature-description" style="">
+                            Chain your kills for epic combos!<br>
+                            Earn medals and hear throwback announcements.<br>
+                            DOUBLE STRIKE! TRIPLE FANG! DEATH COIL!
+                        </p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">🎵</div>
+                        <h3 class="feature-title">EDM SPACE SOUNDTRACK</h3>
+                        <p class="feature-description" style="">
+                            Immerse yourself in an electronic space odyssey.<br>
+                            Original soundtrack that evolves with your journey.<br>
+                            Feel the cosmic void pulse around you.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Game Modes Section -->
+            <div class="section-block">
+                <h2 class="section-title">CHOOSE YOUR FATE</h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 40px; margin-top: 40px; justify-items: center;">
+                    <div class="gameplay-showcase" style="margin: 0; max-width: 500px; width: 100%;">
+                        <h3 class="feature-title">CLASSIC MODE</h3>
+                        <p class="feature-description" style="">
+                            The original challenge. 3 lives. Permadeath.<br>
+                            Every decision matters. Every element counts.<br>
+                            How long can you survive the void?
+                        </p>
+                    </div>
+                    
+                    <div class="gameplay-showcase" style="margin: 0; max-width: 500px; width: 100%;">
+                        <h3 class="feature-title">INFINITE MODE</h3>
+                        <p class="feature-description" style="">
+                            Endless discovery. No limits. Pure creation.<br>
+                            Experiment freely with combinations.<br>
+                            Build your collection without fear.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Gameplay Showcase -->
+            <div class="gameplay-showcase">
+                <h2 class="section-title" style="">ELEMENT COMBINATIONS</h2>
+                <p class="section-subtitle" style="">Mix and match to discover the secrets of the cosmos</p>
+                
+                <div class="element-examples">
+                    <div class="element-combo">
+                        <span>🔥</span>
+                        <span class="plus-sign">+</span>
+                        <span>💧</span>
+                        <span class="equals-sign">=</span>
+                        <span>☁️</span>
+                    </div>
+                    
+                    <div class="element-combo">
+                        <span>🌍</span>
+                        <span class="plus-sign">+</span>
+                        <span>💨</span>
+                        <span class="equals-sign">=</span>
+                        <span>🌪️</span>
+                    </div>
+                    
+                    <div class="element-combo">
+                        <span>🐉</span>
+                        <span class="plus-sign">+</span>
+                        <span>🔥</span>
+                        <span class="equals-sign">=</span>
+                        <span>???</span>
+                    </div>
+                </div>
+                
+                <p class="feature-description">
+                    Every combination unlocks new possibilities. What will you discover?
+                </p>
+            </div>
+            
+            <!-- The Story -->
+            <div class="story-section">
+                <h2 class="section-title">THE STORY</h2>
+                <p class="story-text" style="">
+                    Created as a surprise gift combining two beloved games - Infinite Craft and Snake.io.
+                    What started as a father's gift to his son has become a cosmic adventure for players worldwide.
+                    <br><br>
+                    This game will always remain 100% free because we believe in sharing the joy of discovery.
+                    New elements, lore fragments, and features are added regularly, expanding the cosmos with each update.
+                    <br><br>
+                    Immerse yourself in the electronic space soundtrack as you uncover the mysteries
+                    of why the universe collapsed and your role as the Infinite Snake.
+                </p>
+            </div>
+            
+            <!-- How to Play Summary -->
+            <div class="section-block">
+                <h2 class="section-title">HOW TO PLAY</h2>
+                <div class="features-grid" style="grid-template-columns: repeat(3, 300px); max-width: none; margin: 0; gap: 60px; justify-content: flex-start;">
+                    <div class="feature-card">
+                        <h3 class="feature-title">1. CONTROL</h3>
+                        <p class="feature-description" style="">
+                            Mouse, Arrow Keys, or WASD on desktop<br>
+                            Touch controls on mobile<br>
+                            Hold to boost (uses stamina)
+                        </p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h3 class="feature-title">2. DISCOVER</h3>
+                        <p class="feature-description" style="">
+                            Consume elemental orbs<br>
+                            Your snake holds up to 6 elements<br>
+                            Elements auto-combine when compatible<br>
+                            Unlock lore fragments as you play
+                        </p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h3 class="feature-title">3. DOMINATE</h3>
+                        <p class="feature-description" style="">
+                            Devour smaller snakes<br>
+                            Chain kills for epic streaks<br>
+                            Classic Mode: 3 lives only<br>
+                            Infinite Mode: Play forever
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Call to Action -->
+            <div class="cta-section">
+                <h2 class="section-title">READY TO REBUILD THE COSMOS?</h2>
+                <p class="section-subtitle" style="">No download. No account. Just pure discovery.</p>
+                <div style="margin-top: 50px;">
+                    <button class="cta-button" onclick="document.getElementById('startButton').click()">ENTER THE VOID</button>
+                </div>
+            </div>
+            
+            <!-- Credits moved to bottom -->
+            <div style=" margin-top: 60px; padding-top: 40px; border-top: 2px solid var(--snes-dark-purple);">
+                <a href="/credits.html" style="color: #888; text-decoration: none; font-family: 'Press Start 2P', monospace; font-size: 10px;">Credits</a>
+            </div>
+            
+        </div>
+    </div>
+
+    <script>
+    function scrollToTop() {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    </script>
     </div>
     
     <!-- Game Mode Selection -->
@@ -4042,9 +4526,6 @@
             <a href="/lore.html" style="color: #4ecdc4; text-decoration: none; font-family: 'Press Start 2P', monospace; font-size: 10px; margin-right: 20px;">📜 Lore</a>
             <a href="/leaderboard.html" style="color: #4ecdc4; text-decoration: none; font-family: 'Press Start 2P', monospace; font-size: 10px;">🏆 Leaderboard</a>
         </div>
-        <div style="position: absolute; bottom: 20px; right: 20px; z-index: 10;">
-            <a href="/credits.html" style="color: #888; text-decoration: none; font-family: 'Press Start 2P', monospace; font-size: 10px;">Credits</a>
-        </div>
         
         <div id="gameModeContent">
             <h3>Game Setup</h3>
@@ -4052,13 +4533,13 @@
         <div class="modeSection">
             <h4>Choose Your Mode</h4>
             <div id="victoryButtons" style="display: flex; flex-direction: row; gap: 30px; justify-content: center; align-items: stretch; margin-top: 30px; flex-wrap: wrap;">
-                <div style="text-align: center; width: 280px;">
+                <div style=" width: 280px;">
                     <button class="btn-classic" onclick="selectGameMode('classic')" style="width: 100%; height: 40px; padding: 10px; font-size: 10pt; background: #333; border: 2px solid #222; display: flex; align-items: center; justify-content: center;">
                         Classic Mode
                     </button>
                     <p style="color: #ccc; margin-top: 10px; font-size: 14px;">Test your survival skills and compete for your spot on the leaderboard</p>
                 </div>
-                <div style="text-align: center; width: 280px;">
+                <div style=" width: 280px;">
                     <button class="btn-infinite" onclick="selectGameMode('infinite')" style="width: 100%; height: 40px; padding: 10px !important; font-size: 10pt !important; display: flex; align-items: center; justify-content: center;">
                         Infinite Mode
                     </button>
@@ -4247,7 +4728,7 @@
     
     <!-- Respawn Overlay -->
     <div id="respawnOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 60; pointer-events: auto;">
-        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; pointer-events: auto;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);  pointer-events: auto;">
             <div style="background: linear-gradient(135deg, rgba(20, 20, 40, 0.95) 0%, rgba(30, 30, 50, 0.9) 100%); 
                         border: 2px solid rgba(255, 68, 68, 0.5); 
                         border-radius: 15px; 
@@ -4260,7 +4741,7 @@
                 <div style="margin-bottom: 25px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                     <!-- This Game Column -->
                     <div>
-                        <div style="color: #4ecdc4; font-size: 18px; margin-bottom: 10px; text-align: center;">THIS GAME</div>
+                        <div style="color: #4ecdc4; font-size: 18px; margin-bottom: 10px; ">THIS GAME</div>
                         <div style="background: rgba(0, 0, 0, 0.3); padding: 15px; border-radius: 8px;">
                             <div style="margin-bottom: 10px;">
                                 <div style="color: #AAA; font-size: 14px;">Score</div>
@@ -4279,7 +4760,7 @@
                     
                     <!-- All Time Best Column -->
                     <div>
-                        <div style="color: #9c88ff; font-size: 18px; margin-bottom: 10px; text-align: center;">ALL TIME BEST</div>
+                        <div style="color: #9c88ff; font-size: 18px; margin-bottom: 10px; ">ALL TIME BEST</div>
                         <div style="background: rgba(0, 0, 0, 0.3); padding: 15px; border-radius: 8px;">
                             <div style="margin-bottom: 10px;">
                                 <div style="color: #AAA; font-size: 14px;">Score</div>
@@ -4298,7 +4779,7 @@
                 </div>
                 
                 <!-- Global Rank Display -->
-                <div id="globalRankContainer" style="margin-bottom: 20px; text-align: center; display: none;">
+                <div id="globalRankContainer" style="margin-bottom: 20px;  display: none;">
                     <div style="color: #AAA; font-size: 14px;">Today's Global Rank</div>
                     <div id="globalRank" style="color: #9c88ff; font-size: 28px; font-weight: bold;">#--</div>
                 </div>
@@ -4342,7 +4823,7 @@
                 </div>
                 
                 
-                <div id="respawnPenaltyText" style="margin-top: 8px; font-size: 12px; color: #ff9999; text-align: center; display: none;">
+                <div id="respawnPenaltyText" style="margin-top: 8px; font-size: 12px; color: #ff9999;  display: none;">
                     <!-- No penalty on respawn anymore -->
                 </div>
             </div>
@@ -4387,7 +4868,7 @@
             <div id="journalTab" class="tab-content">
                 <div id="discoveryJournal">
                     <h4 style="color: #FFD700; margin-bottom: 10px;">Discovery Journal</h4>
-                    <p id="discoveryCount" style="color: #4ecdc4; margin-bottom: 10px; text-align: center;">Loading discoveries...</p>
+                    <p id="discoveryCount" style="color: #4ecdc4; margin-bottom: 10px; ">Loading discoveries...</p>
                     <div class="discovery-grid" id="discoveryGrid">
                         <!-- Discoveries will be populated here -->
                     </div>
@@ -4397,7 +4878,7 @@
             <!-- How to Play Tab -->
             <div id="howtoTab" class="tab-content">
                 <div style="padding: 20px; max-height: 400px; overflow-y: auto;">
-                    <h4 style="color: #FFD700; margin-bottom: 15px; text-align: center;">How to Play Infinite Snake</h4>
+                    <h4 style="color: #FFD700; margin-bottom: 15px; ">How to Play Infinite Snake</h4>
                     
                     <div style="color: #ddd; font-size: 14px; line-height: 1.6;">
                         <div style="margin-bottom: 15px;">
@@ -4493,7 +4974,7 @@
             <!-- Leaderboard Tab -->
             <div id="leaderboardTab" class="tab-content">
                 <div style="padding: 20px; max-height: 400px; overflow-y: auto;">
-                    <h4 style="color: #4ecdc4; margin-bottom: 15px; text-align: center;">Classic Mode Leaderboard</h4>
+                    <h4 style="color: #4ecdc4; margin-bottom: 15px; ">Classic Mode Leaderboard</h4>
                     
                     <!-- Mini leaderboard tabs -->
                     <div style="display: flex; margin-bottom: 15px; border-bottom: 2px solid #333;">
@@ -4516,7 +4997,7 @@
                     
                     <!-- Leaderboard entries -->
                     <div id="pauseLeaderboardEntries" style="font-family: monospace;">
-                        <div style="color: #888; text-align: center; padding: 20px;">Loading...</div>
+                        <div style="color: #888;  padding: 20px;">Loading...</div>
                     </div>
                 </div>
             </div>
@@ -4590,7 +5071,7 @@
             
             <!-- Header -->
             <div style="background: rgba(0, 0, 0, 0.5); padding: 20px; border-bottom: 2px solid #4ecdc4;">
-                <h2 style="color: #4ecdc4; margin: 0; font-family: monospace; font-size: 28px; text-align: center;">
+                <h2 style="color: #4ecdc4; margin: 0; font-family: monospace; font-size: 28px; ">
                     CLASSIC MODE LEADERBOARD
                 </h2>
                 <button onclick="closeLeaderboard()" 
@@ -4648,7 +5129,7 @@
                 
                 <!-- Leaderboard Entries -->
                 <div id="leaderboardEntries">
-                    <div style="color: #888; text-align: center; padding: 40px; font-family: monospace;">
+                    <div style="color: #888;  padding: 40px; font-family: monospace;">
                         Loading leaderboard...
                     </div>
                 </div>
@@ -5611,7 +6092,7 @@
             color: var(--snes-white);
             font-size: 16px;
             margin-bottom: 20px;
-            text-align: center;
+            
             text-transform: uppercase;
             text-shadow: 2px 2px 0 rgba(0,0,0,0.5);
         }
