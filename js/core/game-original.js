@@ -1071,10 +1071,24 @@
             const allSkins = Object.keys(skinMetadata);
             allSkins.forEach(skin => {
                 const img = new Image();
+                
+                // Set crossOrigin to ensure we can read image data
+                img.crossOrigin = 'anonymous';
+                
+                img.onload = function() {
+                    // Force the browser to decode the image to ensure dimensions are available
+                    if (this.decode) {
+                        this.decode().catch(() => {
+                            gameLogger.warn('ASSETS', `Failed to decode skin: ${skin}`);
+                        });
+                    }
+                };
+                
                 img.onerror = function() {
                     gameLogger.warn('ASSETS', `Failed to load skin: ${skin}.png`);
                     this.error = true;
                 };
+                
                 // Use old ID for file path if available
                 const fileId = window.skinIdConverter ? (window.skinIdConverter.toOldId(skin) || skin) : skin;
                 if (skinMetadata[skin].isBoss) {

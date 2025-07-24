@@ -1106,7 +1106,7 @@ class Snake {
     
     drawSegments(interpolation) {
         const skinData = window.skinMetadata[this.skin] || window.skinMetadata['snake-default-green'];
-        const skinImg = window.snakeSkinImages[this.skin];
+        const skinImg = window.snakeSkinImages ? window.snakeSkinImages[this.skin] : null;
         const emoji = skinData.emoji;
         
         const effectiveSegmentSize = SEGMENT_SIZE * this.size * window.cameraZoom;
@@ -1141,7 +1141,7 @@ class Snake {
             }
         }
         
-        if (skinImg && skinImg.complete) {
+        if (skinImg && skinImg.complete && skinImg.width > 0 && skinImg.height > 0) {
             // Preserve aspect ratio
             const aspectRatio = skinImg.width / skinImg.height;
             let drawWidth = size;
@@ -1150,10 +1150,11 @@ class Snake {
             if (aspectRatio > 1) {
                 // Wider than tall
                 drawHeight = size / aspectRatio;
-            } else {
-                // Taller than wide
+            } else if (aspectRatio < 1) {
+                // Taller than wide  
                 drawWidth = size * aspectRatio;
             }
+            // If aspectRatio is 1, keep both as size
             
             window.ctx.drawImage(skinImg, screen.x - drawWidth/2, screen.y - drawHeight/2, drawWidth, drawHeight);
         } else {
@@ -1186,7 +1187,7 @@ class Snake {
         window.ctx.translate(headScreen.x, headScreen.y);
         window.ctx.rotate(interpolatedAngle);
         
-        if (skinImg && skinImg.complete) {
+        if (skinImg && skinImg.complete && skinImg.width > 0 && skinImg.height > 0) {
             // Preserve aspect ratio
             const aspectRatio = skinImg.width / skinImg.height;
             let drawWidth = headSize;
@@ -1195,7 +1196,7 @@ class Snake {
             if (aspectRatio > 1) {
                 // Wider than tall
                 drawHeight = headSize / aspectRatio;
-            } else {
+            } else if (aspectRatio < 1) {
                 // Taller than wide
                 drawWidth = headSize * aspectRatio;
             }
