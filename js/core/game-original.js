@@ -1498,6 +1498,12 @@
             gameMode = mode;
             window.gameMode = gameMode; // Expose globally for Snake.js access
             
+            // Track game mode selection
+            if (window.GameAnalyticsWrapper) {
+                window.GameAnalyticsWrapper.setGameMode(mode);
+                window.GameAnalyticsWrapper.trackEvent('design', `mode:selected:${mode}`, 1);
+            }
+            
             // Classic mode has no target, ends on permadeath
             // Infinite mode has no target, continues forever
             gameTarget = 0;
@@ -2892,6 +2898,13 @@
                             // Ensure we store as number
                             const resultId = typeof chosen.result === 'string' ? parseInt(chosen.result) : chosen.result;
                             playerDiscoveredElements.add(resultId);
+                            
+                            // Track discovery analytics
+                            if (window.GameAnalyticsWrapper) {
+                                const resultData = window.elementLoader?.elements?.get(resultId);
+                                const elementName = resultData?.n || 'Unknown';
+                                window.GameAnalyticsWrapper.trackDiscovery(elementName, resultId, discoveredElements.size);
+                            }
                         }
                         
                         this.score += 500; // 500 points for new discovery
@@ -3275,6 +3288,12 @@
                     this.isDying = true;
                     this.deathAnimationTimer = 0;
                     this.speed = 0; // Stop movement during death
+                    
+                    // Track player death analytics
+                    if (this.isPlayer && window.GameAnalyticsWrapper) {
+                        const deathCause = isBossDeath ? 'boss' : 'collision';
+                        window.GameAnalyticsWrapper.trackDeath(deathCause, this.score, { x: this.x, y: this.y });
+                    }
                     
                     // Sound will play with pixel explosion at 600ms
                     
@@ -6353,6 +6372,14 @@
                 defeatedBosses.add(this.bossType);
                 bossesDefeatedThisCycle++;
                 
+                // Track boss defeat analytics
+                if (window.GameAnalyticsWrapper) {
+                    const timeSpent = this.bossEncounterStartTime ? 
+                        Math.floor((Date.now() - this.bossEncounterStartTime) / 1000) : 0;
+                    const attempts = this.defeatAttempts || 1;
+                    window.GameAnalyticsWrapper.trackBossDefeat(this.bossType, attempts, timeSpent);
+                }
+                
                 // Save defeated bosses to localStorage for persistent tracking
                 const defeatedBossList = JSON.parse(localStorage.getItem('defeatedBosses') || '[]');
                 if (!defeatedBossList.includes(this.bossType)) {
@@ -6540,6 +6567,11 @@
                     }
                     saveSkinData();
                     skinUnlocked = true;
+                    
+                    // Track skin unlock analytics
+                    if (window.GameAnalyticsWrapper) {
+                        window.GameAnalyticsWrapper.trackSkinUnlock(bossSkinName, 'boss_defeat');
+                    }
                 }
                 
                 // Track element bank expansion
@@ -9828,6 +9860,11 @@
                     // Use a revive
                     revivesRemaining--;
                     
+                    // Track revive usage
+                    if (window.GameAnalyticsWrapper) {
+                        window.GameAnalyticsWrapper.trackRevive(revivesRemaining);
+                    }
+                    
                     // Update button text
                     const reviveBtn = document.getElementById('reviveBtn');
                     if (reviveBtn) {
@@ -10618,6 +10655,11 @@
                                     pointsGained: points
                                 });
                                 
+                                // Track void orb analytics
+                                if (window.GameAnalyticsWrapper) {
+                                    window.GameAnalyticsWrapper.trackPowerUp('void_orb', points);
+                                }
+                                
                                 showMessage(`<div style="text-align: center">🌀 Void Orb consumed! +${points} points<br><small style="opacity: 0.8">Your elements have been purged to the void</small></div>`, 'info');
                             }
                             
@@ -10800,6 +10842,11 @@
                                 type: 'catalyst',
                                 elementsSpawned: 3
                             });
+                            
+                            // Track catalyst gem analytics
+                            if (window.GameAnalyticsWrapper) {
+                                window.GameAnalyticsWrapper.trackPowerUp('catalyst_gem', 0);
+                            }
                             
                             // Create particle effect
                             for (let j = 0; j < 20; j++) {
@@ -11758,6 +11805,11 @@
         }
         
         function startGame() {
+            // Track game session start
+            if (window.GameAnalyticsWrapper) {
+                window.GameAnalyticsWrapper.trackSessionStart();
+            }
+            
             // Cancel any existing game loop
             if (animationFrameId !== null) {
                 cancelAnimationFrame(animationFrameId);
@@ -12071,6 +12123,13 @@
         }
         
         function stopGame() {
+            // Track game session end if game was running
+            if (gameStarted && window.GameAnalyticsWrapper) {
+                const score = playerSnake ? playerSnake.score : 0;
+                const discoveries = discoveryCount || 0;
+                const deaths = deathCount || 0;
+                window.GameAnalyticsWrapper.trackSessionEnd(score, discoveries, deaths);
+            }
             
             // Cancel the game loop
             if (animationFrameId !== null) {
@@ -12360,6 +12419,13 @@
                 if (playerSnake) {
                     playerSnake.skin = skinId;
                 }
+                
+                // Track skin selection analytics
+                if (window.GameAnalyticsWrapper) {
+                    window.GameAnalyticsWrapper.setSkin(skinId);
+                    window.GameAnalyticsWrapper.trackEvent('design', `skin:selected:${skinId}`, 1);
+                }
+                
                 // Update player portrait
                 const portrait = document.getElementById('playerPortrait');
                 if (portrait) {
@@ -12384,6 +12450,11 @@
                 skinData.unlocked = true;
                 unlockedSkins.add(skinId);
                 availableUnlocks--;
+                
+                // Track skin unlock analytics
+                if (window.GameAnalyticsWrapper) {
+                    window.GameAnalyticsWrapper.trackSkinUnlock(skinId, 'unlock_token');
+                }
                 
                 // Select the newly unlocked skin
                 currentPlayerSkin = skinId;

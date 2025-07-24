@@ -66,6 +66,11 @@ class KillstreakManager {
         
         // Play audio announcement
         this.playKillstreakAudio(kills);
+        
+        // Track killstreak analytics
+        if (window.GameAnalyticsWrapper) {
+            window.GameAnalyticsWrapper.trackKillStreak(milestone.name, kills);
+        }
     }
     
     showKillstreakMessage(streakName, medalFile) {
