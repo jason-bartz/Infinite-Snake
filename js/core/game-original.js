@@ -1075,10 +1075,12 @@
                     gameLogger.warn('ASSETS', `Failed to load skin: ${skin}.png`);
                     this.error = true;
                 };
+                // Use old ID for file path if available
+                const fileId = window.skinIdConverter ? (window.skinIdConverter.toOldId(skin) || skin) : skin;
                 if (skinMetadata[skin].isBoss) {
-                    img.src = `assets/boss-skins/${skin}.png`;
+                    img.src = `assets/boss-skins/${fileId}.png`;
                 } else {
-                    img.src = `skins/${skin}.png`;
+                    img.src = `skins/${fileId}.png`;
                 }
                 skinImages[skin] = img;
             });
@@ -13723,6 +13725,7 @@
             window.saveSkinData = saveSkinData;
             window.skinMetadata = skinMetadata;
             window.unlockedSkins = unlockedSkins;
+            window.snakeSkinImages = skinImages;
             
             // Sync with UnlockManager's unlocked skins
             if (window.unlockManager) {
