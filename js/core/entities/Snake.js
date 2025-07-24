@@ -428,9 +428,78 @@ class Snake {
     
     checkWorldBoundaries() {
         const boundaryMargin = 2;
-        if (this.x <= -boundaryMargin || this.x >= WORLD_SIZE + boundaryMargin || 
-            this.y <= -boundaryMargin || this.y >= WORLD_SIZE + boundaryMargin) {
-            this.die();
+        
+        // Check if we're hitting any boundary
+        const hitLeftBoundary = this.x <= -boundaryMargin;
+        const hitRightBoundary = this.x >= WORLD_SIZE + boundaryMargin;
+        const hitTopBoundary = this.y <= -boundaryMargin;
+        const hitBottomBoundary = this.y >= WORLD_SIZE + boundaryMargin;
+        
+        if (hitLeftBoundary || hitRightBoundary || hitTopBoundary || hitBottomBoundary) {
+            // In cozy mode, bounce instead of die
+            if (this.isPlayer && window.gameMode === 'cozy') {
+                // Bounce physics
+                const dampening = 0.85; // Soft bounce feel
+                const angleVariation = (Math.random() - 0.5) * 0.52; // ±15 degrees in radians
+                
+                // Store explosion position before adjusting snake position
+                let explosionX = this.x;
+                let explosionY = this.y;
+                
+                if (hitLeftBoundary || hitRightBoundary) {
+                    // Reverse horizontal component of angle
+                    this.angle = Math.PI - this.angle + angleVariation;
+                    
+                    // Adjust position to be inside bounds
+                    if (hitLeftBoundary) {
+                        this.x = boundaryMargin;
+                        explosionX = 0;
+                    } else {
+                        this.x = WORLD_SIZE - boundaryMargin;
+                        explosionX = WORLD_SIZE;
+                    }
+                    
+                    // Apply dampened speed
+                    this.speed = this.speed * dampening;
+                }
+                
+                if (hitTopBoundary || hitBottomBoundary) {
+                    // Reverse vertical component of angle
+                    this.angle = -this.angle + angleVariation;
+                    
+                    // Adjust position to be inside bounds
+                    if (hitTopBoundary) {
+                        this.y = boundaryMargin;
+                        explosionY = 0;
+                    } else {
+                        this.y = WORLD_SIZE - boundaryMargin;
+                        explosionY = WORLD_SIZE;
+                    }
+                    
+                    // Apply dampened speed
+                    this.speed = this.speed * dampening;
+                }
+                
+                // Normalize angle to 0-2π range
+                while (this.angle < 0) this.angle += Math.PI * 2;
+                while (this.angle > Math.PI * 2) this.angle -= Math.PI * 2;
+                
+                // Create dust impact explosion at boundary contact point
+                if (window.explosionManager) {
+                    window.explosionManager.createExplosion('dust-impact-small-white', explosionX, explosionY, { 
+                        scale: 0.7 
+                    });
+                }
+                
+                // Ensure minimum speed to prevent getting stuck
+                const minSpeed = SNAKE_SPEED * 0.5;
+                if (this.speed < minSpeed) {
+                    this.speed = minSpeed;
+                }
+            } else {
+                // Normal death for non-cozy modes or AI snakes
+                this.die();
+            }
         }
     }
     
@@ -1230,12 +1299,41 @@ class Snake {
             displayName = this.name.substring(personalityPrefix.length);
         }
         
-        window.ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)';
-        window.ctx.lineWidth = 3;
-        window.ctx.strokeText(displayName, headScreen.x, headScreen.y - nameOffset);
-        
-        window.ctx.fillStyle = this.isPlayer ? '#4ecdc4' : personalityColor;
-        window.ctx.fillText(displayName, headScreen.x, headScreen.y - nameOffset);
+        // Check for invincibility effect (not in cozy mode)
+        if (this.isPlayer && this.invincibilityTimer > 0 && window.gameMode !== 'cozy') {
+            // Save context state
+            window.ctx.save();
+            
+            // Add golden glow effect
+            window.ctx.shadowColor = '#FFD700';
+            window.ctx.shadowBlur = 20;
+            
+            // Draw golden outline
+            window.ctx.strokeStyle = '#FFD700';
+            window.ctx.lineWidth = 6;
+            window.ctx.strokeText(displayName, headScreen.x, headScreen.y - nameOffset);
+            
+            // Draw black inner stroke for readability
+            window.ctx.shadowBlur = 0;
+            window.ctx.strokeStyle = 'black';
+            window.ctx.lineWidth = 2;
+            window.ctx.strokeText(displayName, headScreen.x, headScreen.y - nameOffset);
+            
+            // Draw fill text
+            window.ctx.fillStyle = '#4ecdc4';
+            window.ctx.fillText(displayName, headScreen.x, headScreen.y - nameOffset);
+            
+            // Restore context state
+            window.ctx.restore();
+        } else {
+            // Normal name rendering
+            window.ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)';
+            window.ctx.lineWidth = 3;
+            window.ctx.strokeText(displayName, headScreen.x, headScreen.y - nameOffset);
+            
+            window.ctx.fillStyle = this.isPlayer ? '#4ecdc4' : personalityColor;
+            window.ctx.fillText(displayName, headScreen.x, headScreen.y - nameOffset);
+        }
         
         const scoreY = headScreen.y - nameOffset - 12 * window.cameraZoom;
         const scoreText = `${this.score}`;

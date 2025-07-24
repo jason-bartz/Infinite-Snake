@@ -236,6 +236,7 @@
         let paused = false;
         let controlScheme = 'arrows';
         let gameMode = 'infinite';
+        window.gameMode = gameMode; // Expose globally for Snake.js access
         let gameWon = false;
         let gameTarget = 0;
         let deathCount = 0;
@@ -1495,6 +1496,7 @@
         function selectGameMode(mode) {
             playUISound();
             gameMode = mode;
+            window.gameMode = gameMode; // Expose globally for Snake.js access
             
             // Classic mode has no target, ends on permadeath
             // Infinite mode has no target, continues forever
@@ -2645,10 +2647,86 @@
                 
                 // World boundaries - add small margin for floating point precision
                 const boundaryMargin = 2; // Small margin to prevent edge case deaths
-                if (this.x <= -boundaryMargin || this.x >= WORLD_SIZE + boundaryMargin || 
-                    this.y <= -boundaryMargin || this.y >= WORLD_SIZE + boundaryMargin) {
-                    this.die();
-                    return;
+                const hitLeftBoundary = this.x <= -boundaryMargin;
+                const hitRightBoundary = this.x >= WORLD_SIZE + boundaryMargin;
+                const hitTopBoundary = this.y <= -boundaryMargin;
+                const hitBottomBoundary = this.y >= WORLD_SIZE + boundaryMargin;
+                
+                if (hitLeftBoundary || hitRightBoundary || hitTopBoundary || hitBottomBoundary) {
+                    // In cozy mode, bounce instead of die
+                    if (this.isPlayer && gameMode === 'cozy') {
+                        // Bounce physics
+                        const dampening = 0.85; // Soft bounce feel
+                        const angleVariation = (Math.random() - 0.5) * 0.52; // ±15 degrees in radians
+                        
+                        // Store explosion position before adjusting snake position
+                        let explosionX = this.x;
+                        let explosionY = this.y;
+                        
+                        if (hitLeftBoundary || hitRightBoundary) {
+                            // Reverse horizontal component of angle
+                            this.angle = Math.PI - this.angle + angleVariation;
+                            
+                            // Adjust position to be inside bounds
+                            if (hitLeftBoundary) {
+                                this.x = boundaryMargin;
+                                explosionX = 0;
+                            } else {
+                                this.x = WORLD_SIZE - boundaryMargin;
+                                explosionX = WORLD_SIZE;
+                            }
+                            
+                            // Apply dampened speed
+                            this.speed = this.speed * dampening;
+                        }
+                        
+                        if (hitTopBoundary || hitBottomBoundary) {
+                            // Reverse vertical component of angle
+                            this.angle = -this.angle + angleVariation;
+                            
+                            // Adjust position to be inside bounds
+                            if (hitTopBoundary) {
+                                this.y = boundaryMargin;
+                                explosionY = 0;
+                            } else {
+                                this.y = WORLD_SIZE - boundaryMargin;
+                                explosionY = WORLD_SIZE;
+                            }
+                            
+                            // Apply dampened speed
+                            this.speed = this.speed * dampening;
+                        }
+                        
+                        // Normalize angle to 0-2π range
+                        while (this.angle < 0) this.angle += Math.PI * 2;
+                        while (this.angle > Math.PI * 2) this.angle -= Math.PI * 2;
+                        
+                        // Create dust impact explosion at boundary contact point
+                        if (explosionManager) {
+                            explosionManager.createExplosion('dust-impact-small-white', explosionX, explosionY, { 
+                                scale: 1.4 
+                            });
+                        }
+                        
+                        // Play impact sound effect
+                        const impactSound = new Audio('sounds/short-bass.mp3');
+                        impactSound.volume = 0.3;
+                        impactSound.play().catch(err => {
+                            console.log('Failed to play impact sound:', err);
+                        });
+                        
+                        // Ensure minimum speed to prevent getting stuck
+                        const minSpeed = SNAKE_SPEED * 0.5;
+                        if (this.speed < minSpeed) {
+                            this.speed = minSpeed;
+                        }
+                        
+                        return; // Don't die, continue with bounce
+                    } else {
+                        // Normal death for non-cozy modes or AI snakes
+                        this.die();
+                        return;
+                    }
                 }
                 
                 // Update segments
@@ -3627,26 +3705,7 @@
                     // Normal square segment for all (removed diamond shape as it was causing the lump)
                     ctx.fillRect(segmentX, segmentY, segmentSize, segmentSize);
                     
-                    // Spawn invincibility sparkle particles for player
-                    if (this.invincibilityTimer > 0 && this.isPlayer) {
-                        // Spawn subtle sparkle particles occasionally
-                        if (Math.random() < 0.04) { // 4% chance per segment per frame (reduced by 50%)
-                            const sparkleAngle = Math.random() * Math.PI * 2;
-                            const sparkleSpeed = 0.5 + Math.random() * 1.5;
-                            
-                            // Convert segment screen position to world position
-                            const worldSegX = segment.x;
-                            const worldSegY = segment.y;
-                            
-                            particlePool.spawn(
-                                worldSegX,
-                                worldSegY,
-                                Math.cos(sparkleAngle) * sparkleSpeed,
-                                Math.sin(sparkleAngle) * sparkleSpeed,
-                                '#FFD700' // Golden sparkles
-                            );
-                        }
-                    }
+                    // Removed invincibility particles for better performance
                 }
                 
                 // Draw head
@@ -3702,29 +3761,7 @@
                         }
                     }
                     
-                    // Spawn invincibility sparkle particles around head for player
-                    if (this.invincibilityTimer > 0 && this.isPlayer) {
-                        // More frequent particles around the head
-                        if (Math.random() < 0.1) { // 10% chance per frame for head (reduced by 50%)
-                            // Create a ring of particles around the head
-                            const numParticles = 1 + Math.floor(Math.random() * 1); // Reduced from 2-3 to 1-1 particles
-                            for (let i = 0; i < numParticles; i++) {
-                                const angle = Math.random() * Math.PI * 2;
-                                const distance = SEGMENT_SIZE * sizeMultiplier * 1.5;
-                                const particleX = headX + Math.cos(angle) * distance;
-                                const particleY = headY + Math.sin(angle) * distance;
-                                const speed = 1 + Math.random() * 2;
-                                
-                                particlePool.spawn(
-                                    particleX,
-                                    particleY,
-                                    Math.cos(angle) * speed,
-                                    Math.sin(angle) * speed,
-                                    '#FFD700' // Golden sparkles
-                                );
-                            }
-                        }
-                    }
+                    // Removed invincibility particles for better performance
                     
                     // Draw skin image
                     const skinImage = skinImages[this.skin];
@@ -3816,12 +3853,40 @@
                         ctx.strokeText(actualName, screenX, nameY);
                         ctx.fillText(actualName, screenX, nameY);
                     } else {
-                        // Player name or AI without personality - draw normally
-                        ctx.strokeStyle = 'black';
-                        ctx.lineWidth = 3;
-                        ctx.fillStyle = 'white';
-                        ctx.strokeText(this.name, screenX, nameY);
-                        ctx.fillText(this.name, screenX, nameY);
+                        // Player name or AI without personality - with invincibility effect
+                        if (this.isPlayer && this.invincibilityTimer > 0 && gameMode !== 'cozy') {
+                            // Save context state
+                            ctx.save();
+                            
+                            // Add golden glow effect
+                            ctx.shadowColor = '#FFD700';
+                            ctx.shadowBlur = 20;
+                            
+                            // Draw golden outline
+                            ctx.strokeStyle = '#FFD700';
+                            ctx.lineWidth = 6;
+                            ctx.strokeText(this.name, screenX, nameY);
+                            
+                            // Draw black inner stroke for readability
+                            ctx.shadowBlur = 0;
+                            ctx.strokeStyle = 'black';
+                            ctx.lineWidth = 2;
+                            ctx.strokeText(this.name, screenX, nameY);
+                            
+                            // Draw white fill text
+                            ctx.fillStyle = 'white';
+                            ctx.fillText(this.name, screenX, nameY);
+                            
+                            // Restore context state
+                            ctx.restore();
+                        } else {
+                            // Normal name rendering
+                            ctx.strokeStyle = 'black';
+                            ctx.lineWidth = 3;
+                            ctx.fillStyle = 'white';
+                            ctx.strokeText(this.name, screenX, nameY);
+                            ctx.fillText(this.name, screenX, nameY);
+                        }
                     }
                     
                     // Draw crown if leader (but not in cozy mode)
@@ -11777,6 +11842,7 @@
                 import('./entities/ExplosionAnimation.js').then(module => {
                     const { ExplosionManager } = module;
                     explosionManager = new ExplosionManager({ isMobile });
+                    window.explosionManager = explosionManager; // Expose globally for Snake.js access
                 }).catch(err => {
                     console.error('Failed to load explosion manager:', err);
                     // Continue game without explosions if loading fails

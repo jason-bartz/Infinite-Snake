@@ -30,6 +30,11 @@ class ExplosionAnimation {
                 frames: 9,
                 frameDuration: 80, // 720ms total for boss explosions
                 path: 'assets/explosions/dust-impact-large-red'
+            },
+            'dust-impact-small-white': {
+                frames: 9,
+                frameDuration: 50, // 450ms total for subtle impact
+                path: 'assets/explosions/dust-impact-small-white'
             }
         };
         

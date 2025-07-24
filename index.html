@@ -4521,27 +4521,30 @@
                     <div class="gameplay-showcase" style="margin: 0; width: 100%; padding: 20px; box-sizing: border-box;">
                         <h3 class="feature-title" style="text-align: center;">CLASSIC MODE</h3>
                         <p class="feature-description" style="text-align: center;">
-                            The original challenge. 3 lives. Permadeath.<br>
-                            Every decision matters. Every element counts.<br>
-                            How long can you survive the void?
+                            3 LIVES. PERMADEATH.<br>
+                            BATTLE ENEMY SNAKES AND EPIC BOSSES.<br>
+                            COMPETE FOR THE GLOBAL LEADERBOARD.<br>
+                            HOW LONG CAN YOU SURVIVE THE VOID?
                         </p>
                     </div>
                     
                     <div class="gameplay-showcase" style="margin: 0; width: 100%; padding: 20px; box-sizing: border-box;">
                         <h3 class="feature-title" style="text-align: center;">INFINITE MODE</h3>
                         <p class="feature-description" style="text-align: center;">
-                            Endless discovery. No limits. Pure creation.<br>
-                            Experiment freely with combinations.<br>
-                            Build your collection without fear.
+                            ENDLESS DISCOVERY. NO LIMITS.<br>
+                            FACE ENEMY SNAKES AND BOSSES<br>
+                            WITH INFINITE RESPAWNS.<br>
+                            BUILD YOUR COLLECTION WITHOUT FEAR.
                         </p>
                     </div>
                     
                     <div class="gameplay-showcase" style="margin: 0; width: 100%; padding: 20px; box-sizing: border-box;">
                         <h3 class="feature-title" style="text-align: center;">"COZY" MODE</h3>
                         <p class="feature-description" style="text-align: center;">
-                            No enemies. No stress. Just vibes.<br>
-                            Drift through space with chill lofi beats.<br>
-                            Discover elements at your own pace.
+                            NO ENEMIES. NO BOSSES. NO DEATHS.<br>
+                            JUST VIBES. DRIFT THROUGH SPACE<br>
+                            TO A LOFI SOUNDTRACK.<br>
+                            DISCOVER ELEMENTS AT YOUR OWN PACE.
                         </p>
                     </div>
                 </div>
@@ -4705,24 +4708,52 @@
         
         <div class="modeSection">
             <h4>Choose Your Mode</h4>
-            <div id="victoryButtons" style="display: flex; flex-direction: row; gap: 30px; justify-content: center; align-items: stretch; margin-top: 30px; flex-wrap: wrap;">
-                <div style=" width: 280px;">
-                    <button class="btn-classic" onclick="selectGameMode('classic')" style="width: 100%; height: 40px; padding: 10px; font-size: 10pt; background: #333; border: 2px solid #222; display: flex; align-items: center; justify-content: center;">
-                        Classic Mode
+            <div id="victoryButtons" style="display: flex; justify-content: center; gap: 20px; margin: 30px auto; padding: 0 20px; max-width: 900px;">
+                <div style="background: rgba(0, 0, 0, 0.8); border: 3px solid #F828F8; padding: 15px; border-radius: 8px; box-sizing: border-box; width: 280px; height: 220px; display: flex; flex-direction: column;">
+                    <button class="btn-classic" onclick="selectGameMode('classic')" style="width: 100%; height: 40px; padding: 8px; font-size: 9pt; background: #333; border: 2px solid #222; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; flex-shrink: 0;">
+                        CLASSIC MODE
                     </button>
-                    <p style="color: #ccc; margin-top: 10px; font-size: 14px; text-align: center;">Battle enemies with 3 lives. Permadeath awaits - compete for leaderboard supremacy</p>
+                    <p style="color: #F828F8; font-size: 9px; text-align: center; font-family: 'Press Start 2P', monospace; line-height: 14px; text-transform: uppercase; margin: 0;">
+                        3 LIVES.<br>
+                        PERMADEATH.<br>
+                        BATTLE ENEMY SNAKES<br>
+                        AND EPIC BOSSES.<br>
+                        COMPETE FOR THE<br>
+                        GLOBAL LEADERBOARD.<br>
+                        HOW LONG CAN YOU<br>
+                        SURVIVE THE VOID?
+                    </p>
                 </div>
-                <div style=" width: 280px;">
-                    <button class="btn-infinite" onclick="selectGameMode('infinite')" style="width: 100%; height: 40px; padding: 10px !important; font-size: 10pt !important; display: flex; align-items: center; justify-content: center;">
-                        Infinite Mode
+                <div style="background: rgba(0, 0, 0, 0.8); border: 3px solid #7828F8; padding: 15px; border-radius: 8px; box-sizing: border-box; width: 280px; height: 220px; display: flex; flex-direction: column;">
+                    <button class="btn-infinite" onclick="selectGameMode('infinite')" style="width: 100%; height: 40px; padding: 8px !important; font-size: 9pt !important; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; flex-shrink: 0;">
+                        INFINITE MODE
                     </button>
-                    <p style="color: #ccc; margin-top: 10px; font-size: 14px; text-align: center;">All the action of Classic with unlimited respawns. Practice and experiment freely</p>
+                    <p style="color: #A858F8; font-size: 9px; text-align: center; font-family: 'Press Start 2P', monospace; line-height: 14px; text-transform: uppercase; margin: 0;">
+                        ENDLESS DISCOVERY.<br>
+                        NO LIMITS.<br>
+                        FACE ENEMY SNAKES<br>
+                        AND BOSSES WITH<br>
+                        INFINITE RESPAWNS.<br>
+                        BUILD YOUR<br>
+                        COLLECTION<br>
+                        WITHOUT FEAR.
+                    </p>
                 </div>
-                <div style=" width: 280px;">
-                    <button class="btn-cozy" onclick="selectGameMode('cozy')" style="width: 100%; height: 40px; padding: 10px; font-size: 10pt; display: flex; align-items: center; justify-content: center;">
-                        "Cozy" Mode
+                <div style="background: rgba(0, 0, 0, 0.8); border: 3px solid #00D9FF; padding: 15px; border-radius: 8px; box-sizing: border-box; width: 280px; height: 220px; display: flex; flex-direction: column;">
+                    <button class="btn-cozy" onclick="selectGameMode('cozy')" style="width: 100%; height: 40px; padding: 8px; font-size: 9pt; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; flex-shrink: 0;">
+                        "COZY" MODE
                     </button>
-                    <p style="color: #ccc; margin-top: 10px; font-size: 14px; text-align: center;">No enemies, no stress. Just you, space, and chill lofi beats</p>
+                    <p style="color: #00D9FF; font-size: 9px; text-align: center; font-family: 'Press Start 2P', monospace; line-height: 14px; text-transform: uppercase; margin: 0;">
+                        NO ENEMIES.<br>
+                        NO BOSSES.<br>
+                        NO DEATHS.<br>
+                        JUST VIBES.<br>
+                        DRIFT THROUGH SPACE<br>
+                        TO A LOFI<br>
+                        SOUNDTRACK.<br>
+                        DISCOVER ELEMENTS<br>
+                        AT YOUR OWN PACE.
+                    </p>
                 </div>
             </div>
         </div>
