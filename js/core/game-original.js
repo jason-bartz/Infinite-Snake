@@ -1856,8 +1856,9 @@
             // Remove the selected track from available tracks
             availableTracks.splice(randomIndex, 1);
             
-            // Create audio element
-            currentTrack = new Audio(`music/${trackName}`);
+            // Create audio element - cozy tracks already have path, others need music/ prefix
+            const audioPath = gameMode === 'cozy' ? `music/${trackName}` : `music/${trackName}`;
+            currentTrack = new Audio(audioPath);
             currentTrack.volume = musicMuted ? 0 : musicVolume;
             
             // Create event handlers that we can reference later for removal
@@ -8968,14 +8969,8 @@
                 // Update the height
                 boostMeterFill.style.height = `${staminaPercent}%`;
                 
-                // Change color based on stamina level
-                if (staminaPercent < 30) {
-                    boostMeterFill.style.background = 'linear-gradient(to top, rgba(255, 68, 68, 0.6), rgba(204, 0, 0, 0.6))';
-                } else if (staminaPercent < 60) {
-                    boostMeterFill.style.background = 'linear-gradient(to top, rgba(255, 170, 0, 0.6), rgba(255, 102, 0, 0.6))';
-                } else {
-                    boostMeterFill.style.background = 'linear-gradient(to top, rgba(0, 255, 0, 0.6), rgba(0, 204, 0, 0.6))';
-                }
+                // Use consistent purple/pink cosmic theme regardless of stamina level
+                boostMeterFill.style.background = 'linear-gradient(to top, rgba(248, 40, 248, 0.6), rgba(147, 51, 234, 0.3))';
             }
         }
         
@@ -11011,8 +11006,10 @@
                 const offsetX = (camera.x * parallaxFactor) % bgWidth;
                 const offsetY = (camera.y * parallaxFactor) % bgHeight;
                 
-                // Simpler tiling for mobile with zoom
-                ctx.drawImage(assets.nebulaBackground, -offsetX, -offsetY, canvas.width + bgWidth, canvas.height + bgHeight);
+                // Simpler tiling for mobile with zoom - ensure full viewport coverage
+                const viewportWidth = window.innerWidth;
+                const viewportHeight = window.innerHeight;
+                ctx.drawImage(assets.nebulaBackground, -offsetX, -offsetY, viewportWidth + bgWidth, viewportHeight + bgHeight);
             }
             
             // Draw fewer blinking stars on mobile

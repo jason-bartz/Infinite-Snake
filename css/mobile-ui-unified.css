@@ -96,14 +96,14 @@ body.mobile .boost-button.active {
 
 /* Low boost state */
 body.mobile .boost-button.low-boost {
-    border-color: rgba(255, 68, 68, 0.5);
-    background: rgba(255, 68, 68, 0.1);
+    border-color: rgba(147, 51, 234, 0.3);
+    background: rgba(147, 51, 234, 0.05);
 }
 
 body.mobile .boost-button.low-boost::before {
     background: linear-gradient(to top, 
-        rgba(255, 68, 68, 0.6) 0%, 
-        rgba(255, 68, 68, 0.3) 100%);
+        rgba(248, 40, 248, 0.4) 0%, 
+        rgba(147, 51, 234, 0.2) 100%);
 }
 
 @keyframes boostPulse {
@@ -260,7 +260,7 @@ body.mobile .leaderboard-box .leaderboard-header {
 body.mobile .discovery-feed {
     display: flex !important;
     position: fixed;
-    top: 50%;
+    top: calc(50% - 50px);
     left: 10px;
     transform: translateY(-50%);
     width: 250px;

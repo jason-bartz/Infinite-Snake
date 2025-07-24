@@ -77,6 +77,7 @@
     body.mobile .player-info-box .player-portrait img {
         width: 100% !important;
         height: 100% !important;
+        object-fit: contain !important;
         image-rendering: pixelated !important;
     }
     

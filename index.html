@@ -1773,6 +1773,7 @@
         .player-portrait img {
             width: 44px;
             height: 44px;
+            object-fit: contain;
             image-rendering: pixelated;
         }
         
@@ -2378,6 +2379,7 @@
             body.mobile .player-portrait img {
                 width: 36px !important;
                 height: 36px !important;
+                object-fit: contain !important;
             }
             
             body.mobile .stat-line {
@@ -3566,6 +3568,7 @@
         .player-portrait img {
             width: 60px !important; /* Increased from 44px */
             height: 60px !important; /* Increased from 44px */
+            object-fit: contain !important;
         }
 
         .stat-label {
@@ -4036,6 +4039,7 @@
 <body>
 <body>
 <!-- Immediate Mobile Detection -->
+<script>
 (function() {
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
                      'ontouchstart' in window ||
@@ -4044,6 +4048,7 @@
         document.body.classList.add('mobile');
     }
 })();
+</script>
     <!-- Persistent Star Background -->
     <canvas id="persistentStarsCanvas" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none;"></canvas>
     

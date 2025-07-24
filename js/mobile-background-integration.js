@@ -241,9 +241,9 @@ function renderMobileBackground(ctx, camera) {
     // Start frame timing
     optimizer.startFrame();
     
-    // Clear background
+    // Clear background - ensure full screen coverage on mobile
     ctx.fillStyle = '#000011';
-    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
     optimizer.incrementDrawCalls();
     
     // Render nebula background if available
@@ -255,8 +255,10 @@ function renderMobileBackground(ctx, camera) {
         const offsetX = (camera.x * parallaxFactor) % bgWidth;
         const offsetY = (camera.y * parallaxFactor) % bgHeight;
         
-        // Simple tiling for mobile with zoom
-        ctx.drawImage(assets.backgrounds.nebulaBackground, -offsetX, -offsetY, ctx.canvas.width + bgWidth, ctx.canvas.height + bgHeight);
+        // Simple tiling for mobile with zoom - ensure full viewport coverage
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        ctx.drawImage(assets.backgrounds.nebulaBackground, -offsetX, -offsetY, viewportWidth + bgWidth, viewportHeight + bgHeight);
         optimizer.incrementDrawCalls();
     }
     
@@ -270,7 +272,9 @@ function renderMobileBackground(ctx, camera) {
         const offsetX = (camera.x * parallaxFactor) % starWidth;
         const offsetY = (camera.y * parallaxFactor) % starHeight;
         
-        ctx.drawImage(assets.backgrounds.starOverlay, -offsetX, -offsetY, ctx.canvas.width + starWidth, ctx.canvas.height + starHeight);
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        ctx.drawImage(assets.backgrounds.starOverlay, -offsetX, -offsetY, viewportWidth + starWidth, viewportHeight + starHeight);
         ctx.restore();
         optimizer.incrementDrawCalls();
     }
