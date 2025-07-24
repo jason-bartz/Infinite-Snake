@@ -12522,8 +12522,22 @@
                 const wobbleAngle = Math.sin(wobbleTime) * 0.05; // Max 0.05 radians (~3 degrees)
                 ctx.rotate(wobbleAngle);
                 
-                const size = Math.min(canvas.width, canvas.height) * 0.8;
-                ctx.drawImage(img, -size / 2, -size / 2, size, size);
+                const maxSize = Math.min(canvas.width, canvas.height) * 0.8;
+                
+                // Preserve aspect ratio
+                const aspectRatio = img.width / img.height;
+                let drawWidth = maxSize;
+                let drawHeight = maxSize;
+                
+                if (aspectRatio > 1) {
+                    // Wider than tall
+                    drawHeight = maxSize / aspectRatio;
+                } else {
+                    // Taller than wide
+                    drawWidth = maxSize * aspectRatio;
+                }
+                
+                ctx.drawImage(img, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
                 
                 ctx.restore();
                 wobbleTime += 0.02; // Slow wobble speed

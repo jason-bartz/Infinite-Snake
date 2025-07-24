@@ -1142,7 +1142,20 @@ class Snake {
         }
         
         if (skinImg && skinImg.complete) {
-            window.ctx.drawImage(skinImg, screen.x - size/2, screen.y - size/2, size, size);
+            // Preserve aspect ratio
+            const aspectRatio = skinImg.width / skinImg.height;
+            let drawWidth = size;
+            let drawHeight = size;
+            
+            if (aspectRatio > 1) {
+                // Wider than tall
+                drawHeight = size / aspectRatio;
+            } else {
+                // Taller than wide
+                drawWidth = size * aspectRatio;
+            }
+            
+            window.ctx.drawImage(skinImg, screen.x - drawWidth/2, screen.y - drawHeight/2, drawWidth, drawHeight);
         } else {
             const cachedEmoji = window.getCachedEmoji(emoji, size);
             window.ctx.drawImage(cachedEmoji, screen.x - cachedEmoji.width/2, screen.y - cachedEmoji.height/2);
@@ -1174,7 +1187,20 @@ class Snake {
         window.ctx.rotate(interpolatedAngle);
         
         if (skinImg && skinImg.complete) {
-            window.ctx.drawImage(skinImg, -headSize/2, -headSize/2, headSize, headSize);
+            // Preserve aspect ratio
+            const aspectRatio = skinImg.width / skinImg.height;
+            let drawWidth = headSize;
+            let drawHeight = headSize;
+            
+            if (aspectRatio > 1) {
+                // Wider than tall
+                drawHeight = headSize / aspectRatio;
+            } else {
+                // Taller than wide
+                drawWidth = headSize * aspectRatio;
+            }
+            
+            window.ctx.drawImage(skinImg, -drawWidth/2, -drawHeight/2, drawWidth, drawHeight);
         } else {
             const cachedEmoji = window.getCachedEmoji(skinData.emoji, headSize);
             window.ctx.drawImage(cachedEmoji, -cachedEmoji.width/2, -cachedEmoji.height/2);
