@@ -1109,6 +1109,7 @@ class Snake {
         const skinImg = window.snakeSkinImages ? window.snakeSkinImages[this.skin] : null;
         const emoji = skinData.emoji;
         
+        
         const effectiveSegmentSize = SEGMENT_SIZE * this.size * window.cameraZoom;
         const minSize = isMobile ? 8 : 10;
         const maxSize = isMobile ? 30 : 40;
@@ -1155,6 +1156,7 @@ class Snake {
                 drawWidth = size * aspectRatio;
             }
             // If aspectRatio is 1, keep both as size
+            
             
             window.ctx.drawImage(skinImg, screen.x - drawWidth/2, screen.y - drawHeight/2, drawWidth, drawHeight);
         } else {

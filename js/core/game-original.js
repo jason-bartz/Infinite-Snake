@@ -1098,6 +1098,36 @@
                 }
                 skinImages[skin] = img;
             });
+            
+            // Also preload boss skins that are not in skinMetadata
+            const bossSkins = Object.values(BOSS_TYPES).map(boss => boss.skin);
+            bossSkins.forEach(skin => {
+                if (!skinImages[skin]) { // Only load if not already loaded
+                    const img = new Image();
+                    
+                    // Set crossOrigin to ensure we can read image data
+                    img.crossOrigin = 'anonymous';
+                    
+                    img.onload = function() {
+                        gameLogger.info('ASSETS', `Boss skin loaded: ${skin} (${this.width}x${this.height})`);
+                        // Force the browser to decode the image to ensure dimensions are available
+                        if (this.decode) {
+                            this.decode().catch(() => {
+                                gameLogger.warn('ASSETS', `Failed to decode boss skin: ${skin}`);
+                            });
+                        }
+                    };
+                    
+                    img.onerror = function() {
+                        gameLogger.warn('ASSETS', `Failed to load boss skin: ${skin}.png`);
+                        this.error = true;
+                    };
+                    
+                    // Boss skins use their direct names in the boss-skins directory
+                    img.src = `assets/boss-skins/${skin}.png`;
+                    skinImages[skin] = img;
+                }
+            });
         }
         
         function calculateAvailableUnlocks() {
@@ -3626,6 +3656,16 @@
                     // Draw skin image
                     const skinImage = skinImages[this.skin];
                     if (skinImage && skinImage.complete && !skinImage.error) {
+                        // Debug logging for all skins
+                        if (!window._gameOriginalSkinDebug) window._gameOriginalSkinDebug = new Set();
+                        if (!window._gameOriginalSkinDebug.has(this.skin)) {
+                            console.log(`[game-original.js] Drawing skin: ${this.skin}`);
+                            console.log(`[game-original.js] Image dimensions: ${skinImage.width}x${skinImage.height}`);
+                            console.log(`[game-original.js] Image complete: ${skinImage.complete}`);
+                            console.log(`[game-original.js] Natural dimensions: ${skinImage.naturalWidth}x${skinImage.naturalHeight}`);
+                            window._gameOriginalSkinDebug.add(this.skin);
+                        }
+                        
                         try {
                             ctx.save();
                             ctx.translate(screenX, screenY);
@@ -3633,7 +3673,38 @@
                             // Increase head size by 15% for regular snakes (not bosses)
                             const baseMultiplier = this.isBoss ? 3.47875 : 3.47875 * 1.15; // 15% increase for non-boss snakes
                             const size = SEGMENT_SIZE * sizeMultiplier * baseMultiplier * cameraZoom;
-                            ctx.drawImage(skinImage, -size/2, -size/2, size, size);
+                            
+                            // Preserve aspect ratio - use naturalWidth/naturalHeight if available
+                            const imgWidth = skinImage.naturalWidth || skinImage.width;
+                            const imgHeight = skinImage.naturalHeight || skinImage.height;
+                            
+                            if (imgWidth > 0 && imgHeight > 0) {
+                                const aspectRatio = imgWidth / imgHeight;
+                                let drawWidth = size;
+                                let drawHeight = size;
+                                
+                                if (aspectRatio > 1) {
+                                    // Wider than tall
+                                    drawHeight = size / aspectRatio;
+                                } else if (aspectRatio < 1) {
+                                    // Taller than wide
+                                    drawWidth = size * aspectRatio;
+                                }
+                                
+                                // Debug aspect ratio calculation
+                                if (!window._aspectRatioDebug) window._aspectRatioDebug = new Set();
+                                if (!window._aspectRatioDebug.has(this.skin)) {
+                                    console.log(`[game-original.js] Aspect ratio for ${this.skin}: ${aspectRatio} (${imgWidth}x${imgHeight})`);
+                                    console.log(`[game-original.js] Draw dimensions: ${drawWidth}x${drawHeight} (base size: ${size})`);
+                                    window._aspectRatioDebug.add(this.skin);
+                                }
+                                
+                                ctx.drawImage(skinImage, -drawWidth/2, -drawHeight/2, drawWidth, drawHeight);
+                            } else {
+                                // Fallback to square if dimensions not available
+                                console.warn(`[game-original.js] No valid dimensions for ${this.skin}, using square`);
+                                ctx.drawImage(skinImage, -size/2, -size/2, size, size);
+                            }
                             ctx.restore();
                         } catch (e) {
                             ctx.restore();
@@ -6511,9 +6582,22 @@
                     ctx.save();
                     ctx.translate(headScreen.x, headScreen.y);
                     ctx.rotate(this.angle);
-                    ctx.drawImage(skinImages[this.skin], 
-                        -headSize * 1.5, -headSize * 1.5, 
-                        headSize * 3, headSize * 3);
+                    
+                    // Preserve aspect ratio
+                    const img = skinImages[this.skin];
+                    const aspectRatio = img.width / img.height;
+                    let drawWidth = headSize * 3;
+                    let drawHeight = headSize * 3;
+                    
+                    if (aspectRatio > 1) {
+                        // Wider than tall
+                        drawHeight = drawWidth / aspectRatio;
+                    } else if (aspectRatio < 1) {
+                        // Taller than wide
+                        drawWidth = drawHeight * aspectRatio;
+                    }
+                    
+                    ctx.drawImage(img, -drawWidth/2, -drawHeight/2, drawWidth, drawHeight);
                     ctx.restore();
                 } else {
                     // Fallback to emoji if skin not loaded
