@@ -8,6 +8,7 @@ window.mobileBackgroundOptimizer = null;
 window.assetPreloader = null;
 window.preloadedAssets = null;
 window.easterEggElements = null;
+window.isVisible = true; // Initialize visibility state
 
 /**
  * Initialize mobile renderers and optimizations
@@ -394,6 +395,14 @@ function handleMobileResize() {
 
 // Add resize listener
 window.addEventListener('resize', handleMobileResize);
+
+// Handle visibility changes
+document.addEventListener('visibilitychange', () => {
+    window.isVisible = !document.hidden;
+});
+
+// Initialize visibility state
+window.isVisible = !document.hidden;
 
 // Clean up on page unload
 window.addEventListener('beforeunload', () => {

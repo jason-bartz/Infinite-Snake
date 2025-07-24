@@ -819,7 +819,7 @@
                 emoji: "🔥",
                 color: "#ff4444",
                 maxHealth: 5,
-                attackCooldown: 4000,
+                attackCooldown: 6000, // Increased from 4s to 6s
                 defeated: false,
                 skin: 'pyraxis',
                 attackSound: 'sounds/magma-roar.mp3',
@@ -832,7 +832,7 @@
                 emoji: "🌊",
                 color: "#4444ff",
                 maxHealth: 5,
-                attackCooldown: 6000,
+                attackCooldown: 8000, // Increased from 6s to 8s
                 defeated: false,
                 skin: 'abyssos',
                 attackSound: 'sounds/negative-low-pitch.mp3',
@@ -845,7 +845,7 @@
                 emoji: "🗿",
                 color: "#8b4513",
                 maxHealth: 5,
-                attackCooldown: 5000,
+                attackCooldown: 7000, // Increased from 5s to 7s
                 defeated: false,
                 skin: 'osseus',
                 attackSound: 'sounds/boom-explosion.mp3',
@@ -858,7 +858,7 @@
                 emoji: "💨",
                 color: "#87ceeb",
                 maxHealth: 5,
-                attackCooldown: 8000,
+                attackCooldown: 10000, // Increased from 8s to 10s
                 defeated: false,
                 skin: 'zephyrus',
                 attackSound: 'sounds/power-surge.mp3',
@@ -909,6 +909,7 @@
         let bossProjectiles = [];
         let bossDamageCooldown = 0;
         let shockwaves = [];
+        window.shockwaves = shockwaves; // Expose to window for Snake.js access
         let bossScreenShakeTimer = 0;
         let bossScreenShakeIntensity = 0;
         let elementVacuumActive = false;
@@ -6204,10 +6205,10 @@
                         radius: 0, // Start small and grow
                         targetRadius: size,
                         growthSpeed: 3, // How fast fissure opens
-                        life: 270, // 4.5 seconds total (0.5s warning + 4s active)
-                        maxLife: 270,
+                        life: 285, // 4.75 seconds total (0.75s warning + 4s active)
+                        maxLife: 285,
                         state: 'warning', // Start with warning state
-                        warningDuration: 30 // 0.5 seconds of warning
+                        warningDuration: 45 // 0.75 seconds of warning
                     });
                 }
                 
@@ -6249,13 +6250,13 @@
                 // Shoot tornados at the player
                 const baseAngle = Math.atan2(playerSnake.y - bossY, playerSnake.x - bossX);
                 
-                // Create 5 tornados in a spread pattern
-                const tornadoCount = 5;
+                // Create 3 large tornados that track the player
+                const tornadoCount = 3;
                 for (let i = 0; i < tornadoCount; i++) {
-                    const spreadAngle = (Math.PI * 2 / tornadoCount) * i; // Evenly distribute in circle
+                    const spreadAngle = (i - 1) * 0.3; // Smaller spread, more focused
                     const angle = baseAngle + spreadAngle;
-                    const spawnDistance = 50; // Spawn tornados away from boss center
-                    const speed = 6; // Increased from 4
+                    const spawnDistance = 100; // Spawn tornados away from boss center
+                    const speed = 4; // Start slower for better control
                     
                     bossProjectiles.push({
                         x: bossX + Math.cos(angle) * spawnDistance,
@@ -6263,18 +6264,19 @@
                         vx: Math.cos(angle) * speed,
                         vy: Math.sin(angle) * speed,
                         type: 'tornado',
-                        size: 40,
+                        size: 80, // Much larger than fireballs
                         damage: 0.3,
                         elementId: 2, // Air element
-                        life: 900, // Increased from 600
+                        life: 600, // 10 seconds
                         rotation: 0,
-                        rotationSpeed: 0.3, // Increased from 0.2
+                        rotationSpeed: 0.5, // Faster rotation
                         wanderAngle: angle,
                         wanderTimer: 0,
-                        homingTimer: 300, // 5 seconds of aggressive homing
+                        homingTimer: 180, // 3 seconds of tracking
                         baseSpeed: speed,
-                        maxSpeed: 10, // Allow speed boost during tracking
-                        separationForce: 0.5 // Prevent clustering
+                        maxSpeed: 8, // Allow speed boost during tracking
+                        separationForce: 0.5, // Prevent clustering
+                        trackingStrength: 0.05 // How strongly it tracks the player
                     });
                 }
                 
@@ -7207,6 +7209,10 @@
                         projectile.currentSpeed = projectile.baseSpeed || 6;
                     }
                     
+                    // Update position first!
+                    projectile.x += projectile.vx * deltaTime;
+                    projectile.y += projectile.vy * deltaTime;
+                    
                     // Separation force to prevent clustering
                     let separationX = 0;
                     let separationY = 0;
@@ -7223,63 +7229,50 @@
                         }
                     });
                     
-                    // Enhanced homing behavior
+                    // Enhanced homing behavior (similar to fireballs)
                     if (projectile.homingTimer > 0 && playerSnake && playerSnake.alive) {
                         projectile.homingTimer -= deltaTime;
                         
-                        // Predict player position
-                        const playerSpeed = Math.sqrt(playerSnake.vx * playerSnake.vx + playerSnake.vy * playerSnake.vy);
-                        const timeToReach = Math.sqrt(
-                            Math.pow(playerSnake.x - projectile.x, 2) + 
-                            Math.pow(playerSnake.y - projectile.y, 2)
-                        ) / projectile.currentSpeed;
+                        // Calculate angle to player
+                        const dx = playerSnake.x - projectile.x;
+                        const dy = playerSnake.y - projectile.y;
+                        const targetAngle = Math.atan2(dy, dx);
                         
-                        const predictX = playerSnake.x + playerSnake.vx * timeToReach * 0.5;
-                        const predictY = playerSnake.y + playerSnake.vy * timeToReach * 0.5;
+                        // Current angle
+                        const currentAngle = Math.atan2(projectile.vy, projectile.vx);
                         
-                        const targetAngle = Math.atan2(
-                            predictY - projectile.y,
-                            predictX - projectile.x
-                        );
-                        
-                        // Aggressive turning that increases over time
-                        const aggressiveness = 1 - (projectile.homingTimer / 300);
-                        const turnRate = 0.05 + (aggressiveness * 0.1); // 0.05 to 0.15
-                        
-                        let angleDiff = targetAngle - projectile.wanderAngle;
+                        // Calculate angle difference
+                        let angleDiff = targetAngle - currentAngle;
                         while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
                         while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
                         
-                        projectile.wanderAngle += angleDiff * turnRate;
+                        // Apply tracking with strength
+                        const trackingStrength = projectile.trackingStrength || 0.05;
+                        const newAngle = currentAngle + angleDiff * trackingStrength;
                         
-                        // Speed boost when tracking
-                        projectile.currentSpeed = projectile.baseSpeed + (aggressiveness * 4);
-                    } else {
-                        // Smart wandering - bias towards player
-                        projectile.wanderTimer += deltaTime;
-                        if (projectile.wanderTimer > 20 && playerSnake && playerSnake.alive) {
-                            const playerAngle = Math.atan2(
-                                playerSnake.y - projectile.y,
-                                playerSnake.x - projectile.x
-                            );
-                            projectile.wanderAngle = playerAngle + (Math.random() - 0.5) * Math.PI/2;
-                            projectile.wanderTimer = 0;
+                        // Gradually increase speed while tracking
+                        if (projectile.currentSpeed < projectile.maxSpeed) {
+                            projectile.currentSpeed += 0.1 * deltaTime;
                         }
-                        projectile.currentSpeed = projectile.baseSpeed;
+                        
+                        // Update velocity with new angle and speed
+                        projectile.vx = Math.cos(newAngle) * projectile.currentSpeed;
+                        projectile.vy = Math.sin(newAngle) * projectile.currentSpeed;
+                        
+                        // Apply separation force
+                        projectile.vx += separationX * 0.5;
+                        projectile.vy += separationY * 0.5;
+                    } else {
+                        // After tracking ends, continue in current direction with normal speed
+                        if (projectile.currentSpeed > projectile.baseSpeed) {
+                            projectile.currentSpeed -= 0.1 * deltaTime;
+                        }
+                        
+                        // Update velocity
+                        const currentAngle = Math.atan2(projectile.vy, projectile.vx);
+                        projectile.vx = Math.cos(currentAngle) * projectile.currentSpeed;
+                        projectile.vy = Math.sin(currentAngle) * projectile.currentSpeed;
                     }
-                    
-                    // Apply separation force
-                    projectile.wanderAngle = Math.atan2(
-                        Math.sin(projectile.wanderAngle) + separationY * 0.1,
-                        Math.cos(projectile.wanderAngle) + separationX * 0.1
-                    );
-                    
-                    // Update velocity with current speed
-                    projectile.vx = Math.cos(projectile.wanderAngle) * projectile.currentSpeed;
-                    projectile.vy = Math.sin(projectile.wanderAngle) * projectile.currentSpeed;
-                    
-                    projectile.x += projectile.vx * deltaTime;
-                    projectile.y += projectile.vy * deltaTime;
                     projectile.life -= deltaTime;
                     projectile.rotation += projectile.rotationSpeed * deltaTime;
                     
@@ -11277,9 +11270,9 @@
             if (gameMode !== 'cozy') {
                 // Use optimized mobile renderer if available
                 if (isMobile) {
-                    if (window.renderMobileBackground) {
+                    if (window.renderMobileBackground && window.mobileBackgroundOptimizer) {
                         // Use new optimized mobile background
-                        renderMobileBackground(ctx, camera);
+                        window.renderMobileBackground(ctx, camera);
                     } else {
                         // Simple mobile background with new assets
                         drawSimpleMobileBackground(assets);
@@ -14348,6 +14341,83 @@
             gameLogger.debug('ELEMENT BANK', 'Maximum slots: 12');
             gameLogger.debug('ELEMENT BANK', 'Use addElementBankSlots(n) to add n slots');
             gameLogger.debug('ELEMENT BANK', 'Use setElementBankSlots(n) to set to n slots');
+        };
+        
+        // Store reference to internal spawnBoss function before overriding
+        const internalSpawnBoss = spawnBoss;
+        
+        // Debug boss spawn function
+        window.spawnBossDebug = function(bossType) {
+            if (!gameStarted || !playerSnake || !playerSnake.alive) {
+                console.log('Cannot spawn boss: game not started or player not alive');
+                return;
+            }
+            
+            if (currentBoss && currentBoss.alive) {
+                console.log('Cannot spawn boss: a boss is already active');
+                return;
+            }
+            
+            // If no boss type specified, choose randomly from ALL bosses
+            if (!bossType) {
+                const allBosses = Object.keys(BOSS_TYPES);
+                bossType = allBosses[Math.floor(Math.random() * allBosses.length)];
+            } else {
+                // Validate boss type
+                bossType = bossType.toUpperCase();
+                if (!BOSS_TYPES[bossType]) {
+                    console.log('Invalid boss type. Available bosses:', Object.keys(BOSS_TYPES).join(', '));
+                    console.log('Usage: spawnBossDebug("PYRAXIS"), spawnBossDebug("ABYSSOS"), etc.');
+                    return;
+                }
+            }
+            
+            // Temporarily clear defeated bosses to allow spawning
+            const originalDefeatedBosses = new Set(defeatedBosses);
+            defeatedBosses.clear();
+            
+            // Force spawn the specific boss
+            const originalAvailableBosses = Object.keys(BOSS_TYPES).filter(boss => !defeatedBosses.has(boss));
+            defeatedBosses = new Set(Object.keys(BOSS_TYPES).filter(boss => boss !== bossType));
+            
+            console.log(`Spawning ${bossType}...`);
+            internalSpawnBoss();
+            
+            // Restore defeated bosses
+            defeatedBosses = originalDefeatedBosses;
+        };
+        
+        // Simple spawn boss function that calls the internal spawnBoss
+        window.spawnBoss = function() {
+            if (!gameStarted || !playerSnake || !playerSnake.alive) {
+                console.log('Cannot spawn boss: game not started or player not alive');
+                return;
+            }
+            
+            if (currentBoss && currentBoss.alive) {
+                console.log('Cannot spawn boss: a boss is already active');
+                return;
+            }
+            
+            // Call the internal spawnBoss function
+            internalSpawnBoss();
+        };
+        
+        // List available bosses
+        window.listBosses = function() {
+            console.log('Available bosses:');
+            Object.keys(BOSS_TYPES).forEach(boss => {
+                const data = BOSS_TYPES[boss];
+                const defeated = defeatedBosses.has(boss);
+                console.log(`- ${boss}: ${data.name} (${data.element}) ${defeated ? '[DEFEATED]' : '[AVAILABLE]'}`);
+            });
+        };
+        
+        // Reset defeated bosses
+        window.resetBosses = function() {
+            defeatedBosses.clear();
+            localStorage.removeItem('defeatedBosses');
+            console.log('All bosses have been reset');
         };
         
         // Expose necessary functions to global scope for HTML onclick handlers
