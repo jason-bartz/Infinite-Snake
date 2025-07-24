@@ -7,8 +7,12 @@
             "src": "/android-chrome-192x192.png",
             "sizes": "192x192",
             "type": "image/png"
+        },
+        {
+            "src": "/android-chrome-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png"
         }
-        
     ],
     "theme_color": "#8A2BE2",
     "background_color": "#0a0a1a",
@@ -19,15 +23,15 @@
     "categories": ["games", "puzzle", "arcade"],
     "screenshots": [
         {
-            "src": "/screenshots/gameplay1.png",
+            "src": "/screenshots/screenshot-gameplay-1.jpeg",
             "sizes": "1280x720",
-            "type": "image/png",
+            "type": "image/jpeg",
             "label": "Element crafting gameplay"
         },
         {
-            "src": "/screenshots/gameplay2.png",
+            "src": "/screenshots/screenshot-discovery-journal.jpeg",
             "sizes": "1280x720",
-            "type": "image/png",
+            "type": "image/jpeg",
             "label": "Discovery system"
         }
     ],
