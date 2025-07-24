@@ -248,7 +248,8 @@ function renderMobileBackground(ctx, camera) {
     
     // Render nebula background if available
     if (assets && assets.backgrounds && assets.backgrounds.nebulaBackground && optimizer.shouldRender('background')) {
-        const zoomScale = 1.5; // 50% zoom in
+        // Apply 100% zoom for classic and infinite modes only
+        const zoomScale = (window.gameMode === 'classic' || window.gameMode === 'infinite') ? 2.0 : 1.0;
         const bgWidth = assets.backgrounds.nebulaBackground.width * zoomScale;
         const bgHeight = assets.backgrounds.nebulaBackground.height * zoomScale;
         const parallaxFactor = 0.2;

@@ -2676,6 +2676,22 @@
             checkCombinations(depth = 0) {
                 if (this.elements.length < 2) return;
                 
+                // Clean up any invalid elements before processing
+                const validElements = this.elements.filter(elementId => {
+                    const isValid = elementId && window.elementLoader.elements.get(elementId);
+                    if (!isValid && elementId !== undefined && elementId !== null) {
+                        gameLogger.warn('ELEMENT BANK', `Removing invalid element from bank: ${elementId}`);
+                    }
+                    return isValid;
+                });
+                
+                if (validElements.length !== this.elements.length) {
+                    this.elements = validElements;
+                    if (this.isPlayer) {
+                        updateUI(); // Update UI to reflect cleaned elements
+                    }
+                }
+                
                 // Safety check - ensure we never exceed max elements
                 if (this.elements.length > elementBankSlots) {
                     gameLogger.critical('SNAKE', 'Elements array exceeds max visible elements!', this.elements.length);
@@ -2768,8 +2784,13 @@
                 this.elements.splice(indices[1], 1);
                 
                 // Add the result to a random position in the available slots
-                const insertIndex = Math.floor(Math.random() * (this.elements.length + 1));
-                this.elements.splice(insertIndex, 0, chosen.result);
+                // Validate result before adding
+                if (chosen.result && window.elementLoader.elements.get(chosen.result)) {
+                    const insertIndex = Math.floor(Math.random() * (this.elements.length + 1));
+                    this.elements.splice(insertIndex, 0, chosen.result);
+                } else {
+                    gameLogger.warn('ELEMENT BANK', `Invalid combination result: ${chosen.result}`);
+                }
                 
                 // Safety check - ensure we never exceed max elements after combination
                 if (this.elements.length > elementBankSlots) {
@@ -2964,7 +2985,14 @@
                             
                             // Delay the actual combination for visual effect
                             setTimeout(() => {
-                                this.elements[i] = resultId;
+                                // Validate resultId before adding
+                                if (resultId && window.elementLoader.elements.get(resultId)) {
+                                    this.elements[i] = resultId;
+                                } else {
+                                    // Remove invalid element slot
+                                    gameLogger.warn('ELEMENT BANK', `Invalid resultId: ${resultId}, removing slot`);
+                                    this.elements.splice(i, 1);
+                                }
                                 
                                 // Final safety check after replacement (use global elementBankSlots)
                                 if (this.elements.length > elementBankSlots) {
@@ -3053,8 +3081,13 @@
                     }
                 } else {
                     // We have space - add element to a random position within the available slots
-                    const insertIndex = Math.floor(Math.random() * (this.elements.length + 1));
-                    this.elements.splice(insertIndex, 0, element.id);
+                    // Validate element.id before adding
+                    if (element.id && window.elementLoader.elements.get(element.id)) {
+                        const insertIndex = Math.floor(Math.random() * (this.elements.length + 1));
+                        this.elements.splice(insertIndex, 0, element.id);
+                    } else {
+                        gameLogger.warn('ELEMENT BANK', `Invalid element ID: ${element.id}, not adding to bank`);
+                    }
                     
                     // Immediately enforce max limit as a safety measure (use global elementBankSlots)
                     if (this.elements.length > elementBankSlots) {
@@ -3791,8 +3824,8 @@
                         ctx.fillText(this.name, screenX, nameY);
                     }
                     
-                    // Draw crown if leader
-                    if (this.isLeader) {
+                    // Draw crown if leader (but not in cozy mode)
+                    if (this.isLeader && gameMode !== 'cozy') {
                         const crownSize = 24;
                         const crownCanvas = getCachedEmoji('👑', crownSize);
                         ctx.save();
@@ -10324,7 +10357,7 @@
                     // Filled slot with element
                     const elementId = playerSnake.elements[i];
                     const element = window.elementLoader.elements.get(elementId);
-                    if (element) {
+                    if (element && elementId !== undefined && elementId !== null && elementId !== '') {
                         div.classList.add('filled');
                         div.dataset.elementId = elementId; // Store element ID for boss damage checking
                         
@@ -10378,6 +10411,15 @@
                         const emoji = window.elementLoader.getEmojiForElement(elementId, element.e);
                         div.innerHTML += `<div class="emoji">${emoji}</div><div class="element-name">${element.n}</div>`;
                         div.title = element.n;
+                    } else {
+                        // Invalid element ID - treat as empty slot
+                        div.classList.add('empty');
+                        delete div.dataset.elementId;
+                        
+                        // Log the issue for debugging
+                        if (window.debugElementBank && elementId !== undefined && elementId !== null) {
+                            gameLogger.warn('ELEMENT BANK', `Invalid element ID in bank: ${elementId}`);
+                        }
                     }
                 } else {
                     // Empty slot
@@ -10511,7 +10553,7 @@
                                     pointsGained: points
                                 });
                                 
-                                showMessage(`🌀 Void Orb consumed! +${points} points<br><small style="opacity: 0.8">Your elements have been purged to the void</small>`, 'info');
+                                showMessage(`<div style="text-align: center">🌀 Void Orb consumed! +${points} points<br><small style="opacity: 0.8">Your elements have been purged to the void</small></div>`, 'info');
                             }
                             
                             // Play sound at appropriate volume
@@ -10993,7 +11035,8 @@
             // Draw the nebula background covering the entire viewport
             if (assets.nebulaBackground) {
                 // Calculate how many tiles we need to cover the viewport
-                const zoomScale = 1.5; // 50% zoom in
+                // Apply 100% zoom for classic and infinite modes only
+                const zoomScale = (gameMode === 'classic' || gameMode === 'infinite') ? 2.0 : 1.0;
                 const bgWidth = assets.nebulaBackground.width * zoomScale;
                 const bgHeight = assets.nebulaBackground.height * zoomScale;
                 
@@ -11040,7 +11083,8 @@
         function drawSimpleMobileBackground(assets) {
             // Draw nebula background with reduced tiling for performance
             if (assets.nebulaBackground) {
-                const zoomScale = 1.5; // 50% zoom in
+                // Apply 100% zoom for classic and infinite modes only
+                const zoomScale = (gameMode === 'classic' || gameMode === 'infinite') ? 2.0 : 1.0;
                 const bgWidth = assets.nebulaBackground.width * zoomScale;
                 const bgHeight = assets.nebulaBackground.height * zoomScale;
                 const parallaxFactor = 0.2;
