@@ -171,6 +171,11 @@
                     canvas.height = newHeight;
                     lastCanvasWidth = newWidth;
                     lastCanvasHeight = newHeight;
+                    
+                    // Ensure canvas fills viewport on desktop
+                    canvas.style.width = viewportWidth + 'px';
+                    canvas.style.height = viewportHeight + 'px';
+                    
                     emojiCache.clear();
                 }
             }
@@ -1175,15 +1180,15 @@
             'milky-way.mp3'
         ];
         const cozyMusicTracks = [
-            'cozy-music/astral-ballad.wav',
-            'cozy-music/celestial-sonnet.wav',
-            'cozy-music/ethereal-hymn.wav',
-            'cozy-music/galactic-ode.wav',
-            'cozy-music/intersellar-elegy.wav',
-            'cozy-music/nebula-nocturne.wav',
-            'cozy-music/solar-serenade.wav',
-            'cozy-music/universal-verse.wav',
-            'cozy-music/whispering-cosmos.wav'
+            'cozy-music/astral-ballad.mp3',
+            'cozy-music/celestial-sonnet.mp3',
+            'cozy-music/ethereal-hymn.mp3',
+            'cozy-music/galactic-ode.mp3',
+            'cozy-music/intersellar-elegy.mp3',
+            'cozy-music/nebula-nocturne.mp3',
+            'cozy-music/solar-serenade.mp3',
+            'cozy-music/universal-verse.mp3',
+            'cozy-music/whispering-cosmos.mp3'
         ];
         let availableTracks = [];
         
@@ -1280,6 +1285,13 @@
             // Also try to resume if music should be playing but isn't
             if (musicShouldBePlaying && !musicMuted && gameStarted && !currentTrack && !bossEncounterActive) {
                 playRandomTrack();
+            }
+            
+            // Safari-specific: Try to play current track if it exists but is paused
+            if (currentTrack && currentTrack.paused && !musicMuted && gameStarted && !bossEncounterActive) {
+                currentTrack.play().catch(err => {
+                    gameLogger.error('AUDIO', 'Safari: Failed to resume paused music on touch:', err);
+                });
             }
         }, { passive: true });
         
@@ -1491,6 +1503,27 @@
             // Set default control scheme to mouse
             controlScheme = 'mouse';
             
+            // Apply purple background immediately for cozy mode (desktop and mobile)
+            if (gameMode === 'cozy') {
+                document.body.style.backgroundImage = "url('/assets/background/purple-bg.png')";
+                document.body.style.backgroundSize = "cover";
+                document.body.style.backgroundPosition = "center center";
+                document.body.style.backgroundRepeat = "no-repeat";
+                document.body.style.backgroundAttachment = "fixed";
+                document.body.style.minHeight = "100vh";
+                
+                // For Safari: Try to start music immediately on user interaction
+                if (!currentTrack && !musicMuted) {
+                    // Pre-initialize available tracks for cozy mode
+                    availableTracks = [...cozyMusicTracks];
+                    // Try to play music now while we have user interaction
+                    playRandomTrack();
+                }
+            } else {
+                // Reset background for other modes
+                document.body.style.backgroundImage = "";
+            }
+            
             // Start the game immediately
             startGameTransition();
         }
@@ -1539,11 +1572,7 @@
                             bestRankStatLine.style.display = 'none';
                         }
                         
-                        // Apply purple background for cozy mode
-                        document.body.style.backgroundImage = "url('/assets/background/purple-bg.png')";
-                        document.body.style.backgroundSize = "cover";
-                        document.body.style.backgroundPosition = "center";
-                        document.body.style.backgroundRepeat = "no-repeat";
+                        // Background is already applied in selectGameMode
                     }
                 }, 100);
             }, 300);
@@ -1805,6 +1834,11 @@
         
         // Music functions
         function initMusic() {
+            // Don't start music if it's already playing (Safari fix)
+            if (currentTrack && !currentTrack.paused) {
+                return;
+            }
+            
             // Check which tracks are available
             checkAvailableTracks().then(() => {
                 if (availableTracks.length > 0) {
@@ -1909,6 +1943,11 @@
                     // Store track to retry on user interaction
                     window.pendingMusicTrack = currentTrack;
                     isPlayingNext = false; // Reset flag on error
+                    
+                    // Safari-specific: Set flag to ensure music plays on next interaction
+                    if (/^((?!chrome|android).)*safari/i.test(navigator.userAgent)) {
+                        musicShouldBePlaying = true;
+                    }
                 });
             } else {
                 isPlayingNext = false; // Reset flag if no promise
@@ -11006,10 +11045,8 @@
                 const offsetX = (camera.x * parallaxFactor) % bgWidth;
                 const offsetY = (camera.y * parallaxFactor) % bgHeight;
                 
-                // Simpler tiling for mobile with zoom - ensure full viewport coverage
-                const viewportWidth = window.innerWidth;
-                const viewportHeight = window.innerHeight;
-                ctx.drawImage(assets.nebulaBackground, -offsetX, -offsetY, viewportWidth + bgWidth, viewportHeight + bgHeight);
+                // Simpler tiling for mobile with zoom - use canvas dimensions
+                ctx.drawImage(assets.nebulaBackground, -offsetX, -offsetY, canvas.width + bgWidth, canvas.height + bgHeight);
             }
             
             // Draw fewer blinking stars on mobile
@@ -11078,18 +11115,21 @@
             
             const assets = window.preloadedAssets.backgrounds;
             
-            // Use optimized mobile renderer if available
-            if (isMobile) {
-                if (window.renderMobileBackground) {
-                    // Use new optimized mobile background
-                    renderMobileBackground(ctx, camera);
+            // Skip background rendering in cozy mode to allow purple background to show through
+            if (gameMode !== 'cozy') {
+                // Use optimized mobile renderer if available
+                if (isMobile) {
+                    if (window.renderMobileBackground) {
+                        // Use new optimized mobile background
+                        renderMobileBackground(ctx, camera);
+                    } else {
+                        // Simple mobile background with new assets
+                        drawSimpleMobileBackground(assets);
+                    }
                 } else {
-                    // Simple mobile background with new assets
-                    drawSimpleMobileBackground(assets);
+                    // Desktop background rendering with new assets
+                    drawNewBackgroundSystem(assets);
                 }
-            } else {
-                // Desktop background rendering with new assets
-                drawNewBackgroundSystem(assets);
             }
             
             // Initialize Easter Egg elements for desktop - REMOVED (not using black holes/UFOs)
