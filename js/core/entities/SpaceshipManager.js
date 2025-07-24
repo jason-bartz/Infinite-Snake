@@ -5,7 +5,9 @@ class SpaceshipManager {
         this.context = context;
         this.canvas = canvas;
         this.spaceships = [];
-        this.maxSpaceships = 2;
+        this.maxSpaceships = 4; // Total maximum
+        this.maxRegularSpaceships = 3; // Max regular spaceships (1-9)
+        this.maxSpecialSpaceships = 1; // Max special spaceships
         this.minSpawnInterval = 10000; // 10 seconds minimum
         this.maxSpawnInterval = 30000; // 30 seconds maximum
         this.lastSpawnTime = Date.now();
@@ -30,9 +32,19 @@ class SpaceshipManager {
         if (currentTime >= this.nextSpawnTime && 
             this.spaceships.length < this.maxSpaceships) {
             
+            // Count current spaceship types
+            const regularCount = this.spaceships.filter(s => !s.isSpecial).length;
+            const specialCount = this.spaceships.filter(s => s.isSpecial).length;
+            
             // Random chance to actually spawn
             if (Math.random() < this.spawnChance) {
-                this.spawnSpaceship();
+                // Decide whether to spawn regular or special
+                const spawnSpecial = specialCount < this.maxSpecialSpaceships && 
+                                   Math.random() < 0.25; // 25% chance for special
+                
+                if (spawnSpecial || regularCount < this.maxRegularSpaceships) {
+                    this.spawnSpaceship(spawnSpecial);
+                }
             }
             
             // Calculate next potential spawn time
@@ -40,8 +52,8 @@ class SpaceshipManager {
         }
     }
     
-    spawnSpaceship() {
-        const spaceship = new Spaceship(this.context, this.canvas);
+    spawnSpaceship(isSpecial = false) {
+        const spaceship = new Spaceship(this.context, this.canvas, isSpecial);
         this.spaceships.push(spaceship);
     }
     
