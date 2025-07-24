@@ -737,6 +737,22 @@
             background: var(--snes-cosmic-pink) !important;
         }
         
+        /* Cozy Mode Button - Soft Cyan Blue */
+        .btn-cozy {
+            background: #4a7c8a !important;
+            border: 4px solid !important;
+            border-color: #6a9caa #2a5c6a #2a5c6a #6a9caa !important;
+            min-width: 250px !important;
+            font-size: 12px !important;
+            padding: 16px 32px !important;
+            box-shadow: 4px 4px 0 rgba(0,0,0,0.5) !important;
+            color: white !important;
+        }
+        
+        .btn-cozy:hover {
+            background: #5a8c9a !important;
+        }
+        
         /* Leaderboard Button - SNES Teal */
         .btn-leaderboard {
             background: var(--snes-cosmic-teal) !important;
@@ -1194,6 +1210,7 @@
             padding: 0 2px;
             margin-top: 2px;
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+            text-align: center;
         }
         
         /* Boost Bar (Mana Bar Style) */
@@ -3739,6 +3756,10 @@
             .leaderboard-box {
                 width: 300px !important; /* Keep leaderboard wider */
             }
+            /* Make Choose Your Fate section responsive */
+            .section-block > div[style*="grid-template-columns: repeat(3, 1fr)"] {
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important;
+            }
         }
 
         @media (max-width: 800px) {
@@ -4410,6 +4431,7 @@
                         <p class="feature-description">
                             Classic Mode: 3 lives, high stakes permadeath challenge.<br>
                             Infinite Mode: Endless discovery, create combinations forever.<br>
+                            "Cozy" Mode: Peaceful exploration with chill lofi beats.<br>
                             Choose your path to rebuild the cosmos!
                         </p>
                     </div>
@@ -4495,22 +4517,31 @@
             <!-- Game Modes Section -->
             <div class="section-block">
                 <h2 class="section-title">CHOOSE YOUR FATE</h2>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 40px; margin-top: 40px; justify-items: center;">
-                    <div class="gameplay-showcase" style="margin: 0; max-width: 500px; width: 100%;">
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 40px; justify-items: center; padding: 0 20px; max-width: 1400px; margin-left: auto; margin-right: auto;">
+                    <div class="gameplay-showcase" style="margin: 0; width: 100%; padding: 20px; box-sizing: border-box;">
                         <h3 class="feature-title" style="text-align: center;">CLASSIC MODE</h3>
-                        <p class="feature-description">
+                        <p class="feature-description" style="text-align: center;">
                             The original challenge. 3 lives. Permadeath.<br>
                             Every decision matters. Every element counts.<br>
                             How long can you survive the void?
                         </p>
                     </div>
                     
-                    <div class="gameplay-showcase" style="margin: 0; max-width: 500px; width: 100%;">
+                    <div class="gameplay-showcase" style="margin: 0; width: 100%; padding: 20px; box-sizing: border-box;">
                         <h3 class="feature-title" style="text-align: center;">INFINITE MODE</h3>
-                        <p class="feature-description">
+                        <p class="feature-description" style="text-align: center;">
                             Endless discovery. No limits. Pure creation.<br>
                             Experiment freely with combinations.<br>
                             Build your collection without fear.
+                        </p>
+                    </div>
+                    
+                    <div class="gameplay-showcase" style="margin: 0; width: 100%; padding: 20px; box-sizing: border-box;">
+                        <h3 class="feature-title" style="text-align: center;">"COZY" MODE</h3>
+                        <p class="feature-description" style="text-align: center;">
+                            No enemies. No stress. Just vibes.<br>
+                            Drift through space with chill lofi beats.<br>
+                            Discover elements at your own pace.
                         </p>
                     </div>
                 </div>
@@ -4679,13 +4710,19 @@
                     <button class="btn-classic" onclick="selectGameMode('classic')" style="width: 100%; height: 40px; padding: 10px; font-size: 10pt; background: #333; border: 2px solid #222; display: flex; align-items: center; justify-content: center;">
                         Classic Mode
                     </button>
-                    <p style="color: #ccc; margin-top: 10px; font-size: 14px;">Test your survival skills and compete for your spot on the leaderboard</p>
+                    <p style="color: #ccc; margin-top: 10px; font-size: 14px; text-align: center;">Battle enemies with 3 lives. Permadeath awaits - compete for leaderboard supremacy</p>
                 </div>
                 <div style=" width: 280px;">
                     <button class="btn-infinite" onclick="selectGameMode('infinite')" style="width: 100%; height: 40px; padding: 10px !important; font-size: 10pt !important; display: flex; align-items: center; justify-content: center;">
                         Infinite Mode
                     </button>
-                    <p style="color: #ccc; margin-top: 10px; font-size: 14px;">Unlimited respawns to experiment freely and discover new combinations</p>
+                    <p style="color: #ccc; margin-top: 10px; font-size: 14px; text-align: center;">All the action of Classic with unlimited respawns. Practice and experiment freely</p>
+                </div>
+                <div style=" width: 280px;">
+                    <button class="btn-cozy" onclick="selectGameMode('cozy')" style="width: 100%; height: 40px; padding: 10px; font-size: 10pt; display: flex; align-items: center; justify-content: center;">
+                        "Cozy" Mode
+                    </button>
+                    <p style="color: #ccc; margin-top: 10px; font-size: 14px; text-align: center;">No enemies, no stress. Just you, space, and chill lofi beats</p>
                 </div>
             </div>
         </div>
@@ -5082,6 +5119,11 @@
                             <p>• No score submission to leaderboard</p>
                             <p>• Perfect for discovering new combinations</p>
                             <p>• Great for learning boss patterns</p>
+                            <p><strong>🌙 "Cozy" Mode:</strong> Peaceful exploration</p>
+                            <p>• No enemy snakes or bosses - just you</p>
+                            <p>• Unlimited respawns with no penalties</p>
+                            <p>• Relaxing lofi soundtrack</p>
+                            <p>• Perfect for stress-free discovery</p>
                         </div>
                         
                         <div style="margin-bottom: 15px;">

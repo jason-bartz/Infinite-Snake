@@ -1128,6 +1128,17 @@
             'space-main-theme.mp3',
             'milky-way.mp3'
         ];
+        const cozyMusicTracks = [
+            'cozy-music/astral-ballad.wav',
+            'cozy-music/celestial-sonnet.wav',
+            'cozy-music/ethereal-hymn.wav',
+            'cozy-music/galactic-ode.wav',
+            'cozy-music/intersellar-elegy.wav',
+            'cozy-music/nebula-nocturne.wav',
+            'cozy-music/solar-serenade.wav',
+            'cozy-music/universal-verse.wav',
+            'cozy-music/whispering-cosmos.wav'
+        ];
         let availableTracks = [];
         
         const keys = {};
@@ -1463,6 +1474,31 @@
                 setTimeout(() => {
                     gameCanvas.style.opacity = '1';
                     document.getElementById('ui').style.opacity = '1';
+                    
+                    // Hide scoreboard and modify player stats in cozy mode
+                    if (gameMode === 'cozy') {
+                        const leaderboardBox = document.getElementById('leaderboardBox');
+                        if (leaderboardBox) {
+                            leaderboardBox.style.display = 'none';
+                        }
+                        
+                        // Hide Kills and Best Rank stat lines
+                        const killsStatLine = document.getElementById('playerKills')?.parentElement;
+                        const bestRankStatLine = document.getElementById('playerBestRank')?.parentElement;
+                        
+                        if (killsStatLine) {
+                            killsStatLine.style.display = 'none';
+                        }
+                        if (bestRankStatLine) {
+                            bestRankStatLine.style.display = 'none';
+                        }
+                        
+                        // Apply purple background for cozy mode
+                        document.body.style.backgroundImage = "url('/assets/background/purple-bg.png')";
+                        document.body.style.backgroundSize = "cover";
+                        document.body.style.backgroundPosition = "center";
+                        document.body.style.backgroundRepeat = "no-repeat";
+                    }
                 }, 100);
             }, 300);
         }
@@ -1733,7 +1769,7 @@
         
         async function checkAvailableTracks() {
             // For now, assume all tracks are available
-            availableTracks = [...musicTracks];
+            availableTracks = gameMode === 'cozy' ? [...cozyMusicTracks] : [...musicTracks];
             return true;
         }
         
@@ -1751,7 +1787,7 @@
             
             // Refill available tracks if empty
             if (availableTracks.length === 0) {
-                availableTracks = [...musicTracks];
+                availableTracks = gameMode === 'cozy' ? [...cozyMusicTracks] : [...musicTracks];
             }
             
             // Stop current track if playing
@@ -10928,8 +10964,14 @@
         
         function drawBackground() {
             // Clear with deep space background
-            ctx.fillStyle = '#000011';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            // In cozy mode, don't fill the canvas to allow purple background to show through
+            if (gameMode !== 'cozy') {
+                ctx.fillStyle = '#000011';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            } else {
+                // Clear the canvas to transparent for cozy mode
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
             
             // Check if assets are loaded
             if (!window.preloadedAssets || !window.preloadedAssets.backgrounds) {
@@ -11640,11 +11682,13 @@
                 }
             }
             
-            // Create AI snakes
-            for (let i = 0; i < MAX_AI_SNAKES; i++) {
-                const x = 200 + Math.random() * (WORLD_SIZE - 400);
-                const y = 200 + Math.random() * (WORLD_SIZE - 400);
-                snakes.push(new Snake(x, y, false));
+            // Create AI snakes (not in cozy mode)
+            if (gameMode !== 'cozy') {
+                for (let i = 0; i < MAX_AI_SNAKES; i++) {
+                    const x = 200 + Math.random() * (WORLD_SIZE - 400);
+                    const y = 200 + Math.random() * (WORLD_SIZE - 400);
+                    snakes.push(new Snake(x, y, false));
+                }
             }
             
             
@@ -12831,8 +12875,7 @@
                 // Update Asteroids
                 asteroids.forEach(asteroid => asteroid.update(1.0));
                 
-                // Boss spawn check (infinite mode only)
-                // Boss spawning for both Classic and Infinite modes
+                // Boss spawn check (classic and infinite modes only, not in cozy mode)
                 if ((gameMode === 'classic' || gameMode === 'infinite') && !bossEncounterActive && playerSnake && playerSnake.alive) {
                     // Check if player has reached the next boss spawn score
                     if (playerSnake.score >= nextBossSpawnScore && nextBossSpawnScore > 0) {
@@ -12877,11 +12920,12 @@
                 updates++;
             }
             
-            // Handle AI snake respawning with cooldown
-            const aiSnakes = snakes.filter(s => !s.isPlayer && s.alive).length;
-            
-            // Process respawn queue
-            aiRespawnQueue = aiRespawnQueue.filter(respawnTime => {
+            // Handle AI snake respawning with cooldown (disabled in cozy mode)
+            if (gameMode !== 'cozy') {
+                const aiSnakes = snakes.filter(s => !s.isPlayer && s.alive).length;
+                
+                // Process respawn queue
+                aiRespawnQueue = aiRespawnQueue.filter(respawnTime => {
                 if (currentTime >= respawnTime && aiSnakes < MAX_AI_SNAKES) {
                     // Spawn new AI snake
                     const x = 200 + Math.random() * (WORLD_SIZE - 400);
@@ -12923,6 +12967,7 @@
                     aiRespawnQueue.push(currentTime + AI_RESPAWN_COOLDOWN);
                 }
             }
+            } // End of cozy mode check
             
             // Handle player death and respawn
             if (playerSnake && (playerSnake.isDying || !playerSnake.alive) && !isRespawning) {
