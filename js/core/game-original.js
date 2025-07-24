@@ -4839,6 +4839,8 @@
                 // Draw element name below emoji
                 const elementNameFontSize = isMobile ? 10 : 12;
                 ctx.font = `${elementNameFontSize}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'top';
                 ctx.fillStyle = 'white';
                 ctx.strokeStyle = 'black';
                 ctx.lineWidth = 3;
