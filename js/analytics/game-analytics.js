@@ -70,30 +70,81 @@
             try {
                 const GA = window.gameanalytics.GameAnalytics;
                 
-                // Enable logging during development
-                if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
-                    GA.setEnabledInfoLog(true);
-                    GA.setEnabledVerboseLog(true);
-                }
-                
-                // Configure build version
-                GA.configureBuild(GA_CONFIG.BUILD_VERSION);
-                
-                // Configure available values
-                GA.configureAvailableResourceCurrencies(GA_CONFIG.RESOURCE_CURRENCIES);
-                GA.configureAvailableResourceItemTypes(GA_CONFIG.RESOURCE_ITEM_TYPES);
-                GA.configureAvailableCustomDimensions01(GA_CONFIG.CUSTOM_DIMENSIONS.dimension01);
-                GA.configureAvailableCustomDimensions02(GA_CONFIG.CUSTOM_DIMENSIONS.dimension02);
-                GA.configureAvailableCustomDimensions03(GA_CONFIG.CUSTOM_DIMENSIONS.dimension03);
-                
-                // Initialize SDK
-                GA.initialize(GA_CONFIG.GAME_KEY, GA_CONFIG.SECRET_KEY);
-                
-                initialized = true;
-                console.log('[GA] GameAnalytics initialized successfully');
+                // Test if analytics can reach the server
+                this.testConnection().then(canConnect => {
+                    if (!canConnect) {
+                        console.warn('[GA] Analytics requests are being blocked (likely by ad blocker). Analytics disabled.');
+                        initialized = false;
+                        return;
+                    }
+                    
+                    // Enable logging during development
+                    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+                        GA.setEnabledInfoLog(true);
+                        GA.setEnabledVerboseLog(true);
+                    }
+                    
+                    // Configure build version
+                    GA.configureBuild(GA_CONFIG.BUILD_VERSION);
+                    
+                    // Configure available values
+                    GA.configureAvailableResourceCurrencies(GA_CONFIG.RESOURCE_CURRENCIES);
+                    GA.configureAvailableResourceItemTypes(GA_CONFIG.RESOURCE_ITEM_TYPES);
+                    GA.configureAvailableCustomDimensions01(GA_CONFIG.CUSTOM_DIMENSIONS.dimension01);
+                    GA.configureAvailableCustomDimensions02(GA_CONFIG.CUSTOM_DIMENSIONS.dimension02);
+                    GA.configureAvailableCustomDimensions03(GA_CONFIG.CUSTOM_DIMENSIONS.dimension03);
+                    
+                    // Initialize SDK
+                    GA.initialize(GA_CONFIG.GAME_KEY, GA_CONFIG.SECRET_KEY);
+                    
+                    initialized = true;
+                    console.log('[GA] GameAnalytics initialized successfully');
+                });
                 
             } catch (error) {
                 console.error('[GA] Failed to initialize GameAnalytics:', error);
+            }
+        },
+        
+        /**
+         * Test connection to GameAnalytics servers
+         */
+        testConnection: async function() {
+            try {
+                // Create a simple test request to check if analytics are blocked
+                const testUrl = 'https://api.gameanalytics.com/v2/ping';
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 3000);
+                
+                const response = await fetch(testUrl, {
+                    method: 'HEAD',
+                    mode: 'no-cors',
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+                return true;
+            } catch (error) {
+                // If fetch fails, it's likely blocked
+                return false;
+            }
+        },
+        
+        /**
+         * Safely execute analytics calls
+         */
+        safeExecute: function(fn, description) {
+            if (!initialized || !consentGiven) return;
+            
+            try {
+                fn();
+            } catch (error) {
+                // Silently handle errors from blocked requests
+                if (error.message && error.message.includes('ERR_BLOCKED_BY_CLIENT')) {
+                    console.debug(`[GA] ${description} blocked by client`);
+                } else {
+                    console.debug(`[GA] ${description} failed:`, error.message);
+                }
             }
         },
         
@@ -104,7 +155,9 @@
             if (!initialized || !consentGiven) return;
             
             currentGameMode = mode;
-            window.gameanalytics.GameAnalytics.setCustomDimension01(mode);
+            this.safeExecute(() => {
+                window.gameanalytics.GameAnalytics.setCustomDimension01(mode);
+            }, 'Set game mode');
             console.log('[GA] Game mode set to:', mode);
         },
         
@@ -115,7 +168,9 @@
             if (!initialized || !consentGiven) return;
             
             currentSkin = skin;
-            window.gameanalytics.GameAnalytics.setCustomDimension02(skin);
+            this.safeExecute(() => {
+                window.gameanalytics.GameAnalytics.setCustomDimension02(skin);
+            }, 'Set skin');
             console.log('[GA] Skin set to:', skin);
         },
         
@@ -125,7 +180,9 @@
         setBossEncounter: function(bossType) {
             if (!initialized || !consentGiven) return;
             
-            window.gameanalytics.GameAnalytics.setCustomDimension03(bossType || 'none');
+            this.safeExecute(() => {
+                window.gameanalytics.GameAnalytics.setCustomDimension03(bossType || 'none');
+            }, 'Set boss encounter');
             console.log('[GA] Boss encounter set to:', bossType);
         },
         
@@ -174,9 +231,9 @@
         trackProgression: function(status, progression01, progression02, progression03, score) {
             if (!initialized || !consentGiven) return;
             
-            const GA = window.gameanalytics.GameAnalytics;
-            
-            try {
+            this.safeExecute(() => {
+                const GA = window.gameanalytics.GameAnalytics;
+                
                 if (score !== undefined) {
                     GA.addProgressionEvent(status, progression01, progression02, progression03, score);
                 } else if (progression03) {
@@ -188,9 +245,7 @@
                 }
                 
                 console.log('[GA] Progression tracked:', status, progression01, progression02, progression03, score);
-            } catch (error) {
-                console.error('[GA] Failed to track progression:', error);
-            }
+            }, 'Track progression');
         },
         
         /**
@@ -199,14 +254,11 @@
         trackResource: function(flowType, currency, amount, itemType, itemId) {
             if (!initialized || !consentGiven) return;
             
-            const GA = window.gameanalytics.GameAnalytics;
-            
-            try {
+            this.safeExecute(() => {
+                const GA = window.gameanalytics.GameAnalytics;
                 GA.addResourceEvent(flowType, currency, amount, itemType, itemId);
                 console.log('[GA] Resource tracked:', flowType, currency, amount, itemType, itemId);
-            } catch (error) {
-                console.error('[GA] Failed to track resource:', error);
-            }
+            }, 'Track resource');
         },
         
         /**
@@ -215,9 +267,9 @@
         trackEvent: function(eventType, eventId, value) {
             if (!initialized || !consentGiven) return;
             
-            const GA = window.gameanalytics.GameAnalytics;
-            
-            try {
+            this.safeExecute(() => {
+                const GA = window.gameanalytics.GameAnalytics;
+                
                 if (eventType === 'design') {
                     if (value !== undefined) {
                         GA.addDesignEvent(eventId, value);
@@ -226,9 +278,7 @@
                     }
                     console.log('[GA] Design event tracked:', eventId, value);
                 }
-            } catch (error) {
-                console.error('[GA] Failed to track event:', error);
-            }
+            }, 'Track event');
         },
         
         /**
@@ -355,7 +405,9 @@
             localStorage.setItem('analyticsConsent', hasConsent.toString());
             
             if (window.gameanalytics) {
-                window.gameanalytics.GameAnalytics.setEnabledEventSubmission(hasConsent);
+                this.safeExecute(() => {
+                    window.gameanalytics.GameAnalytics.setEnabledEventSubmission(hasConsent);
+                }, 'Set consent');
                 console.log('[GA] Consent set to:', hasConsent);
             }
             
@@ -385,5 +437,25 @@
     } else {
         setTimeout(() => GameAnalyticsWrapper.init(), 100);
     }
+    
+    // Global error handler to suppress GameAnalytics network errors
+    window.addEventListener('error', function(event) {
+        if (event.message && event.message.includes('api.gameanalytics.com')) {
+            event.preventDefault();
+            console.debug('[GA] Network request blocked - analytics disabled');
+            return true;
+        }
+    });
+    
+    // Handle unhandled promise rejections from GameAnalytics
+    window.addEventListener('unhandledrejection', function(event) {
+        if (event.reason && event.reason.message && 
+            (event.reason.message.includes('api.gameanalytics.com') || 
+             event.reason.message.includes('ERR_BLOCKED_BY_CLIENT'))) {
+            event.preventDefault();
+            console.debug('[GA] Network request blocked - analytics disabled');
+            return true;
+        }
+    });
     
 })();
