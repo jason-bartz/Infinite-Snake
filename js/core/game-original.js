@@ -8785,6 +8785,15 @@
             // Set the hint text
             hintElement.textContent = "💡 Hint: When your elements won't combine, 🌀 Void Orbs can clear your bank for points!";
             
+            // Play hint sound
+            if (!musicMuted) {
+                const hintSound = new Audio('sounds/game-tone-hint.mp3');
+                hintSound.volume = 0.5;
+                hintSound.play().catch(err => {
+                    gameLogger.debug('AUDIO', 'Failed to play hint sound:', err);
+                });
+            }
+            
             // Show the hint
             hintElement.classList.add('show');
             
