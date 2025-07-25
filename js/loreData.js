@@ -1750,5 +1750,36 @@ FOURTH SEAL - ZEPHYRUS OF WINDS
 Each seal broken grants the breaker their essence. Each essence corrupts the bearer. The Snake laughs at this irony.`,
         unlockCriteria: { type: 'defeatBoss', boss: 'any', count: 4 },
         unlockText: 'Defeat all four bosses'
+    },
+    'skin-lore-scuffy': {
+        id: 'skin-lore-scuffy',
+        number: '094',
+        title: 'Sneakerhead Authentication Report',
+        category: 'serpent',
+        content: `AUTHENTICITY VERIFICATION
+StockX Case #AF1-SCFY-2025
+
+Item: "Scuffy" - Air Force 1 Low
+Condition: Well-Loved (7/10)
+Size: Fits All (literally, it's magic)
+
+Authentication Notes:
+- Toe box creasing: Authentic, shows actual wear
+- Outsole yellowing: Natural oxidation confirmed
+- Scuff marks: Each one GPS-verified from famous locations
+- Still has that new shoe smell somehow???
+
+Previous Owners:
+- Some president (receipt lost)
+- That kid who never missed at the courts
+- Your favorite rapper (before the fame)
+- The Infinite Snake (current)
+
+Verifier's Note: "These have more street cred than your entire collection. The scuffs aren't damage – they're battle scars from conquering every block in the multiverse."
+
+Certificate: AUTHENTICATED ✓
+Status: Too fresh to retire`,
+        unlockCriteria: { type: 'modeGames', mode: 'cozy', value: 50 },
+        unlockText: 'Play 50 Cozy games'
     }
 };

@@ -137,6 +137,11 @@ class UnlockManager {
                 // This will be triggered by the boss defeat event
                 return false;
             
+            case 'modeGames':
+                // Check games played in a specific mode
+                if (!criteria.mode || !criteria.value) return false;
+                return stats.getGamesPlayedByMode(criteria.mode) >= criteria.value;
+            
             default:
                 console.warn('Unknown unlock criteria type:', criteria.type);
                 return false;
@@ -436,6 +441,11 @@ class UnlockManager {
                     }
                 }
                 current = exoticCount;
+                break;
+            case 'modeGames':
+                if (criteria.mode) {
+                    current = stats.getGamesPlayedByMode(criteria.mode);
+                }
                 break;
             case 'timeWindow':
             case 'monthWindow':

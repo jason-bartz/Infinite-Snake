@@ -241,7 +241,7 @@
         let gameTarget = 0;
         let deathCount = 0;
         let camera = { x: WORLD_SIZE / 2, y: WORLD_SIZE / 2 };
-        let cameraZoom = isMobile ? 0.75 : 1.0;
+        let cameraZoom = isMobile ? 0.9375 : 1.0; // Mobile zoom increased by 25% (0.75 * 1.25)
         
         let lastTime = 0;
         let frameCount = 0;
@@ -572,7 +572,9 @@
         
         const pixelPlanets = [];
         // Create planets with better distribution
-        const planetCount = isMobile ? 15 : 22; // Mobile: 15 planets (more since static), Desktop: 22 planets
+        const regularPlanetCount = 10; // 10 planets from regular pool
+        const specialPlanetCount = isMobile ? 2 : 3; // Plus 2-3 special planets
+        const planetCount = regularPlanetCount + specialPlanetCount; // Total planets
         
         // Define planet distribution (skip missing planet-14)
         const standardPlanetIds = [];
@@ -596,18 +598,17 @@
         // Use a minimum distance between planets to prevent clumping
         const minPlanetDistance = isMobile ? 400 : 250; // Wider spacing on mobile
         
-        // Determine number of special planets
-        const specialPlanetCount = isMobile ? 2 : 3; // Fewer special planets on mobile
-        
         // Track used special planets to avoid duplicates
         const usedSpecialPlanets = new Set();
         
-        // Shuffle standard planets to use each one exactly once
+        // Shuffle standard planets and pick only 10
         const shuffledStandardPlanets = [...standardPlanetIds];
         for (let i = shuffledStandardPlanets.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [shuffledStandardPlanets[i], shuffledStandardPlanets[j]] = [shuffledStandardPlanets[j], shuffledStandardPlanets[i]];
         }
+        // Only use the first 10 planets
+        const selectedPlanets = shuffledStandardPlanets.slice(0, 10);
         let standardPlanetIndex = 0;
         
         let planetIndex = 0;
@@ -677,6 +678,31 @@
             [shuffledIndices[i], shuffledIndices[j]] = [shuffledIndices[j], shuffledIndices[i]];
         }
         
+        // Get indices that will be regular planets (not special)
+        const regularPlanetIndices = [];
+        for (let i = 0; i < planetPositions.length; i++) {
+            if (shuffledIndices.indexOf(i) >= specialPlanetCount) {
+                regularPlanetIndices.push(i);
+            }
+        }
+        
+        // Randomly select 2-3 regular planets to be XL sized
+        const xlPlanetCount = Math.min(2 + Math.floor(Math.random() * 2), regularPlanetIndices.length); // 2 or 3 XL planets
+        const xlIndices = new Set();
+        while (xlIndices.size < xlPlanetCount && regularPlanetIndices.length > 0) {
+            const randomIndex = Math.floor(Math.random() * regularPlanetIndices.length);
+            xlIndices.add(regularPlanetIndices[randomIndex]);
+            regularPlanetIndices.splice(randomIndex, 1); // Remove to avoid duplicates
+        }
+        
+        // Update planet sizes for XL planets
+        planetPositions.forEach((planet, index) => {
+            if (xlIndices.has(index)) {
+                planet.radius = 112.5; // XL size: 50% smaller than original (150 * 0.75)
+                planet.isXL = true;
+            }
+        });
+        
         // Assign planet types
         for (let i = 0; i < planetPositions.length; i++) {
             const position = planetPositions[i];
@@ -691,9 +717,9 @@
                 usedSpecialPlanets.add(planetId);
                 isSpecial = true;
             } else {
-                // Add a standard planet (no duplicates - use next from shuffled array)
-                if (standardPlanetIndex < shuffledStandardPlanets.length) {
-                    planetId = shuffledStandardPlanets[standardPlanetIndex];
+                // Add a standard planet (no duplicates - use next from selected array)
+                if (standardPlanetIndex < selectedPlanets.length) {
+                    planetId = selectedPlanets[standardPlanetIndex];
                     standardPlanetIndex++;
                 } else {
                     // Skip if we've run out of standard planets
@@ -919,62 +945,62 @@
         let bossFissures = [];
         
         let skinMetadata = {
-            'snake-default-green': { name: 'Basic Boy', unlocked: true, colors: ['#75d18e', '#6abf81'] },
-            'neko': { name: 'Lil Beans (Beta Perk)', unlocked: true, colors: ['#c6c6cb', '#c3c3e7'] },
-            '35mm': { name: 'Ansel 35', unlocked: false, colors: ['#2c3e50', '#1a1a1a'] },
-            'Frank': { name: 'Franklin', unlocked: false, colors: ['#9b59b6', '#8e44ad'] },
-            'af-one': { name: "Scuffy", unlocked: false, colors: ['#e74c3c', '#e23b28'] },
-            'barbi': { name: 'Margot', unlocked: false, colors: ['#ff69b4', '#ff1493'] },
+            'snake-default-green': { name: 'Basic Boy', unlocked: true, colors: ['#80b878', '#80b878'] },
+            'neko': { name: 'Lil Beans (Beta Perk)', unlocked: true, colors: ['#b8b4b2', '#b8b4b2'] },
+            '35mm': { name: 'Ansel 35', unlocked: false, colors: ['#af5e2b', '#af5e2b'] },
+            'Frank': { name: 'Franklin', unlocked: false, colors: ['#cb6ce6', '#cb6ce6'] },
+            'af-one': { name: "Scuffy", unlocked: false, colors: ['#b93c49', '#b93c49'] },
+            'barbi': { name: 'Margot', unlocked: false, colors: ['#ff66c4', '#ff66c4'] },
             'boat-mcboatface': { name: 'Boaty McBoatface', unlocked: false, colors: ['#3498db', '#2980b9'] },
             'camera-guy': { name: 'The Resistance', unlocked: false, colors: ['#2c3e50', '#1a1a1a'] },
             'coffee': { name: 'Caffeine Fiend', unlocked: false, colors: ['#8b4513', '#6b3410'] },
             'controller': { name: 'Little Bro', unlocked: false, colors: ['#9b59b6', '#8e44ad'] },
             'diet-cola': { name: 'Cola Crusader', unlocked: false, colors: ['#e74c3c', '#c0392b'] },
-            'dog': { name: 'Good Boy', unlocked: false, colors: ['#8b4513', '#6b3410'] },
-            'donut': { name: 'Sprinkles', unlocked: false, colors: ['#daa520', '#ff69b4'] },
-            'flame': { name: 'Hot Head', unlocked: false, colors: ['#ff8c00', '#ffd700'] },
+            'dog': { name: 'Good Boy', unlocked: false, colors: ['#f2a561', '#f2a561'] },
+            'donut': { name: 'Sprinkles', unlocked: false, colors: ['#e06b51', '#e06b51'] },
+            'flame': { name: 'Hot Head', unlocked: false, colors: ['#f2a561', '#e06b51'] },
             'football': { name: 'MVP', unlocked: false, colors: ['#2ecc71', '#27ae60'] },
             'fries': { name: 'Sir Dips-a-lot', unlocked: false, colors: ['#e74c3c', '#ffd700'] },
-            'green-dragon': { name: 'World Muncher', unlocked: false, colors: ['#2ecc71', '#27ae60'] },
-            'handheld-game': { name: 'The Pocketeer', unlocked: false, colors: ['#393b32', '#6a7473'] },
-            'hotdog': { name: 'Big Dawg', unlocked: false, colors: ['#f8c83f', '#f8c83f'] },
-            'infinity-glove': { name: 'Snappy', unlocked: false, colors: ['#6c7dcd', '#6c7dcd'] },
-            'kid-car': { name: 'Speed Demon Jr.', unlocked: false, colors: ['#e74c3c', '#c0392b'] },
-            'lovecraft': { name: 'Eldritch Horror', unlocked: false, colors: ['#2ecc71', '#27ae60'] },
-            'nyan': { name: 'Pastry Cat', unlocked: false, colors: ['#e74c3c', '#ff8c00', '#ffd700', '#2ecc71', '#3498db', '#9b59b6'] },
-            'pizza': { name: 'Tony Pep', unlocked: false, colors: ['#f5bf48', '#f39c12'] },
-            'potato': { name: 'Spud Bud', unlocked: false, colors: ['#8b4513', '#6b3410'] },
+            'green-dragon': { name: 'World Muncher', unlocked: false, colors: ['#80b878', '#80b878'] },
+            'handheld-game': { name: 'The Pocketeer', unlocked: false, colors: ['#af5e8b', '#af5e8b'] },
+            'hotdog': { name: 'Big Dawg', unlocked: false, colors: ['#fcef8d', '#fcef8d'] },
+            'infinity-glove': { name: 'Snappy', unlocked: false, colors: ['#ad74a7', '#ad74a7'] },
+            'kid-car': { name: 'Speed Demon Jr.', unlocked: false, colors: ['#c74250', '#c74250'] },
+            'lovecraft': { name: 'Eldritch Horror', unlocked: false, colors: ['#b8325b', '#b8325b'] },
+            'nyan': { name: 'Pastry Cat', unlocked: false, colors: ['#fcef8d', '#fcef8d'] },
+            'pizza': { name: 'Tony Pep', unlocked: false, colors: ['#fcef8d', '#fcef8d'] },
+            'potato': { name: 'Spud Bud', unlocked: false, colors: ['#e3a084', '#e3a084'] },
             'racer': { name: 'Speed Demon', unlocked: false, colors: ['#1f2d35', '#e1e7ea'] },
-            'ramen': { name: 'Noodle Master', unlocked: false, colors: ['#f3c33e', '#f3c33e'] },
-            'red-dragon': { name: 'Ralph', unlocked: false, colors: ['#e74c3c', '#c0392b'] },
-            'robot': { name: 'Metal Boi', unlocked: false, colors: ['#95a5a6', '#7f8c8d'] },
-            'santa': { name: 'Ho Ho Hose', unlocked: false, colors: ['#e34c4a', '#f2ede1'] },
-            'saturn': { name: 'Ring Leader', unlocked: false, colors: ['#ff8c00', '#ff6347'] },
-            'skibidi': { name: 'Mr. Swirley', unlocked: false, colors: ['#ecf0f1', '#bdc3c7'] },
-            'snake-2': { name: 'Snek II', unlocked: false, colors: ['#78a060', '#5f804c'] },
-            'space-cadet': { name: 'Cosmic Ray', unlocked: false, colors: ['#34495e', '#2c3e50'] },
-            'tornado': { name: 'Whirlwind', unlocked: false, colors: ['#1790ff', '#3b9cf6'] },
-            'tv': { name: 'CRT Surfer', unlocked: false, colors: ['#89b6c7', '#bedeeb'] },
-            'unicorn': { name: 'Tres Commas', unlocked: false, colors: ['#ff69b4', '#ffd700'] },
-            'brick-man': { name: 'The Special', unlocked: false, colors: ['#ff8c00', '#ff6347'] },
-            'buffalo': { name: "Billy Blue", unlocked: false, colors: ['#3498db', '#2980b9'] },
-            'clock': { name: 'Time-Out', unlocked: false, colors: ['#8b4513', '#6b3410'] },
-            'floral': { name: 'Bo Kay', unlocked: false, colors: ['#2ecc71', '#27ae60'] },
-            'gnome': { name: 'World Traveler', unlocked: false, colors: ['#2ecc71', '#27ae60'] },
-            'mac': { name: 'Woz', unlocked: false, colors: ['#f5deb3', '#e6d7c3'] },
-            'murica': { name: "'Murica", unlocked: false, colors: ['#ecf0f1', '#f2eeed'] },
-            'pod-player': { name: 'Poddington', unlocked: false, colors: ['#87ceeb', '#5f9ea0'] },
-            'whale': { name: 'Spout', unlocked: false, colors: ['#3498db', '#2980b9'] },
-            'ruby': { name: 'Ruby', unlocked: true, colors: ['#87bb4a', '#7aa53f'] },
-            'chirpy': { name: 'Chirpy', unlocked: true, colors: ['#8eccdb', '#7db8c7'] },
-            'icecream': { name: 'Sir Whirl', unlocked: false, colors: ['#fde3a9', '#fbd692'] },
-            'popcorn': { name: 'Colonel Kernel', unlocked: false, colors: ['#39b7ff', '#2aa2e6'] },
-            'pixel': { name: 'Pixel', unlocked: false, colors: ['#50b72d', '#46a127'] },
-            'midnight': { name: 'Midnight', unlocked: false, colors: ['#474e54', '#3a4147'] },
-            'pyraxis': { name: 'Pyraxis the Molten', unlocked: false, colors: ['#ff4444', '#cc0000'], isBoss: true },
-            'abyssos': { name: 'Abyssos the Deep One', unlocked: false, colors: ['#4444ff', '#0000cc'], isBoss: true },
-            'osseus': { name: 'Osseus the Bone Sovereign', unlocked: false, colors: ['#8b4513', '#654321'], isBoss: true },
-            'zephyrus': { name: 'Zephyrus the Storm Caller', unlocked: false, colors: ['#87ceeb', '#5f9ea0'], isBoss: true }
+            'ramen': { name: 'Noodle Master', unlocked: false, colors: ['#fcef8d', '#fcef8d'] },
+            'red-dragon': { name: 'Ralph', unlocked: false, colors: ['#c74250', '#c74250'] },
+            'robot': { name: 'Metal Boi', unlocked: false, colors: ['#dcdac9', '#dcdac9'] },
+            'santa': { name: 'Ho Ho Hose', unlocked: false, colors: ['#c74250', '#c74250'] },
+            'saturn': { name: 'Ring Leader', unlocked: false, colors: ['#f2a561', '#f2a561'] },
+            'skibidi': { name: 'Mr. Swirley', unlocked: false, colors: ['#dad8c7', '#dad8c7'] },
+            'snake-2': { name: 'Snek II', unlocked: false, colors: ['#658d78', '#658d78'] },
+            'space-cadet': { name: 'Cosmic Ray', unlocked: false, colors: ['#ffffe0', '#ffffe0'] },
+            'tornado': { name: 'Whirlwind', unlocked: false, colors: ['#fafafa', '#fafafa'] },
+            'tv': { name: 'CRT Surfer', unlocked: false, colors: ['#72b6cf', '#72b6cf'] },
+            'unicorn': { name: 'Tres Commas', unlocked: false, colors: ['#ffffe0', '#ffffe0'] },
+            'brick-man': { name: 'The Special', unlocked: false, colors: ['#ff6d4d', '#ff6d4d'] },
+            'buffalo': { name: "Billy Blue", unlocked: false, colors: ['#fdfdfd', '#fdfdfd'] },
+            'clock': { name: 'Time-Out', unlocked: false, colors: ['#5c486a', '#5c486a'] },
+            'floral': { name: 'Bo Kay', unlocked: false, colors: ['#ffc2e8', '#ffc2e8'] },
+            'gnome': { name: 'World Traveler', unlocked: false, colors: ['#38b6ff', '#38b6ff'] },
+            'mac': { name: 'Woz', unlocked: false, colors: ['#b1d480', '#b1d480'] },
+            'murica': { name: "'Murica", unlocked: false, colors: ['#305c76', '#305c76'] },
+            'pod-player': { name: 'Poddington', unlocked: false, colors: ['#95d829', '#95d829'] },
+            'whale': { name: 'Spout', unlocked: false, colors: ['#0084fd', '#0084fd'] },
+            'ruby': { name: 'Ruby', unlocked: true, colors: ['#80b878', '#80b878'] },
+            'chirpy': { name: 'Chirpy', unlocked: true, colors: ['#88d9d9', '#88d9d9'] },
+            'icecream': { name: 'Sir Whirl', unlocked: false, colors: ['#f77c83', '#f77c83'] },
+            'popcorn': { name: 'Colonel Kernel', unlocked: false, colors: ['#ffde59', '#ffde59'] },
+            'pixel': { name: 'Pixel', unlocked: false, colors: ['#75c33c', '#75c33c'] },
+            'midnight': { name: 'Midnight', unlocked: false, colors: ['#5c486a', '#5c486a'] },
+            'pyraxis': { name: 'Pyraxis the Molten', unlocked: false, colors: ['#c74250', '#c74250'], isBoss: true },
+            'abyssos': { name: 'Abyssos the Deep One', unlocked: false, colors: ['#80b878', '#80b878'], isBoss: true },
+            'osseus': { name: 'Osseus the Bone Sovereign', unlocked: false, colors: ['#7a4900', '#7a4900'], isBoss: true },
+            'zephyrus': { name: 'Zephyrus the Storm Caller', unlocked: false, colors: ['#464969', '#464969'], isBoss: true }
         };
         
         if (window.SKIN_DATA && window.skinIdConverter) {
@@ -997,10 +1023,20 @@
             Object.keys(window.SKIN_DATA).forEach(newId => {
                 const oldId = window.skinIdConverter.toOldId(newId);
                 if (!oldId || !mergedMetadata[oldId]) {
+                    // Define custom colors for skins not in the original metadata
+                    const customColors = {
+                        'ice-dragon': ['#72b6cf', '#72b6cf'],
+                        'handheld-game': ['#af5e8b', '#af5e8b'],
+                        'green-dragon': ['#80b878', '#80b878'],
+                        'buffalo': ['#fdfdfd', '#fdfdfd'],
+                        'af-one': ['#b93c49', '#b93c49'],
+                        'floral': ['#ffc2e8', '#ffc2e8']
+                    };
+                    
                     mergedMetadata[newId] = {
                         ...window.SKIN_DATA[newId],
                         unlocked: false,
-                        colors: window.SKIN_DATA[newId].colors || ['#888888', '#666666']
+                        colors: customColors[newId] || window.SKIN_DATA[newId].colors || ['#888888', '#666666']
                     };
                 }
             });
@@ -9894,7 +9930,7 @@
             if (deathSequenceActive) {
                 deathSequenceActive = false;
                 deathCameraAnimation.active = false;
-                cameraZoom = isMobile ? 0.75 : 1.0;
+                cameraZoom = isMobile ? 0.9375 : 1.0; // Mobile zoom increased by 25% (0.75 * 1.25)
             }
             
             // Reset death processed flag
@@ -12546,10 +12582,20 @@
                 Object.keys(window.SKIN_DATA).forEach(newId => {
                     const oldId = window.skinIdConverter.toOldId(newId);
                     if (!oldId || !mergedMetadata[oldId]) {
+                        // Define custom colors for skins not in the original metadata
+                        const customColors = {
+                            'ice-dragon': ['#72b6cf', '#72b6cf'],
+                            'handheld-game': ['#af5e8b', '#af5e8b'],
+                            'green-dragon': ['#80b878', '#80b878'],
+                            'buffalo': ['#fdfdfd', '#fdfdfd'],
+                            'af-one': ['#b93c49', '#b93c49'],
+                            'floral': ['#ffc2e8', '#ffc2e8']
+                        };
+                        
                         mergedMetadata[newId] = {
                             ...window.SKIN_DATA[newId],
                             unlocked: false,
-                            colors: window.SKIN_DATA[newId].colors || ['#888888', '#666666']
+                            colors: customColors[newId] || window.SKIN_DATA[newId].colors || ['#888888', '#666666']
                         };
                     }
                 });
@@ -12669,6 +12715,8 @@
                         equipButton.textContent = 'Equipped';
                         equipButton.disabled = true;
                         buildSkinGrid();
+                        // Close modal after equipping
+                        modal.style.display = 'none';
                     };
                 }
             } else {
@@ -13396,7 +13444,8 @@
                         discoveries: playerSnake.discoveries,
                         kills: playerSnake.kills,
                         playTime: gameSessionStartTime ? Math.floor((Date.now() - gameSessionStartTime) / 1000) : 0,
-                        finalRank: snakes.filter(s => s.alive).length + 1
+                        finalRank: snakes.filter(s => s.alive).length + 1,
+                        mode: gameMode
                     });
                     
                     // Track death event
@@ -13534,7 +13583,7 @@
                     camera.y = WORLD_SIZE / 2;
                     
                     // Reset camera zoom to default
-                    cameraZoom = isMobile ? 0.75 : 1.0;
+                    cameraZoom = isMobile ? 0.9375 : 1.0; // Mobile zoom increased by 25% (0.75 * 1.25)
                     deathCameraAnimation.active = false;
                     
                     // Reset respawn timer

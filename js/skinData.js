@@ -265,6 +265,17 @@ const skinData = {
             description: 'Play for 2 hours total'
         }
     },
+    'scuffy': {
+        name: 'Scuffy',
+        rarity: 'uncommon',
+        bio: 'A crisp, red and white street legend worn by presidents and pretenders alike. Started from the box now we here.',
+        unlockCriteria: {
+            type: 'modeGames',
+            mode: 'cozy',
+            value: 50,
+            description: 'Play 50 Cozy games'
+        }
+    },
 
     // RARE (10 skins)
     'the-resistance': {

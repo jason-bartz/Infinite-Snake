@@ -60,7 +60,8 @@ const skinIdMapping = {
         'icecream': 'sir-whirl',
         'popcorn': 'colonel-kernel',
         'pixel': 'pixel',  // Same ID
-        'midnight': 'midnight'  // Same ID
+        'midnight': 'midnight',  // Same ID
+        'af-one': 'scuffy'  // Scuffy skin - Air Force One shoes
     },
     
     // Reverse mapping (new IDs to old IDs)

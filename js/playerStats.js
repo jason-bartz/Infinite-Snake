@@ -47,6 +47,17 @@ class PlayerStats {
                 parsed.stats.achievements.playedDuringMonths = new Set(parsed.stats.achievements.playedDuringMonths);
             }
             
+            // Ensure gamesPlayedByMode exists for backward compatibility
+            if (!parsed.stats?.lifetime?.gamesPlayedByMode) {
+                parsed.stats.lifetime.gamesPlayedByMode = {
+                    classic: 0,
+                    infinite: 0,
+                    cozy: 0,
+                    discovery: 0,
+                    points: 0
+                };
+            }
+            
             return parsed;
         } catch (error) {
             console.error('Failed to load player stats:', error);
@@ -68,7 +79,14 @@ class PlayerStats {
                     elementsDiscovered: new Set(),
                     daysPlayed: new Set(),
                     firstPlaceFinishes: 0,
-                    monthlyLeaderboardWins: new Set()
+                    monthlyLeaderboardWins: new Set(),
+                    gamesPlayedByMode: {
+                        classic: 0,
+                        infinite: 0,
+                        cozy: 0,
+                        discovery: 0,
+                        points: 0
+                    }
                 },
                 powerups: {
                     voidOrbs: 0,
@@ -93,6 +111,30 @@ class PlayerStats {
         // Migrate any existing data
         if (oldStats.highScore) {
             newStats.stats.lifetime.highScore = oldStats.highScore;
+        }
+        
+        // Migrate v2.0 stats if they exist
+        if (oldStats.stats) {
+            // Deep copy all existing stats
+            if (oldStats.stats.lifetime) {
+                Object.assign(newStats.stats.lifetime, oldStats.stats.lifetime);
+                // Ensure gamesPlayedByMode exists even for old data
+                if (!oldStats.stats.lifetime.gamesPlayedByMode) {
+                    newStats.stats.lifetime.gamesPlayedByMode = {
+                        classic: 0,
+                        infinite: 0,
+                        cozy: 0,
+                        discovery: 0,
+                        points: 0
+                    };
+                }
+            }
+            if (oldStats.stats.powerups) {
+                Object.assign(newStats.stats.powerups, oldStats.stats.powerups);
+            }
+            if (oldStats.stats.achievements) {
+                Object.assign(newStats.stats.achievements, oldStats.stats.achievements);
+            }
         }
         
         return newStats;
@@ -224,7 +266,7 @@ class PlayerStats {
         }, 1000);
     }
 
-    recordGameEnd(finalScore) {
+    recordGameEnd(finalScore, gameMode) {
         // Record final score to lifetime total
         if (finalScore !== undefined && finalScore > 0) {
             this.recordFinalScore(finalScore);
@@ -233,6 +275,12 @@ class PlayerStats {
         // Update total play time
         const sessionTime = (Date.now() - this.sessionStats.startTime) / 1000 / 60; // in minutes
         this.stats.stats.lifetime.totalPlayTime += sessionTime;
+        
+        // Track games played by mode
+        const mode = gameMode || window.gameMode || 'infinite'; // Fallback to window.gameMode or default to infinite
+        if (this.stats.stats.lifetime.gamesPlayedByMode && this.stats.stats.lifetime.gamesPlayedByMode.hasOwnProperty(mode)) {
+            this.stats.stats.lifetime.gamesPlayedByMode[mode]++;
+        }
         
         this.saveStats();
         
@@ -326,6 +374,13 @@ class PlayerStats {
 
     getMonthlyLeaderboardWins() {
         return this.stats.stats.lifetime.monthlyLeaderboardWins.size;
+    }
+
+    getGamesPlayedByMode(mode) {
+        if (this.stats.stats.lifetime.gamesPlayedByMode && this.stats.stats.lifetime.gamesPlayedByMode[mode] !== undefined) {
+            return this.stats.stats.lifetime.gamesPlayedByMode[mode];
+        }
+        return 0;
     }
 
     hasPlayedBetweenHours(startHour, endHour) {
@@ -427,7 +482,7 @@ class PlayerStats {
     initializeEventListeners() {
         // Hook into game events
         window.addEventListener('gameStart', () => this.recordGameStart());
-        window.addEventListener('gameEnd', (e) => this.recordGameEnd(e.detail?.score));
+        window.addEventListener('gameEnd', (e) => this.recordGameEnd(e.detail?.score, e.detail?.mode));
         window.addEventListener('playerDeath', () => this.recordDeath());
         window.addEventListener('enemyKilled', () => {
             this.recordKill();

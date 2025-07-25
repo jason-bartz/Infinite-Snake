@@ -561,6 +561,11 @@ class Snake {
                 if (window.elementLoader && window.elementLoader.combinations) {
                     const key = `${Math.min(id1, id2)}+${Math.max(id1, id2)}`;
                     resultId = window.elementLoader.combinations[key];
+                    
+                    // Debug logging for Earth element combinations
+                    if (id1 === 0 || id2 === 0 || id1 === '0' || id2 === '0') {
+                        window.gameLogger.debug('EARTH COMBO', 'Key:', key, 'Result:', resultId, 'id1:', id1, 'id2:', id2);
+                    }
                 }
                 
                 if (resultId !== undefined && resultId !== null && window.elementLoader.elements.get(resultId)) {
@@ -614,6 +619,7 @@ class Snake {
         if (window.createCombinationParticles) window.createCombinationParticles(this.segments[0].x, this.segments[0].y);
         
         if (this.isPlayer && this === window.playerSnake && window.currentBoss && window.currentBoss.alive) {
+            window.gameLogger.debug('BOSS COMBO CHECK', 'Checking boss element combination. Boss:', window.currentBoss.bossType, 'Element ID:', window.currentBoss.elementId);
             this.checkBossElementCombination(chosen);
         }
         
@@ -691,8 +697,23 @@ class Snake {
     
     checkBossElementCombination(chosen) {
         const bossElementId = window.currentBoss.elementId;
-        if (chosen.elem1 === bossElementId || chosen.elem2 === bossElementId || chosen.result === bossElementId) {
-            window.gameLogger.debug('SHOCKWAVE', 'Creating shockwave for player:', this.name);
+        // Convert to numbers for consistent comparison, handling edge cases
+        const elem1Id = chosen.elem1 === '0' || chosen.elem1 === 0 ? 0 : (typeof chosen.elem1 === 'string' ? parseInt(chosen.elem1, 10) : chosen.elem1);
+        const elem2Id = chosen.elem2 === '0' || chosen.elem2 === 0 ? 0 : (typeof chosen.elem2 === 'string' ? parseInt(chosen.elem2, 10) : chosen.elem2);
+        const resultId = chosen.result === '0' || chosen.result === 0 ? 0 : (typeof chosen.result === 'string' ? parseInt(chosen.result, 10) : chosen.result);
+        
+        window.gameLogger.debug('SHOCKWAVE CHECK', 'Boss element ID:', bossElementId, 'Type:', typeof bossElementId, 'Checking against:', elem1Id, '(type:', typeof elem1Id, ')', elem2Id, '(type:', typeof elem2Id, ')', resultId, '(type:', typeof resultId, ')');
+        
+        // Special logging for Osseus/Earth element
+        if (bossElementId === 0) {
+            window.gameLogger.debug('OSSEUS CHECK', 'Earth boss detected. Comparisons:', 
+                'elem1Id === 0:', elem1Id === 0, 
+                'elem2Id === 0:', elem2Id === 0, 
+                'resultId === 0:', resultId === 0);
+        }
+        
+        if (elem1Id === bossElementId || elem2Id === bossElementId || resultId === bossElementId) {
+            window.gameLogger.debug('SHOCKWAVE', 'MATCH FOUND! Creating shockwave for player:', this.name);
             
             const elementColors = {
                 0: '#8b6914',
@@ -706,6 +727,13 @@ class Snake {
                 const primaryElement = this.elements[0];
                 shockwaveColor = elementColors[primaryElement] || '#FFD700';
             }
+            
+            if (!window.shockwaves) {
+                window.gameLogger.error('SHOCKWAVE', 'window.shockwaves is not defined!');
+                return;
+            }
+            
+            window.gameLogger.debug('SHOCKWAVE', 'Adding shockwave to array. Current count:', window.shockwaves.length);
             
             window.shockwaves.push({
                 x: this.segments[0].x,
@@ -808,6 +836,11 @@ class Snake {
     addElementToBank(element) {
         const insertIndex = Math.floor(Math.random() * (this.elements.length + 1));
         this.elements.splice(insertIndex, 0, element.id);
+        
+        // Debug logging for Earth elements
+        if (element.id === 0 || element.id === '0') {
+            window.gameLogger.debug('EARTH ELEMENT', 'Added Earth element to bank. ID:', element.id, 'Type:', typeof element.id, 'Bank now:', this.elements);
+        }
         
         if (this.elements.length > elementBankSlots) {
             window.gameLogger.warn('ELEMENT BANK', 'Trimming elements array to max size');
@@ -1178,11 +1211,7 @@ class Snake {
         const skinImg = window.snakeSkinImages ? window.snakeSkinImages[this.skin] : null;
         const emoji = skinData.emoji;
         
-        
-        const effectiveSegmentSize = SEGMENT_SIZE * this.size * window.cameraZoom;
-        const minSize = isMobile ? 8 : 10;
-        const maxSize = isMobile ? 30 : 40;
-        const clampedSize = Math.max(minSize, Math.min(maxSize, effectiveSegmentSize));
+        const baseSegmentSize = SEGMENT_SIZE * this.size * window.cameraZoom;
         
         for (let i = this.segments.length - 1; i >= 0; i--) {
             const segment = this.segments[i];
@@ -1196,6 +1225,26 @@ class Snake {
             
             if (screen.x < -margin || screen.x > window.canvas.width + margin ||
                 screen.y < -margin || screen.y > window.canvas.height + margin) continue;
+            
+            // Calculate tapered size for this segment
+            const segmentProgress = i / (this.segments.length - 1); // 0 at head, 1 at tail
+            
+            // Use a more gradual tapering curve
+            // Keep full size for first 40% of body, then gradually taper
+            let taperMultiplier;
+            if (segmentProgress < 0.4) {
+                taperMultiplier = 1.0; // Full size for first 40%
+            } else {
+                // Smooth tapering from 40% to end
+                const taperProgress = (segmentProgress - 0.4) / 0.6; // Normalize to 0-1 for taper region
+                // Use a power curve for smooth tapering, minimum 0.3x size at tail
+                taperMultiplier = 1.0 - (taperProgress * taperProgress * 0.7); // Quadratic taper to 0.3x
+            }
+            
+            const effectiveSegmentSize = baseSegmentSize * taperMultiplier;
+            const minSize = isMobile ? 6 : 8; // Slightly reduced minimum for better visibility
+            const maxSize = isMobile ? 30 : 40;
+            const clampedSize = Math.max(minSize, Math.min(maxSize, effectiveSegmentSize));
             
             this.drawSegmentBody(screen, i, clampedSize, skinImg, emoji);
         }
