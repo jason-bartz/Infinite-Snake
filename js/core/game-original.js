@@ -14325,7 +14325,8 @@
             }, 500);
         });
         
-        // Persistent stars animation for all screens
+        // Persistent stars animation for all screens - REMOVED to eliminate transition star rendering
+        /*
         document.addEventListener('DOMContentLoaded', function() {
             const persistentCanvas = document.getElementById('persistentStarsCanvas');
             const ctx = persistentCanvas.getContext('2d');
@@ -14472,6 +14473,7 @@
             // Start animation
             requestAnimationFrame(animateStars);
         });
+        */
         
         // Try to play music on first user interaction
         document.addEventListener('click', function playMusicOnInteraction() {
