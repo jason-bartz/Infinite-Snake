@@ -286,7 +286,6 @@ class PlayerStats {
         
         // Check for lore unlocks after saving stats
         if (window.loreUnlockManager && window.loreUnlockManager.checkAllLoreUnlocks) {
-            console.log('[STATS] Checking lore unlocks at game end');
             setTimeout(() => {
                 window.loreUnlockManager.checkAllLoreUnlocks();
             }, 100);
@@ -474,7 +473,6 @@ class PlayerStats {
 
     checkLoreUnlocks() {
         if (window.loreUnlockManager && window.loreUnlockManager.checkAllLoreUnlocks) {
-            console.log('[STATS] Periodic lore unlock check');
             window.loreUnlockManager.checkAllLoreUnlocks();
         }
     }
@@ -519,15 +517,7 @@ class PlayerStats {
 
     // Debug method to view all stats
     debugStats() {
-        console.log('Player Stats:', this.stats);
-        console.log('Session Stats:', this.sessionStats);
-        console.log('=== Score Debug ===');
-        console.log('Total Score:', this.getTotalScore());
-        console.log('High Score:', this.getHighScore());
-        console.log('Session Score:', this.sessionStats.score);
-        console.log('=== Discovery Debug ===');
-        console.log('Total Discoveries:', this.getTotalDiscoveries());
-        console.log('Discovered Elements:', Array.from(this.stats.stats.lifetime.elementsDiscovered));
+        // Debug method removed for production
     }
     
     // Reset all stats
@@ -536,7 +526,6 @@ class PlayerStats {
             localStorage.removeItem(this.STORAGE_KEY);
             this.stats = this.createDefaultStats();
             this.sessionStats = this.initSessionStats();
-            console.log('All player stats have been reset!');
             window.location.reload();
         }
     }
@@ -565,8 +554,6 @@ class PlayerStats {
             localStorage.removeItem('leaderboardCollapsed');
             localStorage.removeItem('lastUsername');
             
-            console.log('🔄 ALL game data has been reset!');
-            console.log('Stats, skins, discoveries, and settings have been cleared.');
             
             // Reload the page
             window.location.reload();

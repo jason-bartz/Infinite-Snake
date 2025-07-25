@@ -30,7 +30,6 @@ class KillstreakManager {
             audio.volume = 0.7;
             // Add error handling for missing audio files
             audio.onerror = () => {
-                console.log(`Killstreak audio not found: ${data.file}.mp3`);
             };
             this.audioCache[kills] = audio;
         });
@@ -51,7 +50,6 @@ class KillstreakManager {
         // Add 1 second bonus to streak timeout after each kill
         this.streakTimeout += 1000;
         
-        console.log('[KILLSTREAK] Kill registered, current streak:', this.currentStreak);
         
         // Check for milestone
         const milestone = this.milestones[this.currentStreak];
@@ -66,25 +64,17 @@ class KillstreakManager {
         
         // Play audio announcement
         this.playKillstreakAudio(kills);
-        
-        // Track killstreak analytics
-        if (window.GameAnalyticsWrapper) {
-            window.GameAnalyticsWrapper.trackKillStreak(milestone.name, kills);
-        }
     }
     
     showKillstreakMessage(streakName, medalFile) {
-        console.log('[KILLSTREAK] Attempting to show message:', streakName, medalFile);
         
         // Check if game has started
         if (typeof window.gameStarted === 'undefined' || !window.gameStarted) {
-            console.log('[KILLSTREAK] Game not started, skipping message');
             return;
         }
         
         const popup = document.getElementById('killstreakDisplay');
         if (!popup) {
-            console.log('[KILLSTREAK] killstreakDisplay element not found!');
             return;
         }
         
@@ -95,15 +85,12 @@ class KillstreakManager {
         const medalHtml = `<img src="assets/kill-medals/${medalFileName}.png" class="killstreak-medal" alt="${streakName}">`;
         const messageHtml = `${medalHtml}<div class="killstreak-text">${streakName}</div>`;
         
-        console.log('[KILLSTREAK] Setting popup HTML:', messageHtml);
         popup.innerHTML = messageHtml;
         popup.className = 'show';
-        console.log('[KILLSTREAK] Popup classes:', popup.className);
         
         // Auto-hide after 4 seconds
         clearTimeout(this.messageTimeout);
         this.messageTimeout = setTimeout(() => {
-            console.log('[KILLSTREAK] Hiding message');
             popup.classList.remove('show');
         }, 4000);
     }
@@ -117,7 +104,7 @@ class KillstreakManager {
             // Clone and play to allow overlapping sounds
             const audioClone = audio.cloneNode();
             audioClone.volume = audio.volume;
-            audioClone.play().catch(e => console.log('Killstreak audio play failed:', e));
+            audioClone.play().catch(e => {});
         }
     }
     
@@ -157,7 +144,6 @@ window.testKillstreak = function(streakNumber) {
     // Validate input
     const validStreaks = Object.keys(window.killstreakManager.milestones).map(Number);
     if (!streakNumber) {
-        console.log('[KILLSTREAK TEST] Usage: testKillstreak(number)');
         console.log('[KILLSTREAK TEST] Available streaks:', validStreaks.join(', '));
         return;
     }
