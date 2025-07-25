@@ -80,7 +80,9 @@
         };
         
         function getCachedEmoji(emoji, size) {
-            const validSize = Math.max(1, Math.round(size) || 20);
+            // Increase emoji size by 50% on mobile
+            const mobileMultiplier = isMobile ? 1.5 : 1.0;
+            const validSize = Math.max(1, Math.round((size || 20) * mobileMultiplier));
             const key = `${emoji}_${validSize}`;
             
             if (emojiCache.has(key)) {
@@ -238,7 +240,7 @@
         let gameTarget = 0;
         let deathCount = 0;
         let camera = { x: WORLD_SIZE / 2, y: WORLD_SIZE / 2 };
-        let cameraZoom = 1.0; // Same zoom for mobile and desktop for consistency
+        let cameraZoom = 1.15; // Increased zoom by 15% for better visibility
         
         let lastTime = 0;
         let frameCount = 0;
@@ -729,6 +731,11 @@
             if (!isSpecial) {
                 if (planetId === 'planet-7' || planetId === 'planet-19') frameCount = 120;
                 else if (planetId >= 'planet-21' && planetId <= 'planet-24') frameCount = 8;
+            }
+            
+            // If it's a special planet, override the radius to always be small
+            if (isSpecial) {
+                position.radius = 40; // Small size for special planets
             }
             
             pixelPlanets.push({
@@ -1530,6 +1537,11 @@
         
         // Game mode selection
         function selectGameMode(mode) {
+            // On mobile, only allow cozy mode
+            if (isMobile && mode !== 'cozy') {
+                return; // Don't allow selection of other modes
+            }
+            
             playUISound();
             gameMode = mode;
             window.gameMode = gameMode; // Expose globally for Snake.js access
@@ -1543,7 +1555,7 @@
             
             // Apply purple background immediately for cozy mode (desktop and mobile)
             if (gameMode === 'cozy') {
-                document.body.style.backgroundImage = "url('/assets/background/purple-bg.png')";
+                document.body.style.backgroundImage = "url('assets/background/purple-bg.png')";
                 document.body.style.backgroundSize = "cover";
                 document.body.style.backgroundPosition = "center center";
                 document.body.style.backgroundRepeat = "no-repeat";
@@ -1611,6 +1623,11 @@
                         }
                         
                         // Background is already applied in selectGameMode
+                        // Ensure canvas stays transparent
+                        const gameCanvas = document.getElementById('gameCanvas');
+                        if (gameCanvas) {
+                            gameCanvas.style.backgroundColor = 'transparent';
+                        }
                     }
                 }, 100);
             }, 300);
@@ -2586,7 +2603,8 @@
                         if (isFinite(angleChange)) {
                             this.angle += angleChange;
                         }
-                        this.isBoosting = mouseDown && this.stamina > 0;
+                        // No boost on mobile anymore
+                        this.isBoosting = false;
                     } else if (controlScheme === 'arrows') {
                         // Arrow keys
                         if (keys['ArrowLeft']) this.angle -= TURN_SPEED * turnMultiplier;
@@ -3887,22 +3905,25 @@
                             // Save context state
                             ctx.save();
                             
-                            // Add golden glow effect
+                            // First pass: Draw glow effect only
                             ctx.shadowColor = '#FFD700';
-                            ctx.shadowBlur = 20;
-                            
-                            // Draw golden outline
+                            ctx.shadowBlur = 15; // Reduced from 20
+                            ctx.shadowOffsetX = 0;
+                            ctx.shadowOffsetY = 0;
                             ctx.strokeStyle = '#FFD700';
-                            ctx.lineWidth = 6;
+                            ctx.lineWidth = 4; // Reduced from 6
                             ctx.strokeText(this.name, screenX, nameY);
                             
-                            // Draw black inner stroke for readability
+                            // Reset shadow for subsequent draws
                             ctx.shadowBlur = 0;
+                            ctx.shadowColor = 'transparent';
+                            
+                            // Second pass: Draw black outline for readability
                             ctx.strokeStyle = 'black';
-                            ctx.lineWidth = 2;
+                            ctx.lineWidth = 3;
                             ctx.strokeText(this.name, screenX, nameY);
                             
-                            // Draw white fill text
+                            // Final pass: Draw white fill text
                             ctx.fillStyle = 'white';
                             ctx.fillText(this.name, screenX, nameY);
                             
@@ -6851,6 +6872,9 @@
             snakes.push(currentBoss);
             bossEncounterActive = true;
             
+            // Hide hint during boss battle
+            hideGameHint();
+            
             // Play boss laugh sound on spawn
             if (!musicMuted && BOSS_TYPES[selectedBoss].laughSound) {
                 const laughSound = new Audio(BOSS_TYPES[selectedBoss].laughSound);
@@ -8746,6 +8770,41 @@
         // Expose showMessage globally
         window.showMessage = showMessage;
         
+        // Game hint system
+        let hintTimeout = null;
+        function showGameHint() {
+            // Don't show if game is not running or player is dead
+            if (!gameStarted || !playerSnake || !playerSnake.alive) return;
+            
+            // Don't show during boss battles
+            if (bossEncounterActive) return;
+            
+            const hintElement = document.getElementById('gameHint');
+            if (!hintElement) return;
+            
+            // Set the hint text
+            hintElement.textContent = "💡 Hint: When your elements won't combine, 🌀 Void Orbs can clear your bank for points!";
+            
+            // Show the hint
+            hintElement.classList.add('show');
+            
+            // Hide after 8 seconds
+            hintTimeout = setTimeout(() => {
+                hideGameHint();
+            }, 8000);
+        }
+        
+        function hideGameHint() {
+            const hintElement = document.getElementById('gameHint');
+            if (hintElement) {
+                hintElement.classList.remove('show');
+            }
+            if (hintTimeout) {
+                clearTimeout(hintTimeout);
+                hintTimeout = null;
+            }
+        }
+        
         // Boss Victory Message function
         function showBossVictoryMessage(boss, skinUnlocked, elementBankExpanded) {
             const victoryBox = document.getElementById('bossVictoryMessage');
@@ -9885,7 +9944,7 @@
             if (deathSequenceActive) {
                 deathSequenceActive = false;
                 deathCameraAnimation.active = false;
-                cameraZoom = isMobile ? 0.9375 : 1.0; // Mobile zoom increased by 25% (0.75 * 1.25)
+                cameraZoom = isMobile ? 1.078125 : 1.15; // Increased by 15% (mobile: 0.9375 * 1.15, desktop: 1.0 * 1.15)
             }
             
             // Reset death processed flag
@@ -11782,6 +11841,27 @@
         
         function startGame() {
             
+            // Show mobile controls when game starts
+            if (isMobile) {
+                const joystick = document.getElementById('virtualJoystick');
+                const boostBtn = document.getElementById('boostButton');
+                if (joystick) joystick.style.display = 'block';
+                // Don't show boost button on mobile anymore
+                if (boostBtn) boostBtn.style.display = 'none';
+            }
+            
+            // Track games played for hint system
+            let gamesPlayed = parseInt(localStorage.getItem('gamesPlayed') || '0');
+            gamesPlayed++;
+            localStorage.setItem('gamesPlayed', gamesPlayed.toString());
+            
+            // Show hint for first 2 games
+            if (gamesPlayed <= 2) {
+                setTimeout(() => {
+                    showGameHint();
+                }, 10000); // Show after 10 seconds
+            }
+            
             // Cancel any existing game loop
             if (animationFrameId !== null) {
                 cancelAnimationFrame(animationFrameId);
@@ -11935,6 +12015,19 @@
             // Create player snake
             playerSnake = new Snake(WORLD_SIZE / 2, WORLD_SIZE / 2, true);
             window.playerSnake = playerSnake; // Make available globally
+            
+            // Re-apply background for cozy mode in case it was lost
+            if (gameMode === 'cozy') {
+                document.body.style.backgroundImage = "url('assets/background/purple-bg.png')";
+                document.body.style.backgroundSize = "cover";
+                document.body.style.backgroundPosition = "center";
+                document.body.style.backgroundRepeat = "no-repeat";
+                document.body.style.backgroundAttachment = "fixed";
+                const gameCanvas = document.getElementById('gameCanvas');
+                if (gameCanvas) {
+                    gameCanvas.style.backgroundColor = 'transparent';
+                }
+            }
             
             // Set player name
             const playerName = localStorage.getItem('playerName') || window.nameGenerator.generateRandomName();
@@ -12098,6 +12191,9 @@
         }
         
         function stopGame() {
+            
+            // Hide hint if showing
+            hideGameHint();
             
             // Cancel the game loop
             if (animationFrameId !== null) {
@@ -12552,6 +12648,7 @@
                     const skinGrid = document.getElementById('skinGrid');
                     if (skinGrid) {
                         skinGrid.scrollLeft = 0;
+                        skinGrid.scrollTop = 0; // Also reset vertical scroll for mobile
                     }
                     
                     // Update unlock count display
@@ -13420,6 +13517,9 @@
                     window.deathSequenceActive = true;
                     window.deathSequenceTimer = 0;
                     
+                    // Hide hint on death
+                    hideGameHint();
+                    
                     // Save snake state for respawn
                     savedSnakeScore = playerSnake.score;
                     savedSnakeLength = playerSnake.segments.length; // Use segments.length not .length
@@ -13603,6 +13703,19 @@
                     playerSnake = new Snake(WORLD_SIZE / 2, WORLD_SIZE / 2, true);
                     window.playerSnake = playerSnake; // Make available globally
                     
+                    // Re-apply background for cozy mode in case it was lost
+                    if (gameMode === 'cozy') {
+                        document.body.style.backgroundImage = "url('assets/background/purple-bg.png')";
+                        document.body.style.backgroundSize = "cover";
+                        document.body.style.backgroundPosition = "center";
+                        document.body.style.backgroundRepeat = "no-repeat";
+                        document.body.style.backgroundAttachment = "fixed";
+                        const gameCanvas = document.getElementById('gameCanvas');
+                        if (gameCanvas) {
+                            gameCanvas.style.backgroundColor = 'transparent';
+                        }
+                    }
+                    
                     // Set player name
                     const playerName = localStorage.getItem('playerName') || window.nameGenerator.generateRandomName();
                     playerSnake.name = playerName;
@@ -13649,7 +13762,7 @@
                     camera.y = WORLD_SIZE / 2;
                     
                     // Reset camera zoom to default
-                    cameraZoom = isMobile ? 0.9375 : 1.0; // Mobile zoom increased by 25% (0.75 * 1.25)
+                    cameraZoom = isMobile ? 1.078125 : 1.15; // Increased by 15% (mobile: 0.9375 * 1.15, desktop: 1.0 * 1.15)
                     deathCameraAnimation.active = false;
                     
                     // Reset respawn timer
@@ -13692,6 +13805,14 @@
             // Calculate interpolation factor for smooth rendering
             const interpolation = accumulator / FIXED_TIMESTEP;
             
+            // Reset canvas context state to prevent accumulation of transforms
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.globalAlpha = 1;
+            ctx.fillStyle = '#000';
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([]);
+            
             // Update camera to follow player with interpolation
             if (playerSnake && playerSnake.alive && playerSnake.segments.length > 0) {
                 const head = playerSnake.segments[0];
@@ -13731,8 +13852,9 @@
                 bossScreenShakeTimer--;
             }
             
-            // Draw everything
-            drawBackground();
+            // Draw everything - wrapped in try-catch to prevent blanking
+            try {
+                drawBackground();
             
             // Draw spaceships in pure screen space (behind all game elements) - REMOVED
             // if (spaceshipManager) {
@@ -13837,6 +13959,16 @@
             
             // Draw borders LAST to ensure they appear on top of everything
             drawBorders();
+            
+            } catch (error) {
+                gameLogger.error('RENDER', 'Error during rendering:', error);
+                // Reset context state on error
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+                ctx.globalAlpha = 1;
+                // Try to show something so the screen isn't blank
+                ctx.fillStyle = '#000011';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
         }
         
         // Initialize mobile controls
@@ -13849,6 +13981,10 @@
             const joystick = document.getElementById('virtualJoystick');
             const knob = document.getElementById('joystickKnob');
             const boostBtn = document.getElementById('boostButton');
+            
+            // Hide controls initially until game starts
+            if (joystick) joystick.style.display = 'none';
+            if (boostBtn) boostBtn.style.display = 'none';
             
             let joystickTouch = null;
             

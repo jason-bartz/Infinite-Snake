@@ -1,0 +1,248 @@
+/* Performance Optimizations for Safari and All Browsers */
+/* This file contains optimized styles that replace performance-heavy CSS properties */
+
+/* IMPORTANT: These optimizations are applied progressively to avoid breaking functionality */
+
+/* =============== BACKDROP-FILTER REPLACEMENTS =============== */
+
+/* Replace backdrop-filter in unlock notifications */
+.unlock-content {
+    /* Remove backdrop-filter and use layered backgrounds instead */
+    background: linear-gradient(
+        to bottom,
+        rgba(26, 26, 26, 0.95) 0%,
+        rgba(26, 26, 26, 0.9) 100%
+    );
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    /* Add subtle box shadow for depth */
+    box-shadow: 
+        0 4px 20px rgba(0, 0, 0, 0.5),
+        0 0 40px rgba(0, 0, 0, 0.3) inset;
+    /* Ensure text remains readable */
+    position: relative;
+}
+
+/* Add a pseudo-element for additional visual depth if needed */
+.unlock-content::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    right: -1px;
+    bottom: -1px;
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.1) 0%,
+        transparent 50%,
+        rgba(0, 0, 0, 0.1) 100%
+    );
+    border-radius: 15px;
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* Replace backdrop-filter in discovery feed */
+.discovery-feed::before {
+    /* Use solid gradient instead of blur */
+    background: linear-gradient(
+        to right,
+        rgba(0, 0, 0, 0.8) 0%,
+        rgba(0, 0, 0, 0.7) 50%,
+        rgba(0, 0, 0, 0.4) 85%,
+        rgba(0, 0, 0, 0) 100%
+    );
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+/* Replace backdrop-filter in mobile discovery messages */
+body.mobile .discovery-message {
+    background: linear-gradient(
+        to right,
+        rgba(16, 32, 64, 0.95) 0%,
+        rgba(16, 32, 64, 0.85) 50%,
+        rgba(16, 32, 64, 0.6) 85%,
+        rgba(16, 32, 64, 0) 100%
+    );
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    /* Add subtle shadow for depth */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* =============== WILL-CHANGE OPTIMIZATIONS =============== */
+
+/* Remove excessive will-change properties */
+.discovery-feed {
+    will-change: auto !important;
+}
+
+/* Only apply will-change during actual animations */
+.discovery-feed.transitioning {
+    will-change: transform, opacity;
+}
+
+/* Remove will-change after animation completes */
+.discovery-feed:not(.transitioning) {
+    will-change: auto !important;
+}
+
+/* =============== TRANSFORM OPTIMIZATIONS =============== */
+
+/* Force hardware acceleration for smooth animations */
+.game-canvas,
+.mobile-ui,
+.pause-overlay,
+.unlock-notification {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+}
+
+/* Optimize transform-heavy elements */
+.animated-element {
+    transform-origin: center center;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    perspective: 1000px;
+    -webkit-perspective: 1000px;
+}
+
+/* =============== ANIMATION OPTIMIZATIONS =============== */
+
+/* Reduce animation complexity on low-end devices */
+@media (max-width: 768px) {
+    * {
+        animation-duration: 0.3s !important;
+        transition-duration: 0.3s !important;
+    }
+    
+    /* Disable non-essential animations */
+    .decorative-animation {
+        animation: none !important;
+    }
+}
+
+/* Use GPU-accelerated properties only */
+.smooth-transition {
+    transition-property: transform, opacity;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* =============== SAFARI-SPECIFIC OPTIMIZATIONS =============== */
+
+/* Target Safari specifically for additional optimizations */
+@supports (-webkit-backdrop-filter: none) {
+    /* Ensure no backdrop filters are used in Safari */
+    * {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+    
+    /* Optimize shadows for Safari */
+    .shadow-element {
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        /* Avoid multiple shadows in Safari */
+    }
+}
+
+/* =============== SCROLL OPTIMIZATION =============== */
+
+/* Optimize scrollable containers */
+.scrollable-container {
+    -webkit-overflow-scrolling: touch;
+    overflow-scrolling: touch;
+    scroll-behavior: smooth;
+}
+
+/* Prevent repaints during scroll */
+.scroll-content {
+    transform: translateZ(0);
+    will-change: scroll-position;
+}
+
+/* =============== FONT RENDERING OPTIMIZATION =============== */
+
+/* Optimize font rendering */
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* =============== IMAGE OPTIMIZATION =============== */
+
+/* Optimize image rendering */
+img, 
+.emoji {
+    image-rendering: auto;
+    -ms-interpolation-mode: bicubic;
+}
+
+/* For pixel art or sharp images */
+.pixel-art {
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+}
+
+/* =============== iOS PERFORMANCE MODE =============== */
+
+/* Special optimizations for iOS devices */
+body.ios-performance-mode {
+    /* Disable all animations on iOS */
+    * {
+        animation: none !important;
+        transition: none !important;
+    }
+    
+    /* Simplify shadows */
+    * {
+        box-shadow: none !important;
+        text-shadow: none !important;
+    }
+    
+    /* Disable transforms on non-essential elements */
+    .decorative-element {
+        transform: none !important;
+    }
+}
+
+/* Ensure game canvas still works properly on iOS */
+body.ios-performance-mode #gameCanvas {
+    /* Keep hardware acceleration for game */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+}
+
+/* =============== REDUCE MOTION PREFERENCES =============== */
+
+/* Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    /* Disable parallax effects */
+    .parallax {
+        transform: none !important;
+    }
+}
+
+/* =============== LOW MEMORY MODE =============== */
+
+/* Optimizations for devices with low memory */
+@media (max-device-memory: 2) {
+    /* Reduce image quality */
+    img {
+        image-rendering: auto;
+    }
+    
+    /* Limit shadows and effects */
+    * {
+        box-shadow: none !important;
+        filter: none !important;
+    }
+}
