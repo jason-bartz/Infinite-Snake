@@ -378,7 +378,7 @@
         let voidOrbs = [];
         let lastVoidOrbSpawn = 0;
         const VOID_ORB_SPAWN_INTERVAL = 50000; // Reduced from 75s to 50s for more frequent spawns
-        const VOID_ORB_SPAWN_COUNT = 6; // Increased from 4 to 6 for more orbs on map
+        const VOID_ORB_SPAWN_COUNT = 7; // Increased from 6 to 7 for more orbs on map
         
         let catalystGems = [];
         let lastCatalystGemSpawn = 0;
@@ -979,7 +979,7 @@
             'skibidi': { name: 'Mr. Swirley', unlocked: false, colors: ['#dad8c7', '#dad8c7'] },
             'snake-2': { name: 'Snek II', unlocked: false, colors: ['#658d78', '#658d78'] },
             'space-cadet': { name: 'Cosmic Ray', unlocked: false, colors: ['#ffffe0', '#ffffe0'] },
-            'tornado': { name: 'Whirlwind', unlocked: false, colors: ['#fafafa', '#fafafa'] },
+            'tornado': { name: 'Whirlwind', unlocked: false, colors: ['#ffbd77', '#ffbd77'] },
             'tv': { name: 'CRT Surfer', unlocked: false, colors: ['#72b6cf', '#72b6cf'] },
             'unicorn': { name: 'Tres Commas', unlocked: false, colors: ['#ffffe0', '#ffffe0'] },
             'brick-man': { name: 'The Special', unlocked: false, colors: ['#ff6d4d', '#ff6d4d'] },
@@ -997,6 +997,7 @@
             'popcorn': { name: 'Colonel Kernel', unlocked: false, colors: ['#ffde59', '#ffde59'] },
             'pixel': { name: 'Pixel', unlocked: false, colors: ['#75c33c', '#75c33c'] },
             'midnight': { name: 'Midnight', unlocked: false, colors: ['#5c486a', '#5c486a'] },
+            'gilly': { name: 'Gilly', unlocked: false, colors: ['#f6cfdc', '#f6cfdc'] },
             'pyraxis': { name: 'Pyraxis the Molten', unlocked: false, colors: ['#c74250', '#c74250'], isBoss: true },
             'abyssos': { name: 'Abyssos the Deep One', unlocked: false, colors: ['#80b878', '#80b878'], isBoss: true },
             'osseus': { name: 'Osseus the Bone Sovereign', unlocked: false, colors: ['#7a4900', '#7a4900'], isBoss: true },
@@ -1030,7 +1031,8 @@
                         'green-dragon': ['#80b878', '#80b878'],
                         'buffalo': ['#fdfdfd', '#fdfdfd'],
                         'af-one': ['#b93c49', '#b93c49'],
-                        'floral': ['#ffc2e8', '#ffc2e8']
+                        'floral': ['#ffc2e8', '#ffc2e8'],
+                        'gilly': ['#f6cfdc', '#f6cfdc']
                     };
                     
                     mergedMetadata[newId] = {
@@ -11999,6 +12001,9 @@
             
             snakes.push(playerSnake);
             
+            // Add player's skin to used skins to prevent AI from using it
+            usedAISkins.add(currentPlayerSkin);
+            
             // Initialize leaderboard session for infinite mode
             if (gameMode === 'infinite') {
                 leaderboardSubmitted = false;
@@ -12084,7 +12089,7 @@
             
             
             // Spawn initial void orbs to help players clear banks early
-            const INITIAL_VOID_ORB_COUNT = 2; // Start with 2 void orbs on the map
+            const INITIAL_VOID_ORB_COUNT = 3; // Start with 3 void orbs on the map
             for (let i = 0; i < INITIAL_VOID_ORB_COUNT; i++) {
                 // Distribute initial void orbs across different map sections
                 const sectionWidth = WORLD_SIZE / INITIAL_VOID_ORB_COUNT;
@@ -12589,7 +12594,8 @@
                             'green-dragon': ['#80b878', '#80b878'],
                             'buffalo': ['#fdfdfd', '#fdfdfd'],
                             'af-one': ['#b93c49', '#b93c49'],
-                            'floral': ['#ffc2e8', '#ffc2e8']
+                            'floral': ['#ffc2e8', '#ffc2e8'],
+                            'gilly': ['#f6cfdc', '#f6cfdc']
                         };
                         
                         mergedMetadata[newId] = {

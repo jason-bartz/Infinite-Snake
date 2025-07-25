@@ -1696,7 +1696,7 @@ Terms & Conditions:
 
 Technical Support: "Have you tried turning the universe off and on again?"`,
         unlockCriteria: { type: 'collectExotics', value: 5 },
-        unlockText: 'Collect all other exotic skins'
+        unlockText: 'Collect 5 other exotic skins'
     },
 
     'skin-lore-30': {
@@ -1781,5 +1781,48 @@ Certificate: AUTHENTICATED ✓
 Status: Too fresh to retire`,
         unlockCriteria: { type: 'modeGames', mode: 'cozy', value: 50 },
         unlockText: 'Play 50 Cozy games'
+    },
+    'skin-lore-gilly': {
+        id: 'skin-lore-gilly',
+        number: '095',
+        title: 'Longevity Protocol Documentation',
+        category: 'serpent',
+        content: `GILLY'S DAILY OPTIMIZATION STACK
+"Don't Die" Newsletter - Issue #∞
+
+Morning Routine (4:47 AM precisely):
+- Cold plunge in primordial lake (65 million years and counting)
+- Blue-green algae smoothie (own cultivation)
+- 47 supplements (mostly pond scum)
+- Red light therapy (volcanic vents)
+- Measure telomeres (still infinite)
+
+BIOMARKERS UPDATE:
+- Biological age: -27 years
+- Regeneration speed: 0.3 seconds/limb
+- Mitochondrial function: "Concerning" per last physician
+- Sleep score: N/A (transcended need in Cretaceous)
+
+"People ask about my protocol," Gilly explains during morning ice bath. "It's simple: never mature, track everything, question nothing."
+
+Current Stack:
+- NMN (Naturally Maintaining Neoteny)
+- Resveratrol (from fermented lake bottom)
+- Metformin (found in cave moss)
+- Daily fasting (except when eating researchers)
+- Zone 2 cardio (floating counts)
+
+Latest Experiments:
+- Grew third liver "for redundancy"
+- A/B testing head regeneration speeds
+- Optimizing gill-to-lung ratio (still 100:0)
+
+DISCLAIMER: Subject refuses peer review, citing "haters gonna hate." Previous attempts at scientific validation resulted in consumed scientists.
+
+Sleep Protocol: "Death is just really deep sleep and I'm not interested."
+
+Subscribe to premium for exclusive content on achieving immortality through aggressive immaturity.`,
+        unlockCriteria: { type: 'catalystGems', value: 1000 },
+        unlockText: 'Collect 1,000 catalyst gems total'
     }
 };

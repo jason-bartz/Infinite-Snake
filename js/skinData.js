@@ -511,8 +511,8 @@ const skinData = {
         bio: 'Collected all the stones just to make that one joke everyone saw coming.',
         unlockCriteria: {
             type: 'collectExotics',
-            value: 5, // All other exotic skins
-            description: 'Collect all other exotic skins'
+            value: 5,
+            description: 'Collect 5 other exotic skins'
         }
     },
     'eldritch-horror': {
@@ -535,6 +535,16 @@ const skinData = {
             endHour: 3,
             gamesRequired: 13,
             description: 'Play 13 games between midnight and 3 AM'
+        }
+    },
+    'gilly': {
+        name: 'Gilly',
+        rarity: 'exotic',
+        bio: 'Longevity influencer who achieved immortality through a strict regimen of cold plunges, intermittent fasting, and refusing to evolve. Tracks biomarkers obsessively, still has gills.',
+        unlockCriteria: {
+            type: 'catalystGems',
+            value: 1000,
+            description: 'Collect 1,000 catalyst gems total'
         }
     },
 
