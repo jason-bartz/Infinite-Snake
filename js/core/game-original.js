@@ -470,8 +470,8 @@
         // Asteroid system
         let asteroids = [];
         
-        // Spaceship system
-        let spaceshipManager = null;
+        // Spaceship system - REMOVED
+        // let spaceshipManager = null;
         
         const pixelStarLayers = [
             { stars: [], speed: 0.05, size: 1, color: '#666', count: 100 },
@@ -11896,10 +11896,10 @@
             // Initialize asteroids with better spacing
             asteroids = [];
             
-            // Initialize spaceship manager
-            if (!spaceshipManager && window.SpaceshipManager) {
-                spaceshipManager = new window.SpaceshipManager(ctx, canvas);
-            }
+            // Initialize spaceship manager - REMOVED
+            // if (!spaceshipManager && window.SpaceshipManager) {
+            //     spaceshipManager = new window.SpaceshipManager(ctx, canvas);
+            // }
             const ASTEROID_COUNT = isMobile ? 15 : 30; // Much fewer asteroids on mobile
             const MIN_DISTANCE = isMobile ? 1200 : 800; // Wider spacing on mobile
             
@@ -12549,10 +12549,147 @@
                     currentRarityFilter = this.getAttribute('data-rarity');
                     buildSkinGrid();
                     
+                    // Reset scroll position to the beginning
+                    const skinGrid = document.getElementById('skinGrid');
+                    if (skinGrid) {
+                        skinGrid.scrollLeft = 0;
+                    }
+                    
                     // Update unlock count display
                     updateUnlockCountForRarity(currentRarityFilter);
                 });
             });
+            
+            // Add drag scrolling functionality to skinGrid
+            const skinGrid = document.getElementById('skinGrid');
+            if (skinGrid) {
+                let isMouseDown = false;
+                let startX;
+                let scrollLeft;
+                let totalMovement = 0;
+                let velocity = 0;
+                let lastX = 0;
+                let lastTime = Date.now();
+                let momentumId = null;
+                
+                const stopMomentum = () => {
+                    if (momentumId) {
+                        cancelAnimationFrame(momentumId);
+                        momentumId = null;
+                    }
+                };
+                
+                const startMomentum = () => {
+                    const deceleration = 0.95;
+                    const minVelocity = 0.5;
+                    
+                    const momentum = () => {
+                        if (Math.abs(velocity) > minVelocity) {
+                            skinGrid.scrollLeft -= velocity;
+                            velocity *= deceleration;
+                            momentumId = requestAnimationFrame(momentum);
+                        } else {
+                            stopMomentum();
+                        }
+                    };
+                    
+                    momentumId = requestAnimationFrame(momentum);
+                };
+                
+                skinGrid.addEventListener('mousedown', (e) => {
+                    // Only handle left mouse button
+                    if (e.button !== 0) return;
+                    
+                    isMouseDown = true;
+                    startX = e.pageX;
+                    scrollLeft = skinGrid.scrollLeft;
+                    totalMovement = 0;
+                    skinGrid.totalMovement = 0; // Store on element for access in click handlers
+                    velocity = 0;
+                    lastX = e.pageX;
+                    lastTime = Date.now();
+                    
+                    stopMomentum();
+                    
+                    // Don't prevent default here - it prevents clicks!
+                });
+                
+                skinGrid.addEventListener('mouseleave', () => {
+                    if (isMouseDown) {
+                        isMouseDown = false;
+                        skinGrid.classList.remove('dragging');
+                        if (Math.abs(velocity) > 2) {
+                            startMomentum();
+                        }
+                        // Reset totalMovement when mouse leaves
+                        setTimeout(() => {
+                            skinGrid.totalMovement = 0;
+                        }, 100);
+                    }
+                });
+                
+                skinGrid.addEventListener('mouseup', (e) => {
+                    if (!isMouseDown) return;
+                    
+                    isMouseDown = false;
+                    skinGrid.classList.remove('dragging');
+                    
+                    // Start momentum scrolling if velocity is significant
+                    if (Math.abs(velocity) > 2) {
+                        startMomentum();
+                    }
+                    
+                    // If we dragged, block the next click
+                    if (totalMovement > 5) {
+                        blockNextClick = true;
+                    }
+                    
+                    // Reset totalMovement
+                    totalMovement = 0;
+                    skinGrid.totalMovement = 0;
+                });
+                
+                skinGrid.addEventListener('mousemove', (e) => {
+                    if (!isMouseDown) return;
+                    
+                    const x = e.pageX;
+                    const walk = (x - startX) * 1.5; // Scroll speed multiplier
+                    
+                    // Track movement for click vs drag detection
+                    const movement = Math.abs(x - startX);
+                    if (movement > totalMovement) {
+                        totalMovement = movement;
+                        skinGrid.totalMovement = totalMovement;
+                    }
+                    
+                    // Only start dragging after a threshold
+                    if (totalMovement > 3) {
+                        e.preventDefault();
+                        skinGrid.classList.add('dragging');
+                        skinGrid.scrollLeft = scrollLeft - walk;
+                        
+                        // Calculate velocity for momentum
+                        const now = Date.now();
+                        const dt = now - lastTime;
+                        if (dt > 0) {
+                            velocity = (e.pageX - lastX) / dt * 10;
+                        }
+                        lastX = e.pageX;
+                        lastTime = now;
+                    }
+                });
+                
+                // Add a flag to track if we should block the next click
+                let blockNextClick = false;
+                
+                // Prevent click events on skin items after dragging
+                skinGrid.addEventListener('click', (e) => {
+                    if (blockNextClick) {
+                        e.stopPropagation();
+                        blockNextClick = false;
+                    }
+                }, true);
+            }
             
             // Initialize player stats and unlock manager
             if (window.PlayerStats) {
@@ -13015,10 +13152,10 @@
                     }
                 }
                 
-                // Update spaceships
-                if (spaceshipManager) {
-                    spaceshipManager.update();
-                }
+                // Update spaceships - REMOVED
+                // if (spaceshipManager) {
+                //     spaceshipManager.update();
+                // }
                 
                 // Check collisions
                 checkCollisions();
@@ -13598,13 +13735,13 @@
             // Draw everything
             drawBackground();
             
-            // Draw spaceships in pure screen space (behind all game elements)
-            if (spaceshipManager) {
-                ctx.save();
-                ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset to identity matrix to remove all transformations
-                spaceshipManager.render();
-                ctx.restore();
-            }
+            // Draw spaceships in pure screen space (behind all game elements) - REMOVED
+            // if (spaceshipManager) {
+            //     ctx.save();
+            //     ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset to identity matrix to remove all transformations
+            //     spaceshipManager.render();
+            //     ctx.restore();
+            // }
             
             // Draw asteroids (behind elements but in front of background)
             for (let i = 0; i < asteroids.length; i++) {

@@ -2009,21 +2009,12 @@
         .discovery-feed-inner {
             overflow-y: auto;
             overflow-x: hidden;
-            scrollbar-width: thin;
-            scrollbar-color: rgba(138, 43, 226, 0.3) transparent;
+            scrollbar-width: none; /* Hide scrollbar for Firefox */
+            -ms-overflow-style: none; /* Hide scrollbar for IE and Edge */
         }
         
         .discovery-feed-inner::-webkit-scrollbar {
-            width: 4px;
-        }
-        
-        .discovery-feed-inner::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        
-        .discovery-feed-inner::-webkit-scrollbar-thumb {
-            background: rgba(138, 43, 226, 0.3);
-            border-radius: 2px;
+            display: none; /* Hide scrollbar for Chrome, Safari and Opera */
         }
         
         .discovery-message {
@@ -3342,6 +3333,31 @@
             background: var(--snes-cosmic-pink);
         }
         
+        /* Drag scrolling styles */
+        #skinGrid.dragging {
+            cursor: grabbing !important;
+            user-select: none !important;
+            -webkit-user-select: none !important;
+        }
+        
+        #skinGrid.dragging .skin-item {
+            cursor: grabbing !important;
+            pointer-events: none;
+        }
+        
+        #skinGrid.dragging .skin-image {
+            -webkit-user-drag: none;
+            user-drag: none;
+        }
+        
+        #skinGrid:not(.dragging) {
+            cursor: grab;
+        }
+        
+        #skinGrid:not(.dragging):active {
+            cursor: grabbing;
+        }
+        
         .skin-item {
             position: relative;
             background: rgba(255,255,255,0.1);
@@ -3400,6 +3416,10 @@
             image-rendering: -moz-crisp-edges;
             image-rendering: crisp-edges;
             object-fit: contain;
+            -webkit-user-drag: none;
+            user-drag: none;
+            user-select: none;
+            -webkit-user-select: none;
             flex-shrink: 0;
         }
         
