@@ -131,14 +131,8 @@
             const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
             
             if (isMobile) {
-                let mobileScale = 0.75;
-                
-                if (window.updateMobileCanvasScale) {
-                    mobileScale = window.updateMobileCanvasScale();
-                } else {
-                    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-                    mobileScale = 0.75;
-                }
+                // Use consistent scale factor for mobile
+                const mobileScale = 0.8; // Fixed scale for consistency
                 
                 const newWidth = viewportWidth * mobileScale;
                 const newHeight = viewportHeight * mobileScale;
@@ -225,10 +219,13 @@
         function isInViewport(x, y, margin = 100) {
             const screen = worldToScreen(x, y);
             
-            return screen.x >= -margin && 
-                   screen.x <= canvas.width + margin && 
-                   screen.y >= -margin && 
-                   screen.y <= canvas.height + margin;
+            // Increase margin for mobile to account for canvas scaling and prevent premature culling
+            const adjustedMargin = isMobile ? margin * 2 : margin;
+            
+            return screen.x >= -adjustedMargin && 
+                   screen.x <= canvas.width + adjustedMargin && 
+                   screen.y >= -adjustedMargin && 
+                   screen.y <= canvas.height + adjustedMargin;
         }
         
         let gameStarted = false;
@@ -241,7 +238,7 @@
         let gameTarget = 0;
         let deathCount = 0;
         let camera = { x: WORLD_SIZE / 2, y: WORLD_SIZE / 2 };
-        let cameraZoom = isMobile ? 0.9375 : 1.0; // Mobile zoom increased by 25% (0.75 * 1.25)
+        let cameraZoom = 1.0; // Same zoom for mobile and desktop for consistency
         
         let lastTime = 0;
         let frameCount = 0;
@@ -11125,7 +11122,8 @@
             if (assets.nebulaBackground) {
                 // Calculate how many tiles we need to cover the viewport
                 // Apply 100% zoom for classic and infinite modes only
-                const zoomScale = (gameMode === 'classic' || gameMode === 'infinite') ? 2.0 : 1.0;
+                // Reduce zoom for mobile to prevent rendering issues
+                const zoomScale = (gameMode === 'classic' || gameMode === 'infinite') ? (isMobile ? 1.0 : 2.0) : 1.0;
                 const bgWidth = assets.nebulaBackground.width * zoomScale;
                 const bgHeight = assets.nebulaBackground.height * zoomScale;
                 
@@ -11173,7 +11171,8 @@
             // Draw nebula background with reduced tiling for performance
             if (assets.nebulaBackground) {
                 // Apply 100% zoom for classic and infinite modes only
-                const zoomScale = (gameMode === 'classic' || gameMode === 'infinite') ? 2.0 : 1.0;
+                // Reduce zoom for mobile to prevent rendering issues
+                const zoomScale = (gameMode === 'classic' || gameMode === 'infinite') ? (isMobile ? 1.0 : 2.0) : 1.0;
                 const bgWidth = assets.nebulaBackground.width * zoomScale;
                 const bgHeight = assets.nebulaBackground.height * zoomScale;
                 const parallaxFactor = 0.2;

@@ -184,14 +184,22 @@ class Snake {
     }
     
     assignAISkin() {
+        const playerSkin = window.currentPlayerSkin || 'snake-default-green';
         const allSkins = Object.keys(window.skinMetadata || {}).filter(skin => 
-            skin !== 'snake-default-green' && !(window.skinMetadata[skin] && window.skinMetadata[skin].isBoss) && !(window.usedAISkins && window.usedAISkins.has(skin))
+            skin !== 'snake-default-green' && 
+            skin !== playerSkin && 
+            !(window.skinMetadata[skin] && window.skinMetadata[skin].isBoss) && 
+            !(window.usedAISkins && window.usedAISkins.has(skin))
         );
         
         if (allSkins.length === 0) {
             if (window.usedAISkins) window.usedAISkins.clear();
+            // Keep player's skin in the used set even after clearing
+            if (window.usedAISkins && playerSkin) window.usedAISkins.add(playerSkin);
             const resetSkins = Object.keys(window.skinMetadata || {}).filter(skin => 
-                skin !== 'snake-default-green' && !(window.skinMetadata[skin] && window.skinMetadata[skin].isBoss)
+                skin !== 'snake-default-green' && 
+                skin !== playerSkin &&
+                !(window.skinMetadata[skin] && window.skinMetadata[skin].isBoss)
             );
             this.skin = resetSkins[Math.floor(Math.random() * resetSkins.length)];
         } else {
