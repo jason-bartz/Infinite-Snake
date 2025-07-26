@@ -147,7 +147,7 @@ export default async function handler(req, res) {
               const data = JSON.parse(member);
               if (data.id === entryId) {
                 // Update fields
-                if (username) data.username = username.substring(0, 20).trim();
+                if (username) data.username = username.substring(0, 30).trim();
                 if (score !== undefined) data.score = Math.floor(score);
                 
                 // Remove old entry

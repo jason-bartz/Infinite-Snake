@@ -577,7 +577,7 @@ export default async function handler(req, res) {
       // Create score entry with country
       const scoreEntry = {
         id: generateScoreId(),
-        username: cleanUsername.substring(0, 20), // Use cleaned username, limit length
+        username: cleanUsername.substring(0, 30), // Use cleaned username, limit length
         score: Math.floor(score),
         elements_discovered: elements_discovered || 0,
         play_time: play_time || 0,
