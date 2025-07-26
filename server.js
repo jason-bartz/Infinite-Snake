@@ -127,7 +127,32 @@ const server = http.createServer((req, res) => {
     req.on('end', () => {
       try {
         const data = JSON.parse(body);
-        const { element, combinations, emojis } = data;
+        const { element, combinations, emojis, removeFromDeleted } = data;
+        
+        // Remove from deleted combinations if specified
+        if (removeFromDeleted) {
+          const deletedCombosPath = path.join(__dirname, 'elements', 'deleted-combinations.json');
+          
+          try {
+            // Load current deleted combinations
+            let deletedCombos = [];
+            if (fs.existsSync(deletedCombosPath)) {
+              deletedCombos = JSON.parse(fs.readFileSync(deletedCombosPath, 'utf8'));
+            }
+            
+            // Remove the combination from the list
+            const index = deletedCombos.indexOf(removeFromDeleted);
+            if (index > -1) {
+              deletedCombos.splice(index, 1);
+              
+              // Save updated list
+              fs.writeFileSync(deletedCombosPath, JSON.stringify(deletedCombos, null, 2));
+              console.log(`[Save] Removed ${removeFromDeleted} from deleted combinations list`);
+            }
+          } catch (err) {
+            console.error('Error removing from deleted combinations:', err);
+          }
+        }
         
         // Save to custom files
         if (element) {
@@ -174,7 +199,7 @@ const server = http.createServer((req, res) => {
     req.on('end', () => {
       try {
         const data = JSON.parse(body);
-        const { element, combinations, emojis } = data;
+        const { element, combinations, emojis, removeFromDeleted } = data;
         
         // Create backup directory if it doesn't exist
         const backupDir = path.join(__dirname, 'backups');
@@ -254,6 +279,31 @@ const server = http.createServer((req, res) => {
           // Save updated emojis
           fs.writeFileSync(emojisPath, JSON.stringify(allEmojis, null, 2));
           console.log(`[Save] Updated ${Object.keys(emojis).length} emoji mappings in main file`);
+        }
+        
+        // Remove from deleted combinations if specified
+        if (removeFromDeleted) {
+          const deletedCombosPath = path.join(__dirname, 'elements', 'deleted-combinations.json');
+          
+          try {
+            // Load current deleted combinations
+            let deletedCombos = [];
+            if (fs.existsSync(deletedCombosPath)) {
+              deletedCombos = JSON.parse(fs.readFileSync(deletedCombosPath, 'utf8'));
+            }
+            
+            // Remove the combination from the list
+            const index = deletedCombos.indexOf(removeFromDeleted);
+            if (index > -1) {
+              deletedCombos.splice(index, 1);
+              
+              // Save updated list
+              fs.writeFileSync(deletedCombosPath, JSON.stringify(deletedCombos, null, 2));
+              console.log(`[Save] Removed ${removeFromDeleted} from deleted combinations list`);
+            }
+          } catch (err) {
+            console.error('Error removing from deleted combinations:', err);
+          }
         }
         
         res.writeHead(200, { 

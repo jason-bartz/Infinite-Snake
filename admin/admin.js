@@ -842,6 +842,10 @@ window.saveRecipe = async function(oldElem1, oldElem2, result) {
         return;
     }
     
+    // Check if this combination is in the deleted list
+    const normalizedCombo = parseInt(newElem1) <= parseInt(newElem2) ? `${newElem1}+${newElem2}` : `${newElem2}+${newElem1}`;
+    const isDeleted = deletedCombinations.includes(normalizedCombo);
+    
     const existingResult = combinations[`${newElem1}+${newElem2}`] || combinations[`${newElem2}+${newElem1}`];
     if (existingResult && existingResult != result) {
         const existingElement = elements[existingResult];
@@ -850,6 +854,14 @@ window.saveRecipe = async function(oldElem1, oldElem2, result) {
         
         if (!confirm(`⚠️ Warning: This combination already creates "${existingEmoji} ${existingName}".\n\nDo you want to change it to create "${elements[result].name}" instead?`)) {
             return;
+        }
+    }
+    
+    // Remove from deleted combinations list if it was previously deleted
+    if (isDeleted) {
+        const index = deletedCombinations.indexOf(normalizedCombo);
+        if (index > -1) {
+            deletedCombinations.splice(index, 1);
         }
     }
     
@@ -863,7 +875,7 @@ window.saveRecipe = async function(oldElem1, oldElem2, result) {
     newCombos[`${newElem1}+${newElem2}`] = parseInt(result);
     newCombos[`${newElem2}+${newElem1}`] = parseInt(result);
     
-    const saved = await saveToServer(null, newCombos, null);
+    const saved = await saveToServer(null, newCombos, null, isDeleted ? normalizedCombo : null);
     
     if (saved) {
         showMessage('Recipe updated and saved!', 'success');
@@ -987,7 +999,7 @@ function showMessage(text, type) {
 window.showElement = showElement;
 window.forceReload = forceReload;
 
-async function saveToServer(element, newCombinations, newEmojis) {
+async function saveToServer(element, newCombinations, newEmojis, removeFromDeleted) {
     try {
         let response = await fetch('/api/save-element-main', {
             method: 'POST',
@@ -997,7 +1009,8 @@ async function saveToServer(element, newCombinations, newEmojis) {
             body: JSON.stringify({
                 element: element || null,
                 combinations: newCombinations || null,
-                emojis: newEmojis || null
+                emojis: newEmojis || null,
+                removeFromDeleted: removeFromDeleted || null
             })
         });
         
@@ -1010,7 +1023,8 @@ async function saveToServer(element, newCombinations, newEmojis) {
                 body: JSON.stringify({
                     element: element || null,
                     combinations: newCombinations || null,
-                    emojis: newEmojis || null
+                    emojis: newEmojis || null,
+                    removeFromDeleted: removeFromDeleted || null
                 })
             });
         }
@@ -1507,6 +1521,10 @@ window.saveNewRecipe = async function(resultId) {
         return;
     }
     
+    // Check if this combination is in the deleted list
+    const normalizedCombo = parseInt(elem1Id) <= parseInt(elem2Id) ? `${elem1Id}+${elem2Id}` : `${elem2Id}+${elem1Id}`;
+    const isDeleted = deletedCombinations.includes(normalizedCombo);
+    
     // Check if this combination already exists
     const existingResult = combinations[`${elem1Id}+${elem2Id}`] || combinations[`${elem2Id}+${elem1Id}`];
     if (existingResult && existingResult != resultId) {
@@ -1519,6 +1537,14 @@ window.saveNewRecipe = async function(resultId) {
         }
     }
     
+    // Remove from deleted combinations list if it was previously deleted
+    if (isDeleted) {
+        const index = deletedCombinations.indexOf(normalizedCombo);
+        if (index > -1) {
+            deletedCombinations.splice(index, 1);
+        }
+    }
+    
     // Add the combination
     combinations[`${elem1Id}+${elem2Id}`] = parseInt(resultId);
     combinations[`${elem2Id}+${elem1Id}`] = parseInt(resultId);
@@ -1528,7 +1554,7 @@ window.saveNewRecipe = async function(resultId) {
     newCombos[`${elem1Id}+${elem2Id}`] = parseInt(resultId);
     newCombos[`${elem2Id}+${elem1Id}`] = parseInt(resultId);
     
-    const saved = await saveToServer(null, newCombos, null);
+    const saved = await saveToServer(null, newCombos, null, isDeleted ? normalizedCombo : null);
     
     if (saved) {
         showMessage('Recipe added and saved!', 'success');
