@@ -10265,13 +10265,29 @@
                         displayName = '😊 ' + displayName.substring(9);
                     }
                     
+                    // Format time from seconds to MM:SS
+                    const minutes = Math.floor((entry.play_time || 0) / 60);
+                    const seconds = (entry.play_time || 0) % 60;
+                    const timeStr = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                    
+                    // Get country display
+                    const countryDisplay = getCountryDisplay(entry.country_code || 'XX');
+                    
                     return `
-                        <div style="display: flex; justify-content: space-between; padding: 10px; 
+                        <div style="display: flex; flex-direction: column; padding: 10px; 
                                     background: ${isPlayer ? 'rgba(78, 205, 196, 0.2)' : 'rgba(0, 0, 0, 0.2)'}; 
-                                    margin-bottom: 5px; border: 2px solid ${isPlayer ? '#4ecdc4' : 'transparent'}; font-size: 14px;">
-                            <span class="${rankClass}" style="font-weight: bold; font-size: 14px;">#${entry.rank}</span>
-                            <span style="color: ${isPlayer ? '#4ecdc4' : '#FFF'}; flex: 1; margin: 0 10px; overflow: hidden; text-overflow: ellipsis; font-size: 14px;">${displayName}</span>
-                            <span style="color: #4ecdc4; font-size: 14px;">${entry.score.toLocaleString()}</span>
+                                    margin-bottom: 5px; border: 2px solid ${isPlayer ? '#4ecdc4' : 'transparent'}; font-size: 12px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                                <span class="${rankClass}" style="font-weight: bold; font-size: 14px;">#${entry.rank}</span>
+                                <span>${countryDisplay}</span>
+                                <span style="color: ${isPlayer ? '#4ecdc4' : '#FFF'}; flex: 1; margin: 0 10px; overflow: hidden; text-overflow: ellipsis; font-size: 12px;">${displayName}</span>
+                                <span style="color: #4ecdc4; font-size: 14px; font-weight: bold;">${entry.score.toLocaleString()}</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 10px; color: #888;">
+                                <span>🧪 ${entry.elements_discovered || 0}</span>
+                                <span>⚔️ ${entry.kills || 0}</span>
+                                <span>⏱️ ${timeStr}</span>
+                            </div>
                         </div>
                     `;
                 }).join('');
@@ -12499,6 +12515,15 @@
                 document.getElementById('howtoTab').classList.add('active');
             } else if (tabName === 'leaderboard') {
                 document.getElementById('leaderboardTab').classList.add('active');
+                // Ensure daily tab is highlighted by default
+                document.querySelectorAll('.mini-lb-tab').forEach((tab, index) => {
+                    tab.classList.remove('active');
+                    tab.style.color = '#888';
+                    if (index === 0) { // First tab is daily
+                        tab.classList.add('active');
+                        tab.style.color = '#4ecdc4';
+                    }
+                });
                 // Load leaderboard when tab is opened
                 window.loadPauseLeaderboard(null, currentPauseLBPeriod);
             }
