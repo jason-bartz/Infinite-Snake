@@ -1496,6 +1496,14 @@
             }
         }
         
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+        
         #recentDiscovery small {
             display: block;
             margin-top: 8px;
@@ -6750,11 +6758,30 @@
                 }
             }, 100);
             
-            // Stop cycling when user starts typing
+            // Stop cycling when user starts typing and validate
             playerNameInput.addEventListener('input', () => {
                 isUserTyping = playerNameInput.value.length > 0;
                 if (isUserTyping) {
                     playerNameInput.placeholder = "Enter your name";
+                    
+                    // Real-time validation
+                    const name = playerNameInput.value.trim();
+                    if (name.length > 0) {
+                        // Check if validateUsername function exists (from game-original.js)
+                        if (window.validateUsername) {
+                            const validation = window.validateUsername(name);
+                            if (!validation.valid) {
+                                window.showUsernameError(validation.error);
+                            } else {
+                                window.clearUsernameError();
+                            }
+                        }
+                    } else {
+                        // Clear error if input is empty
+                        if (window.clearUsernameError) {
+                            window.clearUsernameError();
+                        }
+                    }
                 }
             });
             

@@ -1459,6 +1459,85 @@
         // Make it globally available
         window.checkAndShowWelcomeModal = checkAndShowWelcomeModal;
         
+        // Username validation function (matches server-side rules)
+        function validateUsername(username) {
+            if (!username || username.trim().length === 0) {
+                return { valid: false, error: 'Username cannot be empty' };
+            }
+            
+            const trimmedUsername = username.trim();
+            
+            // Check length
+            if (trimmedUsername.length > 20) {
+                return { valid: false, error: 'Username must be 20 characters or less' };
+            }
+            
+            // Profanity and inappropriate content patterns
+            const blockedPatterns = [
+                /admin/i, /moderator/i, /official/i, // Impersonation
+                /\b(fuck|shit|ass|bitch|damn|hell|penis|vagina|dick|cock|pussy)\b/i, // Profanity
+                /\b(nigger|nigga|faggot|fag|retard|kike|spic|chink|gook)\b/i, // Slurs
+                /\b(hitler|nazi|stalin|isis|terrorist)\b/i, // Offensive references
+                /<script|javascript:|eval\(|onclick|onerror/i, // XSS attempts
+            ];
+            
+            for (const pattern of blockedPatterns) {
+                if (pattern.test(trimmedUsername)) {
+                    return { valid: false, error: 'Username contains inappropriate content' };
+                }
+            }
+            
+            // Check for non-printable characters
+            if (/[^\x20-\x7E]/.test(trimmedUsername)) {
+                return { valid: false, error: 'Username contains invalid characters' };
+            }
+            
+            return { valid: true };
+        }
+        
+        // Show error message function
+        function showUsernameError(message) {
+            // Create or update error message element
+            let errorElement = document.getElementById('usernameError');
+            if (!errorElement) {
+                errorElement = document.createElement('div');
+                errorElement.id = 'usernameError';
+                errorElement.style.cssText = `
+                    color: #ff6b6b;
+                    font-family: 'Press Start 2P', monospace;
+                    font-size: 10px;
+                    margin-top: 10px;
+                    text-align: center;
+                    animation: shake 0.3s;
+                `;
+                const nameInput = document.getElementById('playerNameInput');
+                if (nameInput && nameInput.parentNode) {
+                    nameInput.parentNode.insertBefore(errorElement, nameInput.nextSibling);
+                }
+            }
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+            
+            // Add shake animation
+            errorElement.style.animation = 'none';
+            setTimeout(() => {
+                errorElement.style.animation = 'shake 0.3s';
+            }, 10);
+        }
+        
+        // Clear error message function
+        function clearUsernameError() {
+            const errorElement = document.getElementById('usernameError');
+            if (errorElement) {
+                errorElement.style.display = 'none';
+            }
+        }
+        
+        // Make validation functions globally available
+        window.validateUsername = validateUsername;
+        window.showUsernameError = showUsernameError;
+        window.clearUsernameError = clearUsernameError;
+        
         // Splash screen - wait for DOM to be ready
         function setupStartButton() {
             const startButton = document.getElementById('startButton');
@@ -1474,15 +1553,32 @@
                 const nameInput = document.getElementById('playerNameInput');
                 if (nameInput) {
                     let name = nameInput.value.trim();
-                    if (!name && window.nameGenerator && window.nameGenerator.generateRandomName) {
-                        name = window.nameGenerator.generateRandomName();
-                    } else if (!name) {
-                        // Fallback if nameGenerator isn't loaded yet
-                        name = 'Player' + Math.floor(Math.random() * 9999);
+                    
+                    // If no name entered, generate a random one
+                    if (!name) {
+                        if (window.nameGenerator && window.nameGenerator.generateRandomName) {
+                            name = window.nameGenerator.generateRandomName();
+                        } else {
+                            // Fallback if nameGenerator isn't loaded yet
+                            name = 'Player' + Math.floor(Math.random() * 9999);
+                        }
                     }
-                localStorage.setItem('playerName', name);
-                window.currentPlayerName = name;
-            }
+                    
+                    // Validate the username
+                    const validation = validateUsername(name);
+                    if (!validation.valid) {
+                        // Show error and prevent game start
+                        showUsernameError(validation.error);
+                        return; // Don't proceed with game start
+                    }
+                    
+                    // Clear any previous error
+                    clearUsernameError();
+                    
+                    // Save valid username
+                    localStorage.setItem('playerName', name);
+                    window.currentPlayerName = name;
+                }
             
             // Ensure assets are loaded
             if (window.assetLoadingPromise && !window.assetsReady) {
