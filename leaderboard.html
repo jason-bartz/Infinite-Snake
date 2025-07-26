@@ -435,8 +435,16 @@
         };
         
         function getCountryDisplay(countryCode, countryName) {
-            const flag = countryFlags[countryCode] || '🌍';
-            return `<span class="country-flag">${flag}</span><span class="country-code">${countryCode}</span>`;
+            // Make country code lookup case-insensitive
+            const upperCode = countryCode ? countryCode.toUpperCase() : 'XX';
+            const flag = countryFlags[upperCode] || '🌍';
+            
+            // Log for debugging
+            if (!countryFlags[upperCode] && upperCode !== 'XX') {
+                console.log('Unknown country code:', countryCode, '(normalized:', upperCode, ')');
+            }
+            
+            return `<span class="country-flag">${flag}</span><span class="country-code">${upperCode}</span>`;
         }
         
         // Truncate long names to prevent overlap

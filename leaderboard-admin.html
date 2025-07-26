@@ -559,8 +559,8 @@
                 row.innerHTML = `
                     <td class="rank">#${index + 1}</td>
                     <td class="country">
-                        <span class="flag">${countryFlags[entry.country_code] || '🌐'}</span>
-                        <span>${entry.country_code}</span>
+                        <span class="flag">${countryFlags[entry.country_code?.toUpperCase()] || '🌐'}</span>
+                        <span>${entry.country_code?.toUpperCase() || 'XX'}</span>
                     </td>
                     <td id="name-${entryId}">${escapeHtml(entry.username)}</td>
                     <td class="score" id="score-${entryId}">${(entry.score || 0).toLocaleString()}</td>

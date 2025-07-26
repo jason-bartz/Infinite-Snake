@@ -264,13 +264,20 @@ const COUNTRY_NAMES = {
 // Get country from request headers (Vercel provides this)
 function getCountryFromRequest(req) {
   // Vercel provides country in x-vercel-ip-country header
-  const countryCode = req.headers['x-vercel-ip-country'] || 
-                     req.headers['cf-ipcountry'] || // Cloudflare
-                     'XX'; // Unknown
+  const rawCountryCode = req.headers['x-vercel-ip-country'] || 
+                        req.headers['cf-ipcountry'] || // Cloudflare
+                        'XX'; // Unknown
+  
+  // Ensure country code is uppercase
+  const countryCode = rawCountryCode.toUpperCase();
   
   const countryName = COUNTRY_NAMES[countryCode] || countryCode;
   
-  console.log('Detected country:', { code: countryCode, name: countryName });
+  console.log('Detected country:', { 
+    raw: rawCountryCode, 
+    code: countryCode, 
+    name: countryName 
+  });
   
   return {
     code: countryCode,
