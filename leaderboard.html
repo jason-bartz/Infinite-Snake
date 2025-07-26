@@ -180,7 +180,7 @@
         
         .leaderboard-header {
             display: grid;
-            grid-template-columns: 80px 80px 200px 150px 120px 120px 100px;
+            grid-template-columns: 80px 80px 200px 150px 120px 120px 100px 100px;
             gap: 15px;
             padding: 15px;
             background: var(--snes-black);
@@ -195,7 +195,7 @@
         
         .leaderboard-entry {
             display: grid;
-            grid-template-columns: 80px 80px 200px 150px 120px 120px 100px;
+            grid-template-columns: 80px 80px 200px 150px 120px 120px 100px 100px;
             gap: 15px;
             padding: 15px;
             margin-bottom: 5px;
@@ -325,7 +325,7 @@
             
             .leaderboard-header,
             .leaderboard-entry {
-                grid-template-columns: 50px 60px 1fr 80px;
+                grid-template-columns: 50px 60px 1fr 80px 60px;
                 gap: 10px;
                 font-size: 8px;
                 padding: 10px;
@@ -334,9 +334,11 @@
             .leaderboard-header > div:nth-child(5),
             .leaderboard-header > div:nth-child(6),
             .leaderboard-header > div:nth-child(7),
+            .leaderboard-header > div:nth-child(8),
             .leaderboard-entry > div:nth-child(5),
             .leaderboard-entry > div:nth-child(6),
-            .leaderboard-entry > div:nth-child(7) {
+            .leaderboard-entry > div:nth-child(7),
+            .leaderboard-entry > div:nth-child(8) {
                 display: none;
             }
             
@@ -390,6 +392,7 @@
                 <div style="text-align: right;">ELEMENTS</div>
                 <div style="text-align: right;">TIME</div>
                 <div style="text-align: right;">KILLS</div>
+                <div style="text-align: right;">DATE</div>
             </div>
             
             <div id="leaderboard-content">
@@ -455,6 +458,16 @@
             
             if (name.length <= maxLength) return name;
             return name.substring(0, maxLength - 3) + '...';
+        }
+        
+        // Format date as M/D/YY
+        function formatDate(timestamp) {
+            if (!timestamp) return '-';
+            const date = new Date(timestamp);
+            const month = date.getMonth() + 1;
+            const day = date.getDate();
+            const year = date.getFullYear().toString().slice(-2);
+            return `${month}/${day}/${year}`;
         }
         
         // API functions to connect to your Redis backend
@@ -532,6 +545,7 @@
                             <div style="color: #FFD700; text-align: right;">${entry.elements_discovered}</div>
                             <div style="color: #AAA; text-align: right;">${timeStr}</div>
                             <div style="color: #ff6b6b; text-align: right;">${entry.kills}</div>
+                            <div style="color: #AAA; text-align: right;">${formatDate(entry.timestamp)}</div>
                         </div>
                     `;
                 }).join('');
