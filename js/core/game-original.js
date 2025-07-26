@@ -8772,7 +8772,7 @@
         
         // Game hint system
         let hintTimeout = null;
-        function showGameHint() {
+        function showGameHint(hintType) {
             // Don't show if game is not running or player is dead
             if (!gameStarted || !playerSnake || !playerSnake.alive) return;
             
@@ -8782,8 +8782,24 @@
             const hintElement = document.getElementById('gameHint');
             if (!hintElement) return;
             
-            // Set the hint text
-            hintElement.textContent = "💡 Hint: When your elements won't combine, 🌀 Void Orbs can clear your bank for points!";
+            // Hide any existing hint first
+            hideGameHint();
+            
+            // Set the hint text based on type
+            let hintText = '';
+            if (hintType === 'controls') {
+                if (controlScheme === 'arrows') {
+                    hintText = "💡 Control your snake with WASD or Arrow Keys! Press W or ↑ to boost!";
+                } else {
+                    hintText = "💡 Control your snake with your Mouse! Click to boost!";
+                }
+            } else if (hintType === 'voidorbs') {
+                hintText = "💡 Hint: When your elements won't combine, 🌀 Void Orbs can clear your bank for points!";
+            }
+            
+            if (!hintText) return;
+            
+            hintElement.textContent = hintText;
             
             // Play hint sound
             if (!musicMuted) {
@@ -8795,7 +8811,9 @@
             }
             
             // Show the hint
-            hintElement.classList.add('show');
+            setTimeout(() => {
+                hintElement.classList.add('show');
+            }, 50); // Small delay to ensure proper animation
             
             // Hide after 8 seconds
             hintTimeout = setTimeout(() => {
@@ -11864,11 +11882,24 @@
             gamesPlayed++;
             localStorage.setItem('gamesPlayed', gamesPlayed.toString());
             
-            // Show hint for first 2 games
+            // Show hints for first 2 games
             if (gamesPlayed <= 2) {
-                setTimeout(() => {
-                    showGameHint();
-                }, 10000); // Show after 10 seconds
+                // First hint: controls (desktop only)
+                if (!isMobile) {
+                    setTimeout(() => {
+                        showGameHint('controls');
+                    }, 1000); // Show after 1 second
+                    
+                    // Second hint: void orbs
+                    setTimeout(() => {
+                        showGameHint('voidorbs');
+                    }, 16000); // Show 15 seconds after first hint (1s + 15s = 16s)
+                } else {
+                    // Mobile: only show void orb hint
+                    setTimeout(() => {
+                        showGameHint('voidorbs');
+                    }, 10000); // Show after 10 seconds
+                }
             }
             
             // Cancel any existing game loop
