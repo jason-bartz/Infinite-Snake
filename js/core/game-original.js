@@ -10206,9 +10206,15 @@
             currentPauseLBPeriod = period;
             
             // Update mini tab styles
-            document.querySelectorAll('.mini-lb-tab').forEach(tab => {
+            document.querySelectorAll('.mini-lb-tab').forEach((tab, index) => {
                 tab.classList.remove('active');
                 tab.style.color = '#888';
+                
+                // If no event (initial load) and we're loading daily, highlight the first tab
+                if (!event && period === 'daily' && index === 0) {
+                    tab.classList.add('active');
+                    tab.style.color = '#4ecdc4';
+                }
             });
             if (event && event.target) {
                 event.target.classList.add('active');
@@ -12530,15 +12536,6 @@
                 document.getElementById('howtoTab').classList.add('active');
             } else if (tabName === 'leaderboard') {
                 document.getElementById('leaderboardTab').classList.add('active');
-                // Ensure daily tab is highlighted by default
-                document.querySelectorAll('.mini-lb-tab').forEach((tab, index) => {
-                    tab.classList.remove('active');
-                    tab.style.color = '#888';
-                    if (index === 0) { // First tab is daily
-                        tab.classList.add('active');
-                        tab.style.color = '#4ecdc4';
-                    }
-                });
                 // Load leaderboard when tab is opened
                 window.loadPauseLeaderboard(null, currentPauseLBPeriod);
             }
