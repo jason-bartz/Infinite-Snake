@@ -443,6 +443,7 @@ export default async function handler(req, res) {
               
               leaderboard.push({
                 ...data,
+                score: score, // Include the Redis score
                 rank: start + (i / 2) + 1
               });
             } catch (e) {

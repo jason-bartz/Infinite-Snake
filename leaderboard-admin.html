@@ -538,7 +538,7 @@
             const countries = new Set(data.map(entry => entry.country_code)).size;
             document.getElementById('totalCountries').textContent = countries.toLocaleString();
             
-            const highestScore = data.length > 0 ? Math.max(...data.map(entry => entry.score)) : 0;
+            const highestScore = data.length > 0 ? Math.max(...data.map(entry => entry.score || 0)) : 0;
             document.getElementById('highestScore').textContent = highestScore.toLocaleString();
         }
         
@@ -563,7 +563,7 @@
                         <span>${entry.country_code}</span>
                     </td>
                     <td id="name-${entryId}">${escapeHtml(entry.username)}</td>
-                    <td class="score" id="score-${entryId}">${entry.score.toLocaleString()}</td>
+                    <td class="score" id="score-${entryId}">${(entry.score || 0).toLocaleString()}</td>
                     <td>${entry.elements_discovered || 0}</td>
                     <td>${formatTime(entry.play_time)}</td>
                     <td>${entry.kills || 0}</td>
