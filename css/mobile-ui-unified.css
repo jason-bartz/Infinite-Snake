@@ -46,57 +46,17 @@ body.mobile .mobile-controls {
 body.mobile .virtual-joystick {
     position: fixed !important;
     bottom: 40px !important;
-    left: 40px !important;
-    right: auto !important;
-    z-index: 95 !important;
-}
-
-body.mobile .boost-button {
-    position: fixed !important; /* Changed to fixed to ensure it stays in viewport */
-    bottom: 40px !important;
-    right: 40px !important;
     left: auto !important;
-    top: auto !important;
-    width: 100px !important;
-    height: 100px !important;
+    right: 40px !important;
     z-index: 95 !important;
-    overflow: hidden;
-    background: rgba(78, 205, 196, 0.1);
-    border: 3px solid rgba(78, 205, 196, 0.4);
-    border-radius: 50%;
 }
 
-/* Boost fill effect inside button */
-body.mobile .boost-button::before {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: var(--boost-fill, 100%);
-    background: linear-gradient(to top, 
-        rgba(78, 205, 196, 0.6) 0%, 
-        rgba(78, 205, 196, 0.3) 100%);
-    transition: height 0.1s linear;
-    pointer-events: none;
+/* Boost button removed for mobile */
+body.mobile .boost-button {
+    display: none !important;
 }
 
-/* Boost text on top of fill */
-body.mobile .boost-button span {
-    position: relative;
-    z-index: 1;
-}
-
-/* Active boost state */
-body.mobile .boost-button.active {
-    background: rgba(78, 205, 196, 0.2);
-    border-color: rgba(78, 205, 196, 0.8);
-    animation: boostPulse 0.5s ease-in-out infinite;
-}
-
-/* Low boost state */
-body.mobile .boost-button.low-boost {
-    border-color: rgba(147, 51, 234, 0.3);
+/* All boost button styles removed for mobile */
     background: rgba(147, 51, 234, 0.05);
 }
 

@@ -80,9 +80,8 @@
         };
         
         function getCachedEmoji(emoji, size) {
-            // Increase emoji size by 50% on mobile
-            const mobileMultiplier = isMobile ? 1.5 : 1.0;
-            const validSize = Math.max(1, Math.round((size || 20) * mobileMultiplier));
+            // Keep consistent size for all emojis
+            const validSize = Math.max(1, Math.round(size || 20));
             const key = `${emoji}_${validSize}`;
             
             if (emojiCache.has(key)) {
@@ -4975,8 +4974,9 @@
                     }
                 }
                 
-                // Draw emoji using cache
-                const emojiSize = Math.round(ELEMENT_SIZE * 2 * scale * cameraZoom);
+                // Draw emoji using cache - consistent size for mobile
+                const baseEmojiSize = isMobile ? 35 : ELEMENT_SIZE * 2;
+                const emojiSize = Math.round(baseEmojiSize * cameraZoom);
                 const emoji = this.data ? window.elementLoader.getEmojiForElement(this.id, this.data.base ? this.id : window.elementLoader.elements.get(this.id)?.e || this.id) : '❓';
                 const emojiCanvas = getCachedEmoji(emoji, emojiSize);
                 ctx.save();
@@ -9201,23 +9201,7 @@
                 window.unifiedMobileUI.activateBoost(playerSnake.isBoosting);
             }
             
-            // Update boost button meter fill directly
-            const boostButton = document.getElementById('boostButton');
-            if (boostButton) {
-                let boostMeterFill = boostButton.querySelector('.boost-meter-fill');
-                if (!boostMeterFill) {
-                    // Create fill element if it doesn't exist
-                    boostMeterFill = document.createElement('div');
-                    boostMeterFill.className = 'boost-meter-fill';
-                    boostButton.appendChild(boostMeterFill);
-                }
-                
-                // Update the height
-                boostMeterFill.style.height = `${staminaPercent}%`;
-                
-                // Use consistent purple/pink cosmic theme regardless of stamina level
-                boostMeterFill.style.background = 'linear-gradient(to top, rgba(248, 40, 248, 0.6), rgba(147, 51, 234, 0.3))';
-            }
+            // Boost meter removed for mobile
         }
         
         // Leaderboard Integration Variables
@@ -11871,10 +11855,7 @@
             // Show mobile controls when game starts
             if (isMobile) {
                 const joystick = document.getElementById('virtualJoystick');
-                const boostBtn = document.getElementById('boostButton');
                 if (joystick) joystick.style.display = 'block';
-                // Don't show boost button on mobile anymore
-                if (boostBtn) boostBtn.style.display = 'none';
             }
             
             // Track games played for hint system
@@ -14020,11 +14001,9 @@
             
             const joystick = document.getElementById('virtualJoystick');
             const knob = document.getElementById('joystickKnob');
-            const boostBtn = document.getElementById('boostButton');
             
             // Hide controls initially until game starts
             if (joystick) joystick.style.display = 'none';
-            if (boostBtn) boostBtn.style.display = 'none';
             
             let joystickTouch = null;
             
@@ -14093,24 +14072,7 @@
                 resetJoystick();
             });
             
-            // Boost button controls
-            boostBtn.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                mouseDown = true;
-                boostBtn.classList.add('active');
-            });
-            
-            boostBtn.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                mouseDown = false;
-                boostBtn.classList.remove('active');
-            });
-            
-            boostBtn.addEventListener('touchcancel', (e) => {
-                e.preventDefault();
-                mouseDown = false;
-                boostBtn.classList.remove('active');
-            });
+            // Boost functionality removed for mobile
             
             // Prevent scrolling on game canvas
             canvas.addEventListener('touchmove', (e) => {
@@ -14131,8 +14093,7 @@
                     e.target.closest('.discovery-feed') ||
                     e.target.closest('.pause-button-mobile') ||
                     e.target.closest('.mute-button-mobile') ||
-                    e.target.closest('.virtual-joystick') ||
-                    e.target.closest('.boost-button');
+                    e.target.closest('.virtual-joystick');
                     
                 if (isUIElement && !isCanvas) {
                     return;
@@ -14143,8 +14104,8 @@
                     const x = touch.clientX;
                     const screenWidth = window.innerWidth;
                     
-                    // Left half of screen - joystick control
-                    if (x < screenWidth / 2 && leftSideTouch === null) {
+                    // Touch anywhere on screen for joystick control
+                    if (leftSideTouch === null) {
                         leftSideTouch = touch.identifier;
                         leftTouchStartPos = { x: touch.clientX, y: touch.clientY };
                         joystickActive = true;
@@ -14153,12 +14114,6 @@
                         const rect = joystick.getBoundingClientRect();
                         joystickBase.x = rect.left + rect.width / 2;
                         joystickBase.y = rect.top + rect.height / 2;
-                    }
-                    // Right half of screen - boost
-                    else if (x >= screenWidth / 2 && rightSideTouch === null) {
-                        rightSideTouch = touch.identifier;
-                        mouseDown = true;
-                        boostBtn.classList.add('active');
                     }
                 }
             }, { passive: false });
@@ -14203,22 +14158,14 @@
                         leftTouchStartPos = null;
                         resetJoystick();
                     }
-                    else if (touch.identifier === rightSideTouch) {
-                        rightSideTouch = null;
-                        mouseDown = false;
-                        boostBtn.classList.remove('active');
-                    }
                 }
             }, { passive: false });
             
             document.addEventListener('touchcancel', (e) => {
                 // Reset all touches on cancel
                 leftSideTouch = null;
-                rightSideTouch = null;
                 leftTouchStartPos = null;
                 resetJoystick();
-                mouseDown = false;
-                boostBtn.classList.remove('active');
             });
         }
         
