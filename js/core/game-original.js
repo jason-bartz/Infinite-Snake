@@ -8887,7 +8887,7 @@
                 if (controlScheme === 'arrows') {
                     hintText = "💡 Control your snake with WASD or Arrow Keys! Press W or ↑ to boost!";
                 } else {
-                    hintText = "💡 Control your snake with your Mouse! Click to boost!";
+                    hintText = "💡 Control your snake with Mouse or WASD! Click or press W to boost!";
                 }
             } else if (hintType === 'voidorbs') {
                 hintText = "💡 Hint: When your elements won't combine, 🌀 Void Orbs can clear your bank for points!";
