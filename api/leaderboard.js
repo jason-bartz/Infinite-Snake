@@ -264,28 +264,33 @@ export default async function handler(req, res) {
         /\b(porn|p[o0]rn|xxx|nsfw)\b/i,
         
         // Racial & Ethnic Slurs
-        /\b(nigg|n[i!1]gg|n-word)\b/i,
-        /\b(fag|f[a@]g|gay|homo|queer)\b/i,
+        /\b(nigg|n[i!1]gg|n-word)/i,  // Removed trailing \b to catch nigger, nigga, etc.
+        /\b(fag|f[a@]g)\b/i,  // Keep boundaries for fag but not gay/homo
+        /\bgay\b/i,  // Separate pattern with boundaries for "gay"
+        /\b(homo|queer)\b/i,
         /\b(retard|ret[a@]rd|r-word|tard)\b/i,
-        /\b(kike|k[i!1]ke|jew|joo)\b/i,
+        /\b(kike|k[i!1]ke)\b/i,  // Removed jew/joo as they could be legitimate
         /\b(spic|sp[i!1]c|wetback|beaner)\b/i,
         /\b(chink|ch[i!1]nk|gook|g[o0]{2}k)\b/i,
-        /\b(towelhead|sand|camel)\b/i,
+        /\btowelhead\b/i,  // More specific patterns
         /\b(cracker|whitey|honkey)\b/i,
         
         // Offensive Historical/Political References
         /\b(hitler|h[i!1]tler|adolf|fuhrer)\b/i,
-        /\b(nazi|n[a@]zi|ss|gestapo|reich)\b/i,
+        /\b(nazi|n[a@]zi|gestapo|reich)\b/i,  // Removed 'ss' as it's too common
         /\b(stalin|mao|pol-?pot)\b/i,
         /\b(isis|isil|qaeda|taliban)\b/i,
-        /\b(terrorist|terror|bomb|jihad)\b/i,
+        /\b(terrorist|terror)\b/i,
+        /\bbomb\b/i,  // Separate to avoid blocking "bombastic", etc.
+        /\bjihad\b/i,
         /\b(kkk|klan|lynch)\b/i,
         
         // Violence & Death
         /\b(kill|k[i!1]ll|murder|slay)\b/i,
         /\b(rape|r[a@]pe|molest)\b/i,
         /\b(die|d[i!1]e|death|dead)\b/i,
-        /\b(suicide|kys|kms|hang)\b/i,
+        /\b(suicide|kys|kms)\b/i,
+        /\bhang\b/i,  // Separate to avoid blocking "change", "hanging out", etc.
         /\b(shoot|stab|cut|bleed)\b/i,
         
         // Scatological
