@@ -1,5 +1,6 @@
 // api/leaderboard.js
 import { Redis } from '@upstash/redis';
+import crypto from 'crypto';
 
 // Country code to name mapping (partial list)
 const COUNTRY_NAMES = {
@@ -89,20 +90,88 @@ function getWeekNumber(date) {
 
 // Validate scores to prevent cheating
 function validateScore(score, elements, playTime, kills) {
-  // Validation temporarily disabled - all scores are valid
-  return { valid: true };
+  // Basic sanity checks
+  if (typeof score !== 'number' || score < 0) {
+    return { valid: false, error: 'Invalid score format' };
+  }
   
-  // Original validation rules (commented out):
-  // if (playTime < 10) return { valid: false, error: 'Minimum 10 seconds play time required' };
-  // if (score > playTime * 1000) return { valid: false, error: 'Score too high for play time' }; // Allow up to 1000 points per second
-  // if (elements > playTime * 10) return { valid: false, error: 'Too many elements for play time' };
-  // if (kills > playTime * 2) return { valid: false, error: 'Too many kills for play time' };
-  // return { valid: true };
+  // Check for overflow or unrealistic scores
+  if (score > Number.MAX_SAFE_INTEGER || score > 999999999) {
+    return { valid: false, error: 'Score exceeds maximum allowed value' };
+  }
+  
+  // Minimum play time required
+  if (playTime < 5) {
+    return { valid: false, error: 'Minimum 5 seconds play time required' };
+  }
+  
+  // Maximum points per second: 5000 (allows for boss kills + combos)
+  // Boss kill = 10000 points, so in 2-3 seconds of boss defeat that's ~3333-5000 pts/sec
+  if (score > playTime * 5000) {
+    return { valid: false, error: 'Score too high for play time' };
+  }
+  
+  // Maximum elements per second: 10
+  if (elements > playTime * 10) {
+    return { valid: false, error: 'Too many elements discovered for play time' };
+  }
+  
+  // Maximum kills per minute: 30 (0.5 kills per second)
+  if (kills > (playTime / 60) * 30) {
+    return { valid: false, error: 'Too many kills for play time' };
+  }
+  
+  // Additional checks for impossible scenarios
+  if (elements < 0 || kills < 0 || playTime < 0) {
+    return { valid: false, error: 'Invalid game statistics' };
+  }
+  
+  // Check for reasonable score composition
+  // Minimum possible score sources: elements (100 pts each), kills (500 pts each), discoveries (500 pts each)
+  const minPossibleScore = Math.max(0, elements * 100);
+  if (score < minPossibleScore * 0.5) {
+    return { valid: false, error: 'Score inconsistent with game statistics' };
+  }
+  
+  return { valid: true };
 }
 
 // Generate unique ID for each score entry
 function generateScoreId() {
-  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  return `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+}
+
+// Rate limiting helper
+async function checkRateLimit(redis, identifier, maxRequests = 5, windowSeconds = 60) {
+  const key = `rate:${identifier}`;
+  const current = await redis.incr(key);
+  
+  if (current === 1) {
+    // First request, set expiry
+    await redis.expire(key, windowSeconds);
+  }
+  
+  if (current > maxRequests) {
+    const ttl = await redis.ttl(key);
+    return { 
+      allowed: false, 
+      retryAfter: ttl > 0 ? ttl : windowSeconds 
+    };
+  }
+  
+  return { allowed: true, remaining: maxRequests - current };
+}
+
+// Generate a server-side token for score verification
+function generateScoreToken(gameData, secret) {
+  const data = `${gameData.score}:${gameData.elements}:${gameData.playTime}:${gameData.kills}:${gameData.timestamp}`;
+  return crypto.createHmac('sha256', secret).update(data).digest('hex');
+}
+
+// Verify score token
+function verifyScoreToken(gameData, token, secret) {
+  const expectedToken = generateScoreToken(gameData, secret);
+  return crypto.timingSafeEqual(Buffer.from(token), Buffer.from(expectedToken));
 }
 
 export default async function handler(req, res) {
@@ -137,6 +206,49 @@ export default async function handler(req, res) {
         });
       }
       
+      // Get client IP for rate limiting
+      const clientIp = req.headers['x-forwarded-for'] || 
+                      req.headers['x-real-ip'] || 
+                      req.connection?.remoteAddress || 
+                      'unknown';
+      
+      // Check rate limit (10 submissions per minute per IP)
+      const rateLimitResult = await checkRateLimit(redis, `ip:${clientIp}`, 10, 60);
+      if (!rateLimitResult.allowed) {
+        return res.status(429).json({ 
+          error: 'Too many requests', 
+          retryAfter: rateLimitResult.retryAfter 
+        });
+      }
+      
+      // Also rate limit by IP hourly (25 submissions per hour)
+      const hourlyRateLimit = await checkRateLimit(redis, `ip-hourly:${clientIp}`, 25, 3600);
+      if (!hourlyRateLimit.allowed) {
+        return res.status(429).json({ 
+          error: 'Too many submissions this hour', 
+          retryAfter: hourlyRateLimit.retryAfter 
+        });
+      }
+      
+      // Basic username content filtering
+      const blockedPatterns = [
+        /admin/i, /moderator/i, /official/i, // Impersonation
+        /\b(fuck|shit|ass|bitch|damn|hell|penis|vagina|dick|cock|pussy)\b/i, // Profanity
+        /\b(nigger|nigga|faggot|fag|retard|kike|spic|chink|gook)\b/i, // Slurs
+        /\b(hitler|nazi|stalin|isis|terrorist)\b/i, // Offensive references
+        /<script|javascript:|eval\(|onclick|onerror/i, // XSS attempts
+        /[^\x20-\x7E]/g // Non-printable characters (except basic ASCII)
+      ];
+      
+      const cleanUsername = username.trim();
+      for (const pattern of blockedPatterns) {
+        if (pattern.test(cleanUsername)) {
+          return res.status(400).json({ 
+            error: 'Username contains inappropriate content' 
+          });
+        }
+      }
+      
       // Anti-cheat validation
       const validation = validateScore(score, elements_discovered, play_time, kills);
       if (!validation.valid) {
@@ -150,7 +262,7 @@ export default async function handler(req, res) {
       // Create score entry with country
       const scoreEntry = {
         id: generateScoreId(),
-        username: username.substring(0, 20).trim(), // Limit username length
+        username: cleanUsername.substring(0, 20), // Use cleaned username, limit length
         score: Math.floor(score),
         elements_discovered: elements_discovered || 0,
         play_time: play_time || 0,
@@ -403,14 +515,69 @@ export default async function handler(req, res) {
       });
     }
     
-    // DELETE - Clear leaderboard (admin only - add auth in production!)
+    // DELETE - Clear leaderboard or specific entries (admin only)
     if (req.method === 'DELETE') {
-      // WARNING: Add authentication before enabling this in production!
-      const { period = 'all', adminKey } = req.query;
+      const { period = 'all', adminKey, action, threshold } = req.query;
       
       // Simple admin key check (use proper auth in production)
       if (adminKey !== process.env.ADMIN_KEY) {
         return res.status(401).json({ error: 'Unauthorized' });
+      }
+      
+      // Special action to clean suspicious scores
+      if (action === 'clean') {
+        const keys = getLeaderboardKeys();
+        let cleaned = 0;
+        
+        for (const [periodName, key] of Object.entries(keys)) {
+          // Get all scores
+          const allScores = await redis.zrange(key, 0, -1, { 
+            rev: true,
+            withScores: true 
+          });
+          
+          if (!allScores || allScores.length === 0) continue;
+          
+          // Process scores in pairs
+          for (let i = 0; i < allScores.length; i += 2) {
+            try {
+              const member = allScores[i];
+              const score = allScores[i + 1];
+              
+              // Check for overflow or suspicious scores
+              if (score > 999999999 || score > Number.MAX_SAFE_INTEGER / 2) {
+                await redis.zrem(key, member);
+                cleaned++;
+                console.log(`Removed suspicious score: ${score} from ${periodName}`);
+              } else {
+                // Parse member data to check for invalid entries
+                const data = JSON.parse(member);
+                
+                // Re-validate the score
+                const validation = validateScore(
+                  data.score, 
+                  data.elements_discovered, 
+                  data.play_time, 
+                  data.kills
+                );
+                
+                if (!validation.valid) {
+                  await redis.zrem(key, member);
+                  cleaned++;
+                  console.log(`Removed invalid score from ${data.username}: ${validation.error}`);
+                }
+              }
+            } catch (e) {
+              console.error('Error processing score entry:', e);
+            }
+          }
+        }
+        
+        return res.status(200).json({
+          success: true,
+          message: 'Cleaned suspicious scores',
+          cleaned
+        });
       }
       
       const keys = getLeaderboardKeys();

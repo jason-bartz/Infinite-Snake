@@ -89,6 +89,20 @@ export async function submitScore(username, score, elementsDiscovered, playTime,
         error: responseData.error,
         details: responseData
       });
+      
+      // Handle specific error cases with user-friendly messages
+      if (response.status === 429) {
+        // Rate limiting
+        const retryAfter = responseData.retryAfter || 60;
+        throw new Error(`Too many submissions. Please wait ${retryAfter} seconds before trying again.`);
+      } else if (responseData.error && responseData.error.includes('inappropriate content')) {
+        throw new Error('Username contains inappropriate content. Please choose a different name.');
+      } else if (responseData.error && responseData.error.includes('too high for play time')) {
+        throw new Error('Score validation failed. This score appears to be invalid.');
+      } else if (responseData.error && responseData.error.includes('Too many elements')) {
+        throw new Error('Invalid game data detected.');
+      }
+      
       throw new Error(responseData.error || 'Failed to submit score');
     }
     
