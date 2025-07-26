@@ -10251,7 +10251,23 @@
                 
                 const currentUsername = localStorage.getItem('lastUsername');
                 
-                entriesDiv.innerHTML = data.map(entry => {
+                // Create header
+                let leaderboardHTML = `
+                    <div style="display: grid; grid-template-columns: 40px 40px 1fr 60px 50px 50px 60px; 
+                                padding: 5px 10px; border-bottom: 2px solid #4ecdc4; margin-bottom: 10px;
+                                font-size: 10px; color: #4ecdc4; font-weight: bold;">
+                        <div>RANK</div>
+                        <div></div>
+                        <div>PLAYER</div>
+                        <div style="text-align: right;">SCORE</div>
+                        <div style="text-align: center;">ELEM</div>
+                        <div style="text-align: center;">KILLS</div>
+                        <div style="text-align: right;">TIME</div>
+                    </div>
+                `;
+                
+                // Add entries
+                leaderboardHTML += data.map(entry => {
                     const isPlayer = currentUsername && entry.username === currentUsername;
                     const rankClass = entry.rank <= 3 ? `rank-${entry.rank}` : '';
                     
@@ -10270,27 +10286,26 @@
                     const seconds = (entry.play_time || 0) % 60;
                     const timeStr = `${minutes}:${seconds.toString().padStart(2, '0')}`;
                     
-                    // Get country display
-                    const countryDisplay = getCountryDisplay(entry.country_code || 'XX');
+                    // Get country flag only (no code)
+                    const flag = countryFlags[entry.country_code] || '🌍';
                     
                     return `
-                        <div style="display: flex; flex-direction: column; padding: 10px; 
+                        <div style="display: grid; grid-template-columns: 40px 40px 1fr 60px 50px 50px 60px; 
+                                    padding: 5px 10px; align-items: center;
                                     background: ${isPlayer ? 'rgba(78, 205, 196, 0.2)' : 'rgba(0, 0, 0, 0.2)'}; 
-                                    margin-bottom: 5px; border: 2px solid ${isPlayer ? '#4ecdc4' : 'transparent'}; font-size: 12px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-                                <span class="${rankClass}" style="font-weight: bold; font-size: 14px;">#${entry.rank}</span>
-                                <span>${countryDisplay}</span>
-                                <span style="color: ${isPlayer ? '#4ecdc4' : '#FFF'}; flex: 1; margin: 0 10px; overflow: hidden; text-overflow: ellipsis; font-size: 12px;">${displayName}</span>
-                                <span style="color: #4ecdc4; font-size: 14px; font-weight: bold;">${entry.score.toLocaleString()}</span>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; font-size: 10px; color: #888;">
-                                <span>🧪 ${entry.elements_discovered || 0}</span>
-                                <span>⚔️ ${entry.kills || 0}</span>
-                                <span>⏱️ ${timeStr}</span>
-                            </div>
+                                    margin-bottom: 2px; border: 1px solid ${isPlayer ? '#4ecdc4' : 'transparent'};">
+                            <div class="${rankClass}" style="font-weight: bold; font-size: 12px;">#${entry.rank}</div>
+                            <div style="font-size: 16px; text-align: center;">${flag}</div>
+                            <div style="color: ${isPlayer ? '#4ecdc4' : '#FFF'}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px;">${displayName}</div>
+                            <div style="color: #4ecdc4; text-align: right; font-size: 12px; font-weight: bold;">${entry.score.toLocaleString()}</div>
+                            <div style="text-align: center; font-size: 11px; color: #888;">${entry.elements_discovered || 0}</div>
+                            <div style="text-align: center; font-size: 11px; color: #888;">${entry.kills || 0}</div>
+                            <div style="text-align: right; font-size: 11px; color: #888;">${timeStr}</div>
                         </div>
                     `;
                 }).join('');
+                
+                entriesDiv.innerHTML = leaderboardHTML;
                 
             } catch (error) {
                 gameLogger.error('LEADERBOARD', 'Failed to load pause leaderboard:', error);
