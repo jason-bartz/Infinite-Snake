@@ -1472,13 +1472,80 @@
                 return { valid: false, error: 'Username must be 20 characters or less' };
             }
             
-            // Profanity and inappropriate content patterns
+            // Comprehensive username content filtering
             const blockedPatterns = [
-                /admin/i, /moderator/i, /official/i, // Impersonation
-                /\b(fuck|shit|ass|bitch|damn|hell|penis|vagina|dick|cock|pussy)\b/i, // Profanity
-                /\b(nigger|nigga|faggot|fag|retard|kike|spic|chink|gook)\b/i, // Slurs
-                /\b(hitler|nazi|stalin|isis|terrorist)\b/i, // Offensive references
-                /<script|javascript:|eval\(|onclick|onerror/i, // XSS attempts
+                // Impersonation & Authority
+                /\b(admin|administrator|admins|adm1n|4dmin)\b/i,
+                /\b(moderator|mod|m0d|m0der4tor)\b/i,
+                /\b(official|offical|0fficial|staff|support)\b/i,
+                /\b(system|sys|root|sudo|superuser)\b/i,
+                /\b(owner|founder|ceo|president)\b/i,
+                
+                // Profanity & Variations
+                /\b(fuck|f[u\*@#]ck|fck|fuk|fuq|phuck|f[0-9]ck)\b/i,
+                /\b(shit|sh[i!1\*@]t|sht|sh1t|$hit)\b/i,
+                /\b(ass|a[s\$5]{2}|azz|@ss)\b/i,
+                /\b(bitch|b[i!1\*]tch|b1tch|biatch|beotch)\b/i,
+                /\b(damn|dam|d[a@]mn|dayum)\b/i,
+                /\b(hell|h[e3]ll|h3ll)\b/i,
+                /\b(bastard|b[a@]st[a@]rd|basterd)\b/i,
+                /\b(cunt|c[u\*]nt|kunt)\b/i,
+                /\b(whore|wh0re|h[o0]e|h[o0]ar)\b/i,
+                /\b(slut|s1ut|$lut)\b/i,
+                
+                // Anatomical & Sexual Terms
+                /\b(penis|pen[i!1]s|p[e3]n[i!1]s|peen|penus)\b/i,
+                /\b(vagina|vag[i!1]na|vaj|vajay)\b/i,
+                /\b(dick|d[i!1]ck|d1ck|dik)\b/i,
+                /\b(cock|c[o0]ck|cok|c0ck)\b/i,
+                /\b(pussy|pu[s\$]{2}y|p[u\*]ssy)\b/i,
+                /\b(boob|b[o0]{2}b|tit|t[i!1]t|breast)\b/i,
+                /\b(anal|an[a@]l|anus|butt)\b/i,
+                /\b(oral|blowjob|bj|handjob|hj)\b/i,
+                /\b(sex|s[e3]x|secks|seks)\b/i,
+                /\b(porn|p[o0]rn|xxx|nsfw)\b/i,
+                
+                // Racial & Ethnic Slurs
+                /\b(nigg|n[i!1]gg|n-word)\b/i,
+                /\b(fag|f[a@]g|gay|homo|queer)\b/i,
+                /\b(retard|ret[a@]rd|r-word|tard)\b/i,
+                /\b(kike|k[i!1]ke|jew|joo)\b/i,
+                /\b(spic|sp[i!1]c|wetback|beaner)\b/i,
+                /\b(chink|ch[i!1]nk|gook|g[o0]{2}k)\b/i,
+                /\b(towelhead|sand|camel)\b/i,
+                /\b(cracker|whitey|honkey)\b/i,
+                
+                // Offensive Historical/Political References
+                /\b(hitler|h[i!1]tler|adolf|fuhrer)\b/i,
+                /\b(nazi|n[a@]zi|ss|gestapo|reich)\b/i,
+                /\b(stalin|mao|pol-?pot)\b/i,
+                /\b(isis|isil|qaeda|taliban)\b/i,
+                /\b(terrorist|terror|bomb|jihad)\b/i,
+                /\b(kkk|klan|lynch)\b/i,
+                
+                // Violence & Death
+                /\b(kill|k[i!1]ll|murder|slay)\b/i,
+                /\b(rape|r[a@]pe|molest)\b/i,
+                /\b(die|d[i!1]e|death|dead)\b/i,
+                /\b(suicide|kys|kms|hang)\b/i,
+                /\b(shoot|stab|cut|bleed)\b/i,
+                
+                // Scatological
+                /\b(poop|p[o0]{2}p|crap|feces|scat)\b/i,
+                /\b(piss|p[i!1]ss|pee|urine)\b/i,
+                /\b(fart|queef)\b/i,
+                
+                // XSS & Injection Attempts
+                /<script|<iframe|<object|<embed|<form/i,
+                /javascript:|vbscript:|onload=|onerror=|onclick=|onmouse/i,
+                /eval\(|expression\(|prompt\(|confirm\(/i,
+                /document\.|window\.|alert\(/i,
+                /\.exe|\.bat|\.cmd|\.com|\.pif|\.scr|\.vbs|\.js/i,
+                
+                // SQL Injection Patterns
+                /(\b(union|select|insert|update|delete|drop|create)\b.*\b(from|where|table)\b)/i,
+                /(\b(or|and)\b.*=.*)/i,
+                /('|(--|#|\/\*|\*\/)|;.*--)/
             ];
             
             for (const pattern of blockedPatterns) {
