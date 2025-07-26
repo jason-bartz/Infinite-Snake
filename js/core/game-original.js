@@ -2976,7 +2976,7 @@
                 
                 // Clean up any invalid elements before processing
                 const validElements = this.elements.filter(elementId => {
-                    const isValid = elementId && window.elementLoader.elements.get(elementId);
+                    const isValid = elementId !== undefined && elementId !== null && window.elementLoader.elements.get(elementId);
                     if (!isValid && elementId !== undefined && elementId !== null) {
                         gameLogger.warn('ELEMENT BANK', `Removing invalid element from bank: ${elementId}`);
                     }
@@ -3284,7 +3284,7 @@
                             // Delay the actual combination for visual effect
                             setTimeout(() => {
                                 // Validate resultId before adding
-                                if (resultId && window.elementLoader.elements.get(resultId)) {
+                                if (resultId !== undefined && resultId !== null && window.elementLoader.elements.get(resultId)) {
                                     this.elements[i] = resultId;
                                 } else {
                                     // Remove invalid element slot
@@ -3380,7 +3380,7 @@
                 } else {
                     // We have space - add element to a random position within the available slots
                     // Validate element.id before adding
-                    if (element.id && window.elementLoader.elements.get(element.id)) {
+                    if (element.id !== undefined && element.id !== null && window.elementLoader.elements.get(element.id)) {
                         const insertIndex = Math.floor(Math.random() * (this.elements.length + 1));
                         this.elements.splice(insertIndex, 0, element.id);
                     } else {
