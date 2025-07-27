@@ -882,6 +882,11 @@ window.saveRecipe = async function(oldElem1, oldElem2, result) {
         
         window.combinations[`${newElem1}+${newElem2}`] = parseInt(result);
         window.combinations[`${newElem2}+${newElem1}`] = parseInt(result);
+        
+        // Notify the game loader to update its cache
+        if (window.elementLoader && typeof window.elementLoader.addCombination === 'function') {
+            window.elementLoader.addCombination(newElem1, newElem2, parseInt(result));
+        }
     } else {
         combinations[`${oldElem1}+${oldElem2}`] = parseInt(result);
         combinations[`${oldElem2}+${oldElem1}`] = parseInt(result);
@@ -1346,6 +1351,16 @@ window.saveNewElement = async function() {
             window.emojis[id] = emoji;
         }
         
+        // Notify the game loader about new combinations
+        if (window.elementLoader && typeof window.elementLoader.addCombination === 'function') {
+            Object.entries(newCombos).forEach(([combo, result]) => {
+                const [elem1, elem2] = combo.split('+');
+                if (elem1 && elem2) {
+                    window.elementLoader.addCombination(elem1, elem2, result);
+                }
+            });
+        }
+        
         // Show detailed success message
         let successMsg = `✅ Element "${name}" created and saved!`;
         if (recipesAdded > 0) {
@@ -1562,6 +1577,11 @@ window.saveNewRecipe = async function(resultId) {
         // Update the global combinations object to ensure it's in sync
         window.combinations[`${elem1Id}+${elem2Id}`] = parseInt(resultId);
         window.combinations[`${elem2Id}+${elem1Id}`] = parseInt(resultId);
+        
+        // Notify the game loader to update its cache
+        if (window.elementLoader && typeof window.elementLoader.addCombination === 'function') {
+            window.elementLoader.addCombination(elem1Id, elem2Id, parseInt(resultId));
+        }
         
         // Force reload to ensure data consistency
         console.log('[Cache Debug] Forcing reload after recipe save...');

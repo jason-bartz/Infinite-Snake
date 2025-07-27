@@ -198,6 +198,33 @@
             // Fall back to shared emoji index
             return this.emojiMap[emojiIndex] || '❓';
         }
+        
+        // Remove a combination from the deleted list and restore it
+        restoreDeletedCombination(normalizedCombo) {
+            // Remove from deleted set
+            this.deletedCombinations.delete(normalizedCombo);
+            
+            // Also remove the reverse combination
+            const [a, b] = normalizedCombo.split('+');
+            this.deletedCombinations.delete(`${b}+${a}`);
+            
+            console.log(`[Loader] Restored combination: ${normalizedCombo}`);
+        }
+        
+        // Add a combination dynamically (for admin panel updates)
+        addCombination(elem1, elem2, result) {
+            const key1 = `${elem1}+${elem2}`;
+            const key2 = `${elem2}+${elem1}`;
+            
+            // Add to combinations
+            this.combinations[key1] = result;
+            this.combinations[key2] = result;
+            
+            // Remove from deleted if it was there
+            this.restoreDeletedCombination(key1);
+            
+            console.log(`[Loader] Added combination: ${key1} = ${result}`);
+        }
     }
 
     // Create and initialize the loader

@@ -144,11 +144,21 @@ const server = http.createServer((req, res) => {
             const index = deletedCombos.indexOf(removeFromDeleted);
             if (index > -1) {
               deletedCombos.splice(index, 1);
-              
-              // Save updated list
-              fs.writeFileSync(deletedCombosPath, JSON.stringify(deletedCombos, null, 2));
               console.log(`[Save] Removed ${removeFromDeleted} from deleted combinations list`);
             }
+            
+            // Also remove the reverse combination
+            const [a, b] = removeFromDeleted.split('+');
+            const reversedCombo = `${b}+${a}`;
+            const reverseIndex = deletedCombos.indexOf(reversedCombo);
+            if (reverseIndex > -1) {
+              deletedCombos.splice(reverseIndex, 1);
+              console.log(`[Save] Also removed reverse combination ${reversedCombo} from deleted list`);
+            }
+            
+            // Save updated list
+            fs.writeFileSync(deletedCombosPath, JSON.stringify(deletedCombos, null, 2));
+            console.log(`[Save] Updated deleted combinations file`);
           } catch (err) {
             console.error('Error removing from deleted combinations:', err);
           }
@@ -296,11 +306,21 @@ const server = http.createServer((req, res) => {
             const index = deletedCombos.indexOf(removeFromDeleted);
             if (index > -1) {
               deletedCombos.splice(index, 1);
-              
-              // Save updated list
-              fs.writeFileSync(deletedCombosPath, JSON.stringify(deletedCombos, null, 2));
               console.log(`[Save] Removed ${removeFromDeleted} from deleted combinations list`);
             }
+            
+            // Also remove the reverse combination
+            const [a, b] = removeFromDeleted.split('+');
+            const reversedCombo = `${b}+${a}`;
+            const reverseIndex = deletedCombos.indexOf(reversedCombo);
+            if (reverseIndex > -1) {
+              deletedCombos.splice(reverseIndex, 1);
+              console.log(`[Save] Also removed reverse combination ${reversedCombo} from deleted list`);
+            }
+            
+            // Save updated list
+            fs.writeFileSync(deletedCombosPath, JSON.stringify(deletedCombos, null, 2));
+            console.log(`[Save] Updated deleted combinations file`);
           } catch (err) {
             console.error('Error removing from deleted combinations:', err);
           }
@@ -730,10 +750,43 @@ const server = http.createServer((req, res) => {
         res.end('Server error: ' + error.code);
       }
     } else {
-      res.writeHead(200, { 
+      // Set cache headers based on file type
+      const headers = {
         'Content-Type': contentType,
         'Access-Control-Allow-Origin': '*'
-      });
+      };
+      
+      // Check if URL has version parameter
+      const hasVersion = req.url.includes('?v=') || req.url.includes('?t=');
+      
+      if (extname === '.html') {
+        // HTML files should always be checked
+        headers['Cache-Control'] = 'no-cache, no-store, must-revalidate';
+        headers['Pragma'] = 'no-cache';
+        headers['Expires'] = '0';
+      } else if (extname === '.json') {
+        // JSON data files should not be cached
+        headers['Cache-Control'] = 'no-store';
+      } else if (hasVersion || extname === '.js' || extname === '.css') {
+        // Versioned assets can be cached for a long time
+        if (hasVersion) {
+          headers['Cache-Control'] = 'public, max-age=31536000'; // 1 year
+        } else {
+          // Non-versioned JS/CSS - short cache
+          headers['Cache-Control'] = 'public, max-age=3600'; // 1 hour
+        }
+      } else if (extname === '.png' || extname === '.jpg' || extname === '.gif' || extname === '.svg' || extname === '.webp') {
+        // Images can be cached for a while
+        headers['Cache-Control'] = 'public, max-age=86400'; // 1 day
+      } else if (extname === '.mp3') {
+        // Audio files can be cached longer
+        headers['Cache-Control'] = 'public, max-age=604800'; // 1 week
+      } else {
+        // Default cache
+        headers['Cache-Control'] = 'public, max-age=3600'; // 1 hour
+      }
+      
+      res.writeHead(200, headers);
       res.end(content, 'utf-8');
     }
   });

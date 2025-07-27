@@ -12,6 +12,11 @@
     "test:ui": "playwright test --ui",
     "test:headed": "playwright test --headed",
     "test:debug": "playwright test --debug",
-    "test:report": "playwright show-report"
-  }
+    "test:report": "playwright show-report",
+    "build-version": "node build-version.js",
+    "version:patch": "npm version patch --no-git-tag-version && npm run build-version",
+    "version:minor": "npm version minor --no-git-tag-version && npm run build-version",
+    "version:major": "npm version major --no-git-tag-version && npm run build-version"
+  },
+  "version": "1.0.0"
 }
