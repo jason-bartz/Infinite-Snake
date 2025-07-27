@@ -15015,6 +15015,10 @@
         window.startGameTransition = startGameTransition;
         window.playUISound = playUISound;
         
+        // Version check to ensure new code is loaded
+        window.gameVersion = '1.4.1-debug';
+        console.log('[GAME LOADED] Version:', window.gameVersion);
+        
         // Global debug function to check skin status
         window.checkSkinStatus = function() {
             console.log('=== SKIN STATUS DEBUG ===');
