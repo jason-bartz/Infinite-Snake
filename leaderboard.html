@@ -521,14 +521,63 @@
                 
                 const currentUsername = localStorage.getItem('lastUsername');
                 
-                content.innerHTML = data.map(entry => {
-                    const isPlayer = currentUsername && entry.username === currentUsername;
-                    const rankClass = entry.rank <= 3 ? `rank-${entry.rank}` : '';
+                // Filter out corrupted entries
+                const validEntries = data.filter(entry => {
+                    // Validate entry exists and is an object
+                    if (!entry || typeof entry !== 'object') return false;
                     
-                    // Format time
-                    const minutes = Math.floor(entry.play_time / 60);
-                    const seconds = entry.play_time % 60;
-                    const timeStr = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                    // Filter out entries with ALL zeros (score: 0, elements: 0, time: 0)
+                    if (entry.score === 0 && (!entry.elements_discovered || entry.elements_discovered === 0) && (!entry.play_time || entry.play_time === 0)) {
+                        console.log('Filtering out all-zero entry:', entry);
+                        return false;
+                    }
+                    
+                    // Filter out entries with just score 0
+                    if (entry.score === 0) {
+                        console.log('Filtering out zero-score entry:', entry);
+                        return false;
+                    }
+                    
+                    // Validate score is a valid number
+                    if (typeof entry.score !== 'number' || entry.score < 0 || !isFinite(entry.score)) {
+                        console.log('Filtering out invalid score:', entry);
+                        return false;
+                    }
+                    
+                    // Validate play_time is reasonable (max 24 hours = 86400 seconds)
+                    if (entry.play_time && (typeof entry.play_time !== 'number' || entry.play_time < 0 || entry.play_time > 86400 || !isFinite(entry.play_time))) {
+                        console.log('Filtering out invalid play_time:', entry);
+                        return false;
+                    }
+                    
+                    // Validate elements_discovered is reasonable (max 1000)
+                    if (entry.elements_discovered && (typeof entry.elements_discovered !== 'number' || entry.elements_discovered < 0 || entry.elements_discovered > 1000)) {
+                        console.log('Filtering out invalid elements_discovered:', entry);
+                        return false;
+                    }
+                    
+                    return true;
+                });
+                
+                if (validEntries.length === 0) {
+                    content.innerHTML = '<div class="loading">No valid scores to display.</div>';
+                    return;
+                }
+                
+                content.innerHTML = validEntries.map((entry, index) => {
+                    const isPlayer = currentUsername && entry.username === currentUsername;
+                    // Re-calculate rank based on filtered entries
+                    const displayRank = index + 1;
+                    const rankClass = displayRank <= 3 ? `rank-${displayRank}` : '';
+                    
+                    // Format time with safeguards
+                    let timeStr = '0:00';
+                    if (entry.play_time && typeof entry.play_time === 'number' && isFinite(entry.play_time) && entry.play_time >= 0) {
+                        const safeTime = Math.min(entry.play_time, 86400); // Cap at 24 hours
+                        const minutes = Math.floor(safeTime / 60);
+                        const seconds = Math.floor(safeTime % 60);
+                        timeStr = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                    }
                     
                     // Handle country display
                     const countryDisplay = getCountryDisplay(
@@ -538,13 +587,13 @@
                     
                     return `
                         <div class="leaderboard-entry ${isPlayer ? 'player-entry' : ''}">
-                            <div class="${rankClass}" style="font-weight: bold;">#${entry.rank}</div>
+                            <div class="${rankClass}" style="font-weight: bold;">#${displayRank}</div>
                             <div>${countryDisplay}</div>
                             <div style="color: ${isPlayer ? '#4ecdc4' : '#FFF'}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${entry.username}">${entry.username}</div>
                             <div style="color: #4ecdc4; text-align: right;">${(entry.score || 0).toLocaleString()}</div>
-                            <div style="color: #FFD700; text-align: right;">${entry.elements_discovered}</div>
+                            <div style="color: #FFD700; text-align: right;">${entry.elements_discovered || 0}</div>
                             <div style="color: #AAA; text-align: right;">${timeStr}</div>
-                            <div style="color: #ff6b6b; text-align: right;">${entry.kills}</div>
+                            <div style="color: #ff6b6b; text-align: right;">${entry.kills || 0}</div>
                             <div style="color: #AAA; text-align: right;">${formatDate(entry.timestamp)}</div>
                         </div>
                     `;
