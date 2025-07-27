@@ -1753,6 +1753,12 @@
         function startGameTransition() {
             const gameModeSelect = document.getElementById('gameModeSelect');
             const gameCanvas = document.getElementById('gameCanvas');
+            const versionDisplay = document.getElementById('versionDisplay');
+            
+            // Hide version display when game starts
+            if (versionDisplay) {
+                versionDisplay.style.display = 'none';
+            }
             
             // Add transition styles
             gameCanvas.style.transition = 'opacity 0.3s ease-in';
