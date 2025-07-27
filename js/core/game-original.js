@@ -1468,8 +1468,8 @@
             const trimmedUsername = username.trim();
             
             // Check length
-            if (trimmedUsername.length > 20) {
-                return { valid: false, error: 'Username must be 20 characters or less' };
+            if (trimmedUsername.length > 30) {
+                return { valid: false, error: 'Username must be 30 characters or less' };
             }
             
             // Comprehensive username content filtering
@@ -9774,13 +9774,15 @@
             if (playerRespawnTimer > 0) {
                 playerRespawnTimer = 100; // Set to almost 0 to trigger respawn
             }
-            // Reset leaderboard submission flag for next game
-            leaderboardSubmitted = false;
-            lastSubmissionTime = 0;
+            // Don't reset leaderboard submission flag here - only reset when starting a new game
+            // This prevents multiple submissions in classic mode
+            // leaderboardSubmitted = false; // REMOVED to prevent multiple submissions
+            // lastSubmissionTime = 0; // REMOVED to prevent multiple submissions
         }
         
         // Handle permadeath in Classic mode
         function handlePermadeath() {
+            gameLogger.info('PERMADEATH', 'Handling permadeath - final game over in classic mode');
             
             // Save player stats before they get cleared by stopGame()
             const finalScore = playerSnake ? playerSnake.score : 0;
@@ -9796,6 +9798,16 @@
                 // Submit score and wait for rank
                 const playerName = localStorage.getItem('playerName') || 'Anonymous';
                 const playTime = gameSessionStartTime ? Math.floor((Date.now() - gameSessionStartTime) / 1000) : 0;
+                
+                gameLogger.info('PERMADEATH', 'Submitting final score to leaderboard', {
+                    score: finalScore,
+                    discoveries: finalDiscoveries,
+                    kills: finalKills,
+                    playTime: playTime,
+                    playerName: playerName,
+                    deathCount: deathCount,
+                    leaderboardSubmitted: leaderboardSubmitted
+                });
                 
                 if (window.leaderboardModule && window.leaderboardModule.submitScore) {
                     window.leaderboardModule.submitScore(
@@ -10278,8 +10290,44 @@
                     </div>
                 `;
                 
+                // Filter out corrupted entries and add valid ones
+                const validEntries = data.filter(entry => {
+                    // Validate entry data
+                    if (!entry || typeof entry !== 'object') return false;
+                    
+                    // Check score is a valid number
+                    if (typeof entry.score !== 'number' || entry.score < 0 || !isFinite(entry.score)) {
+                        gameLogger.warn('LEADERBOARD', 'Invalid score detected:', entry);
+                        return false;
+                    }
+                    
+                    // Check play_time is reasonable (max 24 hours = 86400 seconds)
+                    if (entry.play_time && (typeof entry.play_time !== 'number' || entry.play_time < 0 || entry.play_time > 86400)) {
+                        gameLogger.warn('LEADERBOARD', 'Invalid play_time detected:', entry);
+                        return false;
+                    }
+                    
+                    // Check elements_discovered is reasonable (max 1000)
+                    if (entry.elements_discovered && (typeof entry.elements_discovered !== 'number' || entry.elements_discovered < 0 || entry.elements_discovered > 1000)) {
+                        gameLogger.warn('LEADERBOARD', 'Invalid elements_discovered detected:', entry);
+                        return false;
+                    }
+                    
+                    // Skip entries with score 0 (likely from the bug)
+                    if (entry.score === 0) {
+                        return false;
+                    }
+                    
+                    return true;
+                });
+                
+                if (validEntries.length === 0) {
+                    entriesDiv.innerHTML = '<div style="color: #888; text-align: center; padding: 20px;">No valid scores to display.</div>';
+                    return;
+                }
+                
                 // Add entries
-                leaderboardHTML += data.map(entry => {
+                leaderboardHTML += validEntries.map(entry => {
                     const isPlayer = currentUsername && entry.username === currentUsername;
                     const rankClass = entry.rank <= 3 ? `rank-${entry.rank}` : '';
                     
@@ -10293,10 +10341,14 @@
                         displayName = '😊 ' + displayName.substring(9);
                     }
                     
-                    // Format time from seconds to MM:SS
-                    const minutes = Math.floor((entry.play_time || 0) / 60);
-                    const seconds = (entry.play_time || 0) % 60;
-                    const timeStr = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                    // Format time from seconds to MM:SS with safeguards
+                    let timeStr = '0:00';
+                    if (entry.play_time && typeof entry.play_time === 'number' && isFinite(entry.play_time) && entry.play_time >= 0) {
+                        const safeTime = Math.min(entry.play_time, 86400); // Cap at 24 hours
+                        const minutes = Math.floor(safeTime / 60);
+                        const seconds = Math.floor(safeTime % 60);
+                        timeStr = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                    }
                     
                     // Get country flag only (no code)
                     const flag = countryFlags[entry.country_code] || '🌍';
@@ -10342,17 +10394,51 @@
                     return;
                 }
                 
+                // Filter out corrupted entries
+                const validLeaderboardData = leaderboardData.filter(entry => {
+                    // Validate entry data
+                    if (!entry || typeof entry !== 'object') return false;
+                    
+                    // Check score is a valid number
+                    if (typeof entry.score !== 'number' || entry.score < 0 || !isFinite(entry.score)) {
+                        gameLogger.warn('LEADERBOARD', 'Invalid score in main leaderboard:', entry);
+                        return false;
+                    }
+                    
+                    // Check play_time is reasonable
+                    if (entry.play_time && (typeof entry.play_time !== 'number' || entry.play_time < 0 || entry.play_time > 86400)) {
+                        gameLogger.warn('LEADERBOARD', 'Invalid play_time in main leaderboard:', entry);
+                        return false;
+                    }
+                    
+                    // Skip entries with score 0
+                    if (entry.score === 0) {
+                        return false;
+                    }
+                    
+                    return true;
+                });
+                
+                if (validLeaderboardData.length === 0) {
+                    entriesDiv.innerHTML = '<div style="color: #888; text-align: center; padding: 40px; font-family: monospace;">No valid scores to display.</div>';
+                    return;
+                }
+                
                 // Get current player's username to highlight their entries
                 const currentUsername = localStorage.getItem('lastUsername');
                 
-                entriesDiv.innerHTML = leaderboardData.map(entry => {
+                entriesDiv.innerHTML = validLeaderboardData.map(entry => {
                     const isPlayer = currentUsername && entry.username === currentUsername;
                     const rankClass = entry.rank <= 3 ? `rank-${entry.rank}` : '';
                     
-                    // Format time from seconds to MM:SS
-                    const minutes = Math.floor(entry.play_time / 60);
-                    const seconds = entry.play_time % 60;
-                    const timeStr = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                    // Format time from seconds to MM:SS with safeguards
+                    let timeStr = '0:00';
+                    if (entry.play_time && typeof entry.play_time === 'number' && isFinite(entry.play_time) && entry.play_time >= 0) {
+                        const safeTime = Math.min(entry.play_time, 86400); // Cap at 24 hours
+                        const minutes = Math.floor(safeTime / 60);
+                        const seconds = Math.floor(safeTime % 60);
+                        timeStr = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                    }
                     
                     // Get country display
                     const countryDisplay = getCountryDisplay(entry.country_code || 'XX');
@@ -12270,17 +12356,20 @@
             // Add player's skin to used skins to prevent AI from using it
             usedAISkins.add(currentPlayerSkin);
             
-            // Initialize leaderboard session for infinite mode
-            if (gameMode === 'infinite') {
-                leaderboardSubmitted = false;
-                lastSubmissionTime = 0; // Reset submission timestamp
-                gameSessionStartTime = Date.now();
-                
-                if (window.leaderboardModule) {
-                    window.leaderboardModule.startGameSession().then(sessionId => {
-                        currentGameSessionId = sessionId;
-                    });
-                }
+            // Initialize leaderboard session and reset submission flags
+            leaderboardSubmitted = false;
+            lastSubmissionTime = 0; // Reset submission timestamp
+            gameSessionStartTime = Date.now();
+            
+            gameLogger.info('GAME START', 'Starting new game', {
+                gameMode: gameMode,
+                leaderboardSubmitted: leaderboardSubmitted
+            });
+            
+            if (gameMode === 'infinite' && window.leaderboardModule) {
+                window.leaderboardModule.startGameSession().then(sessionId => {
+                    currentGameSessionId = sessionId;
+                });
             }
             
             // Create AI snakes (not in cozy mode)
@@ -13788,13 +13877,22 @@
                             deathProcessed,
                             gameMode,
                     
-                    // AUTO-SUBMIT SCORE ON DEATH
+                    // AUTO-SUBMIT SCORE ON DEATH - DISABLED FOR CLASSIC MODE RESPAWN DEATHS
                     setTimeout(() => {
-                        if (gameMode === 'classic' && playerSnake.score > 0 && canSubmitScore()) {
+                        // In classic mode, only submit on final death (4th death when no revives remain)
+                        const isFinalDeath = gameMode === 'classic' && deathCount >= 4 && revivesRemaining === 0;
+                        const shouldSubmit = gameMode === 'classic' ? isFinalDeath : true;
+                        
+                        if (shouldSubmit && playerSnake.score > 0 && canSubmitScore()) {
                             const playerName = localStorage.getItem('playerName') || 'Anonymous';
                             const playTime = gameSessionStartTime ? Math.floor((Date.now() - gameSessionStartTime) / 1000) : 0;
                             
-                            gameLogger.debug('AUTO-SUBMIT', 'Attempting automatic score submission...');
+                            gameLogger.debug('AUTO-SUBMIT', 'Attempting automatic score submission...', {
+                                gameMode,
+                                deathCount,
+                                revivesRemaining,
+                                isFinalDeath
+                            });
                             
                             if (window.leaderboardModule && window.leaderboardModule.submitScore) {
                                 window.leaderboardModule.submitScore(
