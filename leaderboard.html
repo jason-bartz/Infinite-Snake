@@ -419,6 +419,9 @@
         
     </div>
     
+    <!-- Load skin ID mapping for proper skin display -->
+    <script src="js/skinIdMapping.js"></script>
+    
     <script>
         let currentPeriod = 'daily';
         
@@ -602,9 +605,22 @@
                         entry.country_name || 'Unknown'
                     );
                     
-                    // Handle skin display
+                    // Handle skin display - convert new ID to old ID for file path
                     const skinId = entry.skin || 'snake-default-green';
-                    const skinDisplay = `<div class="leaderboard-skin" style="background-image: url('skins/${skinId}.png');"></div>`;
+                    let skinFileName = skinId;
+                    let skinPath = 'skins/';
+                    
+                    // Convert new skin ID to old ID for file path if converter is available
+                    if (window.skinIdConverter && window.skinIdConverter.toOldId) {
+                        skinFileName = window.skinIdConverter.toOldId(skinId) || skinId;
+                    }
+                    
+                    // Check if it's a boss skin (boss skins have '-boss' suffix in their IDs)
+                    if (skinId.includes('-boss')) {
+                        skinPath = 'assets/boss-skins/';
+                    }
+                    
+                    const skinDisplay = `<div class="leaderboard-skin" style="background-image: url('${skinPath}${skinFileName}.png');"></div>`;
                     
                     return `
                         <div class="leaderboard-entry ${isPlayer ? 'player-entry' : ''}">
