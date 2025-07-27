@@ -59,6 +59,7 @@ export async function submitScore(username, score, elementsDiscovered, playTime,
     
     gameLogger.info('LEADERBOARD', 'Submitting score:', { username, score, elementsDiscovered, playTime, kills, skin });
     gameLogger.debug('LEADERBOARD', 'API Endpoint:', API_ENDPOINT);
+    console.log('[SKIN DEBUG] Submitting with skin:', skin, 'window.currentPlayerSkin:', window.currentPlayerSkin);
     
     const requestBody = {
       username,

@@ -607,6 +607,7 @@
                     
                     // Handle skin display - convert new ID to old ID for file path
                     const skinId = entry.skin || 'snake-default-green';
+                    console.log('[SKIN DEBUG] Entry:', entry.username, 'has skin:', entry.skin, 'using:', skinId);
                     let skinFileName = skinId;
                     let skinPath = 'skins/';
                     
