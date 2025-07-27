@@ -9664,7 +9664,6 @@
                     kills: playerSnake.kills,
                     skin: window.currentPlayerSkin
                 });
-                console.log('[SKIN DEBUG MANUAL-SUBMIT] Current skin:', window.currentPlayerSkin, 'Snake skin:', playerSnake ? playerSnake.skin : 'no snake');
                 
                 
                 let result;
@@ -10623,6 +10622,7 @@
                             
                             // Submit score automatically
                             if (window.leaderboardModule && window.leaderboardModule.submitScore) {
+                                
                                 
                                 // Call the working submitScore function with ALL required parameters
                                 window.leaderboardModule.submitScore(
@@ -13931,7 +13931,6 @@
                             const playTime = gameSessionStartTime ? Math.floor((Date.now() - gameSessionStartTime) / 1000) : 0;
                             
                             // Force console log to always show
-                            console.log('[SKIN DEBUG] Death submission - window.currentPlayerSkin:', window.currentPlayerSkin);
                             
                             gameLogger.debug('AUTO-SUBMIT', 'Attempting automatic score submission...', {
                                 gameMode,
@@ -13941,7 +13940,6 @@
                                 currentSkin: window.currentPlayerSkin,
                                 playerSnakeSkin: playerSnake ? playerSnake.skin : 'no snake'
                             });
-                            console.log('[SKIN DEBUG AUTO-SUBMIT] Current skin:', window.currentPlayerSkin, 'Snake skin:', playerSnake ? playerSnake.skin : 'no snake');
                             
                             if (window.leaderboardModule && window.leaderboardModule.submitScore) {
                                 window.leaderboardModule.submitScore(

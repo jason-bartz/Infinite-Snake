@@ -273,11 +273,6 @@ function getCountryFromRequest(req) {
   
   const countryName = COUNTRY_NAMES[countryCode] || countryCode;
   
-  console.log('Detected country:', { 
-    raw: rawCountryCode, 
-    code: countryCode, 
-    name: countryName 
-  });
   
   return {
     code: countryCode,
@@ -567,7 +562,6 @@ export default async function handler(req, res) {
       // Anti-cheat validation
       const validation = validateScore(score, elements_discovered, play_time, kills);
       if (!validation.valid) {
-        console.log('Score validation failed:', { username, score, validation });
         return res.status(400).json({ error: validation.error });
       }
       
@@ -588,6 +582,7 @@ export default async function handler(req, res) {
         timestamp: Date.now()
       };
       
+      
       // Get all period keys
       const keys = getLeaderboardKeys();
       const scoreData = JSON.stringify(scoreEntry);
@@ -595,17 +590,10 @@ export default async function handler(req, res) {
       // Ensure score is a number
       const numericScore = Number(scoreEntry.score);
       
-      console.log('Adding score:', { 
-        key: keys.daily, 
-        score: numericScore, 
-        memberLength: scoreData.length,
-        memberPreview: scoreData.substring(0, 100) + '...'
-      });
       
       // Validate that scoreData is proper JSON
       try {
         const testParse = JSON.parse(scoreData);
-        console.log('JSON validation passed for scoreData');
       } catch (jsonError) {
         console.error('Invalid JSON being stored:', jsonError);
         throw new Error('Failed to create valid JSON for storage');
@@ -638,7 +626,6 @@ export default async function handler(req, res) {
                   playerEntryFound = true;
                   existingScore = score;
                   existingMember = member;
-                  console.log(`Found existing entry for ${cleanUsername} with score ${score}`);
                   break;
                 }
               } catch (e) {
@@ -655,15 +642,12 @@ export default async function handler(req, res) {
               await redis.zrem(key, existingMember);
               // Add new entry
               await redis.zadd(key, { score: numericScore, member: scoreData });
-              console.log(`Updated ${cleanUsername}'s score from ${existingScore} to ${numericScore}`);
             } else {
-              console.log(`Keeping existing higher score ${existingScore} for ${cleanUsername} (new: ${numericScore})`);
               return false; // Indicate score was not updated
             }
           } else {
             // No existing entry, add the new score
             await redis.zadd(key, { score: numericScore, member: scoreData });
-            console.log(`Added new score ${numericScore} for ${cleanUsername}`);
           }
           
           // Set expiration if specified
@@ -680,12 +664,6 @@ export default async function handler(req, res) {
         const monthlyUpdated = await updateScoreIfHigher(keys.monthly, 7776000); // 90 days
         const allTimeUpdated = await updateScoreIfHigher(keys.all, null); // no expiry
         
-        console.log('Score update results:', {
-          daily: dailyUpdated,
-          weekly: weeklyUpdated,
-          monthly: monthlyUpdated,
-          allTime: allTimeUpdated
-        });
         
       } catch (zaddError) {
         console.error('Score update operation failed:', zaddError);
@@ -719,7 +697,6 @@ export default async function handler(req, res) {
           if (!isNaN(numValue)) {
             currentBestScore = numValue;
           }
-          console.log('Current best is a plain number:', currentBestScore);
         }
       }
       
@@ -727,7 +704,6 @@ export default async function handler(req, res) {
         await redis.setex(userKey, 2592000, JSON.stringify(scoreEntry)); // Expire in 30 days
       }
       
-      console.log(`Score submitted: ${username} (${country.code}) - ${score} (rank: ${dailyRank !== null ? dailyRank + 1 : 'unknown'})`);
       
       return res.status(200).json({
         success: true,
@@ -755,7 +731,6 @@ export default async function handler(req, res) {
       // Get the appropriate key
       const keys = getLeaderboardKeys();
       const key = keys[period];
-      console.log('Fetching leaderboard for key:', key);
       
       if (!key) {
         return res.status(400).json({ error: 'Invalid period specified' });
@@ -764,7 +739,6 @@ export default async function handler(req, res) {
       // Fetch leaderboard data with pagination
       const start = parseInt(offset) || 0;
       const end = start + (parseInt(limit) || 100) - 1;
-      console.log('Range:', start, 'to', end);
       
       // Get scores in descending order with scores included
       let scores;
@@ -774,8 +748,6 @@ export default async function handler(req, res) {
           rev: true,
           withScores: true 
         });
-        console.log('Scores retrieved:', scores ? scores.length : 'null');
-        console.log('First few entries:', scores?.slice(0, 4));
       } catch (zrangeError) {
         console.error('zrange error:', zrangeError);
         // Try without withScores as fallback
@@ -801,7 +773,6 @@ export default async function handler(req, res) {
               const member = scores[i];
               const score = scores[i + 1];
               
-              console.log(`Processing entry ${i/2 + 1}:`, { member, score });
               
               // Try to parse the member as JSON
               let data;
@@ -827,7 +798,6 @@ export default async function handler(req, res) {
           // Process as simple array of members
           scores.forEach((entry, index) => {
             try {
-              console.log(`Processing simple entry ${index + 1}:`, entry);
               
               let data;
               if (typeof entry === 'string') {
@@ -922,7 +892,6 @@ export default async function handler(req, res) {
               if (score > 999999999 || score > Number.MAX_SAFE_INTEGER / 2) {
                 await redis.zrem(key, member);
                 cleaned++;
-                console.log(`Removed suspicious score: ${score} from ${periodName}`);
               } else {
                 // Parse member data to check for invalid entries
                 const data = JSON.parse(member);
@@ -938,7 +907,6 @@ export default async function handler(req, res) {
                 if (!validation.valid) {
                   await redis.zrem(key, member);
                   cleaned++;
-                  console.log(`Removed invalid score from ${data.username}: ${validation.error}`);
                 }
               }
             } catch (e) {
@@ -1025,7 +993,6 @@ export default async function handler(req, res) {
             totalEntries: allScores.length / 2
           };
           
-          console.log(`Deduplication for ${periodName}: removed ${removed} duplicates, kept ${playerBestScores.size} unique players`);
         }
         
         return res.status(200).json({
@@ -1059,7 +1026,6 @@ export default async function handler(req, res) {
         try {
           // Get all leaderboard keys
           const allKeys = await redis.keys('lb:*');
-          console.log(`Found ${allKeys.length} total leaderboard keys`);
           
           // Delete them in batches
           const batchSize = 10;

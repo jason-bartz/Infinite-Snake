@@ -462,10 +462,6 @@
             const upperCode = countryCode ? countryCode.toUpperCase() : 'XX';
             const flag = countryFlags[upperCode] || '🌍';
             
-            // Log for debugging
-            if (!countryFlags[upperCode] && upperCode !== 'XX') {
-                console.log('Unknown country code:', countryCode, '(normalized:', upperCode, ')');
-            }
             
             return `<span class="country-flag">${flag}</span><span class="country-code">${upperCode}</span>`;
         }
@@ -548,31 +544,26 @@
                     
                     // Filter out entries with ALL zeros (score: 0, elements: 0, time: 0)
                     if (entry.score === 0 && (!entry.elements_discovered || entry.elements_discovered === 0) && (!entry.play_time || entry.play_time === 0)) {
-                        console.log('Filtering out all-zero entry:', entry);
                         return false;
                     }
                     
                     // Filter out entries with just score 0
                     if (entry.score === 0) {
-                        console.log('Filtering out zero-score entry:', entry);
                         return false;
                     }
                     
                     // Validate score is a valid number
                     if (typeof entry.score !== 'number' || entry.score < 0 || !isFinite(entry.score)) {
-                        console.log('Filtering out invalid score:', entry);
                         return false;
                     }
                     
                     // Validate play_time is reasonable (max 24 hours = 86400 seconds)
                     if (entry.play_time && (typeof entry.play_time !== 'number' || entry.play_time < 0 || entry.play_time > 86400 || !isFinite(entry.play_time))) {
-                        console.log('Filtering out invalid play_time:', entry);
                         return false;
                     }
                     
                     // Validate elements_discovered is reasonable (max 1000)
                     if (entry.elements_discovered && (typeof entry.elements_discovered !== 'number' || entry.elements_discovered < 0 || entry.elements_discovered > 1000)) {
-                        console.log('Filtering out invalid elements_discovered:', entry);
                         return false;
                     }
                     
@@ -607,7 +598,6 @@
                     
                     // Handle skin display - convert new ID to old ID for file path
                     const skinId = entry.skin || 'snake-default-green';
-                    console.log('[SKIN DEBUG] Entry:', entry.username, 'has skin:', entry.skin, 'using:', skinId);
                     let skinFileName = skinId;
                     let skinPath = 'skins/';
                     
@@ -621,7 +611,10 @@
                         skinPath = 'assets/boss-skins/';
                     }
                     
-                    const skinDisplay = `<div class="leaderboard-skin" style="background-image: url('${skinPath}${skinFileName}.png');"></div>`;
+                    // Create skin display with error handling
+                    const skinImgUrl = `${skinPath}${skinFileName}.png`;
+                    const defaultSkinUrl = 'skins/snake-default-green.png';
+                    const skinDisplay = `<div class="leaderboard-skin" style="background-image: url('${skinImgUrl}'), url('${defaultSkinUrl}');"></div>`;
                     
                     return `
                         <div class="leaderboard-entry ${isPlayer ? 'player-entry' : ''}">
