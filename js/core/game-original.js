@@ -3502,6 +3502,9 @@
             }
             
             die(isBossDeath = false) {
+                if (this.isPlayer) {
+                    console.log('[DEATH DEBUG] Player snake die() called, isDying:', this.isDying, 'score:', this.score);
+                }
                 
                 // Start death animation if not already dying
                 if (!this.isDying) {
@@ -13916,10 +13919,12 @@
                             gameMode,
                     
                     // AUTO-SUBMIT SCORE ON DEATH - DISABLED FOR CLASSIC MODE RESPAWN DEATHS
+                    console.log('[DEATH SEQUENCE] Starting auto-submit check, gameMode:', gameMode, 'playerSnake.score:', playerSnake.score);
                     setTimeout(() => {
                         // In classic mode, only submit on final death (4th death when no revives remain)
                         const isFinalDeath = gameMode === 'classic' && deathCount >= 4 && revivesRemaining === 0;
                         const shouldSubmit = gameMode === 'classic' ? isFinalDeath : true;
+                        console.log('[DEATH SEQUENCE] shouldSubmit:', shouldSubmit, 'score:', playerSnake.score, 'canSubmitScore:', canSubmitScore());
                         
                         if (shouldSubmit && playerSnake.score > 0 && canSubmitScore()) {
                             const playerName = localStorage.getItem('playerName') || 'Anonymous';
@@ -15016,7 +15021,7 @@
         window.playUISound = playUISound;
         
         // Version check to ensure new code is loaded
-        window.gameVersion = '1.4.1-debug';
+        window.gameVersion = '1.5.0-debug';
         console.log('[GAME LOADED] Version:', window.gameVersion);
         
         // Global debug function to check skin status
