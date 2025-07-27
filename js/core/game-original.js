@@ -13925,6 +13925,9 @@
                             const playerName = localStorage.getItem('playerName') || 'Anonymous';
                             const playTime = gameSessionStartTime ? Math.floor((Date.now() - gameSessionStartTime) / 1000) : 0;
                             
+                            // Force console log to always show
+                            console.log('[SKIN DEBUG] Death submission - window.currentPlayerSkin:', window.currentPlayerSkin);
+                            
                             gameLogger.debug('AUTO-SUBMIT', 'Attempting automatic score submission...', {
                                 gameMode,
                                 deathCount,
@@ -15011,3 +15014,18 @@
         window.startGame = startGame;
         window.startGameTransition = startGameTransition;
         window.playUISound = playUISound;
+        
+        // Global debug function to check skin status
+        window.checkSkinStatus = function() {
+            console.log('=== SKIN STATUS DEBUG ===');
+            console.log('window.currentPlayerSkin:', window.currentPlayerSkin);
+            console.log('localStorage currentSkin:', localStorage.getItem('currentSkin'));
+            if (typeof playerSnake !== 'undefined' && playerSnake) {
+                console.log('playerSnake.skin:', playerSnake.skin);
+            }
+            return {
+                windowSkin: window.currentPlayerSkin,
+                storageSkin: localStorage.getItem('currentSkin'),
+                snakeSkin: typeof playerSnake !== 'undefined' && playerSnake ? playerSnake.skin : null
+            };
+        };
