@@ -9658,8 +9658,10 @@
                     score: Math.floor(playerSnake.score),
                     elements: playerDiscoveredElements.size,
                     playTime,
-                    kills: playerSnake.kills
+                    kills: playerSnake.kills,
+                    skin: window.currentPlayerSkin
                 });
+                console.log('[SKIN DEBUG MANUAL-SUBMIT] Current skin:', window.currentPlayerSkin, 'Snake skin:', playerSnake ? playerSnake.skin : 'no snake');
                 
                 
                 let result;
@@ -13927,8 +13929,11 @@
                                 gameMode,
                                 deathCount,
                                 revivesRemaining,
-                                isFinalDeath
+                                isFinalDeath,
+                                currentSkin: window.currentPlayerSkin,
+                                playerSnakeSkin: playerSnake ? playerSnake.skin : 'no snake'
                             });
+                            console.log('[SKIN DEBUG AUTO-SUBMIT] Current skin:', window.currentPlayerSkin, 'Snake skin:', playerSnake ? playerSnake.skin : 'no snake');
                             
                             if (window.leaderboardModule && window.leaderboardModule.submitScore) {
                                 window.leaderboardModule.submitScore(
