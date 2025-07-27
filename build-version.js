@@ -3,10 +3,14 @@
 const fs = require('fs');
 const path = require('path');
 
-// Read version from version.json
+// Read version from package.json
+const packageFile = path.join(__dirname, 'package.json');
+const packageData = JSON.parse(fs.readFileSync(packageFile, 'utf8'));
+const version = packageData.version;
+
+// Also read version.json for the updated date tracking
 const versionFile = path.join(__dirname, 'version.json');
 const versionData = JSON.parse(fs.readFileSync(versionFile, 'utf8'));
-const version = versionData.version;
 
 console.log(`Building with version: ${version}`);
 
@@ -53,6 +57,7 @@ console.log(`   - Updated all JS and CSS references with ?v=${version}`);
 console.log(`   - Updated version display to ${version}`);
 console.log(`   - Backup saved as: ${backupPath}`);
 
-// Update version date
+// Update version.json with the current version and date
+versionData.version = version;
 versionData.updated = new Date().toISOString().split('T')[0];
 fs.writeFileSync(versionFile, JSON.stringify(versionData, null, 2));

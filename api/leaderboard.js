@@ -612,25 +612,82 @@ export default async function handler(req, res) {
       
       // Use individual operations instead of pipeline to debug
       try {
-        // Add to daily leaderboard (expires in 7 days)
-        await redis.zadd(keys.daily, { score: numericScore, member: scoreData });
-        await redis.expire(keys.daily, 604800); // 7 days in seconds
+        // For each leaderboard period, check if player already has a score
+        // and only update if the new score is higher
         
-        // Add to weekly leaderboard (expires in 30 days)
-        await redis.zadd(keys.weekly, { score: numericScore, member: scoreData });
-        await redis.expire(keys.weekly, 2592000); // 30 days
+        // Helper function to update score only if higher
+        const updateScoreIfHigher = async (key, expireSeconds) => {
+          // Get all current entries for this leaderboard
+          const existingEntries = await redis.zrange(key, 0, -1, { withScores: true });
+          
+          let playerEntryFound = false;
+          let existingScore = 0;
+          let existingMember = null;
+          
+          // Look for existing entry from this player
+          if (existingEntries && existingEntries.length > 0) {
+            for (let i = 0; i < existingEntries.length; i += 2) {
+              try {
+                const member = existingEntries[i];
+                const score = existingEntries[i + 1];
+                const data = JSON.parse(member);
+                
+                // Check if this is the same player (case-insensitive)
+                if (data.username && data.username.toLowerCase() === cleanUsername.toLowerCase()) {
+                  playerEntryFound = true;
+                  existingScore = score;
+                  existingMember = member;
+                  console.log(`Found existing entry for ${cleanUsername} with score ${score}`);
+                  break;
+                }
+              } catch (e) {
+                // Skip invalid entries
+                continue;
+              }
+            }
+          }
+          
+          // If player has an existing score, only update if new score is higher
+          if (playerEntryFound) {
+            if (numericScore > existingScore) {
+              // Remove old entry
+              await redis.zrem(key, existingMember);
+              // Add new entry
+              await redis.zadd(key, { score: numericScore, member: scoreData });
+              console.log(`Updated ${cleanUsername}'s score from ${existingScore} to ${numericScore}`);
+            } else {
+              console.log(`Keeping existing higher score ${existingScore} for ${cleanUsername} (new: ${numericScore})`);
+              return false; // Indicate score was not updated
+            }
+          } else {
+            // No existing entry, add the new score
+            await redis.zadd(key, { score: numericScore, member: scoreData });
+            console.log(`Added new score ${numericScore} for ${cleanUsername}`);
+          }
+          
+          // Set expiration if specified
+          if (expireSeconds) {
+            await redis.expire(key, expireSeconds);
+          }
+          
+          return true; // Indicate score was updated
+        };
         
-        // Add to monthly leaderboard (expires in 90 days)
-        await redis.zadd(keys.monthly, { score: numericScore, member: scoreData });
-        await redis.expire(keys.monthly, 7776000); // 90 days
+        // Update each leaderboard
+        const dailyUpdated = await updateScoreIfHigher(keys.daily, 604800); // 7 days
+        const weeklyUpdated = await updateScoreIfHigher(keys.weekly, 2592000); // 30 days
+        const monthlyUpdated = await updateScoreIfHigher(keys.monthly, 7776000); // 90 days
+        const allTimeUpdated = await updateScoreIfHigher(keys.all, null); // no expiry
         
-        // Add to all-time leaderboard (no expiry)
-        await redis.zadd(keys.all, { score: numericScore, member: scoreData });
-        
-        console.log('All zadd operations completed successfully');
+        console.log('Score update results:', {
+          daily: dailyUpdated,
+          weekly: weeklyUpdated,
+          monthly: monthlyUpdated,
+          allTime: allTimeUpdated
+        });
         
       } catch (zaddError) {
-        console.error('ZADD operation failed:', zaddError);
+        console.error('Score update operation failed:', zaddError);
         console.error('Score data:', { score: numericScore, member: scoreData });
         throw zaddError;
       }
@@ -893,6 +950,88 @@ export default async function handler(req, res) {
           success: true,
           message: 'Cleaned suspicious scores',
           cleaned
+        });
+      }
+      
+      // Special action to remove duplicate entries (keep highest score per player)
+      if (action === 'deduplicate') {
+        const keys = getLeaderboardKeys();
+        let totalRemoved = 0;
+        const deduplicationResults = {};
+        
+        for (const [periodName, key] of Object.entries(keys)) {
+          // Get all scores
+          const allScores = await redis.zrange(key, 0, -1, { 
+            rev: true,
+            withScores: true 
+          });
+          
+          if (!allScores || allScores.length === 0) {
+            deduplicationResults[periodName] = { removed: 0, kept: 0 };
+            continue;
+          }
+          
+          // Track best score per player
+          const playerBestScores = new Map();
+          const entriesToRemove = [];
+          
+          // Process scores in pairs
+          for (let i = 0; i < allScores.length; i += 2) {
+            try {
+              const member = allScores[i];
+              const score = allScores[i + 1];
+              const data = JSON.parse(member);
+              
+              if (!data.username) continue;
+              
+              const playerKey = data.username.toLowerCase();
+              
+              if (playerBestScores.has(playerKey)) {
+                // Player already has an entry, keep the higher score
+                const existing = playerBestScores.get(playerKey);
+                if (score > existing.score) {
+                  // New score is higher, remove the old one
+                  entriesToRemove.push(existing.member);
+                  playerBestScores.set(playerKey, { score, member });
+                } else {
+                  // Existing score is higher, remove this one
+                  entriesToRemove.push(member);
+                }
+              } else {
+                // First entry for this player
+                playerBestScores.set(playerKey, { score, member });
+              }
+            } catch (e) {
+              console.error('Error processing entry for deduplication:', e);
+            }
+          }
+          
+          // Remove duplicate entries
+          let removed = 0;
+          for (const member of entriesToRemove) {
+            try {
+              await redis.zrem(key, member);
+              removed++;
+            } catch (e) {
+              console.error('Error removing duplicate entry:', e);
+            }
+          }
+          
+          totalRemoved += removed;
+          deduplicationResults[periodName] = {
+            removed,
+            kept: playerBestScores.size,
+            totalEntries: allScores.length / 2
+          };
+          
+          console.log(`Deduplication for ${periodName}: removed ${removed} duplicates, kept ${playerBestScores.size} unique players`);
+        }
+        
+        return res.status(200).json({
+          success: true,
+          message: 'Removed duplicate entries',
+          totalRemoved,
+          details: deduplicationResults
         });
       }
       

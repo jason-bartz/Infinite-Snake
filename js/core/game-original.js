@@ -9385,10 +9385,18 @@
         let lastSubmissionTime = 0; // Track when last submission started
         let currentGameSessionId = null;
         let gameSessionStartTime = null;
+        let submittedGameSessions = new Set(); // Track which game sessions have submitted scores
         
         // Helper function to check if we should submit
         function canSubmitScore() {
             const now = Date.now();
+            
+            // Check if this game session has already submitted a score
+            if (currentGameSessionId && submittedGameSessions.has(currentGameSessionId)) {
+                gameLogger.debug('SUBMISSION', 'Blocked - score already submitted for game session', currentGameSessionId);
+                return false;
+            }
+            
             // Prevent submissions within 3 seconds of each other (increased from 1 second)
             if (now - lastSubmissionTime < 3000) {
                 gameLogger.debug('SUBMISSION', 'Blocked - too soon after last submission', now - lastSubmissionTime, 'ms');
@@ -9401,6 +9409,13 @@
             // Mark as submitted and record time
             leaderboardSubmitted = true;
             lastSubmissionTime = now;
+            
+            // Add current game session to submitted set
+            if (currentGameSessionId) {
+                submittedGameSessions.add(currentGameSessionId);
+                gameLogger.debug('SUBMISSION', 'Added game session to submitted set:', currentGameSessionId);
+            }
+            
             gameLogger.debug('SUBMISSION', 'Allowed - marking as submitted at', now);
             return true;
         }
@@ -10620,8 +10635,8 @@
                                         // Already marked as submitted above
                                     } else {
                                         gameLogger.error('LEADERBOARD', '❌ Submission failed or returned invalid data:', result);
-                                        // Reset flag so it can retry
-                                        leaderboardSubmitted = false;
+                                        // Don't reset flag - keep the game session marked as submitted
+                                        // This prevents multiple submissions from the same game
                                     }
                                 }).catch(error => {
                                     gameLogger.error('LEADERBOARD', '❌ Failed to submit score:', error);
@@ -10630,8 +10645,8 @@
                                         stack: error.stack,
                                         type: error.constructor.name
                                     });
-                                    // Reset flag on failure so it can retry
-                                    leaderboardSubmitted = false;
+                                    // Don't reset flag - keep the game session marked as submitted
+                                    // This prevents multiple submissions from the same game
                                 });
                             } else {
                                 gameLogger.error('LEADERBOARD', 'Supabase module not available!', {
@@ -12361,14 +12376,19 @@
             lastSubmissionTime = 0; // Reset submission timestamp
             gameSessionStartTime = Date.now();
             
+            // Generate a unique game session ID for tracking submissions
+            currentGameSessionId = `game_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+            
             gameLogger.info('GAME START', 'Starting new game', {
                 gameMode: gameMode,
-                leaderboardSubmitted: leaderboardSubmitted
+                leaderboardSubmitted: leaderboardSubmitted,
+                gameSessionId: currentGameSessionId
             });
             
             if (gameMode === 'infinite' && window.leaderboardModule) {
                 window.leaderboardModule.startGameSession().then(sessionId => {
-                    currentGameSessionId = sessionId;
+                    // Keep our own session ID for submission tracking
+                    gameLogger.debug('LEADERBOARD', 'Leaderboard session started:', sessionId);
                 });
             }
             
@@ -13920,13 +13940,11 @@
                                         // Already set to true above
                                     } else {
                                         gameLogger.error('AUTO-SUBMIT', 'Invalid result:', result);
-                                        // Reset flag on failure
-                                        leaderboardSubmitted = false;
+                                        // Don't reset flag - keep the game session marked as submitted
                                     }
                                 }).catch(err => {
                                     gameLogger.error('AUTO-SUBMIT', 'Failed:', err);
-                                    // Reset flag on error
-                                    leaderboardSubmitted = false;
+                                    // Don't reset flag - keep the game session marked as submitted
                                 });
                             } else {
                                 gameLogger.error('AUTO-SUBMIT', 'Supabase module not loaded!');
@@ -14118,10 +14136,14 @@
                         gameSessionStartTime = Date.now();
                     }
                     
+                    // Generate a new game session ID for the new game
+                    currentGameSessionId = `game_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                    gameLogger.debug('RESPAWN', 'New game session started:', currentGameSessionId);
+                    
                     // Start a new game session for proper server-side validation
                     if (gameMode === 'infinite' && leaderboardModule) {
                         leaderboardModule.startGameSession().then(sessionId => {
-                            currentGameSessionId = sessionId;
+                            gameLogger.debug('LEADERBOARD', 'Leaderboard session for respawn:', sessionId);
                         });
                     }
                 }

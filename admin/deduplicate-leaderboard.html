@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deduplicate Leaderboard - Admin Tool</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #0a0a0a;
+            color: #fff;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #4ecdc4;
+            margin-bottom: 30px;
+        }
+        
+        .control-panel {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #ff6b6b;
+        }
+        
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            color: #fff;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        button {
+            background: #4ecdc4;
+            color: #0a0a0a;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-right: 10px;
+            transition: background 0.3s;
+        }
+        
+        button:hover {
+            background: #3dbdb5;
+        }
+        
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+        
+        .danger-button {
+            background: #ff6b6b;
+        }
+        
+        .danger-button:hover {
+            background: #ff5252;
+        }
+        
+        .results {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 8px;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .success {
+            color: #4ecdc4;
+        }
+        
+        .error {
+            color: #ff6b6b;
+        }
+        
+        .warning {
+            background: #2a2a00;
+            border: 1px solid #ff6b6b;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Leaderboard Deduplication Tool</h1>
+    
+    <div class="warning">
+        <strong>⚠️ WARNING:</strong> This tool will remove duplicate leaderboard entries, keeping only the highest score for each player. This action cannot be undone!
+    </div>
+    
+    <div class="control-panel">
+        <div class="form-group">
+            <label for="adminKey">Admin Key:</label>
+            <input type="password" id="adminKey" placeholder="Enter admin key">
+        </div>
+        
+        <button id="deduplicateBtn" onclick="deduplicateLeaderboard()">
+            Remove Duplicates (Keep Highest Scores)
+        </button>
+        
+        <button class="danger-button" onclick="cleanSuspiciousScores()">
+            Clean Suspicious Scores
+        </button>
+    </div>
+    
+    <div id="results" class="results"></div>
+
+    <script>
+        const API_ENDPOINT = '/api/leaderboard';
+        
+        function log(message, type = 'info') {
+            const resultsDiv = document.getElementById('results');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : '';
+            resultsDiv.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+        
+        async function deduplicateLeaderboard() {
+            const adminKey = document.getElementById('adminKey').value;
+            if (!adminKey) {
+                log('Please enter the admin key', 'error');
+                return;
+            }
+            
+            const btn = document.getElementById('deduplicateBtn');
+            btn.disabled = true;
+            btn.textContent = 'Processing...';
+            
+            log('Starting deduplication process...');
+            
+            try {
+                const response = await fetch(`${API_ENDPOINT}?action=deduplicate&adminKey=${encodeURIComponent(adminKey)}`, {
+                    method: 'DELETE'
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to deduplicate');
+                }
+                
+                log(`\nDeduplication complete!`, 'success');
+                log(`Total duplicates removed: ${data.totalRemoved}`, 'success');
+                
+                if (data.details) {
+                    log('\nDetails by period:');
+                    for (const [period, stats] of Object.entries(data.details)) {
+                        log(`  ${period}: ${stats.removed} duplicates removed, ${stats.kept} unique players kept`);
+                    }
+                }
+                
+            } catch (error) {
+                log(`Error: ${error.message}`, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Remove Duplicates (Keep Highest Scores)';
+            }
+        }
+        
+        async function cleanSuspiciousScores() {
+            const adminKey = document.getElementById('adminKey').value;
+            if (!adminKey) {
+                log('Please enter the admin key', 'error');
+                return;
+            }
+            
+            if (!confirm('This will remove all suspicious/invalid scores. Are you sure?')) {
+                return;
+            }
+            
+            log('Cleaning suspicious scores...');
+            
+            try {
+                const response = await fetch(`${API_ENDPOINT}?action=clean&adminKey=${encodeURIComponent(adminKey)}`, {
+                    method: 'DELETE'
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to clean scores');
+                }
+                
+                log(`\nCleaning complete! Removed ${data.cleaned} suspicious scores`, 'success');
+                
+            } catch (error) {
+                log(`Error: ${error.message}`, 'error');
+            }
+        }
+        
+        // Allow Enter key to submit
+        document.getElementById('adminKey').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                deduplicateLeaderboard();
+            }
+        });
+    </script>
+</body>
+</html>
