@@ -180,7 +180,7 @@
         
         .leaderboard-header {
             display: grid;
-            grid-template-columns: 80px 80px 200px 150px 120px 120px 100px 100px;
+            grid-template-columns: 80px 60px 80px 200px 150px 120px 120px 100px 100px;
             gap: 15px;
             padding: 15px;
             background: var(--snes-black);
@@ -195,7 +195,7 @@
         
         .leaderboard-entry {
             display: grid;
-            grid-template-columns: 80px 80px 200px 150px 120px 120px 100px 100px;
+            grid-template-columns: 80px 60px 80px 200px 150px 120px 120px 100px 100px;
             gap: 15px;
             padding: 15px;
             margin-bottom: 5px;
@@ -237,6 +237,16 @@
         .rank-1 { color: var(--snes-gold); font-size: 12px; font-weight: bold; }
         .rank-2 { color: #C0C0C0; font-size: 11px; }
         .rank-3 { color: #CD7F32; font-size: 11px; }
+        
+        .leaderboard-skin {
+            width: 30px;
+            height: 30px;
+            background-size: cover;
+            background-position: center;
+            image-rendering: pixelated;
+            border: 2px solid var(--snes-dark-blue);
+            box-shadow: 0 0 0 1px var(--snes-black);
+        }
         
         .country-flag {
             font-size: 16px;
@@ -325,10 +335,16 @@
             
             .leaderboard-header,
             .leaderboard-entry {
-                grid-template-columns: 50px 60px 1fr 80px 60px;
+                grid-template-columns: 50px 40px 50px 1fr 80px 60px;
                 gap: 10px;
                 font-size: 8px;
                 padding: 10px;
+            }
+            
+            .leaderboard-skin {
+                width: 24px;
+                height: 24px;
+                border-width: 1px;
             }
             
             .leaderboard-header > div:nth-child(5),
@@ -386,6 +402,7 @@
         <div class="leaderboard-container">
             <div class="leaderboard-header">
                 <div>RANK</div>
+                <div>SNAKE</div>
                 <div>COUNTRY</div>
                 <div>PLAYER</div>
                 <div style="text-align: right;">SCORE</div>
@@ -585,9 +602,14 @@
                         entry.country_name || 'Unknown'
                     );
                     
+                    // Handle skin display
+                    const skinId = entry.skin || 'snake-default-green';
+                    const skinDisplay = `<div class="leaderboard-skin" style="background-image: url('skins/${skinId}.png');"></div>`;
+                    
                     return `
                         <div class="leaderboard-entry ${isPlayer ? 'player-entry' : ''}">
                             <div class="${rankClass}" style="font-weight: bold;">#${displayRank}</div>
+                            ${skinDisplay}
                             <div>${countryDisplay}</div>
                             <div style="color: ${isPlayer ? '#4ecdc4' : '#FFF'}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${entry.username}">${entry.username}</div>
                             <div style="color: #4ecdc4; text-align: right;">${(entry.score || 0).toLocaleString()}</div>

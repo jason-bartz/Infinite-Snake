@@ -438,7 +438,7 @@ export default async function handler(req, res) {
   try {
     // POST - Submit a new score
     if (req.method === 'POST') {
-      const { username, score, elements_discovered, play_time, kills } = req.body;
+      const { username, score, elements_discovered, play_time, kills, skin } = req.body;
       
       // Basic validation
       if (!username || typeof score !== 'number' || score < 0) {
@@ -574,7 +574,7 @@ export default async function handler(req, res) {
       // Get country from IP
       const country = getCountryFromRequest(req);
       
-      // Create score entry with country
+      // Create score entry with country and skin
       const scoreEntry = {
         id: generateScoreId(),
         username: cleanUsername.substring(0, 30), // Use cleaned username, limit length
@@ -584,6 +584,7 @@ export default async function handler(req, res) {
         kills: kills || 0,
         country_code: country.code,
         country_name: country.name,
+        skin: skin || 'snake-default-green',
         timestamp: Date.now()
       };
       

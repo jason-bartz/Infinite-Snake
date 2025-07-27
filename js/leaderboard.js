@@ -45,7 +45,7 @@ export async function startGameSession() {
 }
 
 // Submit score to leaderboard
-export async function submitScore(username, score, elementsDiscovered, playTime, kills) {
+export async function submitScore(username, score, elementsDiscovered, playTime, kills, skin) {
   try {
     if (!LEADERBOARD_ENABLED) {
       gameLogger.debug('LEADERBOARD', 'Leaderboard is disabled');
@@ -57,7 +57,7 @@ export async function submitScore(username, score, elementsDiscovered, playTime,
       leaderboardCache[key] = { data: null, timestamp: 0 };
     });
     
-    gameLogger.info('LEADERBOARD', 'Submitting score:', { username, score, elementsDiscovered, playTime, kills });
+    gameLogger.info('LEADERBOARD', 'Submitting score:', { username, score, elementsDiscovered, playTime, kills, skin });
     gameLogger.debug('LEADERBOARD', 'API Endpoint:', API_ENDPOINT);
     
     const requestBody = {
@@ -65,7 +65,8 @@ export async function submitScore(username, score, elementsDiscovered, playTime,
       score,
       elements_discovered: elementsDiscovered,
       play_time: playTime,
-      kills
+      kills,
+      skin: skin || 'snake-default-green'
     };
     gameLogger.debug('LEADERBOARD', 'Request body:', requestBody);
     

@@ -1054,6 +1054,9 @@
         let unlockedSkins = new Set(['snake-default-green', 'chirpy', 'ruby', 'lil-beans']);
         let viewedSkins = new Set(['snake-default-green', 'chirpy', 'ruby', 'lil-beans']);
         let availableUnlocks = 0;
+        
+        // Make currentPlayerSkin globally accessible immediately
+        window.currentPlayerSkin = currentPlayerSkin;
         let skinImages = {};
         
         function loadSkinData() {
@@ -1076,6 +1079,8 @@
             const savedCurrent = localStorage.getItem('currentSkin');
             if (savedCurrent && unlockedSkins.has(savedCurrent)) {
                 currentPlayerSkin = savedCurrent;
+                // Update global reference
+                window.currentPlayerSkin = currentPlayerSkin;
                 const portrait = document.getElementById('playerPortrait');
                 if (portrait) {
                     const fileId = window.skinIdConverter ? (window.skinIdConverter.toOldId(currentPlayerSkin) || currentPlayerSkin) : currentPlayerSkin;
@@ -1113,6 +1118,8 @@
             localStorage.setItem('unlockedSkins', JSON.stringify(Array.from(unlockedSkins)));
             localStorage.setItem('viewedSkins', JSON.stringify(Array.from(viewedSkins)));
             localStorage.setItem('currentSkin', currentPlayerSkin);
+            // Make currentPlayerSkin globally accessible for leaderboard submission
+            window.currentPlayerSkin = currentPlayerSkin;
         }
         
         function preloadSkins() {
@@ -9455,7 +9462,8 @@
                     testData.score,
                     testData.elements,
                     testData.playTime,
-                    testData.kills
+                    testData.kills,
+                    window.currentPlayerSkin || 'snake-default-green'
                 );
                 gameLogger.debug('LEADERBOARD', 'Test submission result:', result, 'Type:', typeof result, 'Keys:', result ? Object.keys(result) : 'null');
             } catch (error) {
@@ -9661,7 +9669,8 @@
                         Math.floor(playerSnake.score),
                         playerDiscoveredElements.size,
                         playTime,
-                        playerSnake.kills
+                        playerSnake.kills,
+                        window.currentPlayerSkin || 'snake-default-green'
                     );
                     gameLogger.debug('LEADERBOARD', 'Submission result:', result);
                 } catch (supabaseError) {
@@ -9830,7 +9839,8 @@
                         Math.floor(finalScore),
                         finalDiscoveries,
                         playTime,
-                        finalKills
+                        finalKills,
+                        window.currentPlayerSkin || 'snake-default-green'
                     ).then(result => {
                         dailyRank = result;
                         isSubmitting = false;
@@ -10615,7 +10625,8 @@
                                     Math.floor(playerSnake.score),
                                     playerDiscoveredElements.size,
                                     playTime,  // Add playTime parameter that was missing!
-                                    playerSnake.kills
+                                    playerSnake.kills,
+                                    window.currentPlayerSkin || 'snake-default-green'
                                 ).then(result => {
                                     
                                     // submitScore returns the rank as a number or 'Submitted' if rank is null
@@ -10664,7 +10675,8 @@
                                                 Math.floor(playerSnake.score),
                                                 playerDiscoveredElements.size,
                                                 playTime,
-                                                playerSnake.kills
+                                                playerSnake.kills,
+                                                window.currentPlayerSkin || 'snake-default-green'
                                             ).then(result => {
                                                 if (result && typeof result === 'number') {
                                                     const globalRankEl = document.getElementById('globalRank');
@@ -12821,6 +12833,8 @@
             if (skinData.unlocked) {
                 // Already unlocked - just select it
                 currentPlayerSkin = skinId;
+                // Update global reference
+                window.currentPlayerSkin = currentPlayerSkin;
                 if (playerSnake) {
                     playerSnake.skin = skinId;
                 }
@@ -12852,6 +12866,8 @@
                 
                 // Select the newly unlocked skin
                 currentPlayerSkin = skinId;
+                // Update global reference
+                window.currentPlayerSkin = currentPlayerSkin;
                 if (playerSnake) {
                     playerSnake.skin = skinId;
                 }
@@ -13920,7 +13936,8 @@
                                     Math.floor(playerSnake.score),
                                     playerDiscoveredElements.size,
                                     playTime,
-                                    playerSnake.kills
+                                    playerSnake.kills,
+                                    window.currentPlayerSkin || 'snake-default-green'
                                 ).then(result => {
                                     gameLogger.debug('AUTO-SUBMIT', 'Score submitted!', result);
                                     if (result !== null && result !== undefined) {
