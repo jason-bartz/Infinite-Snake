@@ -46,6 +46,7 @@ export async function startGameSession() {
 
 // Submit score to leaderboard
 export async function submitScore(username, score, elementsDiscovered, playTime, kills, skin) {
+  console.log('[LEADERBOARD MODULE] submitScore called with:', { username, score, elementsDiscovered, playTime, kills, skin });
   try {
     if (!LEADERBOARD_ENABLED) {
       gameLogger.debug('LEADERBOARD', 'Leaderboard is disabled');
@@ -80,9 +81,11 @@ export async function submitScore(username, score, elementsDiscovered, playTime,
     });
     
     gameLogger.debug('LEADERBOARD', 'Response status:', response.status, response.statusText);
+    console.log('[LEADERBOARD MODULE] Response status:', response.status);
     
     const responseData = await response.json();
     gameLogger.debug('LEADERBOARD', 'Response data:', responseData);
+    console.log('[LEADERBOARD MODULE] Response data:', responseData);
     
     if (!response.ok) {
       gameLogger.error('LEADERBOARD', 'API Error:', {
