@@ -15170,8 +15170,7 @@
         window.playUISound = playUISound;
         
         // Version check to ensure new code is loaded
-        window.gameVersion = '1.5.0-debug';
-        console.log('[GAME LOADED] Version:', window.gameVersion);
+        window.gameVersion = '1.5.0';
         
         // Global debug function to check skin status
         window.checkSkinStatus = function() {

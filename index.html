@@ -57,14 +57,7 @@
     <link rel="dns-prefetch" href="https://fonts.gstatic.com">
     
     <!-- Preload critical resources -->
-    <link rel="preload" href="/assets/preview-logo.png" as="image">
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" as="style">
-    
-    <!-- OPTIMIZATION: Preload critical game assets -->
-    <link rel="preload" href="/elements/data/elements.json" as="fetch" crossorigin>
-    <link rel="preload" href="/elements/data/combinations.json" as="fetch" crossorigin>
-    <link rel="preload" href="/elements/data/emojis.json" as="fetch" crossorigin>
-    <link rel="preload" href="/js/asset-preloader.js" as="script">
     <link rel="preload" href="/assets/background/purple-blue-bg.png" as="image">
     <link rel="preload" href="/assets/background/stars-blue.png" as="image">
     
@@ -426,7 +419,6 @@
         @media (max-width: 800px) {
             #splashLogo {
                 width: 500px !important;
-                max-width: 85% !important;
             }
         }
         
@@ -434,7 +426,6 @@
         @media (orientation: landscape) {
             #splashLogo {
                 width: 300px !important;
-                max-width: 60% !important;
                 margin-bottom: 10px !important;
             }
         }
@@ -2508,7 +2499,6 @@
             
             #splashLogo {
                 width: 240px !important;
-                max-width: 240px !important;
                 height: auto !important;
                 margin-bottom: 5px !important;
             }
@@ -4028,7 +4018,7 @@
             <a href="/leaderboard.html" style="color: #4ecdc4; text-decoration: none; font-family: 'Press Start 2P', monospace; font-size: 10px;">🏆 Leaderboard</a>
         </div>
         <div id="splashContent">
-            <img src="infinite-snake-preview-splash-logo.png" alt="Infinite Snake game logo - A cosmic snake forming an infinity symbol" id="splashLogo" style="width: 800px; max-width: 90%; margin-bottom: 30px;" onerror="this.style.display='none'; document.getElementById('splashTitle').style.display='block';">
+            <img src="infinite-snake-preview-splash-logo.png" alt="Infinite Snake game logo - A cosmic snake forming an infinity symbol" id="splashLogo" style="width: 800px; margin-bottom: 30px;" onerror="this.style.display='none'; document.getElementById('splashTitle').style.display='block';">
             <h1 id="splashTitle">Infinite Snake</h1>
             <p>Welcome to what's left.<br><br>
             The Universe collapsed, scattered its contents across infinite coils of nothing. You're the Infinite Snake - part cleanup crew, part living library.<br><br>
@@ -5081,14 +5071,14 @@
                             <h5 style="color: #4ecdc4; margin-bottom: 5px;">🎮 Controls</h5>
                             <p><strong>Desktop:</strong> Mouse to steer OR WASD keys</p>
                             <p><strong>WASD:</strong> A/D to turn, W to boost</p>
-                            <p><strong>Mobile:</strong> Virtual joystick to steer, Boost button to accelerate</p>
-                            <p><strong>Boost:</strong> Click/W (Desktop) or Boost button (Mobile)</p>
+                            <p><strong>Mobile:</strong> Virtual joystick to steer</p>
+                            <p><strong>Boost:</strong> Click/W (Desktop) or tap anywhere (Mobile)</p>
                             <p><strong>Keyboard:</strong> P to pause, M to mute/unmute</p>
                         </div>
                         
                         <div style="margin-bottom: 15px;">
                             <h5 style="color: #4ecdc4; margin-bottom: 5px;">🎯 Goal</h5>
-                            <p>Grow your snake by collecting elements and discovering new combinations! Climb the global leaderboard, unlock new snake skins, build your Discovery Journal, and compete in Daily, Weekly, Monthly, and All-Time rankings.</p>
+                            <p>Grow your snake by collecting elements and discovering new combinations! Climb the global leaderboard in Classic Mode, unlock new snake skins, build your Discovery Journal, and compete in Weekly, Monthly, and All-Time rankings.</p>
                         </div>
                         
                         <div style="margin-bottom: 15px;">
@@ -5179,15 +5169,15 @@
                     
                     <!-- Mini leaderboard tabs -->
                     <div style="display: flex; margin-bottom: 15px; border-bottom: 2px solid #333; justify-content: center;">
-                        <button class="mini-lb-tab active" onclick="loadPauseLeaderboard(event, 'daily')" 
+                        <button class="mini-lb-tab active" onclick="loadPauseLeaderboard(event, 'weekly')" 
                                 style="flex: 1; padding: 10px; background: transparent; border: none; 
                                        color: #4ecdc4; font-size: 14px; cursor: pointer; font-family: monospace;">
-                            Daily
+                            Weekly
                         </button>
-                        <button class="mini-lb-tab" onclick="loadPauseLeaderboard(event, 'weekly')" 
+                        <button class="mini-lb-tab" onclick="loadPauseLeaderboard(event, 'monthly')" 
                                 style="flex: 1; padding: 10px; background: transparent; border: none; 
                                        color: #888; font-size: 14px; cursor: pointer; font-family: monospace;">
-                            Weekly
+                            Monthly
                         </button>
                         <button class="mini-lb-tab" onclick="loadPauseLeaderboard(event, 'all')" 
                                 style="flex: 1; padding: 10px; background: transparent; border: none; 
@@ -6596,7 +6586,7 @@
                 document.getElementById('leaderboardTab').classList.add('active');
                 // Load leaderboard data when tab is opened
                 if (typeof loadPauseLeaderboard === 'function') {
-                    loadPauseLeaderboard('daily');
+                    loadPauseLeaderboard('weekly');
                 }
             }
         };

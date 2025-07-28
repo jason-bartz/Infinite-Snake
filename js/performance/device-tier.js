@@ -58,9 +58,15 @@ class DeviceTierDetector {
         const canvas = document.createElement('canvas');
         const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
         if (gl) {
-            const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-            if (debugInfo) {
-                this.benchmarkResults.gpu = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+            // Use RENDERER instead of deprecated WEBGL_debug_renderer_info
+            try {
+                const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+                if (debugInfo) {
+                    this.benchmarkResults.gpu = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+                }
+            } catch (e) {
+                // Fallback for browsers where WEBGL_debug_renderer_info is unavailable
+                this.benchmarkResults.gpu = gl.getParameter(gl.RENDERER);
             }
         }
 
