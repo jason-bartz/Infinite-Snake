@@ -246,13 +246,13 @@
     <link rel="alternate" hreflang="en" href="https://infinitesnake.io" />
     <link rel="alternate" hreflang="x-default" href="https://infinitesnake.io" />
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/skin-selection.css?v=1.6.1">
-    <link rel="stylesheet" href="css/cosmic-ui-override.css?v=1.6.1">
-    <link rel="stylesheet" href="css/unlock-notifications.css?v=1.6.1">
-    <link rel="stylesheet" href="css/discovery-feed-gradients.css?v=1.6.1">
-    <link rel="stylesheet" href="css/cosmic-ui-theme.css?v=1.6.1">
-    <link rel="stylesheet" href="css/cosmic-ui-theme.css?v=1.6.1">
-    <link rel="stylesheet" href="css/element-bank-compact.css?v=1.6.1">
+    <link rel="stylesheet" href="css/skin-selection.css?v=1.6.0">
+    <link rel="stylesheet" href="css/cosmic-ui-override.css?v=1.6.0">
+    <link rel="stylesheet" href="css/unlock-notifications.css?v=1.6.0">
+    <link rel="stylesheet" href="css/discovery-feed-gradients.css?v=1.6.0">
+    <link rel="stylesheet" href="css/cosmic-ui-theme.css?v=1.6.0">
+    <link rel="stylesheet" href="css/cosmic-ui-theme.css?v=1.6.0">
+    <link rel="stylesheet" href="css/element-bank-compact.css?v=1.6.0">
     <style>
         /* SNES-Era UI Theme with Cosmic Colors */
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
@@ -4079,7 +4079,7 @@
 <body>
 <!-- Version Display -->
 <div id="versionDisplay" style="position: fixed; top: 5px; left: 50%; transform: translateX(-50%); z-index: 9999; color: #666; font-family: 'Press Start 2P', monospace; font-size: 10px; pointer-events: none;">
-    v<span id="versionNumber">1.6.1</span>
+    v<span id="versionNumber">1.6.0</span>
 </div>
 
 <!-- Immediate Mobile Detection -->
@@ -6588,8 +6588,8 @@
     </style>
 
     <!-- External Dependencies -->
-    <script src="elements/data/loader.js?v=1.6.1"></script>
-    <script src="js/asset-preloader.js?v=1.6.1"></script>
+    <script src="elements/data/loader.js?v=1.6.0"></script>
+    <script src="js/asset-preloader.js?v=1.6.0"></script>
     
     <!-- Version System -->
     <script>
@@ -6603,7 +6603,7 @@
                 }
                 
                 // Check for version mismatch
-                const currentVersion = '1.6.1'; // This will be updated by build script
+                const currentVersion = '1.6.0'; // This will be updated by build script
                 window.GAME_VERSION = data.version;
                 
                 if (currentVersion !== data.version) {
@@ -6638,44 +6638,44 @@
     </script>
     
     <!-- Skin System -->
-    <script src="js/skinData.js?v=1.6.1" defer></script>
-    <script src="js/skinIdMapping.js?v=1.6.1" defer></script>
-    <script src="js/loreData.js?v=1.6.1" defer></script>
-    <script src="js/playerStats.js?v=1.6.1" defer></script>
-    <script src="js/killstreakManager.js?v=1.6.1" defer></script>
-    <script src="js/unlockManager.js?v=1.6.1" defer></script>
-    <script src="js/loreUnlockManager.js?v=1.6.1" defer></script>
-    <script src="js/nameGenerator.js?v=1.6.1" defer></script>
+    <script src="js/skinData.js?v=1.6.0" defer></script>
+    <script src="js/skinIdMapping.js?v=1.6.0" defer></script>
+    <script src="js/loreData.js?v=1.6.0" defer></script>
+    <script src="js/playerStats.js?v=1.6.0" defer></script>
+    <script src="js/killstreakManager.js?v=1.6.0" defer></script>
+    <script src="js/unlockManager.js?v=1.6.0" defer></script>
+    <script src="js/loreUnlockManager.js?v=1.6.0" defer></script>
+    <script src="js/nameGenerator.js?v=1.6.0" defer></script>
     
     <!-- Rendering Systems -->
-    <script src="js/webgl-renderer.js?v=1.6.1"></script>
-    <script src="js/quadtree.js?v=1.6.1"></script>
-    <script src="js/performance-optimizer.js?v=1.6.1"></script>
-    <script src="js/math-optimizations.js?v=1.6.1"></script>
-    <script src="js/texture-atlas.js?v=1.6.1"></script>
-    <script src="js/gpu-particle-system.js?v=1.6.1"></script>
-    <script src="js/mobile-star-renderer.js?v=1.6.1"></script>
-    <script src="js/battery-optimizer.js?v=1.6.1"></script>
-    <script src="js/mobile-background-optimizer.js?v=1.6.1"></script>
-    <script src="js/mobile-background-integration.js?v=1.6.1"></script>
+    <script src="js/webgl-renderer.js?v=1.6.0"></script>
+    <script src="js/quadtree.js?v=1.6.0"></script>
+    <script src="js/performance-optimizer.js?v=1.6.0"></script>
+    <script src="js/math-optimizations.js?v=1.6.0"></script>
+    <script src="js/texture-atlas.js?v=1.6.0"></script>
+    <script src="js/gpu-particle-system.js?v=1.6.0"></script>
+    <script src="js/mobile-star-renderer.js?v=1.6.0"></script>
+    <script src="js/battery-optimizer.js?v=1.6.0"></script>
+    <script src="js/mobile-background-optimizer.js?v=1.6.0"></script>
+    <script src="js/mobile-background-integration.js?v=1.6.0"></script>
     
     <!-- Modernized Systems -->
-    <script src="js/core/module-loader.js?v=1.6.1"></script>
-    <script src="js/core/init-sequence.js?v=1.6.1" type="module"></script>
+    <script src="js/core/module-loader.js?v=1.6.0"></script>
+    <script src="js/core/init-sequence.js?v=1.6.0" type="module"></script>
     
     <!-- Logger (must load before game-original.js) -->
-    <script src="js/core/logger.js?v=1.6.1"></script>
+    <script src="js/core/logger.js?v=1.6.0"></script>
     <!-- Game Entities -->
     <!-- Particle and ParticlePool are loaded by the module system -->
     <!-- Spaceship modules disabled - not using spaceships -->
-    <!-- <script src="js/core/entities/Spaceship.js?v=1.6.1" type="module"></script> -->
-    <!-- <script src="js/core/entities/SpaceshipManager.js?v=1.6.1" type="module"></script> -->
+    <!-- <script src="js/core/entities/Spaceship.js?v=1.6.0" type="module"></script> -->
+    <!-- <script src="js/core/entities/SpaceshipManager.js?v=1.6.0" type="module"></script> -->
     
     <!-- Main Game Code (extracted from inline script) -->
-    <script src="js/core/game-original.js?v=1.6.1" defer></script>
+    <script src="js/core/game-original.js?v=1.6.0" defer></script>
     
     <!-- Performance Integration (must load after game-original.js) -->
-    <script src="js/performance-integration.js?v=1.6.1" defer></script>
+    <script src="js/performance-integration.js?v=1.6.0" defer></script>
     
     
     <!-- Integration -->
