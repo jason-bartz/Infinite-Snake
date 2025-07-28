@@ -304,19 +304,11 @@ try {
 
 // Helper to generate Redis keys for different periods
 function getLeaderboardKeys(period) {
-  // Get current time in Eastern Time
   const now = new Date();
-  const easternTime = new Date(now.toLocaleString("en-US", {timeZone: "America/New_York"}));
-  
-  // Extract ET date components
-  const etYear = easternTime.getFullYear();
-  const etMonth = easternTime.getMonth(); // 0-indexed
-  const etDate = easternTime.getDate();
-  
   const keys = {
-    daily: `lb:daily:${etYear}-${String(etMonth + 1).padStart(2, '0')}-${String(etDate).padStart(2, '0')}`,
-    weekly: `lb:weekly:${getWeekNumber(easternTime)}`,
-    monthly: `lb:monthly:${etYear}-${String(etMonth + 1).padStart(2, '0')}`,
+    daily: `lb:daily:${now.toISOString().split('T')[0]}`,
+    weekly: `lb:weekly:${getUTCWeekNumber(now)}`,
+    monthly: `lb:monthly:${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`,
     all: 'lb:all'
   };
   
@@ -774,78 +766,27 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Invalid period specified' });
       }
       
-      // Also generate UTC-based key for backward compatibility
-      const now = new Date();
-      const utcKeys = {
-        daily: `lb:daily:${now.toISOString().split('T')[0]}`,
-        weekly: `lb:weekly:${getUTCWeekNumber(now)}`,
-        monthly: `lb:monthly:${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`,
-        all: 'lb:all'
-      };
-      const utcKey = utcKeys[period];
-      
       // Fetch leaderboard data with pagination
       const start = parseInt(offset) || 0;
       const end = start + (parseInt(limit) || 100) - 1;
       
-      // Try to get scores from ET-based key first, then UTC-based key
-      let scores = [];
-      let fromUTC = false;
-      
+      // Get scores in descending order with scores included
+      let scores;
       try {
-        // Try ET-based key first
+        // Use WITHSCORES to get both member and score
         scores = await redis.zrange(key, start, end, { 
           rev: true,
           withScores: true 
         });
-        
-        // If no data in ET key and it's different from UTC key, try UTC key
-        if ((!scores || scores.length === 0) && key !== utcKey) {
-          scores = await redis.zrange(utcKey, start, end, { 
-            rev: true,
-            withScores: true 
-          });
-          fromUTC = true;
-          
-          // If we found data in UTC key, migrate it to ET key
-          if (scores && scores.length > 0) {
-            console.log(`Migrating ${period} data from UTC key ${utcKey} to ET key ${key}`);
-            
-            // Get all scores from UTC key (not just the page)
-            const allScores = await redis.zrange(utcKey, 0, -1, { withScores: true });
-            
-            // Add to ET key
-            if (allScores && allScores.length > 0) {
-              const members = [];
-              for (let i = 0; i < allScores.length; i += 2) {
-                members.push({ score: allScores[i + 1], member: allScores[i] });
-              }
-              
-              // Add in batches
-              const batchSize = 100;
-              for (let i = 0; i < members.length; i += batchSize) {
-                const batch = members.slice(i, i + batchSize);
-                await redis.zadd(key, ...batch);
-              }
-              
-              // Set appropriate expiration
-              if (period === 'daily') {
-                await redis.expire(key, 604800); // 7 days
-              } else if (period === 'weekly') {
-                await redis.expire(key, 2592000); // 30 days
-              } else if (period === 'monthly') {
-                await redis.expire(key, 7776000); // 90 days
-              }
-              
-              // Delete the UTC key after migration
-              await redis.del(utcKey);
-              console.log(`Migration complete: moved ${allScores.length / 2} scores`);
-            }
-          }
-        }
       } catch (zrangeError) {
         console.error('zrange error:', zrangeError);
-        scores = [];
+        // Try without withScores as fallback
+        try {
+          scores = await redis.zrange(key, start, end, { rev: true });
+        } catch (fallbackError) {
+          // Final fallback - basic zrange
+          scores = await redis.zrange(key, start, end);
+        }
       }
       
       // Parse and format results
