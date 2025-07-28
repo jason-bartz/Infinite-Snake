@@ -10335,7 +10335,7 @@
         }
         
         // Load mini leaderboard for pause menu
-        let currentPauseLBPeriod = 'daily';
+        let currentPauseLBPeriod = 'weekly';
         
         window.loadPauseLeaderboard = async function(event, period, retryCount = 0) {
             currentPauseLBPeriod = period;
@@ -10345,8 +10345,8 @@
                 tab.classList.remove('active');
                 tab.style.color = '#888';
                 
-                // If no event (initial load) and we're loading daily, highlight the first tab
-                if (!event && period === 'daily' && index === 0) {
+                // If no event (initial load) and we're loading weekly, highlight the first tab
+                if (!event && period === 'weekly' && index === 0) {
                     tab.classList.add('active');
                     tab.style.color = '#4ecdc4';
                 }
