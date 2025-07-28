@@ -303,12 +303,19 @@ try {
 }
 
 // Helper to generate Redis keys for different periods
+// All periods use UTC time to ensure consistency across timezones
+// Daily resets at 00:00 UTC, Weekly on Monday 00:00 UTC, Monthly on 1st at 00:00 UTC
 function getLeaderboardKeys(period) {
   const now = new Date();
+  // Use UTC for all date calculations to ensure consistency
+  const utcYear = now.getUTCFullYear();
+  const utcMonth = now.getUTCMonth() + 1;
+  const utcDate = now.getUTCDate();
+  
   const keys = {
-    daily: `lb:daily:${now.toISOString().split('T')[0]}`,
+    daily: `lb:daily:${utcYear}-${String(utcMonth).padStart(2, '0')}-${String(utcDate).padStart(2, '0')}`,
     weekly: `lb:weekly:${getUTCWeekNumber(now)}`,
-    monthly: `lb:monthly:${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`,
+    monthly: `lb:monthly:${utcYear}-${String(utcMonth).padStart(2, '0')}`,
     all: 'lb:all'
   };
   
