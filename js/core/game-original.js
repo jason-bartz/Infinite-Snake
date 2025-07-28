@@ -1467,7 +1467,7 @@
         window.checkAndShowWelcomeModal = checkAndShowWelcomeModal;
         
         // Username validation function (matches server-side rules)
-        function validateUsername(username) {
+        function validateUsername(username, isGenerated = false) {
             if (!username || username.trim().length === 0) {
                 return { valid: false, error: 'Username cannot be empty' };
             }
@@ -1479,8 +1479,8 @@
                 return { valid: false, error: 'Username must be 30 characters or less' };
             }
             
-            // Comprehensive username content filtering
-            const blockedPatterns = [
+            // Patterns that should always be blocked
+            const alwaysBlockedPatterns = [
                 // Impersonation & Authority
                 /\b(admin|administrator|admins|adm1n|4dmin)\b/i,
                 /\b(moderator|mod|m0d|m0der4tor)\b/i,
@@ -1560,9 +1560,43 @@
                 /('|(--|#|\/\*|\*\/)|;.*--)/
             ];
             
-            for (const pattern of blockedPatterns) {
+            // Patterns that are only blocked for user-entered names (not generated)
+            const userOnlyBlockedPatterns = [
+                // Violence & Death (allowed in random generator)
+                /\b(kill|k[i!1]ll|murder|slay)\b/i,
+                /\b(die|d[i!1]e|death|dead)\b/i,
+                /\bhang\b/i,
+                /\b(shoot|stab|cut|bleed)\b/i,
+                
+                // Some terms used in random names
+                /\b(damn|dam|d[a@]mn|dayum)\b/i,
+                /\b(hell|h[e3]ll|h3ll)\b/i,
+                /\b(ass|a[s\$5]{2}|azz|@ss)\b/i,
+                /\b(terrorist|terror)\b/i,
+                /\bbomb\b/i,
+                
+                // Allowed in suffixes
+                /\bgay\b/i,
+                
+                // Historical figures (some used in names)
+                /\b(hitler|h[i!1]tler|adolf|fuhrer)\b/i,
+                /\b(nazi|n[a@]zi|gestapo|reich)\b/i,
+                /\b(stalin|mao|pol-?pot)\b/i
+            ];
+            
+            // Always check the always-blocked patterns
+            for (const pattern of alwaysBlockedPatterns) {
                 if (pattern.test(trimmedUsername)) {
                     return { valid: false, error: 'Username contains inappropriate content' };
+                }
+            }
+            
+            // Only check user-only patterns if this is not a generated name
+            if (!isGenerated) {
+                for (const pattern of userOnlyBlockedPatterns) {
+                    if (pattern.test(trimmedUsername)) {
+                        return { valid: false, error: 'Username contains inappropriate content' };
+                    }
                 }
             }
             
@@ -1632,19 +1666,22 @@
                 const nameInput = document.getElementById('playerNameInput');
                 if (nameInput) {
                     let name = nameInput.value.trim();
+                    let isGeneratedName = false;
                     
                     // If no name entered, generate a random one
                     if (!name) {
                         if (window.nameGenerator && window.nameGenerator.generateRandomName) {
                             name = window.nameGenerator.generateRandomName();
+                            isGeneratedName = true;
                         } else {
                             // Fallback if nameGenerator isn't loaded yet
                             name = 'Player' + Math.floor(Math.random() * 9999);
+                            isGeneratedName = true;
                         }
                     }
                     
                     // Validate the username
-                    const validation = validateUsername(name);
+                    const validation = validateUsername(name, isGeneratedName);
                     if (!validation.valid) {
                         // Show error and prevent game start
                         showUsernameError(validation.error);
@@ -6588,6 +6625,10 @@
                 defeatedBosses.add(this.bossType);
                 bossesDefeatedThisCycle++;
                 
+                // Reset boss hint state
+                bossHintShown = false;
+                bossHintTimer = 0;
+                
                 // Save defeated bosses to localStorage for persistent tracking
                 const defeatedBossList = JSON.parse(localStorage.getItem('defeatedBosses') || '[]');
                 if (!defeatedBossList.includes(this.bossType)) {
@@ -7056,7 +7097,11 @@
             snakes.push(currentBoss);
             bossEncounterActive = true;
             
-            // Hide hint during boss battle
+            // Initialize boss hint timer
+            bossHintShown = false;
+            bossHintTimer = 600; // 10 seconds at 60 FPS
+            
+            // Hide any existing hint during boss battle
             hideGameHint();
             
             // Play boss laugh sound on spawn
@@ -8956,12 +9001,14 @@
         
         // Game hint system
         let hintTimeout = null;
+        let bossHintShown = false;
+        let bossHintTimer = 0;
         function showGameHint(hintType) {
             // Don't show if game is not running or player is dead
             if (!gameStarted || !playerSnake || !playerSnake.alive) return;
             
-            // Don't show during boss battles
-            if (bossEncounterActive) return;
+            // Don't show during boss battles (except for boss hints)
+            if (bossEncounterActive && hintType !== 'boss') return;
             
             const hintElement = document.getElementById('gameHint');
             if (!hintElement) return;
@@ -8979,6 +9026,8 @@
                 }
             } else if (hintType === 'voidorbs') {
                 hintText = "💡 Hint: When your elements won't combine, 🌀 Void Orbs can clear your bank for points!";
+            } else if (hintType === 'boss') {
+                hintText = "💡 Their power is their weakness. Combine their element with another to create resonance.";
             }
             
             if (!hintText) return;
@@ -13813,6 +13862,15 @@
                     // Check for elemental resonance damage
                     if (currentBoss.alive && currentBoss.stunTimer <= 0) {
                         checkBossElementalDamage();
+                    }
+                    
+                    // Update boss hint timer
+                    if (currentBoss.alive && !bossHintShown && bossHintTimer > 0) {
+                        bossHintTimer--;
+                        if (bossHintTimer <= 0) {
+                            showGameHint('boss');
+                            bossHintShown = true;
+                        }
                     }
                 }
                 

@@ -496,8 +496,48 @@ export default async function handler(req, res) {
         });
       }
       
+      // Function to check if a name matches random generator pattern
+      function isGeneratedName(name) {
+        // Random generator components
+        const firstNames = ['Slithery', 'Noodles', 'Danger', 'Sneaky', 'Hissy', 'Wiggly', 'Sassy', 'Toxic', 
+            'Fatal', 'Speedy', 'Turbo', 'Shadow', 'Cosmic', 'Rainbow', 'Golden', 'Spicy', 
+            'Salty', 'Chunky', 'Professor', 'Captain', 'Doctor', 'Master', 'Lord', 'Lady', 
+            'Sir', 'General', 'Major', 'Colonel', 'Agent', 'Sergeant', 'Officer', 'Detective', 
+            'Mighty', 'Tiny', 'Big', 'Little', 'Angry', 'Happy', 'Grumpy', 'Sleepy', 
+            'Crazy', 'Lucky', 'Unlucky', 'Derpy', 'Elite', 'Royal', 'Noble', 'Ancient', 
+            'Baby', 'Elder', 'Glizzy', 'Noodles'];
+        
+        const lastNames = ['McSnakeface', 'Noodleton', 'McNoodleton', 'Snakerson', 'Coilsworth', 'Fangs', 
+            'Scales', 'Rattlebottom', 'Slithers', 'Hissington', 'Viperson', 'Cobrani', 
+            'Python', 'Boopsmith', 'Noodleman', 'Serpentine', 'Snekkins', 'Tailsworth', 
+            'Venomous', 'Strikerson', 'McBitey', 'Swallows', 'Devourson', 'Munchkin', 
+            'Chompers', 'von Hiss', 'de Coil', 'O\'Scales', 'McSlither', 'Snakewell', 
+            'Benderson', 'Twistworth', 'Longbody', 'Shortfang', 'Quickstrike', 'Deadlyson', 
+            'the Snake', 'the Serpent', 'the Noodle', 'the Danger', 'the Destroyer', 
+            'the Devourer', 'the Mighty', 'the Terrible', 'the Great', 'the Lesser', 
+            'the Unwise', 'the Bold', 'the Coward', 'the Brave', 'the Foolish', 'GlizzMeister', 'The Just'];
+        
+        const suffixes = ['Jr.', 'Sr.', 'III', 'IV', 'V', 'Esq.', 'PhD', 'M.D.', 'Boi', '420', 
+            '69', '2000', '9000', 'XxX', '360', 'NoScope', 'YT', 'TTV', 'GG', 'EZ', 
+            'Pro', 'Noob', 'God', 'Bot', 'Main', 'OG', 'Prime', 'Alpha', 'Beta', 
+            'Omega', 'Max', 'Mini', 'Mega', 'Ultra', 'Hyper', 'Turbo', 'Elite', 
+            'Legend', 'Master', 'King', 'Queen', 'Lord', 'UwU', 'OwO', 'Bruh', 'Junior'];
+        
+        // Check if name matches the pattern: FirstName LastName [Suffix]
+        const parts = name.split(' ');
+        if (parts.length < 2 || parts.length > 3) return false;
+        
+        const hasValidFirstName = firstNames.includes(parts[0]);
+        const hasValidLastName = parts.length === 2 ? lastNames.includes(parts[1]) : lastNames.includes(parts[1]);
+        const hasValidSuffix = parts.length === 3 ? suffixes.includes(parts[2]) : true;
+        
+        return hasValidFirstName && hasValidLastName && hasValidSuffix;
+      }
+      
+      const isGenerated = isGeneratedName(username.trim());
+      
       // Comprehensive username content filtering
-      const blockedPatterns = [
+      const alwaysBlockedPatterns = [
         // Impersonation & Authority
         /\b(admin|administrator|admins|adm1n|4dmin)\b/i,
         /\b(moderator|mod|m0d|m0der4tor)\b/i,
@@ -580,12 +620,49 @@ export default async function handler(req, res) {
         /[^\x20-\x7E]/g
       ];
       
+      // Patterns that are only blocked for user-entered names (not generated)
+      const userOnlyBlockedPatterns = [
+        // Violence & Death (allowed in random generator)
+        /\b(kill|k[i!1]ll|murder|slay)\b/i,
+        /\b(die|d[i!1]e|death|dead)\b/i,
+        /\bhang\b/i,
+        /\b(shoot|stab|cut|bleed)\b/i,
+        
+        // Some terms used in random names
+        /\b(damn|dam|d[a@]mn|dayum)\b/i,
+        /\b(hell|h[e3]ll|h3ll)\b/i,
+        /\b(ass|a[s\$5]{2}|azz|@ss)\b/i,
+        /\b(terrorist|terror)\b/i,
+        /\bbomb\b/i,
+        
+        // Allowed in suffixes
+        /\bgay\b/i,
+        
+        // Historical figures (some used in names)
+        /\b(hitler|h[i!1]tler|adolf|fuhrer)\b/i,
+        /\b(nazi|n[a@]zi|gestapo|reich)\b/i,
+        /\b(stalin|mao|pol-?pot)\b/i
+      ];
+      
       const cleanUsername = username.trim();
-      for (const pattern of blockedPatterns) {
+      
+      // Always check the always-blocked patterns
+      for (const pattern of alwaysBlockedPatterns) {
         if (pattern.test(cleanUsername)) {
           return res.status(400).json({ 
             error: 'Username contains inappropriate content' 
           });
+        }
+      }
+      
+      // Only check user-only patterns if this is not a generated name
+      if (!isGenerated) {
+        for (const pattern of userOnlyBlockedPatterns) {
+          if (pattern.test(cleanUsername)) {
+            return res.status(400).json({ 
+              error: 'Username contains inappropriate content' 
+            });
+          }
         }
       }
       
