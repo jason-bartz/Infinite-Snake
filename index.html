@@ -1445,6 +1445,11 @@
             max-width: 80%;
         }
         
+        /* Hide desktop score on mobile */
+        body.mobile #desktopScore {
+            display: none !important;
+        }
+        
         @keyframes popupBounce {
             0% {
                 transform: translateX(-50%) translateY(20px);
@@ -3650,8 +3655,7 @@
         #recentDiscovery {
             background: linear-gradient(135deg, 
                 rgba(120, 40, 248, 0.95) 0%, 
-                rgba(248, 40, 248, 0.95) 50%, 
-                rgba(0, 248, 248, 0.95) 100%) !important;
+                rgba(248, 40, 248, 0.95) 100%) !important;
             color: var(--snes-white) !important;
             border: 4px solid var(--snes-gold) !important;
             border-color: var(--snes-gold) #A88800 #A88800 var(--snes-gold) !important;
@@ -4762,6 +4766,39 @@
     <!-- Game Canvas -->
     <canvas id="gameCanvas" style="background-color: transparent;"></canvas>
     
+    <!-- Desktop Score Display -->
+    <div id="desktopScore" style="
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-family: 'Press Start 2P', monospace;
+        font-size: 18px;
+        color: var(--snes-gold);
+        text-shadow: 
+            -1px -1px 0 #4800A8,
+            1px -1px 0 #4800A8,
+            -1px 1px 0 #4800A8,
+            1px 1px 0 #4800A8,
+            -2px -2px 0 #4800A8,
+            2px -2px 0 #4800A8,
+            -2px 2px 0 #4800A8,
+            2px 2px 0 #4800A8,
+            -3px -3px 0 #4800A8,
+            3px -3px 0 #4800A8,
+            -3px 3px 0 #4800A8,
+            3px 3px 0 #4800A8,
+            -3px 0 0 #4800A8,
+            3px 0 0 #4800A8,
+            0 -3px 0 #4800A8,
+            0 3px 0 #4800A8;
+        z-index: 1000;
+        pointer-events: none;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        display: none;
+    ">SCORE: 0</div>
+    
     <!-- UI Overlay -->
     <div id="ui">
         <div id="killstreakDisplay"></div>
@@ -4870,7 +4907,6 @@
         <div id="pauseText" style="position: absolute; top: 20px; right: 20px; text-align: right; font-size: 14px; color: rgba(255, 255, 255, 0.4); pointer-events: none;">
             <div style="margin-bottom: 5px;" class="desktop-only">Press P for Pause Menu</div>
             <div style="margin-bottom: 5px;" class="desktop-only" id="muteText">M to Mute</div>
-            <div id="fpsCounter">FPS: --</div>
         </div>
     </div>
     
@@ -5848,10 +5884,6 @@
             display: none !important; /* Hide keyboard shortcuts on mobile */
         }
 
-        body.mobile #fpsCounter {
-            position: fixed !important;
-            top: 5px !important;
-            right: 110px !important;
             font-size: 10px !important;
             color: rgba(255, 255, 255, 0.5) !important;
         }

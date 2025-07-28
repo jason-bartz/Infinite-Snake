@@ -10835,6 +10835,12 @@
             // Update player info box
             document.getElementById('playerScore').textContent = Math.floor(playerSnake.score).toLocaleString();
             
+            // Update desktop score display
+            const desktopScore = document.getElementById('desktopScore');
+            if (desktopScore) {
+                desktopScore.textContent = 'SCORE: ' + Math.floor(playerSnake.score).toLocaleString();
+            }
+            
             // Update discoveries count - use player discoveries only
             const discoveryCount = playerDiscoveredElements.size;
             const discoveriesElement = document.getElementById('playerDiscoveries');
@@ -12332,6 +12338,20 @@
                 if (joystick) joystick.style.display = 'block';
             }
             
+            // Show desktop score display
+            if (!isMobile) {
+                const desktopScore = document.getElementById('desktopScore');
+                if (desktopScore) {
+                    desktopScore.style.display = 'block';
+                    // Set color based on game mode
+                    if (gameMode === 'cozy') {
+                        desktopScore.style.color = '#00D9FF'; // Cozy blue/pink
+                    } else {
+                        desktopScore.style.color = 'var(--snes-gold)'; // Default gold
+                    }
+                }
+            }
+            
             // Track games played for hint system
             let gamesPlayed = parseInt(localStorage.getItem('gamesPlayed') || '0');
             gamesPlayed++;
@@ -13716,11 +13736,7 @@
                 frameCount = 0;
                 lastFpsUpdate = currentTime;
                 
-                // Update FPS display
-                const fpsElement = document.getElementById('fpsCounter');
-                if (fpsElement) {
-                    fpsElement.textContent = `FPS: ${currentFPS}`;
-                }
+                // FPS counter removed - no longer updating display
             }
             
             // Update animation time for border effects
