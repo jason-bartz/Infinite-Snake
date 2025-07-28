@@ -765,7 +765,21 @@ export default async function handler(req, res) {
             } else {
               console.log(`[${periodName}] Adding new score ${numericScore} for ${cleanUsername}`);
               // No existing entry, add the new score
-              await redis.zadd(key, { score: numericScore, member: scoreData });
+              try {
+                const zaddResult = await redis.zadd(key, { score: numericScore, member: scoreData });
+                console.log(`[${periodName}] ZADD result: ${zaddResult}`);
+                
+                // Verify the key was created
+                const keyExists = await redis.exists(key);
+                console.log(`[${periodName}] Key exists after ZADD: ${keyExists}`);
+                
+                if (!keyExists) {
+                  console.error(`[${periodName}] CRITICAL: Key ${key} does not exist after ZADD!`);
+                }
+              } catch (zaddError) {
+                console.error(`[${periodName}] ZADD failed:`, zaddError);
+                throw zaddError;
+              }
             }
             
             // Set expiration if specified
