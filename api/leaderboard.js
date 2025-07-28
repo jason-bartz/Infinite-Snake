@@ -806,6 +806,15 @@ export default async function handler(req, res) {
           }
         };
         
+        // Log the keys being used
+        console.log('Updating leaderboards with keys:', {
+          daily: keys.daily,
+          weekly: keys.weekly,
+          monthly: keys.monthly,
+          all: keys.all,
+          timestamp: new Date().toISOString()
+        });
+        
         // Update each leaderboard
         const dailyUpdated = await updateScoreIfHigher(keys.daily, 604800, 'DAILY'); // 7 days
         const weeklyUpdated = await updateScoreIfHigher(keys.weekly, 2592000, 'WEEKLY'); // 30 days
@@ -913,6 +922,11 @@ export default async function handler(req, res) {
       // Get the appropriate key
       const keys = getLeaderboardKeys();
       const key = keys[period];
+      
+      console.log(`Retrieving ${period} leaderboard with key: ${key}`, {
+        timestamp: new Date().toISOString(),
+        all_keys: keys
+      });
       
       if (!key) {
         return res.status(400).json({ error: 'Invalid period specified' });
@@ -1243,6 +1257,47 @@ export default async function handler(req, res) {
         message: `Cleared ${period} leaderboard`,
         deleted: result
       });
+    }
+    
+    // GET with debug parameter - Show Redis key information
+    if (req.method === 'GET' && req.query.debug === 'keys') {
+      const keys = getLeaderboardKeys();
+      const debugInfo = {
+        timestamp: new Date().toISOString(),
+        utc_components: {
+          year: new Date().getUTCFullYear(),
+          month: new Date().getUTCMonth() + 1,
+          date: new Date().getUTCDate(),
+          day: new Date().getUTCDay(),
+          hours: new Date().getUTCHours()
+        },
+        generated_keys: keys,
+        key_info: {}
+      };
+      
+      // Check each key's existence and entry count
+      for (const [period, key] of Object.entries(keys)) {
+        try {
+          const exists = await redis.exists(key);
+          const count = exists ? await redis.zcard(key) : 0;
+          const ttl = exists ? await redis.ttl(key) : -2;
+          
+          debugInfo.key_info[period] = {
+            key,
+            exists: exists === 1,
+            entry_count: count,
+            ttl_seconds: ttl,
+            ttl_days: ttl > 0 ? Math.floor(ttl / 86400) : ttl
+          };
+        } catch (e) {
+          debugInfo.key_info[period] = {
+            key,
+            error: e.message
+          };
+        }
+      }
+      
+      return res.status(200).json(debugInfo);
     }
     
     return res.status(405).json({ error: 'Method not allowed' });
