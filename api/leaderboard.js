@@ -353,6 +353,15 @@ function getWeekNumber(date) {
   return `${yearOfMonday}-W${String(weekNum).padStart(2, '0')}`;
 }
 
+// Helper to get UTC week number (for backward compatibility)
+function getUTCWeekNumber(date) {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+  return `${d.getUTCFullYear()}-W${Math.ceil((((d - yearStart) / 86400000) + 1)/7)}`;
+}
+
 // Validate scores to prevent cheating
 function validateScore(score, elements, playTime, kills) {
   // Basic sanity checks
@@ -765,27 +774,78 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Invalid period specified' });
       }
       
+      // Also generate UTC-based key for backward compatibility
+      const now = new Date();
+      const utcKeys = {
+        daily: `lb:daily:${now.toISOString().split('T')[0]}`,
+        weekly: `lb:weekly:${getUTCWeekNumber(now)}`,
+        monthly: `lb:monthly:${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`,
+        all: 'lb:all'
+      };
+      const utcKey = utcKeys[period];
+      
       // Fetch leaderboard data with pagination
       const start = parseInt(offset) || 0;
       const end = start + (parseInt(limit) || 100) - 1;
       
-      // Get scores in descending order with scores included
-      let scores;
+      // Try to get scores from ET-based key first, then UTC-based key
+      let scores = [];
+      let fromUTC = false;
+      
       try {
-        // Use WITHSCORES to get both member and score
+        // Try ET-based key first
         scores = await redis.zrange(key, start, end, { 
           rev: true,
           withScores: true 
         });
+        
+        // If no data in ET key and it's different from UTC key, try UTC key
+        if ((!scores || scores.length === 0) && key !== utcKey) {
+          scores = await redis.zrange(utcKey, start, end, { 
+            rev: true,
+            withScores: true 
+          });
+          fromUTC = true;
+          
+          // If we found data in UTC key, migrate it to ET key
+          if (scores && scores.length > 0) {
+            console.log(`Migrating ${period} data from UTC key ${utcKey} to ET key ${key}`);
+            
+            // Get all scores from UTC key (not just the page)
+            const allScores = await redis.zrange(utcKey, 0, -1, { withScores: true });
+            
+            // Add to ET key
+            if (allScores && allScores.length > 0) {
+              const members = [];
+              for (let i = 0; i < allScores.length; i += 2) {
+                members.push({ score: allScores[i + 1], member: allScores[i] });
+              }
+              
+              // Add in batches
+              const batchSize = 100;
+              for (let i = 0; i < members.length; i += batchSize) {
+                const batch = members.slice(i, i + batchSize);
+                await redis.zadd(key, ...batch);
+              }
+              
+              // Set appropriate expiration
+              if (period === 'daily') {
+                await redis.expire(key, 604800); // 7 days
+              } else if (period === 'weekly') {
+                await redis.expire(key, 2592000); // 30 days
+              } else if (period === 'monthly') {
+                await redis.expire(key, 7776000); // 90 days
+              }
+              
+              // Delete the UTC key after migration
+              await redis.del(utcKey);
+              console.log(`Migration complete: moved ${allScores.length / 2} scores`);
+            }
+          }
+        }
       } catch (zrangeError) {
         console.error('zrange error:', zrangeError);
-        // Try without withScores as fallback
-        try {
-          scores = await redis.zrange(key, start, end, { rev: true });
-        } catch (fallbackError) {
-          // Final fallback - basic zrange
-          scores = await redis.zrange(key, start, end);
-        }
+        scores = [];
       }
       
       // Parse and format results
