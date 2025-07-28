@@ -320,20 +320,3 @@ body.mobile .mobile-tab-handle {
     border-color: #7828F8 #4800A8 #4800A8 transparent !important;
 }
 
-/* Boost button cosmic style */
-.boost-button {
-    background: linear-gradient(135deg, #28F8F8 0%, #2878F8 100%) !important;
-    border: 3px solid #28F8F8 !important;
-    box-shadow: 
-        0 0 20px rgba(40, 248, 248, 0.6),
-        inset 2px 2px 0 rgba(255, 255, 255, 0.3),
-        inset -2px -2px 0 rgba(0, 0, 0, 0.3) !important;
-}
-
-.boost-button:active {
-    background: linear-gradient(135deg, #48FFFF 0%, #4898FF 100%) !important;
-    box-shadow: 
-        0 0 30px rgba(40, 248, 248, 0.8),
-        inset 2px 2px 0 rgba(255, 255, 255, 0.4),
-        inset -2px -2px 0 rgba(0, 0, 0, 0.4) !important;
-}

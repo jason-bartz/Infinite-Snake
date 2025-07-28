@@ -239,7 +239,7 @@
         let gameTarget = 0;
         let deathCount = 0;
         let camera = { x: WORLD_SIZE / 2, y: WORLD_SIZE / 2 };
-        let cameraZoom = 1.15; // Increased zoom by 15% for better visibility
+        let cameraZoom = isMobile ? 0.916 : 1.15; // Mobile zoomed out by 15% for more visibility, desktop standard zoom
         
         let lastTime = 0;
         let frameCount = 0;
@@ -10170,7 +10170,7 @@
             if (deathSequenceActive) {
                 deathSequenceActive = false;
                 deathCameraAnimation.active = false;
-                cameraZoom = isMobile ? 1.078125 : 1.15; // Increased by 15% (mobile: 0.9375 * 1.15, desktop: 1.0 * 1.15)
+                cameraZoom = isMobile ? 0.916 : 1.15; // Mobile zoomed out by 15% (0.9375 * 0.85 ≈ 0.916), desktop unchanged
             }
             
             // Reset death processed flag
@@ -14138,7 +14138,7 @@
                     camera.y = WORLD_SIZE / 2;
                     
                     // Reset camera zoom to default
-                    cameraZoom = isMobile ? 1.078125 : 1.15; // Increased by 15% (mobile: 0.9375 * 1.15, desktop: 1.0 * 1.15)
+                    cameraZoom = isMobile ? 0.916 : 1.15; // Mobile zoomed out by 15% (0.9375 * 0.85 ≈ 0.916), desktop unchanged
                     deathCameraAnimation.active = false;
                     
                     // Reset respawn timer

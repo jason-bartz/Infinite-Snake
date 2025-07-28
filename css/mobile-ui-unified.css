@@ -45,26 +45,12 @@ body.mobile .mobile-controls {
 
 body.mobile .virtual-joystick {
     position: fixed !important;
-    bottom: 40px !important;
+    bottom: 120px !important;
     left: auto !important;
-    right: 40px !important;
+    right: 105px !important;
     z-index: 95 !important;
 }
 
-/* Boost button removed for mobile */
-body.mobile .boost-button {
-    display: none !important;
-}
-
-/* All boost button styles removed for mobile */
-    background: rgba(147, 51, 234, 0.05);
-}
-
-body.mobile .boost-button.low-boost::before {
-    background: linear-gradient(to top, 
-        rgba(248, 40, 248, 0.4) 0%, 
-        rgba(147, 51, 234, 0.2) 100%);
-}
 
 @keyframes boostPulse {
     0%, 100% { transform: scale(0.95); }
@@ -366,8 +352,7 @@ body.mobile .mobile-controls {
     z-index: 90;
 }
 
-body.mobile .virtual-joystick,
-body.mobile .boost-button {
+body.mobile .virtual-joystick {
     z-index: 95;
 }
 

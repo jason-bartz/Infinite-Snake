@@ -246,13 +246,13 @@
     <link rel="alternate" hreflang="en" href="https://infinitesnake.io" />
     <link rel="alternate" hreflang="x-default" href="https://infinitesnake.io" />
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/skin-selection.css?v=1.6.3">
-    <link rel="stylesheet" href="css/cosmic-ui-override.css?v=1.6.3">
-    <link rel="stylesheet" href="css/unlock-notifications.css?v=1.6.3">
-    <link rel="stylesheet" href="css/discovery-feed-gradients.css?v=1.6.3">
-    <link rel="stylesheet" href="css/cosmic-ui-theme.css?v=1.6.3">
-    <link rel="stylesheet" href="css/cosmic-ui-theme.css?v=1.6.3">
-    <link rel="stylesheet" href="css/element-bank-compact.css?v=1.6.3">
+    <link rel="stylesheet" href="css/skin-selection.css?v=1.7.0">
+    <link rel="stylesheet" href="css/cosmic-ui-override.css?v=1.7.0">
+    <link rel="stylesheet" href="css/unlock-notifications.css?v=1.7.0">
+    <link rel="stylesheet" href="css/discovery-feed-gradients.css?v=1.7.0">
+    <link rel="stylesheet" href="css/cosmic-ui-theme.css?v=1.7.0">
+    <link rel="stylesheet" href="css/cosmic-ui-theme.css?v=1.7.0">
+    <link rel="stylesheet" href="css/element-bank-compact.css?v=1.7.0">
     <style>
         /* SNES-Era UI Theme with Cosmic Colors */
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
@@ -2095,7 +2095,7 @@
         .virtual-joystick {
             position: absolute;
             bottom: 120px;
-            left: 105px;
+            right: 105px;
             width: 140px;
             height: 140px;
             pointer-events: auto;
@@ -2126,64 +2126,6 @@
             top: 50%;
         }
         
-        .boost-button {
-            position: absolute;
-            bottom: 120px;
-            right: 105px;
-            width: 140px;
-            height: 140px;
-            background: rgba(78, 205, 196, 0.15);
-            border: 3px solid rgba(78, 205, 196, 0.5);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            font-weight: bold;
-            color: rgba(255, 255, 255, 0.8);
-            pointer-events: auto;
-            user-select: none;
-            -webkit-user-select: none;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .boost-button.active {
-            background: rgba(78, 205, 196, 0.4);
-            transform: scale(0.95);
-        }
-        
-        /* Boost meter fill inside button */
-        .boost-button .boost-meter-fill {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 0%;
-            background: linear-gradient(to top, rgba(0, 255, 0, 0.6), rgba(0, 204, 0, 0.6));
-            transition: height 0.3s ease;
-            border-radius: 50%;
-            z-index: 1;
-            pointer-events: none;
-        }
-        
-        /* Ensure text is above the fill */
-        .boost-button {
-            z-index: 0;
-        }
-        
-        .boost-button::after {
-            content: 'BOOST';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 2;
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 16px;
-            font-weight: bold;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-        }
         
         .pause-button-mobile {
             position: absolute;
@@ -2526,8 +2468,7 @@
         body.mobile .player-info-box,
         body.mobile .leaderboard-box,
         body.mobile .boost-bar-container,
-        body.mobile .virtual-joystick,
-        body.mobile .boost-button {
+        body.mobile .virtual-joystick {
             will-change: transform;
             transform: translateZ(0);
             -webkit-transform: translateZ(0);
@@ -2603,15 +2544,9 @@
                 width: 100px !important;
                 height: 100px !important;
                 bottom: 120px !important;
-                left: 105px !important;
-            }
-            
-            .boost-button {
-                width: 100px !important;
-                height: 100px !important;
-                bottom: 120px !important;
                 right: 105px !important;
             }
+            
         }
         
         /* Portrait mobile adjustments */
@@ -2686,17 +2621,10 @@
             .virtual-joystick {
                 width: 100px;
                 height: 100px;
-                left: 105px;
+                right: 105px;
                 bottom: 120px;
             }
             
-            .boost-button {
-                width: 100px; /* Match joystick size */
-                height: 100px; /* Match joystick size */
-                right: 105px; /* Mirror joystick position */
-                bottom: 120px; /* Match joystick position */
-                font-size: 14px;
-            }
             
             .joystick-knob {
                 width: 40px;
@@ -2706,10 +2634,6 @@
         
         /* Force boost button size in landscape on mobile */
         @media (max-width: 800px) and (orientation: landscape) {
-            body.mobile .boost-button {
-                width: 100px !important;
-                height: 100px !important;
-            }
             
             body.mobile .virtual-joystick {
                 width: 100px !important;
@@ -2724,10 +2648,6 @@
                 height: 100px !important;
             }
             
-            .boost-button {
-                width: 100px !important;
-                height: 100px !important;
-            }
         }
         
         /* Additional landscape fixes for all screens */
@@ -4078,8 +3998,8 @@
 </head>
 <body>
 <!-- Version Display -->
-<div id="versionDisplay" style="position: fixed; top: 5px; left: 50%; transform: translateX(-50%); z-index: 9999; color: #666; font-family: 'Press Start 2P', monospace; font-size: 10px; pointer-events: none;">
-    v<span id="versionNumber">1.6.3</span>
+<div id="versionDisplay" style="position: absolute; top: 5px; left: 50%; transform: translateX(-50%); z-index: 100; color: #666; font-family: 'Press Start 2P', monospace; font-size: 10px; pointer-events: none;">
+    v<span id="versionNumber">1.7.0</span>
 </div>
 
 <!-- Immediate Mobile Detection -->
@@ -4950,7 +4870,6 @@
                 <div class="joystick-knob" id="joystickKnob"></div>
             </div>
         </div>
-        <div class="boost-button" id="boostButton" style="display: none;"></div>
         <div class="pause-button-mobile" id="pauseButtonMobile" onclick="togglePause()">⏸</div>
         <div class="mute-button-mobile" id="muteButtonMobile" onclick="toggleMusic()">🔇</div>
     </div>
@@ -5458,8 +5377,7 @@
             }
             
             /* Ensure joystick and boost are same size */
-            .virtual-joystick,
-            .boost-button {
+            .virtual-joystick {
                 width: 120px !important;
                 height: 120px !important;
             }
@@ -5519,18 +5437,12 @@
                 height: var(--mobile-boost-bar-height);
             }
             
-            /* Joystick - Bottom Left Corner */
+            /* Joystick - Bottom Right Corner */
             body.mobile .virtual-joystick {
                 bottom: 120px !important;
-                left: 105px !important;
+                right: 105px !important;
             }
             
-            /* Boost Button - Bottom Right Corner */
-            body.mobile .boost-button {
-                bottom: 120px !important;
-                right: 105px !important;
-                left: auto !important;
-            }
             
             /* Pause & Mute - Bottom center - OVERRIDE DEFAULT POSITIONS */
             body.mobile .pause-button-mobile {
@@ -5656,18 +5568,12 @@
                 margin: 0 auto !important;
             }
             
-            /* Joystick - Bottom Left */
+            /* Joystick - Bottom Right */
             body.mobile .virtual-joystick {
                 bottom: 120px !important;
-                left: 105px !important;
+                right: 105px !important;
             }
             
-            /* Boost Button - Bottom Right */
-            body.mobile .boost-button {
-                bottom: 120px !important;
-                right: 105px !important;
-                left: auto !important;
-            }
             
             /* Pause & Mute - Bottom center */
             body.mobile .pause-button-mobile,
@@ -5748,23 +5654,6 @@
             box-shadow: 0 0 20px rgba(78, 205, 196, 0.5);
         }
 
-        .boost-button {
-            background: radial-gradient(circle, rgba(248, 56, 248, var(--mobile-boost-opacity)) 0%, rgba(120, 40, 248, var(--mobile-boost-opacity)) 100%);
-            border: 3px solid rgba(248, 216, 0, 0.6);
-            font-family: 'Press Start 2P', monospace;
-            font-size: 14px;
-            color: var(--snes-white);
-            text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(5px);
-        }
-
-        .boost-button:active {
-            transform: scale(0.95) !important;
-            box-shadow: 0 0 30px rgba(248, 216, 0, 1) !important;
-        }
 
         /* ===== RESPONSIVE ELEMENT SLOTS ===== */
         @media (max-width: 768px) {
@@ -5874,8 +5763,7 @@
         /* ===== IPAD MINI SPECIFIC OPTIMIZATIONS ===== */
         @media (min-width: 768px) and (max-width: 1024px) {
             /* Slightly larger controls for iPad Mini */
-            .virtual-joystick,
-            .boost-button {
+            .virtual-joystick {
                 width: 140px !important;
                 height: 140px !important;
             }
@@ -5894,12 +5782,6 @@
             }
         }
 
-        /* Ensure boost meter fill is visible */
-        body.mobile .boost-button .boost-meter-fill {
-            display: block !important;
-            visibility: visible !important;
-            border-radius: 0 !important; /* Square shape */
-        }
         
         /* Override circular shapes for mobile controls */
         body.mobile .joystick-base,
@@ -5929,7 +5811,7 @@
             width: 140px !important;
             height: 140px !important;
             bottom: 120px !important;
-            left: 105px !important;
+            right: 105px !important;
             position: fixed !important;
             z-index: 1002 !important;
         }
@@ -5937,19 +5819,6 @@
         /* ===== MOBILE CONTROLS VISUAL STYLING ===== */
         /* Work WITH JavaScript sizing, not against it */
         
-        /* Remove the circular boost button styles */
-        body.mobile .boost-button {
-            border-radius: 0 !important;
-            overflow: visible !important;
-        }
-        
-        /* Ensure boost meter fill is visible and square */
-        body.mobile .boost-button .boost-meter-fill {
-            display: block !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-            border-radius: 0 !important;
-        }
         
         /* Remove circular joystick styles */
         body.mobile .joystick-base {
@@ -6534,16 +6403,12 @@
             z-index: 0 !important;
         }
         
-        /* Hide boost button completely on mobile */
-        body.mobile .boost-button {
-            display: none !important;
-        }
         
         /* Position joystick on right side for mobile */
         body.mobile .virtual-joystick {
-            right: 30px !important;
+            right: 105px !important;
             left: auto !important;
-            bottom: 30px !important;
+            bottom: 120px !important;
         }
         
         /* Game Hint Styling */
@@ -6588,8 +6453,8 @@
     </style>
 
     <!-- External Dependencies -->
-    <script src="elements/data/loader.js?v=1.6.3"></script>
-    <script src="js/asset-preloader.js?v=1.6.3"></script>
+    <script src="elements/data/loader.js?v=1.7.0"></script>
+    <script src="js/asset-preloader.js?v=1.7.0"></script>
     
     <!-- Version System -->
     <script>
@@ -6602,34 +6467,7 @@
                     versionElement.textContent = data.version;
                 }
                 
-                // Check for version mismatch
-                const currentVersion = '1.6.3'; // This will be updated by build script
                 window.GAME_VERSION = data.version;
-                
-                if (currentVersion !== data.version) {
-                    console.log(`Version mismatch: Current ${currentVersion}, Server ${data.version}`);
-                    
-                    // Create update notification
-                    const updateBanner = document.createElement('div');
-                    updateBanner.style.cssText = `
-                        position: fixed;
-                        bottom: 20px;
-                        left: 50%;
-                        transform: translateX(-50%);
-                        background: #4ecdc4;
-                        color: #000;
-                        padding: 15px 30px;
-                        border-radius: 8px;
-                        font-family: 'Press Start 2P', monospace;
-                        font-size: 12px;
-                        z-index: 10000;
-                        box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-                        cursor: pointer;
-                    `;
-                    updateBanner.textContent = 'New version available! Click to update';
-                    updateBanner.onclick = () => location.reload(true);
-                    document.body.appendChild(updateBanner);
-                }
             })
             .catch(err => {
                 console.log('Version file not found, using default');
@@ -6638,44 +6476,44 @@
     </script>
     
     <!-- Skin System -->
-    <script src="js/skinData.js?v=1.6.3" defer></script>
-    <script src="js/skinIdMapping.js?v=1.6.3" defer></script>
-    <script src="js/loreData.js?v=1.6.3" defer></script>
-    <script src="js/playerStats.js?v=1.6.3" defer></script>
-    <script src="js/killstreakManager.js?v=1.6.3" defer></script>
-    <script src="js/unlockManager.js?v=1.6.3" defer></script>
-    <script src="js/loreUnlockManager.js?v=1.6.3" defer></script>
-    <script src="js/nameGenerator.js?v=1.6.3" defer></script>
+    <script src="js/skinData.js?v=1.7.0" defer></script>
+    <script src="js/skinIdMapping.js?v=1.7.0" defer></script>
+    <script src="js/loreData.js?v=1.7.0" defer></script>
+    <script src="js/playerStats.js?v=1.7.0" defer></script>
+    <script src="js/killstreakManager.js?v=1.7.0" defer></script>
+    <script src="js/unlockManager.js?v=1.7.0" defer></script>
+    <script src="js/loreUnlockManager.js?v=1.7.0" defer></script>
+    <script src="js/nameGenerator.js?v=1.7.0" defer></script>
     
     <!-- Rendering Systems -->
-    <script src="js/webgl-renderer.js?v=1.6.3"></script>
-    <script src="js/quadtree.js?v=1.6.3"></script>
-    <script src="js/performance-optimizer.js?v=1.6.3"></script>
-    <script src="js/math-optimizations.js?v=1.6.3"></script>
-    <script src="js/texture-atlas.js?v=1.6.3"></script>
-    <script src="js/gpu-particle-system.js?v=1.6.3"></script>
-    <script src="js/mobile-star-renderer.js?v=1.6.3"></script>
-    <script src="js/battery-optimizer.js?v=1.6.3"></script>
-    <script src="js/mobile-background-optimizer.js?v=1.6.3"></script>
-    <script src="js/mobile-background-integration.js?v=1.6.3"></script>
+    <script src="js/webgl-renderer.js?v=1.7.0"></script>
+    <script src="js/quadtree.js?v=1.7.0"></script>
+    <script src="js/performance-optimizer.js?v=1.7.0"></script>
+    <script src="js/math-optimizations.js?v=1.7.0"></script>
+    <script src="js/texture-atlas.js?v=1.7.0"></script>
+    <script src="js/gpu-particle-system.js?v=1.7.0"></script>
+    <script src="js/mobile-star-renderer.js?v=1.7.0"></script>
+    <script src="js/battery-optimizer.js?v=1.7.0"></script>
+    <script src="js/mobile-background-optimizer.js?v=1.7.0"></script>
+    <script src="js/mobile-background-integration.js?v=1.7.0"></script>
     
     <!-- Modernized Systems -->
-    <script src="js/core/module-loader.js?v=1.6.3"></script>
-    <script src="js/core/init-sequence.js?v=1.6.3" type="module"></script>
+    <script src="js/core/module-loader.js?v=1.7.0"></script>
+    <script src="js/core/init-sequence.js?v=1.7.0" type="module"></script>
     
     <!-- Logger (must load before game-original.js) -->
-    <script src="js/core/logger.js?v=1.6.3"></script>
+    <script src="js/core/logger.js?v=1.7.0"></script>
     <!-- Game Entities -->
     <!-- Particle and ParticlePool are loaded by the module system -->
     <!-- Spaceship modules disabled - not using spaceships -->
-    <!-- <script src="js/core/entities/Spaceship.js?v=1.6.3" type="module"></script> -->
-    <!-- <script src="js/core/entities/SpaceshipManager.js?v=1.6.3" type="module"></script> -->
+    <!-- <script src="js/core/entities/Spaceship.js?v=1.7.0" type="module"></script> -->
+    <!-- <script src="js/core/entities/SpaceshipManager.js?v=1.7.0" type="module"></script> -->
     
     <!-- Main Game Code (extracted from inline script) -->
-    <script src="js/core/game-original.js?v=1.6.3" defer></script>
+    <script src="js/core/game-original.js?v=1.7.0" defer></script>
     
     <!-- Performance Integration (must load after game-original.js) -->
-    <script src="js/performance-integration.js?v=1.6.3" defer></script>
+    <script src="js/performance-integration.js?v=1.7.0" defer></script>
     
     
     <!-- Integration -->

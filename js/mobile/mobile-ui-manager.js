@@ -9,11 +9,8 @@ class MobileUIManager {
             stats: null,
             leaderboard: null
         };
-        this.boostButton = null;
-        this.boostMeterFill = null;
         this.discoveryFeed = null;
         this.monitorInterval = null;
-        this.lastBoostAmount = 0;
         this.currentSkin = null;
     }
     
@@ -55,7 +52,6 @@ class MobileUIManager {
             this.setupSlideoutMode();
         }
         
-        this.setupBoostMeter();
         this.setupDiscoveryFeed();
         this.startMonitoring();
         this.setupMutationObserver();
@@ -69,26 +65,7 @@ class MobileUIManager {
     findElements() {
         this.panels.stats = document.querySelector('.player-info-box');
         this.panels.leaderboard = document.querySelector('.leaderboard-box');
-        this.boostButton = document.querySelector('.boost-button');
         this.discoveryFeed = document.querySelector('.discovery-feed');
-        
-        if (this.boostButton && !this.boostButton.querySelector('.boost-meter-fill')) {
-            const fill = document.createElement('div');
-            fill.className = 'boost-meter-fill';
-            fill.style.cssText = `
-                position: absolute;
-                bottom: 0;
-                left: 0;
-                width: 100%;
-                height: 0%;
-                background: linear-gradient(to top, #00ff00, #00cc00);
-                transition: height 0.3s ease;
-                border-radius: inherit;
-                z-index: 1;
-            `;
-            this.boostButton.appendChild(fill);
-        }
-        this.boostMeterFill = this.boostButton?.querySelector('.boost-meter-fill');
     }
     
     setupFixedMode() {
@@ -106,10 +83,6 @@ class MobileUIManager {
             this.applyFixedStyles(this.panels.leaderboard, 'leaderboard');
             this.setupCollapsibleScoreboard();
         }
-        
-        if (this.boostButton) {
-            this.applyBoostButtonStyles();
-        }
     }
     
     applyFixedStyles(panel, type) {
@@ -126,27 +99,6 @@ class MobileUIManager {
             display: block !important;
             z-index: 1001 !important;
             max-width: ${this.config.visual.panelMaxWidth}px !important;
-        `;
-    }
-    
-    applyBoostButtonStyles() {
-        const pos = this.config.positions.boostButton;
-        this.boostButton.style.cssText = `
-            position: fixed !important;
-            bottom: ${pos.bottom}px !important;
-            right: ${pos.right}px !important;
-            width: ${this.config.visual.boostButtonSize}px !important;
-            height: ${this.config.visual.boostButtonSize}px !important;
-            opacity: ${this.config.visual.panelOpacity} !important;
-            visibility: visible !important;
-            display: flex !important;
-            z-index: 1002 !important;
-            border: 3px solid rgba(147, 51, 234, 0.6) !important;
-            border-radius: 0 !important;
-            background: rgba(0, 0, 0, 0.5) !important;
-            align-items: center !important;
-            justify-content: center !important;
-            box-sizing: border-box !important;
         `;
     }
     
@@ -355,40 +307,6 @@ class MobileUIManager {
         });
     }
     
-    setupBoostMeter() {
-        if (!this.boostButton || !this.boostMeterFill) return;
-        
-        const updateBoostDisplay = () => {
-            if (window.playerSnake && window.playerSnake.isAlive) {
-                const staminaPercent = window.playerSnake.stamina;
-                this.boostMeterFill.style.height = `${staminaPercent}%`;
-                
-                // Use consistent purple/pink cosmic theme
-                this.boostMeterFill.style.background = 'linear-gradient(to top, rgba(248, 40, 248, 0.6), rgba(147, 51, 234, 0.3))';
-                
-                if (Math.abs(staminaPercent - this.lastBoostAmount) > 1) {
-                    this.animateBoostChange(staminaPercent > this.lastBoostAmount);
-                    this.lastBoostAmount = staminaPercent;
-                }
-            }
-        };
-        
-        this.boostUpdateInterval = setInterval(updateBoostDisplay, 50);
-    }
-    
-    animateBoostChange(isIncreasing) {
-        if (!this.boostButton) return;
-        
-        const animation = isIncreasing ? 'boost-pulse' : 'boost-drain';
-        this.boostButton.style.animation = `${animation} 0.3s ease`;
-        
-        setTimeout(() => {
-            if (this.boostButton) {
-                this.boostButton.style.animation = '';
-            }
-        }, 300);
-    }
-    
     setupDiscoveryFeed() {
         if (!this.config.features.discoveryFeed) return;
         
@@ -509,9 +427,6 @@ class MobileUIManager {
     destroy() {
         if (this.monitorInterval) {
             clearInterval(this.monitorInterval);
-        }
-        if (this.boostUpdateInterval) {
-            clearInterval(this.boostUpdateInterval);
         }
         
         document.querySelectorAll('.mobile-tab-handle').forEach(el => el.remove());
