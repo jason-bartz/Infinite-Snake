@@ -10670,17 +10670,25 @@
                     // Only check once per death (not every frame!)
                     if (!window.deathLeaderboardChecked) {
                         window.deathLeaderboardChecked = true;
+                        console.log('[DEATH-SUBMIT] Death leaderboard check started');
                     
                     if (gameMode === 'infinite' && playerSnake.score > 0) {
                         const playTime = gameSessionStartTime ? 
                             Math.floor((Date.now() - gameSessionStartTime) / 1000) : 0;
                         
+                        console.log('[DEATH-SUBMIT] Checking submission eligibility:', {
+                            gameMode,
+                            score: playerSnake.score,
+                            playTime,
+                            canSubmit: canSubmitScore()
+                        });
                         
                         // Only submit if played for at least 5 seconds (reduced from 10)
                         if (playTime >= 5 && canSubmitScore()) {
                             // Get player name
                             const playerName = localStorage.getItem('playerName') || window.nameGenerator.generateRandomName();
                             
+                            console.log('[DEATH-SUBMIT] Submitting score for player:', playerName);
                             
                             // Submit score automatically
                             if (window.leaderboardModule && window.leaderboardModule.submitScore) {
