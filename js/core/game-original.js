@@ -10338,6 +10338,8 @@
         let currentPauseLBPeriod = 'weekly';
         
         window.loadPauseLeaderboard = async function(event, period, retryCount = 0) {
+            // Default to weekly if no period specified
+            period = period || 'weekly';
             currentPauseLBPeriod = period;
             
             // Update mini tab styles
@@ -10345,12 +10347,17 @@
                 tab.classList.remove('active');
                 tab.style.color = '#888';
                 
-                // If no event (initial load) and we're loading weekly, highlight the first tab
-                if (!event && period === 'weekly' && index === 0) {
+                // Highlight the correct tab based on period
+                const tabText = tab.textContent.trim().toLowerCase();
+                if ((period === 'weekly' && tabText === 'weekly') ||
+                    (period === 'monthly' && tabText === 'monthly') ||
+                    (period === 'all' && tabText === 'all time')) {
                     tab.classList.add('active');
                     tab.style.color = '#4ecdc4';
                 }
             });
+            
+            // If event has a target, ensure it's highlighted
             if (event && event.target) {
                 event.target.classList.add('active');
                 event.target.style.color = '#4ecdc4';
@@ -10359,18 +10366,23 @@
             const entriesDiv = document.getElementById('pauseLeaderboardEntries');
             
             // Check if leaderboard module is loaded
-            if (!window.leaderboardModule) {
+            if (!window.leaderboardModule || !window.leaderboardModule.getLeaderboard) {
                 // Show loading message while we wait for the module
-                entriesDiv.innerHTML = '<div style="color: #888; text-align: center; padding: 20px;">Initializing leaderboard...</div>';
+                entriesDiv.innerHTML = '<div style="color: #888; text-align: center; padding: 20px; font-family: \'Press Start 2P\', monospace; font-size: 8px;">Initializing leaderboard...</div>';
                 
                 // Try to initialize if not already done
                 if (retryCount === 0) {
-                    initLeaderboard();
+                    await initLeaderboard();
+                    // Try again immediately after initialization
+                    if (window.leaderboardModule && window.leaderboardModule.getLeaderboard) {
+                        window.loadPauseLeaderboard(event, period, 0);
+                        return;
+                    }
                 }
                 
                 // Retry with exponential backoff (max 3 retries)
                 if (retryCount < 3) {
-                    const delay = Math.min(1000 * Math.pow(2, retryCount), 4000);
+                    const delay = Math.min(500 * Math.pow(2, retryCount), 2000);
                     setTimeout(() => {
                         window.loadPauseLeaderboard(event, period, retryCount + 1);
                     }, delay);

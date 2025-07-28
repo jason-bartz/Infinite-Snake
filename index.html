@@ -6586,8 +6586,10 @@
                 document.getElementById('leaderboardTab').classList.add('active');
                 // Load leaderboard data when tab is opened
                 if (typeof loadPauseLeaderboard === 'function') {
-                    // Pass null as event for initial load
-                    loadPauseLeaderboard(null, 'weekly');
+                    // Small delay to ensure DOM is ready
+                    setTimeout(() => {
+                        loadPauseLeaderboard(null, 'weekly');
+                    }, 50);
                 }
             }
         };
