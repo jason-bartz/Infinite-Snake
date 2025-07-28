@@ -1361,24 +1361,39 @@ class Snake {
             // Save context state
             window.ctx.save();
             
-            // Add golden glow effect
-            window.ctx.shadowColor = '#FFD700';
-            window.ctx.shadowBlur = 20;
-            
-            // Draw golden outline
+            // Draw thick golden outline (no shadow blur to prevent distortion)
             window.ctx.strokeStyle = '#FFD700';
-            window.ctx.lineWidth = 6;
+            window.ctx.lineWidth = 8;
+            window.ctx.lineJoin = 'round';
             window.ctx.strokeText(displayName, headScreen.x, headScreen.y - nameOffset);
             
-            // Draw black inner stroke for readability
-            window.ctx.shadowBlur = 0;
-            window.ctx.strokeStyle = 'black';
-            window.ctx.lineWidth = 2;
+            // Draw medium black stroke for contrast
+            window.ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)';
+            window.ctx.lineWidth = 3;
             window.ctx.strokeText(displayName, headScreen.x, headScreen.y - nameOffset);
             
             // Draw fill text
             window.ctx.fillStyle = '#4ecdc4';
             window.ctx.fillText(displayName, headScreen.x, headScreen.y - nameOffset);
+            
+            // Spawn sparkle particles occasionally
+            if (Math.random() < 0.15 && window.particlePool) { // 15% chance per frame
+                const sparkleOffset = 20 + Math.random() * 10;
+                const sparkleX = headScreen.x + (Math.random() - 0.5) * 40;
+                const sparkleY = headScreen.y - nameOffset - sparkleOffset;
+                const sparkleVx = (Math.random() - 0.5) * 1;
+                const sparkleVy = -Math.random() * 2 - 1;
+                window.particlePool.spawn(
+                    sparkleX, 
+                    sparkleY, 
+                    sparkleVx, 
+                    sparkleVy, 
+                    '#FFD700', 
+                    2 + Math.random() * 2,
+                    'star',
+                    { fadeRate: 0.03, glow: true }
+                );
+            }
             
             // Restore context state
             window.ctx.restore();

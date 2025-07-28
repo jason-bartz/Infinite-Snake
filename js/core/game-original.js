@@ -4125,27 +4125,39 @@
                             // Save context state
                             ctx.save();
                             
-                            // First pass: Draw glow effect only
-                            ctx.shadowColor = '#FFD700';
-                            ctx.shadowBlur = 15; // Reduced from 20
-                            ctx.shadowOffsetX = 0;
-                            ctx.shadowOffsetY = 0;
+                            // Draw thick golden outline (no shadow blur to prevent distortion)
                             ctx.strokeStyle = '#FFD700';
-                            ctx.lineWidth = 4; // Reduced from 6
+                            ctx.lineWidth = 8;
+                            ctx.lineJoin = 'round';
                             ctx.strokeText(this.name, screenX, nameY);
                             
-                            // Reset shadow for subsequent draws
-                            ctx.shadowBlur = 0;
-                            ctx.shadowColor = 'transparent';
-                            
-                            // Second pass: Draw black outline for readability
-                            ctx.strokeStyle = 'black';
+                            // Draw medium black stroke for contrast
+                            ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)';
                             ctx.lineWidth = 3;
                             ctx.strokeText(this.name, screenX, nameY);
                             
-                            // Final pass: Draw white fill text
+                            // Draw fill text
                             ctx.fillStyle = 'white';
                             ctx.fillText(this.name, screenX, nameY);
+                            
+                            // Spawn sparkle particles occasionally
+                            if (Math.random() < 0.15 && particlePool) { // 15% chance per frame
+                                const sparkleOffset = 20 + Math.random() * 10;
+                                const sparkleX = screenX + (Math.random() - 0.5) * 40;
+                                const sparkleY = nameY - sparkleOffset;
+                                const sparkleVx = (Math.random() - 0.5) * 1;
+                                const sparkleVy = -Math.random() * 2 - 1;
+                                particlePool.spawn(
+                                    sparkleX, 
+                                    sparkleY, 
+                                    sparkleVx, 
+                                    sparkleVy, 
+                                    '#FFD700', 
+                                    2 + Math.random() * 2,
+                                    'star',
+                                    { fadeRate: 0.03, glow: true }
+                                );
+                            }
                             
                             // Restore context state
                             ctx.restore();
@@ -10830,6 +10842,40 @@
             
             // Update kills
             document.getElementById('playerKills').textContent = playerSnake.kills;
+            
+            // Handle invincibility effects
+            const playerInfoBox = document.querySelector('.player-info-box');
+            if (playerSnake && playerSnake.invincibilityTimer > 0 && window.gameMode !== 'cozy') {
+                // Add pulsating golden border to player stat box
+                if (playerInfoBox) {
+                    const pulseIntensity = Math.sin(Date.now() * 0.005) * 0.5 + 0.5; // 0 to 1
+                    const borderWidth = 4 + pulseIntensity * 2; // 4-6px
+                    playerInfoBox.style.setProperty('border', `${borderWidth}px solid #FFD700`, 'important');
+                    playerInfoBox.style.setProperty('border-color', '#FFD700', 'important');
+                    playerInfoBox.style.setProperty('box-shadow', `0 0 ${20 + pulseIntensity * 20}px #FFD700, 4px 4px 0 rgba(0,0,0,0.8)`, 'important');
+                }
+                
+                // Update invincibility countdown text under skin
+                const invincibilityText = document.getElementById('invincibilityText');
+                if (invincibilityText) {
+                    const secondsRemaining = Math.ceil(playerSnake.invincibilityTimer / 1000);
+                    invincibilityText.textContent = `INVC: ${secondsRemaining}`;
+                    invincibilityText.style.display = 'block';
+                }
+            } else {
+                // Remove golden border when not invincible
+                if (playerInfoBox) {
+                    playerInfoBox.style.removeProperty('border');
+                    playerInfoBox.style.removeProperty('border-color');
+                    playerInfoBox.style.removeProperty('box-shadow');
+                }
+                
+                // Hide invincibility text
+                const invincibilityText = document.getElementById('invincibilityText');
+                if (invincibilityText) {
+                    invincibilityText.style.display = 'none';
+                }
+            }
             
             // Update AlchemyVision timer
             const timerElement = document.getElementById('alchemyVisionTimer');
