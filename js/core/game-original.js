@@ -10124,7 +10124,7 @@
                             }
                         </div>
                         
-                        <button onclick="location.reload()" style="
+                        <button onclick="window.returnToMainMenu()" style="
                             padding: 12px 32px;
                             font-size: 10px;
                             background: var(--snes-cosmic-purple);
@@ -10257,6 +10257,27 @@
         // Return to main menu
         window.returnToMainMenu = function() {
             playUISound();
+            
+            // Stop game and clean up
+            if (gameStarted) {
+                stopGame();
+            }
+            
+            // Remove game over screen if it exists
+            const gameOverScreen = document.getElementById('permaDeathScreen');
+            if (gameOverScreen) {
+                gameOverScreen.remove();
+            }
+            
+            // Reset important flags
+            leaderboardSubmitted = false;
+            submittedGameSessions.clear();
+            deathCount = 0;
+            revivesRemaining = 3;
+            playerDiscoveredElements.clear();
+            defeatedBosses = [];
+            currentBoss = null;
+            bossEncounterActive = false;
             
             // Reset game state
             location.reload(); // Simple reload to return to main menu
@@ -10690,7 +10711,8 @@
                         });
                         
                         // Only submit if played for at least 5 seconds (reduced from 10)
-                        if (playTime >= 5 && canSubmitScore()) {
+                        // DISABLED: This submission is causing duplicates - death sequence handles it
+                        if (false && playTime >= 5 && canSubmitScore()) {
                             // Get player name
                             const playerName = localStorage.getItem('playerName') || window.nameGenerator.generateRandomName();
                             
@@ -10720,7 +10742,7 @@
                                         } else if (result === 'Submitted') {
                                             const globalRankEl = document.getElementById('globalRank');
                                             if (globalRankEl) {
-                                                globalRankEl.textContent = 'Submitted';
+                                                globalRankEl.textContent = 'Score Submitted';
                                             }
                                         }
                                         
@@ -12507,10 +12529,14 @@
             // Generate a unique game session ID for tracking submissions
             currentGameSessionId = `game_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
             
+            // Clear the submitted game sessions set for fresh start
+            submittedGameSessions.clear();
+            
             gameLogger.info('GAME START', 'Starting new game', {
                 gameMode: gameMode,
                 leaderboardSubmitted: leaderboardSubmitted,
-                gameSessionId: currentGameSessionId
+                gameSessionId: currentGameSessionId,
+                submittedSessions: submittedGameSessions.size
             });
             
             if (gameMode === 'infinite' && window.leaderboardModule) {
@@ -14043,8 +14069,9 @@
                     setTimeout(() => {
                         // In classic mode, only submit on final death (4th death when no revives remain)
                         const isFinalDeath = gameMode === 'classic' && deathCount >= 4 && revivesRemaining === 0;
-                        const shouldSubmit = gameMode === 'classic' ? isFinalDeath : true;
-                        console.log('[DEATH SEQUENCE] shouldSubmit:', shouldSubmit, 'score:', playerSnake.score, 'canSubmitScore:', canSubmitScore());
+                        // For infinite mode, submit on every death. For classic, only on final death (handled by handlePermadeath)
+                        const shouldSubmit = gameMode === 'infinite';
+                        console.log('[DEATH SEQUENCE] shouldSubmit:', shouldSubmit, 'score:', playerSnake.score, 'canSubmitScore:', canSubmitScore(), 'isFinalDeath:', isFinalDeath);
                         
                         if (shouldSubmit && playerSnake.score > 0 && canSubmitScore()) {
                             const playerName = localStorage.getItem('playerName') || 'Anonymous';
@@ -14072,6 +14099,9 @@
                                 ).then(result => {
                                     gameLogger.debug('AUTO-SUBMIT', 'Score submitted!', result);
                                     if (result !== null && result !== undefined) {
+                                        // Mark as submitted immediately on success
+                                        markScoreSubmitted();
+                                        
                                         if (typeof result === 'number') {
                                             const globalRankEl = document.getElementById('globalRank');
                                             if (globalRankEl) {
@@ -14081,18 +14111,19 @@
                                         } else if (result === 'Submitted') {
                                             const globalRankEl = document.getElementById('globalRank');
                                             if (globalRankEl) {
-                                                globalRankEl.textContent = 'Submitted';
+                                                globalRankEl.textContent = 'Score Submitted';
                                                 gameLogger.debug('AUTO-SUBMIT', 'Score submitted (no rank available)');
                                             }
                                         }
-                                        // Already set to true above
                                     } else {
                                         gameLogger.error('AUTO-SUBMIT', 'Invalid result:', result);
                                         // Don't reset flag - keep the game session marked as submitted
+                                        markScoreSubmitted(); // Mark as submitted anyway to prevent retries
                                     }
                                 }).catch(err => {
                                     gameLogger.error('AUTO-SUBMIT', 'Failed:', err);
                                     // Don't reset flag - keep the game session marked as submitted
+                                    // Don't mark as submitted on error to allow retry
                                 });
                             } else {
                                 gameLogger.error('AUTO-SUBMIT', 'Supabase module not loaded!');
