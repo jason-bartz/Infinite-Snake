@@ -180,7 +180,7 @@
         
         .leaderboard-header {
             display: grid;
-            grid-template-columns: 80px 60px 80px 200px 150px 120px 120px 100px 100px;
+            grid-template-columns: 80px 80px 200px 150px 120px 120px 100px 100px;
             gap: 15px;
             padding: 15px;
             background: var(--snes-black);
@@ -195,7 +195,7 @@
         
         .leaderboard-entry {
             display: grid;
-            grid-template-columns: 80px 60px 80px 200px 150px 120px 120px 100px 100px;
+            grid-template-columns: 80px 80px 200px 150px 120px 120px 100px 100px;
             gap: 15px;
             padding: 15px;
             margin-bottom: 5px;
@@ -335,7 +335,7 @@
             
             .leaderboard-header,
             .leaderboard-entry {
-                grid-template-columns: 50px 40px 50px 1fr 80px 60px;
+                grid-template-columns: 50px 50px 1fr 80px 60px;
                 gap: 10px;
                 font-size: 8px;
                 padding: 10px;
@@ -347,10 +347,12 @@
                 border-width: 1px;
             }
             
+            .leaderboard-header > div:nth-child(4),
             .leaderboard-header > div:nth-child(5),
             .leaderboard-header > div:nth-child(6),
             .leaderboard-header > div:nth-child(7),
             .leaderboard-header > div:nth-child(8),
+            .leaderboard-entry > div:nth-child(4),
             .leaderboard-entry > div:nth-child(5),
             .leaderboard-entry > div:nth-child(6),
             .leaderboard-entry > div:nth-child(7),
@@ -402,7 +404,6 @@
         <div class="leaderboard-container">
             <div class="leaderboard-header">
                 <div>RANK</div>
-                <div>SNAKE</div>
                 <div>COUNTRY</div>
                 <div>PLAYER</div>
                 <div style="text-align: right;">SCORE</div>
@@ -611,15 +612,9 @@
                         skinPath = 'assets/boss-skins/';
                     }
                     
-                    // Create skin display with error handling
-                    const skinImgUrl = `${skinPath}${skinFileName}.png`;
-                    const defaultSkinUrl = 'skins/snake-default-green.png';
-                    const skinDisplay = `<div class="leaderboard-skin" style="background-image: url('${skinImgUrl}'), url('${defaultSkinUrl}');"></div>`;
-                    
                     return `
                         <div class="leaderboard-entry ${isPlayer ? 'player-entry' : ''}">
                             <div class="${rankClass}" style="font-weight: bold;">#${displayRank}</div>
-                            ${skinDisplay}
                             <div>${countryDisplay}</div>
                             <div style="color: ${isPlayer ? '#4ecdc4' : '#FFF'}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${entry.username}">${entry.username}</div>
                             <div style="color: #4ecdc4; text-align: right;">${(entry.score || 0).toLocaleString()}</div>
