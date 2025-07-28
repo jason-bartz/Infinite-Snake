@@ -246,13 +246,13 @@
     <link rel="alternate" hreflang="en" href="https://infinitesnake.io" />
     <link rel="alternate" hreflang="x-default" href="https://infinitesnake.io" />
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/skin-selection.css?v=1.6.1">
-    <link rel="stylesheet" href="css/cosmic-ui-override.css?v=1.6.1">
-    <link rel="stylesheet" href="css/unlock-notifications.css?v=1.6.1">
-    <link rel="stylesheet" href="css/discovery-feed-gradients.css?v=1.6.1">
-    <link rel="stylesheet" href="css/cosmic-ui-theme.css?v=1.6.1">
-    <link rel="stylesheet" href="css/cosmic-ui-theme.css?v=1.6.1">
-    <link rel="stylesheet" href="css/element-bank-compact.css?v=1.6.1">
+    <link rel="stylesheet" href="css/skin-selection.css?v=1.6.3">
+    <link rel="stylesheet" href="css/cosmic-ui-override.css?v=1.6.3">
+    <link rel="stylesheet" href="css/unlock-notifications.css?v=1.6.3">
+    <link rel="stylesheet" href="css/discovery-feed-gradients.css?v=1.6.3">
+    <link rel="stylesheet" href="css/cosmic-ui-theme.css?v=1.6.3">
+    <link rel="stylesheet" href="css/cosmic-ui-theme.css?v=1.6.3">
+    <link rel="stylesheet" href="css/element-bank-compact.css?v=1.6.3">
     <style>
         /* SNES-Era UI Theme with Cosmic Colors */
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
@@ -322,7 +322,7 @@
             padding: 0;
             min-height: 100vh;
             height: 100%;
-            background-color: #000011;
+            background: #000011 url('/assets/background/purple-blue-bg.png') center/cover no-repeat fixed;
             font-family: 'Press Start 2P', monospace;
             overflow: hidden;
             color: var(--snes-white);
@@ -368,7 +368,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: var(--snes-black);
+            background: transparent;
             overflow-y: auto;
             overflow-x: hidden;
             z-index: 1000;
@@ -425,16 +425,16 @@
         /* Mobile splash logo sizing */
         @media (max-width: 800px) {
             #splashLogo {
-                width: 250px !important;
-                max-width: 70% !important;
+                width: 500px !important;
+                max-width: 85% !important;
             }
         }
         
         /* Landscape splash logo sizing */
         @media (orientation: landscape) {
             #splashLogo {
-                width: 150px !important;
-                max-width: 40% !important;
+                width: 300px !important;
+                max-width: 60% !important;
                 margin-bottom: 10px !important;
             }
         }
@@ -548,7 +548,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: var(--snes-black);
+            background: transparent;
             overflow: hidden;
             display: none;
             z-index: 50;
@@ -590,7 +590,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: linear-gradient(135deg, #1a1a40 0%, #2a1a50 50%, #181850 100%);
+            background: transparent;
             padding: 32px;
             border-radius: 0;
             
@@ -2565,8 +2565,8 @@
             }
             
             #splashLogo {
-                width: 120px !important;
-                max-width: 120px !important;
+                width: 240px !important;
+                max-width: 240px !important;
                 height: auto !important;
                 margin-bottom: 5px !important;
             }
@@ -2744,7 +2744,7 @@
             }
             
             #splashLogo {
-                width: 100px !important;
+                width: 200px !important;
                 height: auto !important;
                 flex-shrink: 0;
             }
@@ -3849,7 +3849,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: #000011;
+            background: transparent;
             z-index: 9999;
             display: flex;
             justify-content: center;
@@ -4079,7 +4079,7 @@
 <body>
 <!-- Version Display -->
 <div id="versionDisplay" style="position: fixed; top: 5px; left: 50%; transform: translateX(-50%); z-index: 9999; color: #666; font-family: 'Press Start 2P', monospace; font-size: 10px; pointer-events: none;">
-    v<span id="versionNumber">1.6.1</span>
+    v<span id="versionNumber">1.6.3</span>
 </div>
 
 <!-- Immediate Mobile Detection -->
@@ -4107,7 +4107,7 @@
             <a href="/leaderboard.html" style="color: #4ecdc4; text-decoration: none; font-family: 'Press Start 2P', monospace; font-size: 10px;">🏆 Leaderboard</a>
         </div>
         <div id="splashContent">
-            <img src="assets/preview-logo.png" alt="Infinite Snake game logo - A cosmic snake forming an infinity symbol" id="splashLogo" style="width: 400px; max-width: 80%; margin-bottom: 30px;" onerror="this.style.display='none'; document.getElementById('splashTitle').style.display='block';">
+            <img src="infinite-snake-preview-splash-logo.png" alt="Infinite Snake game logo - A cosmic snake forming an infinity symbol" id="splashLogo" style="width: 800px; max-width: 90%; margin-bottom: 30px;" onerror="this.style.display='none'; document.getElementById('splashTitle').style.display='block';">
             <h1 id="splashTitle">Infinite Snake</h1>
             <p>Welcome to what's left.<br><br>
             The Universe collapsed, scattered its contents across infinite coils of nothing. You're the Infinite Snake - part cleanup crew, part living library.<br><br>
@@ -4849,7 +4849,7 @@
     </div>
     
     <!-- Game Canvas -->
-    <canvas id="gameCanvas" style="background-color: black;"></canvas>
+    <canvas id="gameCanvas" style="background-color: transparent;"></canvas>
     
     <!-- UI Overlay -->
     <div id="ui">
@@ -5719,7 +5719,7 @@
             width: 100vw !important;
             height: 100vh !important;
             overflow: hidden !important;
-            background-color: #000011 !important;
+            background-color: transparent !important;
         }
         
         /* Force canvas to fill viewport on mobile */
@@ -5729,7 +5729,7 @@
             position: fixed !important;
             top: 0 !important;
             left: 0 !important;
-            background-color: #000011 !important;
+            background-color: transparent !important;
         }
         
         /* ===== ENHANCED MOBILE CONTROLS ===== */
@@ -6588,8 +6588,8 @@
     </style>
 
     <!-- External Dependencies -->
-    <script src="elements/data/loader.js?v=1.6.1"></script>
-    <script src="js/asset-preloader.js?v=1.6.1"></script>
+    <script src="elements/data/loader.js?v=1.6.3"></script>
+    <script src="js/asset-preloader.js?v=1.6.3"></script>
     
     <!-- Version System -->
     <script>
@@ -6603,7 +6603,7 @@
                 }
                 
                 // Check for version mismatch
-                const currentVersion = '1.6.1'; // This will be updated by build script
+                const currentVersion = '1.6.3'; // This will be updated by build script
                 window.GAME_VERSION = data.version;
                 
                 if (currentVersion !== data.version) {
@@ -6638,44 +6638,44 @@
     </script>
     
     <!-- Skin System -->
-    <script src="js/skinData.js?v=1.6.1" defer></script>
-    <script src="js/skinIdMapping.js?v=1.6.1" defer></script>
-    <script src="js/loreData.js?v=1.6.1" defer></script>
-    <script src="js/playerStats.js?v=1.6.1" defer></script>
-    <script src="js/killstreakManager.js?v=1.6.1" defer></script>
-    <script src="js/unlockManager.js?v=1.6.1" defer></script>
-    <script src="js/loreUnlockManager.js?v=1.6.1" defer></script>
-    <script src="js/nameGenerator.js?v=1.6.1" defer></script>
+    <script src="js/skinData.js?v=1.6.3" defer></script>
+    <script src="js/skinIdMapping.js?v=1.6.3" defer></script>
+    <script src="js/loreData.js?v=1.6.3" defer></script>
+    <script src="js/playerStats.js?v=1.6.3" defer></script>
+    <script src="js/killstreakManager.js?v=1.6.3" defer></script>
+    <script src="js/unlockManager.js?v=1.6.3" defer></script>
+    <script src="js/loreUnlockManager.js?v=1.6.3" defer></script>
+    <script src="js/nameGenerator.js?v=1.6.3" defer></script>
     
     <!-- Rendering Systems -->
-    <script src="js/webgl-renderer.js?v=1.6.1"></script>
-    <script src="js/quadtree.js?v=1.6.1"></script>
-    <script src="js/performance-optimizer.js?v=1.6.1"></script>
-    <script src="js/math-optimizations.js?v=1.6.1"></script>
-    <script src="js/texture-atlas.js?v=1.6.1"></script>
-    <script src="js/gpu-particle-system.js?v=1.6.1"></script>
-    <script src="js/mobile-star-renderer.js?v=1.6.1"></script>
-    <script src="js/battery-optimizer.js?v=1.6.1"></script>
-    <script src="js/mobile-background-optimizer.js?v=1.6.1"></script>
-    <script src="js/mobile-background-integration.js?v=1.6.1"></script>
+    <script src="js/webgl-renderer.js?v=1.6.3"></script>
+    <script src="js/quadtree.js?v=1.6.3"></script>
+    <script src="js/performance-optimizer.js?v=1.6.3"></script>
+    <script src="js/math-optimizations.js?v=1.6.3"></script>
+    <script src="js/texture-atlas.js?v=1.6.3"></script>
+    <script src="js/gpu-particle-system.js?v=1.6.3"></script>
+    <script src="js/mobile-star-renderer.js?v=1.6.3"></script>
+    <script src="js/battery-optimizer.js?v=1.6.3"></script>
+    <script src="js/mobile-background-optimizer.js?v=1.6.3"></script>
+    <script src="js/mobile-background-integration.js?v=1.6.3"></script>
     
     <!-- Modernized Systems -->
-    <script src="js/core/module-loader.js?v=1.6.1"></script>
-    <script src="js/core/init-sequence.js?v=1.6.1" type="module"></script>
+    <script src="js/core/module-loader.js?v=1.6.3"></script>
+    <script src="js/core/init-sequence.js?v=1.6.3" type="module"></script>
     
     <!-- Logger (must load before game-original.js) -->
-    <script src="js/core/logger.js?v=1.6.1"></script>
+    <script src="js/core/logger.js?v=1.6.3"></script>
     <!-- Game Entities -->
     <!-- Particle and ParticlePool are loaded by the module system -->
     <!-- Spaceship modules disabled - not using spaceships -->
-    <!-- <script src="js/core/entities/Spaceship.js?v=1.6.1" type="module"></script> -->
-    <!-- <script src="js/core/entities/SpaceshipManager.js?v=1.6.1" type="module"></script> -->
+    <!-- <script src="js/core/entities/Spaceship.js?v=1.6.3" type="module"></script> -->
+    <!-- <script src="js/core/entities/SpaceshipManager.js?v=1.6.3" type="module"></script> -->
     
     <!-- Main Game Code (extracted from inline script) -->
-    <script src="js/core/game-original.js?v=1.6.1" defer></script>
+    <script src="js/core/game-original.js?v=1.6.3" defer></script>
     
     <!-- Performance Integration (must load after game-original.js) -->
-    <script src="js/performance-integration.js?v=1.6.1" defer></script>
+    <script src="js/performance-integration.js?v=1.6.3" defer></script>
     
     
     <!-- Integration -->
