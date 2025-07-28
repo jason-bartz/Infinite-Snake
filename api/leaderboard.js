@@ -304,24 +304,53 @@ try {
 
 // Helper to generate Redis keys for different periods
 function getLeaderboardKeys(period) {
+  // Get current time in Eastern Time
   const now = new Date();
+  const easternTime = new Date(now.toLocaleString("en-US", {timeZone: "America/New_York"}));
+  
+  // Extract ET date components
+  const etYear = easternTime.getFullYear();
+  const etMonth = easternTime.getMonth(); // 0-indexed
+  const etDate = easternTime.getDate();
+  
   const keys = {
-    daily: `lb:daily:${now.toISOString().split('T')[0]}`,
-    weekly: `lb:weekly:${getWeekNumber(now)}`,
-    monthly: `lb:monthly:${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`,
+    daily: `lb:daily:${etYear}-${String(etMonth + 1).padStart(2, '0')}-${String(etDate).padStart(2, '0')}`,
+    weekly: `lb:weekly:${getWeekNumber(easternTime)}`,
+    monthly: `lb:monthly:${etYear}-${String(etMonth + 1).padStart(2, '0')}`,
     all: 'lb:all'
   };
   
   return period ? keys[period] : keys;
 }
 
-// Helper to get week number
+// Helper to get week number (based on Eastern Time)
 function getWeekNumber(date) {
-  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-  const dayNum = d.getUTCDay() || 7;
-  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-  const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
-  return `${d.getUTCFullYear()}-W${Math.ceil((((d - yearStart) / 86400000) + 1)/7)}`;
+  // Clone the date to avoid modifying the original
+  const d = new Date(date.getTime());
+  
+  // Set to nearest Monday (week starts on Monday in ISO 8601)
+  const day = d.getDay() || 7; // Sunday = 0, we want Sunday = 7
+  if (day !== 1) {
+    d.setDate(d.getDate() - day + 1);
+  }
+  
+  // Get year of this Monday
+  const yearOfMonday = d.getFullYear();
+  
+  // Get first Monday of the year
+  const jan1 = new Date(yearOfMonday, 0, 1);
+  const jan1Day = jan1.getDay() || 7;
+  const firstMonday = new Date(yearOfMonday, 0, jan1Day === 1 ? 1 : 9 - jan1Day);
+  
+  // Calculate week number
+  const weekNum = Math.ceil(((d - firstMonday) / 86400000 + 1) / 7);
+  
+  // Handle edge case where week belongs to previous year
+  if (weekNum === 0) {
+    return getWeekNumber(new Date(yearOfMonday - 1, 11, 31));
+  }
+  
+  return `${yearOfMonday}-W${String(weekNum).padStart(2, '0')}`;
 }
 
 // Validate scores to prevent cheating
