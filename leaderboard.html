@@ -522,6 +522,7 @@
         <header>
             <h1>GLOBAL LEADERBOARD</h1>
             <p class="subtitle">Classic Mode Rankings</p>
+            <p class="subtitle" style="margin-top: 10px; font-size: 8px; color: #888;">Scores update daily at midnight UTC</p>
         </header>
         
         <div class="tabs">
@@ -733,8 +734,9 @@
                 
                 content.innerHTML = validEntries.map((entry, index) => {
                     const isPlayer = currentUsername && entry.username === currentUsername;
-                    // Re-calculate rank based on filtered entries
-                    const displayRank = index + 1;
+                    // Calculate rank based on page offset
+                    const offset = (currentPage - 1) * entriesPerPage;
+                    const displayRank = offset + index + 1;
                     const rankClass = displayRank <= 3 ? `rank-${displayRank}` : '';
                     
                     // Format time with safeguards
@@ -781,8 +783,8 @@
                     `;
                 }).join('');
                 
-                // Update pagination UI
-                updatePaginationUI();
+                // Update pagination UI with actual count of entries shown
+                updatePaginationUI(validEntries.length);
             } catch (error) {
                 console.error('Failed to load leaderboard:', error);
                 content.innerHTML = '<div class="error">Failed to load leaderboard. Please try again later.</div>';
@@ -791,7 +793,7 @@
         }
         
         // Update pagination UI
-        function updatePaginationUI() {
+        function updatePaginationUI(actualEntriesShown) {
             const paginationContainer = document.getElementById('pagination-container');
             const totalPages = Math.ceil(totalEntries / entriesPerPage);
             
@@ -803,9 +805,9 @@
             
             paginationContainer.style.display = 'block';
             
-            // Update info text
+            // Update info text with actual entries shown
             const startEntry = (currentPage - 1) * entriesPerPage + 1;
-            const endEntry = Math.min(currentPage * entriesPerPage, totalEntries);
+            const endEntry = startEntry + actualEntriesShown - 1;
             document.getElementById('pagination-info-text').textContent = 
                 `Showing ${startEntry}-${endEntry} of ${totalEntries}`;
             

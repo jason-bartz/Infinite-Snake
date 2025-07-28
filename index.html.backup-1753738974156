@@ -239,13 +239,13 @@
     <link rel="alternate" hreflang="en" href="https://infinitesnake.io" />
     <link rel="alternate" hreflang="x-default" href="https://infinitesnake.io" />
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/skin-selection.css?v=1.9.4">
-    <link rel="stylesheet" href="css/cosmic-ui-override.css?v=1.9.4">
-    <link rel="stylesheet" href="css/unlock-notifications.css?v=1.9.4">
-    <link rel="stylesheet" href="css/discovery-feed-gradients.css?v=1.9.4">
-    <link rel="stylesheet" href="css/cosmic-ui-theme.css?v=1.9.4">
-    <link rel="stylesheet" href="css/cosmic-ui-theme.css?v=1.9.4">
-    <link rel="stylesheet" href="css/element-bank-compact.css?v=1.9.4">
+    <link rel="stylesheet" href="css/skin-selection.css?v=1.9.3">
+    <link rel="stylesheet" href="css/cosmic-ui-override.css?v=1.9.3">
+    <link rel="stylesheet" href="css/unlock-notifications.css?v=1.9.3">
+    <link rel="stylesheet" href="css/discovery-feed-gradients.css?v=1.9.3">
+    <link rel="stylesheet" href="css/cosmic-ui-theme.css?v=1.9.3">
+    <link rel="stylesheet" href="css/cosmic-ui-theme.css?v=1.9.3">
+    <link rel="stylesheet" href="css/element-bank-compact.css?v=1.9.3">
     <style>
         /* SNES-Era UI Theme with Cosmic Colors */
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
@@ -258,88 +258,6 @@
             transition-duration: 0s !important;
             -webkit-font-smoothing: none;
             -moz-osx-font-smoothing: unset;
-        }
-
-        /* Game Setup Modal Box Styling - Equal Sizes */
-        .mode-selection-container {
-            display: flex !important;
-            justify-content: center !important;
-            gap: 20px !important;
-            align-items: stretch !important;
-            padding: 20px !important;
-        }
-
-        .mode-selection-container .mode-box {
-            flex: 1 !important;
-            max-width: 250px !important;
-            min-height: 200px !important;
-            height: auto !important;
-            display: flex !important;
-            flex-direction: column !important;
-            padding: 0 !important;
-            background: rgba(0, 0, 0, 0.9) !important;
-            border: 3px solid !important;
-        }
-
-        .mode-selection-container .mode-box .mode-title {
-            padding: 10px !important;
-            text-align: center !important;
-            font-size: 11px !important;
-            font-family: 'Press Start 2P', monospace !important;
-            margin: 0 !important;
-            flex-shrink: 0 !important;
-        }
-
-        .mode-selection-container .mode-box .mode-content {
-            padding: 15px !important;
-            flex-grow: 1 !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            text-align: center !important;
-            font-size: 9px !important;
-            line-height: 14px !important;
-            font-family: 'Press Start 2P', monospace !important;
-            text-transform: uppercase !important;
-        }
-
-        .mode-selection-container .mode-box-classic {
-            border-color: #F828F8 !important;
-        }
-
-        .mode-selection-container .mode-box-classic .mode-title {
-            background: #F828F8 !important;
-            color: #000 !important;
-        }
-
-        .mode-selection-container .mode-box-classic .mode-content {
-            color: #F828F8 !important;
-        }
-
-        .mode-selection-container .mode-box-infinite {
-            border-color: #7828F8 !important;
-        }
-
-        .mode-selection-container .mode-box-infinite .mode-title {
-            background: #7828F8 !important;
-            color: #FFF !important;
-        }
-
-        .mode-selection-container .mode-box-infinite .mode-content {
-            color: #A858F8 !important;
-        }
-
-        .mode-selection-container .mode-box-cozy {
-            border-color: #00D9FF !important;
-        }
-
-        .mode-selection-container .mode-box-cozy .mode-title {
-            background: #00D9FF !important;
-            color: #000 !important;
-        }
-
-        .mode-selection-container .mode-box-cozy .mode-content {
-            color: #00D9FF !important;
         }
         
         /* SNES Color Palette - Cosmic Theme */
@@ -4076,7 +3994,7 @@
 <body>
 <!-- Version Display -->
 <div id="versionDisplay" style="position: relative; text-align: center; margin-top: 10px; z-index: 100; color: #666; font-family: 'Press Start 2P', monospace; font-size: 10px; pointer-events: none;">
-    v<span id="versionNumber">1.9.4</span>
+    v<span id="versionNumber">1.9.3</span>
 </div>
 
 <!-- Immediate Mobile Detection -->
@@ -4722,183 +4640,6 @@
     function scrollToTop() {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-    
-    // Fix game setup modal layout
-    function fixGameSetupModal() {
-        const gameModeContent = document.getElementById('gameModeContent');
-        if (!gameModeContent) return;
-        
-        // Add styles for the mode boxes
-        const styleSheet = document.createElement('style');
-        styleSheet.textContent = `
-            .game-mode-box {
-                position: relative;
-                transition: none !important;
-                box-shadow: 6px 6px 0 rgba(0,0,0,0.8) !important;
-            }
-            
-            .game-mode-box:hover {
-                transform: translate(-2px, -2px);
-                box-shadow: 8px 8px 0 rgba(0,0,0,0.8) !important;
-            }
-            
-            .game-mode-box:active {
-                transform: translate(4px, 4px);
-                box-shadow: 2px 2px 0 rgba(0,0,0,0.8) !important;
-            }
-            
-            .game-mode-box.selected {
-                animation: modeSelected 0.5s ease-out;
-            }
-            
-            @keyframes modeSelected {
-                0% { transform: translate(0, 0); }
-                25% { transform: translate(6px, 6px); }
-                50% { transform: translate(4px, 4px) scale(0.95); }
-                75% { transform: translate(2px, 2px) scale(1.05); }
-                100% { transform: translate(4px, 4px) scale(1); }
-            }
-            
-            .mode-title {
-                position: relative;
-                box-shadow: inset 0 -2px 0 rgba(0,0,0,0.3);
-            }
-            
-            .game-mode-box.mode-disabled {
-                opacity: 0.5;
-                cursor: not-allowed !important;
-            }
-            
-            .game-mode-box.mode-disabled:hover {
-                transform: none;
-                box-shadow: 6px 6px 0 rgba(0,0,0,0.8) !important;
-            }
-        `;
-        document.head.appendChild(styleSheet);
-        
-        // Create the properly structured modal content
-        gameModeContent.innerHTML = `
-            <h3 style="color: #F8D800; font-size: 20px; text-align: center; margin-bottom: 15px; font-family: 'Press Start 2P', monospace; text-shadow: 2px 2px 0 #000;">GAME SETUP</h3>
-            <h4 style="color: #00D9FF; font-size: 12px; text-align: center; margin-bottom: 20px; font-family: 'Press Start 2P', monospace; text-shadow: 1px 1px 0 #000;">CHOOSE YOUR MODE</h4>
-            
-            <div class="mode-selection-container" style="display: flex; justify-content: center; gap: 20px; align-items: stretch;">
-                <!-- CLASSIC MODE -->
-                <div class="game-mode-box mode-box-classic" style="flex: 1; max-width: 220px; border: 3px solid #F828F8; background: rgba(0, 0, 0, 0.9); display: flex; flex-direction: column; cursor: pointer; position: relative;" onclick="animateAndSelectMode(this, 'classic')">
-                    <div class="mode-title" style="background: #F828F8; color: #000; padding: 10px; text-align: center; font-size: 11px; font-family: 'Press Start 2P', monospace; border-bottom: 3px solid #C820C8;">
-                        CLASSIC MODE
-                    </div>
-                    <div class="mode-content" style="padding: 20px 15px; flex-grow: 1; display: flex; align-items: center; justify-content: center; text-align: center; color: #F828F8; font-size: 9px; line-height: 14px; font-family: 'Press Start 2P', monospace; text-transform: uppercase;">
-                        <div>
-                            3 LIVES.<br>
-                            PERMADEATH.<br>
-                            BATTLE ENEMY SNAKES<br>
-                            AND EPIC BOSSES.<br>
-                            COMPETE FOR THE<br>
-                            GLOBAL LEADERBOARD.<br>
-                            HOW LONG CAN YOU<br>
-                            SURVIVE THE VOID?
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- INFINITE MODE -->
-                <div class="game-mode-box mode-box-infinite" style="flex: 1; max-width: 220px; border: 3px solid #7828F8; background: rgba(0, 0, 0, 0.9); display: flex; flex-direction: column; cursor: pointer; position: relative;" onclick="animateAndSelectMode(this, 'infinite')">
-                    <div class="mode-title" style="background: #7828F8; color: #FFF; padding: 10px; text-align: center; font-size: 11px; font-family: 'Press Start 2P', monospace; border-bottom: 3px solid #5820C8;">
-                        INFINITE MODE
-                    </div>
-                    <div class="mode-content" style="padding: 20px 15px; flex-grow: 1; display: flex; align-items: center; justify-content: center; text-align: center; color: #A858F8; font-size: 9px; line-height: 14px; font-family: 'Press Start 2P', monospace; text-transform: uppercase;">
-                        <div>
-                            ENDLESS DISCOVERY.<br>
-                            NO LIMITS.<br>
-                            FACE ENEMY SNAKES<br>
-                            AND BOSSES WITH<br>
-                            INFINITE RESPAWNS.<br>
-                            BUILD YOUR<br>
-                            COLLECTION<br>
-                            WITHOUT FEAR.
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- COZY MODE -->
-                <div class="game-mode-box mode-box-cozy" style="flex: 1; max-width: 220px; border: 3px solid #00D9FF; background: rgba(0, 0, 0, 0.9); display: flex; flex-direction: column; cursor: pointer; position: relative;" onclick="animateAndSelectMode(this, 'cozy')">
-                    <div class="mode-title" style="background: #00D9FF; color: #000; padding: 10px; text-align: center; font-size: 11px; font-family: 'Press Start 2P', monospace; border-bottom: 3px solid #00A9CF;">
-                        "COZY" MODE
-                    </div>
-                    <div class="mode-content" style="padding: 20px 15px; flex-grow: 1; display: flex; align-items: center; justify-content: center; text-align: center; color: #00D9FF; font-size: 9px; line-height: 14px; font-family: 'Press Start 2P', monospace; text-transform: uppercase;">
-                        <div>
-                            NO ENEMIES.<br>
-                            NO DEATHS.<br>
-                            JUST VIBES.<br>
-                            DRIFT THROUGH SPACE<br>
-                            TO A LOFI<br>
-                            SOUNDTRACK.<br>
-                            DISCOVER ELEMENTS<br>
-                            AT YOUR OWN PACE.
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div id="mobileMessage" style="display: none; color: #999; font-size: 10px; text-align: center; font-family: 'Press Start 2P', monospace; margin-top: 20px; padding: 0 20px; line-height: 16px;">
-                Infinite Snake was created as a desktop experience.<br>
-                Visit on a desktop browser for the full game.
-            </div>
-        `;
-        
-        // Check if mobile and disable non-cozy modes
-        if (window.isMobile && typeof window.isMobile === 'function' && window.isMobile()) {
-            const classicBox = gameModeContent.querySelector('.mode-box-classic');
-            const infiniteBox = gameModeContent.querySelector('.mode-box-infinite');
-            const mobileMsg = gameModeContent.querySelector('#mobileMessage');
-            
-            if (classicBox) classicBox.classList.add('mode-disabled');
-            if (infiniteBox) infiniteBox.classList.add('mode-disabled');
-            if (mobileMsg) mobileMsg.style.display = 'block';
-        }
-    }
-    
-    // Animate and select game mode
-    function animateAndSelectMode(element, mode) {
-        // Check if mobile and mode is not cozy
-        if (window.isMobile && typeof window.isMobile === 'function' && window.isMobile() && mode !== 'cozy') {
-            return; // Don't allow selection
-        }
-        
-        // Add selected animation
-        element.classList.add('selected');
-        
-        // Remove animation class after it completes
-        setTimeout(() => {
-            element.classList.remove('selected');
-        }, 500);
-        
-        // Call the actual selectGameMode function after a short delay
-        setTimeout(() => {
-            if (typeof selectGameMode === 'function') {
-                selectGameMode(mode);
-            }
-        }, 200);
-    }
-    
-    // Call the fix when DOM is ready and when game mode select is shown
-    document.addEventListener('DOMContentLoaded', function() {
-        fixGameSetupModal();
-        
-        // Also fix it when the modal becomes visible
-        const observer = new MutationObserver(function(mutations) {
-            mutations.forEach(function(mutation) {
-                if (mutation.target.id === 'gameModeSelect' && mutation.target.style.display === 'block') {
-                    setTimeout(fixGameSetupModal, 100);
-                }
-            });
-        });
-        
-        const gameModeSelect = document.getElementById('gameModeSelect');
-        if (gameModeSelect) {
-            observer.observe(gameModeSelect, { attributes: true, attributeFilter: ['style'] });
-        }
-    });
     </script>
     </div>
     
@@ -4920,49 +4661,49 @@
         <div class="modeSection">
             <h4>Choose Your Mode</h4>
             <div id="victoryButtons" style="display: flex; justify-content: center; gap: 20px; margin: 30px auto; padding: 0 20px; max-width: 1200px; flex-wrap: nowrap;">
-                <div class="mode-box mode-box-classic" style="background: rgba(0, 0, 0, 0.8); border: 3px solid #F828F8; padding: 20px; border-radius: 8px; box-sizing: border-box; width: 280px; height: 240px; display: flex; flex-direction: column;">
-                    <button class="btn-classic mode-button" onclick="selectGameMode('classic')" style="width: 100%; height: 45px; padding: 8px; font-size: 9pt; background: #333; border: 2px solid #222; display: flex; align-items: center; justify-content: center; margin-bottom: 15px; flex-shrink: 0;">
+                <div class="mode-box mode-box-classic" style="background: rgba(0, 0, 0, 0.8); border: 3px solid #F828F8; padding: 15px; border-radius: 8px; box-sizing: border-box; width: 280px; height: 220px; display: flex; flex-direction: column;">
+                    <button class="btn-classic mode-button" onclick="selectGameMode('classic')" style="width: 100%; height: 40px; padding: 8px; font-size: 9pt; background: #333; border: 2px solid #222; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; flex-shrink: 0;">
                         CLASSIC MODE
                     </button>
-                    <p style="color: #F828F8; font-size: 9px; text-align: center; font-family: 'Press Start 2P', monospace; line-height: 14px; text-transform: uppercase; margin: 0; display: flex; align-items: center; justify-content: center; flex-grow: 1;">
-                        <span>3 LIVES.<br>
+                    <p style="color: #F828F8; font-size: 9px; text-align: center; font-family: 'Press Start 2P', monospace; line-height: 14px; text-transform: uppercase; margin: 0;">
+                        3 LIVES.<br>
                         PERMADEATH.<br>
                         BATTLE ENEMY SNAKES<br>
                         AND EPIC BOSSES.<br>
                         COMPETE FOR THE<br>
                         GLOBAL LEADERBOARD.<br>
                         HOW LONG CAN YOU<br>
-                        SURVIVE THE VOID?</span>
+                        SURVIVE THE VOID?
                     </p>
                 </div>
-                <div class="mode-box mode-box-infinite" style="background: rgba(0, 0, 0, 0.8); border: 3px solid #7828F8; padding: 20px; border-radius: 8px; box-sizing: border-box; width: 280px; height: 240px; display: flex; flex-direction: column;">
-                    <button class="btn-infinite mode-button" onclick="selectGameMode('infinite')" style="width: 100%; height: 45px; padding: 8px; font-size: 9pt; background: #333; border: 2px solid #222; display: flex; align-items: center; justify-content: center; margin-bottom: 15px; flex-shrink: 0;">
+                <div class="mode-box mode-box-infinite" style="background: rgba(0, 0, 0, 0.8); border: 3px solid #7828F8; padding: 15px; border-radius: 8px; box-sizing: border-box; width: 280px; height: 220px; display: flex; flex-direction: column;">
+                    <button class="btn-infinite mode-button" onclick="selectGameMode('infinite')" style="width: 100%; height: 40px; padding: 8px !important; font-size: 9pt !important; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; flex-shrink: 0;">
                         INFINITE MODE
                     </button>
-                    <p style="color: #A858F8; font-size: 9px; text-align: center; font-family: 'Press Start 2P', monospace; line-height: 14px; text-transform: uppercase; margin: 0; display: flex; align-items: center; justify-content: center; flex-grow: 1;">
-                        <span>ENDLESS DISCOVERY.<br>
+                    <p style="color: #A858F8; font-size: 9px; text-align: center; font-family: 'Press Start 2P', monospace; line-height: 14px; text-transform: uppercase; margin: 0;">
+                        ENDLESS DISCOVERY.<br>
                         NO LIMITS.<br>
                         FACE ENEMY SNAKES<br>
                         AND BOSSES WITH<br>
                         INFINITE RESPAWNS.<br>
                         BUILD YOUR<br>
                         COLLECTION<br>
-                        WITHOUT FEAR.</span>
+                        WITHOUT FEAR.
                     </p>
                 </div>
-                <div class="mode-box mode-box-cozy" style="background: rgba(0, 0, 0, 0.8); border: 3px solid #00D9FF; padding: 20px; border-radius: 8px; box-sizing: border-box; width: 280px; height: 240px; display: flex; flex-direction: column;">
-                    <button class="btn-cozy mode-button" onclick="selectGameMode('cozy')" style="width: 100%; height: 45px; padding: 8px; font-size: 9pt; background: #333; border: 2px solid #222; display: flex; align-items: center; justify-content: center; margin-bottom: 15px; flex-shrink: 0;">
+                <div class="mode-box mode-box-cozy" style="background: rgba(0, 0, 0, 0.8); border: 3px solid #00D9FF; padding: 15px; border-radius: 8px; box-sizing: border-box; width: 280px; height: 220px; display: flex; flex-direction: column;">
+                    <button class="btn-cozy mode-button" onclick="selectGameMode('cozy')" style="width: 100%; height: 40px; padding: 8px; font-size: 9pt; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; flex-shrink: 0;">
                         "COZY" MODE
                     </button>
-                    <p style="color: #00D9FF; font-size: 9px; text-align: center; font-family: 'Press Start 2P', monospace; line-height: 14px; text-transform: uppercase; margin: 0; display: flex; align-items: center; justify-content: center; flex-grow: 1;">
-                        <span>NO ENEMIES.<br>
+                    <p style="color: #00D9FF; font-size: 9px; text-align: center; font-family: 'Press Start 2P', monospace; line-height: 14px; text-transform: uppercase; margin: 0;">
+                        NO ENEMIES.<br>
                         NO DEATHS.<br>
                         JUST VIBES.<br>
                         DRIFT THROUGH SPACE<br>
                         TO A LOFI<br>
                         SOUNDTRACK.<br>
                         DISCOVER ELEMENTS<br>
-                        AT YOUR OWN PACE.</span>
+                        AT YOUR OWN PACE.
                     </p>
                 </div>
             </div>
@@ -6758,8 +6499,8 @@
     </style>
 
     <!-- External Dependencies -->
-    <script src="elements/data/loader.js?v=1.9.4"></script>
-    <script src="js/asset-preloader.js?v=1.9.4"></script>
+    <script src="elements/data/loader.js?v=1.9.3"></script>
+    <script src="js/asset-preloader.js?v=1.9.3"></script>
     
     <!-- Version System -->
     <script>
@@ -6781,44 +6522,44 @@
     </script>
     
     <!-- Skin System -->
-    <script src="js/skinData.js?v=1.9.4" defer></script>
-    <script src="js/skinIdMapping.js?v=1.9.4" defer></script>
-    <script src="js/loreData.js?v=1.9.4" defer></script>
-    <script src="js/playerStats.js?v=1.9.4" defer></script>
-    <script src="js/killstreakManager.js?v=1.9.4" defer></script>
-    <script src="js/unlockManager.js?v=1.9.4" defer></script>
-    <script src="js/loreUnlockManager.js?v=1.9.4" defer></script>
-    <script src="js/nameGenerator.js?v=1.9.4" defer></script>
+    <script src="js/skinData.js?v=1.9.3" defer></script>
+    <script src="js/skinIdMapping.js?v=1.9.3" defer></script>
+    <script src="js/loreData.js?v=1.9.3" defer></script>
+    <script src="js/playerStats.js?v=1.9.3" defer></script>
+    <script src="js/killstreakManager.js?v=1.9.3" defer></script>
+    <script src="js/unlockManager.js?v=1.9.3" defer></script>
+    <script src="js/loreUnlockManager.js?v=1.9.3" defer></script>
+    <script src="js/nameGenerator.js?v=1.9.3" defer></script>
     
     <!-- Rendering Systems -->
-    <script src="js/webgl-renderer.js?v=1.9.4"></script>
-    <script src="js/quadtree.js?v=1.9.4"></script>
-    <script src="js/performance-optimizer.js?v=1.9.4"></script>
-    <script src="js/math-optimizations.js?v=1.9.4"></script>
-    <script src="js/texture-atlas.js?v=1.9.4"></script>
-    <script src="js/gpu-particle-system.js?v=1.9.4"></script>
-    <script src="js/mobile-star-renderer.js?v=1.9.4"></script>
-    <script src="js/battery-optimizer.js?v=1.9.4"></script>
-    <script src="js/mobile-background-optimizer.js?v=1.9.4"></script>
-    <script src="js/mobile-background-integration.js?v=1.9.4"></script>
+    <script src="js/webgl-renderer.js?v=1.9.3"></script>
+    <script src="js/quadtree.js?v=1.9.3"></script>
+    <script src="js/performance-optimizer.js?v=1.9.3"></script>
+    <script src="js/math-optimizations.js?v=1.9.3"></script>
+    <script src="js/texture-atlas.js?v=1.9.3"></script>
+    <script src="js/gpu-particle-system.js?v=1.9.3"></script>
+    <script src="js/mobile-star-renderer.js?v=1.9.3"></script>
+    <script src="js/battery-optimizer.js?v=1.9.3"></script>
+    <script src="js/mobile-background-optimizer.js?v=1.9.3"></script>
+    <script src="js/mobile-background-integration.js?v=1.9.3"></script>
     
     <!-- Modernized Systems -->
-    <script src="js/core/module-loader.js?v=1.9.4"></script>
-    <script src="js/core/init-sequence.js?v=1.9.4" type="module"></script>
+    <script src="js/core/module-loader.js?v=1.9.3"></script>
+    <script src="js/core/init-sequence.js?v=1.9.3" type="module"></script>
     
     <!-- Logger (must load before game-original.js) -->
-    <script src="js/core/logger.js?v=1.9.4"></script>
+    <script src="js/core/logger.js?v=1.9.3"></script>
     <!-- Game Entities -->
     <!-- Particle and ParticlePool are loaded by the module system -->
     <!-- Spaceship modules disabled - not using spaceships -->
-    <!-- <script src="js/core/entities/Spaceship.js?v=1.9.4" type="module"></script> -->
-    <!-- <script src="js/core/entities/SpaceshipManager.js?v=1.9.4" type="module"></script> -->
+    <!-- <script src="js/core/entities/Spaceship.js?v=1.9.3" type="module"></script> -->
+    <!-- <script src="js/core/entities/SpaceshipManager.js?v=1.9.3" type="module"></script> -->
     
     <!-- Main Game Code (extracted from inline script) -->
-    <script src="js/core/game-original.js?v=1.9.4" defer></script>
+    <script src="js/core/game-original.js?v=1.9.3" defer></script>
     
     <!-- Performance Integration (must load after game-original.js) -->
-    <script src="js/performance-integration.js?v=1.9.4" defer></script>
+    <script src="js/performance-integration.js?v=1.9.3" defer></script>
     
     
     <!-- Integration -->
