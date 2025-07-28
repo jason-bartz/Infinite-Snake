@@ -10348,18 +10348,18 @@
                         window.loadPauseLeaderboard(event, period, retryCount + 1);
                     }, delay);
                 } else {
-                    entriesDiv.innerHTML = '<div style="color: #ff4444; text-align: center; padding: 20px;">Leaderboard service unavailable</div>';
+                    entriesDiv.innerHTML = '<div style="color: #ff4444; text-align: center; padding: 20px; font-family: \'Press Start 2P\', monospace; font-size: 8px;">Leaderboard service unavailable</div>';
                 }
                 return;
             }
             
-            entriesDiv.innerHTML = '<div style="color: #888; text-align: center; padding: 20px;">Loading...</div>';
+            entriesDiv.innerHTML = '<div style="color: #888; text-align: center; padding: 20px; font-family: \'Press Start 2P\', monospace; font-size: 8px;">Loading...</div>';
             
             try {
                 const data = await window.leaderboardModule.getLeaderboard(period, 10); // Top 10 only
                 
                 if (!data || data.length === 0) {
-                    entriesDiv.innerHTML = '<div style="color: #888; text-align: center; padding: 20px;">No scores yet. Be the first!</div>';
+                    entriesDiv.innerHTML = '<div style="color: #888; text-align: center; padding: 20px; font-family: \'Press Start 2P\', monospace; font-size: 8px;">No scores yet. Be the first!</div>';
                     return;
                 }
                 
@@ -10367,9 +10367,9 @@
                 
                 // Create header
                 let leaderboardHTML = `
-                    <div style="display: grid; grid-template-columns: 40px 40px 1fr 60px 50px 50px 60px; 
+                    <div style="display: grid; grid-template-columns: 35px 35px 1fr 80px 60px 60px 70px; 
                                 padding: 5px 10px; border-bottom: 2px solid #4ecdc4; margin-bottom: 10px;
-                                font-size: 10px; color: #4ecdc4; font-weight: bold;">
+                                font-size: 8px; color: #4ecdc4; font-weight: bold; font-family: 'Press Start 2P', monospace;">
                         <div>RANK</div>
                         <div></div>
                         <div>PLAYER</div>
@@ -10412,7 +10412,7 @@
                 });
                 
                 if (validEntries.length === 0) {
-                    entriesDiv.innerHTML = '<div style="color: #888; text-align: center; padding: 20px;">No valid scores to display.</div>';
+                    entriesDiv.innerHTML = '<div style="color: #888; text-align: center; padding: 20px; font-family: \'Press Start 2P\', monospace; font-size: 8px;">No valid scores to display.</div>';
                     return;
                 }
                 
@@ -10444,17 +10444,18 @@
                     const flag = countryFlags[entry.country_code] || '🌍';
                     
                     return `
-                        <div style="display: grid; grid-template-columns: 40px 40px 1fr 60px 50px 50px 60px; 
+                        <div style="display: grid; grid-template-columns: 35px 35px 1fr 80px 60px 60px 70px; 
                                     padding: 5px 10px; align-items: center;
                                     background: ${isPlayer ? 'rgba(78, 205, 196, 0.2)' : 'rgba(0, 0, 0, 0.2)'}; 
-                                    margin-bottom: 2px; border: 1px solid ${isPlayer ? '#4ecdc4' : 'transparent'};">
-                            <div class="${rankClass}" style="font-weight: bold; font-size: 12px;">#${entry.rank}</div>
+                                    margin-bottom: 2px; border: 1px solid ${isPlayer ? '#4ecdc4' : 'transparent'};
+                                    font-family: 'Press Start 2P', monospace;">
+                            <div class="${rankClass}" style="font-weight: bold; font-size: 10px;">#${entry.rank}</div>
                             <div style="font-size: 16px; text-align: center;">${flag}</div>
-                            <div style="color: ${isPlayer ? '#4ecdc4' : '#FFF'}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px;">${displayName}</div>
-                            <div style="color: #4ecdc4; text-align: right; font-size: 12px; font-weight: bold;">${entry.score.toLocaleString()}</div>
-                            <div style="text-align: center; font-size: 11px; color: #888;">${entry.elements_discovered || 0}</div>
-                            <div style="text-align: center; font-size: 11px; color: #888;">${entry.kills || 0}</div>
-                            <div style="text-align: right; font-size: 11px; color: #888;">${timeStr}</div>
+                            <div style="color: ${isPlayer ? '#4ecdc4' : '#FFF'}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 8px;">${displayName}</div>
+                            <div style="color: #4ecdc4; text-align: right; font-size: 10px; font-weight: bold;">${entry.score.toLocaleString()}</div>
+                            <div style="text-align: center; font-size: 9px; color: #888;">${entry.elements_discovered || 0}</div>
+                            <div style="text-align: center; font-size: 9px; color: #888;">${entry.kills || 0}</div>
+                            <div style="text-align: right; font-size: 9px; color: #888;">${timeStr}</div>
                         </div>
                     `;
                 }).join('');
@@ -10463,7 +10464,7 @@
                 
             } catch (error) {
                 gameLogger.error('LEADERBOARD', 'Failed to load pause leaderboard:', error);
-                entriesDiv.innerHTML = '<div style="color: #ff4444; text-align: center; padding: 20px;">Failed to load</div>';
+                entriesDiv.innerHTML = '<div style="color: #ff4444; text-align: center; padding: 20px; font-family: \'Press Start 2P\', monospace; font-size: 8px;">Failed to load</div>';
             }
         }
         
