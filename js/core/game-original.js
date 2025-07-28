@@ -9477,18 +9477,23 @@
                 gameLogger.debug('SUBMISSION', 'Blocked - already submitted');
                 return false;
             }
-            // Mark as submitted and record time
+            
+            // Don't mark as submitted here - let the actual submission do that
+            gameLogger.debug('SUBMISSION', 'Allowed - can submit score');
+            return true;
+        }
+        
+        // Helper function to mark score as submitted
+        function markScoreSubmitted() {
+            const now = Date.now();
             leaderboardSubmitted = true;
             lastSubmissionTime = now;
             
             // Add current game session to submitted set
             if (currentGameSessionId) {
                 submittedGameSessions.add(currentGameSessionId);
-                gameLogger.debug('SUBMISSION', 'Added game session to submitted set:', currentGameSessionId);
+                gameLogger.debug('SUBMISSION', 'Marked as submitted - game session:', currentGameSessionId);
             }
-            
-            gameLogger.debug('SUBMISSION', 'Allowed - marking as submitted at', now);
-            return true;
         }
         
         // Test function to verify script is working
@@ -9755,7 +9760,7 @@
                 
                 // If we got here, submission was successful
                 if (result !== null && result !== undefined) {
-                    leaderboardSubmitted = true;
+                    markScoreSubmitted();
                     const rank = result.daily_rank || result.rank || result || 'Submitted';
                     const statusElement = document.getElementById('submissionStatus');
                     statusElement.innerHTML = 
@@ -9908,6 +9913,7 @@
                         window.currentPlayerSkin || 'snake-default-green'
                     ).then(result => {
                         dailyRank = result;
+                        markScoreSubmitted();
                         isSubmitting = false;
                         updateGameOverScreen();
                     }).catch(() => {
@@ -10718,7 +10724,8 @@
                                             }
                                         }
                                         
-                                        // Already marked as submitted above
+                                        // Mark score as submitted
+                                        markScoreSubmitted();
                                     } else {
                                         gameLogger.error('LEADERBOARD', '❌ Submission failed or returned invalid data:', result);
                                         // Don't reset flag - keep the game session marked as submitted
@@ -10758,7 +10765,7 @@
                                                     if (globalRankEl) {
                                                         globalRankEl.textContent = `#${result}`;
                                                     }
-                                                    leaderboardSubmitted = true;
+                                                    markScoreSubmitted();
                                                 }
                                             }).catch(err => {
                                                 gameLogger.error('LEADERBOARD', 'Retry failed:', err);
