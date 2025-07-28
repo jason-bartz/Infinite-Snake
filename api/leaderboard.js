@@ -692,6 +692,9 @@ export default async function handler(req, res) {
       
       // Get all period keys
       const keys = getLeaderboardKeys();
+      console.log('Generated leaderboard keys:', keys);
+      console.log('Current UTC time:', new Date().toISOString());
+      
       const scoreData = JSON.stringify(scoreEntry);
       
       // Ensure score is a number
@@ -712,65 +715,89 @@ export default async function handler(req, res) {
         // and only update if the new score is higher
         
         // Helper function to update score only if higher
-        const updateScoreIfHigher = async (key, expireSeconds) => {
-          // Get all current entries for this leaderboard
-          const existingEntries = await redis.zrange(key, 0, -1, { withScores: true });
-          
-          let playerEntryFound = false;
-          let existingScore = 0;
-          let existingMember = null;
-          
-          // Look for existing entry from this player
-          if (existingEntries && existingEntries.length > 0) {
-            for (let i = 0; i < existingEntries.length; i += 2) {
-              try {
-                const member = existingEntries[i];
-                const score = existingEntries[i + 1];
-                const data = JSON.parse(member);
-                
-                // Check if this is the same player (case-insensitive)
-                if (data.username && data.username.toLowerCase() === cleanUsername.toLowerCase()) {
-                  playerEntryFound = true;
-                  existingScore = score;
-                  existingMember = member;
-                  break;
+        const updateScoreIfHigher = async (key, expireSeconds, periodName) => {
+          try {
+            // First check if key exists
+            const keyExists = await redis.exists(key);
+            console.log(`[${periodName}] Key ${key} exists: ${keyExists}`);
+            
+            // Get all current entries for this leaderboard
+            const existingEntries = await redis.zrange(key, 0, -1, { withScores: true });
+            
+            let playerEntryFound = false;
+            let existingScore = 0;
+            let existingMember = null;
+            
+            // Look for existing entry from this player
+            if (existingEntries && existingEntries.length > 0) {
+              for (let i = 0; i < existingEntries.length; i += 2) {
+                try {
+                  const member = existingEntries[i];
+                  const score = existingEntries[i + 1];
+                  const data = JSON.parse(member);
+                  
+                  // Check if this is the same player (case-insensitive)
+                  if (data.username && data.username.toLowerCase() === cleanUsername.toLowerCase()) {
+                    playerEntryFound = true;
+                    existingScore = score;
+                    existingMember = member;
+                    break;
+                  }
+                } catch (e) {
+                  // Skip invalid entries
+                  continue;
                 }
-              } catch (e) {
-                // Skip invalid entries
-                continue;
               }
             }
-          }
-          
-          // If player has an existing score, only update if new score is higher
-          if (playerEntryFound) {
-            if (numericScore > existingScore) {
-              // Remove old entry
-              await redis.zrem(key, existingMember);
-              // Add new entry
-              await redis.zadd(key, { score: numericScore, member: scoreData });
+            
+            // If player has an existing score, only update if new score is higher
+            if (playerEntryFound) {
+              if (numericScore > existingScore) {
+                console.log(`[${periodName}] Updating existing score from ${existingScore} to ${numericScore}`);
+                // Remove old entry
+                await redis.zrem(key, existingMember);
+                // Add new entry
+                await redis.zadd(key, { score: numericScore, member: scoreData });
+              } else {
+                console.log(`[${periodName}] Score ${numericScore} not higher than existing ${existingScore}`);
+                return false; // Indicate score was not updated
+              }
             } else {
-              return false; // Indicate score was not updated
+              console.log(`[${periodName}] Adding new score ${numericScore} for ${cleanUsername}`);
+              // No existing entry, add the new score
+              await redis.zadd(key, { score: numericScore, member: scoreData });
             }
-          } else {
-            // No existing entry, add the new score
-            await redis.zadd(key, { score: numericScore, member: scoreData });
+            
+            // Set expiration if specified
+            if (expireSeconds) {
+              const expireResult = await redis.expire(key, expireSeconds);
+              console.log(`[${periodName}] Set expiration to ${expireSeconds}s: ${expireResult}`);
+            }
+            
+            // Verify the score was added
+            const verifyCount = await redis.zcard(key);
+            console.log(`[${periodName}] Total entries after update: ${verifyCount}`);
+            
+            return true; // Indicate score was updated
+          } catch (error) {
+            console.error(`[${periodName}] Error updating score:`, error);
+            throw error;
           }
-          
-          // Set expiration if specified
-          if (expireSeconds) {
-            await redis.expire(key, expireSeconds);
-          }
-          
-          return true; // Indicate score was updated
         };
         
         // Update each leaderboard
-        const dailyUpdated = await updateScoreIfHigher(keys.daily, 604800); // 7 days
-        const weeklyUpdated = await updateScoreIfHigher(keys.weekly, 2592000); // 30 days
-        const monthlyUpdated = await updateScoreIfHigher(keys.monthly, 7776000); // 90 days
-        const allTimeUpdated = await updateScoreIfHigher(keys.all, null); // no expiry
+        const dailyUpdated = await updateScoreIfHigher(keys.daily, 604800, 'DAILY'); // 7 days
+        const weeklyUpdated = await updateScoreIfHigher(keys.weekly, 2592000, 'WEEKLY'); // 30 days
+        const monthlyUpdated = await updateScoreIfHigher(keys.monthly, 7776000, 'MONTHLY'); // 90 days
+        const allTimeUpdated = await updateScoreIfHigher(keys.all, null, 'ALL-TIME'); // no expiry
         
+        
+        console.log('Update results:', {
+          daily: dailyUpdated,
+          weekly: weeklyUpdated,
+          monthly: monthlyUpdated,
+          allTime: allTimeUpdated
+        });
         
       } catch (zaddError) {
         console.error('Score update operation failed:', zaddError);
@@ -781,7 +808,34 @@ export default async function handler(req, res) {
       // Get player's rank in daily leaderboard
       let dailyRank = null;
       try {
-        dailyRank = await redis.zrevrank(keys.daily, scoreData);
+        // First verify the daily key exists and has entries
+        const dailyCount = await redis.zcard(keys.daily);
+        console.log(`Daily leaderboard (${keys.daily}) has ${dailyCount} entries`);
+        
+        if (dailyCount > 0) {
+          // Try to find the exact member in the sorted set
+          const allDailyScores = await redis.zrange(keys.daily, 0, -1, { rev: true });
+          let foundIndex = -1;
+          
+          for (let i = 0; i < allDailyScores.length; i++) {
+            try {
+              const memberData = JSON.parse(allDailyScores[i]);
+              if (memberData.username.toLowerCase() === cleanUsername.toLowerCase()) {
+                foundIndex = i;
+                break;
+              }
+            } catch (e) {
+              continue;
+            }
+          }
+          
+          if (foundIndex >= 0) {
+            dailyRank = foundIndex;
+            console.log(`Found player at rank ${dailyRank + 1} in daily leaderboard`);
+          } else {
+            console.log('Player not found in daily leaderboard entries');
+          }
+        }
       } catch (rankError) {
         console.error('Failed to get rank:', rankError);
         // Continue anyway - rank is not critical
