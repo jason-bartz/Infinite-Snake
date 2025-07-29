@@ -5367,8 +5367,33 @@
                             <p><strong>Desktop:</strong> Mouse to steer OR WASD keys</p>
                             <p><strong>WASD:</strong> A/D to turn, W to boost</p>
                             <p><strong>Mobile:</strong> Virtual joystick to steer</p>
-                            <p><strong>Boost:</strong> Click/W (Desktop) or tap anywhere (Mobile)</p>
+                            <p><strong>Boost:</strong> Click or W (Desktop)</p>
                             <p><strong>Keyboard:</strong> P to pause, M to mute/unmute</p>
+                        </div>
+                        
+                        <!-- Game Interface Screenshot -->
+                        <div style="text-align: center; margin-bottom: 20px; padding: 15px; background: rgba(120, 40, 248, 0.1); border: 2px solid #7828F8; border-radius: 0;">
+                            <img src="/screenshots/screenshot-captions.png" 
+                                 alt="Infinite Snake Game Interface with UI element callouts" 
+                                 onclick="openPauseImageModal(this.src)"
+                                 style="
+                                    width: 96%;
+                                    max-width: 720px;
+                                    height: auto;
+                                    border: 3px solid #7828F8;
+                                    box-shadow: 
+                                        0 0 0 2px #F828F8,
+                                        0 0 15px rgba(120, 40, 248, 0.5),
+                                        4px 4px 0 rgba(0,0,0,0.5);
+                                    image-rendering: auto;
+                                    cursor: pointer;
+                                    transition: transform 0.2s;
+                                "
+                                onmouseover="this.style.transform='scale(1.02)'"
+                                onmouseout="this.style.transform='scale(1)'">
+                            <p style="margin-top: 10px; color: #A8A8A8; font-size: 10px; text-transform: uppercase; font-family: 'Press Start 2P';">
+                                Labeled UI Elements • Click to enlarge
+                            </p>
                         </div>
                         
                         <div style="margin-bottom: 15px;">
@@ -7042,6 +7067,61 @@
                 location.reload();
             }, 150);
         }
+    </script>
+    
+    <!-- Pause Menu Image Modal -->
+    <div id="pauseImageModal" style="
+        display: none;
+        position: fixed;
+        z-index: 10000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.95);
+        cursor: pointer;
+    " onclick="closePauseImageModal()">
+        <span style="
+            position: absolute;
+            top: 20px;
+            right: 40px;
+            color: #F8F8F8;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: Arial;
+            text-shadow: 0 0 10px rgba(120, 40, 248, 0.8);
+        ">&times;</span>
+        <img id="pauseModalImage" style="
+            margin: auto;
+            display: block;
+            max-width: 90%;
+            max-height: 90%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 4px solid #7828F8;
+            box-shadow: 0 0 30px rgba(120, 40, 248, 0.8);
+        ">
+    </div>
+    
+    <script>
+        function openPauseImageModal(src) {
+            document.getElementById('pauseImageModal').style.display = 'block';
+            document.getElementById('pauseModalImage').src = src;
+        }
+        
+        function closePauseImageModal() {
+            document.getElementById('pauseImageModal').style.display = 'none';
+        }
+        
+        // Close modal on ESC key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape' && document.getElementById('pauseImageModal').style.display === 'block') {
+                closePauseImageModal();
+            }
+        });
     </script>
     
     <!-- Vercel Web Analytics -->
