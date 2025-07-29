@@ -11422,109 +11422,41 @@
                     const collisionDist = SEGMENT_SIZE + orb.size;
                     if (dx * dx + dy * dy < collisionDist * collisionDist) {
                         // Consume the void orb
-                        if (snake.elements.length > 0) {
-                            const elementCount = snake.elements.length;
-                            const points = elementCount * 100;
+                        const elementCount = snake.elements.length;
+                        const points = elementCount * 100;
+                        
+                        // If snake has elements, purge them and gain points
+                        if (elementCount > 0) {
                             snake.score += points;
                             snake.elements = []; // Clear all elements
+                        }
+                        
+                        // Visual feedback - always show initial message
+                        if (snake.isPlayer) {
+                            // Dispatch void orb collected event
+                            dispatchGameEvent('powerupCollected', {
+                                type: 'voidOrb',
+                                elementsPurged: elementCount,
+                                pointsGained: points
+                            });
                             
-                            // Visual feedback
-                            if (snake.isPlayer) {
-                                // Dispatch void orb collected event
-                                dispatchGameEvent('powerupCollected', {
-                                    type: 'voidOrb',
-                                    elementsPurged: elementCount,
-                                    pointsGained: points
-                                });
-                                
-                                showMessage(`<div style="text-align: center">🌀 Void Orb consumed! +${points} points<br><small style="opacity: 0.8">Your elements have been purged to the void</small></div>`, 'info');
+                            if (elementCount > 0) {
+                                showMessage(`<div style="text-align: center">🌀 Void Orb consumed! +${points} points<br>Your elements have been purged to the void</div>`, 'info');
+                            } else {
+                                showMessage(`<div style="text-align: center">🌀 Void Orb consumed!<br>The void whispers...</div>`, 'info');
                             }
-                            
-                            // Play sound at appropriate volume
-                            playVoidOrbSound(snake.isPlayer);
-                            
-                            // Create particle effect
-                            for (let j = 0; j < 15; j++) {
-                                const angle = (j / 15) * Math.PI * 2;
-                                const speed = 2 + Math.random() * 3;
-                                const vx = Math.cos(angle) * speed;
-                                const vy = Math.sin(angle) * speed;
-                                particlePool.spawn(orb.x, orb.y, vx, vy, 'rgba(100, 200, 255, 0.8)');
-                            }
-                            
-                            // 50% chance to spawn a discovery element
-                            if (Math.random() < 0.5) {
-                                gameLogger.debug('VOID ORB', 'Attempting to spawn element...');
-                                
-                                // Get all available elements
-                                let availableElements = [];
-                                if (window.elementLoader && window.elementLoader.isLoaded && window.elementLoader.isLoaded()) {
-                                    // Get all elements and extract their keys
-                                    const allElements = window.elementLoader.getAllElements();
-                                    availableElements = allElements.map(elem => elem.key);
-                                    gameLogger.debug('VOID ORB', 'Using element loader, found', availableElements.length, 'total elements');
-                                } else {
-                                    availableElements = Object.keys(elementDatabase);
-                                    gameLogger.debug('VOID ORB', 'Using legacy database, found', availableElements.length, 'total elements');
-                                }
-                                
-                                // Filter to only discovered elements (except base elements which are always available)
-                                const spawnableElements = availableElements.filter(elemKey => {
-                                    // Always allow base elements (first 4)
-                                    const elemIndex = availableElements.indexOf(elemKey);
-                                    if (elemIndex < 4) return true;
-                                    
-                                    // For other elements, only spawn if discovered
-                                    return discoveredElements.has(elemKey);
-                                });
-                                
-                                // Prioritize elements that can lead to new discoveries
-                                const discoveryPotentialElements = spawnableElements.filter(elemKey => {
-                                    // Check if this element can combine with carried elements for new discoveries
-                                    let hasDiscoveryPotential = false;
-                                    snake.elements.forEach(carried => {
-                                        const result = window.elementLoader ? 
-                                            window.elementLoader.getCombinationByKeys(elemKey, carried) :
-                                            (combinations[`${elemKey}+${carried}`] || combinations[`${carried}+${elemKey}`]);
-                                        if (result && !discoveredElements.has(result.key || result)) {
-                                            hasDiscoveryPotential = true;
-                                        }
-                                    });
-                                    return hasDiscoveryPotential;
-                                });
-                                
-                                // Use discovery potential elements if available, otherwise use any spawnable element
-                                const finalPool = discoveryPotentialElements.length > 0 ? discoveryPotentialElements : spawnableElements;
-                                
-                                gameLogger.debug('VOID ORB', 'Spawnable elements:', spawnableElements.length, 'Discovery potential:', discoveryPotentialElements.length, 'Final pool:', finalPool.length);
-                                
-                                if (finalPool.length > 0) {
-                                    // Pick a random element
-                                    const randomElement = finalPool[Math.floor(Math.random() * finalPool.length)];
-                                    gameLogger.debug('VOID ORB', 'Selected element to spawn:', randomElement);
-                                    
-                                    // Spawn it at a random location near the void orb
-                                    const spawnAngle = Math.random() * Math.PI * 2;
-                                    const spawnDistance = 50 + Math.random() * 100;
-                                    const spawnX = orb.x + Math.cos(spawnAngle) * spawnDistance;
-                                    const spawnY = orb.y + Math.sin(spawnAngle) * spawnDistance;
-                                    
-                                    // Spawn the element with glow effect (using isCatalystSpawned for glow)
-                                    elementPool.spawn(randomElement, spawnX, spawnY, true);
-                                    
-                                    // Show message if player collected the orb
-                                    if (snake.isPlayer) {
-                                        const elementData = window.elementLoader && window.elementLoader.isLoaded && window.elementLoader.isLoaded() 
-                                            ? window.elementLoader.elements.get(randomElement)
-                                            : elementDatabase[randomElement];
-                                        if (elementData) {
-                                            const emoji = window.elementLoader.getEmojiForElement(randomElement, elementData.e);
-                                            const name = elementData.n;
-                                            showMessage(`✨ The void reveals: ${emoji} ${name}!`, 'discovery');
-                                        }
-                                    }
-                                }
-                            }
+                        }
+                        
+                        // Play sound at appropriate volume
+                        playVoidOrbSound(snake.isPlayer);
+                        
+                        // Create particle effect
+                        for (let j = 0; j < 15; j++) {
+                            const angle = (j / 15) * Math.PI * 2;
+                            const speed = 2 + Math.random() * 3;
+                            const vx = Math.cos(angle) * speed;
+                            const vy = Math.sin(angle) * speed;
+                            particlePool.spawn(orb.x, orb.y, vx, vy, 'rgba(100, 200, 255, 0.8)');
                         }
                         
                         // Remove void orb
