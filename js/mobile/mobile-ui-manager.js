@@ -231,31 +231,31 @@ class MobileUIManager {
     setupCollapsibleScoreboard() {
         if (!this.panels.leaderboard) return;
         
-        // Remove any existing mobile headers first
+        // Clean up any existing mobile headers
         const existingMobileHeader = this.panels.leaderboard.querySelector('.mobile-leaderboard-header');
         if (existingMobileHeader) {
             existingMobileHeader.remove();
         }
         
-        // Check if there's already a scoreboard-header from the HTML
+        // Verify existing leaderboard header presence
         const existingHeader = this.panels.leaderboard.querySelector('.leaderboard-header');
         if (!existingHeader) {
             console.warn('[MobileUI] No existing leaderboard header found');
             return;
         }
         
-        // Store reference to the scrollable content  
+        // Cache scrollable content reference  
         const scrollableContent = this.panels.leaderboard.querySelector('.scrollable-content');
         if (!scrollableContent) {
             console.warn('[MobileUI] No scrollable content found in leaderboard');
             return;
         }
         
-        // Remove any existing click handlers by cloning the header
+        // Reset event handlers via node cloning
         const newHeader = existingHeader.cloneNode(true);
         existingHeader.parentNode.replaceChild(newHeader, existingHeader);
         
-        // Apply mobile-specific styles to the existing header
+        // Apply mobile-optimized styling
         newHeader.style.cssText += `
             cursor: pointer !important;
             user-select: none !important;
@@ -264,10 +264,10 @@ class MobileUIManager {
             z-index: 1010 !important;
         `;
         
-        // Set up proper collapse functionality
+        // Configure collapse/expand behavior
         const collapseIcon = newHeader.querySelector('.collapse-icon');
         
-        // Initialize state
+        // Restore persisted collapse state
         const savedState = localStorage.getItem('mobileScoreboardCollapsed');
         const startCollapsed = savedState === 'true';
         
@@ -280,7 +280,7 @@ class MobileUIManager {
             if (collapseIcon) collapseIcon.textContent = '▼';
         }
         
-        // Add click handler
+        // Attach interaction handler
         newHeader.addEventListener('click', (e) => {
             e.stopPropagation();
             e.preventDefault();
@@ -288,13 +288,11 @@ class MobileUIManager {
             const isCollapsed = this.panels.leaderboard.classList.contains('collapsed');
             
             if (isCollapsed) {
-                // Expand
                 this.panels.leaderboard.classList.remove('collapsed');
                 scrollableContent.style.display = 'block';
                 if (collapseIcon) collapseIcon.textContent = '▼';
                 localStorage.setItem('mobileScoreboardCollapsed', 'false');
             } else {
-                // Collapse
                 this.panels.leaderboard.classList.add('collapsed');
                 scrollableContent.style.display = 'none';
                 if (collapseIcon) collapseIcon.textContent = '▲';

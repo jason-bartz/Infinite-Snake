@@ -3,21 +3,20 @@ class Asteroid {
         this.x = x;
         this.y = y;
         
-        // Random asteroid sprite (1-16)
+        // Asteroid sprite selection (1-16)
         this.spriteIndex = Math.floor(Math.random() * 16) + 1;
         
-        // Random size
-        this.size = 30 + Math.random() * 50; // 30-80 pixels
+        // Size initialization (30-80px)
+        this.size = 30 + Math.random() * 50;
         
-        // Random velocity for slow floating
-        this.vx = (Math.random() - 0.5) * 0.3; // -0.15 to 0.15
+        // Floating velocity initialization
+        this.vx = (Math.random() - 0.5) * 0.3;
         this.vy = (Math.random() - 0.5) * 0.3;
         
-        // Random rotation
+        // Rotation initialization
         this.rotation = Math.random() * Math.PI * 2;
-        this.rotationSpeed = (Math.random() - 0.5) * 0.02; // Slow rotation
+        this.rotationSpeed = (Math.random() - 0.5) * 0.02;
         
-        // Preload image
         this.loadImage();
     }
     
@@ -37,14 +36,12 @@ class Asteroid {
     }
     
     update(deltaTime = 1) {
-        // Update position
         this.x += this.vx * deltaTime;
         this.y += this.vy * deltaTime;
         
-        // Update rotation
         this.rotation += this.rotationSpeed * deltaTime;
         
-        // Wrap around the world if asteroid goes too far
+        // World boundary wrapping
         const worldBounds = window.WORLD_SIZE || 25000;
         if (this.x < -worldBounds) this.x = worldBounds;
         if (this.x > worldBounds) this.x = -worldBounds;
@@ -57,13 +54,10 @@ class Asteroid {
         
         ctx.save();
         
-        // Translate to asteroid position
         ctx.translate(screenX, screenY);
         
-        // Rotate
         ctx.rotate(this.rotation);
         
-        // Draw the asteroid
         const halfSize = this.size / 2;
         ctx.drawImage(this.image, -halfSize, -halfSize, this.size, this.size);
         

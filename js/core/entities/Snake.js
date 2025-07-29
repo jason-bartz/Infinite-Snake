@@ -1,5 +1,5 @@
 const FRAME_TIME_MS = 16;
-const STAMINA_DRAIN_RATE = 100 / (6.25 * 60); // Increased boost duration by 25% (from 5 to 6.25 seconds)
+const STAMINA_DRAIN_RATE = 100 / (6.25 * 60); // Stamina depletion rate: 6.25 seconds of boost duration
 const STAMINA_REGEN_RATE = 100 / (2 * 60);
 const STAMINA_REGEN_COOLDOWN = 30;
 const BOOST_SPEED_MULTIPLIER = 1.75;
@@ -13,15 +13,14 @@ const MAX_CHAIN_DEPTH = 3;
 const INITIAL_SNAKE_LENGTH = 10;
 const DEFAULT_MAX_VISIBLE_ELEMENTS = 6;
 
-// Get game constants from window or use defaults
+// Game configuration constants with fallback defaults
 const SNAKE_SPEED = window.SNAKE_SPEED || 4.761;
 const TURN_SPEED = window.TURN_SPEED || 0.08;
 const WORLD_SIZE = window.WORLD_SIZE || 4000;
 const SEGMENT_SIZE = window.SEGMENT_SIZE || 15;
 
-// Note: Global dependencies are accessed from window object directly in the code
 
-// AI Personality definitions
+// AI behavior profiles configuration
 const AI_PERSONALITIES = {
     AGGRESSIVE: {
         name: 'Aggressive',
@@ -93,7 +92,7 @@ const PERSONALITY_COLORS = {
 
 class Snake {
     constructor(x, y, isPlayer = false) {
-        // Ensure global constants are available
+        // Initialize global AI configuration if not present
         if (!window.AI_PERSONALITIES) {
             window.AI_PERSONALITIES = AI_PERSONALITIES;
         }
@@ -155,7 +154,7 @@ class Snake {
         }
     }
     
-    // Compatibility getter/setter for game-original.js which uses 'alive' instead of 'isAlive'
+    // Legacy compatibility for 'alive' property
     get alive() {
         return this.isAlive;
     }
@@ -194,7 +193,7 @@ class Snake {
         
         if (allSkins.length === 0) {
             if (window.usedAISkins) window.usedAISkins.clear();
-            // Keep player's skin in the used set even after clearing
+            // Preserve player skin selection
             if (window.usedAISkins && playerSkin) window.usedAISkins.add(playerSkin);
             const resetSkins = Object.keys(window.skinMetadata || {}).filter(skin => 
                 skin !== 'snake-default-green' && 
@@ -237,7 +236,7 @@ class Snake {
             this.elementMemoryTimer = 0;
             this.voidOrbCooldown = 0;
             
-            // New AI properties for enhanced behavior
+            // Advanced AI state tracking
             this.persistentTarget = null;
             this.persistentTargetTimer = 0;
             this.attackPattern = 0; // Cycles through different attack strategies
@@ -437,28 +436,25 @@ class Snake {
     checkWorldBoundaries() {
         const boundaryMargin = 2;
         
-        // Check if we're hitting any boundary
+        // Boundary collision detection
         const hitLeftBoundary = this.x <= -boundaryMargin;
         const hitRightBoundary = this.x >= WORLD_SIZE + boundaryMargin;
         const hitTopBoundary = this.y <= -boundaryMargin;
         const hitBottomBoundary = this.y >= WORLD_SIZE + boundaryMargin;
         
         if (hitLeftBoundary || hitRightBoundary || hitTopBoundary || hitBottomBoundary) {
-            // In cozy mode, bounce instead of die
+            // Cozy mode: implement bounce mechanics
             if (this.isPlayer && window.gameMode === 'cozy') {
-                // Bounce physics
-                const dampening = 0.85; // Soft bounce feel
-                const angleVariation = (Math.random() - 0.5) * 0.52; // ±15 degrees in radians
+                const dampening = 0.85; // Velocity dampening factor
+                const angleVariation = (Math.random() - 0.5) * 0.52; // Random angle variance (±15°)
                 
-                // Store explosion position before adjusting snake position
                 let explosionX = this.x;
                 let explosionY = this.y;
                 
                 if (hitLeftBoundary || hitRightBoundary) {
-                    // Reverse horizontal component of angle
+                    // Horizontal boundary reflection
                     this.angle = Math.PI - this.angle + angleVariation;
                     
-                    // Adjust position to be inside bounds
                     if (hitLeftBoundary) {
                         this.x = boundaryMargin;
                         explosionX = 0;
@@ -467,15 +463,13 @@ class Snake {
                         explosionX = WORLD_SIZE;
                     }
                     
-                    // Apply dampened speed
                     this.speed = this.speed * dampening;
                 }
                 
                 if (hitTopBoundary || hitBottomBoundary) {
-                    // Reverse vertical component of angle
+                    // Vertical boundary reflection
                     this.angle = -this.angle + angleVariation;
                     
-                    // Adjust position to be inside bounds
                     if (hitTopBoundary) {
                         this.y = boundaryMargin;
                         explosionY = 0;
@@ -484,28 +478,26 @@ class Snake {
                         explosionY = WORLD_SIZE;
                     }
                     
-                    // Apply dampened speed
                     this.speed = this.speed * dampening;
                 }
                 
-                // Normalize angle to 0-2π range
+                // Normalize angle to [0, 2π]
                 while (this.angle < 0) this.angle += Math.PI * 2;
                 while (this.angle > Math.PI * 2) this.angle -= Math.PI * 2;
                 
-                // Create dust impact explosion at boundary contact point
+                // Spawn boundary impact visual effect
                 if (window.explosionManager) {
                     window.explosionManager.createExplosion('dust-impact-small-white', explosionX, explosionY, { 
                         scale: 0.7 
                     });
                 }
                 
-                // Ensure minimum speed to prevent getting stuck
+                // Maintain minimum velocity
                 const minSpeed = SNAKE_SPEED * 0.5;
                 if (this.speed < minSpeed) {
                     this.speed = minSpeed;
                 }
             } else {
-                // Normal death for non-cozy modes or AI snakes
                 this.die();
             }
         }
@@ -982,7 +974,6 @@ class Snake {
             
             // Dispatch player death event immediately when death starts
             if (this.isPlayer) {
-                console.log('[DEATH TRACKING] Dispatching playerDeath event for player');
                 window.dispatchEvent(new CustomEvent('playerDeath', { 
                     detail: { 
                         snake: this,
@@ -990,7 +981,6 @@ class Snake {
                     } 
                 }));
             } else {
-                console.log('[DEATH TRACKING] Not dispatching playerDeath - isPlayer:', this.isPlayer);
             }
             
             if (isBossDeath && this.isPlayer) {
@@ -1032,7 +1022,7 @@ class Snake {
         const elementsToSpawn = this.elements.length;
         if (elementsToSpawn === 0 || !this.segments || this.segments.length === 0) return;
         
-        // Calculate spacing between elements based on snake length
+        // Element spacing calculation based on snake length
         const segmentSpacing = Math.max(1, Math.floor(this.segments.length / elementsToSpawn));
         
         for (let i = 0; i < elementsToSpawn; i++) {
@@ -1044,7 +1034,7 @@ class Snake {
                 continue;
             }
             
-            // Add small random offset to prevent exact overlap
+            // Apply position variance to avoid overlap
             const smallOffset = 10;
             const offsetX = (Math.random() - 0.5) * smallOffset;
             const offsetY = (Math.random() - 0.5) * smallOffset;
@@ -1256,7 +1246,7 @@ class Snake {
             if (screen.x < -margin || screen.x > window.canvas.width + margin ||
                 screen.y < -margin || screen.y > window.canvas.height + margin) continue;
             
-            // Calculate tapered size for this segment
+            // Segment size tapering calculation
             const segmentProgress = i / (this.segments.length - 1); // 0 at head, 1 at tail
             
             // Use a more gradual tapering curve
@@ -1371,14 +1361,14 @@ class Snake {
         
         const personalityColor = this.personalityColor || '#ffffff';
         
-        // Get display name (remove personality prefix for AI snakes)
+        // Extract display name without AI personality prefix
         let displayName = this.name;
         if (!this.isPlayer && this.personality) {
             const personalityPrefix = this.personality.name + ' ';
             displayName = this.name.substring(personalityPrefix.length);
         }
         
-        // Check for invincibility effect (not in cozy mode)
+        // Invincibility effect validation (disabled in cozy mode)
         if (this.isPlayer && this.invincibilityTimer > 0 && window.gameMode !== 'cozy') {
             // Save context state
             window.ctx.save();
@@ -1448,7 +1438,7 @@ class Snake {
         const personality = this.personality;
         const currentTime = Date.now();
         
-        // Update timers
+        // Timer state updates
         if (this.panicMode) {
             this.panicTimer--;
             if (this.panicTimer <= 0) {
@@ -1472,7 +1462,7 @@ class Snake {
             this.voidOrbCooldown--;
         }
         
-        // Update persistent target tracking
+        // Persistent target state management
         if (this.persistentTargetTimer > 0) {
             this.persistentTargetTimer--;
             if (this.persistentTargetTimer <= 0) {
@@ -1485,10 +1475,10 @@ class Snake {
             this.playerSearchCooldown--;
         }
         
-        // Update aggression level based on length
+        // Dynamic aggression scaling
         this.aggressionLevel = Math.min(1.0, this.length / 100);
         
-        // Get all threats and targets
+        // Threat and target assessment
         const threats = this.assessThreats();
         const targets = this.findTargets();
         
@@ -1556,7 +1546,7 @@ class Snake {
             this.isBoosting = false;
         }
         
-        // Check if we should use void orb
+        // Void orb activation logic
         if (this.elements.length >= this.maxVisibleElements - 1) {
             this.checkVoidOrbUsage();
         }
@@ -1581,10 +1571,10 @@ class Snake {
             const distance = Math.hypot(snake.x - this.x, snake.y - this.y);
             const sizeRatio = snake.length / mySize;
             
-            // Check head collision danger
+            // Head collision risk assessment
             const headDanger = distance < personality.dangerZoneRadius && sizeRatio > personality.fleeThreshold;
             
-            // Check body collision danger
+            // Body collision risk assessment
             let bodyDanger = false;
             for (const segment of snake.segments) {
                 const segDist = Math.hypot(segment.x - this.x, segment.y - this.y);
@@ -1631,7 +1621,7 @@ class Snake {
         const mySize = this.length;
         const personality = this.personality;
         
-        // Find huntable snakes
+        // Identify valid snake targets
         if (window.snakes) {
             for (const snake of window.snakes) {
                 if (snake === this || !snake.isAlive) continue;
@@ -1671,7 +1661,7 @@ class Snake {
             targets.playerTargets.sort((a, b) => b.priority - a.priority);
         }
         
-        // Find nearby elements
+        // Locate collectible elements
         if (window.elements) {
             for (const element of window.elements) {
                 const distance = Math.hypot(element.x - this.x, element.y - this.y);
@@ -1687,7 +1677,7 @@ class Snake {
             targets.elements.sort((a, b) => a.distance - b.distance);
         }
         
-        // Find void orbs
+        // Locate void orb powerups
         if (window.voidOrbs) {
             for (const orb of window.voidOrbs) {
                 const distance = Math.hypot(orb.x - this.x, orb.y - this.y);
@@ -1721,7 +1711,7 @@ class Snake {
         
         // Aggressive personality - ALWAYS hunt players if available
         if (personality.name === 'Aggressive') {
-            // Check if we have a valid persistent target
+            // Persistent target validation
             let target = null;
             if (this.persistentTarget && this.persistentTarget.isAlive) {
                 // Verify the persistent target is still valid
@@ -1735,9 +1725,8 @@ class Snake {
                     isPlayer: this.persistentTarget.isPlayer
                 };
             } else if (targets.playerTargets.length > 0) {
-                // Get new player target
+                // Acquire player target
                 target = targets.playerTargets[0];
-                // Set as persistent target
                 this.persistentTarget = target.snake;
                 this.persistentTargetTimer = 500; // Track for 500 frames (~8 seconds)
                 this.lastTargetPosition = { x: target.snake.x, y: target.snake.y };
@@ -1818,7 +1807,7 @@ class Snake {
     }
     
     calculateEvasionAngle(threats) {
-        // Calculate average danger direction
+        // Compute weighted danger vector
         let dangerX = 0;
         let dangerY = 0;
         
@@ -1874,7 +1863,7 @@ class Snake {
         // If we're on the circle, follow the spiral
         const tangentAngle = this.encirclePhase + Math.PI / 2;
         
-        // Add inward pressure to tighten the spiral
+        // Apply centripetal force for spiral tightening
         const inwardAngle = Math.atan2(targetSnake.y - this.y, targetSnake.x - this.x);
         const spiralAngle = tangentAngle * 0.8 + inwardAngle * 0.2;
         
@@ -1951,7 +1940,7 @@ class Snake {
         const interceptX = targetSnake.x + targetVx * t;
         const interceptY = targetSnake.y + targetVy * t;
         
-        // Add slight adjustment for head collision
+        // Apply collision avoidance adjustment
         const adjustmentAngle = Math.atan2(targetVy, targetVx);
         const adjustedX = interceptX + Math.cos(adjustmentAngle + Math.PI/2) * 20;
         const adjustedY = interceptY + Math.sin(adjustmentAngle + Math.PI/2) * 20;

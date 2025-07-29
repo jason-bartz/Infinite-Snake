@@ -1,5 +1,7 @@
-// WebGL Renderer for Infinite Snake
-// Provides hardware-accelerated rendering with Canvas2D fallback
+/**
+ * WebGL Renderer for Infinite Snake
+ * Hardware-accelerated rendering with Canvas2D fallback support
+ */
 
 class WebGLRenderer {
     constructor(canvas) {
@@ -8,16 +10,16 @@ class WebGLRenderer {
         this.ctx2d = null;
         this.isWebGL = false;
         
-        // Shader programs
+        // WebGL shader program storage
         this.programs = {};
         
-        // Texture management
+        // Texture resource management
         this.textures = {};
         this.textureAtlas = null;
         
-        // Batch rendering
+        // Batch rendering buffer
         this.batchData = {
-            vertices: new Float32Array(65536), // Pre-allocated for performance
+            vertices: new Float32Array(65536), // Pre-allocated vertex buffer
             uvs: new Float32Array(65536),
             colors: new Float32Array(65536),
             indices: new Uint16Array(32768),
@@ -25,11 +27,11 @@ class WebGLRenderer {
             vertexCount: 0
         };
         
-        // Matrix stack for transformations
+        // Transformation matrix stack
         this.matrixStack = [];
         this.currentMatrix = this.createMatrix();
         
-        // Performance metrics
+        // Rendering performance counters
         this.metrics = {
             drawCalls: 0,
             triangles: 0,
@@ -40,7 +42,7 @@ class WebGLRenderer {
     }
     
     init() {
-        // Try to create WebGL2 context first, fall back to WebGL1
+        // Initialize WebGL2 context with fallback to WebGL1
         try {
             this.gl = this.canvas.getContext('webgl2', {
                 alpha: false,

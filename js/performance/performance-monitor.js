@@ -7,7 +7,7 @@ class PerformanceMonitor {
         this.renderTimes = [];
         this.maxSamples = 60;
         
-        // Performance metrics
+        // Performance tracking metrics
         this.metrics = {
             fps: 0,
             avgRenderTime: 0,
@@ -20,14 +20,14 @@ class PerformanceMonitor {
             domUpdates: 0
         };
         
-        // Browser detection
+        // Browser environment detection
         this.isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
         this.isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
         
-        // Performance marks
+        // Performance timing marks
         this.marks = new Map();
         
-        // Initialize display if in development
+        // Development mode: initialize performance overlay
         if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
             this.initDisplay();
         }
@@ -54,7 +54,7 @@ class PerformanceMonitor {
         document.body.appendChild(display);
         this.display = display;
         
-        // Toggle with keyboard shortcut (Shift + P)
+        // Performance overlay toggle: Shift+P
         document.addEventListener('keydown', (e) => {
             if (e.shiftKey && e.key === 'P') {
                 this.toggleDisplay();

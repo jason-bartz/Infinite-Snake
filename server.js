@@ -4,7 +4,7 @@ const path = require('path');
 
 const PORT = 8080;
 
-// Ensure the elements data directory exists
+// Create elements data directory if missing
 const elementsDataDir = path.join(__dirname, 'elements/data');
 if (!fs.existsSync(elementsDataDir)) {
   fs.mkdirSync(elementsDataDir, { recursive: true });
@@ -23,7 +23,7 @@ const mimeTypes = {
   '.webp': 'image/webp'
 };
 
-// Store for custom elements and combinations
+// Custom game data storage
 let customData = {
   elements: {},
   combinations: {},
@@ -32,7 +32,7 @@ let customData = {
   deletedCombinations: []
 };
 
-// Load custom data on startup
+// Initialize custom data from persistent storage
 try {
   const customElementsPath = path.join(__dirname, 'elements', 'elements-custom.json');
   if (fs.existsSync(customElementsPath)) {

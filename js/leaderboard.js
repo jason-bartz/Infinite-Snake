@@ -1,15 +1,15 @@
-// js/leaderboard.js - Leaderboard Client (Upstash Redis)
-// Handles score submission and leaderboard data retrieval
+/**
+ * Leaderboard Client - Upstash Redis Integration
+ * Manages score submission and leaderboard data retrieval
+ */
 
-// Use global gameLogger since this module is loaded dynamically
 const gameLogger = window.gameLogger || console;
 
 const API_ENDPOINT = '/api/leaderboard';
 
-// Feature flag to disable leaderboard when API is unavailable
 let LEADERBOARD_ENABLED = true;
 
-// Cache for leaderboard data to reduce API calls
+// Leaderboard data caching to minimize API requests
 let leaderboardCache = {
   daily: { data: null, timestamp: 0 },
   weekly: { data: null, timestamp: 0 },
@@ -17,13 +17,15 @@ let leaderboardCache = {
   all: { data: null, timestamp: 0 }
 };
 
-const CACHE_DURATION = 30000; // 30 seconds
+const CACHE_DURATION = 30000; // Cache TTL: 30 seconds
 
-// Initialize leaderboard system
+/**
+ * Initialize leaderboard system and test API connectivity
+ * @returns {Promise<boolean>} Connection status
+ */
 export async function initializeLeaderboard() {
-  // Leaderboard system initializing
   
-  // Test API connection
+  // API connectivity test
   try {
     const response = await fetch(`${API_ENDPOINT}?limit=1`);
     if (response.ok) {
@@ -37,14 +39,26 @@ export async function initializeLeaderboard() {
   return false;
 }
 
-// Start game session (kept for compatibility)
+/**
+ * Start game session - Legacy compatibility method
+ * @returns {Promise<string>} Session identifier
+ */
 export async function startGameSession() {
   const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   gameLogger.debug('LEADERBOARD', 'Game session started:', sessionId);
   return sessionId;
 }
 
-// Submit score to leaderboard
+/**
+ * Submit player score to leaderboard
+ * @param {string} username - Player name
+ * @param {number} score - Final score
+ * @param {number} elementsDiscovered - Total elements discovered
+ * @param {number} playTime - Game duration in seconds
+ * @param {number} kills - Total eliminations
+ * @param {string} skin - Player skin identifier
+ * @returns {Promise<Object>} Submission result with rankings
+ */
 export async function submitScore(username, score, elementsDiscovered, playTime, kills, skin) {
   try {
     if (!LEADERBOARD_ENABLED) {

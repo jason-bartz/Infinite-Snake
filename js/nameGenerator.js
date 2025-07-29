@@ -1,4 +1,7 @@
-// Random Name Generator for Infinite Snake
+/**
+ * Name Generator for Infinite Snake
+ * Generates random snake names and death messages
+ */
 class NameGenerator {
     constructor() {
         this.firstNames = [

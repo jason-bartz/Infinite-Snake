@@ -248,11 +248,11 @@ class Boss extends Snake {
         this.specialAttackCounter++;
         
         if (this.bossType === 'zephyrus') {
-            // Alternate between vacuum and tornado attacks
+            // Cycle between vacuum and tornado attack patterns
             if (this.specialAttackCounter % this.vacuumAttackInterval === 0) {
                 this.createVacuumAttack();
             } else if (this.specialAttackCounter % 60 === 0) {
-                // Dispatch tornados every 60 frames (1 second)
+                // Tornado deployment at 1-second intervals
                 this.dispatchTornado();
             } else {
                 this.createProjectileAttack();
