@@ -3873,7 +3873,10 @@
                 // Draw boost trail effect (desktop only)
                 if (!isMobile && this.isBoosting && this.segments && this.segments.length > 1) {
                     ctx.save();
-                    ctx.globalAlpha = 0.3;
+                    ctx.globalAlpha = 0.2; // Reduced opacity for subtler effect
+                    
+                    // Set up composition mode to prevent artifacts
+                    ctx.globalCompositeOperation = 'destination-over'; // Draw behind the snake
                     
                     // Draw speed lines
                     for (let i = 0; i < 3; i++) {
@@ -3891,11 +3894,14 @@
                         }
                         
                         const gradient = ctx.createLinearGradient(screenX1, screenY1, screenX2, screenY2);
-                        gradient.addColorStop(0, this.isPlayer ? 'rgba(100, 200, 255, 0.6)' : 'rgba(255, 100, 100, 0.6)');
+                        gradient.addColorStop(0, this.isPlayer ? 'rgba(100, 200, 255, 0.4)' : 'rgba(255, 100, 100, 0.4)');
                         gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
                         
                         ctx.strokeStyle = gradient;
-                        ctx.lineWidth = SEGMENT_SIZE * 2 - i * 5;
+                        // Fixed line width calculation - removed size multiplier from base calculation
+                        const baseWidth = SEGMENT_SIZE * cameraZoom;
+                        ctx.lineWidth = Math.max(1, baseWidth * (1.5 - i * 0.3)); // Tapered effect
+                        ctx.lineCap = 'round';
                         ctx.beginPath();
                         ctx.moveTo(screenX1, screenY1);
                         ctx.lineTo(screenX2, screenY2);
@@ -9874,6 +9880,69 @@
             // lastSubmissionTime = 0; // REMOVED to prevent multiple submissions
         }
         
+        // Show game over screen for infinite mode
+        function showInfiniteGameOverScreen() {
+            gameLogger.info('GAME OVER', 'Showing game over screen for infinite mode');
+            
+            // Save player stats before they get cleared
+            const finalScore = playerSnake ? playerSnake.score : 0;
+            const finalDiscoveries = playerDiscoveredElements ? playerDiscoveredElements.size : 0;
+            const finalKills = playerSnake ? playerSnake.kills : 0;
+            
+            // Submit score to leaderboard  
+            let isSubmitting = true;
+            let dailyRank = null;
+            
+            if (finalScore > 0 && canSubmitScore()) {
+                const playerName = localStorage.getItem('playerName') || 'Anonymous';
+                const playTime = gameSessionStartTime ? Math.floor((Date.now() - gameSessionStartTime) / 1000) : 0;
+                
+                if (window.leaderboardModule && window.leaderboardModule.submitScore) {
+                    window.leaderboardModule.submitScore(
+                        playerName,
+                        Math.floor(finalScore),
+                        finalDiscoveries,
+                        playTime,
+                        finalKills,
+                        window.currentPlayerSkin || 'snake-default-green'
+                    ).then(result => {
+                        dailyRank = result;
+                        markScoreSubmitted();
+                        isSubmitting = false;
+                        // Re-render screen with rank
+                        const updateBtn = document.getElementById('permaDeathScreen');
+                        if (updateBtn) {
+                            updateGameOverScreen();
+                        }
+                    }).catch(() => {
+                        isSubmitting = false;
+                    });
+                } else {
+                    isSubmitting = false;
+                }
+            } else {
+                isSubmitting = false;
+            }
+            
+            // Update best stats
+            const bestScore = parseInt(localStorage.getItem('bestScore') || '0');
+            const bestDiscoveries = parseInt(localStorage.getItem('bestDiscoveries') || '0');
+            const bestKills = parseInt(localStorage.getItem('bestKills') || '0');
+            
+            if (finalScore > bestScore) {
+                localStorage.setItem('bestScore', finalScore);
+            }
+            if (finalDiscoveries > bestDiscoveries) {
+                localStorage.setItem('bestDiscoveries', finalDiscoveries);
+            }
+            if (finalKills > bestKills) {
+                localStorage.setItem('bestKills', finalKills);
+            }
+            
+            // Now call handlePermadeath which will show the screen with proper buttons
+            handlePermadeath();
+        }
+        
         // Handle permadeath in Classic mode
         function handlePermadeath() {
             gameLogger.info('PERMADEATH', 'Handling permadeath - final game over in classic mode');
@@ -10124,7 +10193,59 @@
                             }
                         </div>
                         
-                        <button onclick="window.returnToMainMenu()" style="
+                        ${gameMode === 'infinite' ? `
+                        <div style="display: flex; gap: 20px; justify-content: center;">
+                            <button id="gameOverRespawnBtn" style="
+                                padding: 12px 32px;
+                                font-size: 10px;
+                                background: var(--snes-cosmic-teal);
+                                color: var(--snes-black);
+                                border: 4px solid;
+                                border-color: #28F8F8 #0078A8 #0078A8 #28F8F8;
+                                box-shadow: 
+                                    inset 2px 2px 0 rgba(255, 255, 255, 0.3),
+                                    inset -2px -2px 0 rgba(0, 0, 0, 0.3),
+                                    4px 4px 0 rgba(0, 0, 0, 0.5);
+                                cursor: pointer;
+                                text-transform: uppercase;
+                                letter-spacing: 1px;
+                                font-family: 'Press Start 2P', monospace;
+                                transition: none;
+                                position: relative;
+                                top: 0;
+                                -webkit-touch-callout: none;
+                                -webkit-user-select: none;
+                                user-select: none;
+                            ">
+                                RESPAWN
+                            </button>
+                            <button id="gameOverMainMenuBtn" style="
+                                padding: 12px 32px;
+                                font-size: 10px;
+                                background: var(--snes-cosmic-purple);
+                                color: var(--snes-white);
+                                border: 4px solid;
+                                border-color: var(--snes-cosmic-pink) var(--snes-dark-purple) var(--snes-dark-purple) var(--snes-cosmic-pink);
+                                box-shadow: 
+                                    inset 2px 2px 0 var(--snes-cosmic-teal),
+                                    inset -2px -2px 0 var(--snes-dark-blue),
+                                    4px 4px 0 rgba(0, 0, 0, 0.5);
+                                cursor: pointer;
+                                text-transform: uppercase;
+                                letter-spacing: 1px;
+                                font-family: 'Press Start 2P', monospace;
+                                transition: none;
+                                position: relative;
+                                top: 0;
+                                -webkit-touch-callout: none;
+                                -webkit-user-select: none;
+                                user-select: none;
+                            ">
+                                MAIN MENU
+                            </button>
+                        </div>
+                        ` : `
+                        <button id="gameOverMainMenuBtn" style="
                             padding: 12px 32px;
                             font-size: 10px;
                             background: var(--snes-cosmic-purple);
@@ -10142,13 +10263,13 @@
                             transition: none;
                             position: relative;
                             top: 0;
-                        "
-                        onmousedown="this.style.top='2px'; this.style.boxShadow='0 0 20px rgba(248, 40, 248, 0.6), inset 2px 2px 0 rgba(255, 255, 255, 0.3), inset -2px -2px 0 rgba(0, 0, 0, 0.3), 0 0 0 2px #000';"
-                        onmouseup="this.style.top='0'; this.style.boxShadow='0 0 20px rgba(248, 40, 248, 0.6), inset 2px 2px 0 rgba(255, 255, 255, 0.3), inset -2px -2px 0 rgba(0, 0, 0, 0.3), 0 0 0 2px #000';"
-                        onmouseleave="this.style.top='0'; this.style.boxShadow='0 0 20px rgba(248, 40, 248, 0.6), inset 2px 2px 0 rgba(255, 255, 255, 0.3), inset -2px -2px 0 rgba(0, 0, 0, 0.3), 0 0 0 2px #000';"
-                        >
+                            -webkit-touch-callout: none;
+                            -webkit-user-select: none;
+                            user-select: none;
+                        ">
                             New Game
                         </button>
+                        `}
                     </div>
                 `;
                 
@@ -10175,6 +10296,75 @@
                     `;
                     gameOverScreen.appendChild(crtDiv);
                 }
+                
+                // Add event listeners for Safari compatibility
+                setTimeout(() => {
+                    // Main menu button
+                    const mainMenuBtn = document.getElementById('gameOverMainMenuBtn');
+                    if (mainMenuBtn) {
+                        // Remove any existing listeners
+                        mainMenuBtn.replaceWith(mainMenuBtn.cloneNode(true));
+                        const newMainMenuBtn = document.getElementById('gameOverMainMenuBtn');
+                        
+                        // Add click handler with multiple event types for Safari
+                        newMainMenuBtn.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            window.returnToMainMenu();
+                        }, { capture: true });
+                        
+                        // Add touch handler for iOS Safari
+                        newMainMenuBtn.addEventListener('touchend', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            window.returnToMainMenu();
+                        }, { capture: true });
+                        
+                        // Visual feedback
+                        newMainMenuBtn.addEventListener('mousedown', function() {
+                            this.style.top = '2px';
+                            this.style.boxShadow = '0 0 20px rgba(248, 40, 248, 0.6), inset 2px 2px 0 rgba(255, 255, 255, 0.3), inset -2px -2px 0 rgba(0, 0, 0, 0.3), 0 0 0 2px #000';
+                        });
+                        
+                        newMainMenuBtn.addEventListener('mouseup', function() {
+                            this.style.top = '0';
+                            this.style.boxShadow = 'inset 2px 2px 0 var(--snes-cosmic-teal), inset -2px -2px 0 var(--snes-dark-blue), 4px 4px 0 rgba(0, 0, 0, 0.5)';
+                        });
+                    }
+                    
+                    // Respawn button for infinite mode
+                    const respawnBtn = document.getElementById('gameOverRespawnBtn');
+                    if (respawnBtn) {
+                        // Remove any existing listeners
+                        respawnBtn.replaceWith(respawnBtn.cloneNode(true));
+                        const newRespawnBtn = document.getElementById('gameOverRespawnBtn');
+                        
+                        // Add click handler
+                        newRespawnBtn.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            window.handleGameOverRespawn();
+                        }, { capture: true });
+                        
+                        // Add touch handler for iOS Safari
+                        newRespawnBtn.addEventListener('touchend', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            window.handleGameOverRespawn();
+                        }, { capture: true });
+                        
+                        // Visual feedback
+                        newRespawnBtn.addEventListener('mousedown', function() {
+                            this.style.top = '2px';
+                            this.style.boxShadow = '0 0 20px rgba(40, 248, 248, 0.6), inset 2px 2px 0 rgba(255, 255, 255, 0.3), inset -2px -2px 0 rgba(0, 0, 0, 0.3), 0 0 0 2px #000';
+                        });
+                        
+                        newRespawnBtn.addEventListener('mouseup', function() {
+                            this.style.top = '0';
+                            this.style.boxShadow = 'inset 2px 2px 0 rgba(255, 255, 255, 0.3), inset -2px -2px 0 rgba(0, 0, 0, 0.3), 4px 4px 0 rgba(0, 0, 0, 0.5)';
+                        });
+                    }
+                }, 100); // Small delay to ensure DOM is ready
             }
             
             // Initial render
@@ -10281,6 +10471,49 @@
             
             // Reset game state
             location.reload(); // Simple reload to return to main menu
+        }
+        
+        // Handle respawn from game over screen (infinite mode)
+        window.handleGameOverRespawn = function() {
+            playUISound();
+            gameLogger.debug('RESPAWN', 'handleGameOverRespawn called from game over screen');
+            
+            // Remove game over screen
+            const gameOverScreen = document.getElementById('permaDeathScreen');
+            if (gameOverScreen) {
+                gameOverScreen.remove();
+            }
+            
+            // Set respawn flags
+            window.isReviving = true;
+            isRespawning = true;
+            deathProcessed = false;
+            waitingForRespawnInput = false;
+            window.waitingForRespawnInput = false;
+            
+            // Force end death sequence if still active
+            if (deathSequenceActive) {
+                deathSequenceActive = false;
+                deathCameraAnimation.active = false;
+                cameraZoom = isMobile ? 0.916 : 1.15;
+            }
+            
+            // Trigger immediate respawn
+            playerRespawnTimer = -1;
+            
+            // Reset session tracking for new game
+            gameSessionStartTime = Date.now();
+            
+            // Create new player snake
+            if (!playerSnake || !playerSnake.alive) {
+                createPlayerSnake();
+            }
+            
+            // Restart the game
+            if (!gameStarted) {
+                gameStarted = true;
+                gameLoop();
+            }
         }
         
         // Country code to flag emoji mapping
@@ -10915,7 +11148,7 @@
                 const invincibilityText = document.getElementById('invincibilityText');
                 if (invincibilityText) {
                     const secondsRemaining = Math.ceil(playerSnake.invincibilityTimer / 1000);
-                    invincibilityText.textContent = `INVC: ${secondsRemaining}`;
+                    invincibilityText.textContent = `INVC: ${secondsRemaining}s..`;
                     invincibilityText.style.display = 'block';
                 }
             } else {
@@ -15027,6 +15260,7 @@
         window.drawBackground = drawBackground;
         window.spawnElement = spawnElement;
         window.createDeathParticles = createDeathParticles;
+        window.showInfiniteGameOverScreen = showInfiniteGameOverScreen;
         
         // Console commands for element bank management
         window.addElementBankSlots = function(count = 1) {

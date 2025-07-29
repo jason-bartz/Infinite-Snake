@@ -6,14 +6,14 @@
 /* Base two-row grid container - STRICT 2 ROWS */
 .element-collection-bar.two-rows {
     display: grid !important;
-    gap: 4px !important;
+    gap: 8px 4px !important; /* Increased vertical gap from 4px to 8px to prevent overlapping */
     justify-content: center !important;
     align-items: start !important;
     width: auto !important;
     margin: 0 auto !important;
     padding: 0 20px !important;
     box-sizing: border-box !important;
-    max-height: calc(2 * 64px + 4px) !important; /* Enforce 2 rows max for desktop */
+    max-height: calc(2 * 64px + 8px) !important; /* Updated to match new gap */
 }
 
 /* 9 slots: 5 on top, 4 on bottom (centered) */
@@ -99,7 +99,7 @@
 
 /* Mobile base container */
 body.mobile .element-collection-bar.two-rows {
-    max-height: calc(2 * 48px + 4px) !important; /* Enforce 2 rows max for mobile */
+    max-height: calc(2 * 48px + 8px) !important; /* Updated to match new gap */
     padding: 0 15px !important;
 }
 
