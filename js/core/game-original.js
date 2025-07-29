@@ -1,3 +1,4 @@
+        console.log('[DEBUG] game-original.js loading - version 1.9.5');
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
                         || ('ontouchstart' in window && navigator.maxTouchPoints > 0);
         
@@ -836,7 +837,7 @@
         let elementGrid = new Map();
         const MIN_ELEMENTS_PER_CELL = 2;
         const MAX_ELEMENTS_PER_CELL = 5;
-        const TARGET_ELEMENT_COUNT = isMobile ? 100 : 200;
+        const TARGET_ELEMENT_COUNT = isMobile ? 90 : 180;
         
         let snakeNameData = null;
         
@@ -1748,6 +1749,8 @@
         
         // Game mode selection
         function selectGameMode(mode) {
+            console.log('[DEBUG] selectGameMode called with:', mode);
+            
             // On mobile, only allow cozy mode
             if (isMobile && mode !== 'cozy') {
                 return; // Don't allow selection of other modes
@@ -1756,6 +1759,7 @@
             playUISound();
             gameMode = mode;
             window.gameMode = gameMode; // Expose globally for Snake.js access
+            console.log('[DEBUG] Game mode set to:', gameMode);
             
             // Classic mode has no target, ends on permadeath
             // Infinite mode has no target, continues forever
@@ -3548,6 +3552,17 @@
                     this.isDying = true;
                     this.deathAnimationTimer = 0;
                     this.speed = 0; // Stop movement during death
+                    
+                    // Dispatch player death event immediately when death starts
+                    if (this.isPlayer) {
+                        console.log('[DEATH TRACKING] Dispatching playerDeath event for player');
+                        window.dispatchEvent(new CustomEvent('playerDeath', { 
+                            detail: { 
+                                snake: this,
+                                isBossDeath: isBossDeath 
+                            } 
+                        }));
+                    }
                     
                     // Sound will play with pixel explosion at 600ms
                     
@@ -12713,7 +12728,8 @@
             window.firstPlaceAchievedThisGame = false;
             
             // Dispatch game start event
-            dispatchGameEvent('gameStart', { timestamp: gameStartTime });
+            console.log('[DEBUG] Game starting with mode:', gameMode);
+            dispatchGameEvent('gameStart', { timestamp: gameStartTime, mode: gameMode });
             
             // Notify unlock manager that game has started
             if (window.unlockManager && window.unlockManager.onGameStart) {
@@ -12992,9 +13008,23 @@
         }
         
         function togglePause() {
+            console.log('[DEBUG] togglePause called, gameStarted:', gameStarted);
             if (!gameStarted) return;
             paused = !paused;
-            document.getElementById('pauseOverlay').style.display = paused ? 'flex' : 'none';
+            console.log('[DEBUG] Paused state:', paused);
+            const pauseOverlay = document.getElementById('pauseOverlay');
+            console.log('[DEBUG] pauseOverlay element:', pauseOverlay);
+            if (pauseOverlay) {
+                pauseOverlay.style.display = paused ? 'flex' : 'none';
+                if (paused) {
+                    // Log all buttons in the pause menu
+                    const buttons = pauseOverlay.querySelectorAll('button');
+                    console.log('[DEBUG] Buttons in pause menu:', buttons.length);
+                    buttons.forEach((btn, i) => {
+                        console.log(`[DEBUG] Button ${i}:`, btn.textContent, 'onclick:', btn.onclick);
+                    });
+                }
+            }
             
             // Update music button state
             if (paused) {
@@ -13038,6 +13068,50 @@
             playUISound();
             paused = false;
             document.getElementById('pauseOverlay').style.display = 'none';
+        }
+        
+        // Function to properly end the game and record stats
+        window.endGame = function() {
+            // Get the player snake if it exists
+            const playerSnake = snakes.find(s => s.isPlayer);
+            const finalScore = playerSnake ? playerSnake.score : 0;
+            
+            // Dispatch game end event with current game mode
+            dispatchGameEvent('gameEnd', {
+                score: finalScore,
+                mode: gameMode, // This is the critical part for tracking mode-specific games
+                discoveries: playerSnake ? playerSnake.discoveries : 0,
+                kills: playerSnake ? playerSnake.kills : 0,
+                playTime: gameSessionStartTime ? Math.floor((Date.now() - gameSessionStartTime) / 1000) : 0,
+                finalRank: snakes.filter(s => s.alive).length + 1
+            });
+            
+            // Mark game as ended
+            gameStarted = false;
+            window.gameStarted = false;
+        }
+        
+        // Manual function to record a cozy game for testing
+        window.recordCozyGame = function() {
+            if (window.playerStats) {
+                window.playerStats.recordGameEnd(0, 'cozy');
+                console.log('Cozy game recorded. Current count:', window.playerStats.getGamesPlayedByMode('cozy'));
+            } else {
+                console.log('PlayerStats not available');
+            }
+        }
+        
+        // Check cozy game stats
+        window.checkCozyStats = function() {
+            if (window.playerStats) {
+                const stats = window.playerStats.stats.stats.lifetime.gamesPlayedByMode;
+                console.log('Game mode stats:', stats);
+                console.log('Cozy games played:', stats.cozy || 0);
+                console.log('Current game mode:', gameMode);
+                console.log('Game started:', gameStarted);
+            } else {
+                console.log('PlayerStats not available');
+            }
         }
         
         // Debug command for element bank issues
@@ -13668,7 +13742,18 @@
                     
                     if (progress && progress.max > 0) {
                         progressBarEl.style.width = `${(progress.current / progress.max) * 100}%`;
-                        progressTextEl.textContent = `${progress.current}/${progress.max}`;
+                        
+                        // Format progress text based on criteria type
+                        let currentDisplay = progress.current;
+                        let maxDisplay = progress.max;
+                        
+                        // Round time-based metrics to nearest minute
+                        if (skinData.unlockCriteria && skinData.unlockCriteria.type === 'playTime') {
+                            currentDisplay = Math.ceil(progress.current);
+                            maxDisplay = Math.ceil(progress.max);
+                        }
+                        
+                        progressTextEl.textContent = `${currentDisplay}/${maxDisplay}`;
                     } else {
                         progressBarEl.style.width = '0%';
                         progressTextEl.textContent = '0/0';
@@ -14244,6 +14329,9 @@
                         // Get the first available AI snake data
                         const [snakeId, snakeData] = aiSnakeDataMap.entries().next().value;
                         
+                        // Remove the temporarily assigned skin from usedAISkins
+                        usedAISkins.delete(newAISnake.skin);
+                        
                         // Restore the AI snake's score and stats (no penalty for AI)
                         newAISnake.score = snakeData.score;
                         newAISnake.kills = snakeData.kills;
@@ -14256,6 +14344,9 @@
                         }
                         newAISnake.name = snakeData.name;
                         newAISnake.skin = snakeData.skin;
+                        
+                        // Add the restored skin back to usedAISkins
+                        usedAISkins.add(snakeData.skin);
                         
                         // Remove used data
                         aiSnakeDataMap.delete(snakeId);
@@ -15432,7 +15523,8 @@
         window.playUISound = playUISound;
         
         // Version check to ensure new code is loaded
-        window.gameVersion = '1.5.0';
+        window.gameVersion = '1.9.5';
+        console.log('[DEBUG] Game version set to:', window.gameVersion);
         
         // Global debug function to check skin status
         window.checkSkinStatus = function() {

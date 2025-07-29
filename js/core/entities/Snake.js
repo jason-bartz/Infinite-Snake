@@ -970,7 +970,8 @@ class Snake {
             isPlayer: this.isPlayer,
             isDying: this.isDying,
             alive: this.isAlive,
-            deathAnimationTimer: this.deathAnimationTimer
+            deathAnimationTimer: this.deathAnimationTimer,
+            deathComplete: this.deathComplete
         });
         
         if (!this.isDying) {
@@ -979,17 +980,36 @@ class Snake {
             this.deathAnimationTimer = 0;
             this.speed = 0;
             
+            // Dispatch player death event immediately when death starts
+            if (this.isPlayer) {
+                console.log('[DEATH TRACKING] Dispatching playerDeath event for player');
+                window.dispatchEvent(new CustomEvent('playerDeath', { 
+                    detail: { 
+                        snake: this,
+                        isBossDeath: isBossDeath 
+                    } 
+                }));
+            } else {
+                console.log('[DEATH TRACKING] Not dispatching playerDeath - isPlayer:', this.isPlayer);
+            }
+            
             if (isBossDeath && this.isPlayer) {
                 this.deathAnimationTimer = this.deathAnimationDuration;
                 this.isAlive = false;
                 this.deathComplete = true;
             }
             
+            // Store isBossDeath for later use
+            this.isBossDeath = isBossDeath;
+            
             return;
         }
         
-        window.gameLogger.debug('SNAKE DEATH', 'Processing actual death (alive = false)');
-        this.isAlive = false;
+        // If we're already dying but death is complete, process the actual death
+        if (this.isDying && this.deathComplete) {
+            window.gameLogger.debug('SNAKE DEATH', 'Processing actual death after animation (alive = false)');
+            this.isAlive = false;
+        }
         
         this.dropElements();
         
@@ -1125,6 +1145,8 @@ class Snake {
         if (this.deathAnimationTimer >= this.deathAnimationDuration) {
             this.deathComplete = true;
             this.isAlive = false;
+            // Call die() to complete the death process and trigger events
+            this.die(this.isBossDeath);
         }
     }
     

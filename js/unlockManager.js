@@ -142,6 +142,11 @@ class UnlockManager {
                 if (!criteria.mode || !criteria.value) return false;
                 return stats.getGamesPlayedByMode(criteria.mode) >= criteria.value;
             
+            case 'sessionDuration':
+                // Check if current session duration meets the criteria (in minutes)
+                if (!criteria.value) return false;
+                return stats.getCurrentSessionDuration() >= criteria.value;
+            
             default:
                 console.warn('Unknown unlock criteria type:', criteria.type);
                 return false;
@@ -447,7 +452,22 @@ class UnlockManager {
                     current = stats.getGamesPlayedByMode(criteria.mode);
                 }
                 break;
+            case 'sessionDuration':
+                current = stats.getCurrentSessionDuration();
+                break;
             case 'timeWindow':
+                // Special handling for Midnight skin which has gamesRequired
+                if (criteria.gamesRequired) {
+                    // Count games played in the time window
+                    const gamesInWindow = stats.getGamesPlayedBetweenHours ? 
+                        stats.getGamesPlayedBetweenHours(criteria.startHour, criteria.endHour) : 0;
+                    return {
+                        current: gamesInWindow,
+                        max: criteria.gamesRequired,
+                        percentage: Math.min(100, (gamesInWindow / criteria.gamesRequired) * 100)
+                    };
+                }
+                // Fall through to binary check for other timeWindow skins
             case 'monthWindow':
             case 'defeatBoss':
                 // These are binary checks - return proper progress object
@@ -462,9 +482,9 @@ class UnlockManager {
         }
         
         return {
-            current,
+            current: current !== undefined ? current : 0,
             max: target,
-            percentage: Math.min(100, (current / target) * 100)
+            percentage: Math.min(100, ((current || 0) / target) * 100)
         };
     }
 

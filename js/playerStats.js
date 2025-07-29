@@ -98,7 +98,8 @@ class PlayerStats {
                     killsWithoutDying: 0,
                     diedWithin30Seconds: 0,
                     playedDuringHours: new Set(),
-                    playedDuringMonths: new Set()
+                    playedDuringMonths: new Set(),
+                    gamesInTimeWindows: {}
                 }
             }
         };
@@ -204,8 +205,10 @@ class PlayerStats {
     }
 
     recordDeath() {
+        console.log('[DEATH TRACKING] recordDeath called in PlayerStats');
         this.sessionStats.deaths++;
         this.stats.stats.lifetime.totalDeaths++;
+        console.log('[DEATH TRACKING] Total deaths now:', this.stats.stats.lifetime.totalDeaths);
         
         // Check if died within 30 seconds
         const timeSinceStart = (Date.now() - this.sessionStats.startTime) / 1000;
@@ -254,6 +257,17 @@ class PlayerStats {
         const hour = new Date().getHours();
         this.stats.stats.achievements.playedDuringHours.add(hour);
         
+        // Track games in time windows (for Midnight skin)
+        if (!this.stats.stats.achievements.gamesInTimeWindows) {
+            this.stats.stats.achievements.gamesInTimeWindows = {};
+        }
+        // Check midnight window (0-3 AM)
+        if (hour >= 0 && hour <= 3) {
+            const key = '0-3';
+            this.stats.stats.achievements.gamesInTimeWindows[key] = 
+                (this.stats.stats.achievements.gamesInTimeWindows[key] || 0) + 1;
+        }
+        
         // Track month played
         const month = new Date().getMonth();
         this.stats.stats.achievements.playedDuringMonths.add(month);
@@ -267,6 +281,8 @@ class PlayerStats {
     }
 
     recordGameEnd(finalScore, gameMode) {
+        console.log('[DEBUG] PlayerStats.recordGameEnd called with mode:', gameMode);
+        
         // Record final score to lifetime total
         if (finalScore !== undefined && finalScore > 0) {
             this.recordFinalScore(finalScore);
@@ -278,9 +294,14 @@ class PlayerStats {
         
         // Track games played by mode
         const mode = gameMode || window.gameMode || 'infinite'; // Fallback to window.gameMode or default to infinite
+        console.log('[DEBUG] Recording game for mode:', mode);
+        console.log('[DEBUG] Before increment - cozy games:', this.stats.stats.lifetime.gamesPlayedByMode.cozy);
+        
         if (this.stats.stats.lifetime.gamesPlayedByMode && this.stats.stats.lifetime.gamesPlayedByMode.hasOwnProperty(mode)) {
             this.stats.stats.lifetime.gamesPlayedByMode[mode]++;
         }
+        
+        console.log('[DEBUG] After increment - cozy games:', this.stats.stats.lifetime.gamesPlayedByMode.cozy);
         
         this.saveStats();
         
@@ -372,7 +393,15 @@ class PlayerStats {
     }
 
     getMonthlyLeaderboardWins() {
-        return this.stats.stats.lifetime.monthlyLeaderboardWins.size;
+        if (this.stats.stats.lifetime.monthlyLeaderboardWins && this.stats.stats.lifetime.monthlyLeaderboardWins.size !== undefined) {
+            return this.stats.stats.lifetime.monthlyLeaderboardWins.size;
+        }
+        return 0;
+    }
+    
+    getCurrentSessionDuration() {
+        // Return current session duration in minutes
+        return Math.floor((Date.now() - this.sessionStartTime) / (1000 * 60));
     }
 
     getGamesPlayedByMode(mode) {
@@ -389,6 +418,16 @@ class PlayerStats {
             }
         }
         return false;
+    }
+    
+    getGamesPlayedBetweenHours(startHour, endHour) {
+        // Track games played in specific time windows
+        if (!this.stats.stats.achievements.gamesInTimeWindows) {
+            this.stats.stats.achievements.gamesInTimeWindows = {};
+        }
+        
+        const key = `${startHour}-${endHour}`;
+        return this.stats.stats.achievements.gamesInTimeWindows[key] || 0;
     }
 
     hasPlayedDuringMonths(startMonth, endMonth) {
@@ -481,7 +520,10 @@ class PlayerStats {
         // Hook into game events
         window.addEventListener('gameStart', () => this.recordGameStart());
         window.addEventListener('gameEnd', (e) => this.recordGameEnd(e.detail?.score, e.detail?.mode));
-        window.addEventListener('playerDeath', () => this.recordDeath());
+        window.addEventListener('playerDeath', () => {
+            console.log('[DEATH TRACKING] playerDeath event received in PlayerStats');
+            this.recordDeath();
+        });
         window.addEventListener('enemyKilled', () => {
             this.recordKill();
             // Check lore every 100 kills

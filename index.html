@@ -239,13 +239,13 @@
     <link rel="alternate" hreflang="en" href="https://infinitesnake.io" />
     <link rel="alternate" hreflang="x-default" href="https://infinitesnake.io" />
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/skin-selection.css?v=1.9.4">
-    <link rel="stylesheet" href="css/cosmic-ui-override.css?v=1.9.4">
-    <link rel="stylesheet" href="css/unlock-notifications.css?v=1.9.4">
-    <link rel="stylesheet" href="css/discovery-feed-gradients.css?v=1.9.4">
-    <link rel="stylesheet" href="css/cosmic-ui-theme.css?v=1.9.4">
-    <link rel="stylesheet" href="css/cosmic-ui-theme.css?v=1.9.4">
-    <link rel="stylesheet" href="css/element-bank-compact.css?v=1.9.4">
+    <link rel="stylesheet" href="css/skin-selection.css?v=1.9.7">
+    <link rel="stylesheet" href="css/cosmic-ui-override.css?v=1.9.7">
+    <link rel="stylesheet" href="css/unlock-notifications.css?v=1.9.7">
+    <link rel="stylesheet" href="css/discovery-feed-gradients.css?v=1.9.7">
+    <link rel="stylesheet" href="css/cosmic-ui-theme.css?v=1.9.7">
+    <link rel="stylesheet" href="css/cosmic-ui-theme.css?v=1.9.7">
+    <link rel="stylesheet" href="css/element-bank-compact.css?v=1.9.7">
     <style>
         /* SNES-Era UI Theme with Cosmic Colors */
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
@@ -4076,7 +4076,7 @@
 <body>
 <!-- Version Display -->
 <div id="versionDisplay" style="position: relative; text-align: center; margin-top: 10px; z-index: 100; color: #666; font-family: 'Press Start 2P', monospace; font-size: 10px; pointer-events: none;">
-    v<span id="versionNumber">1.9.4</span>
+    v<span id="versionNumber">1.9.7</span>
 </div>
 
 <!-- Immediate Mobile Detection -->
@@ -5492,7 +5492,7 @@
                 <button onclick="resumeGame()" style="margin: 10px; padding: 12px 30px; font-size: 10px; background: var(--snes-cosmic-purple); color: var(--snes-white); border: 4px solid var(--snes-white); border-radius: 0; cursor: pointer; font-family: 'Press Start 2P'; text-transform: uppercase; box-shadow: inset 2px 2px 0 var(--snes-cosmic-pink), inset -2px -2px 0 var(--snes-dark-purple), 4px 4px 0 rgba(0,0,0,0.5); transition: none;"
                         onmouseover="this.style.background='var(--snes-cosmic-pink)'; this.style.transform='translate(2px, 2px)'; this.style.boxShadow='inset 2px 2px 0 #FFA8FF, inset -2px -2px 0 var(--snes-dark-purple), 2px 2px 0 rgba(0,0,0,0.5)';"
                         onmouseout="this.style.background='var(--snes-cosmic-purple)'; this.style.transform='translate(0, 0)'; this.style.boxShadow='inset 2px 2px 0 var(--snes-cosmic-pink), inset -2px -2px 0 var(--snes-dark-purple), 4px 4px 0 rgba(0,0,0,0.5)';">Resume</button>
-                <button onclick="playUISound(); location.reload()" style="margin: 10px; padding: 12px 30px; font-size: 10px; background: #333; color: var(--snes-white); border: 4px solid #666; border-radius: 0; cursor: pointer; font-family: 'Press Start 2P'; text-transform: uppercase; box-shadow: 4px 4px 0 rgba(0,0,0,0.5); transition: none;"
+                <button onclick="console.log('[DEBUG] Main Menu clicked!'); playUISound(); handleMainMenuClick();" style="margin: 10px; padding: 12px 30px; font-size: 10px; background: #333; color: var(--snes-white); border: 4px solid #666; border-radius: 0; cursor: pointer; font-family: 'Press Start 2P'; text-transform: uppercase; box-shadow: 4px 4px 0 rgba(0,0,0,0.5); transition: none;"
                         onmouseover="this.style.transform='translate(2px, 2px)'; this.style.boxShadow='2px 2px 0 rgba(0,0,0,0.5)';"
                         onmouseout="this.style.transform='translate(0, 0)'; this.style.boxShadow='4px 4px 0 rgba(0,0,0,0.5)';">Main Menu</button>
             </div>
@@ -6758,8 +6758,8 @@
     </style>
 
     <!-- External Dependencies -->
-    <script src="elements/data/loader.js?v=1.9.4"></script>
-    <script src="js/asset-preloader.js?v=1.9.4"></script>
+    <script src="elements/data/loader.js?v=1.9.7"></script>
+    <script src="js/asset-preloader.js?v=1.9.7"></script>
     
     <!-- Version System -->
     <script>
@@ -6781,44 +6781,44 @@
     </script>
     
     <!-- Skin System -->
-    <script src="js/skinData.js?v=1.9.4" defer></script>
-    <script src="js/skinIdMapping.js?v=1.9.4" defer></script>
-    <script src="js/loreData.js?v=1.9.4" defer></script>
-    <script src="js/playerStats.js?v=1.9.4" defer></script>
-    <script src="js/killstreakManager.js?v=1.9.4" defer></script>
-    <script src="js/unlockManager.js?v=1.9.4" defer></script>
-    <script src="js/loreUnlockManager.js?v=1.9.4" defer></script>
-    <script src="js/nameGenerator.js?v=1.9.4" defer></script>
+    <script src="js/skinData.js?v=1.9.7" defer></script>
+    <script src="js/skinIdMapping.js?v=1.9.7" defer></script>
+    <script src="js/loreData.js?v=1.9.7" defer></script>
+    <script src="js/playerStats.js?v=1.9.7" defer></script>
+    <script src="js/killstreakManager.js?v=1.9.7" defer></script>
+    <script src="js/unlockManager.js?v=1.9.7" defer></script>
+    <script src="js/loreUnlockManager.js?v=1.9.7" defer></script>
+    <script src="js/nameGenerator.js?v=1.9.7" defer></script>
     
     <!-- Rendering Systems -->
-    <script src="js/webgl-renderer.js?v=1.9.4"></script>
-    <script src="js/quadtree.js?v=1.9.4"></script>
-    <script src="js/performance-optimizer.js?v=1.9.4"></script>
-    <script src="js/math-optimizations.js?v=1.9.4"></script>
-    <script src="js/texture-atlas.js?v=1.9.4"></script>
-    <script src="js/gpu-particle-system.js?v=1.9.4"></script>
-    <script src="js/mobile-star-renderer.js?v=1.9.4"></script>
-    <script src="js/battery-optimizer.js?v=1.9.4"></script>
-    <script src="js/mobile-background-optimizer.js?v=1.9.4"></script>
-    <script src="js/mobile-background-integration.js?v=1.9.4"></script>
+    <script src="js/webgl-renderer.js?v=1.9.7"></script>
+    <script src="js/quadtree.js?v=1.9.7"></script>
+    <script src="js/performance-optimizer.js?v=1.9.7"></script>
+    <script src="js/math-optimizations.js?v=1.9.7"></script>
+    <script src="js/texture-atlas.js?v=1.9.7"></script>
+    <script src="js/gpu-particle-system.js?v=1.9.7"></script>
+    <script src="js/mobile-star-renderer.js?v=1.9.7"></script>
+    <script src="js/battery-optimizer.js?v=1.9.7"></script>
+    <script src="js/mobile-background-optimizer.js?v=1.9.7"></script>
+    <script src="js/mobile-background-integration.js?v=1.9.7"></script>
     
     <!-- Modernized Systems -->
-    <script src="js/core/module-loader.js?v=1.9.4"></script>
-    <script src="js/core/init-sequence.js?v=1.9.4" type="module"></script>
+    <script src="js/core/module-loader.js?v=1.9.7"></script>
+    <script src="js/core/init-sequence.js?v=1.9.7" type="module"></script>
     
     <!-- Logger (must load before game-original.js) -->
-    <script src="js/core/logger.js?v=1.9.4"></script>
+    <script src="js/core/logger.js?v=1.9.7"></script>
     <!-- Game Entities -->
     <!-- Particle and ParticlePool are loaded by the module system -->
     <!-- Spaceship modules disabled - not using spaceships -->
-    <!-- <script src="js/core/entities/Spaceship.js?v=1.9.4" type="module"></script> -->
-    <!-- <script src="js/core/entities/SpaceshipManager.js?v=1.9.4" type="module"></script> -->
+    <!-- <script src="js/core/entities/Spaceship.js?v=1.9.7" type="module"></script> -->
+    <!-- <script src="js/core/entities/SpaceshipManager.js?v=1.9.7" type="module"></script> -->
     
     <!-- Main Game Code (extracted from inline script) -->
-    <script src="js/core/game-original.js?v=1.9.4" defer></script>
+    <script src="js/core/game-original.js?v=1.9.7" defer></script>
     
     <!-- Performance Integration (must load after game-original.js) -->
-    <script src="js/performance-integration.js?v=1.9.4" defer></script>
+    <script src="js/performance-integration.js?v=1.9.7" defer></script>
     
     
     <!-- Integration -->
@@ -7002,6 +7002,46 @@
                 isUserTyping = true;
             }
         });
+    </script>
+    
+    <!-- Handle Main Menu Click -->
+    <script>
+        function handleMainMenuClick() {
+            // Try multiple ways to end the game
+            try {
+                // Method 1: Direct dispatch
+                if (window.dispatchEvent && window.CustomEvent) {
+                    const event = new CustomEvent('gameEnd', { 
+                        detail: { 
+                            score: 0, 
+                            mode: window.gameMode || 'cozy',
+                            discoveries: 0,
+                            kills: 0,
+                            playTime: 0,
+                            finalRank: 1
+                        } 
+                    });
+                    window.dispatchEvent(event);
+                }
+                
+                // Method 2: Try calling endGame if it exists
+                if (typeof window.endGame === 'function') {
+                    window.endGame();
+                }
+                
+                // Method 3: Try recording directly to playerStats
+                if (window.playerStats && window.playerStats.recordGameEnd) {
+                    window.playerStats.recordGameEnd(0, window.gameMode || 'cozy');
+                }
+            } catch (e) {
+                console.error('Error ending game:', e);
+            }
+            
+            // Reload after a short delay
+            setTimeout(() => {
+                location.reload();
+            }, 150);
+        }
     </script>
     
     <!-- Vercel Web Analytics -->
