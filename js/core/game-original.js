@@ -837,7 +837,7 @@
         let elementGrid = new Map();
         const MIN_ELEMENTS_PER_CELL = 2;
         const MAX_ELEMENTS_PER_CELL = 5;
-        const TARGET_ELEMENT_COUNT = isMobile ? 90 : 180;
+        const TARGET_ELEMENT_COUNT = isMobile ? 100 : 180;
         
         let snakeNameData = null;
         
