@@ -244,7 +244,6 @@
     <link rel="stylesheet" href="css/unlock-notifications.css?v=1.9.8">
     <link rel="stylesheet" href="css/discovery-feed-gradients.css?v=1.9.8">
     <link rel="stylesheet" href="css/cosmic-ui-theme.css?v=1.9.8">
-    <link rel="stylesheet" href="css/cosmic-ui-theme.css?v=1.9.8">
     <link rel="stylesheet" href="css/element-bank-compact.css?v=1.9.8">
     <style>
         /* SNES-Era UI Theme with Cosmic Colors */
@@ -3075,6 +3074,7 @@
             margin: 16px 0;
             border-bottom: 4px solid var(--snes-dark-purple);
             padding-bottom: 12px;
+            flex-wrap: wrap;
         }
         
         .tab-button {
@@ -3126,6 +3126,8 @@
             display: flex;
             flex-direction: column;
         }
+        
+        
         
         @keyframes fadeIn {
             from { opacity: 0; }
@@ -4101,7 +4103,8 @@
         <div style="position: absolute; top: 20px; right: 20px; z-index: 10;">
             <a href="/how-to-play.html" style="color: #4ecdc4; text-decoration: none; font-family: 'Press Start 2P', monospace; font-size: 10px; margin-right: 20px;">📖 How to Play</a>
             <a href="/lore.html" style="color: #4ecdc4; text-decoration: none; font-family: 'Press Start 2P', monospace; font-size: 10px; margin-right: 20px;">📜 Lore</a>
-            <a href="/leaderboard.html" style="color: #4ecdc4; text-decoration: none; font-family: 'Press Start 2P', monospace; font-size: 10px;">🏆 Leaderboard</a>
+            <a href="/leaderboard.html" style="color: #4ecdc4; text-decoration: none; font-family: 'Press Start 2P', monospace; font-size: 10px; margin-right: 20px;">🏆 Leaderboard</a>
+            <a href="/settings.html" style="color: #4ecdc4; text-decoration: none; font-family: 'Press Start 2P', monospace; font-size: 10px;">⚙️ Settings</a>
         </div>
         <div id="splashContent">
             <img src="infinite-snake-preview-splash-logo.png" alt="Infinite Snake game logo - A cosmic snake forming an infinity symbol" id="splashLogo" style="width: 800px; margin-bottom: 30px;" onerror="this.style.display='none'; document.getElementById('splashTitle').style.display='block';">
@@ -4708,6 +4711,7 @@
                     <a href="/how-to-play.html">How to Play</a>
                     <a href="/lore.html">Lore</a>
                     <a href="/leaderboard.html">Leaderboard</a>
+                    <a href="/settings.html">Settings</a>
                     <a href="/credits.html">Credits</a>
                     <a href="/privacypolicy.html">Privacy Policy</a>
                     <a href="/termsofservice.html">Terms of Service</a>
@@ -4911,7 +4915,8 @@
         <div style="position: absolute; top: 20px; right: 20px; z-index: 10;">
             <a href="/how-to-play.html" style="color: #4ecdc4; text-decoration: none; font-family: 'Press Start 2P', monospace; font-size: 10px; margin-right: 20px;">📖 How to Play</a>
             <a href="/lore.html" style="color: #4ecdc4; text-decoration: none; font-family: 'Press Start 2P', monospace; font-size: 10px; margin-right: 20px;">📜 Lore</a>
-            <a href="/leaderboard.html" style="color: #4ecdc4; text-decoration: none; font-family: 'Press Start 2P', monospace; font-size: 10px;">🏆 Leaderboard</a>
+            <a href="/leaderboard.html" style="color: #4ecdc4; text-decoration: none; font-family: 'Press Start 2P', monospace; font-size: 10px; margin-right: 20px;">🏆 Leaderboard</a>
+            <a href="/settings.html" style="color: #4ecdc4; text-decoration: none; font-family: 'Press Start 2P', monospace; font-size: 10px;">⚙️ Settings</a>
         </div>
         
         <div id="gameModeContent">
@@ -5513,6 +5518,7 @@
                 </div>
             </div>
             
+            <!-- Resume and Main Menu buttons - moved inside pauseMenu -->
             <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(138, 43, 226, 0.3); text-align: center;">
                 <button onclick="resumeGame()" style="margin: 10px; padding: 12px 30px; font-size: 10px; background: var(--snes-cosmic-purple); color: var(--snes-white); border: 4px solid var(--snes-white); border-radius: 0; cursor: pointer; font-family: 'Press Start 2P'; text-transform: uppercase; box-shadow: inset 2px 2px 0 var(--snes-cosmic-pink), inset -2px -2px 0 var(--snes-dark-purple), 4px 4px 0 rgba(0,0,0,0.5); transition: none;"
                         onmouseover="this.style.background='var(--snes-cosmic-pink)'; this.style.transform='translate(2px, 2px)'; this.style.boxShadow='inset 2px 2px 0 #FFA8FF, inset -2px -2px 0 var(--snes-dark-purple), 2px 2px 0 rgba(0,0,0,0.5)';"
@@ -6494,6 +6500,9 @@
             flex-direction: column;
         }
         
+        /* Settings tab now uses the same structure as other working tabs */
+        /* Removed custom CSS rules that were causing conflicts */
+        
         /* Ensure skin selection fills space properly */
         #skinSelection {
             flex: 1;
@@ -6780,6 +6789,8 @@
             padding: 8px 12px;
             text-align: center;
         }
+        
+        }
     </style>
 
     <!-- External Dependencies -->
@@ -6808,6 +6819,7 @@
     <!-- Skin System -->
     <script src="js/skinData.js?v=1.9.8" defer></script>
     <script src="js/skinIdMapping.js?v=1.9.8" defer></script>
+    <script src="js/codeValidator.js?v=1.9.8" defer></script>
     <script src="js/loreData.js?v=1.9.8" defer></script>
     <script src="js/playerStats.js?v=1.9.8" defer></script>
     <script src="js/killstreakManager.js?v=1.9.8" defer></script>
@@ -6881,31 +6893,39 @@
             // Update button states
             const buttons = document.querySelectorAll('.tab-button');
             buttons.forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
             
             // Update content visibility
             document.querySelectorAll('.tab-content').forEach(content => {
                 content.classList.remove('active');
+                // Remove any inline styles that might interfere
+                content.style.display = '';
+                content.style.visibility = '';
+                content.style.opacity = '';
             });
             
-            if (tabName === 'skins') {
-                document.getElementById('skinsTab').classList.add('active');
-            } else if (tabName === 'journal') {
-                document.getElementById('journalTab').classList.add('active');
-                // Populate the discovery journal when tab is opened
-                if (typeof populateDiscoveryJournal === 'function') {
-                    populateDiscoveryJournal();
-                }
-            } else if (tabName === 'howto') {
-                document.getElementById('howtoTab').classList.add('active');
-            } else if (tabName === 'leaderboard') {
-                document.getElementById('leaderboardTab').classList.add('active');
-                // Load leaderboard data when tab is opened
-                if (typeof loadPauseLeaderboard === 'function') {
-                    // Small delay to ensure DOM is ready
-                    setTimeout(() => {
-                        loadPauseLeaderboard(null, 'weekly');
-                    }, 50);
+            // Activate the selected tab
+            const tabMap = {
+                'skins': 'skinsTab',
+                'journal': 'journalTab',
+                'howto': 'howtoTab',
+                'leaderboard': 'leaderboardTab'
+            };
+            
+            const tabId = tabMap[tabName];
+            if (tabId) {
+                const tab = document.getElementById(tabId);
+                if (tab) {
+                    tab.classList.add('active');
+                    
+                    // Special handling for specific tabs
+                    if (tabName === 'journal' && typeof populateDiscoveryJournal === 'function') {
+                        populateDiscoveryJournal();
+                    } else if (tabName === 'leaderboard' && typeof loadPauseLeaderboard === 'function') {
+                        setTimeout(() => loadPauseLeaderboard(null, 'weekly'), 50);
+                    }
                 }
             }
         };
@@ -7129,6 +7149,63 @@
       window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
     </script>
     <script defer src="/_vercel/insights/script.js"></script>
+    
+    <!-- Inline functions for Settings tab -->
+    <script>
+        // Function to redeem codes
+        window.redeemCode = function() {
+            const codeInput = document.getElementById('codeInput');
+            const codeMessage = document.getElementById('codeMessage');
+            
+            if (!codeInput || !codeMessage) return;
+            
+            const code = codeInput.value.trim();
+            
+            if (!code) {
+                codeMessage.style.color = '#ff6b6b';
+                codeMessage.textContent = 'Please enter a code';
+                return;
+            }
+            
+            if (!window.unlockManager) {
+                codeMessage.style.color = '#ff6b6b';
+                codeMessage.textContent = 'System not ready, please try again';
+                return;
+            }
+            
+            // Try to redeem the code
+            const result = window.unlockManager.redeemCode(code);
+            
+            if (result.success) {
+                codeMessage.style.color = '#4ecdc4';
+                codeMessage.textContent = result.message;
+                codeInput.value = '';
+                
+                // Play success sound
+                if (typeof playUISound === 'function') {
+                    playUISound();
+                }
+                
+                // Refresh the skin grid if visible
+                if (window.loadSkinData) {
+                    window.loadSkinData();
+                }
+            } else {
+                codeMessage.style.color = '#ff6b6b';
+                codeMessage.textContent = result.message;
+            }
+        }
+        
+        // Function to toggle mute
+        window.toggleMute = function() {
+            if (typeof toggleMusic === 'function') {
+                toggleMusic();
+            } else {
+                console.log('Music toggle not available');
+            }
+        }
+        
+    </script>
     
 </body>
 </html>

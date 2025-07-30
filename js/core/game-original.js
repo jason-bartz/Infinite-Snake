@@ -1416,9 +1416,8 @@
             
             // Show modal if:
             // 1. First time player (sessionCount === 1)
-            // 2. Every 5 sessions after the last shown
-            const shouldShowWelcome = (sessionCount === 1) || 
-                                    (sessionCount - lastWelcomeShown >= 5);
+            // 2. Second time player (sessionCount === 2)
+            const shouldShowWelcome = (sessionCount === 1) || (sessionCount === 2);
             
             if (shouldShowWelcome) {
                 // Update last shown
@@ -9783,6 +9782,12 @@
                 if (result !== null && result !== undefined) {
                     markScoreSubmitted();
                     const rank = result.daily_rank || result.rank || result || 'Submitted';
+                    
+                    // Record the rank in player stats
+                    if (window.playerStats && typeof rank === 'number') {
+                        window.playerStats.recordLeaderboardRank(rank);
+                    }
+                    
                     const statusElement = document.getElementById('submissionStatus');
                     statusElement.innerHTML = 
                         `<div style="background: linear-gradient(135deg, rgba(78, 205, 196, 0.3) 0%, rgba(78, 205, 196, 0.1) 100%);
@@ -13000,6 +13005,96 @@
             playUISound();
             paused = false;
             document.getElementById('pauseOverlay').style.display = 'none';
+        }
+        
+        // Function to switch tabs in pause menu
+        window.switchTab = function(tabName) {
+            console.log('[DEBUG] switchTab called with:', tabName);
+            playUISound();
+            
+            // Hide all tabs
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => {
+                tab.classList.remove('active');
+                console.log('[DEBUG] Hiding tab:', tab.id);
+            });
+            
+            // Remove active class from all buttons
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            // Show selected tab
+            const selectedTab = document.getElementById(tabName + 'Tab');
+            console.log('[DEBUG] Looking for tab:', tabName + 'Tab', 'Found:', !!selectedTab);
+            if (selectedTab) {
+                selectedTab.classList.add('active');
+                console.log('[DEBUG] Activated tab:', selectedTab.id);
+                
+                // Force display for settings tab
+                if (tabName === 'settings') {
+                    selectedTab.style.display = 'block';
+                    const content = selectedTab.querySelector('#settingsContent');
+                    if (content) {
+                        content.style.display = 'block';
+                        console.log('[DEBUG] Forced display for settings content');
+                    }
+                }
+            }
+            
+            // Add active class to clicked button
+            const clickedButton = document.querySelector(`.tab-button[onclick*="${tabName}"]`);
+            if (clickedButton) {
+                clickedButton.classList.add('active');
+            }
+        }
+        
+        // Function to redeem codes
+        window.redeemCode = function() {
+            const codeInput = document.getElementById('codeInput');
+            const codeMessage = document.getElementById('codeMessage');
+            
+            if (!codeInput || !codeMessage) return;
+            
+            const code = codeInput.value.trim();
+            
+            if (!code) {
+                codeMessage.style.color = '#ff6b6b';
+                codeMessage.textContent = 'Please enter a code';
+                return;
+            }
+            
+            if (!window.unlockManager) {
+                codeMessage.style.color = '#ff6b6b';
+                codeMessage.textContent = 'System not ready, please try again';
+                return;
+            }
+            
+            // Try to redeem the code
+            const result = window.unlockManager.redeemCode(code);
+            
+            if (result.success) {
+                codeMessage.style.color = '#4ecdc4';
+                codeMessage.textContent = result.message;
+                codeInput.value = '';
+                
+                // Play success sound
+                playUISound();
+                
+                // Refresh the skin grid if visible
+                if (window.loadSkinData) {
+                    window.loadSkinData();
+                }
+            } else {
+                codeMessage.style.color = '#ff6b6b';
+                codeMessage.textContent = result.message;
+                
+                // Play error sound (if available)
+                try {
+                    const errorSound = new Audio('data:audio/wav;base64,UklGRkwCAABXQVZFZm10IBAAAAABAAEAECQAACBAAAB4AQCAAgBkYXRhKAIAAP//AAD//wAA');
+                    errorSound.volume = 0.3;
+                    errorSound.play().catch(() => {});
+                } catch (e) {}
+            }
         }
         
         // Function to properly end the game and record stats

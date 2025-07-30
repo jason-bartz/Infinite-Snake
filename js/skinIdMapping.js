@@ -61,7 +61,8 @@ const skinIdMapping = {
         'popcorn': 'colonel-kernel',
         'pixel': 'pixel',  // Same ID
         'midnight': 'midnight',  // Same ID
-        'af-one': 'scuffy'  // Scuffy skin - Air Force One shoes
+        'af-one': 'scuffy',  // Scuffy skin - Air Force One shoes
+        'discord-elite': 'discord-elite'  // Discord exclusive skin
     },
     
     // Reverse mapping (new IDs to old IDs)

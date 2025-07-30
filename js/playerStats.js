@@ -99,7 +99,9 @@ class PlayerStats {
                     diedWithin30Seconds: 0,
                     playedDuringHours: new Set(),
                     playedDuringMonths: new Set(),
-                    gamesInTimeWindows: {}
+                    gamesInTimeWindows: {},
+                    bossKills: 0,
+                    bestWeeklyRank: null
                 }
             }
         };
@@ -135,6 +137,11 @@ class PlayerStats {
             }
             if (oldStats.stats.achievements) {
                 Object.assign(newStats.stats.achievements, oldStats.stats.achievements);
+                
+                // Migrate bestDailyRank to bestWeeklyRank if it exists
+                if (oldStats.stats.achievements.bestDailyRank !== undefined) {
+                    newStats.stats.achievements.bestWeeklyRank = oldStats.stats.achievements.bestDailyRank;
+                }
             }
         }
         
@@ -214,6 +221,26 @@ class PlayerStats {
         const timeSinceStart = (Date.now() - this.sessionStats.startTime) / 1000;
         if (timeSinceStart <= 30) {
             this.stats.stats.achievements.diedWithin30Seconds++;
+        }
+        
+        this.saveStats();
+    }
+
+    recordBossKill() {
+        this.stats.stats.achievements.bossKills++;
+        
+        // Track session boss kills if needed
+        if (!this.sessionStats.bossKills) {
+            this.sessionStats.bossKills = 0;
+        }
+        this.sessionStats.bossKills++;
+        
+        // Track most bosses in one game
+        if (!this.stats.stats.achievements.mostBossesInGame) {
+            this.stats.stats.achievements.mostBossesInGame = 0;
+        }
+        if (this.sessionStats.bossKills > this.stats.stats.achievements.mostBossesInGame) {
+            this.stats.stats.achievements.mostBossesInGame = this.sessionStats.bossKills;
         }
         
         this.saveStats();
@@ -319,6 +346,19 @@ class PlayerStats {
             this.sessionStats.firstPlaceAchieved = true;
             this.stats.stats.lifetime.firstPlaceFinishes++;
             this.saveStats();
+        }
+    }
+
+    recordLeaderboardRank(rank) {
+        // Only record numeric ranks (not 'Submitted' or other non-numeric values)
+        if (typeof rank === 'number' && rank > 0) {
+            // Note: The API returns 'daily_rank' but it's actually the weekly rank
+            // since the game no longer has daily leaderboards
+            if (this.stats.stats.achievements.bestWeeklyRank === null || 
+                rank < this.stats.stats.achievements.bestWeeklyRank) {
+                this.stats.stats.achievements.bestWeeklyRank = rank;
+                this.saveStats();
+            }
         }
     }
 
@@ -509,6 +549,10 @@ class PlayerStats {
     getAllBossesDefeatedCount() {
         return this.stats.stats.achievements.allBossesDefeatedCount || 0;
     }
+    
+    getBestWeeklyRank() {
+        return this.stats.stats.achievements.bestWeeklyRank;
+    }
 
     checkLoreUnlocks() {
         if (window.loreUnlockManager && window.loreUnlockManager.checkAllLoreUnlocks) {
@@ -555,6 +599,10 @@ class PlayerStats {
             }
         });
         window.addEventListener('firstPlace', () => this.recordFirstPlace());
+        window.addEventListener('bossDefeated', (e) => {
+            console.log('[BOSS TRACKING] Boss defeated event received:', e.detail);
+            this.recordBossKill();
+        });
     }
 
     // Debug method to view all stats

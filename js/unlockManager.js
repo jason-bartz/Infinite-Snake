@@ -147,6 +147,11 @@ class UnlockManager {
                 if (!criteria.value) return false;
                 return stats.getCurrentSessionDuration() >= criteria.value;
             
+            case 'code':
+                // Check if code has been redeemed for this skin
+                if (!window.codeValidator) return false;
+                return window.codeValidator.hasRedeemedSkinCode(skinId);
+            
             default:
                 console.warn('Unknown unlock criteria type:', criteria.type);
                 return false;
@@ -563,6 +568,47 @@ class UnlockManager {
     // Get unlocked skins
     getUnlockedSkins() {
         return this.unlockedSkins;
+    }
+    
+    // Redeem code and unlock skin if valid
+    redeemCode(code) {
+        if (!window.codeValidator) {
+            return { success: false, message: 'Code system not initialized' };
+        }
+        
+        const result = window.codeValidator.validateCode(code);
+        
+        if (result.valid && result.skinId) {
+            // Check if skin is already unlocked
+            if (this.unlockedSkins.has(result.skinId)) {
+                return { success: false, message: 'Skin already unlocked' };
+            }
+            
+            // Get skin data
+            const skinData = window.SKIN_DATA[result.skinId];
+            if (!skinData) {
+                return { success: false, message: 'Invalid skin ID' };
+            }
+            
+            // Unlock the skin
+            this.unlockSkin(result.skinId, skinData);
+            
+            // Queue notification
+            this.pendingUnlocks.push({
+                skinId: result.skinId,
+                skinData: skinData
+            });
+            
+            // Show notification immediately
+            this.showUnlockNotifications([{
+                skinId: result.skinId,
+                skinData: skinData
+            }]);
+            
+            return { success: true, message: result.message, skinId: result.skinId };
+        }
+        
+        return { success: false, message: result.message };
     }
     
     // Debug method

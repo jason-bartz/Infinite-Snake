@@ -1824,5 +1824,55 @@ Sleep Protocol: "Death is just really deep sleep and I'm not interested."
 Subscribe to premium for exclusive content on achieving immortality through aggressive immaturity.`,
         unlockCriteria: { type: 'catalystGems', value: 1000 },
         unlockText: 'Collect 1,000 catalyst gems total'
+    },
+    'skin-lore-debuggle': {
+        id: 'skin-lore-debuggle',
+        number: '096',
+        title: 'Bug Report #4201337',
+        category: 'serpent',
+        content: `INFINITE SNAKE QUALITY ASSURANCE DEPT.
+Filed by: Scarabyte the Scarab
+Priority: CRITICAL (but also eternal)
+
+BUG DESCRIPTION:
+Reality.exe has stopped working correctly since approximately 3100 BCE.
+
+STEPS TO REPRODUCE:
+1. Build pyramid
+2. Encode universe's source code in hieroglyphs
+3. Notice syntax error in line 𓂀𓃀𓄿𓆎 (untranslatable)
+4. Attempt to patch using sacred geometry
+5. Universe throws NullPointerException
+
+EXPECTED BEHAVIOR:
+Eternal perfection, mathematical harmony, properly aligned chakras
+
+ACTUAL BEHAVIOR:
+- Entropy increasing
+- Pharaohs keep dying (working as intended?)
+- Sand gets EVERYWHERE
+- Mortals discovered JavaScript (catastrophic failure)
+
+DEBUGGING ATTEMPTS:
+- Rewrote cosmic constants in Scarab++
+- Tried turning the sun off and on again
+- Refactored the Nile's flow pattern
+- Added more beetles (made it worse)
+
+ERROR LOG:
+[BEGINNING_OF_TIME] INFO: Universe initialized successfully
+[OLD_KINGDOM] WARNING: Pyramid.alignment off by 0.0001°
+[MIDDLE_KINGDOM] ERROR: Anubis.dll not found
+[NEW_KINGDOM] FATAL: RA_ACCESS_VIOLATION at address 0xDEADBEEF
+[MODERN_ERA] WTF: Humans put pineapple on pizza
+
+NOTES:
+Have rolled back reality seventeen times. Bug persists across all timelines. Suspect issue is in legacy code written by Thoth after three ambrosias.
+
+STATUS: Won't Fix (Embracing the chaos)
+
+P.S. - Join the Discord to file your own bug reports. Free scarab emoji for valid reproducible issues. 🪲`,
+        unlockCriteria: { type: 'code', value: 'discord' },
+        unlockText: 'Join Discord and redeem a member code'
     }
 };

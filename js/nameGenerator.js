@@ -7,31 +7,31 @@ class NameGenerator {
         this.firstNames = [
             'Slithery', 'Noodles', 'Danger', 'Sneaky', 'Hissy', 'Wiggly', 'Sassy', 'Toxic', 
             'Fatal', 'Speedy', 'Turbo', 'Shadow', 'Cosmic', 'Rainbow', 'Golden', 'Spicy', 
-            'Salty', 'Chunky', 'Professor', 'Captain', 'Doctor', 'Master', 'Lord', 'Lady', 
+            'Salty', 'Chunky', 'Professor', 'Star', 'Captain', 'Doctor', 'Master', 'Lord', 'Lady', 
             'Sir', 'General', 'Major', 'Colonel', 'Agent', 'Sergeant', 'Officer', 'Detective', 
             'Mighty', 'Tiny', 'Big', 'Little', 'Angry', 'Happy', 'Grumpy', 'Sleepy', 
-            'Crazy', 'Lucky', 'Unlucky', 'Derpy', 'Elite', 'Royal', 'Noble', 'Ancient', 
-            'Baby', 'Elder', 'Glizzy', 'Noodles'
+            'Crazy', 'Lucky', 'Unlucky', 'Derpy', 'Snek', 'Elite', 'Royal', 'Noble', 'Ancient', 
+            'Baby', 'Elder', 'Glizzy', 'Glizzard', 'Main', 'OG', 'Prime', 'Alpha', 'Beta', 
+            'Omega', 'Max', 'Mini', 'Mega', 'Ultra', 'Hyper', 'Turbo', 'Elite', 
+            'Legend', 'Master', 'King', 'Queen', 'Lord','Noodles'
         ];
         
         this.lastNames = [
             'McSnakeface', 'Noodleton', 'McNoodleton', 'Snakerson', 'Coilsworth', 'Fangs', 
             'Scales', 'Rattlebottom', 'Slithers', 'Hissington', 'Viperson', 'Cobrani', 
             'Python', 'Boopsmith', 'Noodleman', 'Serpentine', 'Snekkins', 'Tailsworth', 
-            'Venomous', 'Strikerson', 'McBitey', 'Swallows', 'Devourson', 'Munchkin', 
-            'Chompers', 'von Hiss', 'de Coil', 'O\'Scales', 'McSlither', 'Snakewell', 
-            'Benderson', 'Twistworth', 'Longbody', 'Shortfang', 'Quickstrike', 'Deadlyson', 
-            'the Snake', 'the Serpent', 'the Noodle', 'the Danger', 'the Destroyer', 
-            'the Devourer', 'the Mighty', 'the Terrible', 'the Great', 'the Lesser', 
-            'the Unwise', 'the Bold', 'the Coward', 'the Brave', 'the Foolish', 'GlizzMeister', 'The Just'
+            'Venomous', 'Strikerson', 'McBitey', 'McSnek', 'Swallows', 'Devourson', 'Munchkin', 
+            'Chompers', 'von Hiss', 'von Rattle', 'de Coil', 'O\'Scales', 'McSlither', 'Snakewell', 
+            'Benderson', 'Noodleboop', 'Voidsworth', 'Twistworth', 'Longbody', 'Shortfang', 'Quickstrike', 'Deadlyson', 
+            'GlizzMeister'
         ];
         
         this.suffixes = [
             'Jr.', 'Sr.', 'III', 'IV', 'V', 'Esq.', 'PhD', 'M.D.', 'Boi', '420', 
             '69', '2000', '9000', 'XxX', '360', 'NoScope', 'YT', 'TTV', 'GG', 'EZ', 
-            'Pro', 'Noob', 'God', 'Bot', 'Main', 'OG', 'Prime', 'Alpha', 'Beta', 
-            'Omega', 'Max', 'Mini', 'Mega', 'Ultra', 'Hyper', 'Turbo', 'Elite', 
-            'Legend', 'Master', 'King', 'Queen', 'Lord', 'UwU', 'OwO', 'Bruh', 'Junior'
+            'Pro', 'Noob', 'God', 'Bot', 'UwU', 'OwO', 'Bruh', 'the Snake', 'the Serpent', 'the Noodle', 'the Danger', 'the Destroyer', 
+            'the Devourer', 'the Mighty', 'the Terrible', 'the Great', 'the Lesser', 
+            'the Unwise', 'the Bold', 'the Coward', 'the Brave', 'the Foolish', 'Junior', 'The Just'
         ];
         
         this.deathMessages = [

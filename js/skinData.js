@@ -546,6 +546,19 @@ const skinData = {
             description: 'Collect 1,000 catalyst gems total'
         }
     },
+    
+    // DISCORD EXCLUSIVE
+    'discord-elite': {
+        name: 'Scarabyte',
+        rarity: 'exotic',
+        bio: 'Ancient Egyptian scarab turned QA specialist, eternally debugging the hieroglyphic code of the universe. Reserved exclusively for Discord members.',
+        pixelBodyColor: '#296caa',
+        unlockCriteria: {
+            type: 'code',
+            value: 'discord',
+            description: 'Receive an unlock code by joining our Discord community and contributing to the bug hunt'
+        }
+    },
 
     // SECRET (4 skins - Boss skins)
     'abyssos': {

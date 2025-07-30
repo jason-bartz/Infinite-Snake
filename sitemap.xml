@@ -30,6 +30,14 @@
         <priority>0.8</priority>
     </url>
     
+    <!-- Settings - high priority -->
+    <url>
+        <loc>https://infinitesnake.io/settings</loc>
+        <lastmod>2025-01-30</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    
     <!-- Lore - medium priority -->
     <url>
         <loc>https://infinitesnake.io/lore</loc>
