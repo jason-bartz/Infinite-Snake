@@ -377,6 +377,8 @@ GAME OVER STATE
 - `discoveredCombinations` - Array of found combinations
 - `highScore` - Best score achieved
 - `mobileScoreboardCollapsed` - Mobile UI preference
+- `infiniteSnakeRedeemedCodes` - Tracking redeemed unlock codes
+- `settingsUsedMessages` - Tracking displayed messages for variety
 
 ### Game Constants
 **File**: `js/core/game-original.js`
@@ -416,13 +418,117 @@ GAME OVER STATE
 
 ---
 
+## Unlock & Reward Systems
+
+### Discord Code Redemption System
+**Files**: 
+- `js/codeValidator.js` - Core validation logic
+- `js/unlockManager.js` - Skin unlock management
+- `settings.html` - User interface for code entry
+
+**Architecture**:
+1. **Code Format**: `DISCORD-2025-XXXX` (4-char alphanumeric suffix)
+2. **Security**: Codes are validated using hashes, not plaintext
+3. **Mapping**: Each code hash maps to a specific skin ID
+4. **Storage**: Redeemed codes stored in localStorage to prevent reuse
+
+**Current Implementation**:
+- **58 unique codes** map to all 58 skins in the game
+- **"Secret" variety**: Advertised as Scarabyte-only, but each code unlocks a different skin
+- **Dynamic messages**: Random success/error messages for engagement
+
+### Code-to-Skin Mapping
+**File**: `js/codeValidator.js`
+```javascript
+this.CODE_TO_SKIN_MAP = {
+    '507fbf89': 'discord-elite',    // DISCORD-2025-JMQZ - Scarabyte
+    '5080068c': 'hot-head',         // DISCORD-2025-IYTM
+    // ... 56 more mappings
+}
+```
+
+### Message System for Code Redemption
+**File**: `settings.html`
+
+The code redemption interface features dynamic messaging with three pools:
+- **Empty input messages** (10 variations)
+- **Invalid code messages** (11 variations)
+- **Success messages** (9 variations)
+
+Messages cycle without repetition, stored in `settingsUsedMessages` localStorage.
+
+### Skin Unlock System
+**File**: `js/skinData.js`
+- **58 total skins** across 6 rarity tiers
+- **Unlock methods**: Score milestones, achievements, codes
+- **Rarity distribution**:
+  - Common: 15 skins
+  - Uncommon: 12 skins
+  - Rare: 10 skins
+  - Legendary: 8 skins
+  - Exotic: 9 skins
+  - Secret: 4 skins
+
+---
+
+## Admin Tools & Code Management
+
+### Code Generation Tools
+**Location**: `/admin-tools/`
+
+#### Basic Code Generator
+**File**: `admin-tools/generate-codes.js`
+- Generates Discord codes with specified count
+- Creates hash values for validation
+- Outputs: plain text list, JSON record, JS hash array
+
+#### Advanced Skin-Aware Generator
+**File**: `admin-tools/generate-codes-with-skins.js`
+- Maps codes to specific skins
+- Prevents duplicate code generation
+- Tracks previously generated codes
+
+**Commands**:
+```bash
+# List all available skins
+node admin-tools/generate-codes-with-skins.js list-skins
+
+# Generate codes for all skins
+node admin-tools/generate-codes-with-skins.js generate-all
+
+# Generate codes for specific skins
+node admin-tools/generate-codes-with-skins.js generate-for hot-head ruby pixel
+```
+
+#### Generated Files
+- **Plain codes** (`.txt`) - For Discord distribution
+- **Detailed JSON** (`.json`) - Complete records with skin mappings
+- **Code mapping** (`.js`) - Ready to paste into codeValidator.js
+- **Admin reference** (`.md`) - Human-readable documentation
+
+### Master Code List
+**File**: `admin-tools/DISCORD_CODES_MASTER_LIST.md`
+- Complete mapping of all codes to skins
+- Distribution strategy documentation
+- Instructions for adding new skins/codes
+
+### Security & Anti-Cheat
+- Codes validated via hash function (prevents guessing)
+- One-time redemption per code
+- Client-side validation with server verification planned
+- Rate limiting on redemption attempts
+
+---
+
 ## Common Modifications Guide
 
 ### Adding New Snake Skins
 1. Add skin image to `/skins/` directory
-2. Update skin data in game initialization
-3. Add to `SKIN_DATA` object with unlock score
-4. Test unlock progression
+2. Update skin data in `js/skinData.js`
+3. Add to `SKIN_DATA` object with unlock criteria
+4. Generate Discord code: `node admin-tools/generate-codes-with-skins.js generate-for [skin-id]`
+5. Update `CODE_TO_SKIN_MAP` in `js/codeValidator.js`
+6. Test unlock progression
 
 ### Creating New Boss Types
 1. Extend Boss class in `js/core/entities/Boss.js`
@@ -573,5 +679,5 @@ GAME OVER STATE
 
 ---
 
-*Document Version: 1.1.0*  
-*Last Updated: July 29, 2025*  
+*Document Version: 1.2.0*  
+*Last Updated: July 30, 2025*  

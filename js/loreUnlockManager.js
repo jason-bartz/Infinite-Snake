@@ -278,6 +278,17 @@ class LoreUnlockManager {
             case 'allBosses':
                 return stats.getAllBossesDefeatedCount() >= criteria.count;
             
+            case 'code':
+                // Check if code has been redeemed for this lore entry
+                if (!window.codeValidator) return false;
+                
+                // For Scarabyte lore, check if discord-elite skin is unlocked
+                if (criteria.value === 'discord') {
+                    const unlockedSkins = JSON.parse(localStorage.getItem('unlockedSkins') || '[]');
+                    return unlockedSkins.includes('discord-elite');
+                }
+                return window.codeValidator.hasRedeemedSkinCode(loreId);
+            
             default:
                 console.warn('[LORE] Unknown unlock criteria type:', criteria.type);
                 return false;

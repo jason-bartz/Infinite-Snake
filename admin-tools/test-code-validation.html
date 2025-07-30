@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Code Validation Test</title>
+    <style>
+        body { font-family: monospace; padding: 20px; }
+        .test { margin: 10px 0; padding: 10px; border: 1px solid #ccc; }
+        .pass { background: #d4edda; }
+        .fail { background: #f8d7da; }
+        button { margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Code Validation Test</h1>
+    
+    <div class="test">
+        <h3>Test 1: Check SKIN_DATA</h3>
+        <button onclick="testSkinData()">Run Test</button>
+        <div id="skinDataResult"></div>
+    </div>
+    
+    <div class="test">
+        <h3>Test 2: Check codeValidator</h3>
+        <button onclick="testCodeValidator()">Run Test</button>
+        <div id="codeValidatorResult"></div>
+    </div>
+    
+    <div class="test">
+        <h3>Test 3: Test Specific Code</h3>
+        <input type="text" id="testCode" value="DISCORD-2025-JMQZ" />
+        <button onclick="testSpecificCode()">Test Code</button>
+        <div id="specificCodeResult"></div>
+    </div>
+    
+    <div class="test">
+        <h3>Test 4: Hash Function</h3>
+        <button onclick="testHashFunction()">Test Hash</button>
+        <div id="hashResult"></div>
+    </div>
+
+    <script src="../js/skinData.js"></script>
+    <script src="../js/codeValidator.js"></script>
+    
+    <script>
+        function testSkinData() {
+            const result = document.getElementById('skinDataResult');
+            result.innerHTML = '';
+            
+            if (window.SKIN_DATA) {
+                result.innerHTML += '<p class="pass">✓ SKIN_DATA loaded</p>';
+                if (window.SKIN_DATA['discord-elite']) {
+                    result.innerHTML += '<p class="pass">✓ discord-elite skin exists</p>';
+                    result.innerHTML += '<pre>' + JSON.stringify(window.SKIN_DATA['discord-elite'], null, 2) + '</pre>';
+                } else {
+                    result.innerHTML += '<p class="fail">✗ discord-elite skin NOT found</p>';
+                    result.innerHTML += '<p>Available skins: ' + Object.keys(window.SKIN_DATA).join(', ') + '</p>';
+                }
+            } else {
+                result.innerHTML = '<p class="fail">✗ SKIN_DATA not loaded</p>';
+            }
+        }
+        
+        function testCodeValidator() {
+            const result = document.getElementById('codeValidatorResult');
+            result.innerHTML = '';
+            
+            if (window.codeValidator) {
+                result.innerHTML += '<p class="pass">✓ codeValidator loaded</p>';
+                result.innerHTML += '<p>Valid codes count: ' + window.codeValidator.VALID_CODES.length + '</p>';
+                result.innerHTML += '<p>First few hashes: ' + window.codeValidator.VALID_CODES.slice(0, 3).join(', ') + '</p>';
+            } else {
+                result.innerHTML = '<p class="fail">✗ codeValidator not loaded</p>';
+            }
+        }
+        
+        function testSpecificCode() {
+            const result = document.getElementById('specificCodeResult');
+            const code = document.getElementById('testCode').value;
+            result.innerHTML = '';
+            
+            if (!window.codeValidator) {
+                result.innerHTML = '<p class="fail">✗ codeValidator not loaded</p>';
+                return;
+            }
+            
+            // Test validation
+            const validationResult = window.codeValidator.validateCode(code);
+            result.innerHTML += '<p>Code: ' + code + '</p>';
+            result.innerHTML += '<p>Validation result:</p>';
+            result.innerHTML += '<pre>' + JSON.stringify(validationResult, null, 2) + '</pre>';
+            
+            // Show hash
+            const hash = window.codeValidator.simpleHash(code);
+            result.innerHTML += '<p>Hash: ' + hash + '</p>';
+            result.innerHTML += '<p>Hash in valid codes? ' + (window.codeValidator.VALID_CODES.includes(hash) ? 'YES' : 'NO') + '</p>';
+        }
+        
+        function testHashFunction() {
+            const result = document.getElementById('hashResult');
+            result.innerHTML = '';
+            
+            const testCases = [
+                { code: 'DISCORD-2025-JMQZ', expected: '507fbf89' },
+                { code: 'DISCORD-2025-IYTM', expected: '5080068c' },
+                { code: 'DISCORD-2025-F123', expected: '5081fe09' }
+            ];
+            
+            testCases.forEach(test => {
+                const hash = window.codeValidator.simpleHash(test.code);
+                const matches = hash === test.expected;
+                result.innerHTML += `<p class="${matches ? 'pass' : 'fail'}">
+                    ${test.code}: ${hash} ${matches ? '✓' : '✗ (expected ' + test.expected + ')'}
+                </p>`;
+            });
+        }
+    </script>
+</body>
+</html>

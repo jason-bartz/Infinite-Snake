@@ -337,6 +337,11 @@
             .stats-grid { grid-template-columns: 1fr; }
         }
     </style>
+    
+    <!-- Load game scripts for code validation -->
+    <script src="/js/skinData.js"></script>
+    <script src="/js/codeValidator.js"></script>
+    <script src="/js/unlockManager.js"></script>
 </head>
 <body>
     <!-- Starfield Background -->
@@ -391,7 +396,7 @@
         <!-- Code Redemption & Discord Section -->
         <div class="section code-section">
             <h2>🎁 Redeem Code</h2>
-            <p>Join our Discord community to get exclusive codes, report bugs, participate in events, and connect with other players!</p>
+            <p>Join our Discord community to get exclusive codes, report bugs, and connect with other players!</p>
             
             <input type="text" id="codeInput" placeholder="Enter code" maxlength="20">
             
@@ -629,68 +634,128 @@
             return `${minutes}m`;
         }
         
+        // Message pools for different scenarios
+        const messagePool = {
+            empty: [
+                "You forgot to actually enter a code, silly snake!",
+                "That's a lot of nothing you entered there.",
+                "The void stares back... enter an actual code!",
+                "Air codes don't work here, friend.",
+                "Even invisible snakes need visible codes.",
+                "Code field emptier than a snake's leg collection.",
+                "You miss 100% of the codes you don't enter.",
+                "Blank space? Taylor Swift called, she wants it back.",
+                "Hello? Is there a code in there? echo echo",
+                "Plot twist: You need to actually type something!"
+            ],
+            invalid: [
+                "I am inevitable... and so is this error message.",
+                "No code for you! Come back one year!",
+                "This is the way... to enter codes incorrectly.",
+                "Sssssorry, that code doesn't slither right.",
+                "404: Try another code!",
+                "This code has shed its validity like an old skin.",
+                "Even a blind snake could see that's not a valid code.",
+                "Nice try, but that code is about as real as snake legs.",
+                "Error: Code contains 0% reality",
+                "Connection lost. Did you try turning your snake off and on?",
+                "You must construct additional pylons... invalid code!"
+            ],
+            success: [
+                "Hiss-toric moment, code redeemed successfully! 🎉",
+                "You've charmed the system! Rewards incoming!",
+                "Sss-spectacular! New goodies added",
+                "Your snake just got a glow-up! ✨",
+                "Jackpot: Your snake is feeling fancy now!",
+                "Code accepted! Time to slither in style!",
+                "The cake is a lie, but this code is not!",
+                "May the hiss be with you!",
+                "One does not simply slither into free codes."
+            ]
+        };
+
+        // Track used messages for each category (persist across sessions)
+        const usedMessages = JSON.parse(localStorage.getItem('settingsUsedMessages') || '{"empty":[],"invalid":[],"success":[]}');
+
+        // Helper function to get next message from pool without repetition
+        function getRandomMessage(type) {
+            const messages = messagePool[type];
+            const used = usedMessages[type];
+            
+            // If all messages have been used, reset the used array
+            if (used.length >= messages.length) {
+                usedMessages[type] = [];
+                used.length = 0;
+            }
+            
+            // Find unused messages
+            const unusedMessages = messages.filter(msg => !used.includes(msg));
+            
+            // Pick a random unused message
+            const selectedMessage = unusedMessages[Math.floor(Math.random() * unusedMessages.length)];
+            
+            // Mark it as used
+            usedMessages[type].push(selectedMessage);
+            
+            // Save to localStorage
+            localStorage.setItem('settingsUsedMessages', JSON.stringify(usedMessages));
+            
+            return selectedMessage;
+        }
+
         // Code redemption function
         function redeemCode() {
             const codeInput = document.getElementById('codeInput');
             const codeMessage = document.getElementById('codeMessage');
-            const code = codeInput.value.trim().toUpperCase();
+            const code = codeInput.value.trim();
             
             if (!code) {
-                showMessage('Please enter a code!', 'error');
+                showMessage(getRandomMessage('empty'), 'error');
                 return;
             }
             
-            // Check if code has already been redeemed
-            const redeemedCodes = JSON.parse(localStorage.getItem('redeemedCodes') || '[]');
-            if (redeemedCodes.includes(code)) {
-                showMessage('Code already redeemed!', 'error');
+            // Wait for scripts to load
+            if (!window.codeValidator || !window.unlockManager) {
+                // Try again after scripts load
+                setTimeout(() => {
+                    if (!window.codeValidator || !window.unlockManager) {
+                        showMessage('System not ready. Please try again.', 'error');
+                        return;
+                    }
+                    redeemCode();
+                }, 100);
                 return;
             }
             
-            // Valid codes and their rewards
-            const validCodes = {
-                'DISCORD-ELITE-001': { type: 'skin', reward: 'quantum', message: 'Quantum skin unlocked!' },
-                'LAUNCH2024': { type: 'skin', reward: 'cosmic', message: 'Cosmic skin unlocked!' },
-                'SNAKEMASTER': { type: 'points', reward: 1000, message: '1000 points added!' },
-                'INFINITESNAKE': { type: 'skin', reward: 'glitch', message: 'Glitch skin unlocked!' },
-                'GOLDENEYE': { type: 'multiplier', reward: 2, message: '2x score multiplier for next game!' }
-            };
+            // Use the codeValidator to validate the code
+            const result = window.codeValidator.validateCode(code);
             
-            if (validCodes[code]) {
-                const reward = validCodes[code];
-                
-                // Apply reward based on type
-                switch (reward.type) {
-                    case 'skin':
-                        const unlockedSkins = JSON.parse(localStorage.getItem('unlockedSkins') || '["default"]');
-                        if (!unlockedSkins.includes(reward.reward)) {
-                            unlockedSkins.push(reward.reward);
-                            localStorage.setItem('unlockedSkins', JSON.stringify(unlockedSkins));
-                        }
-                        break;
-                    case 'points':
-                        const playerData = JSON.parse(localStorage.getItem('playerData') || '{}');
-                        playerData.totalScore = (playerData.totalScore || 0) + reward.reward;
-                        localStorage.setItem('playerData', JSON.stringify(playerData));
-                        break;
-                    case 'multiplier':
-                        localStorage.setItem('nextGameMultiplier', reward.reward);
-                        break;
+            if (result.valid && result.skinId) {
+                // Check if skin is already unlocked
+                const unlockedSkins = JSON.parse(localStorage.getItem('unlockedSkins') || '["snake-default-green"]');
+                if (unlockedSkins.includes(result.skinId)) {
+                    showMessage('Skin already unlocked!', 'error');
+                    return;
                 }
                 
-                // Mark code as redeemed
-                redeemedCodes.push(code);
-                localStorage.setItem('redeemedCodes', JSON.stringify(redeemedCodes));
+                // Get skin data
+                const skinData = window.SKIN_DATA[result.skinId];
+                if (!skinData) {
+                    showMessage(getRandomMessage('invalid'), 'error');
+                    return;
+                }
                 
-                showMessage(reward.message, 'success');
+                // Unlock the skin
+                unlockedSkins.push(result.skinId);
+                localStorage.setItem('unlockedSkins', JSON.stringify(unlockedSkins));
+                
+                showMessage(getRandomMessage('success') + ` ${skinData.name} skin unlocked!`, 'success');
                 codeInput.value = '';
                 
-                // Refresh stats if skin was unlocked
-                if (reward.type === 'skin') {
-                    loadSkinsRarity();
-                }
+                // Refresh stats
+                loadSkinsRarity();
             } else {
-                showMessage('Invalid code!', 'error');
+                showMessage(getRandomMessage('invalid'), 'error');
             }
         }
         

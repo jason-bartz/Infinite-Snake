@@ -495,8 +495,30 @@ class UnlockManager {
 
     // Initialize method (called from main game)
     initialize() {
+        // Store previously unlocked skins before reloading
+        const previouslyUnlocked = new Set(this.unlockedSkins);
+        
         // Reload unlocked skins to sync with main game
         this.loadUnlockedSkins();
+        
+        // Check for skins that were unlocked outside the game
+        const externallyUnlocked = [];
+        const defaultSkins = ['snake-default-green', 'chirpy', 'ruby', 'lil-beans'];
+        
+        this.unlockedSkins.forEach(skinId => {
+            if (!previouslyUnlocked.has(skinId) && !defaultSkins.includes(skinId)) {
+                // This skin was unlocked outside the game (e.g., from settings page)
+                const skinData = window.SKIN_DATA[skinId];
+                if (skinData) {
+                    externallyUnlocked.push({ skinId, data: skinData });
+                }
+            }
+        });
+        
+        // Queue notifications for externally unlocked skins
+        if (externallyUnlocked.length > 0) {
+            this.notificationQueue = [...this.notificationQueue, ...externallyUnlocked];
+        }
         
         // Check all unlocks on initialization but don't show notifications yet
         this.checkAllUnlocks();
@@ -526,6 +548,13 @@ class UnlockManager {
                 this.showUnlockNotifications(this.notificationQueue);
                 this.notificationQueue = [];
             }
+            
+            // After skin notifications, check for lore unlocks
+            setTimeout(() => {
+                if (window.loreUnlockManager && window.loreUnlockManager.checkAllLoreUnlocks) {
+                    window.loreUnlockManager.checkAllLoreUnlocks();
+                }
+            }, 1000); // Give skin notifications time to display
         }, 3000);
     }
     
