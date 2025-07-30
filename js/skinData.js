@@ -553,6 +553,7 @@ const skinData = {
         rarity: 'exotic',
         bio: 'Ancient Egyptian scarab turned QA specialist, eternally debugging the hieroglyphic code of the universe. Reserved exclusively for Discord members.',
         pixelBodyColor: '#296caa',
+        pixelTailColor: '#296caa',
         unlockCriteria: {
             type: 'code',
             value: 'discord',

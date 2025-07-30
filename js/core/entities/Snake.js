@@ -12,6 +12,7 @@ const FLASH_FREQUENCY = 10;
 const MAX_CHAIN_DEPTH = 3;
 const INITIAL_SNAKE_LENGTH = 10;
 const DEFAULT_MAX_VISIBLE_ELEMENTS = 6;
+const MAX_SNAKE_LENGTH = 750;
 
 // Game configuration constants with fallback defaults
 const SNAKE_SPEED = window.SNAKE_SPEED || 4.761;
@@ -771,8 +772,15 @@ class Snake {
         }
         
         this.elementsEaten++;
-        this.length += 2;
-        this.score += 100;
+        
+        // Cap snake length at MAX_SNAKE_LENGTH
+        if (this.length < MAX_SNAKE_LENGTH) {
+            this.length += 2;
+            this.score += 100;
+        } else {
+            // At max length, convert growth to bonus points
+            this.score += 150; // 100 base + 50 bonus for not growing
+        }
         
         if (this.isPlayer && this.score > window.highScore) {
             window.highScore = this.score;
@@ -1247,18 +1255,12 @@ class Snake {
                 screen.y < -margin || screen.y > window.canvas.height + margin) continue;
             
             // Segment size tapering calculation
-            const segmentProgress = i / (this.segments.length - 1); // 0 at head, 1 at tail
+            // Keep full size for entire body except the very last segment (tail tip)
+            let taperMultiplier = 1.0;
             
-            // Use a more gradual tapering curve
-            // Keep full size for first 40% of body, then gradually taper
-            let taperMultiplier;
-            if (segmentProgress < 0.4) {
-                taperMultiplier = 1.0; // Full size for first 40%
-            } else {
-                // Smooth tapering from 40% to end
-                const taperProgress = (segmentProgress - 0.4) / 0.6; // Normalize to 0-1 for taper region
-                // Use a power curve for smooth tapering, minimum 0.3x size at tail
-                taperMultiplier = 1.0 - (taperProgress * taperProgress * 0.7); // Quadratic taper to 0.3x
+            // Only taper the very last segment for a rounded tail
+            if (i === this.segments.length - 1) {
+                taperMultiplier = 0.7; // Slightly smaller for rounded tail tip
             }
             
             const effectiveSegmentSize = baseSegmentSize * taperMultiplier;
