@@ -40,6 +40,9 @@ class PlayerStats {
             if (parsed.stats?.lifetime?.daysPlayed) {
                 parsed.stats.lifetime.daysPlayed = new Set(parsed.stats.lifetime.daysPlayed);
             }
+            if (parsed.stats?.lifetime?.monthlyLeaderboardWins) {
+                parsed.stats.lifetime.monthlyLeaderboardWins = new Set(parsed.stats.lifetime.monthlyLeaderboardWins);
+            }
             if (parsed.stats?.achievements?.playedDuringHours) {
                 parsed.stats.achievements.playedDuringHours = new Set(parsed.stats.achievements.playedDuringHours);
             }
@@ -159,6 +162,7 @@ class PlayerStats {
                 const toStore = JSON.parse(JSON.stringify(this.stats));
                 toStore.stats.lifetime.elementsDiscovered = Array.from(this.stats.stats.lifetime.elementsDiscovered);
                 toStore.stats.lifetime.daysPlayed = Array.from(this.stats.stats.lifetime.daysPlayed);
+                toStore.stats.lifetime.monthlyLeaderboardWins = Array.from(this.stats.stats.lifetime.monthlyLeaderboardWins);
                 toStore.stats.achievements.playedDuringHours = Array.from(this.stats.stats.achievements.playedDuringHours);
                 toStore.stats.achievements.playedDuringMonths = Array.from(this.stats.stats.achievements.playedDuringMonths);
                 

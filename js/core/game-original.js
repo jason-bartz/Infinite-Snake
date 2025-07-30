@@ -9796,6 +9796,14 @@
                     // Record the monthly rank in player stats (if available)
                     if (window.playerStats && typeof monthlyRank === 'number') {
                         window.playerStats.recordLeaderboardRank(monthlyRank, true);
+                        
+                        // If player achieved first place on monthly leaderboard, record the win
+                        if (monthlyRank === 1) {
+                            const now = new Date();
+                            const month = now.getMonth() + 1; // 1-12
+                            const year = now.getFullYear();
+                            window.playerStats.recordMonthlyLeaderboardWin(month, year);
+                        }
                     } else if (window.playerStats && typeof rank === 'number' && monthlyRank === null) {
                         // Fallback to daily rank for backward compatibility
                         window.playerStats.recordLeaderboardRank(rank, true);
@@ -9946,6 +9954,14 @@
                             // Record the monthly rank in player stats
                             if (window.playerStats && typeof result.monthly_rank === 'number') {
                                 window.playerStats.recordLeaderboardRank(result.monthly_rank, true);
+                                
+                                // If player achieved first place on monthly leaderboard, record the win
+                                if (result.monthly_rank === 1) {
+                                    const now = new Date();
+                                    const month = now.getMonth() + 1; // 1-12
+                                    const year = now.getFullYear();
+                                    window.playerStats.recordMonthlyLeaderboardWin(month, year);
+                                }
                             }
                         } else {
                             // Old response format
@@ -10035,6 +10051,14 @@
                             // Record the monthly rank in player stats
                             if (window.playerStats && typeof result.monthly_rank === 'number') {
                                 window.playerStats.recordLeaderboardRank(result.monthly_rank, true);
+                                
+                                // If player achieved first place on monthly leaderboard, record the win
+                                if (result.monthly_rank === 1) {
+                                    const now = new Date();
+                                    const month = now.getMonth() + 1; // 1-12
+                                    const year = now.getFullYear();
+                                    window.playerStats.recordMonthlyLeaderboardWin(month, year);
+                                }
                             }
                         } else {
                             // Old response format
