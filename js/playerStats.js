@@ -629,6 +629,7 @@ class PlayerStats {
             localStorage.removeItem('infiniteSnakeUnlocks');
             localStorage.removeItem('unlockedSkins');
             localStorage.removeItem('currentSkin');
+            localStorage.removeItem('viewedSkins');
             // Reset skin selection
             localStorage.removeItem('infiniteSnakeSkinData');
             // Reset discovered elements
@@ -638,12 +639,28 @@ class PlayerStats {
             localStorage.removeItem('gameSettings');
             // Reset element combos (if any)
             localStorage.removeItem('elementCombinations');
-            // Reset high score
+            // Reset high score and best scores
             localStorage.removeItem('highScore');
+            localStorage.removeItem('bestScore');
+            localStorage.removeItem('bestDiscoveries');
+            localStorage.removeItem('bestKills');
             // Reset leaderboard settings
             localStorage.removeItem('leaderboardCollapsed');
+            localStorage.removeItem('scoreboardCollapsed');
+            localStorage.removeItem('mobileScoreboardCollapsed');
             localStorage.removeItem('lastUsername');
-            
+            localStorage.removeItem('playerName');
+            // Reset game progression
+            localStorage.removeItem('defeatedBosses');
+            localStorage.removeItem('elementBankSlots');
+            localStorage.removeItem('gamesPlayed');
+            localStorage.removeItem('sessionCount');
+            localStorage.removeItem('lastWelcomeShown');
+            // Reset other features
+            localStorage.removeItem('debugMode');
+            localStorage.removeItem('settingsUsedMessages');
+            localStorage.removeItem('infiniteSnakeLore');
+            localStorage.removeItem('infiniteSnakeRedeemedCodes');
             
             // Reload the page
             window.location.reload();
