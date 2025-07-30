@@ -101,7 +101,7 @@ class PlayerStats {
                     playedDuringMonths: new Set(),
                     gamesInTimeWindows: {},
                     bossKills: 0,
-                    bestWeeklyRank: null
+                    bestMonthlyRank: null
                 }
             }
         };
@@ -138,9 +138,11 @@ class PlayerStats {
             if (oldStats.stats.achievements) {
                 Object.assign(newStats.stats.achievements, oldStats.stats.achievements);
                 
-                // Migrate bestDailyRank to bestWeeklyRank if it exists
-                if (oldStats.stats.achievements.bestDailyRank !== undefined) {
-                    newStats.stats.achievements.bestWeeklyRank = oldStats.stats.achievements.bestDailyRank;
+                // Migrate bestDailyRank/bestWeeklyRank to bestMonthlyRank if it exists
+                if (oldStats.stats.achievements.bestWeeklyRank !== undefined) {
+                    newStats.stats.achievements.bestMonthlyRank = oldStats.stats.achievements.bestWeeklyRank;
+                } else if (oldStats.stats.achievements.bestDailyRank !== undefined) {
+                    newStats.stats.achievements.bestMonthlyRank = oldStats.stats.achievements.bestDailyRank;
                 }
             }
         }
@@ -349,15 +351,16 @@ class PlayerStats {
         }
     }
 
-    recordLeaderboardRank(rank) {
+    recordLeaderboardRank(rank, isMonthly = true) {
         // Only record numeric ranks (not 'Submitted' or other non-numeric values)
         if (typeof rank === 'number' && rank > 0) {
-            // Note: The API returns 'daily_rank' but it's actually the weekly rank
-            // since the game no longer has daily leaderboards
-            if (this.stats.stats.achievements.bestWeeklyRank === null || 
-                rank < this.stats.stats.achievements.bestWeeklyRank) {
-                this.stats.stats.achievements.bestWeeklyRank = rank;
-                this.saveStats();
+            // Track monthly rank
+            if (isMonthly) {
+                if (this.stats.stats.achievements.bestMonthlyRank === null || 
+                    rank < this.stats.stats.achievements.bestMonthlyRank) {
+                    this.stats.stats.achievements.bestMonthlyRank = rank;
+                    this.saveStats();
+                }
             }
         }
     }
@@ -551,7 +554,12 @@ class PlayerStats {
     }
     
     getBestWeeklyRank() {
-        return this.stats.stats.achievements.bestWeeklyRank;
+        // Deprecated - use getBestMonthlyRank instead
+        return this.stats.stats.achievements.bestMonthlyRank;
+    }
+    
+    getBestMonthlyRank() {
+        return this.stats.stats.achievements.bestMonthlyRank;
     }
 
     checkLoreUnlocks() {

@@ -121,14 +121,14 @@ export async function submitScore(username, score, elementsDiscovered, playTime,
       throw new Error(responseData.error || 'Failed to submit score');
     }
     
-    // Return both daily and weekly ranks
-    // For backward compatibility, if only daily_rank is requested (no weekly_rank in response),
+    // Return both daily and monthly ranks
+    // For backward compatibility, if only daily_rank is requested (no monthly_rank in response),
     // return just the daily_rank as before
-    if (responseData.weekly_rank !== undefined) {
+    if (responseData.monthly_rank !== undefined) {
       // New API that returns both ranks
       return {
         daily_rank: responseData.daily_rank,
-        weekly_rank: responseData.weekly_rank
+        monthly_rank: responseData.monthly_rank
       };
     }
     

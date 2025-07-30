@@ -871,21 +871,21 @@ export default async function handler(req, res) {
         // Continue anyway - rank is not critical
       }
       
-      // Get player's rank in weekly leaderboard
-      let weeklyRank = null;
+      // Get player's rank in monthly leaderboard
+      let monthlyRank = null;
       try {
-        // First verify the weekly key exists and has entries
-        const weeklyCount = await redis.zcard(keys.weekly);
-        console.log(`Weekly leaderboard (${keys.weekly}) has ${weeklyCount} entries`);
+        // First verify the monthly key exists and has entries
+        const monthlyCount = await redis.zcard(keys.monthly);
+        console.log(`Monthly leaderboard (${keys.monthly}) has ${monthlyCount} entries`);
         
-        if (weeklyCount > 0) {
+        if (monthlyCount > 0) {
           // Try to find the exact member in the sorted set
-          const allWeeklyScores = await redis.zrange(keys.weekly, 0, -1, { rev: true });
+          const allMonthlyScores = await redis.zrange(keys.monthly, 0, -1, { rev: true });
           let foundIndex = -1;
           
-          for (let i = 0; i < allWeeklyScores.length; i++) {
+          for (let i = 0; i < allMonthlyScores.length; i++) {
             try {
-              const memberData = JSON.parse(allWeeklyScores[i]);
+              const memberData = JSON.parse(allMonthlyScores[i]);
               if (memberData.username.toLowerCase() === cleanUsername.toLowerCase()) {
                 foundIndex = i;
                 break;
@@ -896,14 +896,14 @@ export default async function handler(req, res) {
           }
           
           if (foundIndex >= 0) {
-            weeklyRank = foundIndex;
-            console.log(`Found player at rank ${weeklyRank + 1} in weekly leaderboard`);
+            monthlyRank = foundIndex;
+            console.log(`Found player at rank ${monthlyRank + 1} in monthly leaderboard`);
           } else {
-            console.log('Player not found in weekly leaderboard entries');
+            console.log('Player not found in monthly leaderboard entries');
           }
         }
       } catch (rankError) {
-        console.error('Failed to get weekly rank:', rankError);
+        console.error('Failed to get monthly rank:', rankError);
         // Continue anyway - rank is not critical
       }
       
@@ -935,7 +935,7 @@ export default async function handler(req, res) {
       return res.status(200).json({
         success: true,
         daily_rank: dailyRank !== null ? dailyRank + 1 : null,
-        weekly_rank: weeklyRank !== null ? weeklyRank + 1 : null,
+        monthly_rank: monthlyRank !== null ? monthlyRank + 1 : null,
         score_id: scoreEntry.id,
         country: country
       });
