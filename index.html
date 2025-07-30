@@ -239,12 +239,12 @@
     <link rel="alternate" hreflang="en" href="https://infinitesnake.io" />
     <link rel="alternate" hreflang="x-default" href="https://infinitesnake.io" />
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/skin-selection.css?v=1.9.8">
-    <link rel="stylesheet" href="css/cosmic-ui-override.css?v=1.9.8">
-    <link rel="stylesheet" href="css/unlock-notifications.css?v=1.9.8">
-    <link rel="stylesheet" href="css/discovery-feed-gradients.css?v=1.9.8">
-    <link rel="stylesheet" href="css/cosmic-ui-theme.css?v=1.9.8">
-    <link rel="stylesheet" href="css/element-bank-compact.css?v=1.9.8">
+    <link rel="stylesheet" href="css/skin-selection.css?v=1.10.0">
+    <link rel="stylesheet" href="css/cosmic-ui-override.css?v=1.10.0">
+    <link rel="stylesheet" href="css/unlock-notifications.css?v=1.10.0">
+    <link rel="stylesheet" href="css/discovery-feed-gradients.css?v=1.10.0">
+    <link rel="stylesheet" href="css/cosmic-ui-theme.css?v=1.10.0">
+    <link rel="stylesheet" href="css/element-bank-compact.css?v=1.10.0">
     <style>
         /* SNES-Era UI Theme with Cosmic Colors */
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
@@ -2637,6 +2637,79 @@
             }
         }
         
+        /* Hero video responsive styles */
+        @media (max-width: 1400px) {
+            #splashContent > div:first-child {
+                gap: 60px !important;
+            }
+        }
+        
+        @media (max-width: 1100px) {
+            #splashContent > div:first-child {
+                flex-direction: column-reverse !important;
+                gap: 40px !important;
+                padding: 0 20px !important;
+            }
+            
+            #heroVideoSection {
+                width: 100% !important;
+                max-width: 700px !important;
+                margin: 0 auto;
+                order: -1;
+            }
+            
+            #heroVideoSection p {
+                font-size: 10px !important;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            #splashContent > div:first-child {
+                flex-direction: row !important;
+                gap: 30px !important;
+            }
+            
+            #splashContent > div:first-child > div:first-child {
+                flex: 1.2 !important;
+            }
+            
+            #heroVideoSection {
+                flex: 1 !important;
+                max-width: 300px !important;
+            }
+            
+            #splashScreen p {
+                font-size: 12px !important;
+                line-height: 1.4 !important;
+            }
+            
+            #splashLogo {
+                width: 400px !important;
+            }
+            
+            #heroVideoSection p {
+                font-size: 8px !important;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            #splashContent > div:first-child {
+                gap: 20px !important;
+            }
+            
+            #heroVideoSection {
+                max-width: 200px !important;
+            }
+            
+            #splashScreen p {
+                font-size: 10px !important;
+            }
+            
+            #heroVideoSection p {
+                font-size: 7px !important;
+            }
+        }
+        
         /* Responsive adjustments */
         @media (max-width: 1200px) {
             .player-info-box,
@@ -4078,7 +4151,7 @@
 <body>
 <!-- Version Display -->
 <div id="versionDisplay" style="position: relative; text-align: center; margin-top: 10px; z-index: 100; color: #666; font-family: 'Press Start 2P', monospace; font-size: 10px; pointer-events: none;">
-    v<span id="versionNumber">1.9.8</span>
+    v<span id="versionNumber">1.10.0</span>
 </div>
 
 <!-- Immediate Mobile Detection -->
@@ -4095,6 +4168,20 @@
     <!-- Persistent Star Background - REMOVED to eliminate transition star rendering -->
     <!-- <canvas id="persistentStarsCanvas" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none;"></canvas> -->
     
+    <!-- Video Modal -->
+    <div id="videoModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.9); z-index: 10000; align-items: center; justify-content: center;">
+        <div style="position: relative; width: 90%; max-width: 1200px; margin: 0 auto;">
+            <button onclick="document.getElementById('videoModal').style.display = 'none'" 
+                    style="position: absolute; top: -40px; right: 0; background: none; border: none; color: #4ecdc4; font-size: 30px; cursor: pointer; font-family: 'Press Start 2P', monospace;">
+                X
+            </button>
+            <div style="position: relative; padding-bottom: 54.83870967741935%; height: 0;">
+                <iframe id="loomVideo" src="" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen 
+                        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe>
+            </div>
+        </div>
+    </div>
+    
     <!-- Splash Screen -->
     <div id="splashScreen">
         <div style="position: absolute; top: 20px; left: 20px; z-index: 10;">
@@ -4107,38 +4194,60 @@
             <a href="/profile.html" style="color: #4ecdc4; text-decoration: none; font-family: 'Press Start 2P', monospace; font-size: 10px;">👤 Profile</a>
         </div>
         <div id="splashContent">
-            <img src="infinite-snake-preview-splash-logo.png" alt="Infinite Snake game logo - A cosmic snake forming an infinity symbol" id="splashLogo" style="width: 800px; margin-bottom: 30px;" onerror="this.style.display='none'; document.getElementById('splashTitle').style.display='block';">
-            <h1 id="splashTitle">Infinite Snake</h1>
-            <p>Welcome to what's left.<br><br>
-            The Universe collapsed, scattered its contents across infinite coils of nothing. You're the Infinite Snake - part cleanup crew, part living library.<br><br>
-            Collect fragments of reality. Merge them. See what happens. Rebuild the Cosmos one combination at a time. Maybe you'll figure out what we forgot.<br><br>
-            Just remember: you're not the only thing moving in the dark…</p>
-            <div style="margin: 20px 0;">
-                <input type="text" id="playerNameInput" placeholder="Enter your name" 
-                       style="width: 300px; max-width: 80%; padding: 12px 20px; 
-                              font-family: 'Press Start 2P', monospace; font-size: 12px; 
-                              background: rgba(0, 0, 0, 0.8); 
-                              border: 4px solid #fff; 
-                              color: #4ecdc4;  
-                              border-radius: 0; outline: none;
-                              box-shadow: 
-                                inset 2px 2px 0 #2a2a4a,
-                                inset -2px -2px 0 #000,
-                                4px 4px 0 rgba(0,0,0,0.5);
-                              transition: none;
-                              display: block;
-                              margin: 0 auto;
-                              text-align: center;"
-                       maxlength="30">
-                <p style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #888; margin-top: 8px; text-align: center;">
-                    ENTER YOUR PLAYER NAME
-                </p>
+            <div style="display: flex; align-items: center; gap: 100px; max-width: 1800px; margin: 0 auto; padding: 0 40px;">
+                <div style="flex: 1; max-width: 700px;">
+                    <img src="infinite-snake-preview-splash-logo.png" alt="Infinite Snake game logo - A cosmic snake forming an infinity symbol" id="splashLogo" style="width: 800px; max-width: 100%; margin-bottom: 30px;" onerror="this.style.display='none'; document.getElementById('splashTitle').style.display='block';">
+                    <h1 id="splashTitle" style="text-align: left; margin-left: 0;">Infinite Snake</h1>
+                    <p style="text-align: left; margin-left: 0;">Welcome to what's left.<br><br>
+                    The Universe collapsed, scattered its contents across infinite coils of nothing. You're the Infinite Snake - part cleanup crew, part living library.<br><br>
+                    Collect fragments of reality. Merge them. See what happens. Rebuild the Cosmos one combination at a time. Maybe you'll figure out what we forgot.<br><br>
+                    Just remember: you're not the only thing moving in the dark…</p>
+                    <div style="margin: 20px 0;">
+                        <input type="text" id="playerNameInput" placeholder="Enter your name" 
+                               style="width: 300px; max-width: 80%; padding: 12px 20px; 
+                                      font-family: 'Press Start 2P', monospace; font-size: 12px; 
+                                      background: rgba(0, 0, 0, 0.8); 
+                                      border: 4px solid #fff; 
+                                      color: #4ecdc4;  
+                                      border-radius: 0; outline: none;
+                                      box-shadow: 
+                                        inset 2px 2px 0 #2a2a4a,
+                                        inset -2px -2px 0 #000,
+                                        4px 4px 0 rgba(0,0,0,0.5);
+                                      transition: none;
+                                      display: block;
+                                      margin: 0;
+                                      text-align: center;"
+                               maxlength="30">
+                        <p style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #888; margin-top: 8px; text-align: left;">
+                            ENTER YOUR PLAYER NAME
+                        </p>
+                    </div>
+                    <button id="startButton" style="margin-left: 0;">ENTER THE VOID</button>
+                    <div id="assetLoadingStatus" style="margin-top: 20px; font-family: 'Press Start 2P', monospace; font-size: 10px; color: #4ecdc4; min-height: 20px; text-align: left;">
+                        <span id="loadingText" style="display: none;">Loading assets...</span>
+                    </div>
+                </div>
+                <div id="heroVideoSection" style="flex: 2; max-width: none; position: relative;">
+                    <div style="position: relative; width: 100%; padding-bottom: 56.25%; background: rgba(0, 0, 0, 0.8); border: 4px solid #4ecdc4; box-shadow: 0 0 20px rgba(78, 205, 196, 0.5); overflow: hidden; cursor: pointer;"
+                         onclick="document.getElementById('videoModal').style.display = 'flex'; document.getElementById('loomVideo').src = 'https://www.loom.com/embed/cb0e142aae8544748f270faf88cda78d?sid=5f7df640-70fc-4006-a449-e315f823ce65';">
+                        <video id="heroIntroVideo" 
+                               style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;" 
+                               autoplay 
+                               loop 
+                               muted 
+                               playsinline
+                               preload="auto">
+                            <source src="video/hero-gameplay-intro.mp4" type="video/mp4">
+                        </video>
+                    </div>
+                    <p style="font-family: 'Press Start 2P', monospace; font-size: 12px; color: #4ecdc4; 
+                              text-shadow: 2px 2px 0 #000; margin-top: 15px; text-align: center;">
+                        CLICK TO WATCH FULL GAMEPLAY VIDEO
+                    </p>
+                </div>
             </div>
-            <button id="startButton">ENTER THE VOID</button>
             <div class="scroll-indicator" onclick="document.getElementById('splashScreen').scrollBy({top: window.innerHeight, behavior: 'smooth'})"></div>
-            <div id="assetLoadingStatus" style="margin-top: 20px; font-family: 'Press Start 2P', monospace; font-size: 10px; color: #4ecdc4;  min-height: 20px;">
-                <span id="loadingText" style="display: none;">Loading assets...</span>
-            </div>
         </div>
         
         <!-- Infinite Snake Info Section -->
@@ -6794,8 +6903,8 @@
     </style>
 
     <!-- External Dependencies -->
-    <script src="elements/data/loader.js?v=1.9.8"></script>
-    <script src="js/asset-preloader.js?v=1.9.8"></script>
+    <script src="elements/data/loader.js?v=1.10.0"></script>
+    <script src="js/asset-preloader.js?v=1.10.0"></script>
     
     <!-- Version System -->
     <script>
@@ -6817,45 +6926,45 @@
     </script>
     
     <!-- Skin System -->
-    <script src="js/skinData.js?v=1.9.8" defer></script>
-    <script src="js/skinIdMapping.js?v=1.9.8" defer></script>
-    <script src="js/codeValidator.js?v=1.9.8" defer></script>
-    <script src="js/loreData.js?v=1.9.8" defer></script>
-    <script src="js/playerStats.js?v=1.9.8" defer></script>
-    <script src="js/killstreakManager.js?v=1.9.8" defer></script>
-    <script src="js/unlockManager.js?v=1.9.8" defer></script>
-    <script src="js/loreUnlockManager.js?v=1.9.8" defer></script>
-    <script src="js/nameGenerator.js?v=1.9.8" defer></script>
+    <script src="js/skinData.js?v=1.10.0" defer></script>
+    <script src="js/skinIdMapping.js?v=1.10.0" defer></script>
+    <script src="js/codeValidator.js?v=1.10.0" defer></script>
+    <script src="js/loreData.js?v=1.10.0" defer></script>
+    <script src="js/playerStats.js?v=1.10.0" defer></script>
+    <script src="js/killstreakManager.js?v=1.10.0" defer></script>
+    <script src="js/unlockManager.js?v=1.10.0" defer></script>
+    <script src="js/loreUnlockManager.js?v=1.10.0" defer></script>
+    <script src="js/nameGenerator.js?v=1.10.0" defer></script>
     
     <!-- Rendering Systems -->
-    <script src="js/webgl-renderer.js?v=1.9.8"></script>
-    <script src="js/quadtree.js?v=1.9.8"></script>
-    <script src="js/performance-optimizer.js?v=1.9.8"></script>
-    <script src="js/math-optimizations.js?v=1.9.8"></script>
-    <script src="js/texture-atlas.js?v=1.9.8"></script>
-    <script src="js/gpu-particle-system.js?v=1.9.8"></script>
-    <script src="js/mobile-star-renderer.js?v=1.9.8"></script>
-    <script src="js/battery-optimizer.js?v=1.9.8"></script>
-    <script src="js/mobile-background-optimizer.js?v=1.9.8"></script>
-    <script src="js/mobile-background-integration.js?v=1.9.8"></script>
+    <script src="js/webgl-renderer.js?v=1.10.0"></script>
+    <script src="js/quadtree.js?v=1.10.0"></script>
+    <script src="js/performance-optimizer.js?v=1.10.0"></script>
+    <script src="js/math-optimizations.js?v=1.10.0"></script>
+    <script src="js/texture-atlas.js?v=1.10.0"></script>
+    <script src="js/gpu-particle-system.js?v=1.10.0"></script>
+    <script src="js/mobile-star-renderer.js?v=1.10.0"></script>
+    <script src="js/battery-optimizer.js?v=1.10.0"></script>
+    <script src="js/mobile-background-optimizer.js?v=1.10.0"></script>
+    <script src="js/mobile-background-integration.js?v=1.10.0"></script>
     
     <!-- Modernized Systems -->
-    <script src="js/core/module-loader.js?v=1.9.8"></script>
-    <script src="js/core/init-sequence.js?v=1.9.8" type="module"></script>
+    <script src="js/core/module-loader.js?v=1.10.0"></script>
+    <script src="js/core/init-sequence.js?v=1.10.0" type="module"></script>
     
     <!-- Logger (must load before game-original.js) -->
-    <script src="js/core/logger.js?v=1.9.8"></script>
+    <script src="js/core/logger.js?v=1.10.0"></script>
     <!-- Game Entities -->
     <!-- Particle and ParticlePool are loaded by the module system -->
     <!-- Spaceship modules disabled - not using spaceships -->
-    <!-- <script src="js/core/entities/Spaceship.js?v=1.9.8" type="module"></script> -->
-    <!-- <script src="js/core/entities/SpaceshipManager.js?v=1.9.8" type="module"></script> -->
+    <!-- <script src="js/core/entities/Spaceship.js?v=1.10.0" type="module"></script> -->
+    <!-- <script src="js/core/entities/SpaceshipManager.js?v=1.10.0" type="module"></script> -->
     
     <!-- Main Game Code (extracted from inline script) -->
-    <script src="js/core/game-original.js?v=1.9.8" defer></script>
+    <script src="js/core/game-original.js?v=1.10.0" defer></script>
     
     <!-- Performance Integration (must load after game-original.js) -->
-    <script src="js/performance-integration.js?v=1.9.8" defer></script>
+    <script src="js/performance-integration.js?v=1.10.0" defer></script>
     
     
     <!-- Integration -->
