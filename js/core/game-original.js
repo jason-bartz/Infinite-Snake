@@ -9781,10 +9781,23 @@
                 // If we got here, submission was successful
                 if (result !== null && result !== undefined) {
                     markScoreSubmitted();
-                    const rank = result.daily_rank || result.rank || result || 'Submitted';
+                    let rank = 'Submitted';
+                    let weeklyRank = null;
                     
-                    // Record the rank in player stats
-                    if (window.playerStats && typeof rank === 'number') {
+                    // Handle new response format with both daily and weekly ranks
+                    if (typeof result === 'object' && result.weekly_rank !== undefined) {
+                        rank = result.daily_rank || 'Submitted';
+                        weeklyRank = result.weekly_rank;
+                    } else {
+                        // Old response format - single rank value
+                        rank = result.daily_rank || result.rank || result || 'Submitted';
+                    }
+                    
+                    // Record the weekly rank in player stats (if available)
+                    if (window.playerStats && typeof weeklyRank === 'number') {
+                        window.playerStats.recordLeaderboardRank(weeklyRank);
+                    } else if (window.playerStats && typeof rank === 'number' && weeklyRank === null) {
+                        // Fallback to daily rank for backward compatibility
                         window.playerStats.recordLeaderboardRank(rank);
                     }
                     
@@ -9805,6 +9818,7 @@
                             </span>
                             <div style="color: #4ecdc4; font-size: 18px; margin-top: 8px;">
                                 ${typeof rank === 'number' ? `🏆 Daily Rank: #${rank}` : ''}
+                                ${typeof weeklyRank === 'number' ? `<br>📊 Weekly Rank: #${weeklyRank}` : ''}
                             </div>
                         </div>`;
                     
@@ -9926,7 +9940,21 @@
                         finalKills,
                         window.currentPlayerSkin || 'snake-default-green'
                     ).then(result => {
-                        dailyRank = result;
+                        // Handle new response format with both daily and weekly ranks
+                        if (typeof result === 'object' && result.weekly_rank !== undefined) {
+                            dailyRank = result.daily_rank || 'Submitted';
+                            // Record the weekly rank in player stats
+                            if (window.playerStats && typeof result.weekly_rank === 'number') {
+                                window.playerStats.recordLeaderboardRank(result.weekly_rank);
+                            }
+                        } else {
+                            // Old response format
+                            dailyRank = result;
+                            // Record as weekly rank for backward compatibility
+                            if (window.playerStats && typeof result === 'number') {
+                                window.playerStats.recordLeaderboardRank(result);
+                            }
+                        }
                         markScoreSubmitted();
                         isSubmitting = false;
                         // Re-render screen with rank
@@ -10001,7 +10029,21 @@
                         finalKills,
                         window.currentPlayerSkin || 'snake-default-green'
                     ).then(result => {
-                        dailyRank = result;
+                        // Handle new response format with both daily and weekly ranks
+                        if (typeof result === 'object' && result.weekly_rank !== undefined) {
+                            dailyRank = result.daily_rank || 'Submitted';
+                            // Record the weekly rank in player stats
+                            if (window.playerStats && typeof result.weekly_rank === 'number') {
+                                window.playerStats.recordLeaderboardRank(result.weekly_rank);
+                            }
+                        } else {
+                            // Old response format
+                            dailyRank = result;
+                            // Record as weekly rank for backward compatibility
+                            if (window.playerStats && typeof result === 'number') {
+                                window.playerStats.recordLeaderboardRank(result);
+                            }
+                        }
                         markScoreSubmitted();
                         isSubmitting = false;
                         updateGameOverScreen();

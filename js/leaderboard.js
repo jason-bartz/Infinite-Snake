@@ -121,11 +121,18 @@ export async function submitScore(username, score, elementsDiscovered, playTime,
       throw new Error(responseData.error || 'Failed to submit score');
     }
     
-    // Daily rank: responseData.daily_rank
+    // Return both daily and weekly ranks
+    // For backward compatibility, if only daily_rank is requested (no weekly_rank in response),
+    // return just the daily_rank as before
+    if (responseData.weekly_rank !== undefined) {
+      // New API that returns both ranks
+      return {
+        daily_rank: responseData.daily_rank,
+        weekly_rank: responseData.weekly_rank
+      };
+    }
     
-    // Return the daily rank for the UI, or a special value if null
-    // If daily_rank is null, it means the score was submitted but rank couldn't be determined
-    // (possibly because leaderboard is still calculating or score is outside top ranks)
+    // Old API behavior for backward compatibility
     if (responseData.daily_rank === null) {
       // Score submitted but rank is null
       return 'Submitted'; // Return a string to indicate successful submission without rank

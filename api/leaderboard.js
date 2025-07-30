@@ -871,6 +871,42 @@ export default async function handler(req, res) {
         // Continue anyway - rank is not critical
       }
       
+      // Get player's rank in weekly leaderboard
+      let weeklyRank = null;
+      try {
+        // First verify the weekly key exists and has entries
+        const weeklyCount = await redis.zcard(keys.weekly);
+        console.log(`Weekly leaderboard (${keys.weekly}) has ${weeklyCount} entries`);
+        
+        if (weeklyCount > 0) {
+          // Try to find the exact member in the sorted set
+          const allWeeklyScores = await redis.zrange(keys.weekly, 0, -1, { rev: true });
+          let foundIndex = -1;
+          
+          for (let i = 0; i < allWeeklyScores.length; i++) {
+            try {
+              const memberData = JSON.parse(allWeeklyScores[i]);
+              if (memberData.username.toLowerCase() === cleanUsername.toLowerCase()) {
+                foundIndex = i;
+                break;
+              }
+            } catch (e) {
+              continue;
+            }
+          }
+          
+          if (foundIndex >= 0) {
+            weeklyRank = foundIndex;
+            console.log(`Found player at rank ${weeklyRank + 1} in weekly leaderboard`);
+          } else {
+            console.log('Player not found in weekly leaderboard entries');
+          }
+        }
+      } catch (rankError) {
+        console.error('Failed to get weekly rank:', rankError);
+        // Continue anyway - rank is not critical
+      }
+      
       // Also update user's best score
       const userKey = `user:${username.toLowerCase()}:best`;
       const currentBestStr = await redis.get(userKey);
@@ -899,6 +935,7 @@ export default async function handler(req, res) {
       return res.status(200).json({
         success: true,
         daily_rank: dailyRank !== null ? dailyRank + 1 : null,
+        weekly_rank: weeklyRank !== null ? weeklyRank + 1 : null,
         score_id: scoreEntry.id,
         country: country
       });
