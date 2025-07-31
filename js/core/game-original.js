@@ -240,7 +240,9 @@
         let gameTarget = 0;
         let deathCount = 0;
         let camera = { x: WORLD_SIZE / 2, y: WORLD_SIZE / 2 };
-        let cameraZoom = isMobile ? 0.916 : 1.15; // Mobile zoomed out by 15% for more visibility, desktop standard zoom
+        // Check if mobile phone specifically
+        const isMobilePhone = window.MobilePhoneDetector && window.MobilePhoneDetector.isPhone();
+        let cameraZoom = isMobilePhone ? 0.5 : (isMobile ? 0.916 : 1.15); // Phone: 50% zoom, Tablet: 15% zoomed out, Desktop: standard
         
         let lastTime = 0;
         let frameCount = 0;
@@ -10513,7 +10515,8 @@
             if (deathSequenceActive) {
                 deathSequenceActive = false;
                 deathCameraAnimation.active = false;
-                cameraZoom = isMobile ? 0.916 : 1.15; // Mobile zoomed out by 15% (0.9375 * 0.85 ≈ 0.916), desktop unchanged
+                const isMobilePhone = window.MobilePhoneDetector && window.MobilePhoneDetector.isPhone();
+                cameraZoom = isMobilePhone ? 0.5 : (isMobile ? 0.916 : 1.15); // Phone: 50% zoom, Tablet: 15% zoomed out, Desktop: standard
             }
             
             // Reset death processed flag
@@ -10581,7 +10584,8 @@
             if (deathSequenceActive) {
                 deathSequenceActive = false;
                 deathCameraAnimation.active = false;
-                cameraZoom = isMobile ? 0.916 : 1.15;
+                const isMobilePhone = window.MobilePhoneDetector && window.MobilePhoneDetector.isPhone();
+                cameraZoom = isMobilePhone ? 0.5 : (isMobile ? 0.916 : 1.15);
             }
             
             // Trigger immediate respawn
@@ -14734,7 +14738,8 @@
                     camera.y = WORLD_SIZE / 2;
                     
                     // Reset camera zoom to default
-                    cameraZoom = isMobile ? 0.916 : 1.15; // Mobile zoomed out by 15% (0.9375 * 0.85 ≈ 0.916), desktop unchanged
+                    const isMobilePhone = window.MobilePhoneDetector && window.MobilePhoneDetector.isPhone();
+                cameraZoom = isMobilePhone ? 0.5 : (isMobile ? 0.916 : 1.15); // Phone: 50% zoom, Tablet: 15% zoomed out, Desktop: standard
                     deathCameraAnimation.active = false;
                     
                     // Reset respawn timer
