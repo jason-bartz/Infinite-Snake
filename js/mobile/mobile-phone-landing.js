@@ -108,20 +108,21 @@ class MobilePhoneLanding {
                     position: relative;
                     width: 90%;
                     max-width: 350px;
-                    aspect-ratio: 16/9;
+                    height: 200px;
                     margin-bottom: 30px;
                     cursor: pointer;
                     border: 3px solid #4ecdc4;
                     border-radius: 10px;
                     overflow: hidden;
                     box-shadow: 0 0 20px rgba(78, 205, 196, 0.5);
+                    background: #000;
                 " onclick="document.getElementById('mobileVideoModal').style.display = 'flex';">
                     <video 
                         autoplay 
                         muted 
                         loop 
                         playsinline
-                        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;"
+                        style="width: 100%; height: 100%; object-fit: contain;"
                     >
                         <source src="video/hero-gameplay-intro.mp4" type="video/mp4">
                     </video>
@@ -159,7 +160,7 @@ class MobilePhoneLanding {
                         color: #fff;
                         margin-bottom: 20px;
                     ">
-                        Infinite Snake was designed as a full desktop browser experience and iPad web app.
+                        Infinite Snake was designed as a full desktop browser experience and iPad web app. Please visit from one of those devices to play!
                     </p>
                     
                     
@@ -174,26 +175,23 @@ class MobilePhoneLanding {
                             GAME FEATURES
                         </p>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                            <p style="font-size: 8px; color: #fff; margin: 3px 0;">
+                            <p style="font-size: 8px; color: #fff; margin: 3px 0; text-align: left;">
                                 🌟 10,000+ Elements
                             </p>
-                            <p style="font-size: 8px; color: #fff; margin: 3px 0;">
+                            <p style="font-size: 8px; color: #fff; margin: 3px 0; text-align: left;">
                                 🔮 20,000+ Combinations
                             </p>
-                            <p style="font-size: 8px; color: #fff; margin: 3px 0;">
+                            <p style="font-size: 8px; color: #fff; margin: 3px 0; text-align: left;">
                                 🎨 50+ Unlockable Skins
                             </p>
-                            <p style="font-size: 8px; color: #fff; margin: 3px 0;">
+                            <p style="font-size: 8px; color: #fff; margin: 3px 0; text-align: left;">
                                 📜 80+ Lore Fragments
                             </p>
-                            <p style="font-size: 8px; color: #fff; margin: 3px 0;">
+                            <p style="font-size: 8px; color: #fff; margin: 3px 0; text-align: left;">
                                 ⚔️ Epic Boss Battles
                             </p>
-                            <p style="font-size: 8px; color: #fff; margin: 3px 0;">
+                            <p style="font-size: 8px; color: #fff; margin: 3px 0; text-align: left;">
                                 🎮 3 Unique Game Modes
-                            </p>
-                            <p style="font-size: 8px; color: #fff; margin: 3px 0; grid-column: 1 / -1; text-align: center;">
-                                🎵 2 Electronic Chill Soundtracks
                             </p>
                         </div>
                     </div>
