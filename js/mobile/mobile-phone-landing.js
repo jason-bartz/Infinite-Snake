@@ -105,10 +105,8 @@ class MobilePhoneLanding {
                 
                 <!-- 5 second gameplay video -->
                 <div style="
-                    position: relative;
                     width: 90%;
                     max-width: 350px;
-                    height: 200px;
                     margin-bottom: 30px;
                     cursor: pointer;
                     border: 3px solid #4ecdc4;
@@ -116,16 +114,17 @@ class MobilePhoneLanding {
                     overflow: hidden;
                     box-shadow: 0 0 20px rgba(78, 205, 196, 0.5);
                     background: #000;
+                    position: relative;
                 " onclick="document.getElementById('mobileVideoModal').style.display = 'flex';">
                     <video 
+                        src="video/hero-gameplay-intro.mp4"
                         autoplay 
                         muted 
                         loop 
                         playsinline
-                        style="width: 100%; height: 100%; object-fit: contain;"
-                    >
-                        <source src="video/hero-gameplay-intro.mp4" type="video/mp4">
-                    </video>
+                        webkit-playsinline
+                        style="width: 100%; height: auto; display: block;"
+                    ></video>
                     <div style="
                         position: absolute;
                         bottom: 10px;
