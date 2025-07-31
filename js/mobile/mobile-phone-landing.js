@@ -117,7 +117,7 @@ class MobilePhoneLanding {
                     position: relative;
                 " onclick="document.getElementById('mobileVideoModal').style.display = 'flex';">
                     <img 
-                        src="gameplay-preview.gif"
+                        src="hero-gameplay-intro.gif"
                         alt="Infinite Snake Gameplay"
                         style="width: 100%; height: auto; display: block;"
                     />
