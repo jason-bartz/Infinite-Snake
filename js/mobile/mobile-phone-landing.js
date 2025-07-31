@@ -51,7 +51,10 @@ class MobilePhoneLanding {
                     left: 0;
                     width: 100%;
                     height: 100%;
-                    background: linear-gradient(135deg, #1a0033 0%, #220044 50%, #1a0033 100%);
+                    background-image: url('assets/background/purple-bg.png');
+                    background-size: cover;
+                    background-position: center;
+                    background-repeat: no-repeat;
                     z-index: -2;
                 "></div>
                 
@@ -91,7 +94,7 @@ class MobilePhoneLanding {
                 </style>
                 
                 <!-- Logo -->
-                <img src="/images/logo.png" alt="Infinite Snake" style="
+                <img src="infinite-snake-preview-splash-logo.png" alt="Infinite Snake" style="
                     width: 80%;
                     max-width: 300px;
                     height: auto;
@@ -111,7 +114,7 @@ class MobilePhoneLanding {
                     border-radius: 10px;
                     overflow: hidden;
                     box-shadow: 0 0 20px rgba(78, 205, 196, 0.5);
-                " onclick="window.open('https://www.loom.com/share/cb0e142aae8544748f270faf88cda78d', '_blank')">
+                " onclick="document.getElementById('mobileVideoModal').style.display = 'flex';">
                     <video 
                         autoplay 
                         muted 
@@ -119,7 +122,7 @@ class MobilePhoneLanding {
                         playsinline
                         style="width: 100%; height: auto; display: block;"
                     >
-                        <source src="videos/infinite-snake-preview.mp4" type="video/mp4">
+                        <source src="video/hero-gameplay-intro.mp4" type="video/mp4">
                     </video>
                     <div style="
                         position: absolute;
@@ -206,6 +209,59 @@ class MobilePhoneLanding {
                 ">
                     💬 JOIN OUR DISCORD
                 </a>
+            </div>
+            
+            <!-- Video Modal -->
+            <div id="mobileVideoModal" style="
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.9);
+                z-index: 10001;
+                justify-content: center;
+                align-items: center;
+                padding: 20px;
+                box-sizing: border-box;
+            " onclick="if(event.target === this) this.style.display = 'none';">
+                <div style="
+                    position: relative;
+                    width: 100%;
+                    max-width: 600px;
+                    background: #000;
+                    border: 2px solid #4ecdc4;
+                    border-radius: 10px;
+                    overflow: hidden;
+                ">
+                    <span style="
+                        position: absolute;
+                        top: 10px;
+                        right: 10px;
+                        color: #4ecdc4;
+                        font-size: 24px;
+                        cursor: pointer;
+                        z-index: 10;
+                        background: rgba(0, 0, 0, 0.8);
+                        width: 30px;
+                        height: 30px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        border-radius: 50%;
+                    " onclick="document.getElementById('mobileVideoModal').style.display = 'none';">×</span>
+                    
+                    <div style="position: relative; padding-bottom: 54.83870967741935%; height: 0;">
+                        <iframe src="https://www.loom.com/embed/cb0e142aae8544748f270faf88cda78d?sid=f52461e1-c201-482b-8571-53f207b90398" 
+                                frameborder="0" 
+                                webkitallowfullscreen 
+                                mozallowfullscreen 
+                                allowfullscreen 
+                                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
+                        </iframe>
+                    </div>
+                </div>
             </div>
         `;
         
