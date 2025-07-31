@@ -545,5 +545,78 @@ body.mobile-phone .element-collection-bar::after {
 
 /* Make player stats even more compact */
 body.mobile-phone .player-info-box {
-    width: 140px !important;
+    width: 84px !important;
+}
+
+/* Additional pause menu fixes */
+body.mobile-phone #pauseMenu {
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+/* Make virtual joystick more visible */
+body.mobile-phone .virtual-joystick {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Ensure joystick base is transparent but joystick is visible */
+body.mobile-phone .joystick-base + .joystick-knob {
+    display: block !important;
+    visibility: visible !important;
+}
+
+/* Title screen cleanup */
+body.mobile-phone #splashContent {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 20px !important;
+}
+
+body.mobile-phone #titleScreenContainer > div:first-child {
+    width: 100% !important;
+}
+
+/* Hide preview section on title */
+body.mobile-phone .preview-section {
+    display: none !important;
+}
+
+/* Force virtual joystick to show */
+body.mobile-phone .mobile-controls {
+    display: block !important;
+}
+
+body.mobile-phone #virtualJoystick {
+    display: block !important;
+    width: 80px !important;
+    height: 80px !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    position: fixed !important;
+    bottom: 80px !important;
+    right: 20px !important;
+}
+
+/* Additional title screen fixes */
+body.mobile-phone #splashScreen {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 20px !important;
+}
+
+body.mobile-phone #splashContent {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    width: 100% !important;
+}
+
+/* Ensure stat labels are properly sized */
+body.mobile-phone .stat-label,
+body.mobile-phone .stat-value {
+    font-size: 6px !important;
+    line-height: 1.2 !important;
 }
