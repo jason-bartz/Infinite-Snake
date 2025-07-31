@@ -113,18 +113,22 @@ class MobilePhoneLanding {
                     border-radius: 10px;
                     overflow: hidden;
                     box-shadow: 0 0 20px rgba(78, 205, 196, 0.5);
-                    background: #000;
+                    background: #1a0033;
                     position: relative;
+                    height: 197px;
                 " onclick="document.getElementById('mobileVideoModal').style.display = 'flex';">
                     <video 
-                        src="video/hero-gameplay-intro.mp4"
+                        id="mobilePreviewVideo"
+                        style="width: 100%; height: 100%; object-fit: cover;"
                         autoplay 
                         muted 
                         loop 
                         playsinline
                         webkit-playsinline
-                        style="width: 100%; height: auto; display: block;"
-                    ></video>
+                    >
+                        <source src="/video/hero-gameplay-intro.mp4" type="video/mp4">
+                        <source src="video/hero-gameplay-intro.mp4" type="video/mp4">
+                    </video>
                     <div style="
                         position: absolute;
                         bottom: 10px;
@@ -139,6 +143,17 @@ class MobilePhoneLanding {
                         TAP TO WATCH FULL GAMEPLAY
                     </div>
                 </div>
+                
+                <script>
+                    // Force video to play on mobile
+                    setTimeout(() => {
+                        const video = document.getElementById('mobilePreviewVideo');
+                        if (video) {
+                            video.load();
+                            video.play().catch(e => console.log('Video autoplay failed:', e));
+                        }
+                    }, 100);
+                </script>
                 
                 <!-- Message -->
                 <div style="
