@@ -91,7 +91,7 @@ class MobilePhoneLanding {
                 </style>
                 
                 <!-- Logo -->
-                <img src="images/logo.png" alt="Infinite Snake" style="
+                <img src="/images/logo.png" alt="Infinite Snake" style="
                     width: 80%;
                     max-width: 300px;
                     height: auto;
@@ -136,6 +136,18 @@ class MobilePhoneLanding {
                     </div>
                 </div>
                 
+                <!-- Video caption -->
+                <p style="
+                    font-size: 9px;
+                    color: #4ecdc4;
+                    text-align: center;
+                    margin-top: 10px;
+                    margin-bottom: 20px;
+                    opacity: 0.8;
+                ">
+                    Click to watch full gameplay
+                </p>
+                
                 <!-- Message -->
                 <div style="
                     text-align: center;
@@ -147,7 +159,7 @@ class MobilePhoneLanding {
                         color: #4ecdc4;
                         margin-bottom: 20px;
                         text-shadow: 0 0 10px rgba(78, 205, 196, 0.5);
-                    ">COSMIC ADVENTURE AWAITS!</h2>
+                    ">COSMIC CRAFTING AWAITS!</h2>
                     
                     <p style="
                         font-size: 10px;
@@ -158,15 +170,6 @@ class MobilePhoneLanding {
                         Infinite Snake was designed as a full desktop browser experience and iPad web app.
                     </p>
                     
-                    <p style="
-                        font-size: 10px;
-                        line-height: 1.6;
-                        color: #ffd700;
-                        margin-bottom: 20px;
-                        text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
-                    ">
-                        Please visit from one of those devices to enjoy the game!
-                    </p>
                     
                     <div style="
                         margin-top: 30px;
