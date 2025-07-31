@@ -1,6 +1,18 @@
 /* Mobile Phone Specific Optimizations */
 /* Only applies to phones, not tablets or iPads */
 
+/* Disable all game functionality on mobile phones */
+body.mobile-phone-landing #gameCanvas,
+body.mobile-phone-landing .mobile-controls,
+body.mobile-phone-landing #splashScreen,
+body.mobile-phone-landing #gameModeSelect,
+body.mobile-phone-landing .player-info-box,
+body.mobile-phone-landing .leaderboard-box,
+body.mobile-phone-landing .bottom-ui,
+body.mobile-phone-landing #pauseOverlay {
+    display: none !important;
+}
+
 /* ===== VIRTUAL JOYSTICK OPTIMIZATIONS ===== */
 body.mobile-phone .virtual-joystick {
     width: 80px !important;

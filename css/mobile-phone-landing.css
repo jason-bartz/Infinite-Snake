@@ -1,0 +1,45 @@
+/* Mobile Phone Landing Page Styles */
+
+/* Hide all game content when landing page is active */
+body.mobile-phone-landing > *:not(#mobileLandingPage) {
+    display: none !important;
+}
+
+/* Ensure landing page is always on top */
+body.mobile-phone-landing {
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Smooth hover effect for Discord button */
+#mobileLandingPage a:hover {
+    background: rgba(78, 205, 196, 0.2);
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(78, 205, 196, 0.8);
+}
+
+/* Ensure Press Start 2P font is loaded */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+/* Video container hover effect */
+#mobileLandingPage div[onclick]:hover {
+    transform: scale(1.02);
+    box-shadow: 0 0 30px rgba(78, 205, 196, 0.8);
+}
+
+/* Responsive adjustments for very small phones */
+@media (max-height: 600px) {
+    #mobileLandingPage img {
+        max-width: 200px !important;
+        margin-bottom: 20px !important;
+    }
+    
+    #mobileLandingPage h2 {
+        font-size: 12px !important;
+    }
+    
+    #mobileLandingPage p {
+        font-size: 8px !important;
+    }
+}
