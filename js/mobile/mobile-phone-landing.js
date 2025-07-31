@@ -108,6 +108,7 @@ class MobilePhoneLanding {
                     position: relative;
                     width: 90%;
                     max-width: 350px;
+                    aspect-ratio: 16/9;
                     margin-bottom: 30px;
                     cursor: pointer;
                     border: 3px solid #4ecdc4;
@@ -120,7 +121,7 @@ class MobilePhoneLanding {
                         muted 
                         loop 
                         playsinline
-                        style="width: 100%; height: auto; display: block;"
+                        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;"
                     >
                         <source src="video/hero-gameplay-intro.mp4" type="video/mp4">
                     </video>
@@ -135,21 +136,9 @@ class MobilePhoneLanding {
                         text-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
                         animation: glow 2s ease-in-out infinite;
                     ">
-                        TAP TO WATCH FULL VIDEO
+                        TAP TO WATCH FULL GAMEPLAY
                     </div>
                 </div>
-                
-                <!-- Video caption -->
-                <p style="
-                    font-size: 9px;
-                    color: #4ecdc4;
-                    text-align: center;
-                    margin-top: 10px;
-                    margin-bottom: 20px;
-                    opacity: 0.8;
-                ">
-                    Click to watch full gameplay
-                </p>
                 
                 <!-- Message -->
                 <div style="
@@ -181,34 +170,67 @@ class MobilePhoneLanding {
                         border: 2px solid #4ecdc4;
                         border-radius: 10px;
                     ">
-                        <p style="font-size: 9px; color: #4ecdc4; margin-bottom: 10px;">
-                            RECOMMENDED PLATFORMS:
+                        <p style="font-size: 10px; color: #4ecdc4; margin-bottom: 15px; text-align: center; font-weight: bold;">
+                            GAME FEATURES
                         </p>
-                        <p style="font-size: 8px; color: #fff; margin: 5px 0;">
-                            ✓ Desktop Browser (Chrome, Firefox, Safari)
-                        </p>
-                        <p style="font-size: 8px; color: #fff; margin: 5px 0;">
-                            ✓ iPad / Tablet Browser
-                        </p>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                            <p style="font-size: 8px; color: #fff; margin: 3px 0;">
+                                🌟 10,000+ Elements
+                            </p>
+                            <p style="font-size: 8px; color: #fff; margin: 3px 0;">
+                                🔮 20,000+ Combinations
+                            </p>
+                            <p style="font-size: 8px; color: #fff; margin: 3px 0;">
+                                🎨 50+ Unlockable Skins
+                            </p>
+                            <p style="font-size: 8px; color: #fff; margin: 3px 0;">
+                                📜 80+ Lore Fragments
+                            </p>
+                            <p style="font-size: 8px; color: #fff; margin: 3px 0;">
+                                ⚔️ Epic Boss Battles
+                            </p>
+                            <p style="font-size: 8px; color: #fff; margin: 3px 0;">
+                                🎮 3 Unique Game Modes
+                            </p>
+                            <p style="font-size: 8px; color: #fff; margin: 3px 0; grid-column: 1 / -1; text-align: center;">
+                                🎵 2 Electronic Chill Soundtracks
+                            </p>
+                        </div>
                     </div>
                 </div>
                 
-                <!-- Discord Link -->
-                <a href="https://discord.gg/a6X4W7QbkG" 
-                   target="_blank" 
-                   style="
-                    color: #4ecdc4;
-                    text-decoration: none;
-                    font-size: 10px;
-                    padding: 10px 20px;
-                    border: 2px solid #4ecdc4;
-                    margin-top: 20px;
-                    display: inline-block;
-                    transition: all 0.3s;
-                    text-shadow: 0 0 5px rgba(78, 205, 196, 0.5);
+                <!-- Discord Section -->
+                <div style="
+                    text-align: center;
+                    margin-top: 30px;
                 ">
-                    💬 JOIN OUR DISCORD
-                </a>
+                    <p style="
+                        font-size: 9px;
+                        color: #fff;
+                        margin-bottom: 15px;
+                        line-height: 1.4;
+                        opacity: 0.9;
+                    ">
+                        Join our community to share discoveries,<br>
+                        report bugs, and connect with other players!
+                    </p>
+                    <a href="https://discord.gg/a6X4W7QbkG" 
+                       target="_blank" 
+                       style="
+                        color: #fff;
+                        text-decoration: none;
+                        font-size: 10px;
+                        padding: 12px 25px;
+                        background: #7828F8;
+                        border: 2px solid #7828F8;
+                        border-radius: 5px;
+                        display: inline-block;
+                        transition: all 0.3s;
+                        box-shadow: 0 0 10px rgba(120, 40, 248, 0.5);
+                    ">
+                        💬 JOIN OUR DISCORD
+                    </a>
+                </div>
             </div>
             
             <!-- Video Modal -->
