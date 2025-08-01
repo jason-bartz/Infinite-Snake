@@ -5926,6 +5926,12 @@
                 transform: translateX(10px) !important; /* Offset right from center */
             }
             
+            /* Show buttons during gameplay for mobile */
+            body.mobile.game-active .pause-button-mobile,
+            body.mobile.game-active .mute-button-mobile {
+                display: flex !important;
+            }
+            
             /* Pop-up messages area - Bottom of screen */
             body.mobile #recentDiscovery {
                 bottom: 20% !important; /* Bottom 20% of screen */
@@ -6053,6 +6059,12 @@
             
             body.mobile .mute-button-mobile {
                 transform: translateX(20px) !important; /* Offset right from center */
+            }
+            
+            /* Show buttons during gameplay for mobile portrait */
+            body.mobile.game-active .pause-button-mobile,
+            body.mobile.game-active .mute-button-mobile {
+                display: flex !important;
             }
             
             /* Pop-up messages - Bottom of screen */
