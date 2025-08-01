@@ -11825,11 +11825,6 @@
         }
         
         function drawBorders() {
-            // Skip border drawing on mobile to prevent visible rectangle
-            if (isMobile) {
-                return;
-            }
-            
             // Save context state
             ctx.save();
             
@@ -11837,8 +11832,8 @@
             ctx.globalAlpha = 1;
             
             // Draw world borders with subtle pixel grid
-            const borderThickness = isMobile ? 150 : 60; // Extra thick on mobile to prevent edge issues
-            const borderBuffer = isMobile ? 50 : 0; // Additional buffer for mobile to extend borders
+            const borderThickness = isMobile ? 30 : 60; // Thinner borders on mobile
+            const borderBuffer = isMobile ? 0 : 0; // No extra buffer needed
             
             const leftBorder = (-camera.x) * cameraZoom + canvas.width / 2;
             const rightBorder = (WORLD_SIZE - camera.x) * cameraZoom + canvas.width / 2;
@@ -11848,23 +11843,29 @@
             // Pulsating effect for barriers
             const pulsePhase = Math.floor((animationTime * 2) % 4);
             const pixelSize = isMobile ? 16 : 8; // Larger pixels on mobile for visibility
-            const warningLineThickness = isMobile ? 12 : 6; // Thicker warning lines on mobile
+            const warningLineThickness = isMobile ? 6 : 6; // Consistent warning line thickness
             
             // Left border barrier
             if (leftBorder > -borderThickness) {
                 const borderWidth = Math.min(borderThickness, leftBorder);
                 if (borderWidth > 0) {
-                    // Solid gradient for both mobile and desktop
-                    const gradient = ctx.createLinearGradient(0, 0, borderWidth, 0);
-                    gradient.addColorStop(0, 'rgba(128, 64, 255, 0.675)');
-                    gradient.addColorStop(0.7, 'rgba(128, 64, 255, 0.45)');
-                    gradient.addColorStop(1, 'rgba(128, 64, 255, 0.075)');
-                    ctx.fillStyle = gradient;
-                    ctx.fillRect(0, 0, borderWidth, canvas.height);
-                    
-                    // Solid warning line
-                    ctx.fillStyle = '#8844FF';
-                    ctx.fillRect(Math.max(2, leftBorder - warningLineThickness/2), 0, warningLineThickness, canvas.height);
+                    if (isMobile) {
+                        // Just draw the warning line on mobile, no gradient
+                        ctx.fillStyle = 'rgba(136, 68, 255, 0.8)';
+                        ctx.fillRect(Math.max(2, leftBorder - warningLineThickness/2), 0, warningLineThickness, canvas.height);
+                    } else {
+                        // Full gradient effect on desktop
+                        const gradient = ctx.createLinearGradient(0, 0, borderWidth, 0);
+                        gradient.addColorStop(0, 'rgba(128, 64, 255, 0.675)');
+                        gradient.addColorStop(0.7, 'rgba(128, 64, 255, 0.45)');
+                        gradient.addColorStop(1, 'rgba(128, 64, 255, 0.075)');
+                        ctx.fillStyle = gradient;
+                        ctx.fillRect(0, 0, borderWidth, canvas.height);
+                        
+                        // Solid warning line
+                        ctx.fillStyle = '#8844FF';
+                        ctx.fillRect(Math.max(2, leftBorder - warningLineThickness/2), 0, warningLineThickness, canvas.height);
+                    }
                 }
             }
             
@@ -11873,18 +11874,25 @@
                 const startX = Math.max(0, rightBorder - borderThickness - borderBuffer);
                 const borderWidth = canvas.width - startX + borderBuffer; // Extend beyond canvas edge
                 if (borderWidth > 0) {
-                    // Solid gradient for both mobile and desktop
-                    const gradient = ctx.createLinearGradient(startX, 0, canvas.width + borderBuffer, 0);
-                    gradient.addColorStop(0, 'rgba(128, 64, 255, 0.075)');
-                    gradient.addColorStop(0.3, 'rgba(128, 64, 255, 0.45)');
-                    gradient.addColorStop(1, 'rgba(128, 64, 255, 0.675)');
-                    ctx.fillStyle = gradient;
-                    ctx.fillRect(startX, 0, borderWidth, canvas.height);
-                    
-                    // Solid warning line
-                    ctx.fillStyle = '#8844FF';
-                    const lineX = Math.max(startX + warningLineThickness, Math.min(canvas.width - warningLineThickness - 2, rightBorder - warningLineThickness/2));
-                    ctx.fillRect(lineX, 0, warningLineThickness, canvas.height);
+                    if (isMobile) {
+                        // Just draw the warning line on mobile, no gradient
+                        ctx.fillStyle = 'rgba(136, 68, 255, 0.8)';
+                        const lineX = Math.max(startX + warningLineThickness, Math.min(canvas.width - warningLineThickness - 2, rightBorder - warningLineThickness/2));
+                        ctx.fillRect(lineX, 0, warningLineThickness, canvas.height);
+                    } else {
+                        // Full gradient effect on desktop
+                        const gradient = ctx.createLinearGradient(startX, 0, canvas.width + borderBuffer, 0);
+                        gradient.addColorStop(0, 'rgba(128, 64, 255, 0.075)');
+                        gradient.addColorStop(0.3, 'rgba(128, 64, 255, 0.45)');
+                        gradient.addColorStop(1, 'rgba(128, 64, 255, 0.675)');
+                        ctx.fillStyle = gradient;
+                        ctx.fillRect(startX, 0, borderWidth, canvas.height);
+                        
+                        // Solid warning line
+                        ctx.fillStyle = '#8844FF';
+                        const lineX = Math.max(startX + warningLineThickness, Math.min(canvas.width - warningLineThickness - 2, rightBorder - warningLineThickness/2));
+                        ctx.fillRect(lineX, 0, warningLineThickness, canvas.height);
+                    }
                 }
             }
             
@@ -11892,17 +11900,23 @@
             if (topBorder > -borderThickness) {
                 const borderHeight = Math.min(borderThickness, topBorder);
                 if (borderHeight > 0) {
-                    // Solid gradient for both mobile and desktop
-                    const gradient = ctx.createLinearGradient(0, 0, 0, borderHeight);
-                    gradient.addColorStop(0, 'rgba(128, 64, 255, 0.675)');
-                    gradient.addColorStop(0.7, 'rgba(128, 64, 255, 0.45)');
-                    gradient.addColorStop(1, 'rgba(128, 64, 255, 0.075)');
-                    ctx.fillStyle = gradient;
-                    ctx.fillRect(0, 0, canvas.width, borderHeight);
-                    
-                    // Solid warning line
-                    ctx.fillStyle = '#8844FF';
-                    ctx.fillRect(0, Math.max(2, topBorder - warningLineThickness/2), canvas.width, warningLineThickness);
+                    if (isMobile) {
+                        // Just draw the warning line on mobile, no gradient
+                        ctx.fillStyle = 'rgba(136, 68, 255, 0.8)';
+                        ctx.fillRect(0, Math.max(2, topBorder - warningLineThickness/2), canvas.width, warningLineThickness);
+                    } else {
+                        // Full gradient effect on desktop
+                        const gradient = ctx.createLinearGradient(0, 0, 0, borderHeight);
+                        gradient.addColorStop(0, 'rgba(128, 64, 255, 0.675)');
+                        gradient.addColorStop(0.7, 'rgba(128, 64, 255, 0.45)');
+                        gradient.addColorStop(1, 'rgba(128, 64, 255, 0.075)');
+                        ctx.fillStyle = gradient;
+                        ctx.fillRect(0, 0, canvas.width, borderHeight);
+                        
+                        // Solid warning line
+                        ctx.fillStyle = '#8844FF';
+                        ctx.fillRect(0, Math.max(2, topBorder - warningLineThickness/2), canvas.width, warningLineThickness);
+                    }
                 }
             }
             
@@ -11911,17 +11925,23 @@
                 const startY = Math.max(0, bottomBorder - borderThickness);
                 const borderHeight = canvas.height - startY;
                 if (borderHeight > 0) {
-                    // Solid gradient for both mobile and desktop
-                    const gradient = ctx.createLinearGradient(0, startY, 0, canvas.height);
-                    gradient.addColorStop(0, 'rgba(128, 64, 255, 0.075)');
-                    gradient.addColorStop(0.3, 'rgba(128, 64, 255, 0.45)');
-                    gradient.addColorStop(1, 'rgba(128, 64, 255, 0.675)');
-                    ctx.fillStyle = gradient;
-                    ctx.fillRect(0, startY, canvas.width, borderHeight);
-                    
-                    // Solid warning line
-                    ctx.fillStyle = '#8844FF';
-                    ctx.fillRect(0, Math.min(canvas.height - warningLineThickness - 2, bottomBorder - warningLineThickness/2), canvas.width, warningLineThickness);
+                    if (isMobile) {
+                        // Just draw the warning line on mobile, no gradient
+                        ctx.fillStyle = 'rgba(136, 68, 255, 0.8)';
+                        ctx.fillRect(0, Math.min(canvas.height - warningLineThickness - 2, bottomBorder - warningLineThickness/2), canvas.width, warningLineThickness);
+                    } else {
+                        // Full gradient effect on desktop
+                        const gradient = ctx.createLinearGradient(0, startY, 0, canvas.height);
+                        gradient.addColorStop(0, 'rgba(128, 64, 255, 0.075)');
+                        gradient.addColorStop(0.3, 'rgba(128, 64, 255, 0.45)');
+                        gradient.addColorStop(1, 'rgba(128, 64, 255, 0.675)');
+                        ctx.fillStyle = gradient;
+                        ctx.fillRect(0, startY, canvas.width, borderHeight);
+                        
+                        // Solid warning line
+                        ctx.fillStyle = '#8844FF';
+                        ctx.fillRect(0, Math.min(canvas.height - warningLineThickness - 2, bottomBorder - warningLineThickness/2), canvas.width, warningLineThickness);
+                    }
                 }
             }
             
