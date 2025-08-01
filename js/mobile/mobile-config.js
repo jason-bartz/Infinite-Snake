@@ -9,7 +9,7 @@ const MOBILE_UI_CONFIG = {
     
     // Feature toggles
     features: {
-        boostMeter: false,         // Show boost amount as meter fill (disabled)
+        boostMeter: true,          // Show boost amount as meter fill (enabled for iPad)
         skinPreview: true,         // Show current skin in stats tab (slideout mode)
         discoveryFeed: true,       // Enable click-to-dismiss for discovery messages
         collapsibleLeaderboard: true, // Allow leaderboard collapse in fixed mode

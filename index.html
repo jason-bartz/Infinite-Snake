@@ -1930,9 +1930,18 @@
             pointer-events: none;
         }
         
-        /* Hide player boost bar on mobile */
+        /* Show player boost bar on mobile (iPad) */
         body.mobile .player-boost-bar-container {
-            display: none;
+            display: block !important;
+            margin-top: 6px !important;
+        }
+        
+        body.mobile .player-boost-bar-frame {
+            height: 16px !important;
+        }
+        
+        body.mobile .player-boost-bar-text {
+            font-size: 6px !important;
         }
         
         .stat-line {
@@ -2175,9 +2184,9 @@
         .virtual-joystick {
             position: absolute;
             bottom: 120px;
-            right: 105px;
-            width: 140px;
-            height: 140px;
+            left: 30px;
+            width: 105px;
+            height: 105px;
             pointer-events: auto;
         }
         
@@ -2195,8 +2204,8 @@
         
         .joystick-knob {
             position: absolute;
-            width: 50px;
-            height: 50px;
+            width: 38px;
+            height: 38px;
             background: rgba(255, 255, 255, 0.3);
             border: 2px solid rgba(255, 255, 255, 0.5);
             border-radius: 50%;
@@ -5302,7 +5311,7 @@
     
     <!-- Mobile Controls -->
     <div class="mobile-controls">
-        <div class="virtual-joystick" id="virtualJoystick" style="right: 30px; left: auto;">
+        <div class="virtual-joystick" id="virtualJoystick" style="left: 30px; right: auto;">
             <div class="joystick-base">
                 <div class="joystick-knob" id="joystickKnob"></div>
             </div>

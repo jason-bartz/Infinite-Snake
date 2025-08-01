@@ -452,7 +452,7 @@
         
         let aiRespawnQueue = [];
         const AI_RESPAWN_COOLDOWN = 5000;
-        const MAX_AI_SNAKES = 6;
+        const MAX_AI_SNAKES = isMobile ? 4 : 6; // Reduce by 2 for mobile
         
         let usedAISkins = new Set();
         
@@ -2657,6 +2657,7 @@
                 this.maxVisibleElements = elementBankSlots; // Dynamic element slots based on global value
                 this.elementsEaten = 0; // Track total elements eaten
                 this.length = 10;
+                this.maxLength = isMobile ? 70 : 100; // Mobile snakes max out at 70% of desktop size
                 this.score = 0;
                 this.discoveries = 0; // Track discoveries for this snake
                 this.kills = 0; // Track kills for this snake
@@ -3458,8 +3459,13 @@
                 // Track elements eaten
                 this.elementsEaten++;
                 
-                // Grow snake
-                this.length += 2;
+                // Grow snake (respect max length limit)
+                if (this.length < this.maxLength) {
+                    this.length += 2;
+                    if (this.length > this.maxLength) {
+                        this.length = this.maxLength;
+                    }
+                }
                 
                 // Add score - 100 points per element
                 this.score += 100;
