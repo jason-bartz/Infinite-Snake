@@ -126,20 +126,20 @@ class MobilePhoneLanding {
                         style="width: 100%; height: auto; display: block;"
                         onerror="this.onerror=null; this.src='assets/hero-gameplay-intro.gif';"
                     />
-                    <div style="
-                        position: absolute;
-                        bottom: 10px;
-                        left: 0;
-                        right: 0;
-                        text-align: center;
-                        font-size: 8px;
-                        color: #4ecdc4;
-                        text-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
-                        animation: glow 2s ease-in-out infinite;
-                    ">
-                        TAP TO WATCH FULL GAMEPLAY
-                    </div>
                 </div>
+                
+                <!-- Video caption -->
+                <p style="
+                    font-size: 9px;
+                    color: #4ecdc4;
+                    text-align: center;
+                    margin-top: -20px;
+                    margin-bottom: 30px;
+                    cursor: pointer;
+                    animation: glow 2s ease-in-out infinite;
+                " onclick="document.getElementById('mobileVideoModal').style.display = 'flex';">
+                    TAP TO WATCH FULL GAMEPLAY
+                </p>
                 
                 <!-- Message -->
                 <div style="
@@ -160,7 +160,7 @@ class MobilePhoneLanding {
                         color: #fff;
                         margin-bottom: 20px;
                     ">
-                        Infinite Snake was designed as a full desktop browser experience and iPad web app. Please visit from one of those devices to play!
+                        Infinite Snake is a desktop & iPad experience only. We're crafting something special for mobile phones. But for now, save this page and visit from your desktop or iPad to begin your journey!
                     </p>
                     
                     
@@ -273,7 +273,7 @@ class MobilePhoneLanding {
                     " onclick="document.getElementById('mobileVideoModal').style.display = 'none';">×</span>
                     
                     <div style="position: relative; padding-bottom: 54.83870967741935%; height: 0;">
-                        <iframe src="https://www.loom.com/embed/cb0e142aae8544748f270faf88cda78d?sid=f52461e1-c201-482b-8571-53f207b90398" 
+                        <iframe src="https://www.loom.com/embed/cb0e142aae8544748f270faf88cda78d?sid=b486f4ec-f0fe-448d-849e-17efe432906d" 
                                 frameborder="0" 
                                 webkitallowfullscreen 
                                 mozallowfullscreen 
