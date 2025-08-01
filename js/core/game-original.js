@@ -15004,10 +15004,12 @@
             if (joystick) joystick.style.display = 'none';
             
             let joystickTouch = null;
+            const boostBtn = document.getElementById('mobileBoostButton');
             
             // Joystick controls
             joystick.addEventListener('touchstart', (e) => {
                 e.preventDefault();
+                e.stopPropagation(); // Prevent bubbling to document
                 if (joystickTouch === null && e.changedTouches.length > 0) {
                     joystickTouch = e.changedTouches[0].identifier;
                     joystickActive = true;
@@ -15015,10 +15017,11 @@
                     joystickBase.x = rect.left + rect.width / 2;
                     joystickBase.y = rect.top + rect.height / 2;
                 }
-            });
+            }, { passive: false });
             
             joystick.addEventListener('touchmove', (e) => {
                 e.preventDefault();
+                e.stopPropagation(); // Prevent bubbling to document
                 for (let i = 0; i < e.changedTouches.length; i++) {
                     const touch = e.changedTouches[i];
                     if (touch.identifier === joystickTouch) {
@@ -15046,7 +15049,7 @@
                         break;
                     }
                 }
-            });
+            }, { passive: false });
             
             const resetJoystick = () => {
                 joystickActive = false;
@@ -15057,20 +15060,44 @@
             
             joystick.addEventListener('touchend', (e) => {
                 e.preventDefault();
+                e.stopPropagation(); // Prevent bubbling to document
                 for (let i = 0; i < e.changedTouches.length; i++) {
                     if (e.changedTouches[i].identifier === joystickTouch) {
                         resetJoystick();
                         break;
                     }
                 }
-            });
+            }, { passive: false });
             
             joystick.addEventListener('touchcancel', (e) => {
                 e.preventDefault();
+                e.stopPropagation();
                 resetJoystick();
-            });
+            }, { passive: false });
             
-            // Boost functionality removed for mobile
+            // Boost button controls
+            if (boostBtn) {
+                boostBtn.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    mouseDown = true;
+                    boostBtn.classList.add('active');
+                }, { passive: false });
+                
+                boostBtn.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    mouseDown = false;
+                    boostBtn.classList.remove('active');
+                }, { passive: false });
+                
+                boostBtn.addEventListener('touchcancel', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    mouseDown = false;
+                    boostBtn.classList.remove('active');
+                }, { passive: false });
+            }
             
             // Prevent scrolling on game canvas
             canvas.addEventListener('touchmove', (e) => {
@@ -15091,7 +15118,8 @@
                     e.target.closest('.discovery-feed') ||
                     e.target.closest('.pause-button-mobile') ||
                     e.target.closest('.mute-button-mobile') ||
-                    e.target.closest('.virtual-joystick');
+                    e.target.closest('.virtual-joystick') ||
+                    e.target.closest('.mobile-boost-button');
                     
                 if (isUIElement && !isCanvas) {
                     return;
