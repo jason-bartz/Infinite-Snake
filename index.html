@@ -2184,7 +2184,7 @@
         .virtual-joystick {
             position: absolute;
             bottom: 120px;
-            left: 30px;
+            left: 80px;
             width: 105px;
             height: 105px;
             pointer-events: auto;
@@ -4224,7 +4224,7 @@
                     <p style="text-align: left; margin-left: 0;">Welcome to what's left.<br><br>
                     The Universe collapsed, scattered its contents across infinite coils of nothing. You're the Infinite Snake - part cleanup crew, part living library.<br><br>
                     Collect fragments of reality. Merge them. See what happens. Rebuild the Cosmos one combination at a time. Maybe you'll figure out what we forgot.<br><br>
-                    Just remember: you're not the only thing moving in the dark…</p>
+</p>
                     <div style="margin: 20px 0;">
                         <input type="text" id="playerNameInput" placeholder="Enter your name" 
                                style="width: 300px; max-width: 80%; padding: 12px 20px; 
@@ -5300,10 +5300,13 @@
     
     <!-- Mobile Controls -->
     <div class="mobile-controls">
-        <div class="virtual-joystick" id="virtualJoystick" style="left: 30px; right: auto;">
+        <div class="virtual-joystick" id="virtualJoystick" style="left: 80px; right: auto;">
             <div class="joystick-base">
                 <div class="joystick-knob" id="joystickKnob"></div>
             </div>
+        </div>
+        <div class="mobile-boost-button" id="mobileBoostButton">
+            <div class="boost-button-text">BOOST</div>
         </div>
         <div class="pause-button-mobile" id="pauseButtonMobile" onclick="togglePause()">⏸</div>
         <div class="mute-button-mobile" id="muteButtonMobile" onclick="toggleMusic()">🔇</div>
@@ -5901,7 +5904,7 @@
             /* Joystick - Bottom Left Corner */
             body.mobile .virtual-joystick {
                 bottom: 120px !important;
-                left: 30px !important;
+                left: 80px !important;
                 right: auto !important;
                 width: 105px !important;
                 height: 105px !important;
@@ -6041,7 +6044,7 @@
             /* Joystick - Bottom Left */
             body.mobile .virtual-joystick {
                 bottom: 120px !important;
-                left: 30px !important;
+                left: 80px !important;
                 right: auto !important;
             }
             
@@ -6288,7 +6291,7 @@
             width: 105px !important;
             height: 105px !important;
             bottom: 120px !important;
-            left: 30px !important;
+            left: 80px !important;
             right: auto !important;
             position: fixed !important;
             z-index: 1002 !important;
@@ -6866,11 +6869,47 @@
         
         /* Position joystick on left side for mobile */
         body.mobile .virtual-joystick {
-            left: 30px !important;
+            left: 80px !important;
             right: auto !important;
             bottom: 120px !important;
             width: 105px !important;
             height: 105px !important;
+        }
+        
+        /* Mobile boost button */
+        .mobile-boost-button {
+            position: absolute;
+            bottom: 120px;
+            right: 80px;
+            width: 105px;
+            height: 105px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 3px solid rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: auto;
+            transition: all 0.2s ease;
+            display: none;
+        }
+        
+        body.mobile .mobile-boost-button {
+            display: flex !important;
+        }
+        
+        .mobile-boost-button:active {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: scale(0.95);
+        }
+        
+        .boost-button-text {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 12px;
+            font-family: 'Press Start 2P', monospace;
+            text-align: center;
+            user-select: none;
         }
         
         /* Game Hint Styling */
@@ -7210,6 +7249,24 @@
                 location.reload();
             }, 150);
         }
+    </script>
+    
+    <script>
+    // Scoreboard collapse functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const leaderboardBox = document.getElementById('leaderboardBox');
+        const leaderboardHeader = leaderboardBox?.querySelector('.leaderboard-header');
+        const collapseIcon = leaderboardBox?.querySelector('.collapse-icon');
+        
+        if (leaderboardHeader) {
+            leaderboardHeader.addEventListener('click', function() {
+                leaderboardBox.classList.toggle('collapsed');
+                if (collapseIcon) {
+                    collapseIcon.textContent = leaderboardBox.classList.contains('collapsed') ? '▶' : '▼';
+                }
+            });
+        }
+    });
     </script>
     
     <!-- Pause Menu Image Modal -->
