@@ -11825,6 +11825,11 @@
         }
         
         function drawBorders() {
+            // Skip border drawing on mobile to prevent visible rectangle
+            if (isMobile) {
+                return;
+            }
+            
             // Save context state
             ctx.save();
             
