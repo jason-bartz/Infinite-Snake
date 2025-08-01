@@ -15009,7 +15009,7 @@
             // Joystick controls
             joystick.addEventListener('touchstart', (e) => {
                 e.preventDefault();
-                e.stopPropagation(); // Prevent bubbling to document
+                // Don't stop propagation - allow multi-touch
                 if (joystickTouch === null && e.changedTouches.length > 0) {
                     joystickTouch = e.changedTouches[0].identifier;
                     joystickActive = true;
@@ -15021,7 +15021,7 @@
             
             joystick.addEventListener('touchmove', (e) => {
                 e.preventDefault();
-                e.stopPropagation(); // Prevent bubbling to document
+                // Don't stop propagation - allow multi-touch
                 for (let i = 0; i < e.changedTouches.length; i++) {
                     const touch = e.changedTouches[i];
                     if (touch.identifier === joystickTouch) {
@@ -15060,7 +15060,7 @@
             
             joystick.addEventListener('touchend', (e) => {
                 e.preventDefault();
-                e.stopPropagation(); // Prevent bubbling to document
+                // Don't stop propagation - allow multi-touch
                 for (let i = 0; i < e.changedTouches.length; i++) {
                     if (e.changedTouches[i].identifier === joystickTouch) {
                         resetJoystick();
@@ -15071,7 +15071,7 @@
             
             joystick.addEventListener('touchcancel', (e) => {
                 e.preventDefault();
-                e.stopPropagation();
+                // Don't stop propagation - allow multi-touch
                 resetJoystick();
             }, { passive: false });
             
@@ -15079,21 +15079,21 @@
             if (boostBtn) {
                 boostBtn.addEventListener('touchstart', (e) => {
                     e.preventDefault();
-                    e.stopPropagation();
+                    // Don't stop propagation - allow multi-touch
                     mouseDown = true;
                     boostBtn.classList.add('active');
                 }, { passive: false });
                 
                 boostBtn.addEventListener('touchend', (e) => {
                     e.preventDefault();
-                    e.stopPropagation();
+                    // Don't stop propagation - allow multi-touch
                     mouseDown = false;
                     boostBtn.classList.remove('active');
                 }, { passive: false });
                 
                 boostBtn.addEventListener('touchcancel', (e) => {
                     e.preventDefault();
-                    e.stopPropagation();
+                    // Don't stop propagation - allow multi-touch
                     mouseDown = false;
                     boostBtn.classList.remove('active');
                 }, { passive: false });
@@ -15121,7 +15121,12 @@
                     e.target.closest('.virtual-joystick') ||
                     e.target.closest('.mobile-boost-button');
                     
-                if (isUIElement && !isCanvas) {
+                if (isUIElement) {
+                    return; // Don't process touches on UI elements
+                }
+                
+                // Only handle canvas touches for left/right side controls
+                if (!isCanvas) {
                     return;
                 }
                 
@@ -15130,13 +15135,13 @@
                     const x = touch.clientX;
                     const screenWidth = window.innerWidth;
                     
-                    // Right side for boost
-                    if (x > screenWidth / 2 && rightSideTouch === null) {
+                    // Right side for boost (only on canvas, not on boost button)
+                    if (x > screenWidth / 2 && rightSideTouch === null && !e.target.closest('.mobile-boost-button')) {
                         rightSideTouch = touch.identifier;
                         mouseDown = true; // Trigger boost
                     }
-                    // Left side for joystick control
-                    else if (x <= screenWidth / 2 && leftSideTouch === null) {
+                    // Left side for joystick control (only on canvas, not on joystick)
+                    else if (x <= screenWidth / 2 && leftSideTouch === null && !e.target.closest('.virtual-joystick')) {
                         leftSideTouch = touch.identifier;
                         leftTouchStartPos = { x: touch.clientX, y: touch.clientY };
                         joystickActive = true;
