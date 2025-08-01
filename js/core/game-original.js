@@ -11976,23 +11976,15 @@
         
         // Simple mobile background system
         function drawSimpleMobileBackground(assets) {
-            // Draw nebula background with reduced tiling for performance
+            // Draw static nebula background for mobile - no parallax to prevent warping
             if (assets.nebulaBackground) {
-                // Apply 100% zoom for classic and infinite modes only
-                // Reduce zoom for mobile to prevent rendering issues
-                const zoomScale = (gameMode === 'classic' || gameMode === 'infinite') ? (isMobile ? 1.0 : 2.0) : 1.0;
-                const bgWidth = assets.nebulaBackground.width * zoomScale;
-                const bgHeight = assets.nebulaBackground.height * zoomScale;
-                const parallaxFactor = 0.2;
-                const offsetX = (camera.x * parallaxFactor) % bgWidth;
-                const offsetY = (camera.y * parallaxFactor) % bgHeight;
-                
-                // Simpler tiling for mobile with zoom - use canvas dimensions
-                ctx.drawImage(assets.nebulaBackground, -offsetX, -offsetY, canvas.width + bgWidth, canvas.height + bgHeight);
+                // Simple static background that covers the entire canvas
+                // No parallax, no offsetting based on camera - just a stable background
+                ctx.drawImage(assets.nebulaBackground, 0, 0, canvas.width, canvas.height);
             }
             
-            // Draw fewer blinking stars on mobile
-            drawBlinkingStars(assets, true);
+            // Skip blinking stars on mobile for better performance
+            // drawBlinkingStars(assets, true);
         }
         
         // Draw blinking star sprites
