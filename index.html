@@ -1408,7 +1408,7 @@
         /* Lore Unlock Display - Positioned same as killstreak */
         #loreUnlockDisplay {
             position: absolute;
-            bottom: 280px; /* Same height as killstreak */
+            bottom: 305px; /* Same height as killstreak - moved up 25px */
             left: 50%;
             transform: translateX(-50%);
             background: transparent;
@@ -1452,7 +1452,7 @@
         /* Killstreak Display - Positioned above regular messages */
         #killstreakDisplay {
             position: absolute;
-            bottom: 280px; /* Higher than recentDiscovery */
+            bottom: 305px; /* Moved up 25px to maintain spacing with discovery messages */
             left: 50%;
             transform: translateX(-50%);
             background: transparent;
@@ -1485,7 +1485,7 @@
         /* Message Popups (Over Element Bar) - SNES Style */
         #recentDiscovery {
             position: absolute;
-            bottom: 200px;
+            bottom: 225px; /* Moved up 25px to avoid overlap with hints */
             left: 50%;
             transform: translateX(-50%);
             background: rgba(20, 20, 40, 0.95); /* Dark purple background for discoveries */
@@ -1518,11 +1518,11 @@
         /* Mobile popup adjustments */
         body.mobile #killstreakDisplay,
         body.mobile #loreUnlockDisplay {
-            bottom: 140px; /* Above recentDiscovery on mobile */
+            bottom: 165px; /* Moved up 25px to maintain spacing above recentDiscovery on mobile */
         }
         
         body.mobile #recentDiscovery {
-            bottom: 100px !important; /* Moved up to avoid pause/mute buttons */
+            bottom: 125px !important; /* Moved up 25px to avoid overlap with hints */
             font-size: 10px;
             padding: 12px 20px;
             max-width: 80%;
