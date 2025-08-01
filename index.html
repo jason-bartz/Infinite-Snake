@@ -2245,6 +2245,18 @@
             -webkit-user-select: none;
         }
         
+        /* Hide pause and mute buttons by default */
+        .pause-button-mobile,
+        .mute-button-mobile {
+            display: none !important;
+        }
+        
+        /* Only show buttons during active gameplay (not paused, game started) */
+        body.game-active .pause-button-mobile,
+        body.game-active .mute-button-mobile {
+            display: flex !important;
+        }
+        
         /* Fix pause/mute button positions in landscape - move to bottom center */
         @media (orientation: landscape) {
             .pause-button-mobile {

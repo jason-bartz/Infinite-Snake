@@ -12587,6 +12587,9 @@
         
         function startGame() {
             
+            // Add game-active class to show pause/mute buttons (for mobile)
+            document.body.classList.add('game-active');
+            
             // Show mobile controls when game starts
             if (isMobile) {
                 const joystick = document.getElementById('virtualJoystick');
@@ -12988,6 +12991,9 @@
             gameStarted = false;
             paused = false;
             
+            // Remove game-active class to hide pause/mute buttons
+            document.body.classList.remove('game-active');
+            
             // Notify unlock manager that game has ended
             if (window.unlockManager && window.unlockManager.onGameEnd) {
                 window.unlockManager.onGameEnd();
@@ -13019,6 +13025,14 @@
             if (!gameStarted) return;
             paused = !paused;
             console.log('[DEBUG] Paused state:', paused);
+            
+            // Toggle game-active class when pausing/unpausing
+            if (paused) {
+                document.body.classList.remove('game-active');
+            } else {
+                document.body.classList.add('game-active');
+            }
+            
             const pauseOverlay = document.getElementById('pauseOverlay');
             console.log('[DEBUG] pauseOverlay element:', pauseOverlay);
             if (pauseOverlay) {
@@ -13075,6 +13089,9 @@
             playUISound();
             paused = false;
             document.getElementById('pauseOverlay').style.display = 'none';
+            
+            // Add game-active class back when resuming
+            document.body.classList.add('game-active');
         }
         
         // Function to switch tabs in pause menu
@@ -13186,6 +13203,9 @@
             // Mark game as ended
             gameStarted = false;
             window.gameStarted = false;
+            
+            // Remove game-active class when game ends
+            document.body.classList.remove('game-active');
         }
         
         // Manual function to record a cozy game for testing
