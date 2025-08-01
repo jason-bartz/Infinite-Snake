@@ -12061,13 +12061,9 @@
             if (gameMode !== 'cozy') {
                 // Use optimized mobile renderer if available
                 if (isMobile) {
-                    if (window.renderMobileBackground && window.mobileBackgroundOptimizer) {
-                        // Use new optimized mobile background
-                        window.renderMobileBackground(ctx, camera);
-                    } else {
-                        // Simple mobile background with new assets
-                        drawSimpleMobileBackground(assets);
-                    }
+                    // Disable complex mobile background rendering to prevent flashing
+                    // Just use simple background for mobile classic/infinite modes
+                    drawSimpleMobileBackground(assets);
                 } else {
                     // Desktop background rendering with new assets
                     drawNewBackgroundSystem(assets);

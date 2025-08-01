@@ -5898,10 +5898,13 @@
                 height: var(--mobile-boost-bar-height);
             }
             
-            /* Joystick - Bottom Right Corner */
+            /* Joystick - Bottom Left Corner */
             body.mobile .virtual-joystick {
                 bottom: 120px !important;
-                right: 105px !important;
+                left: 30px !important;
+                right: auto !important;
+                width: 105px !important;
+                height: 105px !important;
             }
             
             
@@ -6035,10 +6038,11 @@
                 margin: 0 auto !important;
             }
             
-            /* Joystick - Bottom Right */
+            /* Joystick - Bottom Left */
             body.mobile .virtual-joystick {
                 bottom: 120px !important;
-                right: 105px !important;
+                left: 30px !important;
+                right: auto !important;
             }
             
             
@@ -6281,10 +6285,11 @@
         
         /* ===== VIRTUAL JOYSTICK SIZE FIX ===== */
         body.mobile .mobile-controls .virtual-joystick {
-            width: 140px !important;
-            height: 140px !important;
+            width: 105px !important;
+            height: 105px !important;
             bottom: 120px !important;
-            right: 105px !important;
+            left: 30px !important;
+            right: auto !important;
             position: fixed !important;
             z-index: 1002 !important;
         }
@@ -6859,11 +6864,13 @@
         }
         
         
-        /* Position joystick on right side for mobile */
+        /* Position joystick on left side for mobile */
         body.mobile .virtual-joystick {
-            right: 105px !important;
-            left: auto !important;
+            left: 30px !important;
+            right: auto !important;
             bottom: 120px !important;
+            width: 105px !important;
+            height: 105px !important;
         }
         
         /* Game Hint Styling */
