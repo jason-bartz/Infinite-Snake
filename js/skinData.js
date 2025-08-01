@@ -554,6 +554,7 @@ const skinData = {
         bio: 'Ancient Egyptian scarab turned QA specialist, eternally debugging the hieroglyphic code of the universe. Reserved exclusively for Discord members.',
         pixelBodyColor: '#296caa',
         pixelTailColor: '#296caa',
+        colors: ['#296caa', '#296caa'],
         unlockCriteria: {
             type: 'code',
             value: 'discord',
