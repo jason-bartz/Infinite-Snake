@@ -4982,24 +4982,13 @@
             </div>
         `;
         
-        // Check if mobile and disable non-cozy modes
-        if (window.isMobile && typeof window.isMobile === 'function' && window.isMobile()) {
-            const classicBox = gameModeContent.querySelector('.mode-box-classic');
-            const infiniteBox = gameModeContent.querySelector('.mode-box-infinite');
-            const mobileMsg = gameModeContent.querySelector('#mobileMessage');
-            
-            if (classicBox) classicBox.classList.add('mode-disabled');
-            if (infiniteBox) infiniteBox.classList.add('mode-disabled');
-            if (mobileMsg) mobileMsg.style.display = 'block';
-        }
+        // Mobile modes are now enabled - no restrictions
+        // All game modes (classic, infinite, cozy) are available on mobile/iPad
     }
     
     // Animate and select game mode
     function animateAndSelectMode(element, mode) {
-        // Check if mobile and mode is not cozy
-        if (window.isMobile && typeof window.isMobile === 'function' && window.isMobile() && mode !== 'cozy') {
-            return; // Don't allow selection
-        }
+        // All modes are now available on mobile - no restrictions
         
         // Add selected animation
         element.classList.add('selected');

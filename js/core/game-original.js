@@ -1752,10 +1752,7 @@
         function selectGameMode(mode) {
             console.log('[DEBUG] selectGameMode called with:', mode);
             
-            // On mobile, only allow cozy mode
-            if (isMobile && mode !== 'cozy') {
-                return; // Don't allow selection of other modes
-            }
+            // All modes are now available on mobile - no restrictions
             
             playUISound();
             gameMode = mode;
