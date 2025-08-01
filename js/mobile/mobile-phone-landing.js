@@ -107,19 +107,24 @@ class MobilePhoneLanding {
                 <div style="
                     width: 90%;
                     max-width: 350px;
+                    min-height: 197px;
                     margin-bottom: 30px;
                     cursor: pointer;
                     border: 3px solid #4ecdc4;
                     border-radius: 10px;
                     overflow: hidden;
                     box-shadow: 0 0 20px rgba(78, 205, 196, 0.5);
-                    background: #1a0033;
+                    background: #1a0033 url('/hero-gameplay-intro.gif') center/cover no-repeat;
                     position: relative;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
                 " onclick="document.getElementById('mobileVideoModal').style.display = 'flex';">
                     <img 
-                        src="hero-gameplay-intro.gif"
+                        src="/hero-gameplay-intro.gif"
                         alt="Infinite Snake Gameplay"
                         style="width: 100%; height: auto; display: block;"
+                        onerror="this.onerror=null; this.src='assets/hero-gameplay-intro.gif';"
                     />
                     <div style="
                         position: absolute;
