@@ -2178,6 +2178,10 @@
         }
         
         body.mobile .mobile-controls {
+            display: none; /* Hidden by default, shown only during gameplay */
+        }
+        
+        body.mobile.game-active .mobile-controls {
             display: block;
         }
         
@@ -5256,7 +5260,7 @@
                         <span class="stat-label">Discoveries</span>
                         <span class="stat-value" id="playerDiscoveries">0</span>
                     </div>
-                    <div class="stat-line">
+                    <div class="stat-line desktop-only">
                         <span class="stat-label">Best Rank</span>
                         <span class="stat-value" id="playerBestRank">-</span>
                     </div>

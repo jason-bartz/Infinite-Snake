@@ -11237,12 +11237,14 @@
                     playerInfoBox.style.setProperty('box-shadow', `0 0 ${20 + pulseIntensity * 20}px #FFD700, 4px 4px 0 rgba(0,0,0,0.8)`, 'important');
                 }
                 
-                // Update invincibility countdown text under skin
-                const invincibilityText = document.getElementById('invincibilityText');
-                if (invincibilityText) {
-                    const secondsRemaining = Math.ceil(playerSnake.invincibilityTimer / 1000);
-                    invincibilityText.textContent = `INVC: ${secondsRemaining}s..`;
-                    invincibilityText.style.display = 'block';
+                // Update invincibility countdown text under skin (desktop only)
+                if (!isMobile) {
+                    const invincibilityText = document.getElementById('invincibilityText');
+                    if (invincibilityText) {
+                        const secondsRemaining = Math.ceil(playerSnake.invincibilityTimer / 1000);
+                        invincibilityText.textContent = `INVC: ${secondsRemaining}s..`;
+                        invincibilityText.style.display = 'block';
+                    }
                 }
             } else {
                 // Remove golden border when not invincible
@@ -15080,7 +15082,7 @@
             let rightSideTouch = null;
             let leftTouchStartPos = null;
             
-            // Touch anywhere on left side for joystick control
+            // Touch anywhere on left side for joystick control, right side for boost
             document.addEventListener('touchstart', (e) => {
                 // Don't interfere with existing UI elements, but DO work on canvas
                 const isCanvas = e.target.id === 'gameCanvas' || e.target.tagName === 'CANVAS';
@@ -15100,8 +15102,13 @@
                     const x = touch.clientX;
                     const screenWidth = window.innerWidth;
                     
-                    // Touch anywhere on screen for joystick control
-                    if (leftSideTouch === null) {
+                    // Right side for boost
+                    if (x > screenWidth / 2 && rightSideTouch === null) {
+                        rightSideTouch = touch.identifier;
+                        mouseDown = true; // Trigger boost
+                    }
+                    // Left side for joystick control
+                    else if (x <= screenWidth / 2 && leftSideTouch === null) {
                         leftSideTouch = touch.identifier;
                         leftTouchStartPos = { x: touch.clientX, y: touch.clientY };
                         joystickActive = true;
@@ -15153,6 +15160,9 @@
                         leftSideTouch = null;
                         leftTouchStartPos = null;
                         resetJoystick();
+                    } else if (touch.identifier === rightSideTouch) {
+                        rightSideTouch = null;
+                        mouseDown = false; // Stop boost
                     }
                 }
             }, { passive: false });
@@ -15161,6 +15171,8 @@
                 // Reset all touches on cancel
                 leftSideTouch = null;
                 leftTouchStartPos = null;
+                rightSideTouch = null;
+                mouseDown = false;
                 resetJoystick();
             });
         }
