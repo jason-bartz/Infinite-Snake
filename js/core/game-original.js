@@ -41,6 +41,15 @@
             useBatchRendering = false;
         }
         
+        // Initialize spatial hash for collision detection
+        let spatialHash = null;
+        let useSpatialHashing = true; // Enable spatial hashing for all platforms
+        
+        // Allow override via URL parameter for testing/debugging
+        if (window.location.search.includes('spatial=off')) {
+            useSpatialHashing = false;
+        }
+        
         // Initialize batch renderer after window loads
         setTimeout(() => {
             if (window.BatchRenderer) {
@@ -60,6 +69,22 @@
                 }
             } else {
                 console.warn('[BatchRenderer] BatchRenderer class not found, continuing without batch rendering');
+            }
+            
+            // Initialize spatial hash
+            if (window.SpatialHashGrid && useSpatialHashing) {
+                // Use smaller cells on mobile for better performance
+                const cellSize = isMobile ? 150 : 100;
+                spatialHash = new SpatialHashGrid(cellSize, WORLD_SIZE, WORLD_SIZE);
+                console.log('[SpatialHash] Initialized with cell size:', cellSize);
+                
+                // Add debug mode for spatial hash
+                if (window.location.search.includes('debug=spatial')) {
+                    setInterval(() => {
+                        const stats = spatialHash.getStats();
+                        console.log(`[SpatialHash Stats] Efficiency: ${stats.efficiency}, Cells: ${stats.cellsInUse}, Cache hits: ${stats.cacheHits}`);
+                    }, 2000);
+                }
             }
         }, 100);
         
@@ -275,6 +300,21 @@
                 asteroid: 150
             }
         };
+        
+        // Helper functions for spatial hash management
+        function addSnakeToSpatialHash(snake) {
+            if (spatialHash && useSpatialHashing && snake) {
+                const snakeRadius = SEGMENT_SIZE * (snake.size || 1);
+                spatialHash.add(snake, snake.x, snake.y, snakeRadius);
+            }
+        }
+        
+        function removeSnakeFromSpatialHash(snake) {
+            if (spatialHash && useSpatialHashing && snake) {
+                const snakeRadius = SEGMENT_SIZE * (snake.size || 1);
+                spatialHash.remove(snake, snake.x, snake.y, snakeRadius);
+            }
+        }
         
         function isInViewport(x, y, margin = 100, entityType = 'default') {
             const screen = worldToScreen(x, y);
@@ -2795,6 +2835,7 @@
                     this.targetMemory = null; // Remember targets for a few frames
                     this.targetMemoryTimer = 0;
                     this.lastCollisionCheck = 0; // Optimize collision checking
+                    this.collisionCheckInterval = isMobile ? 3 : 2; // Check collisions every N frames
                     this.panicMode = false; // Emergency evasion state
                     this.panicTimer = 0;
                     this.lastDangerAngle = null; // Remember last danger direction
@@ -2969,6 +3010,10 @@
                     this.angle = 0;
                 }
                 
+                // Store old position for spatial hash update
+                const oldX = this.x;
+                const oldY = this.y;
+                
                 // Move head (apply deltaTime for proper movement)
                 // Performance optimization: Use fast math for movement
                 const moveX = fastMath.cos(this.angle) * this.speed * deltaTime;
@@ -2977,6 +3022,13 @@
                 if (isFinite(moveX) && isFinite(moveY)) {
                     this.x += moveX;
                     this.y += moveY;
+                    
+                    // Update spatial hash if enabled
+                    if (spatialHash && useSpatialHashing) {
+                        // Update head position in spatial hash
+                        const snakeRadius = SEGMENT_SIZE * (this.size || 1);
+                        spatialHash.update(this, oldX, oldY, this.x, this.y, snakeRadius);
+                    }
                 } else {
                     gameLogger.error('SNAKE', 'Invalid movement!', 'angle:', this.angle, 'speed:', this.speed, 'deltaTime:', deltaTime);
                 }
@@ -3612,6 +3664,9 @@
                 if (this.isPlayer) {
                     console.log('[DEATH DEBUG] Player snake die() called, isDying:', this.isDying, 'score:', this.score);
                 }
+                
+                // Remove from spatial hash when dying
+                removeSnakeFromSpatialHash(this);
                 
                 // Start death animation if not already dying
                 if (!this.isDying) {
@@ -7237,6 +7292,7 @@
             // Create boss
             currentBoss = new Boss(selectedBoss, spawnX, spawnY);
             snakes.push(currentBoss);
+            addSnakeToSpatialHash(currentBoss);
             bossEncounterActive = true;
             
             // Initialize boss hint timer
@@ -11782,7 +11838,31 @@
                 // Check snake collisions (skip if invincible)
                 if (snake.invincibilityTimer > 0) continue;
                 
-                for (const otherSnake of snakes) {
+                // Skip collision checks for AI snakes on some frames (performance optimization)
+                if (!snake.isPlayer && !snake.isBoss) {
+                    snake.lastCollisionCheck = (snake.lastCollisionCheck || 0) + 1;
+                    if (snake.lastCollisionCheck < snake.collisionCheckInterval) {
+                        continue; // Skip this frame
+                    }
+                    snake.lastCollisionCheck = 0; // Reset counter
+                }
+                
+                // Get nearby snakes using spatial hash or fall back to all snakes
+                let nearbySnakes;
+                if (spatialHash && useSpatialHashing) {
+                    // Use spatial hash to find nearby snakes
+                    const checkRadius = 300; // Check radius for nearby snakes
+                    nearbySnakes = spatialHash.getNearby(snake.x, snake.y, checkRadius);
+                    
+                    // Track performance
+                    spatialHash.stats.totalChecks += snakes.length;
+                    spatialHash.stats.checksAvoided += (snakes.length - nearbySnakes.length);
+                } else {
+                    // Fall back to checking all snakes
+                    nearbySnakes = snakes;
+                }
+                
+                for (const otherSnake of nearbySnakes) {
                     if (snake === otherSnake || !otherSnake.alive || !snake.alive || diedThisFrame.has(otherSnake)) continue;
                     
                     // Skip collision if boss is stunned or invulnerable
@@ -12924,6 +13004,9 @@
             playerSnake = new Snake(WORLD_SIZE / 2, WORLD_SIZE / 2, true);
             window.playerSnake = playerSnake; // Make available globally
             
+            // Add to spatial hash
+            addSnakeToSpatialHash(playerSnake);
+            
             // Re-apply background for cozy mode in case it was lost
             if (gameMode === 'cozy') {
                 document.body.style.backgroundImage = "url('assets/background/purple-bg.png')";
@@ -12976,7 +13059,9 @@
                 for (let i = 0; i < MAX_AI_SNAKES; i++) {
                     const x = 200 + Math.random() * (WORLD_SIZE - 400);
                     const y = 200 + Math.random() * (WORLD_SIZE - 400);
-                    snakes.push(new Snake(x, y, false));
+                    const aiSnake = new Snake(x, y, false);
+                    snakes.push(aiSnake);
+                    addSnakeToSpatialHash(aiSnake);
                 }
             }
             
@@ -14604,6 +14689,7 @@
                     }
                     
                     snakes.push(newAISnake);
+                    addSnakeToSpatialHash(newAISnake);
                     return false; // Remove from queue
                 }
                 return true; // Keep in queue
@@ -14885,6 +14971,7 @@
                     
                     // Add back to snakes array
                     snakes.push(playerSnake);
+                    addSnakeToSpatialHash(playerSnake);
                     
                     
                     // Set camera to new player position to prevent jumping
