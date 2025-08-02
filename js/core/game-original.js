@@ -32,8 +32,39 @@
         canvas.style.imageRendering = '-moz-crisp-edges';
         canvas.style.imageRendering = 'crisp-edges';
         
+        // Initialize batch renderer for optimized drawing
+        let batchRenderer = null;
+        let useBatchRendering = true; // Enable batch rendering for all platforms by default
+        
+        // Allow override via URL parameter for testing/debugging
+        if (window.location.search.includes('batch=off')) {
+            useBatchRendering = false;
+        }
+        
+        // Initialize batch renderer after window loads
+        setTimeout(() => {
+            if (window.BatchRenderer) {
+                batchRenderer = new BatchRenderer(ctx, isMobile);
+                // Pre-render common emojis
+                const commonEmojis = ['🔥', '💧', '🌍', '💨', '⚡', '🌟', '💎', '✨', '🐍', '😊', '👑', '💀'];
+                batchRenderer.preRenderCommonEmojis(commonEmojis);
+                console.log('[BatchRenderer] Initialized for mobile:', isMobile);
+                
+                // Add debug mode for testing
+                if (window.location.search.includes('debug=batch')) {
+                    window.DEBUG_RENDERING = true;
+                    setInterval(() => {
+                        const stats = batchRenderer.getStats();
+                        console.log(`[BatchRenderer Stats] Calls: ${stats.drawCalls}, Saved: ${stats.saved}, Efficiency: ${(stats.efficiency * 100).toFixed(1)}%`);
+                    }, 2000);
+                }
+            } else {
+                console.warn('[BatchRenderer] BatchRenderer class not found, continuing without batch rendering');
+            }
+        }, 100);
+        
         const emojiCache = new Map();
-        const MAX_CACHE_SIZE = 200;
+        const MAX_CACHE_SIZE = isMobile ? 500 : 200; // Increased cache size for mobile
         
         const reusableObjects = {
             vector: { x: 0, y: 0 },
@@ -85,6 +116,11 @@
             const validSize = Math.max(1, Math.round(size || 20));
             const key = `${emoji}_${validSize}`;
             
+            // Check batch renderer first if available
+            if (batchRenderer && batchRenderer.preRenderedEmojis.has(key)) {
+                return batchRenderer.preRenderedEmojis.get(key);
+            }
+            
             if (emojiCache.has(key)) {
                 return emojiCache.get(key);
             }
@@ -122,6 +158,9 @@
             
             return offscreenCanvas;
         }
+        
+        // Make getCachedEmoji available globally for batch renderer
+        window.getCachedEmoji = getCachedEmoji;
         
         let resizeTimeout;
         let lastCanvasWidth = 0;
@@ -218,11 +257,34 @@
             };
         }
         
-        function isInViewport(x, y, margin = 100) {
+        // Make worldToScreen globally available for batch renderer
+        window.worldToScreen = worldToScreen;
+        
+        // Configurable viewport culling margins
+        const VIEWPORT_MARGINS = {
+            mobile: {
+                element: 100,
+                snake: 150,
+                particle: 50,
+                asteroid: 200
+            },
+            desktop: {
+                element: 100,
+                snake: 100,
+                particle: 100,
+                asteroid: 150
+            }
+        };
+        
+        function isInViewport(x, y, margin = 100, entityType = 'default') {
             const screen = worldToScreen(x, y);
             
+            // Use entity-specific margins if available
+            const margins = isMobile ? VIEWPORT_MARGINS.mobile : VIEWPORT_MARGINS.desktop;
+            const specificMargin = margins[entityType] || margin;
+            
             // Increase margin for mobile to account for canvas scaling and prevent premature culling
-            const adjustedMargin = isMobile ? margin * 2 : margin;
+            const adjustedMargin = isMobile ? specificMargin * 2 : specificMargin;
             
             return screen.x >= -adjustedMargin && 
                    screen.x <= canvas.width + adjustedMargin && 
@@ -5116,6 +5178,39 @@
             }
             
             draw() {
+                // Use batch rendering if available and enabled
+                if (useBatchRendering && batchRenderer) {
+                    const baseEmojiSize = isMobile ? 35 : ELEMENT_SIZE * 2;
+                    const emojiSize = Math.round(baseEmojiSize * cameraZoom);
+                    const emoji = this.data ? window.elementLoader.getEmojiForElement(this.id, this.data.base ? this.id : window.elementLoader.elements.get(this.id)?.e || this.id) : '❓';
+                    
+                    // Queue for batch rendering
+                    batchRenderer.queueEmoji(emoji, this.x, this.y, emojiSize);
+                    
+                    // Still need to draw non-batchable items (text, effects)
+                    const screen = worldToScreen(this.x, this.y);
+                    const screenX = screen.x;
+                    const screenY = screen.y;
+                    
+                    // Skip if off-screen for text/effects
+                    if (!isInViewport(this.x, this.y, 50, 'element')) return;
+                    
+                    // Draw element name (can't be batched due to stroke)
+                    const elementNameFontSize = isMobile ? 10 : 12;
+                    ctx.font = `${elementNameFontSize}px Arial`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'top';
+                    ctx.fillStyle = 'white';
+                    ctx.strokeStyle = 'black';
+                    ctx.lineWidth = 3;
+                    const name = this.data ? this.data.name : 'Unknown';
+                    ctx.strokeText(name, screenX, screenY + ELEMENT_SIZE * cameraZoom + 5);
+                    ctx.fillText(name, screenX, screenY + ELEMENT_SIZE * cameraZoom + 5);
+                    
+                    return; // Skip the rest of the draw method
+                }
+                
+                // Original draw code for non-batch rendering
                 const screen = worldToScreen(this.x, this.y);
                 const screenX = screen.x;
                 const screenY = screen.y;
@@ -5841,11 +5936,21 @@
             }
             
             draw() {
+                // Start batch if using batch rendering
+                if (useBatchRendering && batchRenderer) {
+                    batchRenderer.startFrame();
+                }
+                
                 this.activeElements.forEach(element => {
-                    if (isInViewport(element.x, element.y, ELEMENT_SIZE + 50)) {
+                    if (isInViewport(element.x, element.y, ELEMENT_SIZE + 50, 'element')) {
                         element.draw();
                     }
                 });
+                
+                // Flush batch if using batch rendering
+                if (useBatchRendering && batchRenderer) {
+                    batchRenderer.flush();
+                }
             }
             
             getActiveElements() {
@@ -8871,7 +8976,7 @@
         }
         
         function createCombinationParticles(x, y) {
-            const particleCount = isMobile ? 10 : 20; // Reduced for mobile
+            const particleCount = isMobile ? 5 : 20; // Further reduced for mobile (50% less)
             for (let i = 0; i < particleCount; i++) {
                 const angle = (Math.PI * 2 * i) / particleCount;
                 const speed = 2 + Math.random() * 3;
