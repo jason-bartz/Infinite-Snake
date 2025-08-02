@@ -23,7 +23,7 @@ class BatchRenderer {
     
     // Pre-render common emojis at startup
     preRenderCommonEmojis(emojis) {
-        console.log('[BatchRenderer] Pre-rendering common emojis...');
+        // Pre-rendering common emojis...
         const startTime = performance.now();
         
         emojis.forEach(emoji => {
@@ -35,7 +35,7 @@ class BatchRenderer {
         });
         
         const elapsed = performance.now() - startTime;
-        console.log(`[BatchRenderer] Pre-rendered ${this.preRenderedEmojis.size} emojis in ${elapsed.toFixed(2)}ms`);
+        // Pre-rendered ${this.preRenderedEmojis.size} emojis in ${elapsed}ms
     }
     
     createEmojiCanvas(emoji, size) {
@@ -160,7 +160,7 @@ class BatchRenderer {
         
         // Log performance stats in debug mode
         if (window.DEBUG_RENDERING) {
-            console.log(`[BatchRenderer] Draw calls: ${this.drawCallsThisFrame}, Saved: ${this.drawCallsSaved}`);
+            // Draw calls: ${this.drawCallsThisFrame}, Saved: ${this.drawCallsSaved}
         }
     }
     

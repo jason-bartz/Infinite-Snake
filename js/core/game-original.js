@@ -57,7 +57,7 @@
                 // Pre-render common emojis
                 const commonEmojis = ['🔥', '💧', '🌍', '💨', '⚡', '🌟', '💎', '✨', '🐍', '😊', '👑', '💀'];
                 batchRenderer.preRenderCommonEmojis(commonEmojis);
-                console.log('[BatchRenderer] Initialized for mobile:', isMobile);
+                // BatchRenderer initialized successfully
                 
                 // Add debug mode for testing
                 if (window.location.search.includes('debug=batch')) {
@@ -68,7 +68,7 @@
                     }, 2000);
                 }
             } else {
-                console.warn('[BatchRenderer] BatchRenderer class not found, continuing without batch rendering');
+                // BatchRenderer not found, continuing without batch rendering
             }
             
             // Initialize spatial hash
@@ -76,7 +76,7 @@
                 // Use smaller cells on mobile for better performance
                 const cellSize = isMobile ? 150 : 100;
                 spatialHash = new SpatialHashGrid(cellSize, WORLD_SIZE, WORLD_SIZE);
-                console.log('[SpatialHash] Initialized with cell size:', cellSize);
+                // SpatialHash initialized successfully
                 
                 // Add debug mode for spatial hash
                 if (window.location.search.includes('debug=spatial')) {
