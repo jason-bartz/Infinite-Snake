@@ -242,8 +242,13 @@ All entities extend base classes with `update()` and `draw()` methods:
    - Spawn interval: 50 seconds (50000ms)
 
 3. **Catalyst Gem** (💎)
-   - Spawns 3 tier 1-2 elements
+   - Spawns 2 random elements (any tier except 0)
+   - Priority system:
+     - First priority: Elements that can combine with player's bank
+     - Second priority: Elements that can combine with map elements
+     - Third priority: Other undiscovered elements
    - Spawn interval: 45 seconds (45000ms)
+   - Map count: 4 gems maintained on map
 
 ---
 
@@ -421,28 +426,22 @@ GAME OVER STATE
 
 ## Analytics & Metrics
 
-### GameAnalytics Integration
-**File**: `js/analytics/gameAnalytics.js`
-- Tracks player behavior and game events
-- Key events tracked:
-  - Game start/end
-  - Score milestones
-  - Element discoveries
-  - Boss encounters
-  - Death reasons
-  - Session duration
-
-### Key Performance Indicators (KPIs)
-- **Engagement**: Average session length, games per session
-- **Progression**: Discovery completion rate, boss defeat rate
-- **Retention**: Daily active users, return rate
-- **Competition**: Leaderboard participation rate
+### Vercel Analytics
+- Uses `@vercel/analytics` for basic metrics tracking
+- Automatically tracks page views and web vitals
+- No custom event tracking implemented
 
 ### Player Statistics
 **File**: `js/playerStats.js`
 - Tracks lifetime stats in localStorage
 - Exportable for analysis
 - Used for unlock progression
+
+### Key Performance Indicators (KPIs)
+- **Engagement**: Average session length, games per session
+- **Progression**: Discovery completion rate, boss defeat rate
+- **Retention**: Daily active users, return rate
+- **Competition**: Leaderboard participation rate
 
 ---
 

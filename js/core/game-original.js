@@ -486,7 +486,7 @@
         let catalystGems = [];
         let lastCatalystGemSpawn = 0;
         const CATALYST_GEM_SPAWN_INTERVAL = 45000;
-        const CATALYST_GEM_SPAWN_COUNT = 3;
+        const CATALYST_GEM_SPAWN_COUNT = 4;
         let catalystSpawnedElements = [];
         
         const AI_PERSONALITIES = {
@@ -11728,71 +11728,122 @@
                     if (dx * dx + dy * dy < collisionDistSq) {
                         // Only activate if catalyst gem logic is ready
                         if (snake.isPlayer && window.elementLoader && window.elementLoader.isLoaded && window.elementLoader.isLoaded()) {
-                            // NEW CATALYST LOGIC: Spawn 3 random elements NOT in the current spawn pool
-                            // These are elements the player hasn't discovered yet
-                            const allElements = window.elementLoader.elements;
-                            const undiscoveredElements = [];
+                            // NEW CATALYST LOGIC: Spawn 2 elements with smart selection
+                            // Priority 1: Elements that can combine with player's bank
+                            // Priority 2: Elements that can combine with elements on the map
+                            // Must be non-tier-0 elements and not in current spawn pool
                             
-                            // Find all elements that are NOT in the spawn pool (not discovered by player)
+                            const allElements = window.elementLoader.elements;
+                            const combinations = window.elementLoader.combinations;
+                            const playerBank = snake.elements || [];
+                            
+                            // Get elements currently on the map
+                            const mapElementIds = new Set();
+                            for (const elem of elementPool.activeElements) {
+                                mapElementIds.add(elem.id);
+                            }
+                            
+                            // Categorize potential spawn candidates
+                            const priority1Elements = []; // Can combine with player's bank
+                            const priority2Elements = []; // Can combine with map elements
+                            const otherElements = [];     // Other undiscovered elements
+                            
                             for (const [elemId, element] of allElements) {
                                 const elemIdNum = typeof elemId === 'string' ? parseInt(elemId) : elemId;
-                                const isBaseElement = elemIdNum >= 0 && elemIdNum <= 3;
                                 
-                                // Skip base elements and already discovered elements
-                                if (!isBaseElement && !playerDiscoveredElements.has(elemIdNum)) {
-                                    undiscoveredElements.push(elemIdNum);
+                                // Skip tier 0 (base) elements and already discovered elements
+                                if (element.t === 0 || playerDiscoveredElements.has(elemIdNum)) {
+                                    continue;
+                                }
+                                
+                                let canCombineWithBank = false;
+                                let canCombineWithMap = false;
+                                
+                                // Check if this element can combine with player's bank
+                                for (const bankElem of playerBank) {
+                                    if (bankElem && bankElem.id !== undefined) {
+                                        const comboKey = `${Math.min(elemIdNum, bankElem.id)}+${Math.max(elemIdNum, bankElem.id)}`;
+                                        if (combinations[comboKey]) {
+                                            canCombineWithBank = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                                
+                                // Check if this element can combine with map elements
+                                if (!canCombineWithBank) {
+                                    for (const mapElemId of mapElementIds) {
+                                        const comboKey = `${Math.min(elemIdNum, mapElemId)}+${Math.max(elemIdNum, mapElemId)}`;
+                                        if (combinations[comboKey]) {
+                                            canCombineWithMap = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                                
+                                // Categorize the element
+                                if (canCombineWithBank) {
+                                    priority1Elements.push(elemIdNum);
+                                } else if (canCombineWithMap) {
+                                    priority2Elements.push(elemIdNum);
+                                } else {
+                                    otherElements.push(elemIdNum);
                                 }
                             }
                             
-                            if (undiscoveredElements.length >= 3) {
-                                // Randomly select 3 undiscovered elements
-                                const shuffled = [...undiscoveredElements].sort(() => Math.random() - 0.5);
-                                const elementsToSpawn = shuffled.slice(0, 3);
-                                
-                                // Spawn the three elements around the player in a triangle pattern
-                                for (let j = 0; j < elementsToSpawn.length; j++) {
-                                    const angle = (j / 3) * Math.PI * 2;
-                                    const distance = 100 + Math.random() * 100;
-                                    const spawnX = snake.x + Math.cos(angle) * distance;
-                                    const spawnY = snake.y + Math.sin(angle) * distance;
-                                    
-                                    // Create the element with catalyst sparkle effect
-                                    elementPool.spawn(elementsToSpawn[j], spawnX, spawnY, true);
+                            // Select 2 elements based on priority
+                            const elementsToSpawn = [];
+                            
+                            // First, try to get from priority 1
+                            if (priority1Elements.length > 0) {
+                                const shuffled = [...priority1Elements].sort(() => Math.random() - 0.5);
+                                elementsToSpawn.push(...shuffled.slice(0, Math.min(2, shuffled.length)));
+                            }
+                            
+                            // If we need more, get from priority 2
+                            if (elementsToSpawn.length < 2 && priority2Elements.length > 0) {
+                                const shuffled = [...priority2Elements].sort(() => Math.random() - 0.5);
+                                const needed = 2 - elementsToSpawn.length;
+                                elementsToSpawn.push(...shuffled.slice(0, Math.min(needed, shuffled.length)));
+                            }
+                            
+                            // If we still need more, get from other elements
+                            if (elementsToSpawn.length < 2 && otherElements.length > 0) {
+                                const shuffled = [...otherElements].sort(() => Math.random() - 0.5);
+                                const needed = 2 - elementsToSpawn.length;
+                                elementsToSpawn.push(...shuffled.slice(0, Math.min(needed, shuffled.length)));
+                            }
+                            
+                            // If no undiscovered elements available, fall back to any non-tier-0 elements
+                            if (elementsToSpawn.length === 0) {
+                                const allNonBaseElements = [];
+                                for (const [elemId, element] of allElements) {
+                                    if (element.t > 0) {
+                                        allNonBaseElements.push(parseInt(elemId));
+                                    }
                                 }
+                                const shuffled = [...allNonBaseElements].sort(() => Math.random() - 0.5);
+                                elementsToSpawn.push(...shuffled.slice(0, 2));
+                            }
+                            
+                            // Spawn the elements in a semi-circle pattern
+                            for (let j = 0; j < elementsToSpawn.length; j++) {
+                                const angle = (j / 2) * Math.PI + Math.PI * 0.5; // Semi-circle in front
+                                const distance = 100 + Math.random() * 50;
+                                const spawnX = snake.x + Math.cos(snake.angle + angle - Math.PI * 0.5) * distance;
+                                const spawnY = snake.y + Math.sin(snake.angle + angle - Math.PI * 0.5) * distance;
                                 
-                                showMessage(`💎 Catalyst Gem: 3 Rare Elements Materialized!`, 'gold');
-                            } else if (undiscoveredElements.length > 0) {
-                                // Spawn whatever undiscovered elements are left
-                                const elementsToSpawn = undiscoveredElements;
-                                
-                                // Spawn the elements
-                                for (let j = 0; j < elementsToSpawn.length; j++) {
-                                    const angle = (j / elementsToSpawn.length) * Math.PI * 2;
-                                    const distance = 100 + Math.random() * 100;
-                                    const spawnX = snake.x + Math.cos(angle) * distance;
-                                    const spawnY = snake.y + Math.sin(angle) * distance;
-                                    
-                                    elementPool.spawn(elementsToSpawn[j], spawnX, spawnY, true);
-                                }
-                                
-                                showMessage(`💎 Catalyst Gem: ${elementsToSpawn.length} Rare Elements Materialized!`, 'gold');
+                                // Create the element with catalyst sparkle effect
+                                elementPool.spawn(elementsToSpawn[j], spawnX, spawnY, true);
+                            }
+                            
+                            // Show appropriate message
+                            if (elementsToSpawn.length === 2) {
+                                showMessage(`💎 Catalyst Gem: 2 Random Elements Materialized!`, 'gold');
+                            } else if (elementsToSpawn.length === 1) {
+                                showMessage(`💎 Catalyst Gem: 1 Random Element Materialized!`, 'gold');
                             } else {
-                                // Fallback: All elements discovered, spawn random elements
-                                const allElementsList = Array.from(allElements.keys());
-                                const shuffled = [...allElementsList].sort(() => Math.random() - 0.5);
-                                const elementsToSpawn = shuffled.slice(0, 3);
-                                
-                                // Spawn the elements
-                                for (let j = 0; j < elementsToSpawn.length; j++) {
-                                    const angle = (j / elementsToSpawn.length) * Math.PI * 2;
-                                    const distance = 100 + Math.random() * 100;
-                                    const spawnX = snake.x + Math.cos(angle) * distance;
-                                    const spawnY = snake.y + Math.sin(angle) * distance;
-                                    
-                                    elementPool.spawn(elementsToSpawn[j], spawnX, spawnY, true);
-                                }
-                                
-                                showMessage(`💎 Catalyst Gem: 3 Elements Materialized!`, 'gold');
+                                showMessage(`💎 Catalyst Gem activated!`, 'gold');
                             }
                             
                             // Play catalyst gem sound at appropriate volume
@@ -11801,7 +11852,7 @@
                             // Dispatch catalyst gem collected event
                             dispatchGameEvent('powerupCollected', {
                                 type: 'catalyst',
-                                elementsSpawned: 3
+                                elementsSpawned: elementsToSpawn.length
                             });
                             
                             // Create particle effect
