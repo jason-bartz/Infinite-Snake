@@ -486,7 +486,7 @@
         let catalystGems = [];
         let lastCatalystGemSpawn = 0;
         const CATALYST_GEM_SPAWN_INTERVAL = 45000;
-        const CATALYST_GEM_SPAWN_COUNT = 4;
+        const CATALYST_GEM_SPAWN_COUNT = 5;
         let catalystSpawnedElements = [];
         
         const AI_PERSONALITIES = {

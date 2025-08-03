@@ -247,8 +247,9 @@ All entities extend base classes with `update()` and `draw()` methods:
      - First priority: Elements that can combine with player's bank
      - Second priority: Elements that can combine with map elements
      - Third priority: Other undiscovered elements
+   - Only spawns undiscovered elements to help with game progression
    - Spawn interval: 45 seconds (45000ms)
-   - Map count: 4 gems maintained on map
+   - Map count: 5 gems maintained on map
 
 ---
 
