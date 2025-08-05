@@ -735,14 +735,14 @@ window.editRecipe = function(elem1, elem2, result) {
                 <label>First Element - Search by name or ID</label>
                 <input type="text" id="recipe-elem1" placeholder="Type to search..." autocomplete="off">
                 <input type="hidden" id="recipe-elem1-id" value="${elem1}">
-                <div id="search-results-1" style="display: none; max-height: 200px; overflow-y: auto; background: #0f0f0f; border: 1px solid #333; border-radius: 6px; margin-top: 5px;"></div>
+                <div id="search-results-1" style="display: none;"></div>
             </div>
             
             <div class="form-group">
                 <label>Second Element - Search by name or ID</label>
                 <input type="text" id="recipe-elem2" placeholder="Type to search..." autocomplete="off">
                 <input type="hidden" id="recipe-elem2-id" value="${elem2}">
-                <div id="search-results-2" style="display: none; max-height: 200px; overflow-y: auto; background: #0f0f0f; border: 1px solid #333; border-radius: 6px; margin-top: 5px;"></div>
+                <div id="search-results-2" style="display: none;"></div>
             </div>
             
             <button onclick="saveRecipe('${elem1}', '${elem2}', '${result}')">Save Recipe</button>
@@ -763,6 +763,21 @@ function setupRecipeSearch(inputId, hiddenId, resultsId, previewId) {
     const preview = previewId ? document.getElementById(previewId) : null;
     
     let searchTimeout;
+    
+    // Update the style of the results div to be a grid
+    resultsDiv.style.cssText = `
+        display: none;
+        position: absolute;
+        z-index: 1000;
+        background: #0f0f0f;
+        border: 1px solid #333;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        max-height: 400px;
+        overflow-y: auto;
+        width: min(90vw, 800px);
+        padding: 10px;
+    `;
     
     input.addEventListener('input', function(e) {
         clearTimeout(searchTimeout);
@@ -785,34 +800,59 @@ function setupRecipeSearch(inputId, hiddenId, resultsId, previewId) {
             }
             
             if (matches.length > 0) {
-                let html = '';
+                let html = '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px;">';
                 matches.forEach(elem => {
                     const emoji = emojis[elem.id] || emojis[elem.emojiIndex] || '❓';
                     html += `
-                        <div style="padding: 10px; cursor: pointer; border-bottom: 1px solid #333;" 
-                             onmouseover="this.style.background='#2a2a2a'" 
-                             onmouseout="this.style.background='transparent'"
-                             onclick="selectRecipeElement('${inputId}', '${hiddenId}', '${previewId}', '${elem.id}', '${elem.name.replace(/'/g, "\\'")}', '${emoji}')"">
-                            <span style="font-size: 20px; margin-right: 10px;">${emoji}</span>
-                            <span>${elem.name}</span>
-                            <span style="color: #888; font-size: 12px; margin-left: 10px;">(ID: ${elem.id})</span>
+                        <div style="
+                            padding: 10px;
+                            cursor: pointer;
+                            border: 1px solid #333;
+                            border-radius: 6px;
+                            text-align: center;
+                            transition: all 0.2s;
+                            background: #1a1a1a;
+                        " 
+                        onmouseover="this.style.background='#2a2a2a'; this.style.borderColor='#4ecdc4'; this.style.transform='scale(1.05)'" 
+                        onmouseout="this.style.background='#1a1a1a'; this.style.borderColor='#333'; this.style.transform='scale(1)'"
+                        onclick="selectRecipeElement('${inputId}', '${hiddenId}', '${previewId}', '${elem.id}', '${elem.name.replace(/'/g, "\\'")}', '${emoji}')">
+                            <div style="font-size: 28px; margin-bottom: 5px;">${emoji}</div>
+                            <div style="font-size: 12px; font-weight: 500; color: #e0e0e0; margin-bottom: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                ${elem.name}
+                            </div>
+                            <div style="font-size: 10px; color: #666;">ID: ${elem.id}</div>
                         </div>
                     `;
                 });
+                html += '</div>';
                 resultsDiv.innerHTML = html;
                 resultsDiv.style.display = 'block';
+                
+                // Position the grid below the input
+                const inputRect = input.getBoundingClientRect();
+                resultsDiv.style.top = (inputRect.bottom + 5) + 'px';
+                resultsDiv.style.left = inputRect.left + 'px';
             } else {
-                resultsDiv.innerHTML = '<div style="padding: 10px; color: #888;">No elements found</div>';
+                resultsDiv.innerHTML = '<div style="padding: 20px; color: #888; text-align: center;">No elements found</div>';
                 resultsDiv.style.display = 'block';
+                
+                // Position even when no results
+                const inputRect = input.getBoundingClientRect();
+                resultsDiv.style.top = (inputRect.bottom + 5) + 'px';
+                resultsDiv.style.left = inputRect.left + 'px';
             }
         }, 200);
     });
     
-    document.addEventListener('click', function(e) {
-        if (!input.contains(e.target) && !resultsDiv.contains(e.target)) {
-            resultsDiv.style.display = 'none';
-        }
-    });
+    // Add click outside handler only once
+    if (!resultsDiv.hasAttribute('data-click-handler')) {
+        resultsDiv.setAttribute('data-click-handler', 'true');
+        document.addEventListener('click', function(e) {
+            if (!input.contains(e.target) && !resultsDiv.contains(e.target)) {
+                resultsDiv.style.display = 'none';
+            }
+        });
+    }
 }
 
 window.selectRecipeElement = function(inputId, hiddenId, previewId, elemId, elemName, emoji) {
@@ -1147,13 +1187,13 @@ window.addRecipeRow = function() {
     row.innerHTML = `
         <input type="text" id="${rowId}-elem1" placeholder="Search first element..." autocomplete="off">
         <input type="hidden" id="${rowId}-elem1-id">
-        <div id="${rowId}-elem1-results" style="display: none; position: absolute; max-height: 200px; overflow-y: auto; background: #0f0f0f; border: 1px solid #333; border-radius: 6px; z-index: 100;"></div>
+        <div id="${rowId}-elem1-results" style="display: none;"></div>
         
         <span style="margin: 0 10px;">+</span>
         
         <input type="text" id="${rowId}-elem2" placeholder="Search second element..." autocomplete="off">
         <input type="hidden" id="${rowId}-elem2-id">
-        <div id="${rowId}-elem2-results" style="display: none; position: absolute; max-height: 200px; overflow-y: auto; background: #0f0f0f; border: 1px solid #333; border-radius: 6px; z-index: 100;"></div>
+        <div id="${rowId}-elem2-results" style="display: none;"></div>
         
         <button class="remove-btn" onclick="removeRow('${rowId}')">✕</button>
     `;
@@ -1178,13 +1218,13 @@ window.addCreatesRow = function() {
         
         <input type="text" id="${rowId}-other" placeholder="Search element..." autocomplete="off">
         <input type="hidden" id="${rowId}-other-id">
-        <div id="${rowId}-other-results" style="display: none; position: absolute; max-height: 200px; overflow-y: auto; background: #0f0f0f; border: 1px solid #333; border-radius: 6px; z-index: 100;"></div>
+        <div id="${rowId}-other-results" style="display: none;"></div>
         
         <span style="margin: 0 10px;">=</span>
         
         <input type="text" id="${rowId}-result" placeholder="Search or create result..." autocomplete="off">
         <input type="hidden" id="${rowId}-result-id">
-        <div id="${rowId}-result-results" style="display: none; position: absolute; max-height: 200px; overflow-y: auto; background: #0f0f0f; border: 1px solid #333; border-radius: 6px; z-index: 100;"></div>
+        <div id="${rowId}-result-results" style="display: none;"></div>
         
         <button class="remove-btn" onclick="removeRow('${rowId}')">✕</button>
     `;
@@ -1402,6 +1442,21 @@ function setupRecipeSearchWithCreate(inputId, hiddenId, resultsId) {
     
     let searchTimeout;
     
+    // Update the style of the results div to be a grid
+    resultsDiv.style.cssText = `
+        display: none;
+        position: absolute;
+        z-index: 1000;
+        background: #0f0f0f;
+        border: 1px solid #333;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        max-height: 400px;
+        overflow-y: auto;
+        width: min(90vw, 800px);
+        padding: 10px;
+    `;
+    
     input.addEventListener('input', function(e) {
         clearTimeout(searchTimeout);
         const query = e.target.value.trim();
@@ -1420,11 +1475,11 @@ function setupRecipeSearchWithCreate(inputId, hiddenId, resultsId) {
             for (const [id, elem] of Object.entries(window.elements)) {
                 if (elem.name.toLowerCase().includes(queryLower) || id.toString().includes(query)) {
                     matches.push({ id, ...elem });
-                    if (matches.length >= 100) break;
+                    if (matches.length >= 99) break;
                 }
             }
             
-            let html = '';
+            let html = '<div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">';
             
             // Show create new option if exact match doesn't exist
             let exactMatch = false;
@@ -1437,12 +1492,21 @@ function setupRecipeSearchWithCreate(inputId, hiddenId, resultsId) {
             
             if (!exactMatch && query.length >= 2) {
                 html += `
-                    <div style="padding: 10px; cursor: pointer; border-bottom: 1px solid #333; background: #1a3a3a;" 
-                         onmouseover="this.style.background='#2a4a4a'" 
-                         onmouseout="this.style.background='#1a3a3a'"
-                         onclick="selectNewElement('${inputId}', '${hiddenId}', '${query}')">
-                        <span style="font-size: 20px; margin-right: 10px;">➕</span>
-                        <span style="color: #4ecdc4;">Create new: "${query}"</span>
+                    <div style="
+                        padding: 10px;
+                        cursor: pointer;
+                        border: 2px solid #4ecdc4;
+                        border-radius: 6px;
+                        text-align: center;
+                        transition: all 0.2s;
+                        background: #1a3a3a;
+                        grid-column: span 4;
+                    " 
+                    onmouseover="this.style.background='#2a4a4a'; this.style.transform='scale(1.02)'" 
+                    onmouseout="this.style.background='#1a3a3a'; this.style.transform='scale(1)'"
+                    onclick="selectNewElement('${inputId}', '${hiddenId}', '${query}')">
+                        <div style="font-size: 28px; margin-bottom: 5px;">➕</div>
+                        <div style="font-size: 14px; font-weight: 500; color: #4ecdc4;">Create new: "${query}"</div>
                     </div>
                 `;
             }
@@ -1450,34 +1514,60 @@ function setupRecipeSearchWithCreate(inputId, hiddenId, resultsId) {
             // Show existing matches
             matches.forEach(elem => {
                 // Prefer element-specific emoji over shared emojiIndex
-    const emoji = emojis[elem.id] || emojis[elem.emojiIndex] || '❓';
+                const emoji = emojis[elem.id] || emojis[elem.emojiIndex] || '❓';
                 html += `
-                    <div style="padding: 10px; cursor: pointer; border-bottom: 1px solid #333;" 
-                         onmouseover="this.style.background='#2a2a2a'" 
-                         onmouseout="this.style.background='transparent'"
-                         onclick="selectRecipeElement('${inputId}', '${hiddenId}', null, '${elem.id}', '${elem.name.replace(/'/g, "\\'")}', '${emoji}')">
-                        <span style="font-size: 20px; margin-right: 10px;">${emoji}</span>
-                        <span>${elem.name}</span>
-                        <span style="color: #888; font-size: 12px; margin-left: 10px;">(ID: ${elem.id})</span>
+                    <div style="
+                        padding: 10px;
+                        cursor: pointer;
+                        border: 1px solid #333;
+                        border-radius: 6px;
+                        text-align: center;
+                        transition: all 0.2s;
+                        background: #1a1a1a;
+                    " 
+                    onmouseover="this.style.background='#2a2a2a'; this.style.borderColor='#4ecdc4'; this.style.transform='scale(1.05)'" 
+                    onmouseout="this.style.background='#1a1a1a'; this.style.borderColor='#333'; this.style.transform='scale(1)'"
+                    onclick="selectRecipeElement('${inputId}', '${hiddenId}', null, '${elem.id}', '${elem.name.replace(/'/g, "\\'")}', '${emoji}')">
+                        <div style="font-size: 28px; margin-bottom: 5px;">${emoji}</div>
+                        <div style="font-size: 12px; font-weight: 500; color: #e0e0e0; margin-bottom: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            ${elem.name}
+                        </div>
+                        <div style="font-size: 10px; color: #666;">ID: ${elem.id}</div>
                     </div>
                 `;
             });
             
-            if (html) {
+            html += '</div>';
+            
+            if (matches.length > 0 || (!exactMatch && query.length >= 2)) {
                 resultsDiv.innerHTML = html;
                 resultsDiv.style.display = 'block';
+                
+                // Position the grid below the input
+                const inputRect = input.getBoundingClientRect();
+                resultsDiv.style.top = (inputRect.bottom + 5) + 'px';
+                resultsDiv.style.left = inputRect.left + 'px';
             } else {
-                resultsDiv.innerHTML = '<div style="padding: 10px; color: #888;">No elements found</div>';
+                resultsDiv.innerHTML = '<div style="padding: 20px; color: #888; text-align: center;">No elements found</div>';
                 resultsDiv.style.display = 'block';
+                
+                // Position even when no results
+                const inputRect = input.getBoundingClientRect();
+                resultsDiv.style.top = (inputRect.bottom + 5) + 'px';
+                resultsDiv.style.left = inputRect.left + 'px';
             }
         }, 200);
     });
     
-    document.addEventListener('click', function(e) {
-        if (!input.contains(e.target) && !resultsDiv.contains(e.target)) {
-            resultsDiv.style.display = 'none';
-        }
-    });
+    // Add click outside handler only once
+    if (!resultsDiv.hasAttribute('data-click-handler')) {
+        resultsDiv.setAttribute('data-click-handler', 'true');
+        document.addEventListener('click', function(e) {
+            if (!input.contains(e.target) && !resultsDiv.contains(e.target)) {
+                resultsDiv.style.display = 'none';
+            }
+        });
+    }
 }
 
 // Select new element (to be created)
@@ -1504,14 +1594,14 @@ window.addNewRecipe = function(elementId) {
                 <label>First Element - Search by name or ID</label>
                 <input type="text" id="new-recipe-elem1" placeholder="Type to search..." autocomplete="off">
                 <input type="hidden" id="new-recipe-elem1-id">
-                <div id="new-recipe-search-1" style="display: none; max-height: 200px; overflow-y: auto; background: #0f0f0f; border: 1px solid #333; border-radius: 6px; margin-top: 5px;"></div>
+                <div id="new-recipe-search-1" style="display: none;"></div>
             </div>
             
             <div class="form-group">
                 <label>Second Element - Search by name or ID</label>
                 <input type="text" id="new-recipe-elem2" placeholder="Type to search..." autocomplete="off">
                 <input type="hidden" id="new-recipe-elem2-id">
-                <div id="new-recipe-search-2" style="display: none; max-height: 200px; overflow-y: auto; background: #0f0f0f; border: 1px solid #333; border-radius: 6px; margin-top: 5px;"></div>
+                <div id="new-recipe-search-2" style="display: none;"></div>
             </div>
             
             <button onclick="saveNewRecipe('${elementId}')">Save Recipe</button>
@@ -1888,7 +1978,7 @@ window.editAffectedCombo = function(index, combo, deletingElemId, otherElemId, r
             <div style="margin-bottom: 10px;">Replace deleted element with:</div>
             <input type="text" id="replace-${index}" placeholder="Search for element..." style="width: 100%; padding: 8px;">
             <input type="hidden" id="replace-${index}-id" value="">
-            <div id="replace-${index}-results" style="display: none; max-height: 150px; overflow-y: auto; background: #1a1a1a; border: 1px solid #444; margin-top: 5px;"></div>
+            <div id="replace-${index}-results" style="display: none;"></div>
             <div style="display: flex; gap: 10px; margin-top: 10px;">
                 <button onclick="saveReplacementCombo(${index}, '${combo}', '${deletingElemId}', '${otherElemId}', '${resultId}')" style="padding: 5px 10px;">
                     Save
