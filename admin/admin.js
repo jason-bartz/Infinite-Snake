@@ -1624,7 +1624,10 @@ window.selectNewElement = function(inputId, hiddenId, name) {
     document.getElementById(inputId + '-results').style.display = 'none';
 };
 
-// Add new recipe to existing element
+// Track recipe rows for bulk add
+let bulkRecipeRowId = 0;
+
+// Add new recipe to existing element (bulk mode)
 window.addNewRecipe = function(elementId) {
     const results = document.getElementById('results');
     const elem = elements[elementId];
@@ -1633,34 +1636,175 @@ window.addNewRecipe = function(elementId) {
     // Prefer element-specific emoji over shared emojiIndex
     const emoji = emojis[elem.id] || emojis[elem.emojiIndex] || '❓';
     
+    // Reset row counter
+    bulkRecipeRowId = 0;
+    
     let html = `
         <div style="background: #1a1a1a; padding: 20px; border-radius: 8px;">
-            <h3 style="color: #4ecdc4; margin-bottom: 20px;">Add Recipe for ${emoji} ${elem.name}</h3>
+            <h3 style="color: #4ecdc4; margin-bottom: 20px;">Add Recipes for ${emoji} ${elem.name}</h3>
             
-            <div class="form-group">
-                <label>First Element - Search by name or ID</label>
-                <input type="text" id="new-recipe-elem1" placeholder="Type to search..." autocomplete="off">
-                <input type="hidden" id="new-recipe-elem1-id">
-                <div id="new-recipe-search-1" style="display: none;"></div>
+            <div id="bulk-recipe-container">
+                <!-- Recipe rows will be added here -->
             </div>
             
-            <div class="form-group">
-                <label>Second Element - Search by name or ID</label>
-                <input type="text" id="new-recipe-elem2" placeholder="Type to search..." autocomplete="off">
-                <input type="hidden" id="new-recipe-elem2-id">
-                <div id="new-recipe-search-2" style="display: none;"></div>
+            <div style="margin-top: 20px; display: flex; gap: 10px;">
+                <button onclick="addBulkRecipeRow()" style="background: #2a9d8f; border-color: #2a9d8f;">
+                    + Add Another Recipe
+                </button>
+                <button onclick="saveAllNewRecipes('${elementId}')" style="background: #4ecdc4; border-color: #4ecdc4;">
+                    Save All Recipes
+                </button>
+                <button class="secondary" onclick="showElement('${elementId}')">Cancel</button>
             </div>
-            
-            <button onclick="saveNewRecipe('${elementId}')">Save Recipe</button>
-            <button class="secondary" onclick="showElement('${elementId}')">Cancel</button>
         </div>
     `;
     
     results.innerHTML = html;
     
-    // Setup search
-    setupRecipeSearch('new-recipe-elem1', 'new-recipe-elem1-id', 'new-recipe-search-1', null);
-    setupRecipeSearch('new-recipe-elem2', 'new-recipe-elem2-id', 'new-recipe-search-2', null);
+    // Add the first recipe row automatically
+    addBulkRecipeRow();
+};
+
+// Add a new recipe row to the bulk form
+window.addBulkRecipeRow = function() {
+    const container = document.getElementById('bulk-recipe-container');
+    const rowId = `bulk-recipe-${bulkRecipeRowId++}`;
+    
+    const row = document.createElement('div');
+    row.className = 'recipe-row';
+    row.id = rowId;
+    row.style.cssText = 'background: #2a2a2a; padding: 15px; border-radius: 6px; margin-bottom: 15px; position: relative;';
+    
+    row.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+            <h4 style="color: #4ecdc4; margin: 0; flex: 1;">Recipe #${bulkRecipeRowId}</h4>
+            ${bulkRecipeRowId > 1 ? `<button onclick="removeBulkRecipeRow('${rowId}')" style="background: #dc3545; border: none; color: white; padding: 5px 10px; border-radius: 4px; cursor: pointer;">✕ Remove</button>` : ''}
+        </div>
+        
+        <div class="form-group">
+            <label>First Element - Search by name or ID</label>
+            <input type="text" id="${rowId}-elem1" placeholder="Type to search..." autocomplete="off">
+            <input type="hidden" id="${rowId}-elem1-id">
+            <div id="${rowId}-elem1-results" style="display: none;"></div>
+        </div>
+        
+        <div class="form-group">
+            <label>Second Element - Search by name or ID</label>
+            <input type="text" id="${rowId}-elem2" placeholder="Type to search..." autocomplete="off">
+            <input type="hidden" id="${rowId}-elem2-id">
+            <div id="${rowId}-elem2-results" style="display: none;"></div>
+        </div>
+    `;
+    
+    container.appendChild(row);
+    
+    // Setup search for both inputs
+    setupRecipeSearch(`${rowId}-elem1`, `${rowId}-elem1-id`, `${rowId}-elem1-results`, null);
+    setupRecipeSearch(`${rowId}-elem2`, `${rowId}-elem2-id`, `${rowId}-elem2-results`, null);
+};
+
+// Remove a recipe row
+window.removeBulkRecipeRow = function(rowId) {
+    const row = document.getElementById(rowId);
+    if (row) row.remove();
+};
+
+// Save all new recipes at once
+window.saveAllNewRecipes = async function(resultId) {
+    const container = document.getElementById('bulk-recipe-container');
+    const rows = container.querySelectorAll('.recipe-row');
+    
+    if (rows.length === 0) {
+        showMessage('Please add at least one recipe', 'error');
+        return;
+    }
+    
+    const recipes = [];
+    let hasErrors = false;
+    
+    // Validate all recipes first
+    rows.forEach((row, index) => {
+        const rowId = row.id;
+        const elem1Id = document.getElementById(`${rowId}-elem1-id`).value;
+        const elem2Id = document.getElementById(`${rowId}-elem2-id`).value;
+        
+        if (!elem1Id || !elem2Id) {
+            showMessage(`Recipe #${index + 1}: Please select both elements`, 'error');
+            hasErrors = true;
+            return;
+        }
+        
+        recipes.push({ elem1Id, elem2Id });
+    });
+    
+    if (hasErrors) return;
+    
+    // Process all recipes
+    let successCount = 0;
+    let errorCount = 0;
+    const newCombos = {};
+    const removedFromDeleted = [];
+    
+    for (let i = 0; i < recipes.length; i++) {
+        const { elem1Id, elem2Id } = recipes[i];
+        
+        // Check if this combination is in the deleted list
+        const normalizedCombo = parseInt(elem1Id) <= parseInt(elem2Id) ? `${elem1Id}+${elem2Id}` : `${elem2Id}+${elem1Id}`;
+        const isDeleted = deletedCombinations.includes(normalizedCombo);
+        
+        // Check if this combination already exists
+        const existingResult = combinations[`${elem1Id}+${elem2Id}`] || combinations[`${elem2Id}+${elem1Id}`];
+        
+        if (existingResult && existingResult != resultId) {
+            const existingElement = elements[existingResult];
+            const existingName = existingElement ? existingElement.name : `ID: ${existingResult}`;
+            const existingEmoji = existingElement ? (emojis[existingElement.id] || emojis[existingElement.emojiIndex] || '❓') : '❓';
+            
+            if (!confirm(`⚠️ Recipe #${i + 1}: This combination already creates "${existingEmoji} ${existingName}".\n\nDo you want to change it to create "${elements[resultId].name}" instead?`)) {
+                errorCount++;
+                continue;
+            }
+        }
+        
+        // Remove from deleted combinations list if it was previously deleted
+        if (isDeleted) {
+            const index = deletedCombinations.indexOf(normalizedCombo);
+            if (index > -1) {
+                deletedCombinations.splice(index, 1);
+                removedFromDeleted.push(normalizedCombo);
+            }
+        }
+        
+        // Add the combination
+        combinations[`${elem1Id}+${elem2Id}`] = parseInt(resultId);
+        combinations[`${elem2Id}+${elem1Id}`] = parseInt(resultId);
+        newCombos[`${elem1Id}+${elem2Id}`] = parseInt(resultId);
+        newCombos[`${elem2Id}+${elem1Id}`] = parseInt(resultId);
+        
+        successCount++;
+    }
+    
+    if (successCount === 0) {
+        showMessage('No recipes were added', 'error');
+        return;
+    }
+    
+    // Save to server
+    const saved = await saveToServer(null, newCombos, null, removedFromDeleted.length > 0 ? removedFromDeleted : null);
+    
+    if (saved) {
+        const message = errorCount > 0 
+            ? `Added ${successCount} recipes successfully! (${errorCount} skipped)`
+            : `All ${successCount} recipes added successfully!`;
+        showMessage(message, 'success');
+        
+        // Show the element again
+        setTimeout(() => {
+            showElement(resultId);
+        }, 1000);
+    } else {
+        showMessage('Failed to save recipes. Please try again.', 'error');
+    }
 };
 
 // Save new recipe
