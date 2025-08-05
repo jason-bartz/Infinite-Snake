@@ -731,14 +731,14 @@ window.editRecipe = function(elem1, elem2, result) {
                 </div>
             </div>
             
-            <div class="form-group">
+            <div class="form-group" style="position: relative;">
                 <label>First Element - Search by name or ID</label>
                 <input type="text" id="recipe-elem1" placeholder="Type to search..." autocomplete="off">
                 <input type="hidden" id="recipe-elem1-id" value="${elem1}">
                 <div id="search-results-1" style="display: none;"></div>
             </div>
             
-            <div class="form-group">
+            <div class="form-group" style="position: relative;">
                 <label>Second Element - Search by name or ID</label>
                 <input type="text" id="recipe-elem2" placeholder="Type to search..." autocomplete="off">
                 <input type="hidden" id="recipe-elem2-id" value="${elem2}">
@@ -850,18 +850,34 @@ function setupRecipeSearch(inputId, hiddenId, resultsId, previewId) {
                 resultsDiv.innerHTML = html;
                 resultsDiv.style.display = 'block';
                 
-                // Position the grid below the input
+                // Position the grid below the input relative to the container
                 const inputRect = input.getBoundingClientRect();
-                resultsDiv.style.top = (inputRect.bottom + 5) + 'px';
-                resultsDiv.style.left = inputRect.left + 'px';
+                const containerRect = input.closest('.form-group') || input.parentElement;
+                if (containerRect) {
+                    resultsDiv.style.position = 'absolute';
+                    resultsDiv.style.top = (input.offsetTop + input.offsetHeight + 5) + 'px';
+                    resultsDiv.style.left = '0';
+                    resultsDiv.style.right = '0';
+                } else {
+                    resultsDiv.style.top = (inputRect.bottom + window.scrollY + 5) + 'px';
+                    resultsDiv.style.left = inputRect.left + 'px';
+                }
             } else {
                 resultsDiv.innerHTML = '<div style="padding: 20px; color: #666; text-align: center; background: #f8f8f8; border-radius: 6px;">No elements found</div>';
                 resultsDiv.style.display = 'block';
                 
                 // Position even when no results
                 const inputRect = input.getBoundingClientRect();
-                resultsDiv.style.top = (inputRect.bottom + 5) + 'px';
-                resultsDiv.style.left = inputRect.left + 'px';
+                const containerRect = input.closest('.form-group') || input.parentElement;
+                if (containerRect) {
+                    resultsDiv.style.position = 'absolute';
+                    resultsDiv.style.top = (input.offsetTop + input.offsetHeight + 5) + 'px';
+                    resultsDiv.style.left = '0';
+                    resultsDiv.style.right = '0';
+                } else {
+                    resultsDiv.style.top = (inputRect.bottom + window.scrollY + 5) + 'px';
+                    resultsDiv.style.left = inputRect.left + 'px';
+                }
             }
         }, 200);
     });
@@ -1590,18 +1606,34 @@ function setupRecipeSearchWithCreate(inputId, hiddenId, resultsId) {
                 resultsDiv.innerHTML = html;
                 resultsDiv.style.display = 'block';
                 
-                // Position the grid below the input
+                // Position the grid below the input relative to the container
                 const inputRect = input.getBoundingClientRect();
-                resultsDiv.style.top = (inputRect.bottom + 5) + 'px';
-                resultsDiv.style.left = inputRect.left + 'px';
+                const containerRect = input.closest('.form-group') || input.parentElement;
+                if (containerRect) {
+                    resultsDiv.style.position = 'absolute';
+                    resultsDiv.style.top = (input.offsetTop + input.offsetHeight + 5) + 'px';
+                    resultsDiv.style.left = '0';
+                    resultsDiv.style.right = '0';
+                } else {
+                    resultsDiv.style.top = (inputRect.bottom + window.scrollY + 5) + 'px';
+                    resultsDiv.style.left = inputRect.left + 'px';
+                }
             } else {
                 resultsDiv.innerHTML = '<div style="padding: 20px; color: #666; text-align: center; background: #f8f8f8; border-radius: 6px;">No elements found</div>';
                 resultsDiv.style.display = 'block';
                 
                 // Position even when no results
                 const inputRect = input.getBoundingClientRect();
-                resultsDiv.style.top = (inputRect.bottom + 5) + 'px';
-                resultsDiv.style.left = inputRect.left + 'px';
+                const containerRect = input.closest('.form-group') || input.parentElement;
+                if (containerRect) {
+                    resultsDiv.style.position = 'absolute';
+                    resultsDiv.style.top = (input.offsetTop + input.offsetHeight + 5) + 'px';
+                    resultsDiv.style.left = '0';
+                    resultsDiv.style.right = '0';
+                } else {
+                    resultsDiv.style.top = (inputRect.bottom + window.scrollY + 5) + 'px';
+                    resultsDiv.style.left = inputRect.left + 'px';
+                }
             }
         }, 200);
     });
@@ -1681,14 +1713,14 @@ window.addBulkRecipeRow = function() {
             ${bulkRecipeRowId > 1 ? `<button onclick="removeBulkRecipeRow('${rowId}')" style="background: #dc3545; border: none; color: white; padding: 5px 10px; border-radius: 4px; cursor: pointer;">✕ Remove</button>` : ''}
         </div>
         
-        <div class="form-group">
+        <div class="form-group" style="position: relative;">
             <label>First Element - Search by name or ID</label>
             <input type="text" id="${rowId}-elem1" placeholder="Type to search..." autocomplete="off">
             <input type="hidden" id="${rowId}-elem1-id">
             <div id="${rowId}-elem1-results" style="display: none;"></div>
         </div>
         
-        <div class="form-group">
+        <div class="form-group" style="position: relative;">
             <label>Second Element - Search by name or ID</label>
             <input type="text" id="${rowId}-elem2" placeholder="Type to search..." autocomplete="off">
             <input type="hidden" id="${rowId}-elem2-id">
