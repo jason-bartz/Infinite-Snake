@@ -789,32 +789,54 @@ function setupRecipeSearch(inputId, hiddenId, resultsId, previewId) {
         }
         
         searchTimeout = setTimeout(() => {
-            const matches = [];
+            const exactMatches = [];
+            const startsWithMatches = [];
+            const containsMatches = [];
             const queryLower = query.toLowerCase();
             
             for (const [id, elem] of Object.entries(window.elements)) {
-                if (elem.name.toLowerCase().includes(queryLower) || id.toString().includes(query)) {
-                    matches.push({ id, ...elem });
-                    if (matches.length >= 100) break;
+                const nameLower = elem.name.toLowerCase();
+                
+                if (nameLower === queryLower || id.toString() === query) {
+                    // Exact match - highest priority
+                    exactMatches.push({ id, ...elem });
+                } else if (nameLower.startsWith(queryLower)) {
+                    // Starts with query - medium priority
+                    startsWithMatches.push({ id, ...elem });
+                } else if (nameLower.includes(queryLower) || id.toString().includes(query)) {
+                    // Contains query - lowest priority
+                    containsMatches.push({ id, ...elem });
                 }
             }
             
+            // Combine matches in priority order, limit to 120 total
+            const matches = [
+                ...exactMatches,
+                ...startsWithMatches.slice(0, Math.max(0, 60 - exactMatches.length)),
+                ...containsMatches.slice(0, Math.max(0, 120 - exactMatches.length - startsWithMatches.length))
+            ];
+            
             if (matches.length > 0) {
                 let html = '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px;">';
-                matches.forEach(elem => {
+                matches.forEach((elem, index) => {
                     const emoji = emojis[elem.id] || emojis[elem.emojiIndex] || '❓';
+                    const isExactMatch = index < exactMatches.length;
+                    const borderColor = isExactMatch ? '#4ecdc4' : '#e0e0e0';
+                    const borderWidth = isExactMatch ? '2px' : '1px';
+                    
                     html += `
                         <div style="
                             padding: 10px;
                             cursor: pointer;
-                            border: 1px solid #e0e0e0;
+                            border: ${borderWidth} solid ${borderColor};
                             border-radius: 6px;
                             text-align: center;
                             transition: all 0.2s;
                             background: #f8f8f8;
+                            ${isExactMatch ? 'box-shadow: 0 0 0 1px #4ecdc4 inset;' : ''}
                         " 
                         onmouseover="this.style.background='#f0f0f0'; this.style.borderColor='#4ecdc4'; this.style.transform='scale(1.05)'" 
-                        onmouseout="this.style.background='#f8f8f8'; this.style.borderColor='#e0e0e0'; this.style.transform='scale(1)'"
+                        onmouseout="this.style.background='#f8f8f8'; this.style.borderColor='${borderColor}'; this.style.transform='scale(1)'"
                         onclick="selectRecipeElement('${inputId}', '${hiddenId}', '${previewId}', '${elem.id}', '${elem.name.replace(/'/g, "\\'")}', '${emoji}')">
                             <div style="font-size: 28px; margin-bottom: 5px;">${emoji}</div>
                             <div style="font-size: 12px; font-weight: 500; color: #333; margin-bottom: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
@@ -1471,18 +1493,35 @@ function setupRecipeSearchWithCreate(inputId, hiddenId, resultsId) {
         }
         
         searchTimeout = setTimeout(() => {
-            const matches = [];
+            const exactMatches = [];
+            const startsWithMatches = [];
+            const containsMatches = [];
             const queryLower = query.toLowerCase();
             
             // Search existing elements
             for (const [id, elem] of Object.entries(window.elements)) {
-                if (elem.name.toLowerCase().includes(queryLower) || id.toString().includes(query)) {
-                    matches.push({ id, ...elem });
-                    if (matches.length >= 99) break;
+                const nameLower = elem.name.toLowerCase();
+                
+                if (nameLower === queryLower || id.toString() === query) {
+                    // Exact match - highest priority
+                    exactMatches.push({ id, ...elem });
+                } else if (nameLower.startsWith(queryLower)) {
+                    // Starts with query - medium priority
+                    startsWithMatches.push({ id, ...elem });
+                } else if (nameLower.includes(queryLower) || id.toString().includes(query)) {
+                    // Contains query - lowest priority
+                    containsMatches.push({ id, ...elem });
                 }
             }
             
-            let html = '<div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">';
+            // Combine matches in priority order, limit to 120 total
+            const matches = [
+                ...exactMatches,
+                ...startsWithMatches.slice(0, Math.max(0, 60 - exactMatches.length)),
+                ...containsMatches.slice(0, Math.max(0, 120 - exactMatches.length - startsWithMatches.length))
+            ];
+            
+            let html = '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px;">';
             
             // Show create new option if exact match doesn't exist
             let exactMatch = false;
@@ -1515,27 +1554,32 @@ function setupRecipeSearchWithCreate(inputId, hiddenId, resultsId) {
             }
             
             // Show existing matches
-            matches.forEach(elem => {
+            matches.forEach((elem, index) => {
                 // Prefer element-specific emoji over shared emojiIndex
                 const emoji = emojis[elem.id] || emojis[elem.emojiIndex] || '❓';
+                const isExactMatch = index < exactMatches.length;
+                const borderColor = isExactMatch ? '#4ecdc4' : '#e0e0e0';
+                const borderWidth = isExactMatch ? '2px' : '1px';
+                
                 html += `
                     <div style="
                         padding: 10px;
                         cursor: pointer;
-                        border: 1px solid #333;
+                        border: ${borderWidth} solid ${borderColor};
                         border-radius: 6px;
                         text-align: center;
                         transition: all 0.2s;
-                        background: #1a1a1a;
+                        background: #f8f8f8;
+                        ${isExactMatch ? 'box-shadow: 0 0 0 1px #4ecdc4 inset;' : ''}
                     " 
-                    onmouseover="this.style.background='#2a2a2a'; this.style.borderColor='#4ecdc4'; this.style.transform='scale(1.05)'" 
-                    onmouseout="this.style.background='#1a1a1a'; this.style.borderColor='#333'; this.style.transform='scale(1)'"
+                    onmouseover="this.style.background='#f0f0f0'; this.style.borderColor='#4ecdc4'; this.style.transform='scale(1.05)'" 
+                    onmouseout="this.style.background='#f8f8f8'; this.style.borderColor='${borderColor}'; this.style.transform='scale(1)'"
                     onclick="selectRecipeElement('${inputId}', '${hiddenId}', null, '${elem.id}', '${elem.name.replace(/'/g, "\\'")}', '${emoji}')">
                         <div style="font-size: 28px; margin-bottom: 5px;">${emoji}</div>
-                        <div style="font-size: 12px; font-weight: 500; color: #e0e0e0; margin-bottom: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                        <div style="font-size: 12px; font-weight: 500; color: #333; margin-bottom: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                             ${elem.name}
                         </div>
-                        <div style="font-size: 10px; color: #666;">ID: ${elem.id}</div>
+                        <div style="font-size: 10px; color: #888;">ID: ${elem.id}</div>
                     </div>
                 `;
             });
