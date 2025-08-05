@@ -769,10 +769,10 @@ function setupRecipeSearch(inputId, hiddenId, resultsId, previewId) {
         display: none;
         position: absolute;
         z-index: 1000;
-        background: #0f0f0f;
-        border: 1px solid #333;
+        background: #ffffff;
+        border: 1px solid #e0e0e0;
         border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         max-height: 400px;
         overflow-y: auto;
         width: min(90vw, 800px);
@@ -807,20 +807,20 @@ function setupRecipeSearch(inputId, hiddenId, resultsId, previewId) {
                         <div style="
                             padding: 10px;
                             cursor: pointer;
-                            border: 1px solid #333;
+                            border: 1px solid #e0e0e0;
                             border-radius: 6px;
                             text-align: center;
                             transition: all 0.2s;
-                            background: #1a1a1a;
+                            background: #f8f8f8;
                         " 
-                        onmouseover="this.style.background='#2a2a2a'; this.style.borderColor='#4ecdc4'; this.style.transform='scale(1.05)'" 
-                        onmouseout="this.style.background='#1a1a1a'; this.style.borderColor='#333'; this.style.transform='scale(1)'"
+                        onmouseover="this.style.background='#f0f0f0'; this.style.borderColor='#4ecdc4'; this.style.transform='scale(1.05)'" 
+                        onmouseout="this.style.background='#f8f8f8'; this.style.borderColor='#e0e0e0'; this.style.transform='scale(1)'"
                         onclick="selectRecipeElement('${inputId}', '${hiddenId}', '${previewId}', '${elem.id}', '${elem.name.replace(/'/g, "\\'")}', '${emoji}')">
                             <div style="font-size: 28px; margin-bottom: 5px;">${emoji}</div>
-                            <div style="font-size: 12px; font-weight: 500; color: #e0e0e0; margin-bottom: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            <div style="font-size: 12px; font-weight: 500; color: #333; margin-bottom: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                                 ${elem.name}
                             </div>
-                            <div style="font-size: 10px; color: #666;">ID: ${elem.id}</div>
+                            <div style="font-size: 10px; color: #888;">ID: ${elem.id}</div>
                         </div>
                     `;
                 });
@@ -833,7 +833,7 @@ function setupRecipeSearch(inputId, hiddenId, resultsId, previewId) {
                 resultsDiv.style.top = (inputRect.bottom + 5) + 'px';
                 resultsDiv.style.left = inputRect.left + 'px';
             } else {
-                resultsDiv.innerHTML = '<div style="padding: 20px; color: #888; text-align: center;">No elements found</div>';
+                resultsDiv.innerHTML = '<div style="padding: 20px; color: #666; text-align: center; background: #f8f8f8; border-radius: 6px;">No elements found</div>';
                 resultsDiv.style.display = 'block';
                 
                 // Position even when no results
@@ -861,10 +861,13 @@ window.selectRecipeElement = function(inputId, hiddenId, previewId, elemId, elem
     if (previewId && document.getElementById(previewId)) {
         document.getElementById(previewId).textContent = `${emoji} ${elemName}`;
     }
-    const resultsDiv = document.querySelector(`#${inputId}-results`);
-    if (resultsDiv) {
-        resultsDiv.style.display = 'none';
-    }
+    // Find and hide all visible search results
+    const allResults = document.querySelectorAll('[id*="search-results"], [id*="-results"]');
+    allResults.forEach(div => {
+        if (div.style.display !== 'none') {
+            div.style.display = 'none';
+        }
+    });
 };
 
 window.saveRecipe = async function(oldElem1, oldElem2, result) {
@@ -1447,10 +1450,10 @@ function setupRecipeSearchWithCreate(inputId, hiddenId, resultsId) {
         display: none;
         position: absolute;
         z-index: 1000;
-        background: #0f0f0f;
-        border: 1px solid #333;
+        background: #ffffff;
+        border: 1px solid #e0e0e0;
         border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         max-height: 400px;
         overflow-y: auto;
         width: min(90vw, 800px);
@@ -1499,14 +1502,14 @@ function setupRecipeSearchWithCreate(inputId, hiddenId, resultsId) {
                         border-radius: 6px;
                         text-align: center;
                         transition: all 0.2s;
-                        background: #1a3a3a;
+                        background: #f0fffe;
                         grid-column: span 4;
                     " 
-                    onmouseover="this.style.background='#2a4a4a'; this.style.transform='scale(1.02)'" 
-                    onmouseout="this.style.background='#1a3a3a'; this.style.transform='scale(1)'"
+                    onmouseover="this.style.background='#e0fff9'; this.style.transform='scale(1.02)'" 
+                    onmouseout="this.style.background='#f0fffe'; this.style.transform='scale(1)'"
                     onclick="selectNewElement('${inputId}', '${hiddenId}', '${query}')">
                         <div style="font-size: 28px; margin-bottom: 5px;">➕</div>
-                        <div style="font-size: 14px; font-weight: 500; color: #4ecdc4;">Create new: "${query}"</div>
+                        <div style="font-size: 14px; font-weight: 500; color: #2a9d8f;">Create new: "${query}"</div>
                     </div>
                 `;
             }
@@ -1548,7 +1551,7 @@ function setupRecipeSearchWithCreate(inputId, hiddenId, resultsId) {
                 resultsDiv.style.top = (inputRect.bottom + 5) + 'px';
                 resultsDiv.style.left = inputRect.left + 'px';
             } else {
-                resultsDiv.innerHTML = '<div style="padding: 20px; color: #888; text-align: center;">No elements found</div>';
+                resultsDiv.innerHTML = '<div style="padding: 20px; color: #666; text-align: center; background: #f8f8f8; border-radius: 6px;">No elements found</div>';
                 resultsDiv.style.display = 'block';
                 
                 // Position even when no results
