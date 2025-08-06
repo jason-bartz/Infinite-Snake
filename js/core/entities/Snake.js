@@ -698,23 +698,38 @@ class Snake {
     
     checkBossElementCombination(chosen) {
         const bossElementId = window.currentBoss.elementId;
+        const bossType = window.currentBoss.bossType;
+        
+        // Define additional damage elements for each boss
+        const bossDamageElements = {
+            'ZEPHYRUS': [2, 11, 113, 3116], // Air (2), Wind (11), Tornado (113), Hurricane (3116)
+            'ABYSSOS': [1, 181, 9473, 122], // Water (1), Tsunami (181), Sea (9473), Lake (122)
+            'PYRAXIS': [3, 4, 114, 132, 2799], // Fire (3), Lava (4), Volcano (114), Magma (132), Hell (2799)
+            'OSSEUS': [0, 9438, 6, 180, 183, 4611, 9243, 15] // Earth (0), Dirt (9438), Mud (6), Earthquake (180), Landslide (183), Rock (4611), Rocks (9243), Stone (15)
+        };
+        
         // Convert to numbers for consistent comparison, handling edge cases
         const elem1Id = chosen.elem1 === '0' || chosen.elem1 === 0 ? 0 : (typeof chosen.elem1 === 'string' ? parseInt(chosen.elem1, 10) : chosen.elem1);
         const elem2Id = chosen.elem2 === '0' || chosen.elem2 === 0 ? 0 : (typeof chosen.elem2 === 'string' ? parseInt(chosen.elem2, 10) : chosen.elem2);
         const resultId = chosen.result === '0' || chosen.result === 0 ? 0 : (typeof chosen.result === 'string' ? parseInt(chosen.result, 10) : chosen.result);
         
-        window.gameLogger.debug('SHOCKWAVE CHECK', 'Boss element ID:', bossElementId, 'Type:', typeof bossElementId, 'Checking against:', elem1Id, '(type:', typeof elem1Id, ')', elem2Id, '(type:', typeof elem2Id, ')', resultId, '(type:', typeof resultId, ')');
+        window.gameLogger.debug('SHOCKWAVE CHECK', 'Boss:', bossType, 'Boss element ID:', bossElementId, 'Type:', typeof bossElementId, 'Checking against:', elem1Id, '(type:', typeof elem1Id, ')', elem2Id, '(type:', typeof elem2Id, ')', resultId, '(type:', typeof resultId, ')');
+        
+        // Get the damage elements for this boss
+        const damageElements = bossDamageElements[bossType] || [bossElementId];
         
         // Special logging for Osseus/Earth element
         if (bossElementId === 0) {
-            window.gameLogger.debug('OSSEUS CHECK', 'Earth boss detected. Comparisons:', 
-                'elem1Id === 0:', elem1Id === 0, 
-                'elem2Id === 0:', elem2Id === 0, 
-                'resultId === 0:', resultId === 0);
+            window.gameLogger.debug('OSSEUS CHECK', 'Earth boss detected. Valid damage elements:', damageElements, 'Comparisons:', 
+                'elem1Id in damageElements:', damageElements.includes(elem1Id), 
+                'elem2Id in damageElements:', damageElements.includes(elem2Id), 
+                'resultId in damageElements:', damageElements.includes(resultId));
         }
         
-        if (elem1Id === bossElementId || elem2Id === bossElementId || resultId === bossElementId) {
-            window.gameLogger.debug('SHOCKWAVE', 'MATCH FOUND! Creating shockwave for player:', this.name);
+        // Check if any of the elements in the combination match any of the boss's damage elements
+        if (damageElements.includes(elem1Id) || damageElements.includes(elem2Id) || damageElements.includes(resultId)) {
+            const matchedElement = damageElements.includes(elem1Id) ? elem1Id : (damageElements.includes(elem2Id) ? elem2Id : resultId);
+            window.gameLogger.debug('SHOCKWAVE', 'MATCH FOUND! Element', matchedElement, 'can damage', bossType, '! Creating shockwave for player:', this.name);
             
             const elementColors = {
                 0: '#8b6914',

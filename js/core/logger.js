@@ -126,4 +126,6 @@ if (typeof module !== 'undefined' && module.exports) {
     module.exports = gameLogger;
 } else {
     window.gameLogger = gameLogger;
+    // Temporary fix for any code that might be using window.gameLog instead of window.gameLogger
+    window.gameLog = gameLogger;
 }
