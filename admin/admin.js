@@ -31,10 +31,14 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     const searchInput = document.getElementById('search');
     if (searchInput) {
-        searchInput.setAttribute('data-admin-search', 'true');
+        // Remove any existing event listeners from elements.js
+        const newSearchInput = searchInput.cloneNode(true);
+        searchInput.parentNode.replaceChild(newSearchInput, searchInput);
+        
+        newSearchInput.setAttribute('data-admin-search', 'true');
         let searchTimeout;
         
-        searchInput.addEventListener('input', function(e) {
+        newSearchInput.addEventListener('input', function(e) {
             clearTimeout(searchTimeout);
             const query = e.target.value.trim();
             
@@ -52,8 +56,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (elementParam) {
         showElement(elementParam);
     } else if (searchParam) {
-        if (searchInput) {
-            searchInput.value = searchParam;
+        const currentSearchInput = document.getElementById('search');
+        if (currentSearchInput) {
+            currentSearchInput.value = searchParam;
         }
         searchElement(searchParam);
     }
@@ -235,13 +240,7 @@ async function searchElement(query) {
     results.classList.add('active');
     
     // Force reload data first to ensure we have the latest elements
-    console.log('[Cache Debug] Searching for:', query, '- ensuring fresh data...');
     await forceReload();
-    
-    if (elements[query]) {
-        showElement(query);
-        return;
-    }
     
     // Check if query is an emoji
     const isEmoji = /\p{Emoji}/u.test(query);
@@ -251,23 +250,61 @@ async function searchElement(query) {
     }
     
     const queryLower = query.toLowerCase();
-    for (const [id, elem] of Object.entries(window.elements)) {
-        if (elem.name.toLowerCase() === queryLower) {
-            showElement(id);
-            return;
-        }
-    }
-    
     const matches = [];
+    
+    // Search by ID or name
     for (const [id, elem] of Object.entries(window.elements)) {
-        if (elem.name.toLowerCase().includes(queryLower)) {
-            matches.push({ id, ...elem });
+        let score = 0;
+        let matched = false;
+        
+        // Check if query matches ID (convert both to string for comparison)
+        const idStr = id.toString();
+        const queryStr = query.toString();
+        if (idStr.includes(queryStr)) {
+            matched = true;
+            score = idStr === queryStr ? 100 : 50; // Exact ID match gets highest score
+        }
+        
+        // Check if name matches (including numbers in names)
+        const nameLower = elem.name.toLowerCase();
+        // Also check original name for number matching
+        const nameOriginal = elem.name;
+        
+        if (nameLower.includes(queryLower) || nameOriginal.includes(query)) {
+            matched = true;
+            // Exact name match
+            if (nameLower === queryLower) {
+                score = Math.max(score, 95);
+            }
+            // Name starts with query
+            else if (nameLower.startsWith(queryLower) || nameOriginal.startsWith(query)) {
+                score = Math.max(score, 80);
+            }
+            // Query is a word boundary match (e.g., "man" in "Iron Man", "1099" in "1099 Employee")
+            else if (new RegExp(`\\b${queryLower}\\b`).test(nameLower) || new RegExp(`\\b${query}\\b`).test(nameOriginal)) {
+                score = Math.max(score, 70);
+            }
+            // Name contains query
+            else {
+                score = Math.max(score, 50);
+            }
+        }
+        
+        if (matched) {
+            matches.push({ id, ...elem, score });
         }
     }
     
-    if (matches.length === 1) {
-        showElement(matches[0].id);
-    } else if (matches.length > 1) {
+    // Sort by score (highest first), then by name
+    matches.sort((a, b) => {
+        if (b.score !== a.score) {
+            return b.score - a.score;
+        }
+        return a.name.localeCompare(b.name);
+    });
+    
+    // Always show results in grid, even for single or exact matches
+    if (matches.length > 0) {
         showSearchResults(matches);
     } else {
         results.innerHTML = '<div style="text-align: center; padding: 20px; color: #888;">No elements found</div>';
@@ -301,23 +338,29 @@ function searchByEmoji(emojiQuery) {
 function showSearchResults(matches, title) {
     const results = document.getElementById('results');
     
-    let html = `<div style="margin-bottom: 20px;"><strong>${title || 'Multiple matches found:'}</strong></div>`;
+    let html = `<div style="margin-bottom: 20px;"><strong>${title || 'Search Results:'}</strong></div>`;
+    
+    // Create a grid container for search results
+    html += '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; padding: 20px 0;">';
     
     matches.slice(0, 100).forEach(elem => {
         const emoji = emojis[elem.id] || emojis[elem.emojiIndex] || '❓';
         html += `
-            <div class="combo-item" style="cursor: pointer;" onclick="showElement('${elem.id}', false)">
-                <div class="combo-formula">
-                    <span style="font-size: 24px;">${emoji}</span>
-                    <span>${elem.name}</span>
-                    <span style="color: #888;">(ID: ${elem.id})</span>
-                </div>
+            <div class="element-card" style="background: white; border-radius: 8px; padding: 15px; text-align: center; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.2s, box-shadow 0.2s;"
+                 onclick="showElement('${elem.id}', false)"
+                 onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.15)'"
+                 onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)'">
+                <div style="font-size: 48px; margin-bottom: 10px;">${emoji}</div>
+                <div style="font-weight: 500; font-size: 14px; margin-bottom: 5px;">${elem.name}</div>
+                <div style="font-size: 12px; color: #666;">ID: ${elem.id} | Tier: ${elem.tier || 'N/A'}</div>
             </div>
         `;
     });
     
+    html += '</div>';
+    
     if (matches.length > 100) {
-        html += `<div style="text-align: center; color: #888; margin-top: 10px;">... and ${matches.length - 100} more</div>`;
+        html += `<div style="text-align: center; color: #888; margin-top: 10px;">... and ${matches.length - 100} more results</div>`;
     }
     
     results.innerHTML = html;
@@ -427,7 +470,10 @@ function displayElementDetails(elem, recipes, creates, elementId) {
         <button class="secondary" onclick="hideResults()" style="margin-bottom: 20px;">← Back to Elements</button>
         <div class="element-header">
             <h2>${emoji} ${elem.name}</h2>
-            <div style="color: #666;">ID: ${elem.id} | Tier: ${elem.tier || 'N/A'}</div>
+            <div style="color: #666; display: flex; align-items: center; gap: 15px;">
+                <span>ID: ${elem.id} | Tier: ${elem.tier || 'N/A'}</span>
+                <button class="lookup-btn" onclick="lookupElement('${elem.name}')" style="padding: 4px 12px; font-size: 14px;">🔍 Lookup</button>
+            </div>
         </div>
     `;
     
@@ -1069,6 +1115,13 @@ function hideResults() {
             window.scrollTo(0, window.navigationState.scrollPosition);
         }, 50);
     }
+}
+
+function lookupElement(elementName) {
+    // Encode the element name for use in URL
+    const encodedName = encodeURIComponent(elementName);
+    // Open DuckDuckGo search in a new tab
+    window.open(`https://duckduckgo.com/?q=${encodedName}`, '_blank');
 }
 
 function showMessage(text, type) {

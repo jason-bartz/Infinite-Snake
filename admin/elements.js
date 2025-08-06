@@ -321,8 +321,7 @@ function showEmojiFilter() {
     
     // Sort emojis by usage count
     const sortedEmojis = Object.entries(emojiUsage)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 50); // Show top 50 most used emojis
+        .sort((a, b) => b[1] - a[1]); // Show all emojis
     
     // Create emoji grid
     emojiGrid.innerHTML = sortedEmojis.map(([emoji, count]) => `
