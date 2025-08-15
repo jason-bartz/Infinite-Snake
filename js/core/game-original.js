@@ -1889,8 +1889,142 @@
                 document.body.style.backgroundImage = "";
             }
             
-            // Start the game immediately
-            startGameTransition();
+            // Check if tutorial should be shown for this mode
+            const tutorialKey = `tutorialHidden_${mode}`;
+            const tutorialHidden = localStorage.getItem(tutorialKey) === 'true';
+            
+            if (!tutorialHidden) {
+                showTutorialScreen();
+            } else {
+                // Start the game immediately
+                startGameTransition();
+            }
+        }
+        
+        // Show tutorial screen
+        function showTutorialScreen() {
+            const tutorialScreen = document.getElementById('tutorialScreen');
+            const gameModeSelect = document.getElementById('gameModeSelect');
+            
+            // Fade out game mode select
+            gameModeSelect.style.opacity = '0';
+            
+            setTimeout(() => {
+                gameModeSelect.style.display = 'none';
+                tutorialScreen.style.display = 'block';
+                
+                // Setup handlers after showing the tutorial screen
+                setupTutorialHandlers();
+                
+                // Fade in tutorial screen
+                setTimeout(() => {
+                    tutorialScreen.style.opacity = '1';
+                }, 50);
+            }, 300);
+        }
+        
+        // Continue from tutorial to game
+        function proceedFromTutorial() {
+            const tutorialScreen = document.getElementById('tutorialScreen');
+            
+            // Fade out tutorial
+            tutorialScreen.style.opacity = '0';
+            
+            setTimeout(() => {
+                tutorialScreen.style.display = 'none';
+                startGameTransition();
+            }, 300);
+        }
+        
+        // Set up tutorial button handlers
+        function setupTutorialHandlers() {
+            const dontShowButton = document.getElementById('dontShowTutorial');
+            const continueButton = document.getElementById('continueTutorial');
+            const tutorialScreenshot = document.getElementById('tutorialScreenshot');
+            const imageModal = document.getElementById('imageModal');
+            
+            if (dontShowButton) {
+                dontShowButton.onclick = function() {
+                    playUISound();
+                    // Save preference for current game mode
+                    const tutorialKey = `tutorialHidden_${gameMode}`;
+                    localStorage.setItem(tutorialKey, 'true');
+                    proceedFromTutorial();
+                };
+            }
+            
+            if (continueButton) {
+                continueButton.onclick = function() {
+                    playUISound();
+                    proceedFromTutorial();
+                };
+            }
+            
+            // Set up image modal handlers
+            if (tutorialScreenshot) {
+                tutorialScreenshot.onclick = function() {
+                    playUISound();
+                    openImageModal();
+                };
+                
+                // Also make the "click to enlarge" text clickable
+                const clickToEnlarge = tutorialScreenshot.nextElementSibling;
+                if (clickToEnlarge) {
+                    clickToEnlarge.onclick = function() {
+                        playUISound();
+                        openImageModal();
+                    };
+                }
+            }
+            
+            if (imageModal) {
+                // Click anywhere on modal to close
+                imageModal.onclick = function(e) {
+                    // Don't close if clicking on the image itself
+                    if (e.target === imageModal || e.target.tagName === 'BUTTON' || e.target.tagName === 'P') {
+                        playUISound();
+                        closeImageModal();
+                    }
+                };
+                
+                // Close button
+                const closeButton = imageModal.querySelector('button');
+                if (closeButton) {
+                    closeButton.onclick = function() {
+                        playUISound();
+                        closeImageModal();
+                    };
+                }
+            }
+        }
+        
+        // Open image modal
+        function openImageModal() {
+            const imageModal = document.getElementById('imageModal');
+            if (imageModal) {
+                imageModal.style.display = 'block';
+                setTimeout(() => {
+                    imageModal.style.opacity = '1';
+                }, 50);
+            }
+        }
+        
+        // Close image modal
+        function closeImageModal() {
+            const imageModal = document.getElementById('imageModal');
+            if (imageModal) {
+                imageModal.style.opacity = '0';
+                setTimeout(() => {
+                    imageModal.style.display = 'none';
+                }, 300);
+            }
+        }
+        
+        // Call setup when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', setupTutorialHandlers);
+        } else {
+            setupTutorialHandlers();
         }
         
         // Keep old function for compatibility but redirect to new one
