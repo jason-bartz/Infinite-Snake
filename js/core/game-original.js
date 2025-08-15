@@ -88,6 +88,43 @@
             }
         }, 100);
         
+        // Initialize performance optimization systems
+        let canvasLayerSystem = null;
+        let gradientCache = null;
+        let canvasStateOptimizer = null;
+        let enhancedBatchRenderer = null;
+        
+        // Initialize performance optimizations after window loads
+        setTimeout(() => {
+            // Canvas Layer System for separated rendering
+            if (window.CanvasLayerSystem) {
+                canvasLayerSystem = new CanvasLayerSystem();
+                canvasLayerSystem.init(canvas);
+                console.log('[Performance] Canvas Layer System initialized');
+            }
+            
+            // Gradient Cache to prevent recreating gradients
+            if (window.GradientCache) {
+                gradientCache = new GradientCache(ctx);
+                console.log('[Performance] Gradient Cache initialized');
+            }
+            
+            // Canvas State Optimizer to reduce save/restore calls
+            if (window.CanvasStateOptimizer) {
+                canvasStateOptimizer = new CanvasStateOptimizer(ctx);
+                console.log('[Performance] Canvas State Optimizer initialized');
+            }
+            
+            // Enhanced Batch Renderer for improved batching
+            if (window.EnhancedBatchRenderer) {
+                enhancedBatchRenderer = new EnhancedBatchRenderer(ctx, {
+                    maxBatchSize: isMobile ? 100 : 200,
+                    adaptiveCulling: true
+                });
+                console.log('[Performance] Enhanced Batch Renderer initialized');
+            }
+        }, 150);
+        
         const emojiCache = new Map();
         const MAX_CACHE_SIZE = isMobile ? 500 : 200; // Increased cache size for mobile
         
@@ -4163,9 +4200,18 @@
                             continue;
                         }
                         
-                        const gradient = ctx.createLinearGradient(screenX1, screenY1, screenX2, screenY2);
-                        gradient.addColorStop(0, this.isPlayer ? 'rgba(100, 200, 255, 0.4)' : 'rgba(255, 100, 100, 0.4)');
-                        gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                        // Use cached gradient if available
+                        const gradient = gradientCache ? 
+                            gradientCache.getLinearGradient(screenX1, screenY1, screenX2, screenY2, [
+                                { offset: 0, color: this.isPlayer ? 'rgba(100, 200, 255, 0.4)' : 'rgba(255, 100, 100, 0.4)' },
+                                { offset: 1, color: 'rgba(255, 255, 255, 0)' }
+                            ]) :
+                            (() => {
+                                const g = ctx.createLinearGradient(screenX1, screenY1, screenX2, screenY2);
+                                g.addColorStop(0, this.isPlayer ? 'rgba(100, 200, 255, 0.4)' : 'rgba(255, 100, 100, 0.4)');
+                                g.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                                return g;
+                            })();
                         
                         ctx.strokeStyle = gradient;
                         // Fixed line width calculation - removed size multiplier from base calculation
@@ -5621,10 +5667,20 @@
                 
                 // Purple/gold glow effect
                 const glowSize = this.size * 2 * scale;
-                const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, glowSize);
-                gradient.addColorStop(0, 'rgba(255, 215, 0, 0.6)'); // Gold
-                gradient.addColorStop(0.5, 'rgba(147, 0, 211, 0.4)'); // Purple
-                gradient.addColorStop(1, 'transparent');
+                // Use cached gradient for alchemy vision glow
+                const gradient = gradientCache ?
+                    gradientCache.getRadialGradient(0, 0, 0, 0, 0, glowSize, [
+                        { offset: 0, color: 'rgba(255, 215, 0, 0.6)' },
+                        { offset: 0.5, color: 'rgba(147, 0, 211, 0.4)' },
+                        { offset: 1, color: 'transparent' }
+                    ]) :
+                    (() => {
+                        const g = ctx.createRadialGradient(0, 0, 0, 0, 0, glowSize);
+                        g.addColorStop(0, 'rgba(255, 215, 0, 0.6)');
+                        g.addColorStop(0.5, 'rgba(147, 0, 211, 0.4)');
+                        g.addColorStop(1, 'transparent');
+                        return g;
+                    })();
                 ctx.fillStyle = gradient;
                 ctx.fillRect(-glowSize, -glowSize, glowSize * 2, glowSize * 2);
                 
@@ -5710,10 +5766,20 @@
                 
                 // Blue glow effect
                 const glowSize = this.size * 2 * scale * cameraZoom;
-                const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, glowSize);
-                gradient.addColorStop(0, 'rgba(0, 150, 255, 0.6)'); // Bright blue
-                gradient.addColorStop(0.5, 'rgba(0, 50, 200, 0.4)'); // Dark blue
-                gradient.addColorStop(1, 'transparent');
+                // Use cached gradient for void orb glow
+                const gradient = gradientCache ?
+                    gradientCache.getRadialGradient(0, 0, 0, 0, 0, glowSize, [
+                        { offset: 0, color: 'rgba(0, 150, 255, 0.6)' },
+                        { offset: 0.5, color: 'rgba(0, 50, 200, 0.4)' },
+                        { offset: 1, color: 'transparent' }
+                    ]) :
+                    (() => {
+                        const g = ctx.createRadialGradient(0, 0, 0, 0, 0, glowSize);
+                        g.addColorStop(0, 'rgba(0, 150, 255, 0.6)');
+                        g.addColorStop(0.5, 'rgba(0, 50, 200, 0.4)');
+                        g.addColorStop(1, 'transparent');
+                        return g;
+                    })();
                 ctx.fillStyle = gradient;
                 ctx.fillRect(-glowSize, -glowSize, glowSize * 2, glowSize * 2);
                 
@@ -5803,10 +5869,20 @@
                 
                 // Orange glow effect
                 const glowSize = this.size * 2.5 * scale * cameraZoom;
-                const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, glowSize);
-                gradient.addColorStop(0, 'rgba(255, 165, 0, 0.8)'); // Bright orange
-                gradient.addColorStop(0.5, 'rgba(255, 100, 0, 0.5)'); // Dark orange
-                gradient.addColorStop(1, 'transparent');
+                // Use cached gradient for catalyst gem glow
+                const gradient = gradientCache ?
+                    gradientCache.getRadialGradient(0, 0, 0, 0, 0, glowSize, [
+                        { offset: 0, color: 'rgba(255, 165, 0, 0.8)' },
+                        { offset: 0.5, color: 'rgba(255, 100, 0, 0.5)' },
+                        { offset: 1, color: 'transparent' }
+                    ]) :
+                    (() => {
+                        const g = ctx.createRadialGradient(0, 0, 0, 0, 0, glowSize);
+                        g.addColorStop(0, 'rgba(255, 165, 0, 0.8)');
+                        g.addColorStop(0.5, 'rgba(255, 100, 0, 0.5)');
+                        g.addColorStop(1, 'transparent');
+                        return g;
+                    })();
                 ctx.fillStyle = gradient;
                 ctx.fillRect(-glowSize, -glowSize, glowSize * 2, glowSize * 2);
                 
@@ -8556,11 +8632,16 @@
                 
                 switch(projectile.type) {
                     case 'fireball':
-                        // Draw fireball
-                        const gradient = ctx.createRadialGradient(screen.x, screen.y, 0, screen.x, screen.y, projectile.size);
-                        gradient.addColorStop(0, '#ffff00');
-                        gradient.addColorStop(0.5, '#ff6600');
-                        gradient.addColorStop(1, 'rgba(255, 0, 0, 0.3)');
+                        // Draw fireball with cached gradient
+                        const gradient = gradientCache ? 
+                            gradientCache.createFireballGradient(screen.x, screen.y, projectile.size) :
+                            (() => {
+                                const g = ctx.createRadialGradient(screen.x, screen.y, 0, screen.x, screen.y, projectile.size);
+                                g.addColorStop(0, '#ffff00');
+                                g.addColorStop(0.5, '#ff6600');
+                                g.addColorStop(1, 'rgba(255, 0, 0, 0.3)');
+                                return g;
+                            })();
                         ctx.fillStyle = gradient;
                         ctx.beginPath();
                         ctx.arc(screen.x, screen.y, projectile.size * cameraZoom, 0, Math.PI * 2);
