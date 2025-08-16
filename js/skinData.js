@@ -561,6 +561,19 @@ const skinData = {
             description: 'Receive an unlock code by joining our Discord community and contributing to the bug hunt'
         }
     },
+    'neko-chan': {
+        name: 'Neko-Chan',
+        rarity: 'legendary',
+        bio: 'Professional e-girl who speedruns dating sims between ranked matches. Calls everyone "senpai" unironically and has a concerning collection of body pillows.',
+        pixelBodyColor: '#99daff',
+        pixelTailColor: '#99daff',
+        colors: ['#99daff', '#99daff'],
+        unlockCriteria: {
+            type: 'discoveries',
+            value: 250,
+            description: 'Make 250 total discoveries'
+        }
+    },
 
     // SECRET (4 skins - Boss skins)
     'abyssos': {

@@ -67,7 +67,8 @@ class CodeValidator {
             '507d1599': 'osseus',           // DISCORD-2025-PIGJ
             '507e7d94': 'pyraxis',          // DISCORD-2025-MFJR
             '50883336': 'zephyrus',         // DISCORD-2025-7ZFB
-            '5078664b': 'snake-default-green' // DISCORD-2025-ZRVH - Default green as bonus
+            '5078664b': 'snake-default-green', // DISCORD-2025-ZRVH - Default green as bonus
+            '507e0cda': 'neko-chan'         // DISCORD-2025-NEKO
         };
         
         // Extract valid codes array from the map
@@ -144,12 +145,11 @@ class CodeValidator {
     
     // Check if a specific skin code has been redeemed
     hasRedeemedSkinCode(skinId) {
-        if (skinId === 'discord-elite') {
-            // Check if any Discord code has been redeemed
-            for (const code of this.redeemedCodes) {
-                if (code.startsWith('DISCORD-')) {
-                    return true;
-                }
+        // Check if a code that unlocks this specific skin has been redeemed
+        for (const code of this.redeemedCodes) {
+            const hashedCode = this.simpleHash(code);
+            if (this.CODE_TO_SKIN_MAP[hashedCode] === skinId) {
+                return true;
             }
         }
         return false;
