@@ -1762,22 +1762,25 @@ window.addBulkRecipeRow = function() {
     
     row.innerHTML = `
         <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
-            <h4 style="color: #4ecdc4; margin: 0; flex: 1;">Recipe #${bulkRecipeRowId}</h4>
-            ${bulkRecipeRowId > 1 ? `<button onclick="removeBulkRecipeRow('${rowId}')" style="background: #dc3545; border: none; color: white; padding: 5px 10px; border-radius: 4px; cursor: pointer;">✕ Remove</button>` : ''}
+            <h4 style="color: #4ecdc4; margin: 0;">Recipe #${bulkRecipeRowId}</h4>
         </div>
         
-        <div class="form-group" style="position: relative;">
-            <label>First Element - Search by name or ID</label>
-            <input type="text" id="${rowId}-elem1" placeholder="Type to search..." autocomplete="off">
-            <input type="hidden" id="${rowId}-elem1-id">
-            <div id="${rowId}-elem1-results" style="display: none;"></div>
-        </div>
+        ${bulkRecipeRowId > 1 ? `<button onclick="removeBulkRecipeRow('${rowId}')" style="position: absolute; top: 15px; right: 15px; background: #dc3545; border: none; color: white; padding: 5px 10px; border-radius: 4px; cursor: pointer;">✕ Remove</button>` : ''}
         
-        <div class="form-group" style="position: relative;">
-            <label>Second Element - Search by name or ID</label>
-            <input type="text" id="${rowId}-elem2" placeholder="Type to search..." autocomplete="off">
-            <input type="hidden" id="${rowId}-elem2-id">
-            <div id="${rowId}-elem2-results" style="display: none;"></div>
+        <div style="display: flex; gap: 15px; align-items: flex-start;">
+            <div class="form-group" style="position: relative; flex: 1;">
+                <label style="display: block; height: 20px; margin-bottom: 5px;">First Element - Search by name or ID</label>
+                <input type="text" id="${rowId}-elem1" placeholder="Type to search..." autocomplete="off">
+                <input type="hidden" id="${rowId}-elem1-id">
+                <div id="${rowId}-elem1-results" style="display: none;"></div>
+            </div>
+            
+            <div class="form-group" style="position: relative; flex: 1;">
+                <label style="display: block; height: 20px; margin-bottom: 5px;">Second Element - Search by name or ID</label>
+                <input type="text" id="${rowId}-elem2" placeholder="Type to search..." autocomplete="off">
+                <input type="hidden" id="${rowId}-elem2-id">
+                <div id="${rowId}-elem2-results" style="display: none;"></div>
+            </div>
         </div>
     `;
     
