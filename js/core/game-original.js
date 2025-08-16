@@ -1,4 +1,3 @@
-        console.log('[DEBUG] game-original.js loading - version 1.9.5');
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
                         || ('ontouchstart' in window && navigator.maxTouchPoints > 0);
         
@@ -64,7 +63,6 @@
                     window.DEBUG_RENDERING = true;
                     setInterval(() => {
                         const stats = batchRenderer.getStats();
-                        console.log(`[BatchRenderer Stats] Calls: ${stats.drawCalls}, Saved: ${stats.saved}, Efficiency: ${(stats.efficiency * 100).toFixed(1)}%`);
                     }, 2000);
                 }
             } else {
@@ -82,7 +80,6 @@
                 if (window.location.search.includes('debug=spatial')) {
                     setInterval(() => {
                         const stats = spatialHash.getStats();
-                        console.log(`[SpatialHash Stats] Efficiency: ${stats.efficiency}, Cells: ${stats.cellsInUse}, Cache hits: ${stats.cacheHits}`);
                     }, 2000);
                 }
             }
@@ -100,19 +97,16 @@
             if (window.CanvasLayerSystem) {
                 canvasLayerSystem = new CanvasLayerSystem();
                 canvasLayerSystem.init(canvas);
-                console.log('[Performance] Canvas Layer System initialized');
             }
             
             // Gradient Cache to prevent recreating gradients
             if (window.GradientCache) {
                 gradientCache = new GradientCache(ctx);
-                console.log('[Performance] Gradient Cache initialized');
             }
             
             // Canvas State Optimizer to reduce save/restore calls
             if (window.CanvasStateOptimizer) {
                 canvasStateOptimizer = new CanvasStateOptimizer(ctx);
-                console.log('[Performance] Canvas State Optimizer initialized');
             }
             
             // Enhanced Batch Renderer for improved batching
@@ -121,7 +115,6 @@
                     maxBatchSize: isMobile ? 100 : 200,
                     adaptiveCulling: true
                 });
-                console.log('[Performance] Enhanced Batch Renderer initialized');
             }
         }, 150);
         
@@ -1889,14 +1882,12 @@
         
         // Game mode selection
         function selectGameMode(mode) {
-            console.log('[DEBUG] selectGameMode called with:', mode);
             
             // All modes are now available on mobile - no restrictions
             
             playUISound();
             gameMode = mode;
             window.gameMode = gameMode; // Expose globally for Snake.js access
-            console.log('[DEBUG] Game mode set to:', gameMode);
             
             // Classic mode has no target, ends on permadeath
             // Infinite mode has no target, continues forever
@@ -3833,7 +3824,6 @@
             
             die(isBossDeath = false) {
                 if (this.isPlayer) {
-                    console.log('[DEATH DEBUG] Player snake die() called, isDying:', this.isDying, 'score:', this.score);
                 }
                 
                 // Remove from spatial hash when dying
@@ -3847,7 +3837,6 @@
                     
                     // Dispatch player death event immediately when death starts
                     if (this.isPlayer) {
-                        console.log('[DEATH TRACKING] Dispatching playerDeath event for player');
                         window.dispatchEvent(new CustomEvent('playerDeath', { 
                             detail: { 
                                 snake: this,
@@ -4401,7 +4390,6 @@
                                 ctx.drawImage(skinImage, -drawWidth/2, -drawHeight/2, drawWidth, drawHeight);
                             } else {
                                 // Fallback to square if dimensions not available
-                                console.warn(`[game-original.js] No valid dimensions for ${this.skin}, using square`);
                                 ctx.drawImage(skinImage, -size/2, -size/2, size, size);
                             }
                             ctx.restore();
@@ -6942,7 +6930,6 @@
             }
             
             takeDamage(source = 'unknown') {
-                console.trace('[BOSS] Damage call stack');
                 
                 // Only allow damage from player elemental combinations
                 if (source !== 'player_elemental') {
@@ -11422,13 +11409,11 @@
                     // Only check once per death (not every frame!)
                     if (!window.deathLeaderboardChecked) {
                         window.deathLeaderboardChecked = true;
-                        console.log('[DEATH-SUBMIT] Death leaderboard check started');
                     
                     if (gameMode === 'infinite' && playerSnake.score > 0) {
                         const playTime = gameSessionStartTime ? 
                             Math.floor((Date.now() - gameSessionStartTime) / 1000) : 0;
                         
-                        console.log('[DEATH-SUBMIT] Checking submission eligibility:', {
                             gameMode,
                             score: playerSnake.score,
                             playTime,
@@ -11441,7 +11426,6 @@
                             // Get player name
                             const playerName = localStorage.getItem('playerName') || window.nameGenerator.generateRandomName();
                             
-                            console.log('[DEATH-SUBMIT] Submitting score for player:', playerName);
                             
                             // Submit score automatically
                             if (window.leaderboardModule && window.leaderboardModule.submitScore) {
@@ -13218,7 +13202,6 @@
             window.firstPlaceAchievedThisGame = false;
             
             // Dispatch game start event
-            console.log('[DEBUG] Game starting with mode:', gameMode);
             dispatchGameEvent('gameStart', { timestamp: gameStartTime, mode: gameMode });
             
             // Notify unlock manager that game has started
@@ -13506,10 +13489,8 @@
         }
         
         function togglePause() {
-            console.log('[DEBUG] togglePause called, gameStarted:', gameStarted);
             if (!gameStarted) return;
             paused = !paused;
-            console.log('[DEBUG] Paused state:', paused);
             
             // Toggle game-active class when pausing/unpausing
             if (paused) {
@@ -13519,15 +13500,12 @@
             }
             
             const pauseOverlay = document.getElementById('pauseOverlay');
-            console.log('[DEBUG] pauseOverlay element:', pauseOverlay);
             if (pauseOverlay) {
                 pauseOverlay.style.display = paused ? 'flex' : 'none';
                 if (paused) {
                     // Log all buttons in the pause menu
                     const buttons = pauseOverlay.querySelectorAll('button');
-                    console.log('[DEBUG] Buttons in pause menu:', buttons.length);
                     buttons.forEach((btn, i) => {
-                        console.log(`[DEBUG] Button ${i}:`, btn.textContent, 'onclick:', btn.onclick);
                     });
                 }
             }
@@ -13581,14 +13559,12 @@
         
         // Function to switch tabs in pause menu
         window.switchTab = function(tabName) {
-            console.log('[DEBUG] switchTab called with:', tabName);
             playUISound();
             
             // Hide all tabs
             const tabs = document.querySelectorAll('.tab-content');
             tabs.forEach(tab => {
                 tab.classList.remove('active');
-                console.log('[DEBUG] Hiding tab:', tab.id);
             });
             
             // Remove active class from all buttons
@@ -13597,10 +13573,8 @@
             
             // Show selected tab
             const selectedTab = document.getElementById(tabName + 'Tab');
-            console.log('[DEBUG] Looking for tab:', tabName + 'Tab', 'Found:', !!selectedTab);
             if (selectedTab) {
                 selectedTab.classList.add('active');
-                console.log('[DEBUG] Activated tab:', selectedTab.id);
                 
                 // Force display for settings tab
                 if (tabName === 'settings') {
@@ -13608,7 +13582,6 @@
                     const content = selectedTab.querySelector('#settingsContent');
                     if (content) {
                         content.style.display = 'block';
-                        console.log('[DEBUG] Forced display for settings content');
                     }
                 }
             }
@@ -13697,9 +13670,7 @@
         window.recordCozyGame = function() {
             if (window.playerStats) {
                 window.playerStats.recordGameEnd(0, 'cozy');
-                console.log('Cozy game recorded. Current count:', window.playerStats.getGamesPlayedByMode('cozy'));
             } else {
-                console.log('PlayerStats not available');
             }
         }
         
@@ -13707,12 +13678,7 @@
         window.checkCozyStats = function() {
             if (window.playerStats) {
                 const stats = window.playerStats.stats.stats.lifetime.gamesPlayedByMode;
-                console.log('Game mode stats:', stats);
-                console.log('Cozy games played:', stats.cozy || 0);
-                console.log('Current game mode:', gameMode);
-                console.log('Game started:', gameStarted);
             } else {
-                console.log('PlayerStats not available');
             }
         }
         
@@ -15020,13 +14986,11 @@
                             gameMode,
                     
                     // AUTO-SUBMIT SCORE ON DEATH - DISABLED FOR CLASSIC MODE RESPAWN DEATHS
-                    console.log('[DEATH SEQUENCE] Starting auto-submit check, gameMode:', gameMode, 'playerSnake.score:', playerSnake.score);
                     setTimeout(() => {
                         // In classic mode, only submit on final death (4th death when no revives remain)
                         const isFinalDeath = gameMode === 'classic' && deathCount >= 4 && revivesRemaining === 0;
                         // For infinite mode, submit on every death. For classic, only on final death (handled by handlePermadeath)
                         const shouldSubmit = gameMode === 'infinite';
-                        console.log('[DEATH SEQUENCE] shouldSubmit:', shouldSubmit, 'score:', playerSnake.score, 'canSubmitScore:', canSubmitScore(), 'isFinalDeath:', isFinalDeath);
                         
                         if (shouldSubmit && playerSnake.score > 0 && canSubmitScore()) {
                             const playerName = localStorage.getItem('playerName') || 'Anonymous';
@@ -16074,7 +16038,6 @@
             if (!enabled) {
                 spaceships = [];
             } else {
-                console.log('Spaceships enabled');
             }
         };
         */
@@ -16092,12 +16055,10 @@
         // Debug boss spawn function
         window.spawnBossDebug = function(bossType) {
             if (!gameStarted || !playerSnake || !playerSnake.alive) {
-                console.log('Cannot spawn boss: game not started or player not alive');
                 return;
             }
             
             if (currentBoss && currentBoss.alive) {
-                console.log('Cannot spawn boss: a boss is already active');
                 return;
             }
             
@@ -16109,8 +16070,6 @@
                 // Validate boss type
                 bossType = bossType.toUpperCase();
                 if (!BOSS_TYPES[bossType]) {
-                    console.log('Invalid boss type. Available bosses:', Object.keys(BOSS_TYPES).join(', '));
-                    console.log('Usage: spawnBossDebug("PYRAXIS"), spawnBossDebug("ABYSSOS"), etc.');
                     return;
                 }
             }
@@ -16123,7 +16082,6 @@
             const originalAvailableBosses = Object.keys(BOSS_TYPES).filter(boss => !defeatedBosses.has(boss));
             defeatedBosses = new Set(Object.keys(BOSS_TYPES).filter(boss => boss !== bossType));
             
-            console.log(`Spawning ${bossType}...`);
             internalSpawnBoss();
             
             // Restore defeated bosses
@@ -16133,12 +16091,10 @@
         // Simple spawn boss function that calls the internal spawnBoss
         window.spawnBoss = function() {
             if (!gameStarted || !playerSnake || !playerSnake.alive) {
-                console.log('Cannot spawn boss: game not started or player not alive');
                 return;
             }
             
             if (currentBoss && currentBoss.alive) {
-                console.log('Cannot spawn boss: a boss is already active');
                 return;
             }
             
@@ -16148,11 +16104,9 @@
         
         // List available bosses
         window.listBosses = function() {
-            console.log('Available bosses:');
             Object.keys(BOSS_TYPES).forEach(boss => {
                 const data = BOSS_TYPES[boss];
                 const defeated = defeatedBosses.has(boss);
-                console.log(`- ${boss}: ${data.name} (${data.element}) ${defeated ? '[DEFEATED]' : '[AVAILABLE]'}`);
             });
         };
         
@@ -16160,7 +16114,6 @@
         window.resetBosses = function() {
             defeatedBosses.clear();
             localStorage.removeItem('defeatedBosses');
-            console.log('All bosses have been reset');
         };
         
         // Expose necessary functions to global scope for HTML onclick handlers
@@ -16172,15 +16125,10 @@
         
         // Version check to ensure new code is loaded
         window.gameVersion = '1.9.5';
-        console.log('[DEBUG] Game version set to:', window.gameVersion);
         
         // Global debug function to check skin status
         window.checkSkinStatus = function() {
-            console.log('=== SKIN STATUS DEBUG ===');
-            console.log('window.currentPlayerSkin:', window.currentPlayerSkin);
-            console.log('localStorage currentSkin:', localStorage.getItem('currentSkin'));
             if (typeof playerSnake !== 'undefined' && playerSnake) {
-                console.log('playerSnake.skin:', playerSnake.skin);
             }
             return {
                 windowSkin: window.currentPlayerSkin,
