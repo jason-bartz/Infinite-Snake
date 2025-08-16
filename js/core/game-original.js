@@ -1,8 +1,39 @@
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
                         || ('ontouchstart' in window && navigator.maxTouchPoints > 0);
         
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
+        // Initialize after DOM is ready
+        let canvas = null;
+        let ctx = null;
+        
+        // Wait for DOM to be ready before accessing canvas
+        function initializeCanvasWhenReady() {
+            canvas = document.getElementById('gameCanvas');
+            if (!canvas) {
+                // Try again in 100ms
+                setTimeout(initializeCanvasWhenReady, 100);
+                return;
+            }
+            
+            ctx = canvas.getContext('2d');
+            
+            // Apply canvas settings
+            ctx.imageSmoothingEnabled = false;
+            ctx.mozImageSmoothingEnabled = false;
+            ctx.webkitImageSmoothingEnabled = false;
+            ctx.msImageSmoothingEnabled = false;
+            ctx.imageSmoothingQuality = 'low';
+            
+            canvas.style.imageRendering = 'pixelated';
+            canvas.style.imageRendering = '-moz-crisp-edges';
+            canvas.style.imageRendering = 'crisp-edges';
+        }
+        
+        // Start initialization
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeCanvasWhenReady);
+        } else {
+            initializeCanvasWhenReady();
+        }
         
         // Initialize AssetPreloader if not already done
         async function initializeAssets() {
@@ -20,16 +51,6 @@
         }
         
         // Don't start asset loading here - it's now done on page load
-        
-        ctx.imageSmoothingEnabled = false;
-        ctx.mozImageSmoothingEnabled = false;
-        ctx.webkitImageSmoothingEnabled = false;
-        ctx.msImageSmoothingEnabled = false;
-        ctx.imageSmoothingQuality = 'low';
-        
-        canvas.style.imageRendering = 'pixelated';
-        canvas.style.imageRendering = '-moz-crisp-edges';
-        canvas.style.imageRendering = 'crisp-edges';
         
         // Initialize batch renderer for optimized drawing
         let batchRenderer = null;
@@ -1794,6 +1815,19 @@
             }
             
             startButton.addEventListener('click', async () => {
+                // Ensure canvas is initialized before proceeding
+                if (!canvas || !ctx) {
+                    console.error('Canvas not initialized, waiting...');
+                    await new Promise(resolve => {
+                        const checkCanvas = setInterval(() => {
+                            if (canvas && ctx) {
+                                clearInterval(checkCanvas);
+                                resolve();
+                            }
+                        }, 100);
+                    });
+                }
+                
                 playUISound();
                 
                 // Save player name
@@ -2079,8 +2113,14 @@
             
             setTimeout(() => {
                 gameModeSelect.style.display = 'none';
-                stopGame(); // Ensure clean state before starting
-                startGame();
+                try {
+                    stopGame(); // Ensure clean state before starting
+                    startGame();
+                } catch (error) {
+                    console.error('Error starting game:', error);
+                    // Try to start anyway
+                    startGame();
+                }
                 
                 // Show canvas and UI
                 setTimeout(() => {
@@ -11414,6 +11454,7 @@
                         const playTime = gameSessionStartTime ? 
                             Math.floor((Date.now() - gameSessionStartTime) / 1000) : 0;
                         
+                        gameLogger.debug('DEATH_LEADERBOARD', 'Checking submission', {
                             gameMode,
                             score: playerSnake.score,
                             playTime,
@@ -13270,7 +13311,15 @@
             }
             
             // Set player name
-            const playerName = localStorage.getItem('playerName') || window.nameGenerator.generateRandomName();
+            let playerName = localStorage.getItem('playerName');
+            if (!playerName) {
+                // Try to use name generator, fall back to default if not available
+                if (window.nameGenerator && window.nameGenerator.generateRandomName) {
+                    playerName = window.nameGenerator.generateRandomName();
+                } else {
+                    playerName = 'Snake Player';
+                }
+            }
             playerSnake.name = playerName;
             
             snakes.push(playerSnake);

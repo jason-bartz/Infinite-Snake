@@ -7322,21 +7322,30 @@
             // Function to cycle through random names
             function cycleRandomNames() {
                 // Only cycle if input is empty and user hasn't typed
-                if (!playerNameInput.value && !isUserTyping && window.nameGenerator) {
-                    const randomName = window.nameGenerator.getRandomName();
+                if (!playerNameInput.value && !isUserTyping && window.nameGenerator && window.nameGenerator.generateRandomName) {
+                    const randomName = window.nameGenerator.generateRandomName();
                     playerNameInput.placeholder = randomName;
                 }
             }
             
-            // Start cycling names every 3 seconds
-            nameInterval = setInterval(cycleRandomNames, 3000);
-            
-            // Set initial random name
-            setTimeout(() => {
-                if (window.nameGenerator && !playerNameInput.value) {
-                    playerNameInput.placeholder = window.nameGenerator.getRandomName();
+            // Wait for nameGenerator to be loaded (important for incognito mode)
+            function waitForNameGenerator() {
+                if (window.nameGenerator && window.nameGenerator.generateRandomName) {
+                    // Start cycling names every 3 seconds
+                    nameInterval = setInterval(cycleRandomNames, 3000);
+                    
+                    // Set initial random name
+                    if (!playerNameInput.value) {
+                        playerNameInput.placeholder = window.nameGenerator.generateRandomName();
+                    }
+                } else {
+                    // Try again in 100ms
+                    setTimeout(waitForNameGenerator, 100);
                 }
-            }, 100);
+            }
+            
+            // Start waiting for nameGenerator
+            waitForNameGenerator();
             
             // Stop cycling when user starts typing and validate
             playerNameInput.addEventListener('input', () => {
