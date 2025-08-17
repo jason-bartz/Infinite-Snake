@@ -1434,6 +1434,20 @@ window.saveNewElement = async function() {
                 }
                 
                 if (resultId) {
+                    // Check if this combination already exists with a different result
+                    const existingResult = combinations[`${id}+${otherId}`] || combinations[`${otherId}+${id}`];
+                    if (existingResult && existingResult != resultId) {
+                        const existingElement = elements[existingResult];
+                        const existingName = existingElement ? existingElement.name : `ID: ${existingResult}`;
+                        const otherName = elements[otherId]?.name || otherId;
+                        const resultName = elements[resultId]?.name || resultId;
+                        
+                        if (!confirm(`⚠️ Warning: "${name}" + "${otherName}" already creates "${existingName}".\n\nDo you want to change it to create "${resultName}" instead?\n\nClicking OK will DELETE the existing combination that creates "${existingName}".`)) {
+                            // Skip this combination if user cancels
+                            return;
+                        }
+                    }
+                    
                     // Add combination
                     combinations[`${id}+${otherId}`] = parseInt(resultId);
                     combinations[`${otherId}+${id}`] = parseInt(resultId);
