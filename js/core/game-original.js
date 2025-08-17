@@ -9488,10 +9488,10 @@
                 hintElement.classList.add('show');
             }, 50); // Small delay to ensure proper animation
             
-            // Hide after 8 seconds
+            // Hide after 12 seconds (50% longer than original 8 seconds)
             hintTimeout = setTimeout(() => {
                 hideGameHint();
-            }, 8000);
+            }, 12000);
         }
         
         function hideGameHint() {
@@ -13122,18 +13122,14 @@
             
             // Show hints for first 2 games
             if (gamesPlayed <= 2) {
-                // First hint: controls (desktop only)
+                // Show void orb hint only
                 if (!isMobile) {
-                    setTimeout(() => {
-                        showGameHint('controls');
-                    }, 1000); // Show after 1 second
-                    
-                    // Second hint: void orbs
+                    // Desktop: show void orb hint
                     setTimeout(() => {
                         showGameHint('voidorbs');
-                    }, 16000); // Show 15 seconds after first hint (1s + 15s = 16s)
+                    }, 10000); // Show after 10 seconds
                 } else {
-                    // Mobile: only show void orb hint
+                    // Mobile: show void orb hint
                     setTimeout(() => {
                         showGameHint('voidorbs');
                     }, 10000); // Show after 10 seconds
