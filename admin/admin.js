@@ -1210,7 +1210,7 @@ window.showCreateForm = function() {
             <div class="form-group">
                 <label>Emoji</label>
                 <div class="emoji-picker">
-                    <input type="text" id="new-emoji" class="emoji-input" value="🆕" maxlength="2">
+                    <input type="text" id="new-emoji" class="emoji-input" value="🆕">
                 </div>
             </div>
             
