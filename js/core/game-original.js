@@ -1947,8 +1947,12 @@
                     playRandomTrack();
                 }
             } else {
-                // Reset background for other modes
-                document.body.style.backgroundImage = "";
+                // Reset background to default for other modes
+                document.body.style.backgroundImage = "url('/assets/background/purple-blue-bg.png')";
+                document.body.style.backgroundSize = "cover";
+                document.body.style.backgroundPosition = "center center";
+                document.body.style.backgroundRepeat = "no-repeat";
+                document.body.style.backgroundAttachment = "fixed";
             }
             
             // Check if tutorial should be shown for this mode

@@ -249,7 +249,7 @@ button[onclick*="location.reload"] {
 
 /* Game Mode Selection Screen */
 #gameModeSelect {
-    background: radial-gradient(ellipse at center, #1a0033 0%, #0a0015 100%) !important;
+    /* Keep the default background from main CSS */
 }
 
 #gameModeContent {

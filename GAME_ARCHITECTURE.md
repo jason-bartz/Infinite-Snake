@@ -318,9 +318,8 @@ All entities extend base classes with `update()` and `draw()` methods:
 ## Game Flow & States
 
 ### Game Modes
-- **Infinite Mode**: Classic survival gameplay, progressively harder
+- **Classic Mode**: Competitive survival gameplay with 3 lives and permadeath
 - **Cozy Mode**: Relaxed gameplay, no boundary deaths, peaceful music
-- *Additional modes planned but not yet implemented*
 
 ### State Machine
 ```
