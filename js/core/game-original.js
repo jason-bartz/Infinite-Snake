@@ -1027,7 +1027,7 @@
                 name: "Osseus the Bone Sovereign",
                 element: "earth",
                 elementId: 0,
-                emoji: "🗿",
+                emoji: "🌎",
                 color: "#8b4513",
                 maxHealth: 5,
                 attackCooldown: 7000, // Increased from 5s to 7s
@@ -7607,7 +7607,9 @@
             bossNameDisplay.style.whiteSpace = 'nowrap'; // Ensure single line display
             bossNameDisplay.style.overflow = 'hidden';
             bossNameDisplay.style.textOverflow = 'ellipsis';
-            bossNameDisplay.textContent = `💀 ${currentBoss.name}`;
+            // Get the element emoji from the boss's emoji property
+            const elementEmoji = currentBoss.emoji || '';
+            bossNameDisplay.textContent = `💀 ${currentBoss.name} ${elementEmoji}`;
             
             bossHealthBarContainer.appendChild(healthBarBg);
             bossHealthBarContainer.appendChild(bossNameDisplay);
