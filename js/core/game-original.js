@@ -1930,8 +1930,8 @@
             // Set default control scheme to mouse
             controlScheme = 'mouse';
             
-            // Apply purple background immediately for cozy mode (desktop and mobile)
-            if (gameMode === 'cozy') {
+            // Apply purple background for both classic and cozy modes
+            if (gameMode === 'cozy' || gameMode === 'classic') {
                 document.body.style.backgroundImage = "url('assets/background/purple-bg.png')";
                 document.body.style.backgroundSize = "cover";
                 document.body.style.backgroundPosition = "center center";
@@ -1941,7 +1941,7 @@
                 
                 // For Safari: Try to start music immediately on user interaction
                 if (!currentTrack && !musicMuted) {
-                    // Pre-initialize available tracks for cozy mode
+                    // Pre-initialize available tracks for cozy mode music
                     availableTracks = [...cozyMusicTracks];
                     // Try to play music now while we have user interaction
                     playRandomTrack();
@@ -2234,7 +2234,7 @@
             // Create multiple audio instances for overlapping sounds
             for (let i = 0; i < 5; i++) {
                 const eatSound = new Audio('sounds/blip.mp3');
-                eatSound.volume = 0.3125; // 31.25% volume (increased by 25%)
+                eatSound.volume = 0.234375; // 23.4375% volume (reduced by 25% from 0.3125)
                 eatSounds.push(eatSound);
                 
                 const explosionSound = new Audio('sounds/fire-impact.mp3');
@@ -2431,7 +2431,8 @@
         
         async function checkAvailableTracks() {
             // For now, assume all tracks are available
-            availableTracks = gameMode === 'cozy' ? [...cozyMusicTracks] : [...musicTracks];
+            // Use cozy music tracks for both classic and cozy modes
+            availableTracks = (gameMode === 'cozy' || gameMode === 'classic') ? [...cozyMusicTracks] : [...musicTracks];
             return true;
         }
         
@@ -2449,7 +2450,8 @@
             
             // Refill available tracks if empty
             if (availableTracks.length === 0) {
-                availableTracks = gameMode === 'cozy' ? [...cozyMusicTracks] : [...musicTracks];
+                // Use cozy music tracks for both classic and cozy modes
+                availableTracks = (gameMode === 'cozy' || gameMode === 'classic') ? [...cozyMusicTracks] : [...musicTracks];
             }
             
             // Stop current track if playing
@@ -9483,7 +9485,7 @@
             // Play hint sound
             if (!musicMuted) {
                 const hintSound = new Audio('sounds/game-tone-hint.mp3');
-                hintSound.volume = 0.5;
+                hintSound.volume = 0.25; // 25% volume (reduced by 50% from 0.5)
                 hintSound.play().catch(err => {
                     gameLogger.debug('AUDIO', 'Failed to play hint sound:', err);
                 });
