@@ -1,22 +1,42 @@
 {
-  "dependencies": {
-    "@upstash/redis": "^1.35.0",
-    "@vercel/analytics": "^1.5.0"
-  },
-  "devDependencies": {
-    "@playwright/test": "^1.54.1",
-    "@types/node": "^24.0.15"
-  },
+  "name": "infinite-snake",
+  "version": "2.1.0",
+  "type": "module",
+  "private": true,
   "scripts": {
-    "test": "playwright test",
-    "test:ui": "playwright test --ui",
-    "test:headed": "playwright test --headed",
-    "test:debug": "playwright test --debug",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:debug": "playwright test --debug",
     "test:report": "playwright show-report",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
+    "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
     "build-version": "node build-version.js",
     "version:patch": "npm version patch --no-git-tag-version && npm run build-version",
     "version:minor": "npm version minor --no-git-tag-version && npm run build-version",
     "version:major": "npm version major --no-git-tag-version && npm run build-version"
   },
-  "version": "2.0.0"
+  "dependencies": {
+    "@upstash/redis": "^1.35.0",
+    "@vercel/analytics": "^1.5.0",
+    "lit": "^3.2.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.54.1",
+    "@types/node": "^24.0.15",
+    "@vitest/ui": "^2.1.8",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-lit": "^1.15.0",
+    "prettier": "^3.4.2",
+    "vite": "^5.4.11",
+    "vitest": "^2.1.8"
+  }
 }
