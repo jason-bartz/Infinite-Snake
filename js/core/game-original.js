@@ -11056,7 +11056,7 @@
         }
         
         // Leaderboard UI Functions
-        let currentLeaderboardPeriod = 'daily';
+        let currentLeaderboardPeriod = 'all';
         let leaderboardData = [];
         
         window.showLeaderboard = async function() {

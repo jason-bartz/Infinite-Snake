@@ -5711,19 +5711,9 @@
                     
                     <!-- Mini leaderboard tabs -->
                     <div style="display: flex; margin-bottom: 15px; border-bottom: 2px solid #333; justify-content: center;">
-                        <button class="mini-lb-tab active" onclick="loadPauseLeaderboard(event, 'weekly')" 
-                                style="flex: 1; padding: 10px; background: transparent; border: none; 
+                        <button class="mini-lb-tab active" onclick="loadPauseLeaderboard(event, 'all')"
+                                style="flex: 1; padding: 10px; background: transparent; border: none;
                                        color: #4ecdc4; font-size: 14px; cursor: pointer; font-family: monospace;">
-                            Weekly
-                        </button>
-                        <button class="mini-lb-tab" onclick="loadPauseLeaderboard(event, 'monthly')" 
-                                style="flex: 1; padding: 10px; background: transparent; border: none; 
-                                       color: #888; font-size: 14px; cursor: pointer; font-family: monospace;">
-                            Monthly
-                        </button>
-                        <button class="mini-lb-tab" onclick="loadPauseLeaderboard(event, 'all')" 
-                                style="flex: 1; padding: 10px; background: transparent; border: none; 
-                                       color: #888; font-size: 14px; cursor: pointer; font-family: monospace;">
                             All Time
                         </button>
                     </div>
@@ -5819,27 +5809,9 @@
             
             <!-- Time Period Tabs -->
             <div style="display: flex; background: rgba(0, 0, 0, 0.3); border-bottom: 2px solid #333;">
-                <button class="leaderboard-tab active" onclick="switchLeaderboardPeriod('daily')" 
-                        style="flex: 1; padding: 15px; background: transparent; border: none; 
-                               color: #4ecdc4; font-size: 16px; cursor: pointer; 
-                               font-family: monospace; border-right: 2px solid #333;">
-                    DAILY
-                </button>
-                <button class="leaderboard-tab" onclick="switchLeaderboardPeriod('weekly')" 
-                        style="flex: 1; padding: 15px; background: transparent; border: none; 
-                               color: #888; font-size: 16px; cursor: pointer; 
-                               font-family: monospace; border-right: 2px solid #333;">
-                    WEEKLY
-                </button>
-                <button class="leaderboard-tab" onclick="switchLeaderboardPeriod('monthly')" 
-                        style="flex: 1; padding: 15px; background: transparent; border: none; 
-                               color: #888; font-size: 16px; cursor: pointer; 
-                               font-family: monospace; border-right: 2px solid #333;">
-                    MONTHLY
-                </button>
-                <button class="leaderboard-tab" onclick="switchLeaderboardPeriod('all')" 
-                        style="flex: 1; padding: 15px; background: transparent; border: none; 
-                               color: #888; font-size: 16px; cursor: pointer; 
+                <button class="leaderboard-tab active" onclick="switchLeaderboardPeriod('all')"
+                        style="flex: 1; padding: 15px; background: transparent; border: none;
+                               color: #4ecdc4; font-size: 16px; cursor: pointer;
                                font-family: monospace;">
                     ALL TIME
                 </button>
@@ -7191,7 +7163,7 @@
                     if (tabName === 'journal' && typeof populateDiscoveryJournal === 'function') {
                         populateDiscoveryJournal();
                     } else if (tabName === 'leaderboard' && typeof loadPauseLeaderboard === 'function') {
-                        setTimeout(() => loadPauseLeaderboard(null, 'weekly'), 50);
+                        setTimeout(() => loadPauseLeaderboard(null, 'all'), 50);
                     }
                 }
             }

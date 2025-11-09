@@ -537,9 +537,7 @@
         </header>
         
         <div class="tabs">
-            <button class="tab active" onclick="switchPeriod('weekly')">WEEKLY</button>
-            <button class="tab" onclick="switchPeriod('monthly')">MONTHLY</button>
-            <button class="tab" onclick="switchPeriod('all')">ALL TIME</button>
+            <button class="tab active" onclick="switchPeriod('all')">ALL TIME</button>
         </div>
         
         <div class="leaderboard-container">
@@ -577,7 +575,7 @@
     <script src="js/skinIdMapping.js"></script>
     
     <script>
-        let currentPeriod = 'weekly';
+        let currentPeriod = 'all';
         let currentPage = 1;
         let totalEntries = 0;
         const entriesPerPage = 100;
@@ -673,7 +671,7 @@
         
         // Initialize
         async function init() {
-            await loadLeaderboard('weekly');
+            await loadLeaderboard('all');
         }
         
         // Switch period
