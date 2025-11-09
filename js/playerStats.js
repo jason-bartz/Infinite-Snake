@@ -103,7 +103,6 @@ class PlayerStats {
                     playedDuringHours: new Set(),
                     playedDuringMonths: new Set(),
                     gamesInTimeWindows: {},
-                    bossKills: 0,
                     bestMonthlyRank: null
                 }
             }
@@ -233,20 +232,14 @@ class PlayerStats {
     }
 
     recordBossKill() {
-        this.stats.stats.achievements.bossKills++;
         
         // Track session boss kills if needed
-        if (!this.sessionStats.bossKills) {
-            this.sessionStats.bossKills = 0;
         }
-        this.sessionStats.bossKills++;
         
         // Track most bosses in one game
         if (!this.stats.stats.achievements.mostBossesInGame) {
             this.stats.stats.achievements.mostBossesInGame = 0;
         }
-        if (this.sessionStats.bossKills > this.stats.stats.achievements.mostBossesInGame) {
-            this.stats.stats.achievements.mostBossesInGame = this.sessionStats.bossKills;
         }
         
         this.saveStats();
@@ -496,7 +489,6 @@ class PlayerStats {
     }
     
     getTotalBossKills() {
-        return this.stats.stats.achievements.bossKills || 0;
     }
     
     getWeekendDaysPlayed() {
@@ -553,8 +545,6 @@ class PlayerStats {
         return this.stats.stats.achievements.holidaysPlayed || 0;
     }
     
-    getAllBossesDefeatedCount() {
-        return this.stats.stats.achievements.allBossesDefeatedCount || 0;
     }
     
     getBestWeeklyRank() {

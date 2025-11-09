@@ -33,8 +33,7 @@ class GameLogger {
         // Suppress certain tags in production
         this.suppressedTags = new Set([
             'NEBULA GENERATION',
-            'BOSS',
-            'COMBINATION',
+                        'COMBINATION',
             'SHOCKWAVE',
             'VOID ORB',
             'ELEMENT BANK',

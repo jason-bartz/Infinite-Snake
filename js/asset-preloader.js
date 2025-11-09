@@ -40,7 +40,7 @@ class AssetPreloader {
             { text: "Tip: Earth 🌍 + Water 💧 makes Mud!", elements: ["🌍", "💧"] },
             { text: "Tip: Legendary skins unlock at milestone discoveries!", icon: "🏆" },
             { text: "Tip: Use boost wisely - it drains your energy!", icon: "⚡" },
-            { text: "Tip: Boss snakes drop rare elements when defeated!", icon: "👹" },
+
             { text: "Tip: Some combinations only work with rare elements!", icon: "💎" },
             { text: "Tip: The more you discover, the faster rare elements spawn!", icon: "✨" }
         ];

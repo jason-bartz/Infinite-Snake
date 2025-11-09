@@ -133,10 +133,6 @@ class UnlockManager {
                 }
                 return exoticCount >= criteria.value;
             
-            case 'defeatBoss':
-                // This will be triggered by the boss defeat event
-                return false;
-            
             case 'modeGames':
                 // Check games played in a specific mode
                 if (!criteria.mode || !criteria.value) return false;
@@ -272,7 +268,7 @@ class UnlockManager {
         }
         
         // Determine the correct image path
-        const imagePath = skinData.isBoss ? `assets/boss-skins/${imageId}.png` : `skins/${imageId}.png`;
+        const imagePath = `skins/${imageId}.png`;
         
         notification.innerHTML = `
             <div class="unlock-content">
@@ -310,15 +306,6 @@ class UnlockManager {
         audio.play().catch(() => {
             console.log('[UNLOCK] Failed to play skin unlock sound');
         });
-    }
-
-    // Boss unlock method
-    unlockBossSkin(bossName) {
-        const bossSkinId = bossName.toLowerCase();
-        if (window.SKIN_DATA[bossSkinId] && window.SKIN_DATA[bossSkinId].isBoss) {
-            this.unlockSkin(bossSkinId, window.SKIN_DATA[bossSkinId]);
-            this.showUnlockNotifications([{ skinId: bossSkinId, data: window.SKIN_DATA[bossSkinId] }]);
-        }
     }
 
     // Check specific events
@@ -365,13 +352,6 @@ class UnlockManager {
         
         // Check play time periodically
         setInterval(() => this.checkEventBasedUnlocks('playTime'), 60000); // Every minute
-        
-        // Boss defeat events
-        window.addEventListener('bossDefeated', (e) => {
-            if (e.detail && e.detail.bossName) {
-                this.unlockBossSkin(e.detail.bossName);
-            }
-        });
     }
 
     // Get progress towards a specific skin
@@ -474,7 +454,6 @@ class UnlockManager {
                 }
                 // Fall through to binary check for other timeWindow skins
             case 'monthWindow':
-            case 'defeatBoss':
                 // These are binary checks - return proper progress object
                 const isUnlocked = this.checkUnlockCriteria(skinId, criteria);
                 return {
@@ -556,27 +535,6 @@ class UnlockManager {
                 }
             }, 1000); // Give skin notifications time to display
         }, 3000);
-    }
-    
-    // Called when a boss is defeated
-    onBossDefeat(bossType) {
-        console.log('[UNLOCK] Boss defeated:', bossType);
-        
-        // Find skins that require defeating this boss
-        for (const [skinId, data] of Object.entries(window.SKIN_DATA)) {
-            if (!this.unlockedSkins.has(skinId) && data.unlockCriteria) {
-                if (data.unlockCriteria.type === 'defeatBoss' && 
-                    data.unlockCriteria.boss === bossType.toLowerCase()) {
-                    this.unlockSkin(skinId, data);
-                    this.pendingUnlocks.push({ skinId, data });
-                }
-            }
-        }
-        
-        // Process unlock notifications
-        if (this.pendingUnlocks.length > 0 && !this.isProcessingNotification) {
-            this.processNextUnlock();
-        }
     }
     
     // Called when returning to menu

@@ -67,7 +67,6 @@ window.LORE_DATA = {
         Epoch 50,293: Structural integrity holding. Visitor count: 0. Greg hasn't visited in three epochs. Starting to think he's avoiding me.
         
         Epoch 50,294: Wrote new poem about bones. It's terrible. Perfect.`,
-        unlockCriteria: { type: 'defeatBoss', bossName: 'Osseus' },
         unlockText: 'Defeat Osseus'
     },
     'recursion-1': {
@@ -434,7 +433,6 @@ It is the Devourer of Distinction
 It is the Hunger That Hungers for Hunger
 
 (Remaining 92 names classified as cognitohazard)`,
-        unlockCriteria: { type: 'bossKills', value: 10 },
         unlockText: 'Defeat 10 bosses'
     },
     
@@ -670,7 +668,6 @@ It had always been there, coiled around everything. We just finally did the math
 God help us, we did the math."
 
 [Witness began screaming in prime numbers. Statement concluded.]`,
-        unlockCriteria: { type: 'bossStreak', value: 3 },
         unlockText: 'Defeat 3 bosses in a single game'
     },
     
@@ -990,78 +987,15 @@ This message will not repeat. There is nothing left to repeat to.
         unlockText: 'Play for a full year (365 days)'
     },
     
-    // Boss-related entries
-    'pyraxis-lore': {
-        id: 'pyraxis-lore',
-        number: '031',
-        title: 'Pyraxis Research Notes',
-        category: 'old-ones',
-        content: `Temperature readings off scale. Entity appears to be anger given thermodynamic form.
-
-Subject consumes matter through oxidation at molecular level. Everything burns. Even concepts.
-
-Pyraxis speaks only in degrees Celsius. Last recorded statement: "10,000 and climbing."
-
-Note: Do not attempt diplomacy. Fire does not negotiate.`,
-        unlockCriteria: { type: 'defeatBoss', bossName: 'Pyraxis' },
         unlockText: 'Defeat Pyraxis the Molten'
     },
     
-    'abyssos-lore': {
-        id: 'abyssos-lore',
-        number: '032',
-        title: 'Deep Pressure Readings',
-        category: 'old-ones',
-        content: `Abyssos exists at pressures that collapse matter into memory.
-
-The depths speak through it. What they say cannot be transcribed in languages that use words.
-
-Subject's laughter recorded at 20Hz - below human hearing threshold. Still causes existential dread.
-
-Witness report: "It showed me the bottom. There is no bottom. That IS the bottom."`,
-        unlockCriteria: { type: 'defeatBoss', bossName: 'Abyssos' },
         unlockText: 'Defeat Abyssos the Depths'
     },
     
-    'zephyrus-lore': {
-        id: 'zephyrus-lore',
-        number: '033',
-        title: 'Wind Speed Documentation',
-        category: 'old-ones',
-        content: `Zephyrus measured at YES mph.
-
-Subject exists in permanent state of motion without destination. The journey is the destination is the journey.
-
-Atmospheric readings indicate entity is 40% wind, 60% malice, 100% problem.
-
-Final log entry: "It's in the walls. The walls are gone. We are the walls now."`,
-        unlockCriteria: { type: 'defeatBoss', bossName: 'Zephyrus' },
         unlockText: 'Defeat Zephyrus of the Gale'
     },
     
-    'four-seals': {
-        id: 'four-seals',
-        number: '035',
-        title: 'The Four Seals',
-        category: 'old-ones',
-        content: `FROM THE BOOK OF BOSS BATTLES
-
-And when the Snake had consumed enough, the Seals were broken:
-
-FIRST SEAL - OSSEUS OF EARTH
-"Bones remember what flesh forgets"
-
-SECOND SEAL - PYRAXIS OF FLAME  
-"Anger given form, form given hunger"
-
-THIRD SEAL - ABYSSOS OF DEPTHS
-"The deep calls to deep, and both are famished"
-
-FOURTH SEAL - ZEPHYRUS OF WINDS
-"Motion without purpose, purpose without end"
-
-Each seal broken grants the breaker their essence. Each essence corrupts the bearer. The Snake laughs at this irony.`,
-        unlockCriteria: { type: 'allBosses', count: 50 },
         unlockText: 'Defeat all 4 bosses a total of 50 times'
     },
     
@@ -1731,7 +1665,6 @@ Status: Funded. No one knows why.`,
         number: '093',
         title: 'The Four Seals',
         category: 'serpent',
-        content: `FROM THE BOOK OF BOSS BATTLES
 
 And when the Snake had consumed enough, the Seals were broken:
 
@@ -1748,7 +1681,6 @@ FOURTH SEAL - ZEPHYRUS OF WINDS
 "Motion without purpose, purpose without end"
 
 Each seal broken grants the breaker their essence. Each essence corrupts the bearer. The Snake laughs at this irony.`,
-        unlockCriteria: { type: 'defeatBoss', boss: 'any', count: 4 },
         unlockText: 'Defeat all four bosses'
     },
     'skin-lore-scuffy': {

@@ -811,92 +811,6 @@
         
         let snakeNameData = null;
         
-        const BOSS_TYPES = {
-            PYRAXIS: {
-                name: "Pyraxis the Molten",
-                element: "fire",
-                elementId: 3,
-                emoji: "🔥",
-                color: "#ff4444",
-                maxHealth: 5,
-                attackCooldown: 6000, // Increased from 4s to 6s
-                defeated: false,
-                skin: 'pyraxis',
-                attackSound: 'sounds/magma-roar.mp3',
-                laughSound: 'sounds/pyraxis-laugh.mp3'
-            },
-            ABYSSOS: {
-                name: "Abyssos the Deep One",
-                element: "water",
-                elementId: 1,
-                emoji: "🌊",
-                color: "#4444ff",
-                maxHealth: 5,
-                attackCooldown: 8000, // Increased from 6s to 8s
-                defeated: false,
-                skin: 'abyssos',
-                attackSound: 'sounds/negative-low-pitch.mp3',
-                laughSound: 'sounds/abyssos-laugh.mp3'
-            },
-            OSSEUS: {
-                name: "Osseus the Bone Sovereign",
-                element: "earth",
-                elementId: 0,
-                emoji: "🌎",
-                color: "#8b4513",
-                maxHealth: 5,
-                attackCooldown: 7000, // Increased from 5s to 7s
-                defeated: false,
-                skin: 'osseus',
-                attackSound: 'sounds/boom-explosion.mp3',
-                laughSound: 'sounds/osseus-laugh.mp3'
-            },
-            ZEPHYRUS: {
-                name: "Zephyrus the Storm Caller",
-                element: "air",
-                elementId: 2,
-                emoji: "💨",
-                color: "#87ceeb",
-                maxHealth: 5,
-                attackCooldown: 10000, // Increased from 8s to 10s
-                defeated: false,
-                skin: 'zephyrus',
-                attackSound: 'sounds/power-surge.mp3',
-                laughSound: 'sounds/zephyrus-laugh.mp3'
-            }
-        };
-        
-        let currentBoss = null;
-        let bossEncounterActive = false;
-        let nextBossSpawnScore = 0;
-        let lastBossDefeatScore = 0;
-        let bossSpawnCount = 0;
-        let defeatedBosses = new Set();
-        
-        // Load defeated bosses from localStorage for persistence
-        const savedDefeatedBosses = JSON.parse(localStorage.getItem('defeatedBosses') || '[]');
-        savedDefeatedBosses.forEach(boss => defeatedBosses.add(boss));
-        
-        // Make defeatedBosses available globally for unlock checks
-        window.defeatedBosses = defeatedBosses;
-        
-        function calculateNextBossSpawn() {
-            if (bossSpawnCount === 0) {
-                nextBossSpawnScore = 50000 + Math.floor(Math.random() * 25000);
-            } else {
-                const baseInterval = 200000;
-                const randomRange = 50000;
-                nextBossSpawnScore = lastBossDefeatScore + baseInterval + Math.floor(Math.random() * randomRange);
-            }
-            gameLogger.debug('BOSS', `Next boss will spawn at ${nextBossSpawnScore.toLocaleString()} points`);
-        }
-        let bossesDefeatedThisCycle = 0;
-        let bossIsUndead = false;
-        let bossIntroMusic = null;
-        let bossBattleMusic = null;
-        let bossHealthBar = null;
-        let bossHealthBarContainer = null;
-        let bossNameDisplay = null;
         // Load element bank slots from localStorage or default to 6
         let elementBankSlots = parseInt(localStorage.getItem('elementBankSlots')) || 6;
         
@@ -904,20 +818,13 @@
         function saveElementBankSlots() {
             localStorage.setItem('elementBankSlots', elementBankSlots.toString());
         }
-        let bossDamageFlashTimer = 0;
-        let bossStunTimer = 0;
-        let bossProjectiles = [];
-        let bossDamageCooldown = 0;
         let shockwaves = [];
         window.shockwaves = shockwaves; // Expose to window for Snake.js access
-        let bossScreenShakeTimer = 0;
-        let bossScreenShakeIntensity = 0;
         let elementVacuumActive = false;
         let elementVacuumTimer = 0;
         let vacuumedElements = [];
         let damageNumbers = [];
-        let bossFissures = [];
-        
+
         let skinMetadata = {
             'snake-default-green': { name: 'Basic Boy', unlocked: true, colors: ['#80b878', '#80b878'] },
             'neko': { name: 'Lil Beans (Beta Perk)', unlocked: true, colors: ['#b8b4b2', '#b8b4b2'] },
@@ -971,11 +878,7 @@
             'popcorn': { name: 'Colonel Kernel', unlocked: false, colors: ['#ffde59', '#ffde59'] },
             'pixel': { name: 'Pixel', unlocked: false, colors: ['#75c33c', '#75c33c'] },
             'midnight': { name: 'Midnight', unlocked: false, colors: ['#5c486a', '#5c486a'] },
-            'gilly': { name: 'Gilly', unlocked: false, colors: ['#f6cfdc', '#f6cfdc'] },
-            'pyraxis': { name: 'Pyraxis the Molten', unlocked: false, colors: ['#c74250', '#c74250'], isBoss: true },
-            'abyssos': { name: 'Abyssos the Deep One', unlocked: false, colors: ['#80b878', '#80b878'], isBoss: true },
-            'osseus': { name: 'Osseus the Bone Sovereign', unlocked: false, colors: ['#7a4900', '#7a4900'], isBoss: true },
-            'zephyrus': { name: 'Zephyrus the Storm Caller', unlocked: false, colors: ['#464969', '#464969'], isBoss: true }
+            'gilly': { name: 'Gilly', unlocked: false, colors: ['#f6cfdc', '#f6cfdc'] }
         };
         
         if (window.SKIN_DATA && window.skinIdConverter) {
@@ -1020,7 +923,7 @@
             skinMetadata = mergedMetadata;
         }
         
-        const aiSkins = Object.keys(skinMetadata).filter(skin => skinMetadata[skin] && !skinMetadata[skin].isBoss);
+        const aiSkins = Object.keys(skinMetadata).filter(skin => skinMetadata[skin]);
         let currentPlayerSkin = 'snake-default-green';
         let unlockedSkins = new Set(['snake-default-green', 'chirpy', 'ruby', 'lil-beans']);
         let viewedSkins = new Set(['snake-default-green', 'chirpy', 'ruby', 'lil-beans']);
@@ -1055,11 +958,7 @@
                 const portrait = document.getElementById('playerPortrait');
                 if (portrait) {
                     const fileId = window.skinIdConverter ? (window.skinIdConverter.toOldId(currentPlayerSkin) || currentPlayerSkin) : currentPlayerSkin;
-                    if (skinMetadata[currentPlayerSkin] && skinMetadata[currentPlayerSkin].isBoss) {
-                        portrait.src = `assets/boss-skins/${fileId}.png`;
-                    } else {
-                        portrait.src = `skins/${fileId}.png`;
-                    }
+                    portrait.src = `skins/${fileId}.png`;
                     setTimeout(() => {
                         document.dispatchEvent(new Event('skinChanged'));
                         if (window.unifiedMobileUI) {
@@ -1117,42 +1016,8 @@
                 
                 // Use old ID for file path if available
                 const fileId = window.skinIdConverter ? (window.skinIdConverter.toOldId(skin) || skin) : skin;
-                if (skinMetadata[skin].isBoss) {
-                    img.src = `assets/boss-skins/${fileId}.png`;
-                } else {
-                    img.src = `skins/${fileId}.png`;
-                }
+                img.src = `skins/${fileId}.png`;
                 skinImages[skin] = img;
-            });
-            
-            // Also preload boss skins that are not in skinMetadata
-            const bossSkins = Object.values(BOSS_TYPES).map(boss => boss.skin);
-            bossSkins.forEach(skin => {
-                if (!skinImages[skin]) { // Only load if not already loaded
-                    const img = new Image();
-                    
-                    // Set crossOrigin to ensure we can read image data
-                    img.crossOrigin = 'anonymous';
-                    
-                    img.onload = function() {
-                        gameLogger.info('ASSETS', `Boss skin loaded: ${skin} (${this.width}x${this.height})`);
-                        // Force the browser to decode the image to ensure dimensions are available
-                        if (this.decode) {
-                            this.decode().catch(() => {
-                                gameLogger.warn('ASSETS', `Failed to decode boss skin: ${skin}`);
-                            });
-                        }
-                    };
-                    
-                    img.onerror = function() {
-                        gameLogger.warn('ASSETS', `Failed to load boss skin: ${skin}.png`);
-                        this.error = true;
-                    };
-                    
-                    // Boss skins use their direct names in the boss-skins directory
-                    img.src = `assets/boss-skins/${skin}.png`;
-                    skinImages[skin] = img;
-                }
             });
         }
         
@@ -1304,12 +1169,12 @@
             }
             
             // Also try to resume if music should be playing but isn't
-            if (musicShouldBePlaying && !musicMuted && gameStarted && !currentTrack && !bossEncounterActive) {
+            if (musicShouldBePlaying && !musicMuted && gameStarted && !currentTrack) {
                 playRandomTrack();
             }
             
             // Safari-specific: Try to play current track if it exists but is paused
-            if (currentTrack && currentTrack.paused && !musicMuted && gameStarted && !bossEncounterActive) {
+            if (currentTrack && currentTrack.paused && !musicMuted && gameStarted) {
                 currentTrack.play().catch(err => {
                     gameLogger.error('AUDIO', 'Safari: Failed to resume paused music on touch:', err);
                 });
@@ -2378,28 +2243,15 @@
                 if (currentTrack) {
                     currentTrack.pause();
                 }
-                // Also pause boss music
-                if (bossIntroMusic) {
-                    bossIntroMusic.pause();
                 }
-                if (bossBattleMusic) {
-                    bossBattleMusic.pause();
                 }
             } else {
                 // Set music should be playing flag when unmuting
                 musicShouldBePlaying = true;
-                if (currentTrack && gameStarted && !bossEncounterActive) {
+                if (currentTrack && gameStarted) {
                     currentTrack.volume = musicVolume;
                     currentTrack.play().catch(() => {});
                 }
-                // Resume boss music if boss encounter is active
-                if (bossEncounterActive) {
-                    if (bossIntroMusic && !bossIntroMusic.ended) {
-                        bossIntroMusic.volume = 0.7 * musicVolume;
-                        bossIntroMusic.play().catch(() => {});
-                    } else if (bossBattleMusic && currentBoss && currentBoss.alive) {
-                        bossBattleMusic.volume = 0.6 * musicVolume;
-                        bossBattleMusic.play().catch(() => {});
                     }
                 }
             }
@@ -2413,12 +2265,7 @@
                 if (currentTrack) {
                     currentTrack.volume = musicVolume;
                 }
-                // Also update boss music volume
-                if (bossIntroMusic) {
-                    bossIntroMusic.volume = 0.7 * musicVolume;
                 }
-                if (bossBattleMusic) {
-                    bossBattleMusic.volume = 0.6 * musicVolume;
                 }
             }
         };
@@ -2426,8 +2273,6 @@
         // Audio Lifecycle Management - Fix iOS background audio issue
         let audioWasPlaying = {
             music: false,
-            bossIntro: false,
-            bossBattle: false
         };
         
         // Pause all audio sources
@@ -2435,13 +2280,9 @@
             
             // Track what was playing
             audioWasPlaying.music = currentTrack && !currentTrack.paused;
-            audioWasPlaying.bossIntro = bossIntroMusic && !bossIntroMusic.paused;
-            audioWasPlaying.bossBattle = bossBattleMusic && !bossBattleMusic.paused;
             
             gameLogger.debug('AUDIO', 'Audio state before pause:', {
                 music: audioWasPlaying.music,
-                bossIntro: audioWasPlaying.bossIntro,
-                bossBattle: audioWasPlaying.bossBattle,
                 currentTrack: currentTrack ? 'exists' : 'null',
                 gameStarted,
                 musicMuted
@@ -2451,11 +2292,7 @@
             if (currentTrack) {
                 currentTrack.pause();
             }
-            if (bossIntroMusic) {
-                bossIntroMusic.pause();
             }
-            if (bossBattleMusic) {
-                bossBattleMusic.pause();
             }
             
             // Also pause any sound effects
@@ -2476,15 +2313,13 @@
             
             // Check if music should be playing even if it wasn't actively playing
             const shouldAttemptResume = (audioWasPlaying.music || musicShouldBePlaying) || 
-                                       audioWasPlaying.bossIntro || 
-                                       audioWasPlaying.bossBattle;
             
             if (!shouldAttemptResume) {
                 return;
             }
             
             // Resume background music if it should be playing and audio is not muted
-            if ((audioWasPlaying.music || musicShouldBePlaying) && !musicMuted && gameStarted && !bossEncounterActive) {
+            if ((audioWasPlaying.music || musicShouldBePlaying) && !musicMuted && gameStarted) {
                 if (currentTrack) {
                     const playPromise = currentTrack.play();
                     
@@ -2537,21 +2372,9 @@
                 }
             }
             
-            // Resume boss music if in boss encounter and audio is not muted
-            if (bossEncounterActive && !musicMuted) {
-                if (audioWasPlaying.bossIntro && bossIntroMusic && !bossIntroMusic.ended) {
-                    bossIntroMusic.play().then(() => {
-                        audioWasPlaying.bossIntro = false;
                     }).catch(error => {
-                        gameLogger.error('AUDIO', 'Failed to resume boss intro music:', error);
-                        audioWasPlaying.bossIntro = false;
                     });
-                } else if (audioWasPlaying.bossBattle && bossBattleMusic) {
-                    bossBattleMusic.play().then(() => {
-                        audioWasPlaying.bossBattle = false;
                     }).catch(error => {
-                        gameLogger.error('AUDIO', 'Failed to resume boss battle music:', error);
-                        audioWasPlaying.bossBattle = false;
                     });
                 }
             }
@@ -2575,16 +2398,7 @@
                 currentTrack = null;
             }
             
-            // Stop boss music
-            if (bossIntroMusic) {
-                bossIntroMusic.pause();
-                bossIntroMusic.currentTime = 0;
-                bossIntroMusic = null;
             }
-            if (bossBattleMusic) {
-                bossBattleMusic.pause();
-                bossBattleMusic.currentTime = 0;
-                bossBattleMusic = null;
             }
             
             // Stop all sound effects
@@ -2824,16 +2638,12 @@
                 if (isPlayer) {
                     this.skin = currentPlayerSkin;
                 } else {
-                    // Get available AI skins (exclude snake-default-green, boss skins, and already used skins)
                     const allSkins = Object.keys(skinMetadata).filter(skin => 
-                        skin !== 'snake-default-green' && !skinMetadata[skin].isBoss && !usedAISkins.has(skin)
                     );
                     
-                    // If all skins are used, reset the used skins set (but still exclude default green and boss skins)
                     if (allSkins.length === 0) {
                         usedAISkins.clear();
                         const resetSkins = Object.keys(skinMetadata).filter(skin => 
-                            skin !== 'snake-default-green' && !skinMetadata[skin].isBoss
                         );
                         this.skin = resetSkins[Math.floor(Math.random() * resetSkins.length)];
                     } else {
@@ -2843,8 +2653,6 @@
                     // Mark this skin as used
                     usedAISkins.add(this.skin);
                     
-                    // Assign random personality to AI snakes (but not bosses)
-                    if (!this.isBoss) {
                         const personalities = Object.keys(AI_PERSONALITIES);
                         const personalityKey = personalities[Math.floor(Math.random() * personalities.length)];
                         this.personality = AI_PERSONALITIES[personalityKey];
@@ -3365,16 +3173,8 @@
                     // Create particle effect at snake head
                     createCombinationParticles(this.segments[0].x, this.segments[0].y);
                     
-                    // Debug: Log when any snake creates a combination during boss fight
-                    if (currentBoss && currentBoss.alive) {
-                        gameLogger.debug('COMBINATION', `Snake: ${this.name} isPlayer: ${this.isPlayer} created combination: ${chosen.elem1} + ${chosen.elem2} = ${chosen.result} Boss element: ${currentBoss.elementId}`);
                     }
                     
-                    // Check if this combination involves the boss's element and create shockwave
-                    if (this.isPlayer && this === playerSnake && currentBoss && currentBoss.alive) {
-                        const bossElementId = currentBoss.elementId;
-                        // Check if either of the combining elements or the result is the boss element
-                        if (chosen.elem1 === bossElementId || chosen.elem2 === bossElementId || chosen.result === bossElementId) {
                             gameLogger.debug('SHOCKWAVE', `Creating shockwave for player: ${this.name} isPlayer: ${this.isPlayer} playerSnake match: ${this === playerSnake}`);
                             // Create shockwave effect
                             const elementColors = {
@@ -3408,8 +3208,6 @@
                             shockwaveSound.volume = 0.8;
                             shockwaveSound.play().catch(e => {});
                             
-                            // Show special message for boss element combination
-                            showMessage('Boss Element Resonance!', 'gold', 3000);
                         }
                     }
                     
@@ -3683,7 +3481,6 @@
                 }
             }
             
-            die(isBossDeath = false) {
                 if (this.isPlayer) {
                 }
                 
@@ -3701,17 +3498,13 @@
                         window.dispatchEvent(new CustomEvent('playerDeath', { 
                             detail: { 
                                 snake: this,
-                                isBossDeath: isBossDeath 
                             } 
                         }));
                     }
                     
                     // Sound will play with pixel explosion at 600ms
                     
-                    // For instant death (like boss kills), skip animation
-                    if (isBossDeath && this.isPlayer) {
                         this.deathAnimationTimer = this.deathAnimationDuration;
-                        this.alive = false; // Immediately mark as dead for boss kills
                         this.deathComplete = true; // Mark death as complete
                     }
                     
@@ -3762,7 +3555,6 @@
                 }
                 
                 // Additional dramatic effects for player death
-                if (this.isPlayer && !isBossDeath) {
                     // Flash effect
                     const flashOverlay = document.createElement('div');
                     flashOverlay.style.cssText = `
@@ -3797,9 +3589,6 @@
                     }
                 }
                 
-                // Special effects for boss deaths
-                if (this.isPlayer && isBossDeath) {
-                    // Create massive explosion for player death by boss
                     for (let i = 0; i < 50; i++) {
                         const angle = (Math.PI * 2 * i) / 50;
                         const speed = 5 + Math.random() * 10;
@@ -3823,8 +3612,6 @@
                     }
                     
                     // Add intense screen shake
-                    bossScreenShakeTimer = 60;
-                    bossScreenShakeIntensity = 20;
                 }
                 
                 // Respawn if player
@@ -3905,17 +3692,11 @@
                 if (progress >= 1 && !this.deathComplete) {
                     this.deathComplete = true;
                     this.alive = false;
-                    this.die(this.isBossDeath); // Call die again to complete the death process
                 }
             }
             
             explode(killer) {
-                // Check if either party is a boss - bosses don't make explosion sounds
-                const killerIsBoss = killer && killer.isBoss;
-                const thisIsBoss = this.isBoss;
                 
-                // Play explosion sound - louder if player is involved, skip if either party is boss
-                if (!killerIsBoss && !thisIsBoss) {
                     const isPlayerInvolved = this.isPlayer || (killer && killer.isPlayer);
                     playExplosionSound(isPlayerInvolved);
                 }
@@ -3997,7 +3778,6 @@
                     }
                 }
                 
-                // Get size multiplier (bosses have size = 3, normal snakes have size = 1)
                 // Ensure size multiplier is always at least 1 to prevent invisibility
                 const sizeMultiplier = Math.max(1, this.size || 1);
                 
@@ -4005,7 +3785,6 @@
                 // Skip rendering if snake is completely off-screen (performance optimization)
                 if (this.segments.length > 0) {
                     // Quick check using head position first
-                    // Increase margin for larger snakes (bosses)
                     const margin = (isMobile ? 300 : 400) * sizeMultiplier;
                     if (!isInViewport(this.x, this.y, margin)) {
                         // Check if any segment is visible
@@ -4221,8 +4000,6 @@
                             ctx.save();
                             ctx.translate(screenX, screenY);
                             ctx.rotate(angle - Math.PI/2); // Rotate 90 degrees counter-clockwise so top faces body
-                            // Increase head size by 15% for regular snakes (not bosses)
-                            const baseMultiplier = this.isBoss ? 3.47875 : 3.47875 * 1.15; // 15% increase for non-boss snakes
                             const size = SEGMENT_SIZE * sizeMultiplier * baseMultiplier * cameraZoom;
                             
                             // Preserve aspect ratio - use naturalWidth/naturalHeight if available
@@ -4260,7 +4037,6 @@
                         }
                     } else {
                         // Fallback to emoji if image not loaded
-                        const emojiMultiplier = this.isBoss ? 2 : 2 * 1.15; // 15% increase for non-boss snakes
                         const snakeEmojiSize = Math.round(SEGMENT_SIZE * sizeMultiplier * emojiMultiplier * cameraZoom);
                         const snakeEmojiCanvas = getCachedEmoji(this.isPlayer ? '😊' : '🐍', snakeEmojiSize);
                         ctx.save();
@@ -4276,9 +4052,6 @@
                     ctx.textBaseline = 'bottom';
                     const nameY = screenY - SEGMENT_SIZE * cameraZoom - 10;
                     
-                    // Check for boss first, before checking personality
-                    if (this.isBoss) {
-                        // Bosses don't show their name, only the skull emoji below
                     } else if (!this.isPlayer && this.personality) {
                         // Get actual name without personality prefix
                         const personalityName = this.personality.name + ' ';
@@ -4353,8 +4126,6 @@
                         ctx.restore();
                     }
                     
-                    // Draw skull if boss
-                    if (this.isBoss) {
                         const skullSize = 32; // Larger than crown
                         const skullCanvas = getCachedEmoji('💀', skullSize);
                         ctx.save();
@@ -6292,1538 +6063,16 @@
             }
         }
         
-        // Boss class - extends Snake with special abilities
-        class Boss extends Snake {
-            constructor(bossType, x, y) {
-                super(x, y, false);
-                this.isBoss = true; // Set this early to prevent personality assignment
-                
-                // Boss configuration
-                this.bossType = bossType;
-                const bossData = BOSS_TYPES[bossType];
-                this.baseName = bossData.name; // Store the original base name
-                this.isUndead = bossIsUndead;
-                this.name = bossIsUndead ? `Undead ${bossData.name}` : bossData.name;
-                this.maxHealth = bossIsUndead ? bossData.maxHealth * 2 : bossData.maxHealth;
-                this.health = this.maxHealth;
-                this.elementType = bossData.element;
-                this.elementId = bossData.elementId;
-                this.color = bossData.color;
-                this.emoji = bossData.emoji;
-                this.attackCooldown = bossData.attackCooldown;
-                this.skin = bossData.skin;
-                this.attackSound = bossData.attackSound;
-                
-                // Boss-specific properties
-                this.isBoss = true;
-                this.size = 3; // 300% larger than normal snakes
-                this.length = 30; // Longer than normal snakes
-                this.speed = SNAKE_SPEED * 0.8 * 0.9; // 80% of normal speed (20% slower) * 0.9 for AI reduction
-                this.baseSpeed = SNAKE_SPEED * 0.8 * 0.9;
-                this.attackTimer = 0;
-                this.introAnimationTimer = 120; // 2 seconds of intro animation
-                this.damageFlashTimer = 0;
-                this.stunTimer = 0;
-                this.invulnerabilityTimer = 0; // Post-stun invulnerability
-                
-                // Stationary attack phase management
-                this.attackPhase = false;
-                this.attackPhaseTimer = 0;
-                this.attackPhaseDuration = 180; // 3 seconds
-                this.chasePhaseDuration = 240; // 4 seconds
-                this.phaseTimer = this.chasePhaseDuration; // Start in chase phase
-                
-                // Laugh sound management
-                this.laughCooldown = 0;
-                this.nextLaughDelay = 15000 + Math.random() * 10000; // 15-25 seconds
-                
-                // Special attack counter for Zephyrus vacuum
-                this.specialAttackCounter = 0;
-                this.vacuumAttackInterval = 4; // Use vacuum every 4th attack
-                
-                // Override segment initialization for longer boss
-                this.segments = [];
-                for (let i = 0; i < this.length; i++) {
-                    const segX = x - i * SEGMENT_SIZE * this.size * Math.cos(this.angle);
-                    const segY = y - i * SEGMENT_SIZE * this.size * Math.sin(this.angle);
-                    this.segments.push({
-                        x: segX,
-                        y: segY,
-                        prevX: segX,
-                        prevY: segY
-                    });
-                }
-                
-                // Boss starts with some elements matching its type
-                for (let i = 0; i < 4; i++) {
-                    this.elements.push(this.elementId);
-                }
-            }
-            
-            update(deltaTime = 1) {
-                if (!this.alive) return;
-                
-                // Update timers
-                if (this.introAnimationTimer > 0) {
-                    this.introAnimationTimer -= deltaTime;
-                    return; // Don't move during intro
-                }
-                
-                if (this.damageFlashTimer > 0) {
-                    this.damageFlashTimer -= deltaTime;
-                }
-                
-                if (this.stunTimer > 0) {
-                    this.stunTimer -= deltaTime;
-                    if (this.stunTimer <= 0) {
-                        // When stun ends, start invulnerability period
-                        this.invulnerabilityTimer = 180; // 3 seconds of invulnerability
-                    }
-                    return; // Don't move or attack while stunned
-                }
-                
-                // Update invulnerability timer
-                if (this.invulnerabilityTimer > 0) {
-                    this.invulnerabilityTimer -= deltaTime;
-                }
-                
-                // Update phase timer
-                this.phaseTimer -= deltaTime;
-                
-                // Switch between chase and attack phases
-                if (this.phaseTimer <= 0) {
-                    if (this.attackPhase) {
-                        // Exit attack phase, return to chase
-                        this.attackPhase = false;
-                        this.phaseTimer = this.chasePhaseDuration;
-                        this.speed = this.baseSpeed; // Resume movement
-                    } else {
-                        // Enter attack phase
-                        this.attackPhase = true;
-                        this.phaseTimer = this.attackPhaseDuration;
-                        this.speed = 0; // Stop moving
-                        
-                        // Show attack warning message
-                        switch(this.bossType) {
-                            case 'PYRAXIS':
-                                showMessage("The Molten One gathers primordial flames!", 'orange', 2000);
-                                break;
-                            case 'ABYSSOS':
-                                showMessage("The Deep One summons torrential fury!", 'blue', 2000);
-                                break;
-                            case 'OSSEUS':
-                                showMessage("The Bone Sovereign calls forth earthen devastation!", 'brown', 2000);
-                                break;
-                            case 'ZEPHYRUS':
-                                showMessage("The Storm Caller harnesses the void!", 'purple', 2000);
-                                break;
-                        }
-                    }
-                }
-                
-                // Update attack timer
-                this.attackTimer += deltaTime * 16; // Convert to milliseconds
-                
-                // Update laugh cooldown and play periodic laugh sounds
-                if (this.laughCooldown > 0) {
-                    this.laughCooldown -= deltaTime * 16;
-                } else if (this.laughCooldown <= 0 && bossEncounterActive) {
-                    // Check if it's time to laugh
-                    if (Math.random() < 0.3) { // 30% chance when cooldown expires
-                        const bossData = BOSS_TYPES[this.bossType];
-                        if (!musicMuted && bossData.laughSound) {
-                            const laughSound = new Audio(bossData.laughSound);
-                            laughSound.volume = 0.5; // Quieter than initial laugh
-                            laughSound.play().catch(e => {});
-                        }
-                    }
-                    // Reset cooldown with random delay
-                    this.laughCooldown = 15000 + Math.random() * 10000; // 15-25 seconds
-                }
-                
-                // Boss AI - Strategic hunting behavior
-                if (playerSnake && playerSnake.alive && !this.attackPhase) {
-                    const dx = playerSnake.x - this.x;
-                    const dy = playerSnake.y - this.y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-                    
-                    // Initialize boss AI state if not present
-                    if (!this.aiState) {
-                        this.aiState = 'chase';
-                        this.aiStateTimer = 0;
-                        this.lastPlayerAngle = playerSnake.angle;
-                    }
-                    
-                    this.aiStateTimer += deltaTime;
-                    
-                    // State machine for boss behavior
-                    let targetAngle = Math.atan2(dy, dx); // Default chase angle
-                    let speedMultiplier = 1.0;
-                    
-                    switch(this.aiState) {
-                        case 'chase':
-                            // Direct chase for 2-3 seconds
-                            targetAngle = Math.atan2(dy, dx);
-                            speedMultiplier = 0.85;
-                            
-                            if (this.aiStateTimer > 120 + Math.random() * 60) { // 2-3 seconds
-                                // Announce strategy change
-                                if (distance < 400) {
-                                    const nextState = Math.random() < 0.5 ? 'cutoff' : 'flank';
-                                    if (nextState === 'cutoff') {
-                                        showMessage(`${this.name} is trying to cut you off!`, 'orange', 1500);
-                                    } else {
-                                        showMessage(`${this.name} is flanking!`, 'orange', 1500);
-                                    }
-                                    this.aiState = nextState;
-                                } else {
-                                    this.aiState = 'chase'; // Keep chasing if too far
-                                }
-                                this.aiStateTimer = 0;
-                            }
-                            break;
-                            
-                        case 'cutoff':
-                            // Try to get in front of the player
-                            const playerSpeed = playerSnake.speed || SNAKE_SPEED;
-                            const futureSteps = 10; // Look ahead
-                            const futureX = playerSnake.x + Math.cos(playerSnake.angle) * playerSpeed * futureSteps;
-                            const futureY = playerSnake.y + Math.sin(playerSnake.angle) * playerSpeed * futureSteps;
-                            
-                            // Aim for a point ahead of the player
-                            const cutoffDx = futureX - this.x;
-                            const cutoffDy = futureY - this.y;
-                            targetAngle = Math.atan2(cutoffDy, cutoffDx);
-                            speedMultiplier = 1.0; // Move faster to cut off
-                            
-                            if (this.aiStateTimer > 90 || distance < 100) { // 1.5 seconds or too close
-                                this.aiState = 'coil';
-                                this.aiStateTimer = 0;
-                                if (distance < 150) {
-                                    showMessage(`${this.name} is coiling around you!`, 'red', 1500);
-                                }
-                            }
-                            break;
-                            
-                        case 'flank':
-                            // Move to the side of the player
-                            const sideAngle = Math.atan2(dy, dx) + (Math.random() < 0.5 ? Math.PI/2 : -Math.PI/2);
-                            targetAngle = sideAngle;
-                            speedMultiplier = 0.95;
-                            
-                            if (this.aiStateTimer > 60 || distance < 150) { // 1 second or close enough
-                                this.aiState = 'coil';
-                                this.aiStateTimer = 0;
-                            }
-                            break;
-                            
-                        case 'coil':
-                            // Try to circle around the player
-                            if (distance < 200) {
-                                // Circle at current distance
-                                const perpAngle = Math.atan2(dy, dx) + Math.PI/2;
-                                targetAngle = perpAngle;
-                                speedMultiplier = 1.0;
-                            } else {
-                                // Too far, get closer first
-                                targetAngle = Math.atan2(dy, dx);
-                                speedMultiplier = 0.85;
-                            }
-                            
-                            if (this.aiStateTimer > 120) { // 2 seconds
-                                this.aiState = 'backoff';
-                                this.aiStateTimer = 0;
-                            }
-                            break;
-                            
-                        case 'backoff':
-                            // Move away briefly to reset
-                            targetAngle = Math.atan2(-dy, -dx); // Opposite direction
-                            speedMultiplier = 0.8;
-                            
-                            if (this.aiStateTimer > 60 || distance > 300) { // 1 second or far enough
-                                this.aiState = 'chase';
-                                this.aiStateTimer = 0;
-                            }
-                            break;
-                    }
-                    
-                    // Smooth angle interpolation
-                    let angleDiff = targetAngle - this.angle;
-                    while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
-                    while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
-                    
-                    // Bosses have good turning but not perfect
-                    const baseTurnSpeed = this.bossType === 'ZEPHYRUS' && elementVacuumActive ? 
-                        TURN_SPEED * 1.5 : TURN_SPEED * 0.5;
-                    // Faster turning when cutting off or coiling
-                    const turnSpeed = (this.aiState === 'cutoff' || this.aiState === 'coil') ? 
-                        baseTurnSpeed * 1.5 : baseTurnSpeed;
-                    this.angle += angleDiff * turnSpeed;
-                    
-                    // Apply speed based on state and boss type (only if not in attack phase)
-                    if (!this.attackPhase) {
-                        if (this.bossType === 'ZEPHYRUS' && elementVacuumActive) {
-                            this.speed = this.baseSpeed * 2 * speedMultiplier;
-                        } else {
-                            this.speed = this.baseSpeed * speedMultiplier;
-                        }
-                    }
-                    
-                    // Store player angle for prediction
-                    this.lastPlayerAngle = playerSnake.angle;
-                }
-                
-                // Execute attack pattern only during attack phase
-                // Double attack speed when desperate (health <= 25%)
-                const healthPercent = this.health / this.maxHealth;
-                const effectiveCooldown = healthPercent <= 0.25 ? this.attackCooldown / 2 : this.attackCooldown;
-                
-                if (this.attackPhase && this.attackTimer >= effectiveCooldown) {
-                    this.executeAttack();
-                    this.attackTimer = 0;
-                }
-                
-                
-                // Call parent update
-                super.update(deltaTime);
-            }
-            
-            executeAttack() {
-                if (!playerSnake || !playerSnake.alive) return;
-                
-                switch (this.bossType) {
-                    case 'PYRAXIS':
-                        this.fireballAttack();
-                        break;
-                    case 'ABYSSOS':
-                        this.waterWaveAttack();
-                        break;
-                    case 'OSSEUS':
-                        this.rockFallAttack();
-                        break;
-                    case 'ZEPHYRUS':
-                        this.specialAttackCounter++;
-                        // Use vacuum attack every Nth attack, otherwise shoot void projectiles
-                        if (this.specialAttackCounter >= this.vacuumAttackInterval) {
-                            this.elementVacuumAttack();
-                            this.specialAttackCounter = 0;
-                            showMessage("Zephyrus summons a void vortex!", 'purple', 2000);
-                        } else {
-                            this.shootVoidProjectiles();
-                        }
-                        break;
-                }
-                
-                // Play attack sound
-                if (this.attackSound && !musicMuted) {
-                    const audio = new Audio(this.attackSound);
-                    audio.volume = 0.5;
-                    audio.play().catch(e => {});
-                }
-            }
-            
-            fireballAttack() {
-                // Get boss head position
-                const bossHead = this.segments && this.segments.length > 0 ? this.segments[0] : {x: this.x, y: this.y};
-                const bossX = bossHead.x || this.x;
-                const bossY = bossHead.y || this.y;
-                
-                // Shoot 4 fireballs in spread pattern toward player
-                const baseAngle = Math.atan2(playerSnake.y - bossY, playerSnake.x - bossX);
-                const spreadAngle = Math.PI / 8; // Slightly tighter spread for 4 fireballs
-                
-                for (let i = -1.5; i <= 1.5; i++) {
-                    const angle = baseAngle + (i * spreadAngle);
-                    const speed = 8;
-                    
-                    bossProjectiles.push({
-                        x: bossX,
-                        y: bossY,
-                        vx: Math.cos(angle) * speed,
-                        vy: Math.sin(angle) * speed,
-                        type: 'fireball',
-                        size: 20,
-                        damage: 0.25,
-                        elementId: 3, // Fire element
-                        life: 300 // 5 seconds
-                    });
-                }
-            }
-            
-            waterWaveAttack() {
-                // Get boss head position
-                const bossHead = this.segments && this.segments.length > 0 ? this.segments[0] : {x: this.x, y: this.y};
-                const bossX = bossHead.x || this.x;
-                const bossY = bossHead.y || this.y;
-                
-                // Shoot water orbs in all directions
-                const orbs = 12; // Reduced from 16 for easier dodging
-                for (let i = 0; i < orbs; i++) {
-                    const angle = (Math.PI * 2 * i) / orbs;
-                    const speed = 5; // Reduced from 6 for more reaction time
-                    
-                    bossProjectiles.push({
-                        x: bossX,
-                        y: bossY,
-                        vx: Math.cos(angle) * speed,
-                        vy: Math.sin(angle) * speed,
-                        type: 'waterorb',
-                        size: 25,
-                        damage: 0.25,
-                        elementId: 1, // Water element
-                        life: 400 // 6.7 seconds
-                    });
-                }
-            }
-            
-            rockFallAttack() {
-                // Create ground fissures attack
-                bossScreenShakeTimer = 60; // Longer shake for ground splitting
-                bossScreenShakeIntensity = 12;
-                
-                // Clear existing fissures
-                bossFissures = [];
-                
-                // Create multiple fissures around the map
-                const fissureCount = 8 + Math.floor(Math.random() * 5); // 8-12 fissures
-                
-                for (let i = 0; i < fissureCount; i++) {
-                    // Random position anywhere on the visible game board
-                    // Get the visible world bounds based on camera
-                    const worldBounds = {
-                        left: camera.x - (canvas.width / 2) / cameraZoom,
-                        right: camera.x + (canvas.width / 2) / cameraZoom,
-                        top: camera.y - (canvas.height / 2) / cameraZoom,
-                        bottom: camera.y + (canvas.height / 2) / cameraZoom
-                    };
-                    
-                    // Add some padding to ensure fissures can appear at screen edges
-                    const padding = 100;
-                    const x = worldBounds.left - padding + Math.random() * (worldBounds.right - worldBounds.left + padding * 2);
-                    const y = worldBounds.top - padding + Math.random() * (worldBounds.bottom - worldBounds.top + padding * 2);
-                    
-                    // Vary fissure sizes
-                    const size = 60 + Math.random() * 80; // 60-140 pixel radius
-                    
-                    bossFissures.push({
-                        x: x,
-                        y: y,
-                        radius: 0, // Start small and grow
-                        targetRadius: size,
-                        growthSpeed: 3, // How fast fissure opens
-                        life: 285, // 4.75 seconds total (0.75s warning + 4s active)
-                        maxLife: 285,
-                        state: 'warning', // Start with warning state
-                        warningDuration: 45 // 0.75 seconds of warning
-                    });
-                }
-                
-                // Play rumbling sound
-                if (!musicMuted) {
-                    const rumbleSound = new Audio('sounds/boom-explosion.mp3');
-                    rumbleSound.volume = 0.6;
-                    rumbleSound.play().catch(e => {});
-                }
-                
-                showMessage("The ground splits open!", 'brown', 2000);
-            }
-            
-            elementVacuumAttack() {
-                // ALL elements get vacuumed for 7 seconds
-                elementVacuumActive = true;
-                elementVacuumTimer = 420; // 7 seconds at 60fps
-                
-                // Store current elements for vacuum effect
-                vacuumedElements = [];
-                const activeElements = elementPool.getActiveElements();
-                activeElements.forEach(element => {
-                    vacuumedElements.push({
-                        element: element,
-                        originalX: element.x,
-                        originalY: element.y
-                    });
-                });
-            }
-            
-            shootVoidProjectiles() {
-                if (!playerSnake || !playerSnake.alive) return;
-                
-                // Get boss head position
-                const bossHead = this.segments && this.segments.length > 0 ? this.segments[0] : {x: this.x, y: this.y};
-                const bossX = bossHead.x || this.x;
-                const bossY = bossHead.y || this.y;
-                
-                // Shoot tornados at the player
-                const baseAngle = Math.atan2(playerSnake.y - bossY, playerSnake.x - bossX);
-                
-                // Create 3 large tornados that track the player
-                const tornadoCount = 3;
-                for (let i = 0; i < tornadoCount; i++) {
-                    const spreadAngle = (i - 1) * 0.3; // Smaller spread, more focused
-                    const angle = baseAngle + spreadAngle;
-                    const spawnDistance = 100; // Spawn tornados away from boss center
-                    const speed = 4; // Start slower for better control
-                    
-                    bossProjectiles.push({
-                        x: bossX + Math.cos(angle) * spawnDistance,
-                        y: bossY + Math.sin(angle) * spawnDistance,
-                        vx: Math.cos(angle) * speed,
-                        vy: Math.sin(angle) * speed,
-                        type: 'tornado',
-                        size: 80, // Much larger than fireballs
-                        damage: 0.3,
-                        elementId: 2, // Air element
-                        life: 600, // 10 seconds
-                        rotation: 0,
-                        rotationSpeed: 0.5, // Faster rotation
-                        wanderAngle: angle,
-                        wanderTimer: 0,
-                        homingTimer: 180, // 3 seconds of tracking
-                        baseSpeed: speed,
-                        maxSpeed: 8, // Allow speed boost during tracking
-                        separationForce: 0.5, // Prevent clustering
-                        trackingStrength: 0.05 // How strongly it tracks the player
-                    });
-                }
-                
-                showMessage("Zephyrus unleashes twisters!", 'purple', 2000);
-            }
-            
-            takeDamage(source = 'unknown') {
-                
-                // Only allow damage from player elemental combinations
-                if (source !== 'player_elemental') {
-                    gameLogger.warn('BOSS', 'Damage blocked - not from player elemental:', source);
-                    return;
-                }
-                
-                // Make boss invincible during stun period and post-stun invulnerability
-                if (this.stunTimer > 0) {
-                    gameLogger.debug('BOSS', 'Damage blocked - boss is stunned');
-                    return;
-                }
-                
-                if (this.invulnerabilityTimer > 0) {
-                    gameLogger.debug('BOSS', 'Damage blocked - boss is invulnerable');
-                    return;
-                }
-                
-                // Make Zephyrus invincible during element vacuum
-                if (this.bossType === 'ZEPHYRUS' && elementVacuumActive) {
-                    return;
-                }
-                
-                this.health--;
-                this.damageFlashTimer = 30;
-                this.stunTimer = 60; // 1 second stun (reduced from 2 seconds)
-                bossDamageFlashTimer = 20;
-                
-                // Create damage number
-                damageNumbers.push({
-                    x: this.x,
-                    y: this.y - 50,
-                    text: '-1',
-                    color: '#FFD700',
-                    life: 60,
-                    vy: -3
-                });
-                
-                // Create damage particles
-                for (let i = 0; i < 20; i++) {
-                    const angle = Math.random() * Math.PI * 2;
-                    const speed = 2 + Math.random() * 3;
-                    particlePool.spawn(
-                        this.x, 
-                        this.y,
-                        Math.cos(angle) * speed,
-                        Math.sin(angle) * speed,
-                        this.color
-                    );
-                }
-                
-                // Check if defeated
-                if (this.health <= 0) {
-                    this.defeatBoss();
-                }
-                
-                // Update health bar
-                if (bossHealthBar) {
-                    const healthPercent = (this.health / this.maxHealth) * 100;
-                    bossHealthBar.style.width = healthPercent + '%';
-                }
-                
-                // Update boss name with prefix based on health
-                if (bossNameDisplay) {
-                    let prefix = '';
-                    const healthRatio = this.health / this.maxHealth;
-                    
-                    if (healthRatio <= 0.2) {
-                        prefix = 'Desperate ';
-                    } else if (healthRatio <= 0.4) {
-                        prefix = 'Furious ';
-                    } else if (healthRatio <= 0.6) {
-                        prefix = 'Enraged ';
-                    } else if (healthRatio < 1.0) {
-                        prefix = 'Angry ';
-                    }
-                    
-                    // Build display name using the stored base name
-                    const displayName = this.isUndead ? `Undead ${prefix}${this.baseName}` : `${prefix}${this.baseName}`;
-                    bossNameDisplay.textContent = `💀 ${displayName}`;
-                }
-            }
-            
-            defeatBoss() {
-                this.alive = false;
-                bossEncounterActive = false;
-                defeatedBosses.add(this.bossType);
-                bossesDefeatedThisCycle++;
-                
-                // Reset boss hint state
-                bossHintShown = false;
-                bossHintTimer = 0;
-                
-                // Save defeated bosses to localStorage for persistent tracking
-                const defeatedBossList = JSON.parse(localStorage.getItem('defeatedBosses') || '[]');
-                if (!defeatedBossList.includes(this.bossType)) {
-                    defeatedBossList.push(this.bossType);
-                    localStorage.setItem('defeatedBosses', JSON.stringify(defeatedBossList));
-                }
-                
-                // Check for lore unlocks related to this boss
-                if (window.loreUnlockManager && window.loreUnlockManager.checkAllLoreUnlocks) {
-                    window.loreUnlockManager.checkAllLoreUnlocks();
-                }
-                
-                // Check for skin unlocks related to this boss
-                if (window.unlockManager && window.unlockManager.onBossDefeat) {
-                    window.unlockManager.onBossDefeat(this.bossType);
-                }
-                
-                // Track score at boss defeat and calculate next spawn
-                if (playerSnake) {
-                    lastBossDefeatScore = playerSnake.score;
-                    calculateNextBossSpawn();
-                }
-                
-                // Award extra revive for defeating boss (Classic mode only)
-                if (gameMode === 'classic' && revivesRemaining < 3) {
-                    revivesRemaining++;
-                    gameLogger.debug('BOSS', 'Extra revive awarded! Revives remaining:', revivesRemaining);
-                    
-                    // Show revive award message
-                    showCombinationMessage('', '', `+1 REVIVE! Boss defeated!`, false, 3000);
-                }
-                
-                // Stop boss battle music and resume normal music
-                if (bossBattleMusic) {
-                    bossBattleMusic.pause();
-                    bossBattleMusic = null;
-                }
-                if (currentTrack && !musicMuted) {
-                    currentTrack.stopRequested = false; // Allow it to continue normally
-                    currentTrack.volume = musicVolume;
-                    currentTrack.play();
-                }
-                
-                // Dispatch boss defeated event
-                dispatchGameEvent('bossDefeated', {
-                    bossType: this.bossType,
-                    bossName: this.baseName,
-                    totalBossesDefeated: bossesDefeatedThisCycle
-                });
-                
-                // Epic victory explosion sequence
-                // First wave - main explosion
-                for (let i = 0; i < 100; i++) {
-                    const angle = Math.random() * Math.PI * 2;
-                    const speed = 2 + Math.random() * 8;
-                    particlePool.spawn(
-                        this.x,
-                        this.y,
-                        Math.cos(angle) * speed,
-                        Math.sin(angle) * speed,
-                        this.color
-                    );
-                }
-                
-                // Second wave - delayed secondary explosions
-                setTimeout(() => {
-                    for (let j = 0; j < 5; j++) {
-                        const offsetAngle = (Math.PI * 2 / 5) * j;
-                        const offsetDist = 100;
-                        const offsetX = this.x + Math.cos(offsetAngle) * offsetDist;
-                        const offsetY = this.y + Math.sin(offsetAngle) * offsetDist;
-                        
-                        for (let i = 0; i < 20; i++) {
-                            const angle = Math.random() * Math.PI * 2;
-                            const speed = 1 + Math.random() * 4;
-                            particlePool.spawn(
-                                offsetX,
-                                offsetY,
-                                Math.cos(angle) * speed,
-                                Math.sin(angle) * speed,
-                                this.color
-                            );
-                        }
-                    }
-                }, 200);
-                
-                // Screen flash and shake
-                bossScreenShakeTimer = 60;
-                bossScreenShakeIntensity = 20;
-                
-                // Victory damage number
-                damageNumbers.push({
-                    x: this.x,
-                    y: this.y - 100,
-                    text: 'VICTORY!',
-                    color: '#FFD700',
-                    life: 120,
-                    vy: -2
-                });
-                
-                // Elemental burst - spawn fewer elements in a spiral (reduced from 16 to 8)
-                for (let i = 0; i < 8; i++) {
-                    const angle = (Math.PI * 2 / 8) * i;
-                    const delay = i * 50; // Stagger the spawns
-                    
-                    setTimeout(() => {
-                        const dist = 150;
-                        spawnElement(this.elementId, 
-                            this.x + Math.cos(angle) * dist,
-                            this.y + Math.sin(angle) * dist
-                        );
-                    }, delay);
-                }
-                
-                // Play boss defeat sounds
-                if (!musicMuted) {
-                    // Play boss laugh sound immediately (as they're banished)
-                    const bossData = BOSS_TYPES[this.bossType];
-                    if (bossData.laughSound) {
-                        const laughSound = new Audio(bossData.laughSound);
-                        laughSound.volume = 0.7;
-                        laughSound.play().catch(e => {});
-                    }
-                    
-                    // Play success tone after a delay
-                    setTimeout(() => {
-                        const successSound = new Audio('sounds/success-tone.mp3');
-                        successSound.volume = 0.6;
-                        successSound.play().catch(e => {});
-                    }, 800);
-                    
-                    // Play explosion shockwave sound
-                    const shockwaveSound = new Audio('sounds/explosion-shockwave.mp3');
-                    shockwaveSound.volume = 0.8;
-                    shockwaveSound.play().catch(e => {});
-                }
-                
-                // Spawn rewards
-                // 4 catalyst gems
-                for (let i = 0; i < 4; i++) {
-                    const angle = (Math.PI * 2 / 4) * i;
-                    const dist = 50;
-                    catalystGems.push(new CatalystGem(
-                        this.x + Math.cos(angle) * dist,
-                        this.y + Math.sin(angle) * dist
-                    ));
-                }
-                
-                // 2 void orbs
-                for (let i = 0; i < 2; i++) {
-                    const angle = Math.PI * i;
-                    const dist = 80;
-                    voidOrbs.push(new VoidOrb(
-                        this.x + Math.cos(angle) * dist,
-                        this.y + Math.sin(angle) * dist
-                    ));
-                }
-                
-                // 8-12 random elements
-                const numElements = 8 + Math.floor(Math.random() * 5);
-                for (let i = 0; i < numElements; i++) {
-                    const angle = Math.random() * Math.PI * 2;
-                    const dist = 100 + Math.random() * 100;
-                    spawnElement(null,
-                        this.x + Math.cos(angle) * dist,
-                        this.y + Math.sin(angle) * dist
-                    );
-                }
-                
-                // Award points and kill credit
-                if (playerSnake) {
-                    playerSnake.score += 10000;
-                    playerSnake.kills++; // Boss defeat counts as a kill
-                }
-                
-                // Track skin unlock status
-                const bossData = BOSS_TYPES[this.bossType];
-                const bossSkinName = bossData.skin;
-                let skinUnlocked = false;
-                
-                if (!unlockedSkins.has(bossSkinName)) {
-                    unlockedSkins.add(bossSkinName);
-                    if (skinMetadata[bossSkinName]) {
-                        skinMetadata[bossSkinName].unlocked = true;
-                    }
-                    saveSkinData();
-                    skinUnlocked = true;
-                }
-                
-                // Track element bank expansion
-                let elementBankExpanded = false;
-                if (elementBankSlots < 12) {
-                    elementBankSlots++;
-                    saveElementBankSlots(); // Save to localStorage
-                    // Update player snake's max visible elements
-                    if (playerSnake) {
-                        playerSnake.maxVisibleElements = elementBankSlots;
-                    }
-                    updateElementBankUI();
-                    elementBankExpanded = true;
-                }
-                
-                // Show the epic boss victory message
-                showBossVictoryMessage(this, skinUnlocked, elementBankExpanded);
-                
-                // Remove boss from snakes array
-                const bossIndex = snakes.indexOf(this);
-                if (bossIndex > -1) {
-                    snakes.splice(bossIndex, 1);
-                }
-                
-                // Hide health bar
-                if (bossHealthBarContainer) {
-                    bossHealthBarContainer.style.display = 'none';
-                }
-                
-                // Stop boss battle music and resume normal music
-                if (bossBattleMusic) {
-                    bossBattleMusic.pause();
-                    bossBattleMusic = null;
-                }
-                if (currentTrack && !musicMuted) {
-                    currentTrack.stopRequested = false; // Allow it to continue normally
-                    currentTrack.volume = musicVolume;
-                    currentTrack.play();
-                }
-                
-                // Check if all bosses defeated for undead cycle
-                if (bossesDefeatedThisCycle >= 4 && !bossIsUndead) {
-                    bossIsUndead = true;
-                    bossesDefeatedThisCycle = 0;
-                    defeatedBosses.clear();
-                    showMessage('The Bosses Rise Again... UNDEAD!', 'purple');
-                }
-                
-                currentBoss = null;
-                bossFissures = []; // Clear all fissures when boss is defeated
-            }
-            
-            // Override die method to prevent normal death
-            die() {
-                // Bosses don't die from collisions, only from elemental damage
-                return;
-            }
-            
-            // Override draw method to handle boss-specific rendering
-            draw(interpolation = 0) {
-                if (!this.alive) return;
-                
-                // Boss-specific effects
-                const glowIntensity = this.damageFlashTimer > 0 ? 
-                    Math.sin(this.damageFlashTimer * 0.3) : 0;
-                
-                // Health phase effects
-                const healthPercent = this.health / this.maxHealth;
-                let phaseColor = this.color;
-                let phaseGlow = false;
-                
-                if (healthPercent <= 0.25) {
-                    // Critical phase - red tint and strong glow
-                    phaseColor = '#ff0000';
-                    phaseGlow = true;
-                } else if (healthPercent <= 0.5) {
-                    // Danger phase - orange tint
-                    phaseColor = '#ff8800';
-                    phaseGlow = true;
-                } else if (healthPercent <= 0.75) {
-                    // Caution phase - yellow tint
-                    phaseColor = '#ffff00';
-                }
-                
-                // Don't scale SEGMENT_SIZE globally - it can break viewport calculations
-                // Instead, we'll pass the size to the parent draw method
-                try {
-                    // Call parent draw method directly
-                    super.draw(interpolation);
-                } catch (e) {
-                    gameLogger.error('BOSS', 'Boss draw error:', e);
-                    // Fallback to custom boss drawing
-                    this.drawBossSnake(interpolation);
-                }
-                
-                // No need to restore SEGMENT_SIZE since we didn't change it
-                
-                // Add invulnerability shield effect
-                if (this.invulnerabilityTimer > 0) {
-                    ctx.save();
-                    const screen = worldToScreen(this.x, this.y);
-                    
-                    // Pulsing blue shield effect
-                    const shieldPulse = Math.sin(Date.now() * 0.01) * 0.2 + 0.3;
-                    ctx.globalAlpha = shieldPulse;
-                    ctx.strokeStyle = '#00ffff';
-                    ctx.lineWidth = 8 * cameraZoom;
-                    
-                    // Draw shield ring
-                    ctx.beginPath();
-                    ctx.arc(screen.x, screen.y, 90 * cameraZoom, 0, Math.PI * 2);
-                    ctx.stroke();
-                    
-                    // Add inner shield effect
-                    ctx.globalAlpha = shieldPulse * 0.5;
-                    ctx.fillStyle = '#00ffff';
-                    ctx.beginPath();
-                    ctx.arc(screen.x, screen.y, 85 * cameraZoom, 0, Math.PI * 2);
-                    ctx.fill();
-                    
-                    ctx.restore();
-                }
-                
-                // Add boss glow effect
-                if (glowIntensity > 0 || phaseGlow) {
-                    ctx.save();
-                    const screen = worldToScreen(this.x, this.y);
-                    
-                    // Damage flash or phase glow
-                    if (glowIntensity > 0) {
-                        ctx.globalAlpha = glowIntensity * 0.5;
-                        ctx.fillStyle = this.color;
-                    } else if (phaseGlow) {
-                        const phasePulse = Math.sin(Date.now() * 0.005) * 0.3 + 0.7;
-                        ctx.globalAlpha = phasePulse * 0.4;
-                        ctx.fillStyle = phaseColor;
-                    }
-                    
-                    ctx.beginPath();
-                    ctx.arc(screen.x, screen.y, 100 * cameraZoom, 0, Math.PI * 2);
-                    ctx.fill();
-                    
-                    // Add phase indicator ring
-                    if (phaseGlow) {
-                        ctx.strokeStyle = phaseColor;
-                        ctx.lineWidth = 5 * cameraZoom;
-                        ctx.globalAlpha = 0.8;
-                        ctx.beginPath();
-                        ctx.arc(screen.x, screen.y, 80 * cameraZoom, 0, Math.PI * 2);
-                        ctx.stroke();
-                    }
-                    
-                    ctx.restore();
-                }
-            }
-            
-            drawBossSnake(interpolation) {
-                // Basic boss snake drawing if parent draw doesn't exist
-                // This is a fallback implementation
-                const segmentSize = SEGMENT_SIZE * this.size;
-                
-                // Draw segments
-                for (let i = this.segments.length - 1; i >= 0; i--) {
-                    const segment = this.segments[i];
-                    const screen = worldToScreen(segment.x, segment.y);
-                    
-                    ctx.save();
-                    ctx.fillStyle = this.color;
-                    ctx.beginPath();
-                    ctx.arc(screen.x, screen.y, segmentSize * cameraZoom, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.restore();
-                }
-                
-                // Draw head with boss skin
-                const headScreen = worldToScreen(this.x, this.y);
-                const headSize = segmentSize * 1.2 * cameraZoom;
-                
-                if (skinImages[this.skin] && !skinImages[this.skin].error) {
-                    ctx.save();
-                    ctx.translate(headScreen.x, headScreen.y);
-                    ctx.rotate(this.angle);
-                    
-                    // Preserve aspect ratio
-                    const img = skinImages[this.skin];
-                    const aspectRatio = img.width / img.height;
-                    let drawWidth = headSize * 3;
-                    let drawHeight = headSize * 3;
-                    
-                    if (aspectRatio > 1) {
-                        // Wider than tall
-                        drawHeight = drawWidth / aspectRatio;
-                    } else if (aspectRatio < 1) {
-                        // Taller than wide
-                        drawWidth = drawHeight * aspectRatio;
-                    }
-                    
-                    ctx.drawImage(img, -drawWidth/2, -drawHeight/2, drawWidth, drawHeight);
-                    ctx.restore();
-                } else {
-                    // Fallback to emoji if skin not loaded
-                    const emojiCanvas = getCachedEmoji(this.emoji, Math.round(headSize * 2));
-                    ctx.drawImage(emojiCanvas, 
-                        headScreen.x - emojiCanvas.width / 2, 
-                        headScreen.y - emojiCanvas.height / 2);
-                }
-            }
-        }
         
-        // Boss system functions
-        function spawnBoss() {
-            // Select a random boss that hasn't been defeated this cycle
-            const availableBosses = Object.keys(BOSS_TYPES).filter(boss => !defeatedBosses.has(boss));
-            if (availableBosses.length === 0) {
-                return;
-            }
-            
-            const selectedBoss = availableBosses[Math.floor(Math.random() * availableBosses.length)];
-            const bossData = BOSS_TYPES[selectedBoss];
-            
-            // Show warning message
-            const bossName = bossIsUndead ? `Undead ${bossData.name}` : bossData.name;
-            showMessage(`${bossName} Emerges from the Cosmic Void!`, 'red', 3000);
-            
-            // Pause normal music completely
-            if (currentTrack && !musicMuted) {
-                currentTrack.pause();
-                currentTrack.stopRequested = true; // Prevent it from restarting
-            }
-            
-            // Also clear any pending music track
-            if (window.pendingMusicTrack) {
-                window.pendingMusicTrack.pause();
-                window.pendingMusicTrack = null;
-            }
-            
-            // Play boss intro music
-            if (!musicMuted) {
-                bossIntroMusic = new Audio('sounds/low-pitched-melody.mp3');
-                bossIntroMusic.volume = 0.7 * musicVolume;
-                bossIntroMusic.play().catch(e => {});
-                
-                // Start battle music when intro ends
-                bossIntroMusic.addEventListener('ended', () => {
-                    if (!musicMuted && currentBoss && currentBoss.alive) {
-                        bossBattleMusic = new Audio('music/dramatic-pounding-percussion.mp3');
-                        bossBattleMusic.volume = 0.6 * musicVolume;
-                        bossBattleMusic.loop = true;
-                        bossBattleMusic.play().catch(e => {});
-                    }
-                });
-            }
-            
-            // Select random edge to spawn from
-            const edge = Math.floor(Math.random() * 4);
-            let spawnX, spawnY;
-            
-            switch(edge) {
-                case 0: // Top
-                    spawnX = Math.random() * WORLD_SIZE;
-                    spawnY = 100;
-                    break;
-                case 1: // Right
-                    spawnX = WORLD_SIZE - 100;
-                    spawnY = Math.random() * WORLD_SIZE;
-                    break;
-                case 2: // Bottom
-                    spawnX = Math.random() * WORLD_SIZE;
-                    spawnY = WORLD_SIZE - 100;
-                    break;
-                case 3: // Left
-                    spawnX = 100;
-                    spawnY = Math.random() * WORLD_SIZE;
-                    break;
-            }
-            
-            // Create boss
-            currentBoss = new Boss(selectedBoss, spawnX, spawnY);
-            snakes.push(currentBoss);
-            addSnakeToSpatialHash(currentBoss);
-            bossEncounterActive = true;
-            
-            // Initialize boss hint timer
-            bossHintShown = false;
-            bossHintTimer = 600; // 10 seconds at 60 FPS
-            
-            // Hide any existing hint during boss battle
-            hideGameHint();
-            
-            // Play boss laugh sound on spawn
-            if (!musicMuted && BOSS_TYPES[selectedBoss].laughSound) {
-                const laughSound = new Audio(BOSS_TYPES[selectedBoss].laughSound);
-                laughSound.volume = 0.7;
-                laughSound.play().catch(e => {});
-            }
-            
-            // Make AI snakes flee
-            snakes.forEach(snake => {
-                if (!snake.isPlayer && !snake.isBoss && snake.alive) {
-                    snake.panicMode = true;
-                    snake.panicTimer = 999999; // Permanent panic during boss
-                }
-            });
-            
-            // Create boss health bar UI
-            createBossHealthBar();
-        }
         
-        function createBossHealthBar() {
-            // Remove existing health bar if any
-            if (bossHealthBarContainer) {
-                bossHealthBarContainer.remove();
-            }
-            
-            // Create health bar container
-            bossHealthBarContainer = document.createElement('div');
-            bossHealthBarContainer.style.position = 'fixed';
-            bossHealthBarContainer.style.top = isMobile ? '80px' : '50px'; // Lower on mobile to avoid UI overlap
-            bossHealthBarContainer.style.left = '50%';
-            bossHealthBarContainer.style.transform = 'translateX(-50%)';
-            bossHealthBarContainer.style.width = isMobile ? '300px' : '600px'; // Smaller on mobile
-            bossHealthBarContainer.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
-            bossHealthBarContainer.style.border = '3px solid #fff';
-            bossHealthBarContainer.style.borderRadius = '10px';
-            bossHealthBarContainer.style.padding = '10px';
-            bossHealthBarContainer.style.zIndex = '50'; // Below pause menu (z-index 100)
-            
-            // Create health bar
-            const healthBarBg = document.createElement('div');
-            healthBarBg.style.width = '100%';
-            healthBarBg.style.height = isMobile ? '20px' : '30px';
-            healthBarBg.style.backgroundColor = '#333';
-            healthBarBg.style.borderRadius = '5px';
-            healthBarBg.style.overflow = 'hidden';
-            
-            bossHealthBar = document.createElement('div');
-            bossHealthBar.style.width = '100%';
-            bossHealthBar.style.height = '100%';
-            bossHealthBar.style.backgroundColor = currentBoss.color;
-            bossHealthBar.style.transition = 'width 0.3s ease';
-            
-            healthBarBg.appendChild(bossHealthBar);
-            
-            // Create boss name display
-            bossNameDisplay = document.createElement('div');
-            bossNameDisplay.style.textAlign = 'center';
-            bossNameDisplay.style.color = '#fff';
-            bossNameDisplay.style.fontSize = isMobile ? '14px' : '18px';
-            bossNameDisplay.style.fontWeight = 'bold';
-            bossNameDisplay.style.marginTop = '5px';
-            bossNameDisplay.style.whiteSpace = 'nowrap'; // Ensure single line display
-            bossNameDisplay.style.overflow = 'hidden';
-            bossNameDisplay.style.textOverflow = 'ellipsis';
-            // Get the element emoji from the boss's emoji property
-            const elementEmoji = currentBoss.emoji || '';
-            bossNameDisplay.textContent = `💀 ${currentBoss.name} ${elementEmoji}`;
-            
-            bossHealthBarContainer.appendChild(healthBarBg);
-            bossHealthBarContainer.appendChild(bossNameDisplay);
-            document.body.appendChild(bossHealthBarContainer);
-        }
         
-        // Unified boss projectile collision check
-        function checkBossProjectileCollision(projectile, effectiveRadius = null) {
-            if (!playerSnake || !playerSnake.alive || playerSnake.invincibilityTimer > 0) {
-                return false;
-            }
-            
-            const playerRadius = SEGMENT_SIZE * (playerSnake.size || 1);
-            const projectileRadius = effectiveRadius || projectile.size;
-            const collisionRadius = projectileRadius + playerRadius;
-            
-            const dx = playerSnake.x - projectile.x;
-            const dy = playerSnake.y - projectile.y;
-            const distanceSquared = dx * dx + dy * dy;
-            
-            return distanceSquared < (collisionRadius * collisionRadius);
-        }
         
-        function updateBossProjectiles(deltaTime) {
-            // Update and remove expired projectiles
-            bossProjectiles = bossProjectiles.filter(projectile => {
-                switch(projectile.type) {
-                    case 'fireball':
-                        projectile.x += projectile.vx * deltaTime;
-                        projectile.y += projectile.vy * deltaTime;
-                        projectile.life -= deltaTime;
-                        
-                        // Check collision with player
-                        if (checkBossProjectileCollision(projectile)) {
-                            // Create explosion particles before death
-                            for (let i = 0; i < 30; i++) {
-                                const angle = Math.random() * Math.PI * 2;
-                                const speed = 2 + Math.random() * 5;
-                                particlePool.spawn(
-                                    playerSnake.x,
-                                    playerSnake.y,
-                                    Math.cos(angle) * speed,
-                                    Math.sin(angle) * speed,
-                                    '#ff6600'
-                                );
-                            }
-                            // Boss elemental attacks are insta-death
-                            playerSnake.die(true);
-                            showMessage('Incinerated by Pyraxis!', 'red');
-                            
-                            // Rarely leave fire element (reduced from 30% to 10%)
-                            if (Math.random() < 0.1) {
-                                spawnElement(projectile.elementId, projectile.x, projectile.y);
-                            }
-                            
-                            return false; // Remove projectile
-                        }
-                        
-                        return projectile.life > 0;
-                        
-                    case 'waterwave':
-                        projectile.radius += projectile.expandSpeed * deltaTime;
-                        
-                        // Check collision with player
-                        if (!projectile.hasHitPlayer && checkBossProjectileCollision(projectile, projectile.radius)) {
-                            // Create water splash particles before death
-                            for (let i = 0; i < 30; i++) {
-                                const angle = Math.random() * Math.PI * 2;
-                                const speed = 2 + Math.random() * 5;
-                                particlePool.spawn(
-                                    playerSnake.x,
-                                    playerSnake.y,
-                                    Math.cos(angle) * speed,
-                                    Math.sin(angle) * speed,
-                                    '#0066ff'
-                                );
-                            }
-                            // Boss elemental attacks are insta-death
-                            playerSnake.die(true);
-                            projectile.hasHitPlayer = true; // Prevent multiple hits from same wave
-                            showMessage('Drowned by Abyssos!', 'red');
-                        }
-                        
-                        // Spawn water elements occasionally
-                        if (Math.random() < 0.02) { // Reduced from 5% to 2%
-                            const angle = Math.random() * Math.PI * 2;
-                            spawnElement(projectile.elementId,
-                                projectile.x + Math.cos(angle) * projectile.radius,
-                                projectile.y + Math.sin(angle) * projectile.radius
-                            );
-                        }
-                        
-                        return projectile.radius < projectile.maxRadius;
-                        
-                    case 'rock':
-                        if (projectile.falling) {
-                            const fallSpeed = projectile.fallSpeed || 10;
-                            projectile.y += fallSpeed * deltaTime;
-                            
-                            // Check collision while falling
-                            if (playerSnake && playerSnake.alive) {
-                                const dx = playerSnake.x - projectile.x;
-                                const dy = playerSnake.y - projectile.y;
-                                const distSq = dx * dx + dy * dy;
-                                
-                                // Collision radius is larger while falling (40 pixels)
-                                if (distSq < 40 * 40) {
-                                    if (playerSnake.invincibilityTimer <= 0) {
-                                        // Create debris particles
-                                        for (let i = 0; i < 20; i++) {
-                                            const angle = Math.random() * Math.PI * 2;
-                                            const speed = 3 + Math.random() * 4;
-                                            particlePool.spawn(
-                                                playerSnake.x,
-                                                playerSnake.y,
-                                                Math.cos(angle) * speed,
-                                                Math.sin(angle) * speed,
-                                                '#8b6914'
-                                            );
-                                        }
-                                        playerSnake.die(true);
-                                        showMessage('Crushed by falling rock!', 'red');
-                                    }
-                                }
-                            }
-                            
-                            if (projectile.y >= projectile.shadowY) {
-                                projectile.falling = false;
-                                projectile.y = projectile.shadowY;
-                                
-                                // Create impact crater when rock lands
-                                if (!projectile.impactCrater) {
-                                    projectile.impactCrater = {
-                                        x: projectile.x,
-                                        y: projectile.y,
-                                        radius: 50, // 50 pixel radius crater
-                                        life: 180 // 3 seconds
-                                    };
-                                    
-                                    // Screen shake on impact
-                                    bossScreenShakeTimer = 15;
-                                    bossScreenShakeIntensity = 8;
-                                    
-                                    // Create impact particles
-                                    for (let i = 0; i < 15; i++) {
-                                        const angle = Math.random() * Math.PI * 2;
-                                        const speed = 2 + Math.random() * 3;
-                                        particlePool.spawn(
-                                            projectile.x,
-                                            projectile.y,
-                                            Math.cos(angle) * speed,
-                                            Math.sin(angle) * speed,
-                                            '#8b6914'
-                                        );
-                                    }
-                                }
-                            }
-                        }
-                        
-                        // Check collision with impact crater
-                        if (projectile.impactCrater && playerSnake && playerSnake.alive) {
-                            const crater = projectile.impactCrater;
-                            const dx = playerSnake.x - crater.x;
-                            const dy = playerSnake.y - crater.y;
-                            
-                            if (dx * dx + dy * dy < crater.radius * crater.radius) {
-                                if (playerSnake.invincibilityTimer <= 0) {
-                                    // Create debris particles
-                                    for (let i = 0; i < 25; i++) {
-                                        const angle = Math.random() * Math.PI * 2;
-                                        const speed = 2 + Math.random() * 5;
-                                        particlePool.spawn(
-                                            playerSnake.x,
-                                            playerSnake.y,
-                                            Math.cos(angle) * speed,
-                                            Math.sin(angle) * speed,
-                                            '#8b6914'
-                                        );
-                                    }
-                                    playerSnake.die(true);
-                                    showMessage('Crushed in impact crater!', 'red');
-                                }
-                            }
-                            
-                            // Update crater life
-                            crater.life -= deltaTime;
-                            if (crater.life <= 0) {
-                                projectile.impactCrater = null;
-                            }
-                        }
-                        
-                        // Rocks and craters stay for a while
-                        if (!projectile.falling) {
-                            if (!projectile.groundTimer) {
-                                projectile.groundTimer = 180; // 3 seconds on ground
-                                // Disabled element spawning from bone projectiles to reduce boss element abundance
-                                // spawnElement(projectile.elementId, projectile.x, projectile.y);
-                            }
-                            projectile.groundTimer -= deltaTime;
-                            
-                            return projectile.groundTimer > 0 || projectile.impactCrater;
-                        }
-                        
-                        return true; // Keep falling rocks active
-                        
-                case 'waterorb':
-                    // Update water orb position
-                    projectile.x += projectile.vx * deltaTime;
-                    projectile.y += projectile.vy * deltaTime;
-                    projectile.life -= deltaTime;
-                    
-                    // Check collision with player
-                    if (playerSnake && playerSnake.alive) {
-                        const dx = playerSnake.x - projectile.x;
-                        const dy = playerSnake.y - projectile.y;
-                        const distance = Math.sqrt(dx * dx + dy * dy);
-                        const playerRadius = SEGMENT_SIZE * (playerSnake.size || 1);
-                        if (distance < projectile.size + playerRadius) {
-                            if (playerSnake.invincibilityTimer <= 0) {
-                                // Create water splash particles before death
-                                for (let i = 0; i < 30; i++) {
-                                    const angle = Math.random() * Math.PI * 2;
-                                    const speed = 2 + Math.random() * 5;
-                                    particlePool.spawn(
-                                        playerSnake.x,
-                                        playerSnake.y,
-                                        Math.cos(angle) * speed,
-                                        Math.sin(angle) * speed,
-                                        '#40a4df'
-                                    );
-                                }
-                                // Boss elemental attacks are insta-death
-                                playerSnake.die(true);
-                                showMessage('Swept away by Abyssos!', 'red');
-                            }
-                            
-                            // Rarely leave water element (reduced from 30% to 10%)
-                            if (Math.random() < 0.1) {
-                                spawnElement(projectile.elementId, projectile.x, projectile.y);
-                            }
-                            
-                            return false; // Remove projectile
-                        }
-                    }
-                    
-                    return projectile.life > 0;
-                    
-                case 'void':
-                    // Update void projectile position
-                    projectile.x += projectile.vx * deltaTime;
-                    projectile.y += projectile.vy * deltaTime;
-                    projectile.life -= deltaTime;
-                    
-                    // Check collision with player
-                    if (playerSnake && playerSnake.alive) {
-                        const dx = projectile.x - playerSnake.x;
-                        const dy = projectile.y - playerSnake.y;
-                        if (Math.sqrt(dx * dx + dy * dy) < projectile.size + SEGMENT_SIZE) {
-                            if (playerSnake.invincibilityTimer <= 0) {
-                                // Create void particles before death
-                                for (let i = 0; i < 30; i++) {
-                                    const angle = Math.random() * Math.PI * 2;
-                                    const speed = 2 + Math.random() * 5;
-                                    particlePool.spawn(
-                                        playerSnake.x,
-                                        playerSnake.y,
-                                        Math.cos(angle) * speed,
-                                        Math.sin(angle) * speed,
-                                        '#9b59b6'
-                                    );
-                                }
-                                playerSnake.die(true);
-                                showMessage('Consumed by the void!', 'red');
-                            }
-                            return false; // Remove projectile
-                        }
-                    }
-                    
-                    return projectile.life > 0;
-                    
-                case 'tornado':
-                    // Initialize properties
-                    if (projectile.homingTimer === undefined) {
-                        projectile.homingTimer = 300; // Use value from spawn
-                    }
-                    if (projectile.currentSpeed === undefined) {
-                        projectile.currentSpeed = projectile.baseSpeed || 6;
-                    }
-                    
-                    // Update position first!
-                    projectile.x += projectile.vx * deltaTime;
-                    projectile.y += projectile.vy * deltaTime;
-                    
-                    // Separation force to prevent clustering
-                    let separationX = 0;
-                    let separationY = 0;
-                    bossProjectiles.forEach(other => {
-                        if (other !== projectile && other.type === 'tornado') {
-                            const dx = projectile.x - other.x;
-                            const dy = projectile.y - other.y;
-                            const distance = Math.sqrt(dx * dx + dy * dy);
-                            if (distance < 100 && distance > 0) { // Separation radius
-                                const force = (100 - distance) / 100 * 2;
-                                separationX += (dx / distance) * force;
-                                separationY += (dy / distance) * force;
-                            }
-                        }
-                    });
-                    
-                    // Enhanced homing behavior (similar to fireballs)
-                    if (projectile.homingTimer > 0 && playerSnake && playerSnake.alive) {
-                        projectile.homingTimer -= deltaTime;
-                        
-                        // Calculate angle to player
-                        const dx = playerSnake.x - projectile.x;
-                        const dy = playerSnake.y - projectile.y;
-                        const targetAngle = Math.atan2(dy, dx);
-                        
-                        // Current angle
-                        const currentAngle = Math.atan2(projectile.vy, projectile.vx);
-                        
-                        // Calculate angle difference
-                        let angleDiff = targetAngle - currentAngle;
-                        while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
-                        while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
-                        
-                        // Apply tracking with strength
-                        const trackingStrength = projectile.trackingStrength || 0.05;
-                        const newAngle = currentAngle + angleDiff * trackingStrength;
-                        
-                        // Gradually increase speed while tracking
-                        if (projectile.currentSpeed < projectile.maxSpeed) {
-                            projectile.currentSpeed += 0.1 * deltaTime;
-                        }
-                        
-                        // Update velocity with new angle and speed
-                        projectile.vx = Math.cos(newAngle) * projectile.currentSpeed;
-                        projectile.vy = Math.sin(newAngle) * projectile.currentSpeed;
-                        
-                        // Apply separation force
-                        projectile.vx += separationX * 0.5;
-                        projectile.vy += separationY * 0.5;
-                    } else {
-                        // After tracking ends, continue in current direction with normal speed
-                        if (projectile.currentSpeed > projectile.baseSpeed) {
-                            projectile.currentSpeed -= 0.1 * deltaTime;
-                        }
-                        
-                        // Update velocity
-                        const currentAngle = Math.atan2(projectile.vy, projectile.vx);
-                        projectile.vx = Math.cos(currentAngle) * projectile.currentSpeed;
-                        projectile.vy = Math.sin(currentAngle) * projectile.currentSpeed;
-                    }
-                    projectile.life -= deltaTime;
-                    projectile.rotation += projectile.rotationSpeed * deltaTime;
-                    
-                    // Check collision with player
-                    if (playerSnake && playerSnake.alive) {
-                        const dx = projectile.x - playerSnake.x;
-                        const dy = projectile.y - playerSnake.y;
-                        if (Math.sqrt(dx * dx + dy * dy) < projectile.size + SEGMENT_SIZE) {
-                            if (playerSnake.invincibilityTimer <= 0) {
-                                // Create wind particles before death
-                                for (let i = 0; i < 40; i++) {
-                                    const angle = Math.random() * Math.PI * 2;
-                                    const speed = 3 + Math.random() * 6;
-                                    particlePool.spawn(
-                                        playerSnake.x,
-                                        playerSnake.y,
-                                        Math.cos(angle) * speed,
-                                        Math.sin(angle) * speed,
-                                        '#87ceeb'
-                                    );
-                                }
-                                playerSnake.die(true);
-                                showMessage('Swept away by the tornado!', 'red');
-                            }
-                            return false; // Remove projectile
-                        }
-                    }
-                    
-                    return projectile.life > 0;
-                }
-                
-                return false;
-            });
-        }
         
         function updateElementVacuum(deltaTime) {
-            // Make all elements move toward boss and consume them
-            if (!currentBoss || !currentBoss.alive) return;
             
             vacuumedElements = vacuumedElements.filter(({element, originalX, originalY}) => {
                 if (!element.active) return false; // Already deactivated
                 
-                const dx = currentBoss.x - element.x;
-                const dy = currentBoss.y - element.y;
                 const dist = Math.sqrt(dx * dx + dy * dy);
                 
                 if (dist > 50) {
@@ -7832,7 +6081,6 @@
                     element.y += (dy / dist) * speed;
                     return true; // Keep in array
                 } else {
-                    // Element reached the boss - consume it into the void
                     element.deactivate();
                     
                     // Create void consumption particles
@@ -7860,13 +6108,10 @@
             // The map will naturally repopulate through the normal spawn system
             
             // Create a burst of void energy particles when vacuum ends
-            if (currentBoss && currentBoss.alive) {
                 for (let i = 0; i < 30; i++) {
                     const angle = Math.random() * Math.PI * 2;
                     const speed = 3 + Math.random() * 5;
                     particlePool.spawn(
-                        currentBoss.x,
-                        currentBoss.y,
                         Math.cos(angle) * speed,
                         Math.sin(angle) * speed,
                         '#9b59b6' // Purple void color
@@ -7877,282 +6122,7 @@
             vacuumedElements = [];
         }
         
-        function drawBossSkullIndicator() {
-            if (!currentBoss || !currentBoss.alive || !playerSnake || !playerSnake.alive) return;
-            
-            // Calculate boss position relative to camera
-            const bossScreenX = (currentBoss.x - camera.x) * cameraZoom + canvas.width / 2;
-            const bossScreenY = (currentBoss.y - camera.y) * cameraZoom + canvas.height / 2;
-            
-            // Check if boss is on screen
-            const margin = 100; // Extra margin to ensure boss is fully visible
-            if (bossScreenX >= -margin && bossScreenX <= canvas.width + margin && 
-                bossScreenY >= -margin && bossScreenY <= canvas.height + margin) {
-                // Boss is on screen, don't show indicator
-                return;
-            }
-            
-            // Calculate direction from player to boss
-            const dx = currentBoss.x - playerSnake.x;
-            const dy = currentBoss.y - playerSnake.y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            
-            // Normalize direction
-            const dirX = dx / distance;
-            const dirY = dy / distance;
-            
-            // Calculate position on screen edge
-            const edgeMargin = 60; // Distance from edge of screen
-            let indicatorX, indicatorY;
-            
-            // Find intersection with screen edges
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
-            
-            // Calculate the parameter t for the ray from center to boss
-            const maxX = (canvas.width / 2 - edgeMargin) / Math.abs(dirX * cameraZoom);
-            const maxY = (canvas.height / 2 - edgeMargin) / Math.abs(dirY * cameraZoom);
-            const t = Math.min(maxX, maxY);
-            
-            indicatorX = centerX + dirX * t * cameraZoom;
-            indicatorY = centerY + dirY * t * cameraZoom;
-            
-            // Clamp to screen bounds with margin
-            indicatorX = Math.max(edgeMargin, Math.min(canvas.width - edgeMargin, indicatorX));
-            indicatorY = Math.max(edgeMargin, Math.min(canvas.height - edgeMargin, indicatorY));
-            
-            // Draw the skull indicator
-            ctx.save();
-            
-            // Create pulsing effect
-            const pulseScale = 1 + Math.sin(Date.now() * 0.003) * 0.2;
-            const indicatorSize = 50 * pulseScale; // Increased from 30 to 50
-            
-            // Draw background circle with boss color
-            ctx.fillStyle = currentBoss.color;
-            ctx.globalAlpha = 0.5; // Increased from 0.3
-            ctx.beginPath();
-            ctx.arc(indicatorX, indicatorY, indicatorSize, 0, Math.PI * 2);
-            ctx.fill();
-            
-            // Draw border circle
-            ctx.strokeStyle = currentBoss.color;
-            ctx.lineWidth = 5; // Increased from 3
-            ctx.globalAlpha = 1.0; // Increased from 0.8
-            ctx.stroke();
-            
-            // Add white outline for better visibility
-            ctx.strokeStyle = '#fff';
-            ctx.lineWidth = 2;
-            ctx.globalAlpha = 0.8;
-            ctx.stroke();
-            
-            // Draw skull emoji
-            ctx.globalAlpha = 1;
-            const skullSize = Math.round(indicatorSize * 1.5);
-            const skullCanvas = getCachedEmoji('💀', skullSize);
-            ctx.drawImage(skullCanvas, indicatorX - skullCanvas.width / 2, indicatorY - skullCanvas.height / 2);
-            
-            // Draw directional arrow pointing towards boss
-            ctx.save();
-            ctx.translate(indicatorX, indicatorY);
-            ctx.rotate(Math.atan2(dy, dx));
-            
-            // Arrow pointing outward
-            ctx.strokeStyle = '#fff';
-            ctx.lineWidth = 4; // Increased from 2
-            ctx.globalAlpha = 1.0; // Increased from 0.8
-            ctx.beginPath();
-            ctx.moveTo(indicatorSize + 10, 0);
-            ctx.lineTo(indicatorSize + 25, -10); // Increased arrow size
-            ctx.moveTo(indicatorSize + 10, 0);
-            ctx.lineTo(indicatorSize + 25, 10); // Increased arrow size
-            ctx.stroke();
-            
-            ctx.restore();
-            
-            // Draw distance text
-            const distanceInUnits = Math.round(distance / 10);
-            ctx.font = `bold ${14 * cameraZoom}px Arial`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'top';
-            ctx.strokeStyle = '#000';
-            ctx.lineWidth = 3;
-            ctx.strokeText(`${distanceInUnits}m`, indicatorX, indicatorY + indicatorSize + 5);
-            ctx.fillStyle = '#fff';
-            ctx.fillText(`${distanceInUnits}m`, indicatorX, indicatorY + indicatorSize + 5);
-            
-            ctx.restore();
-        }
         
-        function checkBossElementalDamage() {
-            if (!currentBoss || !currentBoss.alive || !playerSnake || !playerSnake.alive) return;
-            
-            // Check cooldown to prevent spam damage
-            if (bossDamageCooldown > 0) return;
-            
-            // Don't allow damage while boss is stunned
-            if (currentBoss.stunTimer > 0) return;
-            
-            // Check player's element bank for combinations
-            const playerElements = playerSnake.elements;
-            const elementBank = getElementBankElements();
-            const allPlayerElements = [...playerElements, ...elementBank];
-            
-            // Check if player has the right combination near the boss
-            const dx = playerSnake.x - currentBoss.x;
-            const dy = playerSnake.y - currentBoss.y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            
-            if (dist < 500) { // Within 500 pixels
-                let canDamage = false;
-                
-                // Check if player has ANY combination containing the boss's element
-                const bossElementId = currentBoss.elementId;
-                let comboFound = null;
-                let otherElementId = null;
-                
-                // First check for boss elements on the map near the player
-                let mapBossElement = null;
-                const elements = elementPool.getActiveElements();
-                for (let i = 0; i < elements.length; i++) {
-                    const element = elements[i];
-                    if (!element.active || element.id !== bossElementId) continue;
-                    
-                    // Check if this boss element is near the player
-                    const elemDx = element.x - playerSnake.x;
-                    const elemDy = element.y - playerSnake.y;
-                    const elemDist = Math.sqrt(elemDx * elemDx + elemDy * elemDy);
-                    
-                    if (elemDist < 150) { // Close enough to interact
-                        mapBossElement = element;
-                        break;
-                    }
-                }
-                
-                // Check if we can form a combination
-                if (mapBossElement && allPlayerElements.length > 0) {
-                    // Player has elements and there's a boss element on the map nearby
-                    canDamage = true;
-                    // Find any element in player's bank to combine with
-                    otherElementId = allPlayerElements[0];
-                    const comboKey = `${Math.min(bossElementId, otherElementId)}+${Math.max(bossElementId, otherElementId)}`;
-                    if (window.elementLoader && window.elementLoader.combinations[comboKey]) {
-                        comboFound = window.elementLoader.combinations[comboKey];
-                    }
-                } else if (allPlayerElements.includes(bossElementId)) {
-                    // Check if player has the boss's element in their bank
-                    const uniqueElements = [...new Set(allPlayerElements)];
-                    if (uniqueElements.length >= 2) {
-                        canDamage = true;
-                        // Find the other element that isn't the boss element
-                        for (let elemId of uniqueElements) {
-                            if (elemId !== bossElementId) {
-                                otherElementId = elemId;
-                                // Check what this combination creates
-                                const comboKey = `${Math.min(bossElementId, elemId)}+${Math.max(bossElementId, elemId)}`;
-                                if (window.elementLoader && window.elementLoader.combinations[comboKey]) {
-                                    comboFound = window.elementLoader.combinations[comboKey];
-                                }
-                                break;
-                            }
-                        }
-                    }
-                }
-                
-                if (canDamage) {
-                    currentBoss.takeDamage('player_elemental');
-                    
-                    // Consume elements from player's bank
-                    if (playerSnake && playerSnake.elements.length > 0) {
-                        // Remove one boss element and one other element
-                        let bossElementRemoved = false;
-                        let otherElementRemoved = false;
-                        
-                        // Create new array without the consumed elements
-                        playerSnake.elements = playerSnake.elements.filter(elemId => {
-                            if (!bossElementRemoved && elemId === bossElementId) {
-                                bossElementRemoved = true;
-                                return false; // Remove this element
-                            }
-                            if (!otherElementRemoved && elemId === otherElementId) {
-                                otherElementRemoved = true;
-                                return false; // Remove this element
-                            }
-                            return true; // Keep this element
-                        });
-                        
-                        // Update element bank display
-                        if (typeof updateElementBank !== 'undefined') {
-                            updateElementBank();
-                        }
-                    }
-                    
-                    // Show combo message
-                    if (comboFound && otherElementId !== null) {
-                        const bossElement = window.elementLoader.elementsById[bossElementId];
-                        const otherElement = window.elementLoader.elementsById[otherElementId];
-                        const resultElement = window.elementLoader.elementsById[comboFound];
-                        if (bossElement && otherElement && resultElement) {
-                            showMessage(`${bossElement.name} + ${otherElement.name} = ${resultElement.name}!`, 'gold', 5000);
-                        } else {
-                            showMessage('Elemental Resonance!', 'gold', 5000);
-                        }
-                    } else {
-                        showMessage('Elemental Resonance!', 'gold', 5000);
-                    }
-                    
-                    bossDamageCooldown = 180; // 3 second cooldown
-                    
-                    // Create shockwave effect
-                    const elementColors = {
-                        0: '#8b6914', // Earth - brown
-                        1: '#0066ff', // Water - blue
-                        2: '#ffffff', // Air - white
-                        3: '#ff4444'  // Fire - red
-                    };
-                    
-                    // Determine the color based on player's primary element
-                    let shockwaveColor = '#FFD700'; // Default gold
-                    if (allPlayerElements.length > 0) {
-                        const primaryElement = allPlayerElements[0];
-                        shockwaveColor = elementColors[primaryElement] || '#FFD700';
-                    }
-                    
-                    shockwaves.push({
-                        x: playerSnake.x,
-                        y: playerSnake.y,
-                        radius: 0,
-                        maxRadius: 600, // Fixed max radius for omnidirectional wave
-                        speed: 10, // Slower expansion for visibility
-                        color: shockwaveColor,
-                        life: 1.0,
-                        type: 'omnidirectional',
-                        owner: 'player' // Mark this as a player shockwave
-                    });
-                    
-                    // Create spawn effect - energy gathering particles
-                    for (let i = 0; i < 20; i++) {
-                        const angle = (Math.PI * 2 * i) / 20;
-                        const startRadius = 50;
-                        particlePool.spawn(
-                            playerSnake.x + Math.cos(angle) * startRadius,
-                            playerSnake.y + Math.sin(angle) * startRadius,
-                            -Math.cos(angle) * 3, // Particles move inward
-                            -Math.sin(angle) * 3,
-                            shockwaveColor
-                        );
-                    }
-                    
-                    // Play energy blast sound
-                    if (!musicMuted) {
-                        const blastSound = new Audio('sounds/magic-energy-whoosh.mp3');
-                        blastSound.volume = 0.7;
-                        blastSound.play().catch(e => {});
-                    }
-                }
-            }
-        }
         
         function getElementBankElements() {
             // Get elements from the element bank UI
@@ -8182,23 +6152,12 @@
                 shockwave.radius += shockwave.speed * deltaTime;
                 shockwave.life = 1.0 - (shockwave.radius / shockwave.maxRadius);
                 
-                // For omnidirectional shockwaves, check if it hits the boss
-                if (shockwave.type === 'omnidirectional' && currentBoss && currentBoss.alive && !shockwave.hasHitBoss) {
-                    const dx = currentBoss.x - shockwave.x;
-                    const dy = currentBoss.y - shockwave.y;
-                    const distToBoss = Math.sqrt(dx * dx + dy * dy);
                     
-                    // Check if the expanding ring has reached the boss
                     const ringThickness = 20; // How thick the shockwave ring is
-                    if (distToBoss >= shockwave.radius - ringThickness && distToBoss <= shockwave.radius + ringThickness) {
-                        shockwave.hasHitBoss = true;
                         
-                        // Deal damage to the boss only if this is a player shockwave
                         if (shockwave.owner === 'player') {
-                            currentBoss.takeDamage('player_elemental');
                         }
                         
-                        // Create impact particles at boss location
                         const impactParticles = 30;
                         for (let i = 0; i < impactParticles; i++) {
                             const angle = (Math.PI * 2 * i) / impactParticles;
@@ -8206,8 +6165,6 @@
                             const particleColor = i % 2 === 0 ? shockwave.color : '#ffffff';
                             
                             particlePool.spawn(
-                                currentBoss.x,
-                                currentBoss.y,
                                 Math.cos(angle) * speed,
                                 Math.sin(angle) * speed,
                                 particleColor
@@ -8215,9 +6172,6 @@
                         }
                         
                         // Add screen shake for impact
-                        if (bossScreenShakeTimer < 10) {
-                            bossScreenShakeTimer = 10;
-                            bossScreenShakeIntensity = 5;
                         }
                     }
                 } else if (!shockwave.type) {
@@ -8335,350 +6289,8 @@
             });
         }
         
-        function updateBossFissures(deltaTime) {
-            bossFissures = bossFissures.filter(fissure => {
-                // Update fissure state
-                if (fissure.state === 'warning') {
-                    fissure.warningDuration -= deltaTime;
-                    if (fissure.warningDuration <= 0) {
-                        fissure.state = 'opening';
-                    }
-                } else if (fissure.state === 'opening') {
-                    fissure.radius += fissure.growthSpeed * deltaTime;
-                    if (fissure.radius >= fissure.targetRadius) {
-                        fissure.radius = fissure.targetRadius;
-                        fissure.state = 'open';
-                    }
-                } else if (fissure.state === 'open') {
-                    fissure.life -= deltaTime;
-                    if (fissure.life <= 60) { // Start closing in last second
-                        fissure.state = 'closing';
-                    }
-                } else if (fissure.state === 'closing') {
-                    fissure.radius -= fissure.growthSpeed * 2 * deltaTime; // Close faster
-                    fissure.life -= deltaTime;
-                    if (fissure.radius <= 0 || fissure.life <= 0) {
-                        return false; // Remove fissure
-                    }
-                }
-                
-                // Check collision with player when fissure is open (not during warning)
-                if (fissure.state !== 'warning' && fissure.radius > 20 && playerSnake && playerSnake.alive) {
-                    const dx = playerSnake.x - fissure.x;
-                    const dy = playerSnake.y - fissure.y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-                    const playerRadius = SEGMENT_SIZE * (playerSnake.size || 1);
-                    
-                    if (distance < fissure.radius + playerRadius) {
-                        if (playerSnake.invincibilityTimer <= 0) {
-                            // Create earth particles before death
-                            for (let i = 0; i < 30; i++) {
-                                const angle = Math.random() * Math.PI * 2;
-                                const speed = 2 + Math.random() * 5;
-                                particlePool.spawn(
-                                    playerSnake.x,
-                                    playerSnake.y,
-                                    Math.cos(angle) * speed,
-                                    Math.sin(angle) * speed,
-                                    '#8b6914'
-                                );
-                            }
-                            playerSnake.die(true);
-                            showMessage('Swallowed by the earth!', 'red');
-                        }
-                    }
-                }
-                
-                return true;
-            });
-        }
         
-        function drawBossFissures() {
-            bossFissures.forEach(fissure => {
-                const screen = worldToScreen(fissure.x, fissure.y);
-                
-                ctx.save();
-                
-                // Handle warning state - draw dotted circle
-                if (fissure.state === 'warning') {
-                    const warningRadius = fissure.targetRadius * cameraZoom;
-                    ctx.strokeStyle = 'rgba(255, 100, 0, 0.8)';
-                    ctx.lineWidth = 3 * cameraZoom;
-                    ctx.setLineDash([10 * cameraZoom, 10 * cameraZoom]);
-                    ctx.beginPath();
-                    ctx.arc(screen.x, screen.y, warningRadius, 0, Math.PI * 2);
-                    ctx.stroke();
-                    ctx.setLineDash([]); // Reset line dash
-                    ctx.restore();
-                    return; // Skip normal fissure drawing
-                }
-                
-                const radius = fissure.radius * cameraZoom;
-                
-                // Draw dark fissure hole
-                const gradient = ctx.createRadialGradient(
-                    screen.x, screen.y, 0,
-                    screen.x, screen.y, radius
-                );
-                
-                // Animate the colors based on state
-                if (fissure.state === 'opening') {
-                    gradient.addColorStop(0, 'rgba(20, 10, 0, 0.9)');
-                    gradient.addColorStop(0.5, 'rgba(50, 25, 10, 0.7)');
-                    gradient.addColorStop(0.8, 'rgba(80, 40, 20, 0.5)');
-                    gradient.addColorStop(1, 'rgba(100, 50, 25, 0.2)');
-                } else if (fissure.state === 'closing') {
-                    const alpha = fissure.life / 60; // Fade out
-                    gradient.addColorStop(0, `rgba(20, 10, 0, ${0.9 * alpha})`);
-                    gradient.addColorStop(0.5, `rgba(50, 25, 10, ${0.7 * alpha})`);
-                    gradient.addColorStop(0.8, `rgba(80, 40, 20, ${0.5 * alpha})`);
-                    gradient.addColorStop(1, `rgba(100, 50, 25, ${0.2 * alpha})`);
-                } else {
-                    gradient.addColorStop(0, 'rgba(10, 5, 0, 1)'); // Very dark center
-                    gradient.addColorStop(0.3, 'rgba(30, 15, 5, 0.9)');
-                    gradient.addColorStop(0.6, 'rgba(60, 30, 15, 0.6)');
-                    gradient.addColorStop(1, 'rgba(90, 45, 20, 0.3)');
-                }
-                
-                ctx.fillStyle = gradient;
-                ctx.beginPath();
-                ctx.arc(screen.x, screen.y, radius, 0, Math.PI * 2);
-                ctx.fill();
-                
-                // Draw danger edge
-                if (fissure.state === 'open') {
-                    ctx.strokeStyle = 'rgba(255, 100, 0, 0.5)';
-                    ctx.lineWidth = 3 * cameraZoom;
-                    ctx.stroke();
-                }
-                
-                // Draw cracks around the edge
-                ctx.strokeStyle = 'rgba(50, 25, 10, 0.8)';
-                ctx.lineWidth = 2 * cameraZoom;
-                for (let i = 0; i < 8; i++) {
-                    const angle = (i / 8) * Math.PI * 2;
-                    const crackLength = radius * 0.3;
-                    ctx.beginPath();
-                    ctx.moveTo(
-                        screen.x + Math.cos(angle) * radius,
-                        screen.y + Math.sin(angle) * radius
-                    );
-                    ctx.lineTo(
-                        screen.x + Math.cos(angle) * (radius + crackLength),
-                        screen.y + Math.sin(angle) * (radius + crackLength)
-                    );
-                    ctx.stroke();
-                }
-                
-                ctx.restore();
-            });
-        }
         
-        function drawBossProjectiles() {
-            bossProjectiles.forEach(projectile => {
-                const screen = worldToScreen(projectile.x, projectile.y);
-                
-                ctx.save();
-                
-                switch(projectile.type) {
-                    case 'fireball':
-                        // Draw fireball with cached gradient
-                        const gradient = gradientCache ? 
-                            gradientCache.createFireballGradient(screen.x, screen.y, projectile.size) :
-                            (() => {
-                                const g = ctx.createRadialGradient(screen.x, screen.y, 0, screen.x, screen.y, projectile.size);
-                                g.addColorStop(0, '#ffff00');
-                                g.addColorStop(0.5, '#ff6600');
-                                g.addColorStop(1, 'rgba(255, 0, 0, 0.3)');
-                                return g;
-                            })();
-                        ctx.fillStyle = gradient;
-                        ctx.beginPath();
-                        ctx.arc(screen.x, screen.y, projectile.size * cameraZoom, 0, Math.PI * 2);
-                        ctx.fill();
-                        
-                        // Add fire emoji
-                        const fireCanvas = getCachedEmoji('🔥', Math.round(projectile.size * cameraZoom));
-                        ctx.drawImage(fireCanvas, screen.x - fireCanvas.width / 2, screen.y - fireCanvas.height / 2);
-                        break;
-                        
-                    case 'waterwave':
-                        // Draw expanding water ring
-                        ctx.strokeStyle = 'rgba(0, 100, 255, 0.8)';
-                        ctx.lineWidth = 10 * cameraZoom;
-                        ctx.beginPath();
-                        ctx.arc(projectile.x - camera.x + canvas.width / 2, 
-                               projectile.y - camera.y + canvas.height / 2, 
-                               projectile.radius * cameraZoom, 0, Math.PI * 2);
-                        ctx.stroke();
-                        
-                        // Inner glow
-                        ctx.strokeStyle = 'rgba(100, 200, 255, 0.5)';
-                        ctx.lineWidth = 20 * cameraZoom;
-                        ctx.stroke();
-                        break;
-                        
-                    case 'rock':
-                        if (projectile.falling) {
-                            // Draw shadow at target position with warning indicator
-                            const shadowScreen = worldToScreen(projectile.x, projectile.targetY);
-                            
-                            // Draw pulsing red warning circle
-                            const warningPulse = Math.sin(Date.now() * 0.01) * 0.3 + 0.7;
-                            ctx.globalAlpha = warningPulse * 0.5;
-                            ctx.strokeStyle = '#ff0000';
-                            ctx.lineWidth = 3 * cameraZoom;
-                            ctx.beginPath();
-                            ctx.arc(shadowScreen.x, shadowScreen.y, 
-                                  projectile.size * 1.5 * cameraZoom, 
-                                  0, Math.PI * 2);
-                            ctx.stroke();
-                            
-                            // Draw shadow
-                            ctx.globalAlpha = 0.3;
-                            ctx.fillStyle = '#000';
-                            ctx.beginPath();
-                            ctx.ellipse(shadowScreen.x, shadowScreen.y, 
-                                      projectile.size * cameraZoom, 
-                                      projectile.size * 0.5 * cameraZoom, 
-                                      0, 0, Math.PI * 2);
-                            ctx.fill();
-                            ctx.globalAlpha = 1;
-                        }
-                        
-                        // Draw rock
-                        const rockGradient = ctx.createRadialGradient(screen.x, screen.y, 0, screen.x, screen.y, projectile.size);
-                        rockGradient.addColorStop(0, '#8b6914');
-                        rockGradient.addColorStop(0.7, '#654321');
-                        rockGradient.addColorStop(1, '#4a3018');
-                        ctx.fillStyle = rockGradient;
-                        ctx.beginPath();
-                        ctx.arc(screen.x, screen.y, projectile.size * cameraZoom, 0, Math.PI * 2);
-                        ctx.fill();
-                        
-                        // Add rock emoji
-                        const rockCanvas = getCachedEmoji('🪨', Math.round(projectile.size * 1.5 * cameraZoom));
-                        ctx.drawImage(rockCanvas, screen.x - rockCanvas.width / 2, screen.y - rockCanvas.height / 2);
-                        
-                        // Draw impact crater if it exists
-                        if (projectile.impactCrater) {
-                            const crater = projectile.impactCrater;
-                            const craterScreen = worldToScreen(crater.x, crater.y);
-                            
-                            // Draw crater with fading effect
-                            const craterAlpha = crater.life / 180; // Fade out over time
-                            ctx.globalAlpha = craterAlpha * 0.6;
-                            
-                            // Crater gradient
-                            const craterGradient = ctx.createRadialGradient(
-                                craterScreen.x, craterScreen.y, 0,
-                                craterScreen.x, craterScreen.y, crater.radius * cameraZoom
-                            );
-                            craterGradient.addColorStop(0, 'rgba(50, 30, 10, 0.8)');
-                            craterGradient.addColorStop(0.5, 'rgba(80, 50, 20, 0.5)');
-                            craterGradient.addColorStop(1, 'rgba(100, 70, 30, 0)');
-                            
-                            ctx.fillStyle = craterGradient;
-                            ctx.beginPath();
-                            ctx.arc(craterScreen.x, craterScreen.y, crater.radius * cameraZoom, 0, Math.PI * 2);
-                            ctx.fill();
-                            
-                            // Danger zone indicator
-                            ctx.globalAlpha = craterAlpha * 0.3;
-                            ctx.strokeStyle = '#ff4444';
-                            ctx.lineWidth = 2 * cameraZoom;
-                            ctx.setLineDash([5, 5]);
-                            ctx.beginPath();
-                            ctx.arc(craterScreen.x, craterScreen.y, crater.radius * cameraZoom, 0, Math.PI * 2);
-                            ctx.stroke();
-                            ctx.setLineDash([]);
-                        }
-                        break;
-                        
-                    case 'waterorb':
-                        // Draw water orb
-                        const waterOrbGradient = ctx.createRadialGradient(screen.x, screen.y, 0, screen.x, screen.y, projectile.size * cameraZoom);
-                        waterOrbGradient.addColorStop(0, 'rgba(100, 200, 255, 0.8)');
-                        waterOrbGradient.addColorStop(0.5, 'rgba(64, 164, 223, 0.6)');
-                        waterOrbGradient.addColorStop(1, 'rgba(30, 100, 200, 0.4)');
-                        
-                        ctx.fillStyle = waterOrbGradient;
-                        ctx.beginPath();
-                        ctx.arc(screen.x, screen.y, projectile.size * cameraZoom, 0, Math.PI * 2);
-                        ctx.fill();
-                        
-                        // Add water emoji
-                        const waterCanvas = getCachedEmoji('💧', Math.round(projectile.size * 1.2 * cameraZoom));
-                        ctx.drawImage(waterCanvas, screen.x - waterCanvas.width / 2, screen.y - waterCanvas.height / 2);
-                        break;
-                        
-                    case 'void':
-                        // Draw void projectile with dark purple energy
-                        const voidGradient = ctx.createRadialGradient(screen.x, screen.y, 0, screen.x, screen.y, projectile.size * cameraZoom);
-                        voidGradient.addColorStop(0, 'rgba(155, 89, 182, 0.9)');
-                        voidGradient.addColorStop(0.5, 'rgba(75, 0, 130, 0.7)');
-                        voidGradient.addColorStop(1, 'rgba(25, 0, 51, 0.5)');
-                        
-                        ctx.fillStyle = voidGradient;
-                        ctx.beginPath();
-                        ctx.arc(screen.x, screen.y, projectile.size * cameraZoom, 0, Math.PI * 2);
-                        ctx.fill();
-                        
-                        // Add void/dark energy effect
-                        ctx.strokeStyle = 'rgba(155, 89, 182, 0.8)';
-                        ctx.lineWidth = 3 * cameraZoom;
-                        ctx.stroke();
-                        
-                        // Add void emoji or symbol
-                        const voidCanvas = getCachedEmoji('🌀', Math.round(projectile.size * 1.3 * cameraZoom));
-                        ctx.drawImage(voidCanvas, screen.x - voidCanvas.width / 2, screen.y - voidCanvas.height / 2);
-                        break;
-                        
-                    case 'tornado':
-                        // Save context for rotation
-                        ctx.save();
-                        ctx.translate(screen.x, screen.y);
-                        ctx.rotate(projectile.rotation);
-                        
-                        // Draw swirling tornado effect
-                        const tornadoGradient = ctx.createRadialGradient(0, 0, projectile.size * 0.2 * cameraZoom, 0, 0, projectile.size * cameraZoom);
-                        tornadoGradient.addColorStop(0, 'rgba(135, 206, 235, 0.9)'); // Light blue center
-                        tornadoGradient.addColorStop(0.3, 'rgba(100, 150, 200, 0.7)');
-                        tornadoGradient.addColorStop(0.6, 'rgba(70, 130, 180, 0.5)');
-                        tornadoGradient.addColorStop(1, 'rgba(50, 100, 150, 0.2)');
-                        
-                        ctx.fillStyle = tornadoGradient;
-                        ctx.beginPath();
-                        ctx.arc(0, 0, projectile.size * cameraZoom, 0, Math.PI * 2);
-                        ctx.fill();
-                        
-                        // Draw spiral lines
-                        ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
-                        ctx.lineWidth = 2 * cameraZoom;
-                        for (let i = 0; i < 3; i++) {
-                            ctx.beginPath();
-                            const startAngle = (i * Math.PI * 2 / 3);
-                            ctx.moveTo(0, 0);
-                            const endX = Math.cos(startAngle) * projectile.size * cameraZoom;
-                            const endY = Math.sin(startAngle) * projectile.size * cameraZoom;
-                            ctx.quadraticCurveTo(
-                                endX * 0.5, endY * 0.5 + 10 * cameraZoom,
-                                endX, endY
-                            );
-                            ctx.stroke();
-                        }
-                        
-                        ctx.restore();
-                        
-                        // Add tornado emoji
-                        const tornadoCanvas = getCachedEmoji('🌪️', Math.round(projectile.size * 1.5 * cameraZoom));
-                        ctx.drawImage(tornadoCanvas, screen.x - tornadoCanvas.width / 2, screen.y - tornadoCanvas.height / 2);
-                        break;
-                }
-                
-                ctx.restore();
-            });
-        }
         
         function updateDamageNumbers(deltaTime) {
             damageNumbers = damageNumbers.filter(num => {
@@ -9113,16 +6725,12 @@
         function createDeathParticles(x, y, snakeLength = 5, snakeColor = null, elementsCarried = [], snakeType = null) {
             // Determine explosion type based on snake
             let explosionType;
-            let isBossSnake = false;
             
             // Check if this is the player snake
             if (snakeType === 'player' || (snakes[0] && snakes[0].x === x && snakes[0].y === y && snakes[0].isPlayer)) {
                 explosionType = 'toon-impact-large-violet';
             } 
-            // Check if this is a boss snake
-            else if (snakeType === 'boss' || (currentBoss && currentBoss.snake && currentBoss.snake.x === x && currentBoss.snake.y === y)) {
                 explosionType = 'dust-impact-large-red';
-                isBossSnake = true;
             }
             // Default to AI snake explosion
             else {
@@ -9131,8 +6739,6 @@
             
             // Create the explosion animation if manager is loaded
             if (explosionManager) {
-                if (isBossSnake) {
-                    // Boss gets cluster explosion
                     explosionManager.createClusterExplosion(explosionType, x, y, 4, 60);
                 } else {
                     // Regular explosion for player and AI snakes
@@ -9144,7 +6750,6 @@
             // Keep minimal particle effects for elements
             // Reduce particles significantly for players
             if (elementsCarried.length > 0 && !isMobile && snakeType !== 'player') {
-                // Only spawn element particles for AI and boss snakes
                 const elementParticleCount = Math.min(elementsCarried.length * 2, 8);
                 for (let i = 0; i < elementParticleCount; i++) {
                     const element = elementsCarried[i % elementsCarried.length];
@@ -9264,14 +6869,10 @@
         
         // Game hint system
         let hintTimeout = null;
-        let bossHintShown = false;
-        let bossHintTimer = 0;
         function showGameHint(hintType) {
             // Don't show if game is not running or player is dead
             if (!gameStarted || !playerSnake || !playerSnake.alive) return;
             
-            // Don't show during boss battles (except for boss hints)
-            if (bossEncounterActive && hintType !== 'boss') return;
             
             const hintElement = document.getElementById('gameHint');
             if (!hintElement) return;
@@ -9289,7 +6890,6 @@
                 }
             } else if (hintType === 'voidorbs') {
                 hintText = "💡 Hint: When your elements won't combine, 🌀 Void Orbs can clear your bank for points!";
-            } else if (hintType === 'boss') {
                 hintText = "💡 Their power is their weakness. Combine their element with another to create resonance.";
             }
             
@@ -9328,80 +6928,6 @@
             }
         }
         
-        // Boss Victory Message function
-        function showBossVictoryMessage(boss, skinUnlocked, elementBankExpanded) {
-            const victoryBox = document.getElementById('bossVictoryMessage');
-            
-            // Build the message content
-            let html = '<h2>BOSS VANQUISHED!</h2>';
-            html += `<div class="boss-name">${boss.name}</div>`;
-            
-            // Add defeat flavor text based on boss type
-            let defeatText = '';
-            switch(boss.bossType) {
-                case 'PYRAXIS':
-                    defeatText = "The Molten Lord's flames are extinguished! Banished to the eternal void!";
-                    break;
-                case 'ABYSSOS':
-                    defeatText = "The Deep One sinks into the abyss! Cast into the void's embrace!";
-                    break;
-                case 'ZEPHYRUS':
-                    defeatText = "The Storm Caller's winds are silenced! Scattered to the void!";
-                    break;
-                case 'OSSEUS':
-                    defeatText = "The Bone Sovereign crumbles to dust! Entombed in the void!";
-                    break;
-                default:
-                    defeatText = `${boss.name} has been banished to the void!`;
-            }
-            html += `<div class="defeat-text">${defeatText}</div>`;
-            
-            // Add rewards section
-            html += '<div class="rewards">';
-            html += '<div class="reward-item highlight">✨ +10,000 Points!</div>';
-            
-            // Add revive earned message for Classic mode
-            if (gameMode === 'classic' && revivesRemaining < 3) {
-                html += '<div class="reward-item highlight">❤️ +1 Revive Earned!</div>';
-            }
-            
-            html += '<div class="reward-item">💎 4x Catalyst Gems</div>';
-            html += '<div class="reward-item">🌀 2x Void Orbs</div>';
-            html += '<div class="reward-item">🔥 16x Boss Elements</div>';
-            
-            // Only show skin unlock if it's new
-            if (skinUnlocked) {
-                const skinName = BOSS_TYPES[boss.bossType].skin;
-                html += `<div class="reward-item highlight">🎨 ${boss.name} Skin Unlocked!</div>`;
-            }
-            
-            // Show element bank expansion if applicable
-            if (elementBankExpanded) {
-                html += `<div class="reward-item highlight">📦 Element Bank Expanded!</div>`;
-            }
-            
-            html += '</div>';
-            
-            // Set the content and show the message
-            victoryBox.innerHTML = html;
-            victoryBox.className = 'show';
-            victoryBox.style.display = 'block';
-            
-            // Clear any existing timeout
-            if (victoryBox.hideTimeout) {
-                clearTimeout(victoryBox.hideTimeout);
-            }
-            
-            // Hide after 8 seconds
-            victoryBox.hideTimeout = setTimeout(() => {
-                victoryBox.style.opacity = '0';
-                setTimeout(() => {
-                    victoryBox.style.display = 'none';
-                    victoryBox.className = '';
-                    victoryBox.style.opacity = '1';
-                }, 300);
-            }, 8000);
-        }
         
         // Victory popup function
         function showVictoryScreen(type, target) {
@@ -10783,9 +8309,6 @@
             deathCount = 0;
             revivesRemaining = 3;
             playerDiscoveredElements.clear();
-            defeatedBosses = [];
-            currentBoss = null;
-            bossEncounterActive = false;
             
             // Reset game state
             location.reload(); // Simple reload to return to main menu
@@ -11558,7 +9081,6 @@
                     const element = window.elementLoader.elements.get(elementId);
                     if (element && elementId !== undefined && elementId !== null && elementId !== '') {
                         div.classList.add('filled');
-                        div.dataset.elementId = elementId; // Store element ID for boss damage checking
                         
                         // Highlight the active element
                         if (i === playerSnake.highlightedIndex) {
@@ -11953,7 +9475,6 @@
                 if (snake.invincibilityTimer > 0) continue;
                 
                 // Skip collision checks for AI snakes on some frames (performance optimization)
-                if (!snake.isPlayer && !snake.isBoss) {
                     snake.lastCollisionCheck = (snake.lastCollisionCheck || 0) + 1;
                     if (snake.lastCollisionCheck < snake.collisionCheckInterval) {
                         continue; // Skip this frame
@@ -11979,8 +9500,6 @@
                 for (const otherSnake of nearbySnakes) {
                     if (snake === otherSnake || !otherSnake.alive || !snake.alive || diedThisFrame.has(otherSnake)) continue;
                     
-                    // Skip collision if boss is stunned or invulnerable
-                    if (otherSnake.isBoss && (otherSnake.stunTimer > 0 || otherSnake.invulnerabilityTimer > 0)) continue;
                     
                     // Skip collision check if snakes are too far apart (optimization for mobile)
                     const maxCollisionDistance = 500; // Maximum distance for collision checks
@@ -11997,8 +9516,6 @@
                     const collisionRadius = SEGMENT_SIZE * (snakeSize + otherSnakeSize) / 2;
                     const collisionRadiusSq = collisionRadius * collisionRadius;
                     
-                    // For body segments, check collision with all segments (including head and tail for bosses)
-                    const startIndex = otherSnake.isBoss ? 0 : 3; // Boss collision includes all segments
                     for (let i = startIndex; i < otherSnake.segments.length; i++) {
                         const segment = otherSnake.segments[i];
                         // Performance optimization: Use squared distance
@@ -12415,7 +9932,6 @@
                     worldWidth: WORLD_WIDTH,
                     worldHeight: WORLD_HEIGHT,
                     playerSnake: playerSnake,
-                    bossActive: currentBoss && currentBoss.isActive || false
                 };
                 
                 window.easterEggElements.update(16.67, gameState);
@@ -12776,10 +10292,6 @@
             aiRespawnQueue = [];
             usedAISkins.clear();
             
-            // Reset boss spawn tracking
-            bossSpawnCount = 0;
-            lastBossDefeatScore = 0;
-            calculateNextBossSpawn(); // Set first boss spawn point
             
             // ALWAYS start fresh - no saved discoveries affect spawning
             discoveredElements = new Set([0, 1, 2, 3]); // Only base elements in global pool
@@ -13449,7 +10961,6 @@
                 
                 if (!skinData.unlocked) {
                     div.classList.add('locked');
-                    if (availableUnlocks > 0 && !skinData.isBoss) {
                         div.classList.add('unlockable');
                     }
                 }
@@ -13459,8 +10970,6 @@
                 innerContainer.className = 'skin-item-inner';
                 
                 // Create image or placeholder
-                if (skinData.isBoss && !skinData.unlocked) {
-                    // Mystery placeholder for locked boss skins
                     const placeholder = document.createElement('div');
                     placeholder.className = 'skin-mystery';
                     placeholder.innerHTML = '❓';
@@ -13470,7 +10979,6 @@
                     img.className = 'skin-image';
                     // Use old ID for file path if available
                     const fileId = window.skinIdConverter ? (window.skinIdConverter.toOldId(skinId) || skinId) : skinId;
-                    img.src = skinData.isBoss ? `assets/boss-skins/${fileId}.png` : `skins/${fileId}.png`;
                     img.alt = skinData.name;
                     img.onerror = function() {
                         // Show placeholder on error
@@ -13491,10 +10999,8 @@
                 rarityIndicator.setAttribute('data-rarity', skinData.rarity);
                 innerContainer.appendChild(rarityIndicator);
                 
-                // Add name (hidden for locked boss skins)
                 const name = document.createElement('div');
                 name.className = 'skin-name';
-                name.textContent = (skinData.isBoss && !skinData.unlocked) ? '???' : skinData.name;
                 innerContainer.appendChild(name);
                 
                 // Add lock overlay if locked
@@ -13549,10 +11055,7 @@
                 // Update player portrait
                 const portrait = document.getElementById('playerPortrait');
                 if (portrait) {
-                    // Boss skins are in a different directory
                     const fileId = window.skinIdConverter ? (window.skinIdConverter.toOldId(skinId) || skinId) : skinId;
-                    if (skinMetadata[skinId].isBoss) {
-                        portrait.src = `assets/boss-skins/${fileId}.png`;
                     } else {
                         portrait.src = `skins/${fileId}.png`;
                     }
@@ -13581,10 +11084,7 @@
                 // Update player portrait
                 const portrait = document.getElementById('playerPortrait');
                 if (portrait) {
-                    // Boss skins are in a different directory
                     const fileId = window.skinIdConverter ? (window.skinIdConverter.toOldId(skinId) || skinId) : skinId;
-                    if (skinMetadata[skinId].isBoss) {
-                        portrait.src = `assets/boss-skins/${fileId}.png`;
                     } else {
                         portrait.src = `skins/${fileId}.png`;
                     }
@@ -13892,7 +11392,6 @@
             const unlockButton = document.getElementById('unlockButton');
             
             // Update modal content
-            nameEl.textContent = (skinData.isBoss && !skinData.unlocked) ? '???' : skinData.name;
             
             // Update rarity badge
             const rarityBadge = rarityEl.querySelector('.rarity-text');
@@ -13904,7 +11403,6 @@
                 rarityStars.textContent = '★'.repeat(rarityConfig.stars);
             }
             
-            bioEl.textContent = (skinData.isBoss && !skinData.unlocked) ? 'Defeat this boss to unlock their skin!' : skinData.bio;
             
             // Handle unlock criteria display
             if (skinData.unlocked) {
@@ -13990,8 +11488,6 @@
                 
                 equipButton.style.display = 'none';
                 
-                // Show unlock button if we have tokens and it's not a boss skin
-                if (availableUnlocks > 0 && !skinData.isBoss) {
                     unlockButton.style.display = 'block';
                     unlockButton.onclick = () => {
                         selectSkin(skinId);
@@ -14035,7 +11531,6 @@
                         <span class="unlock-title">NEW SKIN UNLOCKED!</span>
                     </div>
                     <div class="unlock-skin-info">
-                        <img src="${skinData.isBoss ? `assets/boss-skins/${skinId}.png` : `skins/${skinId}.png`}" 
                              alt="${skinData.name}" class="unlock-skin-image">
                         <div class="unlock-details">
                             <h3 class="unlock-skin-name">${skinData.name}</h3>
@@ -14083,8 +11578,6 @@
             const ctx = canvas.getContext('2d');
             const skinData = skinMetadata[skinId];
             
-            if (!skinData || (skinData.isBoss && !skinData.unlocked)) {
-                // Draw mystery placeholder for locked boss skins
                 ctx.fillStyle = '#1a1a2e';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ctx.fillStyle = '#fff';
@@ -14107,7 +11600,6 @@
             // Load and draw the skin image with rotation animation
             const img = new Image();
             const fileId = window.skinIdConverter ? (window.skinIdConverter.toOldId(skinId) || skinId) : skinId;
-            const imagePath = skinData.isBoss ? `assets/boss-skins/${fileId}.png` : `skins/${fileId}.png`;
             
             let wobbleTime = 0;
             let animationId = null;
@@ -14347,36 +11839,21 @@
                 // Remove dead snakes (but keep dying ones for animation)
                 snakes = snakes.filter(snake => snake.alive || snake.isDying);
                 
-                // Spawn new elements to maintain target count (increased during boss battles)
                 const currentElementCount = elementPool.getActiveCount();
                 // Special case for Osseus - limit to 2x spawn rate
-                let bossSpawnMultiplier = 1;
-                if (bossEncounterActive) {
-                    if (currentBoss && currentBoss.elementId === 0) { // Osseus (Earth element)
-                        bossSpawnMultiplier = 2; // Cap at 2x for Osseus
                     } else {
-                        bossSpawnMultiplier = 3; // 3x for other bosses
                     }
                 }
                 
                 if (currentElementCount < TARGET_ELEMENT_COUNT - 20) {
                     // Only spawn if significantly below target
-                    const elementsToSpawn = Math.min(2 * bossSpawnMultiplier, Math.floor((TARGET_ELEMENT_COUNT - currentElementCount) / 10));
                     for (let i = 0; i < elementsToSpawn; i++) {
                         if (Math.random() < 0.8) { // 80% chance per spawn
-                            if (bossEncounterActive && currentBoss && Math.random() < 0.15) {
-                                // Reduced from 50% to 15% chance to spawn boss's element type during boss battles
-                                spawnElement(currentBoss.elementId);
                             } else {
                                 spawnElementWithGridDistribution();
                             }
                         }
                     }
-                } else if (Math.random() < (0.05 * bossSpawnMultiplier) && currentElementCount < TARGET_ELEMENT_COUNT) {
-                    // Occasional spawns to replace consumed elements (increased during boss battles)
-                    if (bossEncounterActive && currentBoss && Math.random() < 0.15) {
-                        // Reduced from 50% to 15% chance to spawn boss's element type during boss battles
-                        spawnElement(currentBoss.elementId);
                     } else {
                         spawnElementWithGridDistribution();
                     }
@@ -14483,22 +11960,11 @@
                 
                 // Update Asteroids
                 asteroids.forEach(asteroid => asteroid.update(1.0));
-                
-                // Boss spawn check (classic and infinite modes only, not in cozy mode)
-                if ((gameMode === 'classic' || gameMode === 'infinite') && !bossEncounterActive && playerSnake && playerSnake.alive) {
-                    // Check if player has reached the next boss spawn score
-                    if (playerSnake.score >= nextBossSpawnScore && nextBossSpawnScore > 0) {
-                        spawnBoss();
-                        bossSpawnCount++;
-                    }
+
+                if ((gameMode === 'classic' || gameMode === 'infinite') && playerSnake && playerSnake.alive) {
                 }
-                
-                // Update boss encounter
-                if (bossEncounterActive && currentBoss) {
-                    // Update boss projectiles
-                    updateBossProjectiles(1.0);
+
                     updateShockwaves(1.0);
-                    updateBossFissures(1.0);
                     
                     // Update damage numbers
                     updateDamageNumbers(1.0);
@@ -14515,21 +11981,11 @@
                     }
                     
                     // Update screen shake
-                    if (bossScreenShakeTimer > 0) {
-                        bossScreenShakeTimer -= 1.0;
                     }
                     
                     // Check for elemental resonance damage
-                    if (currentBoss.alive && currentBoss.stunTimer <= 0) {
-                        checkBossElementalDamage();
                     }
                     
-                    // Update boss hint timer
-                    if (currentBoss.alive && !bossHintShown && bossHintTimer > 0) {
-                        bossHintTimer--;
-                        if (bossHintTimer <= 0) {
-                            showGameHint('boss');
-                            bossHintShown = true;
                         }
                     }
                 }
@@ -14563,8 +12019,6 @@
                         newAISnake.kills = snakeData.kills;
                         newAISnake.discoveries = snakeData.discoveries;
                         newAISnake.elementCapacity = snakeData.elementCapacity;
-                        // Only restore personality if not a boss (safety check)
-                        if (!newAISnake.isBoss && snakeData.personality) {
                             newAISnake.personality = snakeData.personality;
                             newAISnake.personalityColor = PERSONALITY_COLORS[snakeData.personality.name];
                         }
@@ -14953,13 +12407,9 @@
             
             // Apply screen shake if active
             let screenShakeActive = false;
-            if (bossScreenShakeTimer > 0) {
                 screenShakeActive = true;
                 ctx.save();
-                const shakeX = (Math.random() - 0.5) * bossScreenShakeIntensity;
-                const shakeY = (Math.random() - 0.5) * bossScreenShakeIntensity;
                 ctx.translate(shakeX, shakeY);
-                bossScreenShakeTimer--;
             }
             
             // Draw everything - wrapped in try-catch to prevent blanking
@@ -15009,10 +12459,6 @@
                 }
             }
             
-            // Draw boss projectiles
-            if (bossEncounterActive) {
-                drawBossFissures(); // Draw fissures first (under everything else)
-                drawBossProjectiles();
                 drawShockwaves();
                 drawDamageNumbers();
             }
@@ -15025,9 +12471,6 @@
                 }
             }
             
-            // Draw boss skull indicator
-            if (currentBoss && currentBoss.alive) {
-                drawBossSkullIndicator();
             }
             
             // Draw particles (particle pool handles viewport culling)
@@ -15038,14 +12481,9 @@
                 explosionManager.render(ctx);
             }
             
-            // Draw boss damage flash
-            if (bossDamageFlashTimer > 0) {
                 ctx.save();
-                ctx.globalAlpha = bossDamageFlashTimer / 20 * 0.3;
-                ctx.fillStyle = currentBoss ? currentBoss.color : '#fff';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ctx.restore();
-                bossDamageFlashTimer--;
                 
                 // Redraw player on top of the damage flash to ensure visibility
                 if (playerSnake && playerSnake.alive) {
@@ -15057,9 +12495,6 @@
                 }
             }
             
-            // Update boss damage cooldown
-            if (bossDamageCooldown > 0) {
-                bossDamageCooldown--;
             }
             
             // Restore context if screen shake was active
@@ -15598,7 +13033,7 @@
         document.addEventListener('click', function playMusicOnInteraction() {
             
             // Try to play current track if paused
-            if (currentTrack && currentTrack.paused && gameStarted && !musicMuted && !bossEncounterActive) {
+            if (currentTrack && currentTrack.paused && gameStarted && !musicMuted) {
                 currentTrack.play().then(() => {
                 }).catch(error => {
                     gameLogger.error('AUDIO', 'Failed to start music on user interaction:', error);
@@ -15706,74 +13141,7 @@
             gameLogger.debug('ELEMENT BANK', 'Use addElementBankSlots(n) to add n slots');
             gameLogger.debug('ELEMENT BANK', 'Use setElementBankSlots(n) to set to n slots');
         };
-        
-        // Store reference to internal spawnBoss function before overriding
-        const internalSpawnBoss = spawnBoss;
-        
-        // Debug boss spawn function
-        window.spawnBossDebug = function(bossType) {
-            if (!gameStarted || !playerSnake || !playerSnake.alive) {
-                return;
-            }
-            
-            if (currentBoss && currentBoss.alive) {
-                return;
-            }
-            
-            // If no boss type specified, choose randomly from ALL bosses
-            if (!bossType) {
-                const allBosses = Object.keys(BOSS_TYPES);
-                bossType = allBosses[Math.floor(Math.random() * allBosses.length)];
-            } else {
-                // Validate boss type
-                bossType = bossType.toUpperCase();
-                if (!BOSS_TYPES[bossType]) {
-                    return;
-                }
-            }
-            
-            // Temporarily clear defeated bosses to allow spawning
-            const originalDefeatedBosses = new Set(defeatedBosses);
-            defeatedBosses.clear();
-            
-            // Force spawn the specific boss
-            const originalAvailableBosses = Object.keys(BOSS_TYPES).filter(boss => !defeatedBosses.has(boss));
-            defeatedBosses = new Set(Object.keys(BOSS_TYPES).filter(boss => boss !== bossType));
-            
-            internalSpawnBoss();
-            
-            // Restore defeated bosses
-            defeatedBosses = originalDefeatedBosses;
-        };
-        
-        // Simple spawn boss function that calls the internal spawnBoss
-        window.spawnBoss = function() {
-            if (!gameStarted || !playerSnake || !playerSnake.alive) {
-                return;
-            }
-            
-            if (currentBoss && currentBoss.alive) {
-                return;
-            }
-            
-            // Call the internal spawnBoss function
-            internalSpawnBoss();
-        };
-        
-        // List available bosses
-        window.listBosses = function() {
-            Object.keys(BOSS_TYPES).forEach(boss => {
-                const data = BOSS_TYPES[boss];
-                const defeated = defeatedBosses.has(boss);
-            });
-        };
-        
-        // Reset defeated bosses
-        window.resetBosses = function() {
-            defeatedBosses.clear();
-            localStorage.removeItem('defeatedBosses');
-        };
-        
+
         // Expose necessary functions to global scope for HTML onclick handlers
         window.selectGameMode = selectGameMode;
         window.selectControls = selectControls;

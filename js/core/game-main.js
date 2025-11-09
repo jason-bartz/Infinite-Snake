@@ -8,7 +8,6 @@ import Particle from './entities/Particle.js';
 import ParticlePool from './entities/ParticlePool.js';
 import ElementPool from './entities/ElementPool.js';
 import ShootingStar from './entities/ShootingStar.js';
-import Boss from './entities/Boss.js';
 import SpaceshipManager from './entities/SpaceshipManager.js';
 import SharedContext from './shared-context.js';
 import MobileUIManager from '../mobile/mobile-ui-manager.js';

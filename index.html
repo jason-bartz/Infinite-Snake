@@ -1715,88 +1715,24 @@
             font-size: 14px;
         }
         
-        /* Boss Victory Message - Epic announcement */
-        #bossVictoryMessage {
-            position: absolute;
-            top: 120px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(10, 0, 30, 0.85);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            color: var(--snes-gold);
-            font-size: 14px;
-            font-weight: bold;
-            text-shadow: 2px 2px 0 rgba(0,0,0,0.8);
-            padding: 24px 48px;
-            border-radius: 0;
-            border: 6px solid var(--snes-gold);
-            border-color: var(--snes-gold) #A88800 #A88800 var(--snes-gold);
-            
-            pointer-events: none;
-            box-shadow: 8px 8px 0 rgba(0,0,0,0.9), 
-                        0 0 30px rgba(255, 215, 0, 0.3),
-                        inset 0 0 20px rgba(255, 215, 0, 0.1);
-            opacity: 0;
-            transition: none;
-            animation: none;
-            z-index: 30;
-            min-width: 400px;
-            display: none;
-        }
         
-        #bossVictoryMessage.show {
-            display: block;
-            opacity: 1;
-            animation: epicBossVictory 0.8s steps(12);
-        }
         
-        #bossVictoryMessage h2 {
-            margin: 0 0 16px 0;
-            font-size: 24px;
-            color: var(--snes-gold);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            animation: victoryPulse 1s steps(2) infinite;
-        }
         
-        #bossVictoryMessage .boss-name {
-            font-size: 18px;
-            color: var(--snes-white);
-            margin-bottom: 12px;
-        }
         
-        #bossVictoryMessage .defeat-text {
-            font-size: 14px;
-            color: var(--snes-cosmic-teal);
-            margin-bottom: 20px;
-            font-style: italic;
-        }
         
-        #bossVictoryMessage .rewards {
-            border-top: 2px solid var(--snes-gold);
-            padding-top: 16px;
-            margin-top: 16px;
-        }
         
-        #bossVictoryMessage .reward-item {
-            font-size: 13px;
-            color: var(--snes-white);
-            margin: 8px 0;
-            text-align: left;
-            padding-left: 20px;
-        }
         
-        #bossVictoryMessage .reward-item.highlight {
-            color: var(--snes-gold);
-            font-size: 14px;
-        }
         
-        @keyframes epicBossVictory {
-            0% {
-                transform: translateX(-50%) scale(0.1);
-                opacity: 0;
-            }
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
             50% {
                 transform: translateX(-50%) scale(1.1);
                 opacity: 1;
@@ -1818,23 +1754,13 @@
         
         /* Mobile responsive for boss victory */
         @media screen and (max-width: 600px) {
-            #bossVictoryMessage {
-                min-width: 300px;
-                padding: 16px 24px;
-                font-size: 12px;
-            }
             
-            #bossVictoryMessage h2 {
-                font-size: 18px;
-            }
             
-            #bossVictoryMessage .boss-name {
-                font-size: 14px;
-            }
             
-            #bossVictoryMessage .reward-item {
-                font-size: 11px;
-            }
+            
+            
+            
+            
         }
         
         /* Player Info Box (Bottom Left for Desktop, Top for Mobile) - SNES Style */
@@ -4675,7 +4601,7 @@
                     
                     <div class="feature-card">
                         <div class="feature-icon">👹</div>
-                        <h3 class="feature-title">BOSS BATTLES</h3>
+                        
                         <p class="feature-description">
                             Face the Deep Old Ones - ancient beings from the void.<br>
                             Defeat them to unlock exclusive snake skins and rare elements.
@@ -4728,7 +4654,7 @@
                         <p class="feature-description">
                             Unlock unique skins through gameplay achievements.<br>
                             Rarity tiers: Common, Uncommon, Rare, Legendary, Exotic, Secret.<br>
-                            Special skins from boss defeats and milestones!
+                            Special skins from achievements and milestones!
                         </p>
                     </div>
                 </div>
@@ -4962,7 +4888,7 @@
                             3 LIVES.<br>
                             PERMADEATH.<br>
                             BATTLE ENEMY SNAKES<br>
-                            AND EPIC BOSSES.<br>
+                            
                             COMPETE FOR THE<br>
                             GLOBAL LEADERBOARD.<br>
                             HOW LONG CAN YOU<br>
@@ -5069,7 +4995,7 @@
                         <span>3 LIVES.<br>
                         PERMADEATH.<br>
                         BATTLE ENEMY SNAKES<br>
-                        AND EPIC BOSSES.<br>
+                        
                         COMPETE FOR THE<br>
                         GLOBAL LEADERBOARD.<br>
                         HOW LONG CAN YOU<br>
@@ -5287,7 +5213,7 @@
         <div id="killstreakDisplay"></div>
         <div id="loreUnlockDisplay"></div>
         <div id="recentDiscovery"></div>
-        <div id="bossVictoryMessage"></div>
+        
         <div id="score">Score: 0</div>
         <div id="discoveries">Discoveries: 0</div>
         <div id="elementQueue"></div>
@@ -5667,7 +5593,7 @@
                             <p>• Survive as long as possible to achieve high scores</p>
                             <p>• Game ends permanently on 4th death (permadeath)</p>
                             <p>• Scores submitted to leaderboard only on permadeath</p>
-                            <p>• Defeat bosses to earn extra lives (up to 3 max)</p>
+                            
                             <p><strong>🌙 "Cozy" Mode:</strong> Peaceful exploration</p>
                             <p>• No enemy snakes - just you</p>
                             <p>• Unlimited respawns with no penalties</p>
@@ -5676,7 +5602,7 @@
                         </div>
                         
                         <div style="margin-bottom: 15px;">
-                            <h5 style="color: #4ecdc4; margin-bottom: 5px;">👹 Boss Encounters</h5>
+                            
                             <p>• Ancient beings known as Deep Old Ones emerge from the void</p>
                             <p>• Each has unique attack patterns</p>
                             <p>• Defeat them to unlock exclusive snake skins</p>
@@ -5685,7 +5611,7 @@
                         
                         <div style="margin-bottom: 15px;">
                             <h5 style="color: #4ecdc4; margin-bottom: 5px;">📜 Lore Unlocks</h5>
-                            <p>• Defeat bosses to uncover their backstories</p>
+                            
                             <p>• Reach score milestones to unlock world lore</p>
                             <p>• Discover rare elements to reveal secrets</p>
                             <p>• Track your lore discovery progress</p>

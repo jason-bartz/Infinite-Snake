@@ -573,52 +573,6 @@ const skinData = {
             value: 250,
             description: 'Make 250 total discoveries'
         }
-    },
-
-    // SECRET (4 skins - Boss skins)
-    'abyssos': {
-        name: 'Abyssos',
-        rarity: 'secret',
-        isBoss: true,
-        bio: 'Emerged from depths unknown, bringing darkness and pretty good seafood.',
-        unlockCriteria: {
-            type: 'defeatBoss',
-            boss: 'abyssos',
-            description: 'Defeat Abyssos'
-        }
-    },
-    'osseus': {
-        name: 'Osseus',
-        rarity: 'secret',
-        isBoss: true,
-        bio: 'Ancient bones rattling with secrets, calcium supplements highly recommended.',
-        unlockCriteria: {
-            type: 'defeatBoss',
-            boss: 'osseus',
-            description: 'Defeat Osseus'
-        }
-    },
-    'pyraxis': {
-        name: 'Pyraxis',
-        rarity: 'secret',
-        isBoss: true,
-        bio: 'Burns with the intensity of a thousand suns, in search of a good aluminum-free antiperspirant.',
-        unlockCriteria: {
-            type: 'defeatBoss',
-            boss: 'pyraxis',
-            description: 'Defeat Pyraxis'
-        }
-    },
-    'zephyrus': {
-        name: 'Zephyrus',
-        rarity: 'secret',
-        isBoss: true,
-        bio: 'Whispers on the wind speak of the void, or maybe that\'s just the sound of everyone gossiping about you.',
-        unlockCriteria: {
-            type: 'defeatBoss',
-            boss: 'zephyrus',
-            description: 'Defeat Zephyrus'
-        }
     }
 };
 
@@ -653,12 +607,6 @@ const rarityConfig = {
         borderColor: '#ff8c00',
         glowColor: 'rgba(255, 140, 0, 0.5)',
         particleCount: 4
-    },
-    secret: {
-        color: '#e74c3c',
-        borderColor: '#e74c3c',
-        glowColor: 'rgba(231, 76, 60, 0.5)',
-        particleCount: 5
     }
 };
 
