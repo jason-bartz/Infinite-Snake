@@ -231,20 +231,6 @@ class PlayerStats {
         this.saveStats();
     }
 
-    recordBossKill() {
-        
-        // Track session boss kills if needed
-        }
-        
-        // Track most bosses in one game
-        if (!this.stats.stats.achievements.mostBossesInGame) {
-            this.stats.stats.achievements.mostBossesInGame = 0;
-        }
-        }
-        
-        this.saveStats();
-    }
-
     recordDiscovery(element) {
         this.sessionStats.discoveries.add(element);
         this.stats.stats.lifetime.elementsDiscovered.add(element);

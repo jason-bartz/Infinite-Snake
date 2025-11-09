@@ -2243,8 +2243,6 @@
                 if (currentTrack) {
                     currentTrack.pause();
                 }
-                }
-                }
             } else {
                 // Set music should be playing flag when unmuting
                 musicShouldBePlaying = true;

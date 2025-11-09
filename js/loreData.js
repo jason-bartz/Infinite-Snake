@@ -986,20 +986,7 @@ This message will not repeat. There is nothing left to repeat to.
         unlockCriteria: { type: 'veteranStatus', days: 365 },
         unlockText: 'Play for a full year (365 days)'
     },
-    
-        unlockText: 'Defeat Pyraxis the Molten'
-    },
-    
-        unlockText: 'Defeat Abyssos the Depths'
-    },
-    
-        unlockText: 'Defeat Zephyrus of the Gale'
-    },
-    
-        unlockText: 'Defeat all 4 bosses a total of 50 times'
-    },
-    
-    
+
     // Skin unlock lore entries
     'skin-lore-1': {
         id: 'skin-lore-1',

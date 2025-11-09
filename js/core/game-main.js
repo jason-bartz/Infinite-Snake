@@ -278,7 +278,6 @@ export {
     ParticlePool,
     ElementPool,
     ShootingStar,
-    Boss,
     SharedContext,
     MobileUIManager,
     UnifiedPerformanceSystem
