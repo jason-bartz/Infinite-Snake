@@ -157,26 +157,33 @@ export class RenderingSystem extends System {
      */
     registerRenderers() {
         // Register in layer order (using correct RenderLayer enum values)
+        // Pipeline calls: render(ctx, camera, interpolation, gameState)
         this.pipeline
             .registerRenderer(RenderLayer.BACKGROUND, {
                 name: 'BackgroundRenderer',
-                render: () => this.renderers.background.render(this.ctx, null, this.camera)
+                render: (ctx, camera) => this.renderers.background.render(ctx, null, camera)
             })
             .registerRenderer(RenderLayer.UI_OVERLAY, {
                 name: 'BorderRenderer',
-                render: () => this.renderers.border.render(this.ctx, null, this.camera)
+                render: (ctx, camera) => this.renderers.border.render(ctx, null, camera)
             })
             .registerRenderer(RenderLayer.GAME_OBJECTS, {
                 name: 'ElementRenderer',
-                render: (entities) => this.renderElements(entities || [])
+                render: (ctx, camera, interpolation, gameState) => {
+                    const elements = gameState?.elements || this.currentGameState?.elements || [];
+                    this.renderElements(elements);
+                }
             })
             .registerRenderer(RenderLayer.ENTITIES, {
                 name: 'SnakeRenderer',
-                render: (snakes) => this.renderSnakes(snakes || [])
+                render: (ctx, camera, interpolation, gameState) => {
+                    const snakes = gameState?.snakes || this.currentGameState?.snakes || [];
+                    this.renderSnakes(snakes);
+                }
             })
             .registerRenderer(RenderLayer.PARTICLES, {
                 name: 'ParticleRenderer',
-                render: () => this.renderers.particle.render(this.ctx, null, this.camera)
+                render: (ctx, camera) => this.renderers.particle.render(ctx, null, camera)
             });
 
         if (this.config.enableDebugInfo) {
