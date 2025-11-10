@@ -108,29 +108,23 @@ export class RenderingSystem extends System {
         this.camera.setBounds(-mapWidth / 2, mapWidth / 2, -mapHeight / 2, mapHeight / 2);
 
         // Create all renderers with shared dependencies
-        this.renderers.background = new BackgroundRenderer(
-            this.ctx,
-            this.camera,
-            { isMobile: this.config.isMobile }
-        );
+        this.renderers.background = new BackgroundRenderer({
+            isMobile: this.config.isMobile
+        });
 
-        this.renderers.border = new BorderRenderer(
-            this.ctx,
-            this.camera,
-            { isMobile: this.config.isMobile }
-        );
+        this.renderers.border = new BorderRenderer({
+            isMobile: this.config.isMobile,
+            worldSize: mapWidth // Border needs world size
+        });
 
-        this.renderers.snake = new SnakeRenderer(
-            this.ctx,
-            this.camera,
-            { isMobile: this.config.isMobile, skinImages }
-        );
+        this.renderers.snake = new SnakeRenderer({
+            isMobile: this.config.isMobile,
+            skinImages
+        });
 
-        this.renderers.element = new ElementRenderer(
-            this.ctx,
-            this.camera,
-            { isMobile: this.config.isMobile }
-        );
+        this.renderers.element = new ElementRenderer({
+            isMobile: this.config.isMobile
+        });
 
         this.renderers.particle = new ParticleRenderer(
             this.ctx,
@@ -166,11 +160,11 @@ export class RenderingSystem extends System {
         this.pipeline
             .registerRenderer(RenderLayer.BACKGROUND, {
                 name: 'BackgroundRenderer',
-                render: () => this.renderers.background.render()
+                render: () => this.renderers.background.render(this.ctx, null, this.camera)
             })
             .registerRenderer(RenderLayer.UI_OVERLAY, {
                 name: 'BorderRenderer',
-                render: () => this.renderers.border.render()
+                render: () => this.renderers.border.render(this.ctx, null, this.camera)
             })
             .registerRenderer(RenderLayer.GAME_OBJECTS, {
                 name: 'ElementRenderer',
@@ -182,7 +176,7 @@ export class RenderingSystem extends System {
             })
             .registerRenderer(RenderLayer.PARTICLES, {
                 name: 'ParticleRenderer',
-                render: () => this.renderers.particle.render()
+                render: () => this.renderers.particle.render(this.ctx, null, this.camera)
             });
 
         if (this.config.enableDebugInfo) {
