@@ -96,16 +96,40 @@ UPSTASH_REDIS_REST_TOKEN=your_redis_token
 
 ## 🚀 Development
 
+> **⚠️ Active Refactoring**: This codebase is undergoing a professional architecture modernization (Phase 3 of 11). See [START_HERE.md](START_HERE.md:1) for current status.
+
 ### Project Structure
 ```
 infinite-snake/
-├── index.html              # Main game file
+├── index.html              # Main game file (original)
+├── src/                    # New modular architecture (Phase 1-3)
+│   ├── core/
+│   │   ├── ecs/           # Entity-Component-System ✅
+│   │   ├── rendering/     # Camera & viewport ✅
+│   │   └── GameLoop.js    # Fixed timestep loop ✅
+│   ├── systems/
+│   │   ├── renderers/     # Layer-based rendering 🟡
+│   │   │   ├── BackgroundRenderer.js ✅
+│   │   │   └── BorderRenderer.js ✅
+│   │   ├── RenderPipeline.js ✅
+│   │   └── RenderLayer.js ✅
+│   ├── state/             # Redux-like state management ✅
+│   │   ├── store.js
+│   │   ├── actions.js
+│   │   ├── selectors.js
+│   │   └── reducers/
+│   └── services/          # Service layer ✅
+│       └── StorageService.js
 ├── js/
-│   ├── core/              # Core game logic
-│   │   ├── entities/      # Game objects (Snake, Boss, etc.)
-│   │   └── systems/       # Game systems
-│   ├── ui/                # User interface components
-│   └── performance/       # Optimization modules
+│   └── core/
+│       └── game-original.js   # Legacy monolith (being refactored)
+├── config/                # Game configuration ✅
+│   ├── game.config.js
+│   ├── balance.config.js
+│   └── feature-flags.js
+├── tests/
+│   ├── unit/              # 642 passing tests ✅
+│   └── e2e/               # Playwright E2E tests ✅
 ├── elements/              # Element data and combinations
 ├── assets/                # Game sprites and textures
 ├── music/                 # Background music tracks
@@ -113,13 +137,57 @@ infinite-snake/
 └── api/                   # Backend endpoints
 ```
 
+### Development Setup (New Architecture)
+
+```bash
+# Install dependencies
+npm install
+
+# Run tests (642 passing)
+npm test
+
+# Run tests once
+npm test -- --run
+
+# Start dev server with HMR
+npm run dev
+
+# Run E2E tests
+npm run test:e2e
+```
+
 ### Building for Production
 
 ```bash
-# No build step required - pure JavaScript
-# Deploy directly to Vercel or similar platform
+# Build with Vite
+npm run build
+
+# Preview production build
+npm run preview
+
+# Deploy to Vercel
 vercel deploy
 ```
+
+### Refactoring Progress
+
+**Current Status**: Phase 3 - Systems Extraction (40% complete)
+**Tests**: 642 passing ✅
+**Documentation**: [START_HERE.md](START_HERE.md:1) | [REFACTORING_PROGRESS.md](REFACTORING_PROGRESS.md:1)
+
+```
+Phase 0: Preparation              [██████████] 100% ✅
+Phase 1: Core Infrastructure      [██████████] 100% ✅
+Phase 2: State Management         [██████████] 100% ✅
+Phase 3: Systems Extraction       [████░░░░░░]  40% 🟡 ← Current
+Phase 4-10: In Planning           [░░░░░░░░░░]   0%
+
+Overall: 31% complete (Week 5 of 22)
+```
+
+### Contributing to the Refactoring
+
+See [CONTINUE_FROM_HERE_PHASE_3.md](CONTINUE_FROM_HERE_PHASE_3.md:1) for how to contribute to the ongoing modernization.
 
 ## 🌐 Browser Support (Tested)
 

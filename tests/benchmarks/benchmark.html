@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rendering Performance Benchmark</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Monaco', 'Courier New', monospace;
+      background: #0a0a0a;
+      color: #00ff00;
+      padding: 20px;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      text-align: center;
+      color: #00ff00;
+      margin-bottom: 30px;
+      font-size: 2em;
+      text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+    }
+
+    .controls {
+      background: #1a1a1a;
+      border: 2px solid #00ff00;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .control-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: inline-block;
+      width: 150px;
+      color: #00ff00;
+    }
+
+    select, button {
+      background: #0a0a0a;
+      color: #00ff00;
+      border: 1px solid #00ff00;
+      padding: 8px 16px;
+      font-family: inherit;
+      font-size: 14px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    button {
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+
+    button:hover:not(:disabled) {
+      background: #00ff00;
+      color: #0a0a0a;
+      box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    #results {
+      background: #1a1a1a;
+      border: 2px solid #00ff00;
+      border-radius: 8px;
+      padding: 20px;
+      min-height: 400px;
+      white-space: pre-wrap;
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 13px;
+    }
+
+    .status {
+      text-align: center;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 4px;
+    }
+
+    .status.running {
+      background: #1a3a1a;
+      color: #ffff00;
+      border: 1px solid #ffff00;
+    }
+
+    .status.complete {
+      background: #1a3a1a;
+      color: #00ff00;
+      border: 1px solid #00ff00;
+    }
+
+    .status.error {
+      background: #3a1a1a;
+      color: #ff0000;
+      border: 1px solid #ff0000;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 20px;
+      background: #0a0a0a;
+      border: 1px solid #00ff00;
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 10px 0;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: #00ff00;
+      transition: width 0.3s;
+      box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+    }
+
+    canvas {
+      display: none;
+    }
+
+    .info {
+      background: #1a1a1a;
+      border: 1px solid #666;
+      border-radius: 4px;
+      padding: 15px;
+      margin-top: 20px;
+      color: #999;
+      font-size: 12px;
+    }
+
+    .info h3 {
+      color: #00ff00;
+      margin-bottom: 10px;
+    }
+
+    .emoji {
+      font-size: 1.2em;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎮 Rendering Performance Benchmark</h1>
+
+    <div class="controls">
+      <div class="control-group">
+        <label for="complexity">Complexity:</label>
+        <select id="complexity">
+          <option value="low">Low (2 snakes, 20 elements, 50 particles)</option>
+          <option value="medium" selected>Medium (5 snakes, 50 elements, 200 particles)</option>
+          <option value="high">High (10 snakes, 100 elements, 500 particles)</option>
+          <option value="extreme">Extreme (20 snakes, 200 elements, 1000 particles)</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label for="frames">Frames to Test:</label>
+        <select id="frames">
+          <option value="100">100 (Quick)</option>
+          <option value="300" selected>300 (Standard)</option>
+          <option value="600">600 (Thorough)</option>
+          <option value="1200">1200 (Extensive)</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <button id="runButton" onclick="runBenchmark()">🚀 Run Benchmark</button>
+        <button id="exportButton" onclick="exportResults()" disabled>📊 Export Results</button>
+      </div>
+
+      <div id="statusContainer"></div>
+      <div id="progressContainer" style="display: none;">
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="results">
+Click "Run Benchmark" to start performance testing.
+
+This will measure:
+• Frame rate (FPS)
+• Frame time (ms)
+• Canvas draw calls
+• Memory usage
+• Render time by layer
+
+Results will compare:
+• Old system (simulated from game-original.js)
+• New RenderingSystem (ECS-based with all renderers)
+    </div>
+
+    <div class="info">
+      <h3>ℹ️ About This Benchmark</h3>
+      <p>
+        This benchmark simulates real-world rendering scenarios with varying complexity levels.
+        The "Old System" benchmark simulates the rendering approach from game-original.js (no culling, no batching).
+        The "New RenderingSystem" uses the modern ECS-based rendering pipeline with optimizations.
+      </p>
+      <p style="margin-top: 10px;">
+        <strong>Note:</strong> Results may vary based on your hardware and browser.
+        For best results, close other tabs and disable browser extensions during testing.
+      </p>
+    </div>
+  </div>
+
+  <canvas id="testCanvas"></canvas>
+
+  <script type="module">
+    import { runBenchmarks } from './rendering-benchmark.js';
+
+    let lastResults = null;
+
+    window.runBenchmark = async function() {
+      const complexity = document.getElementById('complexity').value;
+      const frames = parseInt(document.getElementById('frames').value);
+      const runButton = document.getElementById('runButton');
+      const exportButton = document.getElementById('exportButton');
+      const results = document.getElementById('results');
+      const statusContainer = document.getElementById('statusContainer');
+      const progressContainer = document.getElementById('progressContainer');
+
+      // Disable button during test
+      runButton.disabled = true;
+      exportButton.disabled = true;
+
+      // Show progress
+      progressContainer.style.display = 'block';
+      updateProgress(0, 'Initializing...');
+
+      try {
+        results.textContent = 'Running benchmarks...\n\n';
+
+        // Update progress during test
+        let currentPhase = 0;
+        const phases = ['Warming up...', 'Testing old system...', 'Testing new system...', 'Generating report...'];
+
+        const progressInterval = setInterval(() => {
+          const phase = phases[Math.min(currentPhase, phases.length - 1)];
+          const progress = (currentPhase / phases.length) * 100;
+          updateProgress(progress, phase);
+          currentPhase++;
+        }, 2000);
+
+        // Run benchmarks
+        const benchmarkResults = await runBenchmarks(complexity, frames);
+
+        clearInterval(progressInterval);
+        updateProgress(100, 'Complete!');
+
+        // Store results
+        lastResults = benchmarkResults;
+
+        // Display results
+        results.textContent = benchmarkResults.report;
+
+        // Show success status
+        showStatus('✅ Benchmark complete! Results displayed below.', 'complete');
+
+        // Enable export
+        exportButton.disabled = false;
+
+      } catch (error) {
+        console.error('Benchmark error:', error);
+        results.textContent = `❌ Error running benchmark:\n\n${error.message}\n\n${error.stack}`;
+        showStatus('❌ Benchmark failed. Check console for details.', 'error');
+      } finally {
+        runButton.disabled = false;
+        setTimeout(() => {
+          progressContainer.style.display = 'none';
+        }, 2000);
+      }
+    };
+
+    window.exportResults = function() {
+      if (!lastResults) {
+        alert('No results to export. Run a benchmark first.');
+        return;
+      }
+
+      const exportData = {
+        timestamp: new Date().toISOString(),
+        complexity: document.getElementById('complexity').value,
+        frames: parseInt(document.getElementById('frames').value),
+        userAgent: navigator.userAgent,
+        results: lastResults,
+      };
+
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `rendering-benchmark-${Date.now()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+
+      showStatus('📥 Results exported successfully!', 'complete');
+    };
+
+    function updateProgress(percent, message) {
+      const fill = document.getElementById('progressFill');
+      const status = document.getElementById('statusContainer');
+
+      fill.style.width = `${percent}%`;
+      showStatus(`${message} (${Math.round(percent)}%)`, 'running');
+    }
+
+    function showStatus(message, type) {
+      const container = document.getElementById('statusContainer');
+      container.innerHTML = `<div class="status ${type}">${message}</div>`;
+    }
+  </script>
+</body>
+</html>
