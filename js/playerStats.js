@@ -531,7 +531,7 @@ class PlayerStats {
         return this.stats.stats.achievements.holidaysPlayed || 0;
     }
     
-    }
+
     
     getBestWeeklyRank() {
         // Deprecated - use getBestMonthlyRank instead

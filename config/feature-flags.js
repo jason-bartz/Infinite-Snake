@@ -38,6 +38,9 @@ class FeatureFlagManager {
 
       // Phase 4: Entities
       useECSEntities: false,
+      useECSParticles: false, // New ECS-based particle system
+      useECSElements: false, // New ECS-based element system
+      useECSSnakes: false, // New ECS-based snake system (SnakeSystem + SnakeFactory)
       useNewSnake: false,
       useNewBoss: false,
 
