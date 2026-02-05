@@ -4171,6 +4171,59 @@
     </style>
 </head>
 <body>
+<!-- Maintenance Banner -->
+<div id="maintenanceBanner" style="
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 10000;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    border-bottom: 3px solid #e94560;
+    padding: 15px 20px;
+    text-align: center;
+    font-family: 'Press Start 2P', monospace;
+    box-shadow: 0 4px 20px rgba(233, 69, 96, 0.3);
+">
+    <div style="max-width: 1200px; margin: 0 auto;">
+        <div style="
+            color: #e94560;
+            font-size: clamp(10px, 2.5vw, 14px);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            animation: pulse 2s ease-in-out infinite;
+        ">
+            🚧 REBUILDING THE COSMOS 🚧
+        </div>
+        <div style="
+            color: #ffffff;
+            font-size: clamp(8px, 2vw, 11px);
+            line-height: 1.8;
+            max-width: 800px;
+            margin: 0 auto;
+        ">
+            <p style="margin: 0 0 8px 0;">Infinite Snake is undergoing a complete rebuild and will be back online soon!</p>
+            <p style="margin: 0; color: #4ecdc4;">
+                Stay tuned for: <span style="color: #f9d923;">Fun new design</span> •
+                <span style="color: #f9d923;">Global multiplayer for true "io" gameplay</span> •
+                <span style="color: #f9d923;">AI-generated combinations</span>
+            </p>
+        </div>
+    </div>
+</div>
+<style>
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+    }
+    body { padding-top: 120px !important; }
+    @media (max-width: 600px) {
+        body { padding-top: 150px !important; }
+        #maintenanceBanner { padding: 12px 15px; }
+    }
+</style>
+
 <!-- Version Display -->
 <div id="versionDisplay" style="position: relative; text-align: center; margin-top: 10px; z-index: 100; color: #666; font-family: 'Press Start 2P', monospace; font-size: 10px; pointer-events: none;">
     v<span id="versionNumber">2.0.0</span>
@@ -4245,7 +4298,7 @@
                             ENTER YOUR PLAYER NAME
                         </p>
                     </div>
-                    <button id="startButton" style="margin-left: 0;">ENTER THE VOID</button>
+                    <button id="startButton" style="margin-left: 0; opacity: 0.5; cursor: not-allowed; filter: grayscale(100%);" disabled>ENTER THE VOID</button>
                     <div id="assetLoadingStatus" style="margin-top: 20px; font-family: 'Press Start 2P', monospace; font-size: 10px; color: #4ecdc4; min-height: 20px; text-align: left;">
                         <span id="loadingText" style="display: none;">Loading assets...</span>
                     </div>
@@ -4790,7 +4843,7 @@
             <div class="cta-section">
                 <h2 class="section-title" style="text-align: center;">READY TO REBUILD THE COSMOS?</h2>
                 <div style="margin-top: 50px; text-align: center;">
-                    <button class="cta-button" onclick="document.getElementById('startButton').click()">ENTER THE VOID</button>
+                    <button class="cta-button" style="opacity: 0.5; cursor: not-allowed; filter: grayscale(100%);" disabled>ENTER THE VOID</button>
                 </div>
             </div>
             
