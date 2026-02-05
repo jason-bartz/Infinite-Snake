@@ -9,7 +9,7 @@ export default defineConfig({
     outDir: 'dist',
     assetsDir: 'assets',
     sourcemap: true,
-    minify: 'terser',
+    minify: 'esbuild',
     target: 'es2020',
 
     rollupOptions: {
@@ -23,13 +23,6 @@ export default defineConfig({
             './js/core/game-original.js'
           ],
         },
-      },
-    },
-
-    terserOptions: {
-      compress: {
-        drop_console: false,
-        drop_debugger: true,
       },
     },
 
